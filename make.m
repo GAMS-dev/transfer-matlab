@@ -26,40 +26,66 @@
 % SOFTWARE.
 %
 
-function make()
+function make(varargin)
 
-    gams_dir = GAMSTransfer.find_gams();
+    current_dir = fileparts(mfilename('fullpath'));
+    addpath(fullfile(current_dir, 'src'));
 
+    p = inputParser();
+    is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
+        ~strcmpi(x, 'target_dir') && ~strcmpi(x, 'system_dir');
+    addParameter(p, 'target_dir', '+GAMSTransfer', is_string_char);
+    addParameter(p, 'system_dir', find_gams(), is_string_char);
+    parse(p, varargin{:});
+    if strcmp(p.Results.system_dir, '')
+        error('GAMS system directory not found.');
+    end
+
+    try
+        make_internal(p.Results.system_dir, current_dir, p.Results.target_dir)
+        rmpath(fullfile(current_dir, 'src'));
+    catch e
+        rmpath(fullfile(current_dir, 'src'));
+        error(e.message);
+    end
+
+    fprintf('GAMSTransfer install completed successfully.\n');
+
+end
+
+function make_internal(gams_dir, current_dir, target_dir)
+
+    m_files = dir(fullfile(current_dir, 'src', '*.m'));
     c_files = {
-        fullfile('+GAMSTransfer', 'gt_gdx_read_basics.c'), ...
-        fullfile('+GAMSTransfer', 'gt_gdx_read_records.cpp'), ...
-        fullfile('+GAMSTransfer', 'gt_gdx_write.c'), ...
-        fullfile('+GAMSTransfer', 'gt_idx_read_basics.c'), ...
-        fullfile('+GAMSTransfer', 'gt_idx_read_records.c'), ...
-        fullfile('+GAMSTransfer', 'gt_idx_write.c'), ...
-        fullfile('+GAMSTransfer', 'gt_get_defaults.c'), ...
-        fullfile('+GAMSTransfer', 'getna.c'), ...
-        fullfile('+GAMSTransfer', 'isna.c'), ...
-        fullfile('+GAMSTransfer', 'geteps.c'), ...
-        fullfile('+GAMSTransfer', 'iseps.c'), ...
+        fullfile(current_dir, 'src', 'gt_gdx_read_basics.c'), ...
+        fullfile(current_dir, 'src', 'gt_gdx_read_records.cpp'), ...
+        fullfile(current_dir, 'src', 'gt_gdx_write.c'), ...
+        fullfile(current_dir, 'src', 'gt_idx_read_basics.c'), ...
+        fullfile(current_dir, 'src', 'gt_idx_read_records.c'), ...
+        fullfile(current_dir, 'src', 'gt_idx_write.c'), ...
+        fullfile(current_dir, 'src', 'gt_get_defaults.c'), ...
+        fullfile(current_dir, 'src', 'getna.c'), ...
+        fullfile(current_dir, 'src', 'isna.c'), ...
+        fullfile(current_dir, 'src', 'geteps.c'), ...
+        fullfile(current_dir, 'src', 'iseps.c'), ...
     };
     c_common = {
         fullfile(gams_dir, 'apifiles', 'C', 'api', 'gdxcc.c'), ...
         fullfile(gams_dir, 'apifiles', 'C', 'api', 'idxcc.c'), ...
         fullfile(gams_dir, 'apifiles', 'C', 'api', 'gclgms.c'), ...
         fullfile(gams_dir, 'apifiles', 'C', 'api', 'gcmt.c'), ...
-        fullfile('+GAMSTransfer', 'gt_utils.c'), ...
-        fullfile('+GAMSTransfer', 'gt_mex.c'), ...
-        fullfile('+GAMSTransfer', 'gt_gdx_idx.c'), ...
+        fullfile(current_dir, 'src', 'gt_utils.c'), ...
+        fullfile(current_dir, 'src', 'gt_mex.c'), ...
+        fullfile(current_dir, 'src', 'gt_gdx_idx.c'), ...
     };
     c_include = {
         fullfile(gams_dir, 'apifiles', 'C', 'api'), ...
     };
     mex_c_flags = {
-        '-silent -g COMPFLAGS=''$COMPFLAGS -Wall''' ...
+        '-silent COMPFLAGS=''$COMPFLAGS -Wall''' ...
     };
     mex_cpp_flags = {
-        '-silent -g COMPFLAGS=''$COMPFLAGS -Wall''' ...
+        '-silent COMPFLAGS=''$COMPFLAGS -Wall''' ...
     };
     lib_linux = {
         'dl', ...
@@ -68,6 +94,19 @@ function make()
         'dl', ...
     };
 
+    % create target directory
+    mkdir(target_dir);
+    [~, target_folder] = fileparts(target_dir);
+    if ~strcmp(target_folder(1), '+')
+        warning('Target directory ''%s'' does not create a package.', target_dir);
+    end
+
+    for i = 1:numel(m_files)
+        target_file = fullfile(target_dir, m_files(i).name);
+
+        fprintf('Copying (%2d/%2d): %s\n', i, numel(m_files), target_file);
+        copyfile(fullfile(m_files(i).folder, m_files(i).name), target_file);
+    end
 
     for i = 1:numel(c_files)
 
@@ -90,6 +129,10 @@ function make()
             end
         elseif ispc
         end
+
+        % filename in target directory
+        [~,filename,~] = fileparts(c_files{i});
+        target_file = fullfile(target_dir, filename);
 
         % check octave / matlab version
         if exist('OCTAVE_VERSION', 'builtin') <= 0
@@ -116,18 +159,15 @@ function make()
             end
 
             % output directory
-            cmd = sprintf('%s -outdir +GAMSTransfer', cmd);
+            cmd = sprintf('%s -outdir %s', cmd, target_dir);
         else
             % output directory
-            [filepath,filename,~] = fileparts(c_files{i});
-            cmd = sprintf('%s -o %s', cmd, fullfile(filepath, filename));
+            cmd = sprintf('%s -o %s', cmd, target_file);
         end
 
         % build
-        fprintf('Compiling (%2d/%2d): %s\n', i, numel(c_files), c_files{i});
+        fprintf('Compiling (%2d/%2d): %s\n', i, numel(c_files), target_file);
         eval(cmd);
     end
-
-    fprintf('GAMSTransfer install completed successfully.\n');
 
 end
