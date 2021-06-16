@@ -17,13 +17,14 @@ the high performance of this package.
 
 ## Install
 
-To build GAMSTransfer, open Matlab and run one of the following:
+To build GAMSTransfer, open Matlab and run:
 ```
 gams_transfer_setup('target_dir', <install_directory>, 'system_dir', <gams_system_directory>);
 ```
-Both parameters, `target_dir` and `system_dir`, are optional with defaults
-`'+GAMSTransfer'` and the GAMS system directory found in the PATH environment
-variable, respectively.
+The directory `<install_directory>` must start with `+` to create a valid Matlab
+package. Both parameters, `target_dir` and `system_dir`, are optional with
+defaults `'+GAMSTransfer'` and the GAMS system directory found in the PATH
+environment variable, respectively.
 
 ## Run Unit Tests
 
