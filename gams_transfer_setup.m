@@ -1,4 +1,4 @@
-% Builds GAMSTransfer C interface
+% Setups GAMSTransfer
 %
 
 %
@@ -26,7 +26,7 @@
 % SOFTWARE.
 %
 
-function make(varargin)
+function gams_transfer_setup(varargin)
 
     current_dir = fileparts(mfilename('fullpath'));
     addpath(fullfile(current_dir, 'src'));
@@ -42,7 +42,7 @@ function make(varargin)
     end
 
     try
-        make_internal(p.Results.system_dir, current_dir, p.Results.target_dir)
+        gams_transfer_setup_internal(p.Results.system_dir, current_dir, p.Results.target_dir)
         rmpath(fullfile(current_dir, 'src'));
     catch e
         rmpath(fullfile(current_dir, 'src'));
@@ -53,7 +53,7 @@ function make(varargin)
 
 end
 
-function make_internal(gams_dir, current_dir, target_dir)
+function gams_transfer_setup_internal(gams_dir, current_dir, target_dir)
 
     m_files = dir(fullfile(current_dir, 'src', '*.m'));
     c_files = {
