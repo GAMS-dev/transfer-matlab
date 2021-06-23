@@ -136,16 +136,16 @@ classdef VariableType
             end
         end
 
-        function bool = is_valid(value)
+        function bool = isvalid(value)
             % Checks if a variable type name or identifier is valid
             %
-            % b = VariableType.is_valid(s) returns true if s is a valid variable
+            % b = VariableType.isvalid(s) returns true if s is a valid variable
             % type name or variable type identifier and false otherwise.
             %
             % Example:
-            % VariableType.is_valid('binary') is true
-            % VariableType.is_valid(VariableType.BINARY) is true
-            % VariableType.is_valid('not_a_valid_name') is false
+            % VariableType.isvalid('binary') is true
+            % VariableType.isvalid(VariableType.BINARY) is true
+            % VariableType.isvalid('not_a_valid_name') is false
             %
 
             if ischar(value) || isstring(value)

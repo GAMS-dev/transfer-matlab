@@ -160,7 +160,7 @@ classdef Equation < GAMSTransfer.Symbol
             if ischar(typ) || isstring(typ)
                 obj.type_ = GAMSTransfer.EquationType.str2int(typ);
             elseif isnumeric(typ)
-                if ~GAMSTransfer.EquationType.is_valid(typ)
+                if ~GAMSTransfer.EquationType.isvalid(typ)
                     error("Invalid variable type: %d", typ);
                 end
                 obj.type_ = typ;

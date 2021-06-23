@@ -160,7 +160,7 @@ classdef Variable < GAMSTransfer.Symbol
             if ischar(typ) || isstring(typ)
                 obj.type_ = GAMSTransfer.VariableType.str2int(typ);
             elseif isnumeric(typ)
-                if ~GAMSTransfer.VariableType.is_valid(typ)
+                if ~GAMSTransfer.VariableType.isvalid(typ)
                     error("Invalid variable type: %d", typ);
                 end
                 obj.type_ = typ;

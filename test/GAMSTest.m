@@ -128,10 +128,10 @@ classdef GAMSTest < handle
                 obj.assert(islogical(symbol.singleton));
             case 'GAMSTransfer.Variable'
                 obj.assert(ischar(symbol.type));
-                obj.assert(GAMSTransfer.VariableType.is_valid(symbol.type));
+                obj.assert(GAMSTransfer.VariableType.isvalid(symbol.type));
             case 'GAMSTransfer.Equation'
                 obj.assert(ischar(symbol.type));
-                obj.assert(GAMSTransfer.EquationType.is_valid(symbol.type));
+                obj.assert(GAMSTransfer.EquationType.isvalid(symbol.type));
             end
         end
 

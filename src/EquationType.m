@@ -123,16 +123,16 @@ classdef EquationType
             end
         end
 
-        function bool = is_valid(value)
+        function bool = isvalid(value)
             % Checks if an equation type name or identifier is valid
             %
-            % b = EquationType.is_valid(s) returns true if s is a valid equation
+            % b = EquationType.isvalid(s) returns true if s is a valid equation
             % type name or equation type identifier and false otherwise.
             %
             % Example:
-            % EquationType.is_valid('eq') is true
-            % EquationType.is_valid(EquationType.EQ) is true
-            % EquationType.is_valid('not_a_valid_name') is false
+            % EquationType.isvalid('eq') is true
+            % EquationType.isvalid(EquationType.EQ) is true
+            % EquationType.isvalid('not_a_valid_name') is false
             %
 
             if ischar(value) || isstring(value)
