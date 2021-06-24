@@ -69,6 +69,15 @@ classdef Set < GAMSTransfer.Symbol
         singleton
     end
 
+    properties (Hidden, Constant)
+        VALUE_FIELDS = {}
+        TEXT_FIELDS = {'text'}
+        SUPPORTS_FORMAT_DENSE_MATRIX = false
+        SUPPORTS_FORMAT_SPARSE_MATRIX = false
+        SUPPORTS_FORMAT_STRUCT = true
+        SUPPORTS_FORMAT_TABLE = true
+    end
+
     methods
 
         function obj = Set(container, name, varargin)

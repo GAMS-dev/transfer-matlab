@@ -374,7 +374,7 @@ classdef Symbol < handle
                 nrecs = height(obj.records);
             case GAMSTransfer.RecordsFormat.STRUCT
                 nrecs = -1;
-                for f = {'level', 'value', 'marginal', 'lower', 'upper', 'scale'}
+                for f = obj.VALUE_FIELDS
                     if isfield(obj.records, f{1})
                         nrecs = numel(obj.records.(f{1}));
                         break;
@@ -391,7 +391,7 @@ classdef Symbol < handle
                 end
             case GAMSTransfer.RecordsFormat.DENSE_MATRIX
                 nrecs = 0;
-                for f = {'level', 'value', 'marginal', 'lower', 'upper', 'scale'}
+                for f = obj.VALUE_FIELDS
                     if isfield(obj.records, f{1})
                         nrecs = numel(obj.records.(f{1}));
                         break;
@@ -399,7 +399,7 @@ classdef Symbol < handle
                 end
             case GAMSTransfer.RecordsFormat.SPARSE_MATRIX
                 nrecs = 0;
-                for f = {'level', 'value', 'marginal', 'lower', 'upper', 'scale'}
+                for f = obj.VALUE_FIELDS
                     if isfield(obj.records, f{1})
                         nrecs = nnz(obj.records.(f{1}));
                         break;
@@ -537,16 +537,9 @@ classdef Symbol < handle
                 fields = fieldnames(records);
                 for i = 1:numel(fields)
                     field = fields{i};
-                    if strcmp(field, 'level') || strcmp(field, 'value')
-                        obj.setRecordsValueField(1, records.(field), false);
-                    elseif strcmp(field, 'marginal')
-                        obj.setRecordsValueField(2, records.(field), false);
-                    elseif strcmp(field, 'lower')
-                        obj.setRecordsValueField(3, records.(field), false);
-                    elseif strcmp(field, 'upper')
-                        obj.setRecordsValueField(4, records.(field), false);
-                    elseif strcmp(field, 'scale')
-                        obj.setRecordsValueField(5, records.(field), false);
+                    j = find(ismember(obj.VALUE_FIELDS, field));
+                    if ~isempty(j)
+                        obj.setRecordsValueField(j, records.(field), false);
                     else
                         for j = 1:obj.dimension_
                             if strcmp(field, obj.domain_label_{j}) || ...
@@ -622,6 +615,22 @@ classdef Symbol < handle
                 obj.records = [];
             case {GAMSTransfer.RecordsFormat.UNKNOWN, GAMSTransfer.RecordsFormat.NOT_READ}
                 error('Invalid target format: %s', p.Results.target_format);
+            case GAMSTransfer.RecordsFormat.STRUCT
+                if ~obj.SUPPORTS_FORMAT_STRUCT
+                    error('Cannot transform this symbol type into ''struct''.');
+                end
+            case GAMSTransfer.RecordsFormat.TABLE
+                if ~obj.SUPPORTS_FORMAT_TABLE
+                    error('Cannot transform this symbol type into ''table''.');
+                end
+            case GAMSTransfer.RecordsFormat.DENSE_MATRIX
+                if ~obj.SUPPORTS_FORMAT_DENSE_MATRIX
+                    error('Cannot transform this symbol type into ''dense_matrix''.');
+                end
+            case GAMSTransfer.RecordsFormat.SPARSE_MATRIX
+                if ~obj.SUPPORTS_FORMAT_SPARSE_MATRIX
+                    error('Cannot transform this symbol type into ''sparse_matrix''.');
+                end
             end
 
             % transform between column based formats
@@ -649,9 +658,6 @@ classdef Symbol < handle
             case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
                 switch target_format
                 case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
-                    if isa(obj, 'GAMSTransfer.Set')
-                        error('Cannot transform a Set to anything else than ''struct'' and ''table''.');
-                    end
                     if any(isnan(obj.size_) | isinf(obj.size_))
                         error('Matrix sizes not available. Can''t transform to matrix.');
                     end
@@ -681,16 +687,9 @@ classdef Symbol < handle
                         fields = obj.records.Properties.VariableNames;
                     end
                     for i = 1:numel(fields)
-                        if strcmp(fields{i}, 'level') || strcmp(fields{i}, 'value')
-                            def = def_values(1);
-                        elseif strcmp(fields{i}, 'marginal')
-                            def = def_values(2);
-                        elseif strcmp(fields{i}, 'lower')
-                            def = def_values(3);
-                        elseif strcmp(fields{i}, 'upper')
-                            def = def_values(4);
-                        elseif strcmp(fields{i}, 'scale')
-                            def = def_values(5);
+                        j = find(ismember(obj.VALUE_FIELDS, fields{i}));
+                        if ~isempty(j)
+                            def = def_values(j);
                         else
                             continue
                         end
@@ -716,7 +715,7 @@ classdef Symbol < handle
                 case GAMSTransfer.RecordsFormat.DENSE_MATRIX
                     return
                 case GAMSTransfer.RecordsFormat.SPARSE_MATRIX
-                    for f = {'level', 'value', 'marginal', 'lower', 'upper', 'scale'}
+                    for f = obj.VALUE_FIELDS
                         if isfield(obj.records, f{1})
                             obj.records.(f{1}) = sparse(obj.records.(f{1}));
                         end
@@ -726,7 +725,7 @@ classdef Symbol < handle
             case GAMSTransfer.RecordsFormat.SPARSE_MATRIX
                 switch target_format
                 case GAMSTransfer.RecordsFormat.DENSE_MATRIX
-                    for f = {'level', 'value', 'marginal', 'lower', 'upper', 'scale'}
+                    for f = obj.VALUE_FIELDS
                         if isfield(obj.records, f{1})
                             obj.records.(f{1}) = full(obj.records.(f{1}));
                         end
@@ -758,15 +757,14 @@ classdef Symbol < handle
 
                     % get sparse indices
                     idx = false(1, nrecs);
-                    fields = {'level', 'value', 'marginal', 'lower', 'upper', 'scale'};
-                    for i = 1:numel(fields)
-                        i_field = max(1, i-1);
-                        if ~isfield(obj.records, fields{i})
+                    for i = 1:numel(obj.VALUE_FIELDS)
+                        field = obj.VALUE_FIELDS{i};
+                        if ~isfield(obj.records, field)
                             continue
                         end
-                        [row, col, val] = find(obj.records.(fields{i}));
-                        linear_idx = sub2ind(size(obj.records.(fields{i})), row, col);
-                        idx(linear_idx(val ~= def_values(i_field))) = true;
+                        [row, col, val] = find(obj.records.(field));
+                        linear_idx = sub2ind(size(obj.records.(field)), row, col);
+                        idx(linear_idx(val ~= def_values(i))) = true;
                     end
                     idx = ~idx(k_idx_sorted);
                     k_sorted(idx,:) = [];
@@ -789,7 +787,7 @@ classdef Symbol < handle
                     end
 
                     % store value fields
-                    for f = {'level', 'value', 'marginal', 'lower', 'upper', 'scale'}
+                    for f = obj.VALUE_FIELDS
                         if isfield(obj.records, f{1})
                             records.(f{1}) = full(obj.records.(f{1})(k_idx_sorted));
                         end
@@ -1267,25 +1265,11 @@ classdef Symbol < handle
             otherwise
                 fields = fieldnames(obj.records);
             end
-
-            switch class(obj)
-            case 'GAMSTransfer.Set'
-                values = {};
-                return
-            case 'GAMSTransfer.Parameter'
-                values = {'value'};
-            case {'GAMSTransfer.Variable', 'GAMSTransfer.Equation'}
-                if nargin == 1
-                    values = {'level'};
-                elseif nargin == 2
-                    if ischar(values) || isstring(values)
-                        values = {values};
-                    elseif ~iscellstr(values)
-                        error('Requested value fields must be of type ''cellstr''.');
-                    end
-                end
+            if nargin == 1
+                values = obj.VALUE_FIELDS;
+            else
+                values = intersect(obj.VALUE_FIELDS, values);
             end
-
             values = intersect(fields, values);
         end
 
@@ -1326,24 +1310,11 @@ classdef Symbol < handle
             for i = 1:numel(labels)
                 field = obj.records.(labels{i});
                 switch labels{i}
-                case 'value'
-                    if ~isa(obj, 'GAMSTransfer.Parameter')
-                        error('Field ''value'' only allowed for type ''GAMSTransfer.Parameter''.');
-                    end
-                    if ~isnumeric(field)
-                        error('Field ''value'' must be of type ''numeric''.');
-                    end
-                case 'text'
-                    if ~isa(obj, 'GAMSTransfer.Set')
-                        error('Field ''text'' only allowed for type ''GAMSTransfer.Set''.');
-                    end
+                case obj.TEXT_FIELDS
                     if (~obj.container.features.categorical || ~iscategorical(field)) && ~iscellstr(field)
                         error('Field ''text'' must be of type ''categorical'' or ''cellstr''.');
                     end
-                case {'level', 'marginal', 'lower', 'upper', 'scale'}
-                    if ~isa(obj, 'GAMSTransfer.Variable') && ~isa(obj, 'GAMSTransfer.Equation')
-                        error('Field ''%s'' only allowed for type ''GAMSTransfer.Variable'' or ''GAMSTransfer.Equation''.', labels{i});
-                    end
+                case obj.VALUE_FIELDS
                     if ~isnumeric(field)
                         error('Field ''%s'' must be of type ''numeric''.', labels{i});
                     end
@@ -1469,7 +1440,8 @@ classdef Symbol < handle
             end
 
             % check if matrix or struct
-            if prod(val_size(1:obj.dimension_) == obj.size_) && ~isa(obj, 'GAMSTransfer.Set')
+            if prod(val_size(1:obj.dimension_) == obj.size_) && ...
+                (obj.SUPPORTS_FORMAT_DENSE_MATRIX || obj.SUPPORTS_FORMAT_SPARSE_MATRIX)
                 if val_fields_same_size && val_fields_same_length && val_fields_dense
                     records_format = GAMSTransfer.RecordsFormat.DENSE_MATRIX;
                 elseif val_fields_same_size && val_fields_sparse
@@ -1538,36 +1510,14 @@ classdef Symbol < handle
             end
 
             % check value for symbol type
-            if isa(obj, 'GAMSTransfer.Parameter')
-                if dim < 1 || dim > 1
-                    return
-                end
-            elseif isa(obj, 'GAMSTransfer.Variable') || isa(obj, 'GAMSTransfer.Equation')
-                if dim < 1 || dim > 5
-                    return
-                end
-            else
+            if numel(obj.VALUE_FIELDS) == 0
                 error('Numerical records only allowed for Parameter, Variable and Equation');
+            elseif dim < 1 || dim > numel(obj.VALUE_FIELDS)
+                return
             end
 
             % set records value
-            switch dim
-            case 1
-                if isa(obj, 'GAMSTransfer.Parameter')
-                    obj.records.value = values;
-                else
-                    obj.records.level = values;
-                end
-            case 2
-                obj.records.marginal = values;
-            case 3
-                obj.records.lower = values;
-            case 4
-                obj.records.upper = values;
-            case 5
-                obj.records.scale = values;
-            end
-
+            obj.records.(obj.VALUE_FIELDS{dim}) = values;
         end
 
         function updateDomainSetDependentData(obj)

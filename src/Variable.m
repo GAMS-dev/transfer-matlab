@@ -72,6 +72,15 @@ classdef Variable < GAMSTransfer.Symbol
         type_
     end
 
+    properties (Hidden, Constant)
+        VALUE_FIELDS = {'level', 'marginal', 'lower', 'upper', 'scale'}
+        TEXT_FIELDS = {}
+        SUPPORTS_FORMAT_DENSE_MATRIX = true
+        SUPPORTS_FORMAT_SPARSE_MATRIX = true
+        SUPPORTS_FORMAT_STRUCT = true
+        SUPPORTS_FORMAT_TABLE = true
+    end
+
     methods
 
         function obj = Variable(container, name, varargin)

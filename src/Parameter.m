@@ -62,6 +62,15 @@ classdef Parameter < GAMSTransfer.Symbol
         description
     end
 
+    properties (Hidden, Constant)
+        VALUE_FIELDS = {'value'}
+        TEXT_FIELDS = {}
+        SUPPORTS_FORMAT_DENSE_MATRIX = true
+        SUPPORTS_FORMAT_SPARSE_MATRIX = true
+        SUPPORTS_FORMAT_STRUCT = true
+        SUPPORTS_FORMAT_TABLE = true
+    end
+
     methods
 
         function obj = Parameter(container, name, varargin)
