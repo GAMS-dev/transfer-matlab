@@ -804,7 +804,7 @@ classdef Symbol < handle
                 obj.format, p.Results.target_format);
         end
 
-        function check(obj, varargin)
+        function valid = check(obj, verbose)
             % Checks if records are stored in supported format
             %
             % If the function argument is true, this function will print the
@@ -814,6 +814,7 @@ classdef Symbol < handle
             % See also: GAMSTransfer.Symbol/is_valid
             %
 
+            valid = false;
             obj.format_ = GAMSTransfer.RecordsFormat.UNKNOWN;
 
             obj.updateDomainSetDependentData();
@@ -865,9 +866,10 @@ classdef Symbol < handle
                     end
                 end
 
+                valid = true;
             catch e
                 obj.format_ = GAMSTransfer.RecordsFormat.UNKNOWN;
-                if nargin > 0 && varargin{1}
+                if verbose
                     error(e.message);
                 end
             end
@@ -1230,6 +1232,10 @@ classdef Symbol < handle
             end
             if ~obj.is_valid
                 error('Symbol must be valid in order to get used UELs.');
+            end
+            if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
+                uels = {};
+                return
             end
 
             label = obj.domain_label_{dim};
