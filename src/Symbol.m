@@ -1166,7 +1166,7 @@ classdef Symbol < handle
             % be considered: level, value, lower, upper, scale. If none is given
             % all available for the symbol are considered.
             %
-            % See also: GAMSTransfer.getna, GAMSTransfer.isna
+            % See also: GAMSTransfer.SpecialValues.NA, GAMSTransfer.SpecialValues.isna
             %
 
             n = 0;
@@ -1179,7 +1179,7 @@ classdef Symbol < handle
 
             % get count
             for i = 1:numel(values)
-                n = n + sum(GAMSTransfer.isna(obj.records.(values{i})(:)));
+                n = n + sum(GAMSTransfer.SpecialValues.isna(obj.records.(values{i})(:)));
             end
         end
 
@@ -1202,7 +1202,7 @@ classdef Symbol < handle
 
             % get count
             for i = 1:numel(values)
-                n = n + sum(isnan(obj.records.(values{i})(:)) & ~GAMSTransfer.isna(obj.records.(values{i})(:)));
+                n = n + sum(isnan(obj.records.(values{i})(:)) & ~GAMSTransfer.SpecialValues.isna(obj.records.(values{i})(:)));
             end
         end
 
@@ -1214,7 +1214,7 @@ classdef Symbol < handle
             % be considered: level, value, lower, upper, scale. If none is given
             % all available for the symbol are considered.
             %
-            % See also: GAMSTransfer.geteps, GAMSTransfer.iseps
+            % See also: GAMSTransfer.SpecialValues.EPS, GAMSTransfer.SpecialValues.iseps
             %
 
             n = 0;
@@ -1227,7 +1227,7 @@ classdef Symbol < handle
 
             % get count
             for i = 1:numel(values)
-                n = n + sum(GAMSTransfer.iseps(obj.records.(values{i})(:)));
+                n = n + sum(GAMSTransfer.SpecialValues.iseps(obj.records.(values{i})(:)));
             end
         end
 

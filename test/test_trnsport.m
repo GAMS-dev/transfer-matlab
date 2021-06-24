@@ -25,7 +25,7 @@
 
 function test_trnsport(t, cfg)
 
-    geps = GAMSTransfer.geteps();
+    geps = GAMSTransfer.SpecialValues.EPS;
 
     for k = 1:3
         if k == 1
@@ -533,7 +533,7 @@ function test_trnsport(t, cfg)
         t.assert(numel(supply.records.upper) == 2);
         t.assert(supply.records.level(1) == 350);
         t.assert(supply.records.level(2) == 550);
-        t.assert(GAMSTransfer.iseps(supply.records.marginal(1)));
+        t.assert(GAMSTransfer.SpecialValues.iseps(supply.records.marginal(1)));
         t.assert(supply.records.marginal(2) == 0);
         t.assert(supply.records.upper(1) == 350);
         t.assert(supply.records.upper(2) == 600);

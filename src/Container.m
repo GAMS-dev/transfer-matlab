@@ -304,9 +304,8 @@ classdef Container < handle
             %
 
             if ~obj.is_valid
-                [n_invalid, invalid_symbols] = obj.getInvalidSymbols();
-                invalid_str = GAMSTransfer.Utils.list2str(invalid_symbols, '', '');
-                error('Can''t write invalid container. Invalid symbols: %s.', invalid_str);
+                invalids = GAMSTransfer.Utils.list2str(obj.listInvalidSymbols(), '', '');
+                error('Can''t write invalid container. Invalid symbols: %s.', invalids);
             end
 
             % input arguments
@@ -345,28 +344,28 @@ classdef Container < handle
             end
         end
 
-        function symbol = get(obj, name)
-            % Get symbol object(s) by name
+        function symbols = getSymbols(obj, names)
+            % Get symbol objects by names
             %
-            % s = c.get(a) returns the handle to GAMS symbol named a.
-            % s = c.get(b) returns a list of handles to the GAMS symbols
-            % with name equal to any element in cell b.
+            % s = c.getSymbols(a) returns the handle to GAMS symbol named a.
+            % s = c.getSymbols(b) returns a list of handles to the GAMS symbols
+            % with names equal to any element in cell b.
             %
             % Example:
-            % v1 = c.get('v1');
-            % vars = c.get(c.listVariables());
+            % v1 = c.getSymbols('v1');
+            % vars = c.getSymbols(c.listVariables());
             %
 
-            if ischar(name) || isstring(name)
-                symbol = obj.data.(name);
+            if ischar(names) || isstring(names)
+                symbols = obj.data.(names);
                 return
-            elseif ~iscellstr(name)
+            elseif ~iscellstr(names)
                 error('Name must be of type ''char'' or ''cellstr''.');
             end
-            n = numel(name);
-            symbol = cell(size(name));
+            n = numel(names);
+            symbols = cell(size(names));
             for i = 1:n
-                symbol{i} = obj.data.(name{i});
+                symbols{i} = obj.data.(names{i});
             end
         end
 
@@ -698,6 +697,30 @@ classdef Container < handle
             list = obj.listSymbols(GAMSTransfer.SymbolType.ALIAS);
         end
 
+        function list = listInvalidSymbols(obj)
+            % List all symbols with invalid records
+            %
+
+            symbols = fieldnames(obj.data);
+
+            n_invalid = 0;
+            for i = 1:numel(symbols)
+                if ~obj.data.(symbols{i}).is_valid
+                    n_invalid = n_invalid + 1;
+                end
+            end
+
+            list = cell(1, n_invalid);
+
+            n_invalid = 0;
+            for i = 1:numel(symbols)
+                if ~obj.data.(symbols{i}).is_valid
+                    n_invalid = n_invalid + 1;
+                    list{n_invalid} = symbol.name;
+                end
+            end
+        end
+
         function descr = describeSets(obj)
             % Returns an overview over all sets in container
             %
@@ -842,27 +865,6 @@ classdef Container < handle
                     continue
                 end
                 symbol.updateDomains(verbose);
-            end
-        end
-
-        function [n_invalid, invalid_symbols] = getInvalidSymbols(obj)
-            % List all symbols with invalid records
-            %
-            % [n_invalid, invalid_symbols] = getInvalidSymbols() returns the
-            % number of invalid symbols n_invalid and a list with handles to it
-            % in invalid_symbols
-            %
-
-            n_invalid = 0;
-            invalid_symbols = {};
-
-            symbols = fieldnames(obj.data);
-            for i = 1:numel(symbols)
-                symbol = obj.data.(symbols{i});
-                if ~symbol.is_valid
-                    n_invalid = n_invalid + 1;
-                    invalid_symbols{end+1} = symbol;
-                end
             end
         end
 

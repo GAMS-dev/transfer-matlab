@@ -1058,13 +1058,13 @@ function test_defaultvalues(t, cfg)
     s = GAMSTransfer.Set(gdx, 'i1');
     def = s.getDefaultValues();
     t.assert(def(1) == 0);
-    t.assert(all(GAMSTransfer.isna(def(2:end))));
+    t.assert(all(GAMSTransfer.SpecialValues.isna(def(2:end))));
 
     t.add('default_values_parameters');
     s = GAMSTransfer.Parameter(gdx, 'a1');
     def = s.getDefaultValues();
     t.assert(def(1) == 0);
-    t.assert(all(GAMSTransfer.isna(def(2:end))));
+    t.assert(all(GAMSTransfer.SpecialValues.isna(def(2:end))));
 
     t.add('default_values_variables');
     s = GAMSTransfer.Variable(gdx, 'x1', 'binary');

@@ -26,7 +26,9 @@
 #include "mex.h"
 #include "gt_utils.h"
 
-#define ERRID "GAMSTransfer:isna:"
+#include <time.h>
+
+#define ERRID "GAMSTransfer:gt_geteps:"
 
 void mexFunction(
     int             nlhs,
@@ -35,32 +37,26 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
-    mxLogical* mx_outputs;
 #ifdef WITH_R2018A_OR_NEWER
-    mxDouble* mx_inputs = NULL;
+    mxDouble* mx_value = NULL;
 #else
-    double* mx_inputs = NULL;
+    double* mx_value = NULL;
 #endif
 
     if (nlhs != 1 && nlhs != 0)
         mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of outputs (%d). 0 or 1 required.", nlhs);
-    if (nrhs != 1)
-        mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of inputs (%d). 1 required.", nrhs);
-    if (!mxIsDouble(prhs[0]))
-        mexErrMsgIdAndTxt(ERRID"check_argument", "Argument has invalid type: need double");
+    if (nrhs != 0)
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of inputs (%d). 0 required.", nrhs);
 
     /* create output data */
-    plhs[0] = mxCreateLogicalArray(mxGetNumberOfDimensions(prhs[0]), mxGetDimensions(prhs[0]));
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
 
     /* access data */
 #ifdef WITH_R2018A_OR_NEWER
-    mx_inputs = mxGetDoubles(prhs[0]);
-    mx_outputs = mxGetLogicals(plhs[0]);
+    mx_value = mxGetDoubles(plhs[0]);
 #else
-    mx_inputs = mxGetPr(prhs[0]);
-    mx_outputs = (mxLogical*) mxGetData(plhs[0]);
+    mx_value = mxGetPr(plhs[0]);
 #endif
 
-    for (size_t i = 0; i < mxGetNumberOfElements(plhs[0]); i++)
-        mx_outputs[i] = gt_utils_iseps(mx_inputs[i]);
+    mx_value[0] = gt_utils_geteps();
 }

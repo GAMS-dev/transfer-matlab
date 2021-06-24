@@ -28,16 +28,16 @@ function test_general(t, cfg)
 end
 
 function test_specialValues(t, cfg)
-    geps = GAMSTransfer.geteps();
-    gna = GAMSTransfer.getna();
+    geps = GAMSTransfer.SpecialValues.EPS;
+    gna = GAMSTransfer.SpecialValues.NA;
 
     t.add('special_values_eps');
-    t.assert(GAMSTransfer.iseps(geps));
-    t.assert(~GAMSTransfer.iseps(0));
-    t.assert(GAMSTransfer.iseps([1, 2, 0, -0, geps, nan, gna]) == [0, 0, 0, 1, 1, 0, 0]);
+    t.assert(GAMSTransfer.SpecialValues.iseps(geps));
+    t.assert(~GAMSTransfer.SpecialValues.iseps(0));
+    t.assert(GAMSTransfer.SpecialValues.iseps([1, 2, 0, -0, geps, nan, gna]) == [0, 0, 0, 1, 1, 0, 0]);
 
     t.add('special_values_na');
-    t.assert(GAMSTransfer.isna(gna));
-    t.assert(~GAMSTransfer.isna(nan));
-    t.assert(GAMSTransfer.isna([1, 2, 0, -0, geps, nan, gna]) == [0, 0, 0, 0, 0, 0, 1]);
+    t.assert(GAMSTransfer.SpecialValues.isna(gna));
+    t.assert(~GAMSTransfer.SpecialValues.isna(nan));
+    t.assert(GAMSTransfer.SpecialValues.isna([1, 2, 0, -0, geps, nan, gna]) == [0, 0, 0, 0, 0, 0, 1]);
 end

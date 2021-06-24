@@ -386,13 +386,13 @@ function test_idx_readSpecialValues(t, cfg)
     t.assert(isstruct(gdx.data.GEps.records));
     t.assert(isnan(gdx.data.GUndef.records.value));
     t.assert(isnan(gdx.data.GNA.records.value));
-    t.assert(GAMSTransfer.isna(gdx.data.GNA.records.value));
+    t.assert(GAMSTransfer.SpecialValues.isna(gdx.data.GNA.records.value));
     t.assert(gdx.data.GPInf.records.value == Inf);
     t.assert(gdx.data.GMInf.records.value == -Inf);
 
     % doesn't return 0 (bug in IDX API (special values already translated): steve says 'no bug'; renke says 'definitely bug')
     % t.assert(gdx.data.GEps.records.value == 0);
-    % t.assert(GAMSTransfer.iseps(gdx.data.GEps.records.value));
+    % t.assert(GAMSTransfer.SpecialValues.iseps(gdx.data.GEps.records.value));
 end
 
 function test_idx_readWrite(t, cfg)

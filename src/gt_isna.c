@@ -26,7 +26,7 @@
 #include "mex.h"
 #include "gt_utils.h"
 
-#define ERRID "GAMSTransfer:iseps:"
+#define ERRID "GAMSTransfer:gt_iseps:"
 
 void mexFunction(
     int             nlhs,

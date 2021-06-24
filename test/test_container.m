@@ -34,37 +34,37 @@ function test_getlist(t, cfg)
     gdx = GAMSTransfer.Container(cfg.filenames{3});
 
     t.add('get_list_empty')
-    l = gdx.get({});
+    l = gdx.getSymbols({});
     t.assert(iscell(l));
     t.assert(isempty(l));
 
     t.add('get_list_set');
-    l = gdx.get('i');
+    l = gdx.getSymbols('i');
     t.assert(isa(l, 'GAMSTransfer.Set'));
     t.assertEquals(l.name, 'i');
 
     t.add('get_list_variable');
-    l = gdx.get('x1');
+    l = gdx.getSymbols('x1');
     t.assert(isa(l, 'GAMSTransfer.Variable'));
     t.assertEquals(l.name, 'x1');
 
     t.add('get_list_equation');
-    l = gdx.get('e1');
+    l = gdx.getSymbols('e1');
     t.assert(isa(l, 'GAMSTransfer.Equation'));
     t.assertEquals(l.name, 'e1');
 
     t.add('get_list_parameter');
-    l = gdx.get('a');
+    l = gdx.getSymbols('a');
     t.assert(isa(l, 'GAMSTransfer.Parameter'));
     t.assertEquals(l.name, 'a');
 
     t.add('get_list_alias');
-    l = gdx.get('i2');
+    l = gdx.getSymbols('i2');
     t.assert(isa(l, 'GAMSTransfer.Alias'));
     t.assertEquals(l.name, 'i2');
 
     t.add('get_list_sets');
-    l = gdx.get(gdx.listSets());
+    l = gdx.getSymbols(gdx.listSets());
     t.assert(iscell(l));
     t.assert(numel(l) == 2);
     t.assert(isa(l{1}, 'GAMSTransfer.Set'));
@@ -73,7 +73,7 @@ function test_getlist(t, cfg)
     t.assertEquals(l{2}.name, 'j');
 
     t.add('get_list_variables');
-    l = gdx.get(gdx.listVariables());
+    l = gdx.getSymbols(gdx.listVariables());
     t.assert(iscell(l));
     t.assert(numel(l) == 10);
     t.assert(isa(l{1}, 'GAMSTransfer.Variable'));
@@ -98,7 +98,7 @@ function test_getlist(t, cfg)
     t.assertEquals(l{10}.name, 'x10');
 
     t.add('get_list_equations');
-    l = gdx.get(gdx.listEquations());
+    l = gdx.getSymbols(gdx.listEquations());
     t.assert(iscell(l));
     t.assert(numel(l) == 3);
     t.assert(isa(l{1}, 'GAMSTransfer.Equation'));
@@ -109,14 +109,14 @@ function test_getlist(t, cfg)
     t.assertEquals(l{3}.name, 'e3');
 
     t.add('get_list_parameters');
-    l = gdx.get(gdx.listParameters());
+    l = gdx.getSymbols(gdx.listParameters());
     t.assert(iscell(l));
     t.assert(numel(l) == 1);
     t.assert(isa(l{1}, 'GAMSTransfer.Parameter'));
     t.assertEquals(l{1}.name, 'a');
 
     t.add('get_list_aliases');
-    l = gdx.get(gdx.listAliases());
+    l = gdx.getSymbols(gdx.listAliases());
     t.assert(iscell(l));
     t.assert(numel(l) == 2);
     t.assert(isa(l{1}, 'GAMSTransfer.Alias'));

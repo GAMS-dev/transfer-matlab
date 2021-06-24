@@ -28,7 +28,7 @@
 
 #include <time.h>
 
-#define ERRID "GAMSTransfer:geteps:"
+#define ERRID "GAMSTransfer:gt_getna:"
 
 void mexFunction(
     int             nlhs,
@@ -58,5 +58,5 @@ void mexFunction(
     mx_value = mxGetPr(plhs[0]);
 #endif
 
-    mx_value[0] = gt_utils_geteps();
+    mx_value[0] = gt_utils_getna();
 }
