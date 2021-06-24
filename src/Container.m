@@ -458,14 +458,14 @@ classdef Container < handle
             symbol = GAMSTransfer.Alias(obj, name, aliased_with, varargin{:});
         end
 
-        function rename(obj, oldname, newname)
+        function renameSymbol(obj, oldname, newname)
             % Rename a symbol
             %
-            % rename(oldname, newname) renames the symbol with name oldname to
-            % newname. The symbol order in data will not change.
+            % renameSymbol(oldname, newname) renames the symbol with name
+            % oldname to newname. The symbol order in data will not change.
             %
             % Example:
-            % c.rename('x', 'xx');
+            % c.renameSymbol('x', 'xx');
             %
 
             if strcmp(oldname, newname)
@@ -491,7 +491,7 @@ classdef Container < handle
             obj.data = orderfields(obj.data, perm);
         end
 
-        function remove(obj, name)
+        function removeSymbol(obj, name)
             % Removes a symbol from container
             %
 
@@ -829,7 +829,7 @@ classdef Container < handle
             end
         end
 
-        function updateDomains(obj, varargin)
+        function resolveDomainViolations(obj, varargin)
             % Extends domain sets in order to remove domain violations
             %
             % Domain violations occur when this symbol uses other Set(s) as
@@ -837,9 +837,10 @@ classdef Container < handle
             % the corresponding set. Such a domain violation will lead to a GDX
             % error when writing the data.
             %
-            % updateDomains(b) extends the domain sets with the violated domain
-            % entries. Hence, the domain violations disappear. If b is true, then
-            % a list will be printed with the updated elements.
+            % resolveDomainViolations(b) extends the domain sets with the
+            % violated domain entries. Hence, the domain violations disappear.
+            % If b is true, then a list will be printed with the updated
+            % elements.
             %
             % See also: GAMSTransfer.Container.getDomainViolations,
             % GAMSTransfer.Symbol.updateDomains
@@ -864,7 +865,7 @@ classdef Container < handle
                 if isa(symbol, 'GAMSTransfer.Alias')
                     continue
                 end
-                symbol.updateDomains(verbose);
+                symbol.resolveDomainViolations(verbose);
             end
         end
 
@@ -967,44 +968,44 @@ classdef Container < handle
                 descr.sparsity(i) = symbol.getSparsity();
                 switch symtype
                 case {GAMSTransfer.SymbolType.VARIABLE, GAMSTransfer.SymbolType.EQUATION}
-                    descr.min_level(i) = symbol.minValue('level');
-                    descr.mean_level(i) = symbol.meanValue('level');
-                    descr.max_level(i) = symbol.maxValue('level');
-                    [absmax, descr.where_max_abs_level{i}] = symbol.maxAbsValue('level');
+                    descr.min_level(i) = symbol.getMinValue('level');
+                    descr.mean_level(i) = symbol.getMeanValue('level');
+                    descr.max_level(i) = symbol.getMaxValue('level');
+                    [absmax, descr.where_max_abs_level{i}] = symbol.getMaxAbsValue('level');
                     if isnan(absmax)
                         descr.where_max_abs_level{i} = '';
                     else
                         descr.where_max_abs_level{i} = GAMSTransfer.Utils.list2str(descr.where_max_abs_level{i});
                     end
-                    descr.min_marginal(i) = symbol.minValue('marginal');
-                    descr.mean_marginal(i) = symbol.meanValue('marginal');
-                    descr.max_marginal(i) = symbol.maxValue('marginal');
-                    [absmax, descr.where_max_abs_marginal{i}] = symbol.maxAbsValue('marginal');
+                    descr.min_marginal(i) = symbol.getMinValue('marginal');
+                    descr.mean_marginal(i) = symbol.getMeanValue('marginal');
+                    descr.max_marginal(i) = symbol.getMaxValue('marginal');
+                    [absmax, descr.where_max_abs_marginal{i}] = symbol.getMaxAbsValue('marginal');
                     if isnan(absmax)
                         descr.where_max_abs_marginal{i} = '';
                     else
                         descr.where_max_abs_marginal{i} = GAMSTransfer.Utils.list2str(descr.where_max_abs_marginal{i});
                     end
-                    descr.num_na(i) = symbol.numNa({'level', 'marginal', 'lower', 'upper', 'scale'});
-                    descr.num_undef(i) = symbol.numUndef({'level', 'marginal', 'lower', 'upper', 'scale'});
-                    descr.num_eps(i) = symbol.numEps({'level', 'marginal', 'lower', 'upper', 'scale'});
-                    descr.num_minf(i) = symbol.numMinf({'level', 'marginal', 'lower', 'upper', 'scale'});
-                    descr.num_pinf(i) = symbol.numPinf({'level', 'marginal', 'lower', 'upper', 'scale'});
+                    descr.num_na(i) = symbol.getNumNa({'level', 'marginal', 'lower', 'upper', 'scale'});
+                    descr.num_undef(i) = symbol.getNumUndef({'level', 'marginal', 'lower', 'upper', 'scale'});
+                    descr.num_eps(i) = symbol.getNumEps({'level', 'marginal', 'lower', 'upper', 'scale'});
+                    descr.num_minf(i) = symbol.getNumNegInf({'level', 'marginal', 'lower', 'upper', 'scale'});
+                    descr.num_pinf(i) = symbol.getNumPosInf({'level', 'marginal', 'lower', 'upper', 'scale'});
                 case GAMSTransfer.SymbolType.PARAMETER
-                    descr.min_value(i) = symbol.minValue();
-                    descr.mean_value(i) = symbol.meanValue();
-                    descr.max_value(i) = symbol.maxValue();
-                    [absmax, descr.where_max_abs_value{i}] = symbol.maxAbsValue();
+                    descr.min_value(i) = symbol.getMinValue();
+                    descr.mean_value(i) = symbol.getMeanValue();
+                    descr.max_value(i) = symbol.getMaxValue();
+                    [absmax, descr.where_max_abs_value{i}] = symbol.getMaxAbsValue();
                     if isnan(absmax)
                         descr.where_max_abs_value{i} = '';
                     else
                         descr.where_max_abs_value{i} = GAMSTransfer.Utils.list2str(descr.where_max_abs_value{i});
                     end
-                    descr.num_na(i) = symbol.numNa();
-                    descr.num_undef(i) = symbol.numUndef();
-                    descr.num_eps(i) = symbol.numEps();
-                    descr.num_minf(i) = symbol.numMinf();
-                    descr.num_pinf(i) = symbol.numPinf();
+                    descr.num_na(i) = symbol.getNumNa();
+                    descr.num_undef(i) = symbol.getNumUndef();
+                    descr.num_eps(i) = symbol.getNumEps();
+                    descr.num_minf(i) = symbol.getNumNegInf();
+                    descr.num_pinf(i) = symbol.getNumPosInf();
                 end
             end
 

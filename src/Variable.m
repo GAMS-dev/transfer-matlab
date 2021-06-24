@@ -138,7 +138,7 @@ classdef Variable < GAMSTransfer.Symbol
             if strcmp(obj.name_, name)
                 return
             end
-            obj.container.rename(obj.name_, name);
+            obj.container.renameSymbol(obj.name_, name);
         end
 
         function descr = get.description(obj)

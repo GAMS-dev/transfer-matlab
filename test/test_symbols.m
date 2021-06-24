@@ -1144,7 +1144,7 @@ function test_domainViolation(t, cfg);
     end
 
     t.add('domain_violation_3');
-    gdx.updateDomains();
+    gdx.resolveDomainViolations();
     [n_domviol, domviol] = gdx.getDomainViolations();
     t.assert(n_domviol == 0);
     t.assert(isstruct(domviol));
@@ -1789,16 +1789,16 @@ function test_transformRecords(t, cfg)
                 else
                     t.assert(true);
                 end
-                gdx.data.i.transform(formats{j});
-                gdx.data.j.transform(formats{j});
+                gdx.data.i.transformRecords(formats{j});
+                gdx.data.j.transformRecords(formats{j});
             catch
                 if strcmp(formats{j}, 'dense_matrix') || strcmp(formats{j}, 'sparse_matrix')
                     t.reset();
                 end
             end
-            gdx.data.a.transform(formats{j});
-            gdx.data.b.transform(formats{j});
-            gdx.data.x.transform(formats{j});
+            gdx.data.a.transformRecords(formats{j});
+            gdx.data.b.transformRecords(formats{j});
+            gdx.data.x.transformRecords(formats{j});
             if strcmp(formats{j}, 'dense_matrix') || strcmp(formats{j}, 'sparse_matrix')
                 t.assertEquals(gdx.data.i.format, i_format{i});
                 t.assertEquals(gdx.data.j.format, j_format{i});

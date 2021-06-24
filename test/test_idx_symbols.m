@@ -667,9 +667,9 @@ function test_idx_transformRecords(t, cfg)
 
             t.add(sprintf('idx_transform_records_%s_to_%s', formats{i}, formats{j}));
             gdx.read('format', formats{i});
-            gdx.data.a.transform(formats{j});
-            gdx.data.b.transform(formats{j});
-            gdx.data.c.transform(formats{j});
+            gdx.data.a.transformRecords(formats{j});
+            gdx.data.b.transformRecords(formats{j});
+            gdx.data.c.transformRecords(formats{j});
             t.assertEquals(gdx.data.a.format, a_format{j});
             t.assertEquals(gdx.data.b.format, b_format{j});
             t.assertEquals(gdx.data.c.format, c_format{j});

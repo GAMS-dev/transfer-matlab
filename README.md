@@ -74,7 +74,7 @@ x.setRecords([50, 300, 0; 275, 0, 275], [0, 0, 0.036; 0, 0.009, 0]);
 z.setRecords(153.675);
 
 % (optional) transform records into different format
-x.transform('table');
+x.transformRecords('table');
 
 % add equations
 cost = Equation(m, 'cost', 'e', 'description', 'define objective function');

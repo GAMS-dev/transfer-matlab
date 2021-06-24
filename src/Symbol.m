@@ -594,7 +594,7 @@ classdef Symbol < handle
             def = GAMSTransfer.gt_get_defaults(obj);
         end
 
-        function transform(obj, target_format)
+        function transformRecords(obj, target_format)
             % Transforms symbol records into given format
             %
             % See also: GAMSTransfer.RecordsFormat
@@ -933,17 +933,18 @@ classdef Symbol < handle
             end
         end
 
-        function updateDomains(obj, varargin)
-            % Extends domain sets in order to remove domain violations
+        function resolveDomainViolations(obj, varargin)
+            % Extends domain sets in order to resolve domain violations
             %
             % Domain violations occur when this symbol uses other Set(s) as
             % domain(s) and a domain entry in its records that is not present in
             % the corresponding set. Such a domain violation will lead to a GDX
             % error when writing the data.
             %
-            % updateDomains(b) extends the domain sets with the violated domain
-            % entries. Hence, the domain violations disappear. If b is true, then
-            % a list will be printed with the updated elements.
+            % resolveDomainViolations(b) extends the domain sets with the
+            % violated domain entries. Hence, the domain violations disappear.
+            % If b is true, then a list will be printed with the updated
+            % elements.
             %
             % See also: GAMSTransfer.Symbol.getDomainViolations,
             % GAMSTransfer.Container.updateDomains
@@ -1009,6 +1010,11 @@ classdef Symbol < handle
         end
 
         function sparsity = getSparsity(obj)
+            % Returns the sparsity of symbol records
+            %
+            % s = getSparsity() returns sparsity s in the symbol records.
+            %
+
             n_dense = prod(obj.size_);
             if n_dense == 0
                 sparsity = NaN;
@@ -1017,13 +1023,14 @@ classdef Symbol < handle
             end
         end
 
-        function [value, where] = maxValue(obj, varargin)
+        function [value, where] = getMaxValue(obj, varargin)
             % Returns the largest value in records
             %
-            % [v, w] = maxValue(varargin) returns the largest value in records v
-            % and where it is w. varargin can include a list of value fields
-            % that should be considered: level, value, lower, upper, scale. If
-            % none is given all available for the symbol are considered.
+            % [v, w] = getMaxValue(varargin) returns the largest value in
+            % records v and where it is w. varargin can include a list of value
+            % fields that should be considered: level, value, lower, upper,
+            % scale. If none is given all available for the symbol are
+            % considered.
             %
 
             value = nan;
@@ -1051,13 +1058,14 @@ classdef Symbol < handle
             end
         end
 
-        function [value, where] = minValue(obj, varargin)
+        function [value, where] = getMinValue(obj, varargin)
             % Returns the smallest value in records
             %
-            % [v, w] = minValue(varargin) returns the smallest value in records v
-            % and where it is w. varargin can include a list of value fields
-            % that should be considered: level, value, lower, upper, scale. If
-            % none is given all available for the symbol are considered.
+            % [v, w] = getMinValue(varargin) returns the smallest value in
+            % records v and where it is w. varargin can include a list of value
+            % fields that should be considered: level, value, lower, upper,
+            % scale. If none is given all available for the symbol are
+            % considered.
             %
 
             value = nan;
@@ -1085,13 +1093,13 @@ classdef Symbol < handle
             end
         end
 
-        function value = meanValue(obj, varargin)
+        function value = getMeanValue(obj, varargin)
             % Returns the mean value over all values in records
             %
-            % v = minValue(varargin) returns the mean value over all values in
-            % records v. varargin can include a list of value fields that should
-            % be considered: level, value, lower, upper, scale. If none is given
-            % all available for the symbol are considered.
+            % v = getMinValue(varargin) returns the mean value over all values
+            % in records v. varargin can include a list of value fields that
+            % should be considered: level, value, lower, upper, scale. If none
+            % is given all available for the symbol are considered.
             %
 
             value = nan;
@@ -1121,13 +1129,14 @@ classdef Symbol < handle
             end
         end
 
-        function [value, where] = maxAbsValue(obj, varargin)
+        function [value, where] = getMaxAbsValue(obj, varargin)
             % Returns the largest absolute value in records
             %
-            % [v, w] = maxAbsValue(varargin) returns the largest absolute value
-            % in records v and where it is w. varargin can include a list of
-            % value fields that should be considered: level, value, lower, upper,
-            % scale. If none is given all available for the symbol are considered.
+            % [v, w] = getMaxAbsValue(varargin) returns the largest absolute
+            % value in records v and where it is w. varargin can include a list
+            % of value fields that should be considered: level, value, lower,
+            % upper, scale. If none is given all available for the symbol are
+            % considered.
             %
 
             value = nan;
@@ -1155,10 +1164,10 @@ classdef Symbol < handle
             end
         end
 
-        function n = numNa(obj, varargin)
+        function n = getNumNa(obj, varargin)
             % Returns the number of GAMS NA values in records
             %
-            % n = numNa(varargin) returns the number of GAMS NA values n in
+            % n = getNumNa(varargin) returns the number of GAMS NA values n in
             % records. varargin can include a list of value fields that should
             % be considered: level, value, lower, upper, scale. If none is given
             % all available for the symbol are considered.
@@ -1180,13 +1189,13 @@ classdef Symbol < handle
             end
         end
 
-        function n = numUndef(obj, varargin)
+        function n = getNumUndef(obj, varargin)
             % Returns the number of GAMS UNDEF values in records
             %
-            % n = numUndef(varargin) returns the number of GAMS UNDEF values n in
-            % records. varargin can include a list of value fields that should
-            % be considered: level, value, lower, upper, scale. If none is given
-            % all available for the symbol are considered.
+            % n = getNumUndef(varargin) returns the number of GAMS UNDEF values
+            % n in records. varargin can include a list of value fields that
+            % should be considered: level, value, lower, upper, scale. If none
+            % is given all available for the symbol are considered.
             %
 
             n = 0;
@@ -1199,14 +1208,14 @@ classdef Symbol < handle
 
             % get count
             for i = 1:numel(values)
-                n = n + sum(isnan(obj.records.(values{i})(:)) & ~GAMSTransfer.SpecialValues.isna(obj.records.(values{i})(:)));
+                n = n + sum(GAMSTransfer.SpecialValues.isundef(obj.records.(values{i})(:)));
             end
         end
 
-        function n = numEps(obj, varargin)
+        function n = getNumEps(obj, varargin)
             % Returns the number of GAMS EPS values in records
             %
-            % n = numEps(varargin) returns the number of GAMS EPS values n in
+            % n = getNumEps(varargin) returns the number of GAMS EPS values n in
             % records. varargin can include a list of value fields that should
             % be considered: level, value, lower, upper, scale. If none is given
             % all available for the symbol are considered.
@@ -1228,13 +1237,14 @@ classdef Symbol < handle
             end
         end
 
-        function n = numPinf(obj, varargin)
-            % Returns the number of GAMS PINF (positive infinity) values in records
+        function n = getNumPosInf(obj, varargin)
+            % Returns the number of GAMS PINF (positive infinity) values in
+            % records
             %
-            % n = numPinf(varargin) returns the number of GAMS PINF values n in
-            % records. varargin can include a list of value fields that should
-            % be considered: level, value, lower, upper, scale. If none is given
-            % all available for the symbol are considered.
+            % n = getNumPosInf(varargin) returns the number of GAMS PINF values
+            % n in records. varargin can include a list of value fields that
+            % should be considered: level, value, lower, upper, scale. If none
+            % is given all available for the symbol are considered.
             %
 
             n = 0;
@@ -1247,17 +1257,18 @@ classdef Symbol < handle
 
             % get count
             for i = 1:numel(values)
-                n = n + sum(isinf(obj.records.(values{i})(:)) & obj.records.(values{i})(:) > 0);
+                n = n + sum(GAMSTransfer.SpecialValues.isposinf(obj.records.(values{i})(:)));
             end
         end
 
-        function n = numMinf(obj, varargin)
-            % Returns the number of GAMS MINF (negative infinity) values in records
+        function n = getNumNegInf(obj, varargin)
+            % Returns the number of GAMS MINF (negative infinity) values in
+            % records
             %
-            % n = numMinf(varargin) returns the number of GAMS MINF values n in
-            % records. varargin can include a list of value fields that should
-            % be considered: level, value, lower, upper, scale. If none is given
-            % all available for the symbol are considered.
+            % n = getNumNegInf(varargin) returns the number of GAMS MINF values
+            % n in records. varargin can include a list of value fields that
+            % should be considered: level, value, lower, upper, scale. If none
+            % is given all available for the symbol are considered.
             %
 
             n = 0;
@@ -1270,7 +1281,7 @@ classdef Symbol < handle
 
             % get count
             for i = 1:numel(values)
-                n = n + sum(isinf(obj.records.(values{i})(:)) & obj.records.(values{i})(:) < 0);
+                n = n + sum(GAMSTransfer.SpecialValues.isneginf(obj.records.(values{i})(:)));
             end
         end
 
