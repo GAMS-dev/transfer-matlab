@@ -51,9 +51,6 @@ classdef Symbol < handle
         % domain_info Specifies if domains are stored 'relaxed' or 'regular'
         domain_info
 
-        % sparsity Sparsity of symbol (only available if size info is)
-        sparsity
-
         % format Format in which records are stored in (e.g. struct or dense_matrix)
         format
 
@@ -293,15 +290,6 @@ classdef Symbol < handle
             obj.uels_ = struct();
             for i = 1:obj.dimension_
                 obj.uels_.(obj.domain_label_{i}) = {};
-            end
-        end
-
-        function sparsity = get.sparsity(obj)
-            n_dense = prod(obj.size_);
-            if n_dense == 0
-                sparsity = NaN;
-            else
-                sparsity = 1 - double(obj.number_records) / n_dense;
             end
         end
 
@@ -1017,6 +1005,15 @@ classdef Symbol < handle
                 else
                     obj.domain_{i}.records = s;
                 end
+            end
+        end
+
+        function sparsity = getSparsity(obj)
+            n_dense = prod(obj.size_);
+            if n_dense == 0
+                sparsity = NaN;
+            else
+                sparsity = 1 - double(obj.number_records) / n_dense;
             end
         end
 

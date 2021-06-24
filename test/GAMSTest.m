@@ -110,7 +110,6 @@ classdef GAMSTest < handle
                 obj.assert(ischar(symbol.domain_info));
                 obj.assert(isnumeric(symbol.size));
                 obj.assert(numel(symbol.size) == symbol.dimension);
-                obj.assert(isnan(symbol.sparsity) | symbol.sparsity >= 0 & symbol.sparsity <= 1);
                 obj.assert(ischar(symbol.format));
                 obj.assert(strcmp(symbol.format, 'not_read') || strcmp(symbol.format, 'empty'));
                 obj.assert(symbol.number_records >= 0);

@@ -948,20 +948,6 @@ function test_changeSymbol(t, cfg)
         t.assertEquals(e.message, 'Setting symbol size only allowed in indexed mode.');
     end
 
-    t.add('change_symbol_sparsity');
-    try
-        x1.sparsity = 0;
-        t.assert(false);
-    catch e
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            msg_end = 'has private access and cannot be set in this context';
-            t.assertEquals(e.message(end-numel(msg_end)+1:end), msg_end);
-        else
-            msg_begin = 'You cannot set the read-only property';
-            t.assertEquals(e.message(1:numel(msg_begin)), msg_begin);
-        end
-    end
-
     t.add('change_symbol_format');
     try
         x1.format = 'struct';

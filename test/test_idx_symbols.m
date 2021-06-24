@@ -364,20 +364,6 @@ function test_idx_changeSymbol(t, cfg)
         t.assertEquals(e.message, 'Size must not be non-negative.');
     end
 
-    t.add('idx_change_symbol_sparsity');
-    try
-        p1.sparsity = 0;
-        t.assert(false);
-    catch e
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            msg_end = 'has private access and cannot be set in this context';
-            t.assertEquals(e.message(end-numel(msg_end)+1:end), msg_end);
-        else
-            msg_begin = 'You cannot set the read-only property';
-            t.assertEquals(e.message(1:numel(msg_begin)), msg_begin);
-        end
-    end
-
     t.add('idx_change_symbol_format');
     try
         p1.format = 'struct';

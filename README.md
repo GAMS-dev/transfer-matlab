@@ -107,7 +107,6 @@ x =
             domain: {[1×1 GAMSTransfer.Set]  [1×1 GAMSTransfer.Set]}
       domain_label: {'i_1'  'j_2'}
        domain_info: 'regular'
-          sparsity: 0
             format: 'table'
     number_records: 6
            records: [6×4 table]

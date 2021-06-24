@@ -964,7 +964,7 @@ classdef Container < handle
                 descr.domain{i} = GAMSTransfer.Utils.list2str(symbol.domain);
                 descr.size{i} = GAMSTransfer.Utils.list2str(symbol.size);
                 descr.count(i) = symbol.number_records;
-                descr.sparsity(i) = symbol.sparsity;
+                descr.sparsity(i) = symbol.getSparsity();
                 switch symtype
                 case {GAMSTransfer.SymbolType.VARIABLE, GAMSTransfer.SymbolType.EQUATION}
                     descr.min_level(i) = symbol.minValue('level');

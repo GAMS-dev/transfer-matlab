@@ -59,7 +59,7 @@ function test_read(t, cfg)
     t.assertEquals(s.domain_info, 'regular');
     t.assert(numel(s.size) == 1);
     t.assert(isnan(s.size(1)));
-    t.assert(isnan(s.sparsity));
+    t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
     t.assert(s.number_records == 5);
     t.assert(numel(fieldnames(s.uels)) == 1);
@@ -79,7 +79,7 @@ function test_read(t, cfg)
     t.assert(numel(s.domain_label) == 0);
     t.assertEquals(s.domain_info, 'regular');
     t.assert(numel(s.size) == 0);
-    t.assert(s.sparsity == 0);
+    t.assert(s.getSparsity() == 0);
     t.assert(strcmp(s.format, 'not_read'));
     t.assert(s.number_records == 1);
     t.assert(numel(fieldnames(s.uels)) == 0);
@@ -103,7 +103,7 @@ function test_read(t, cfg)
     t.assertEquals(s.domain_info, 'regular');
     t.assert(numel(s.size) == 1);
     t.assert(s.size(1) == 5);
-    t.assert(s.sparsity == 1 - 3/5);
+    t.assert(s.getSparsity() == 1 - 3/5);
     t.assert(strcmp(s.format, 'not_read'));
     t.assert(s.number_records == 3);
     t.assert(numel(fieldnames(s.uels)) == 1);
@@ -134,7 +134,7 @@ function test_read(t, cfg)
     t.assert(numel(s.size) == 2);
     t.assert(s.size(1) == 5);
     t.assert(s.size(2) == 5);
-    t.assert(s.sparsity == 1 - 6/25);
+    t.assert(s.getSparsity() == 1 - 6/25);
     t.assert(strcmp(s.format, 'not_read'));
     t.assert(s.number_records == 6);
     t.assert(numel(fieldnames(s.uels)) == 2);
