@@ -795,7 +795,7 @@ classdef Container < handle
             end
         end
 
-        function [n_dom_violations, dom_violations] = getDomainViolations(obj)
+        function dom_violations = getDomainViolations(obj)
             % Get domain violations for all symbols
             %
             % Domain violations occur when a symbol uses other Set(s) as
@@ -803,16 +803,14 @@ classdef Container < handle
             % the corresponding set. Such a domain violation will lead to a GDX
             % error when writing the data.
             %
-            % [n_dom_violations, dom_violations] = getDomainViolations returns
-            % the number of domain violatins n_dom_violations and a struct with
-            % fields named like the symbol that contains domain violations.
+            % dom_violations = getDomainViolations returns a list of domain
+            % violations.
             %
-            % See also: GAMSTransfer.Container.updateDomains,
-            % GAMSTransfer.Symbol.getDomainViolations
+            % See also: GAMSTransfer.Container.resovleDomainViolations,
+            % GAMSTransfer.Symbol.getDomainViolations, GAMSTransfer.DomainViolation
             %
 
-            dom_violations = struct();
-            n_dom_violations = 0;
+            dom_violations = {};
 
             symbols = fieldnames(obj.data);
             for i = 1:numel(symbols)
@@ -821,15 +819,12 @@ classdef Container < handle
                     continue
                 end
 
-                [n_dom_viol_sym, dom_viol_sym] = symbol.getDomainViolations();
-                if n_dom_viol_sym > 0
-                    dom_violations.(symbols{i}) = dom_viol_sym;
-                    n_dom_violations = n_dom_violations + n_dom_viol_sym;
-                end
+                dom_violations_sym = symbol.getDomainViolations();
+                dom_violations(end+1:end+numel(dom_violations_sym)) = dom_violations_sym;
             end
         end
 
-        function resolveDomainViolations(obj, varargin)
+        function resolveDomainViolations(obj)
             % Extends domain sets in order to remove domain violations
             %
             % Domain violations occur when this symbol uses other Set(s) as
@@ -837,35 +832,16 @@ classdef Container < handle
             % the corresponding set. Such a domain violation will lead to a GDX
             % error when writing the data.
             %
-            % resolveDomainViolations(b) extends the domain sets with the
+            % resolveDomainViolations() extends the domain sets with the
             % violated domain entries. Hence, the domain violations disappear.
-            % If b is true, then a list will be printed with the updated
-            % elements.
             %
             % See also: GAMSTransfer.Container.getDomainViolations,
-            % GAMSTransfer.Symbol.updateDomains
+            % GAMSTransfer.Symbol.resovleDomainViolations, GAMSTransfer.DomainViolation
             %
 
-            p = inputParser();
-            if obj.features.parser_optional
-                addOptional(p, 'verbose', false, @islogical);
-            else
-                addParameter(p, 'verbose', false, @islogical);
-            end
-            if ~obj.features.parser_optional
-                varargin = GAMSTransfer.Utils.parserOptional2Parameter(0, ...
-                    {'verbose'}, {}, varargin);
-            end
-            parse(p, varargin{:});
-            verbose = p.Results.verbose;
-
-            symbols = fieldnames(obj.data);
-            for i = 1:numel(symbols)
-                symbol = obj.data.(symbols{i});
-                if isa(symbol, 'GAMSTransfer.Alias')
-                    continue
-                end
-                symbol.resolveDomainViolations(verbose);
+            dom_violations = obj.getDomainViolations();
+            for i = 1:numel(dom_violations)
+                dom_violations{i}.resolve();
             end
         end
 

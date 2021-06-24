@@ -231,9 +231,8 @@ classdef Symbol < handle
                 elseif isa(obj.domain_{i}, 'GAMSTransfer.Set') && ...
                     (obj.domain_{i}.format_ == GAMSTransfer.RecordsFormat.STRUCT || ...
                     obj.domain_{i}.format_ == GAMSTransfer.RecordsFormat.TABLE) && ...
-                    obj.domain_{i}.dimension == 1 && strcmp(obj.domain_{i}.domain{1}, '*') && ...
-                    obj.domain_{i}.is_valid
-                    new_uels.(label) = obj.domain_{i}.uels.uni_1(obj.domain_{i}.records.uni_1);
+                    obj.domain_{i}.isValidAsDomain()
+                    new_uels.(label) = obj.domain_{i}.getUsedUels(1);
                 else
                     new_uels.(label) = {};
                 end
@@ -886,7 +885,7 @@ classdef Symbol < handle
             end
         end
 
-        function [n_dom_violations, dom_violations] = getDomainViolations(obj)
+        function dom_violations = getDomainViolations(obj)
             % Get domain violations
             %
             % Domain violations occur when this symbol uses other Set(s) as
@@ -894,46 +893,35 @@ classdef Symbol < handle
             % the corresponding set. Such a domain violation will lead to a GDX
             % error when writing the data.
             %
-            % [n_dom_violations, dom_violations] = getDomainViolations returns
-            % the number of domain violatins n_dom_violations and a struct with
-            % fields equal domain_labels and a list of added domain entries per
-            % domain.
+            % dom_violations = getDomainViolations returns a list of domain
+            % violations.
             %
-            % See also: GAMSTransfer.Symbol.updateDomains,
-            % GAMSTransfer.Container.getDomainViolations
+            % See also: GAMSTransfer.Symbol.resovleDomainViolations,
+            % GAMSTransfer.Container.getDomainViolations, GAMSTransfer.DomainViolation
             %
 
             if obj.container.indexed
                 error('Getting domain violations not allowed in indexed mode.');
             end
+            if ~obj.is_valid
+                error('Symbol must be valid in order to get domain violations.');
+            end
 
-            obj.checkDomains()
-
-            dom_violations = struct();
-            n_dom_violations = 0;
-
+            dom_violations = {};
             for i = 1:obj.dimension_
                 if ~isa(obj.domain_{i}, 'GAMSTransfer.Set')
                     continue;
                 end
 
-                label = obj.domain_label_{i};
-
-                % get uels
-                sym_uels = obj.uels_.(label);
-                dom_uels = obj.domain_{i}.uels.uni_1(obj.domain_{i}.records.uni_1);
-
-                % check for added uels
-                added_uels = setdiff(sym_uels, dom_uels);
+                added_uels = setdiff(obj.getUsedUels(i), obj.domain_{i}.getUsedUels(1));
                 n_added_uels = numel(added_uels);
                 if n_added_uels > 0
-                    dom_violations.(label) = added_uels;
-                    n_dom_violations = n_dom_violations + n_added_uels;
+                    dom_violations{end+1} = GAMSTransfer.DomainViolation(obj, i, obj.domain_{i}, added_uels);
                 end
             end
         end
 
-        function resolveDomainViolations(obj, varargin)
+        function resolveDomainViolations(obj)
             % Extends domain sets in order to resolve domain violations
             %
             % Domain violations occur when this symbol uses other Set(s) as
@@ -941,71 +929,16 @@ classdef Symbol < handle
             % the corresponding set. Such a domain violation will lead to a GDX
             % error when writing the data.
             %
-            % resolveDomainViolations(b) extends the domain sets with the
+            % resolveDomainViolations() extends the domain sets with the
             % violated domain entries. Hence, the domain violations disappear.
-            % If b is true, then a list will be printed with the updated
-            % elements.
             %
             % See also: GAMSTransfer.Symbol.getDomainViolations,
-            % GAMSTransfer.Container.updateDomains
+            % GAMSTransfer.Container.resovleDomainViolations, GAMSTransfer.DomainViolation
             %
 
-            if obj.container.indexed
-                error('Updating domains not allowed in indexed mode.');
-            end
-            if ~obj.is_valid
-                error('Symbol records are invalid.');
-            end
-            obj.checkDomains()
-
-            for i = 1:obj.dimension_
-                if ~isa(obj.domain_{i}, 'GAMSTransfer.Set')
-                    continue;
-                end
-
-                sym_uels_old = obj.uels_.(obj.domain_label_{i});
-
-                % merge domain uels
-                n1 = numel(obj.domain_{i}.uels.uni_1);
-                dom_uels_diff = setdiff(sym_uels_old, obj.domain_{i}.uels.uni_1);
-                dom_uels = cell(1, n1 + numel(dom_uels_diff));
-                dom_uels(1:n1) = obj.domain_{i}.uels.uni_1;
-                dom_uels(n1+1:end) = dom_uels_diff;
-
-                % merge symbol uels
-                dom_uels_old = dom_uels(obj.domain_{i}.records.uni_1);
-                n1 = numel(dom_uels_old);
-                sym_uels_diff = setdiff(sym_uels_old, dom_uels_old);
-                sym_uels = cell(1, n1 + numel(sym_uels_diff));
-                sym_uels(1:n1) = dom_uels_old;
-                sym_uels(n1+1:end) = sym_uels_diff;
-
-                if nargin > 0 && varargin{1}
-                    for j = 1:numel(sym_uels_diff)
-                        fprintf('Added ''%s'' to set ''%s''.\n', sym_uels_diff{i}, obj.domain_{i}.name);
-                    end
-                end
-
-                % get merged domain records
-                dom_recs = find(ismember(dom_uels, sym_uels))';
-                if obj.container.features.categorical
-                    dom_recs = categorical(dom_recs, 1:numel(dom_uels), dom_uels);
-                end
-
-                % update domain uels
-                obj.domain_{i}.uels.uni_1 = dom_uels;
-
-                % update domain records
-                s = struct('uni_1', dom_recs);
-                if isfield(obj.domain_{i}, 'text')
-                    s.text = obj.domain_{i}.records.text;
-                    s.text(end+1:numel(s.uni_1)) = '';
-                end
-                if obj.domain_{i}.format_ == GAMSTransfer.RecordsFormat.TABLE
-                    obj.domain_{i}.records = struct2table(s);
-                else
-                    obj.domain_{i}.records = s;
-                end
+            dom_violations = obj.getDomainViolations();
+            for i = 1:numel(dom_violations)
+                dom_violations{i}.resolve();
             end
         end
 
@@ -1285,6 +1218,34 @@ classdef Symbol < handle
             end
         end
 
+        function uels = getUsedUels(obj, dim)
+            % Returns the UELs that are actually used in the symbol records
+            %
+            % u = Symbol.getUsedUels(d) returns the actually usesd uels u for
+            % the d-th dimension.
+            %
+
+            if dim < 1 || dim > obj.dimension
+                error('Given dimension must be within [1,%d].', obj.dimension);
+            end
+            if ~obj.is_valid
+                error('Symbol must be valid in order to get used UELs.');
+            end
+
+            label = obj.domain_label_{dim};
+            uels = obj.uels_.(label);
+            uels = uels(unique(obj.records.(label), 'stable'));
+        end
+
+        function trimUels(obj)
+            % Removes unused UELs
+            %
+
+            for i = 1:obj.dimension_
+                obj.uels_.(obj.domain_label_{i}) = obj.getUsedUels(i);
+            end
+        end
+
     end
 
     methods (Hidden, Access = protected)
@@ -1431,11 +1392,8 @@ classdef Symbol < handle
                 end
 
                 % check domain set
-                if obj.domain_{i}.dimension ~= 1
-                    error('Set ''%s'' must have dimension=1 to be valid as domain.', obj.domain_{i}.name);
-                end
-                if ~obj.domain_{i}.is_valid
-                    error('Set ''%s'' must be valid to be used as domain.', obj.domain_{i}.name);
+                if ~obj.domain_{i}.isValidAsDomain()
+                    error('Set ''%s'' is not valid as domain.', obj.domain_{i}.name);
                 end
             end
         end
@@ -1535,7 +1493,7 @@ classdef Symbol < handle
                 return;
             end
 
-            % get uels
+            % set uels
             obj.uels_.(label) = unique(domains, 'stable');
 
             % set record values in numerical or categorical format

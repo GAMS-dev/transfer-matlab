@@ -156,4 +156,25 @@ classdef Set < GAMSTransfer.Symbol
 
     end
 
+    methods
+
+        function bool = isValidAsDomain(obj)
+            % Checks if set could be used as a domain of a different symbol
+            %
+            % b = isValidAsDomain() returns true if this set can be used as
+            % domain and false otherwise.
+            %
+
+            bool = false;
+            if ~obj.is_valid
+                return
+            end
+            if obj.dimension ~= 1
+                return
+            end
+            bool = true;
+        end
+
+    end
+
 end
