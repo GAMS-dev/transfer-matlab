@@ -82,9 +82,8 @@ supply = Equation(m, 'supply', 'l', i, 'description', 'observe supply limit at p
 demand = Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
 
 % set equation records
-% Note: GAMS special value EPS can be inserted with geteps().
 cost.setRecords(0, 1, 0, 0);
-supply.setRecords(struct('level', [350, 550], 'marginal', [geteps(), 0], 'upper', [350, 600]));
+supply.setRecords(struct('level', [350, 550], 'marginal', [SpecialValues.EPS, 0], 'upper', [350, 600]));
 demand.setRecords([325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]);
 
 % write data to a GDX file
