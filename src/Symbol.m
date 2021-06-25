@@ -1385,6 +1385,7 @@ classdef Symbol < handle
             end
 
             % determine shape and size of value and domain fields (columns)
+            has_domains = false;
             val_fields_same_size = true;
             val_fields_same_length = true;
             dom_fields_same_length = true;
@@ -1420,6 +1421,7 @@ classdef Symbol < handle
                         val_fields_sparse = false;
                     end
                 otherwise
+                    has_domains = true;
                     if dom_nrecs < 0
                         dom_nrecs = numel(field);
                     elseif dom_nrecs ~= numel(field)
@@ -1440,7 +1442,7 @@ classdef Symbol < handle
             end
 
             % check if matrix or struct
-            if prod(val_size(1:obj.dimension_) == obj.size_) && ...
+            if ~has_domains && prod(val_size(1:obj.dimension_) == obj.size_) && ...
                 (obj.SUPPORTS_FORMAT_DENSE_MATRIX || obj.SUPPORTS_FORMAT_SPARSE_MATRIX)
                 if val_fields_same_size && val_fields_same_length && val_fields_dense
                     records_format = GAMSTransfer.RecordsFormat.DENSE_MATRIX;

@@ -567,12 +567,14 @@ function test_describe(t, cfg)
             t.assert(tbl{1,'num_pinf'} == 0);
             t.assertEquals(tbl{2,'name'}, 'b');
             switch i
-            case {1,3}
-                t.assert(isequal(tbl{1,'format'}, 'struct') || isequal(tbl{1,'format'}, 'dense_matrix'));
+            case 1
+                t.assertEquals(tbl{2,'format'}, 'struct');
             case 2
-                t.assertEquals(tbl{1,'format'}, 'table');
+                t.assertEquals(tbl{2,'format'}, 'table');
+            case 3
+                t.assertEquals(tbl{2,'format'}, 'dense_matrix');
             case 4
-                t.assertEquals(tbl{1,'format'}, 'sparse_matrix');
+                t.assertEquals(tbl{2,'format'}, 'sparse_matrix');
             end
             t.assert(tbl{2,'dim'} == 1);
             t.assertEquals(tbl{2,'domain'}, '[i]');
@@ -629,12 +631,14 @@ function test_describe(t, cfg)
             t.assert(tbl.num_pinf(1) == 0);
             t.assertEquals(tbl.name{2}, 'b');
             switch i
-            case {1,3}
-                t.assert(isequal(tbl.format{1}, 'struct') || isequal(tbl.format{1}, 'dense_matrix'));
+            case 1
+                t.assertEquals(tbl.format{2}, 'struct');
             case 2
-                t.assertEquals(tbl.format{1}, 'table');
+                t.assertEquals(tbl.format{2}, 'table');
+            case 3
+                t.assertEquals(tbl.format{2}, 'dense_matrix');
             case 4
-                t.assertEquals(tbl.format{1}, 'sparse_matrix');
+                t.assertEquals(tbl.format{2}, 'sparse_matrix');
             end
             t.assert(tbl.dim(2) == 1);
             t.assertEquals(tbl.domain{2}, '[i]');
@@ -1008,12 +1012,14 @@ function test_idx_describe(t, cfg)
             t.assert(tbl{1,'num_pinf'} == 0);
             t.assertEquals(tbl{2,'name'}, 'b');
             switch i
-            case {1,3}
-                t.assert(isequal(tbl{1,'format'}, 'struct') || isequal(tbl{1,'format'}, 'dense_matrix'));
+            case 1
+                t.assertEquals(tbl{2,'format'}, 'struct');
             case 2
-                t.assertEquals(tbl{1,'format'}, 'table');
+                t.assertEquals(tbl{2,'format'}, 'table');
+            case 3
+                t.assertEquals(tbl{2,'format'}, 'dense_matrix');
             case 4
-                t.assertEquals(tbl{1,'format'}, 'sparse_matrix');
+                t.assertEquals(tbl{2,'format'}, 'sparse_matrix');
             end
             t.assert(tbl{2,'dim'} == 1);
             t.assertEquals(tbl{2,'domain'}, '[dim_1]');
@@ -1043,12 +1049,14 @@ function test_idx_describe(t, cfg)
             t.assert(tbl{2,'num_pinf'} == 0);
             t.assertEquals(tbl{3,'name'}, 'c');
             switch i
-            case {1,3}
-                t.assert(isequal(tbl{1,'format'}, 'struct') || isequal(tbl{1,'format'}, 'dense_matrix'));
+            case 1
+                t.assertEquals(tbl{3,'format'}, 'struct');
             case 2
-                t.assertEquals(tbl{1,'format'}, 'table');
+                t.assertEquals(tbl{3,'format'}, 'table');
+            case 3
+                t.assertEquals(tbl{3,'format'}, 'dense_matrix');
             case 4
-                t.assertEquals(tbl{1,'format'}, 'sparse_matrix');
+                t.assertEquals(tbl{3,'format'}, 'sparse_matrix');
             end
             t.assert(tbl{3,'dim'} == 2);
             t.assertEquals(tbl{3,'domain'}, '[dim_1,dim_2]');
@@ -1105,12 +1113,14 @@ function test_idx_describe(t, cfg)
             t.assert(tbl.num_pinf(1) == 0);
             t.assertEquals(tbl.name{2}, 'b');
             switch i
-            case {1,3}
-                t.assert(isequal(tbl.format{1}, 'struct') || isequal(tbl.format{1}, 'dense_matrix'));
+            case 1
+                t.assertEquals(tbl.format{2}, 'struct');
             case 2
-                t.assertEquals(tbl.format{1}, 'table');
+                t.assertEquals(tbl.format{2}, 'table');
+            case 3
+                t.assertEquals(tbl.format{2}, 'dense_matrix');
             case 4
-                t.assertEquals(tbl.format{1}, 'sparse_matrix');
+                t.assertEquals(tbl.format{2}, 'sparse_matrix');
             end
             t.assert(tbl.dim(2) == 1);
             t.assertEquals(tbl.domain{2}, '[dim_1]');
@@ -1140,12 +1150,14 @@ function test_idx_describe(t, cfg)
             t.assert(tbl.num_pinf(2) == 0);
             t.assertEquals(tbl.name{3}, 'c');
             switch i
-            case {1,3}
-                t.assert(isequal(tbl.format{1}, 'struct') || isequal(tbl.format{1}, 'dense_matrix'));
+            case 1
+                t.assertEquals(tbl.format{3}, 'struct');
             case 2
-                t.assertEquals(tbl.format{1}, 'table');
+                t.assertEquals(tbl.format{3}, 'table');
+            case 3
+                t.assertEquals(tbl.format{3}, 'dense_matrix');
             case 4
-                t.assertEquals(tbl.format{1}, 'sparse_matrix');
+                t.assertEquals(tbl.format{3}, 'sparse_matrix');
             end
             t.assert(tbl.dim(3) == 2);
             t.assertEquals(tbl.domain{3}, '[dim_1,dim_2]');
