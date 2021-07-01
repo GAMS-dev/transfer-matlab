@@ -625,6 +625,12 @@ classdef Container < handle
             % apply permutation
             perm = [idx_sets, idx_alis, idx_pars, idx_vars, idx_equs];
             obj.data = orderfields(obj.data, perm);
+
+            % force recheck of all remaining symbols in container
+            names = fieldnames(obj.data);
+            for i = 1:numel(names)
+                obj.data.(names{i}).check(false);
+            end
         end
 
         function list = listSymbols(obj, varargin)
@@ -878,7 +884,7 @@ classdef Container < handle
             obj.data.(symbol.name_) = symbol;
 
             % reorder
-            if obj.reorder_after_add
+            if ~obj.is_valid && obj.reorder_after_add
                 obj.reorder();
             end
         end

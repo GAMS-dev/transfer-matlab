@@ -1403,6 +1403,11 @@ classdef Symbol < handle
                 if ~obj.domain_{i}.isValidAsDomain()
                     error('Set ''%s'' is not valid as domain.', obj.domain_{i}.name);
                 end
+
+                % check correct order of symbols
+                if ~GAMSTransfer.gt_check_symorder(obj.container.data, obj.domain_{i}.name, obj.name);
+                    error('Domain set ''%s'' is out of order: Try calling reorder().', obj.domain_{i}.name);
+                end
             end
         end
 

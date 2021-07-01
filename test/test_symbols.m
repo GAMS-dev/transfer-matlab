@@ -1726,10 +1726,10 @@ function test_reorder(t, cfg)
     t.assertEquals(fields{4}, 's4');
     try
         t.assert(false);
-        gdx.write(write_filename);
+        s3.check(true);
     catch e
         t.reset();
-        t.assertEquals(e.message, 'GDX error: Unknown domain');
+        t.assertEquals(e.message, 'Domain set ''s4'' is out of order: Try calling reorder().');
     end
 
     gdx.reorder();
@@ -1743,7 +1743,7 @@ function test_reorder(t, cfg)
     t.assertEquals(fields{4}, 's3');
     try
         gdx.write(write_filename);
-    catch
+    catch e
         t.assert(false);
     end
 
