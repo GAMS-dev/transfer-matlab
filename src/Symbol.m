@@ -91,6 +91,9 @@ classdef Symbol < handle
         size_
         uels_
         format_
+
+        % number_records_ if negative: -1 * number of records - 1; if positive:
+        % number of records in symbol data
         number_records_
     end
 
@@ -111,16 +114,20 @@ classdef Symbol < handle
             else
                 obj.domain = domain_size;
             end
-
             obj.format_ = nan;
-            if ~isempty(records)
-                obj.setRecords(records);
-            end
             obj.read_entry = read_entry;
-            obj.number_records_ = -read_number_records;
+
+            % a negative number_records signals that we store the number of
+            % records of the GDX file
+            obj.number_records_ = -read_number_records-1;
 
             % add symbol to container
             obj.container.add(obj);
+
+            % assign records
+            if ~isempty(records)
+                obj.setRecords(records);
+            end
         end
 
     end
@@ -370,7 +377,11 @@ classdef Symbol < handle
 
         function nrecs = get.number_records(obj)
             if ~isnan(obj.number_records_)
-                nrecs = abs(obj.number_records_);
+                if obj.number_records_ < 0
+                    nrecs = -obj.number_records_-1;
+                else
+                    nrecs = obj.number_records_;
+                end
                 return
             end
             if ~obj.is_valid
@@ -815,31 +826,39 @@ classdef Symbol < handle
         end
 
         function valid = check(obj, verbose)
-            % Checks if records are stored in supported format
+            % Checks correctness of symbol
             %
             % If the function argument is true, this function will print the
-            % reason why the current data can't be interpreted as any of the
-            % supported formats.
+            % reason why the symbol is invalid.
             %
             % See also: GAMSTransfer.Symbol/is_valid
             %
 
             valid = false;
             obj.format_ = GAMSTransfer.RecordsFormat.UNKNOWN;
-
             obj.updateDomainSetDependentData();
 
-            % check if records are empty
-            if isempty(obj.records)
-                if ~isnan(obj.number_records_) && obj.number_records_ < 0
-                    obj.format_ = GAMSTransfer.RecordsFormat.NOT_READ;
-                else
-                    obj.format_ = GAMSTransfer.RecordsFormat.EMPTY;
-                end
-                return
-            end
-
             try
+                % check if symbol is actually contained in container
+                if ~isfield(obj.container.data, obj.name)
+                    error('Symbol is not part of its linked container.');
+                end
+
+                % if the symbol has not been properly read, we don't check any further
+                % Note that format NOT_READ will lead to an invalid symbol
+                if isempty(obj.records) && ~isnan(obj.number_records_) && obj.number_records_ < 0
+                    obj.format_ = GAMSTransfer.RecordsFormat.NOT_READ;
+                    return
+                end
+
+                % check domains
+                obj.checkDomains();
+
+                % check if records are empty
+                if isempty(obj.records)
+                    obj.format_ = GAMSTransfer.RecordsFormat.EMPTY;
+                    return
+                end
 
                 % check data type of records (must be table or struct) and get column names
                 if obj.container.features.table && istable(obj.records);
@@ -855,9 +874,6 @@ classdef Symbol < handle
                     obj.format_ = GAMSTransfer.RecordsFormat.EMPTY;
                     return
                 end
-
-                % check domains
-                obj.checkDomains();
 
                 % check column / field names and data types
                 has_domain_label = obj.checkRecordFields(labels);

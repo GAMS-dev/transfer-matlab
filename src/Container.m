@@ -499,8 +499,20 @@ classdef Container < handle
                 error('Symbol ''%s'' does not exist', name);
             end
 
+            symbol = obj.data.(name);
+
             % remove symbol
             obj.data = rmfield(obj.data, name);
+
+            % force recheck of deleted symbol (it may still live within an
+            % alias, domain or in the user's program)
+            symbol.check(false);
+
+            % force recheck of all remaining symbols in container
+            names = fieldnames(obj.data);
+            for i = 1:numel(names)
+                obj.data.(names{i}).check(false);
+            end
         end
 
         function reorder(obj)

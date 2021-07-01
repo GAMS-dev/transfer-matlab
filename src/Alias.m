@@ -126,6 +126,43 @@ classdef Alias < handle
             obj.aliased_with = alias;
         end
 
+        function valid = get.is_valid(obj)
+            valid = obj.check(false);
+        end
+
+    end
+
+    methods
+
+        function valid = check(obj, verbose)
+            % Checks correctness of alias
+            %
+            % If the function argument is true, this function will print the
+            % reason why the symbol is invalid.
+            %
+            % See also: GAMSTransfer.Alias/is_valid
+            %
+
+            valid = false;
+
+            % check if symbol is actually contained in container
+            if ~isfield(obj.container.data, obj.name)
+                if verbose
+                    error('Symbol is not part of its linked container.');
+                end
+                return
+            end
+
+            if ~obj.aliased_with.is_valid
+                if verbose
+                    error('Linked symbol is invalid.');
+                end
+                return
+            end
+
+            valid = true;
+        end
+
     end
 
 end

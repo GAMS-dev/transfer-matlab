@@ -27,6 +27,7 @@ function test_container(t, cfg)
     test_getlist(t, cfg);
     test_describe(t, cfg);
     test_idx_describe(t, cfg);
+    test_remove(t, cfg);
 end
 
 function test_getlist(t, cfg)
@@ -1187,4 +1188,29 @@ function test_idx_describe(t, cfg)
             t.assert(tbl.num_pinf(3) == 0);
         end
     end
+end
+
+function test_remove(t, cfg)
+
+    gdx = GAMSTransfer.Container();
+    i1 = GAMSTransfer.Set(gdx, 'i1');
+    a1 = GAMSTransfer.Alias(gdx, 'a1', i1);
+    x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
+
+    t.add('remove_1');
+    t.assert(numel(fieldnames(gdx.data)) == 3);
+    t.assert(isfield(gdx.data, 'i1'));
+    t.assert(isfield(gdx.data, 'a1'));
+    t.assert(isfield(gdx.data, 'x1'));
+    t.assert(i1.is_valid);
+    t.assert(a1.is_valid);
+    t.assert(x1.is_valid);
+    gdx.removeSymbol('i1');
+    t.assert(numel(fieldnames(gdx.data)) == 2);
+    t.assert(isfield(gdx.data, 'a1'));
+    t.assert(isfield(gdx.data, 'x1'));
+    t.assert(~i1.is_valid);
+    t.assert(~a1.is_valid);
+    t.assert(~x1.is_valid);
+
 end
