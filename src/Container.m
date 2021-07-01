@@ -938,7 +938,8 @@ classdef Container < handle
             descr.dim = zeros(n_symbols, 1);
             descr.domain = cell(n_symbols, 1);
             descr.size = cell(n_symbols, 1);
-            descr.count = zeros(n_symbols, 1);
+            descr.num_recs = zeros(n_symbols, 1);
+            descr.num_vals = zeros(n_symbols, 1);
             descr.sparsity = zeros(n_symbols, 1);
             switch symtype
             case {GAMSTransfer.SymbolType.VARIABLE, GAMSTransfer.SymbolType.EQUATION}
@@ -979,7 +980,8 @@ classdef Container < handle
                 descr.dim(i) = symbol.dimension;
                 descr.domain{i} = GAMSTransfer.Utils.list2str(symbol.domain);
                 descr.size{i} = GAMSTransfer.Utils.list2str(symbol.size);
-                descr.count(i) = symbol.number_records;
+                descr.num_recs(i) = symbol.number_records;
+                descr.num_vals(i) = symbol.number_values;
                 descr.sparsity(i) = symbol.getSparsity();
                 switch symtype
                 case {GAMSTransfer.SymbolType.VARIABLE, GAMSTransfer.SymbolType.EQUATION}

@@ -64,7 +64,7 @@ classdef GAMSTest < handle
             end
             fails = strfind(obj.tests{end}.asserts, 'x');
             if ~isempty(fails);
-                fprintf('FAIL: %s/%s (%s | fails: ', obj.name, obj.tests{end}.name, obj.tests{end}.asserts);
+                fprintf('*** FAIL: %s/%s (%s | fails: ', obj.name, obj.tests{end}.name, obj.tests{end}.asserts);
                 for i = 1:numel(fails)
                     fprintf('%d', fails(i));
                     if i < numel(fails)
@@ -85,7 +85,7 @@ classdef GAMSTest < handle
                 n_fails = n_fails + numel(fails);
                 n_tests = n_tests + numel(obj.tests{i}.asserts);
             end
-            fprintf('Test Summary (%s): %d testsets (%d tests), %.2f s, %d failures. ', obj.name, numel(obj.tests), n_tests, time, n_fails);
+            fprintf('Test Summary (%30s): %3d testsets (%5d tests), %.2f s, %2d failures. ', obj.name, numel(obj.tests), n_tests, time, n_fails);
             if n_fails > 0
                 fprintf('FAIL!\n');
             else
@@ -113,6 +113,7 @@ classdef GAMSTest < handle
                 obj.assert(ischar(symbol.format));
                 obj.assert(strcmp(symbol.format, 'not_read') || strcmp(symbol.format, 'empty'));
                 obj.assert(symbol.number_records >= 0);
+                obj.assert(symbol.number_values == 0 || isnan(symbol.number_values));
                 obj.assert(isempty(symbol.records));
                 obj.assert(isstruct(symbol.uels));
                 obj.assert(islogical(symbol.is_valid));

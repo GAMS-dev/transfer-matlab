@@ -23,7 +23,8 @@
 % SOFTWARE.
 %
 
-function test_readwrite(t, cfg)
+function test_readwrite(cfg)
+    t = GAMSTest('GAMSTransfer/readwrite');
     test_read(t, cfg);
     test_readPartial(t, cfg);
     test_readSpecialValues(t, cfg);
@@ -31,6 +32,7 @@ function test_readwrite(t, cfg)
     test_readWrite(t, cfg);
     test_readWriteDomainCheck(t, cfg);
     test_readWriteNoTableCategorical(t, cfg);
+    t.summary();
 end
 
 function test_read(t, cfg)
@@ -79,7 +81,7 @@ function test_read(t, cfg)
     t.assert(numel(s.domain_label) == 0);
     t.assertEquals(s.domain_info, 'regular');
     t.assert(numel(s.size) == 0);
-    t.assert(s.getSparsity() == 0);
+    t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
     t.assert(s.number_records == 1);
     t.assert(numel(fieldnames(s.uels)) == 0);
@@ -103,7 +105,7 @@ function test_read(t, cfg)
     t.assertEquals(s.domain_info, 'regular');
     t.assert(numel(s.size) == 1);
     t.assert(s.size(1) == 5);
-    t.assert(s.getSparsity() == 1 - 3/5);
+    t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
     t.assert(s.number_records == 3);
     t.assert(numel(fieldnames(s.uels)) == 1);
@@ -134,7 +136,7 @@ function test_read(t, cfg)
     t.assert(numel(s.size) == 2);
     t.assert(s.size(1) == 5);
     t.assert(s.size(2) == 5);
-    t.assert(s.getSparsity() == 1 - 6/25);
+    t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
     t.assert(s.number_records == 6);
     t.assert(numel(fieldnames(s.uels)) == 2);
@@ -749,7 +751,7 @@ function test_read(t, cfg)
     t.assert(s.is_valid);
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.value) == s.number_records);
+    t.assert(numel(s.records.value) == 1);
     t.assert(s.records.value == 4);
     t.assert(numel(fieldnames(s.uels)) == 0);
 
@@ -765,7 +767,7 @@ function test_read(t, cfg)
     t.assert(numel(s.records.value) == gdx.data.i.number_records);
     t.assert(size(s.records.value, 1) == gdx.data.i.number_records);
     t.assert(size(s.records.value, 2) == 1);
-    t.assert(nnz(s.records.value) == s.number_records);
+    t.assert(nnz(s.records.value) == s.number_values);
     t.assert(s.records.value(1) == 1);
     t.assert(s.records.value(2) == 3);
     t.assert(s.records.value(3) == 0);
@@ -812,11 +814,8 @@ function test_read(t, cfg)
     t.assert(size(s.records.upper, 2) == gdx.data.j.number_records);
     t.assert(size(s.records.scale, 1) == gdx.data.i.number_records);
     t.assert(size(s.records.scale, 2) == gdx.data.j.number_records);
-    t.assert(nnz(s.records.level) == s.number_records);
-    t.assert(nnz(s.records.marginal) == s.number_records);
-    t.assert(nnz(s.records.lower) == s.number_records);
-    t.assert(nnz(s.records.upper) == s.number_records);
-    t.assert(nnz(s.records.scale) == s.number_records);
+    t.assert(nnz(s.records.level) + nnz(s.records.marginal) + nnz(s.records.lower) + ...
+        nnz(s.records.upper) + nnz(s.records.scale) == s.number_values);
     t.assert(s.records.level(1,1) == 2);
     t.assert(s.records.level(2,4) == 0);
     t.assert(s.records.level(2,5) == 9);

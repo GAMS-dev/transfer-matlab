@@ -23,12 +23,14 @@
 % SOFTWARE.
 %
 
-function test_container(t, cfg)
+function test_container(cfg)
+    t = GAMSTest('GAMSTransfer/container');
     test_getlist(t, cfg);
     test_describe(t, cfg);
     test_idx_describe(t, cfg);
     test_remove(t, cfg);
     test_universalset(t, cfg);
+    t.summary();
 end
 
 function test_getlist(t, cfg)
@@ -137,7 +139,7 @@ function test_describe(t, cfg)
     t.add('describe_sets_basic');
     if gdx.features.table
         t.assert(istable(tbl));
-        t.assert(numel(tbl.Properties.VariableNames) == 8);
+        t.assert(numel(tbl.Properties.VariableNames) == 9);
         t.assert(height(tbl) == 2);
         t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
         t.assertEquals(tbl.Properties.VariableNames{2}, 'singleton');
@@ -145,15 +147,17 @@ function test_describe(t, cfg)
         t.assertEquals(tbl.Properties.VariableNames{4}, 'dim');
         t.assertEquals(tbl.Properties.VariableNames{5}, 'domain');
         t.assertEquals(tbl.Properties.VariableNames{6}, 'size');
-        t.assertEquals(tbl.Properties.VariableNames{7}, 'count');
-        t.assertEquals(tbl.Properties.VariableNames{8}, 'sparsity');
+        t.assertEquals(tbl.Properties.VariableNames{7}, 'num_recs');
+        t.assertEquals(tbl.Properties.VariableNames{8}, 'num_vals');
+        t.assertEquals(tbl.Properties.VariableNames{9}, 'sparsity');
         t.assertEquals(tbl{1,'name'}, 'i');
         t.assertEquals(tbl{1,'format'}, 'not_read');
         t.assert(~tbl{1,'singleton'});
         t.assert(tbl{1,'dim'} == 1);
         t.assertEquals(tbl{1,'domain'}, '[*]');
         t.assertEquals(tbl{1,'size'}, '[NaN]');
-        t.assert(tbl{1,'count'} == 5);
+        t.assert(tbl{1,'num_recs'} == 5);
+        t.assert(isnan(tbl{1,'num_vals'}));
         t.assert(isnan(tbl{1,'sparsity'}));
     else
         t.assert(isstruct(tbl));
@@ -165,7 +169,8 @@ function test_describe(t, cfg)
         t.assert(isfield(tbl, 'dim'));
         t.assert(isfield(tbl, 'domain'));
         t.assert(isfield(tbl, 'size'));
-        t.assert(isfield(tbl, 'count'));
+        t.assert(isfield(tbl, 'num_recs'));
+        t.assert(isfield(tbl, 'num_vals'));
         t.assert(isfield(tbl, 'sparsity'));
         t.assertEquals(tbl.name{1}, 'i');
         t.assertEquals(tbl.format{1}, 'not_read');
@@ -173,7 +178,8 @@ function test_describe(t, cfg)
         t.assert(tbl.dim(1) == 1);
         t.assertEquals(tbl.domain{1}, '[*]');
         t.assertEquals(tbl.size{1}, '[NaN]');
-        t.assert(tbl.count(1) == 5);
+        t.assert(tbl.num_recs(1) == 5);
+        t.assert(isnan(tbl.num_vals(1)));
         t.assert(isnan(tbl.sparsity(1)));
     end
 
@@ -182,31 +188,33 @@ function test_describe(t, cfg)
     t.add('describe_parameters_basic');
     if gdx.features.table
         t.assert(istable(tbl));
-        t.assert(numel(tbl.Properties.VariableNames) == 16);
+        t.assert(numel(tbl.Properties.VariableNames) == 17);
         t.assert(height(tbl) == 2);
         t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
         t.assertEquals(tbl.Properties.VariableNames{2}, 'format');
         t.assertEquals(tbl.Properties.VariableNames{3}, 'dim');
         t.assertEquals(tbl.Properties.VariableNames{4}, 'domain');
         t.assertEquals(tbl.Properties.VariableNames{5}, 'size');
-        t.assertEquals(tbl.Properties.VariableNames{6}, 'count');
-        t.assertEquals(tbl.Properties.VariableNames{7}, 'sparsity');
-        t.assertEquals(tbl.Properties.VariableNames{8}, 'min_value');
-        t.assertEquals(tbl.Properties.VariableNames{9}, 'mean_value');
-        t.assertEquals(tbl.Properties.VariableNames{10}, 'max_value');
-        t.assertEquals(tbl.Properties.VariableNames{11}, 'where_max_abs_value');
-        t.assertEquals(tbl.Properties.VariableNames{12}, 'num_na');
-        t.assertEquals(tbl.Properties.VariableNames{13}, 'num_undef');
-        t.assertEquals(tbl.Properties.VariableNames{14}, 'num_eps');
-        t.assertEquals(tbl.Properties.VariableNames{15}, 'num_minf');
-        t.assertEquals(tbl.Properties.VariableNames{16}, 'num_pinf');
+        t.assertEquals(tbl.Properties.VariableNames{6}, 'num_recs');
+        t.assertEquals(tbl.Properties.VariableNames{7}, 'num_vals');
+        t.assertEquals(tbl.Properties.VariableNames{8}, 'sparsity');
+        t.assertEquals(tbl.Properties.VariableNames{9}, 'min_value');
+        t.assertEquals(tbl.Properties.VariableNames{10}, 'mean_value');
+        t.assertEquals(tbl.Properties.VariableNames{11}, 'max_value');
+        t.assertEquals(tbl.Properties.VariableNames{12}, 'where_max_abs_value');
+        t.assertEquals(tbl.Properties.VariableNames{13}, 'num_na');
+        t.assertEquals(tbl.Properties.VariableNames{14}, 'num_undef');
+        t.assertEquals(tbl.Properties.VariableNames{15}, 'num_eps');
+        t.assertEquals(tbl.Properties.VariableNames{16}, 'num_minf');
+        t.assertEquals(tbl.Properties.VariableNames{17}, 'num_pinf');
         t.assertEquals(tbl{1,'name'}, 'a');
         t.assertEquals(tbl{1,'format'}, 'not_read');
         t.assert(tbl{1,'dim'} == 0);
         t.assertEquals(tbl{1,'domain'}, '[]');
         t.assertEquals(tbl{1,'size'}, '[]');
-        t.assert(tbl{1,'count'} == 1);
-        t.assert(tbl{1,'sparsity'} == 0);
+        t.assert(tbl{1,'num_recs'} == 1);
+        t.assert(isnan(tbl{1,'num_vals'}));
+        t.assert(isnan(tbl{1,'sparsity'}));
         t.assert(isnan(tbl{1,'min_value'}));
         t.assert(isnan(tbl{1,'mean_value'}));
         t.assert(isnan(tbl{1,'max_value'}));
@@ -225,8 +233,9 @@ function test_describe(t, cfg)
         t.assert(tbl{2,'dim'} == 1);
         t.assertEquals(tbl{2,'domain'}, '[i]');
         t.assertEquals(tbl{2,'size'}, '[5]');
-        t.assert(tbl{2,'count'} == 3);
-        t.assert(tbl{2,'sparsity'} == 0.4);
+        t.assert(tbl{2,'num_recs'} == 3);
+        t.assert(isnan(tbl{2,'num_vals'}));
+        t.assert(isnan(tbl{2,'sparsity'}));
         t.assert(isnan(tbl{2,'min_value'}));
         t.assert(isnan(tbl{2,'mean_value'}));
         t.assert(isnan(tbl{2,'max_value'}));
@@ -242,14 +251,15 @@ function test_describe(t, cfg)
         t.assert(tbl{2,'num_pinf'} == 0);
     else
         t.assert(isstruct(tbl));
-        t.assert(numel(fieldnames(tbl)) == 16);
+        t.assert(numel(fieldnames(tbl)) == 17);
         t.assert(numel(tbl.name) == 2);
         t.assert(isfield(tbl, 'name'));
         t.assert(isfield(tbl, 'format'));
         t.assert(isfield(tbl, 'dim'));
         t.assert(isfield(tbl, 'domain'));
         t.assert(isfield(tbl, 'size'));
-        t.assert(isfield(tbl, 'count'));
+        t.assert(isfield(tbl, 'num_recs'));
+        t.assert(isfield(tbl, 'num_vals'));
         t.assert(isfield(tbl, 'sparsity'));
         t.assert(isfield(tbl, 'min_value'));
         t.assert(isfield(tbl, 'mean_value'));
@@ -265,8 +275,9 @@ function test_describe(t, cfg)
         t.assert(tbl.dim(1) == 0);
         t.assertEquals(tbl.domain{1}, '[]');
         t.assertEquals(tbl.size{1}, '[]');
-        t.assert(tbl.count(1) == 1);
-        t.assert(tbl.sparsity(1) == 0);
+        t.assert(tbl.num_recs(1) == 1);
+        t.assert(isnan(tbl.num_vals(1)));
+        t.assert(isnan(tbl.sparsity(1)));
         t.assert(isnan(tbl.min_value(1)));
         t.assert(isnan(tbl.mean_value(1)));
         t.assert(isnan(tbl.max_value(1)));
@@ -285,8 +296,9 @@ function test_describe(t, cfg)
         t.assert(tbl.dim(2) == 1);
         t.assertEquals(tbl.domain{2}, '[i]');
         t.assertEquals(tbl.size{2}, '[5]');
-        t.assert(tbl.count(2) == 3);
-        t.assert(tbl.sparsity(2) == 0.4);
+        t.assert(tbl.num_recs(2) == 3);
+        t.assert(isnan(tbl.num_vals(2)));
+        t.assert(isnan(tbl.sparsity(2)));
         t.assert(isnan(tbl.min_value(2)));
         t.assert(isnan(tbl.mean_value(2)));
         t.assert(isnan(tbl.max_value(2)));
@@ -307,7 +319,7 @@ function test_describe(t, cfg)
     t.add('describe_variables_basic');
     if gdx.features.table
         t.assert(istable(tbl));
-        t.assert(numel(tbl.Properties.VariableNames) == 21);
+        t.assert(numel(tbl.Properties.VariableNames) == 22);
         t.assert(height(tbl) == 1);
         t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
         t.assertEquals(tbl.Properties.VariableNames{2}, 'type');
@@ -315,29 +327,31 @@ function test_describe(t, cfg)
         t.assertEquals(tbl.Properties.VariableNames{4}, 'dim');
         t.assertEquals(tbl.Properties.VariableNames{5}, 'domain');
         t.assertEquals(tbl.Properties.VariableNames{6}, 'size');
-        t.assertEquals(tbl.Properties.VariableNames{7}, 'count');
-        t.assertEquals(tbl.Properties.VariableNames{8}, 'sparsity');
-        t.assertEquals(tbl.Properties.VariableNames{9}, 'min_level');
-        t.assertEquals(tbl.Properties.VariableNames{10}, 'mean_level');
-        t.assertEquals(tbl.Properties.VariableNames{11}, 'max_level');
-        t.assertEquals(tbl.Properties.VariableNames{12}, 'where_max_abs_level');
-        t.assertEquals(tbl.Properties.VariableNames{13}, 'min_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{14}, 'mean_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{15}, 'max_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{16}, 'where_max_abs_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{17}, 'num_na');
-        t.assertEquals(tbl.Properties.VariableNames{18}, 'num_undef');
-        t.assertEquals(tbl.Properties.VariableNames{19}, 'num_eps');
-        t.assertEquals(tbl.Properties.VariableNames{20}, 'num_minf');
-        t.assertEquals(tbl.Properties.VariableNames{21}, 'num_pinf');
+        t.assertEquals(tbl.Properties.VariableNames{7}, 'num_recs');
+        t.assertEquals(tbl.Properties.VariableNames{8}, 'num_vals');
+        t.assertEquals(tbl.Properties.VariableNames{9}, 'sparsity');
+        t.assertEquals(tbl.Properties.VariableNames{10}, 'min_level');
+        t.assertEquals(tbl.Properties.VariableNames{11}, 'mean_level');
+        t.assertEquals(tbl.Properties.VariableNames{12}, 'max_level');
+        t.assertEquals(tbl.Properties.VariableNames{13}, 'where_max_abs_level');
+        t.assertEquals(tbl.Properties.VariableNames{14}, 'min_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{15}, 'mean_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{16}, 'max_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{17}, 'where_max_abs_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{18}, 'num_na');
+        t.assertEquals(tbl.Properties.VariableNames{19}, 'num_undef');
+        t.assertEquals(tbl.Properties.VariableNames{20}, 'num_eps');
+        t.assertEquals(tbl.Properties.VariableNames{21}, 'num_minf');
+        t.assertEquals(tbl.Properties.VariableNames{22}, 'num_pinf');
         t.assertEquals(tbl{1,'name'}, 'x');
         t.assertEquals(tbl{1,'type'}, 'positive');
         t.assertEquals(tbl{1,'format'}, 'not_read');
         t.assert(tbl{1,'dim'} == 2);
         t.assertEquals(tbl{1,'domain'}, '[i,j]');
         t.assertEquals(tbl{1,'size'}, '[5,5]');
-        t.assert(tbl{1,'count'} == 6);
-        t.assert(tbl{1,'sparsity'} == 0.76);
+        t.assert(tbl{1,'num_recs'} == 6);
+        t.assert(isnan(tbl{1,'num_vals'}));
+        t.assert(isnan(tbl{1,'sparsity'}));
         t.assert(isnan(tbl{1,'min_level'}));
         t.assert(isnan(tbl{1,'mean_level'}));
         t.assert(isnan(tbl{1,'max_level'}));
@@ -369,7 +383,8 @@ function test_describe(t, cfg)
         t.assert(isfield(tbl, 'dim'));
         t.assert(isfield(tbl, 'domain'));
         t.assert(isfield(tbl, 'size'));
-        t.assert(isfield(tbl, 'count'));
+        t.assert(isfield(tbl, 'num_recs'));
+        t.assert(isfield(tbl, 'num_vals'));
         t.assert(isfield(tbl, 'sparsity'));
         t.assert(isfield(tbl, 'min_level'));
         t.assert(isfield(tbl, 'mean_level'));
@@ -390,8 +405,9 @@ function test_describe(t, cfg)
         t.assert(tbl.dim(1) == 2);
         t.assertEquals(tbl.domain{1}, '[i,j]');
         t.assertEquals(tbl.size{1}, '[5,5]');
-        t.assert(tbl.count(1) == 6);
-        t.assert(tbl.sparsity(1) == 0.76);
+        t.assert(tbl.num_recs(1) == 6);
+        t.assert(isnan(tbl.num_vals(1)));
+        t.assert(isnan(tbl.sparsity(1)));
         t.assert(isnan(tbl.min_level(1)));
         t.assert(isnan(tbl.mean_level(1)));
         t.assert(isnan(tbl.max_level(1)));
@@ -420,7 +436,7 @@ function test_describe(t, cfg)
     t.add('describe_equations_basic');
     if gdx.features.table
         t.assert(istable(tbl));
-        t.assert(numel(tbl.Properties.VariableNames) == 21);
+        t.assert(numel(tbl.Properties.VariableNames) == 22);
         t.assert(height(tbl) == 0);
         t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
         t.assertEquals(tbl.Properties.VariableNames{2}, 'type');
@@ -428,24 +444,25 @@ function test_describe(t, cfg)
         t.assertEquals(tbl.Properties.VariableNames{4}, 'dim');
         t.assertEquals(tbl.Properties.VariableNames{5}, 'domain');
         t.assertEquals(tbl.Properties.VariableNames{6}, 'size');
-        t.assertEquals(tbl.Properties.VariableNames{7}, 'count');
-        t.assertEquals(tbl.Properties.VariableNames{8}, 'sparsity');
-        t.assertEquals(tbl.Properties.VariableNames{9}, 'min_level');
-        t.assertEquals(tbl.Properties.VariableNames{10}, 'mean_level');
-        t.assertEquals(tbl.Properties.VariableNames{11}, 'max_level');
-        t.assertEquals(tbl.Properties.VariableNames{12}, 'where_max_abs_level');
-        t.assertEquals(tbl.Properties.VariableNames{13}, 'min_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{14}, 'mean_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{15}, 'max_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{16}, 'where_max_abs_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{17}, 'num_na');
-        t.assertEquals(tbl.Properties.VariableNames{18}, 'num_undef');
-        t.assertEquals(tbl.Properties.VariableNames{19}, 'num_eps');
-        t.assertEquals(tbl.Properties.VariableNames{20}, 'num_minf');
-        t.assertEquals(tbl.Properties.VariableNames{21}, 'num_pinf');
+        t.assertEquals(tbl.Properties.VariableNames{7}, 'num_recs');
+        t.assertEquals(tbl.Properties.VariableNames{8}, 'num_vals');
+        t.assertEquals(tbl.Properties.VariableNames{9}, 'sparsity');
+        t.assertEquals(tbl.Properties.VariableNames{10}, 'min_level');
+        t.assertEquals(tbl.Properties.VariableNames{11}, 'mean_level');
+        t.assertEquals(tbl.Properties.VariableNames{12}, 'max_level');
+        t.assertEquals(tbl.Properties.VariableNames{13}, 'where_max_abs_level');
+        t.assertEquals(tbl.Properties.VariableNames{14}, 'min_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{15}, 'mean_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{16}, 'max_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{17}, 'where_max_abs_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{18}, 'num_na');
+        t.assertEquals(tbl.Properties.VariableNames{19}, 'num_undef');
+        t.assertEquals(tbl.Properties.VariableNames{20}, 'num_eps');
+        t.assertEquals(tbl.Properties.VariableNames{21}, 'num_minf');
+        t.assertEquals(tbl.Properties.VariableNames{22}, 'num_pinf');
     else
         t.assert(isstruct(tbl));
-        t.assert(numel(fieldnames(tbl)) == 21);
+        t.assert(numel(fieldnames(tbl)) == 22);
         t.assert(numel(tbl.name) == 0);
         t.assert(isfield(tbl, 'name'));
         t.assert(isfield(tbl, 'type'));
@@ -453,7 +470,8 @@ function test_describe(t, cfg)
         t.assert(isfield(tbl, 'dim'));
         t.assert(isfield(tbl, 'domain'));
         t.assert(isfield(tbl, 'size'));
-        t.assert(isfield(tbl, 'count'));
+        t.assert(isfield(tbl, 'num_recs'));
+        t.assert(isfield(tbl, 'num_vals'));
         t.assert(isfield(tbl, 'sparsity'));
         t.assert(isfield(tbl, 'min_level'));
         t.assert(isfield(tbl, 'mean_level'));
@@ -503,7 +521,7 @@ function test_describe(t, cfg)
         t.add(test_name_describe_sets);
         if gdx.features.table
             t.assert(istable(tbl));
-            t.assert(numel(tbl.Properties.VariableNames) == 8);
+            t.assert(numel(tbl.Properties.VariableNames) == 9);
             t.assert(height(tbl) == 2);
             t.assertEquals(tbl{1,'name'}, 'i');
             t.assert(~tbl{1,'singleton'});
@@ -516,11 +534,12 @@ function test_describe(t, cfg)
             t.assert(tbl{1,'dim'} == 1);
             t.assertEquals(tbl{1,'domain'}, '[*]');
             t.assertEquals(tbl{1,'size'}, '[NaN]');
-            t.assert(tbl{1,'count'} == 5);
+            t.assert(tbl{1,'num_recs'} == 5);
+            t.assert(tbl{1,'num_vals'} == 0);
             t.assert(isnan(tbl{1,'sparsity'}));
         else
             t.assert(isstruct(tbl));
-            t.assert(numel(fieldnames(tbl)) == 8);
+            t.assert(numel(fieldnames(tbl)) == 9);
             t.assert(numel(tbl.name) == 2);
             t.assertEquals(tbl.name{1}, 'i');
             t.assert(~tbl.singleton(1));
@@ -533,7 +552,8 @@ function test_describe(t, cfg)
             t.assert(tbl.dim(1) == 1);
             t.assertEquals(tbl.domain{1}, '[*]');
             t.assertEquals(tbl.size{1}, '[NaN]');
-            t.assert(tbl.count(1) == 5);
+            t.assert(tbl.num_recs(1) == 5);
+            t.assert(tbl.num_vals(1) == 0);
             t.assert(isnan(tbl.sparsity(1)));
         end
 
@@ -542,7 +562,7 @@ function test_describe(t, cfg)
         t.add(test_name_describe_parameters);
         if gdx.features.table
             t.assert(istable(tbl));
-            t.assert(numel(tbl.Properties.VariableNames) == 16);
+            t.assert(numel(tbl.Properties.VariableNames) == 17);
             t.assert(height(tbl) == 2);
             t.assertEquals(tbl{1,'name'}, 'a');
             switch i
@@ -556,7 +576,13 @@ function test_describe(t, cfg)
             t.assert(tbl{1,'dim'} == 0);
             t.assertEquals(tbl{1,'domain'}, '[]');
             t.assertEquals(tbl{1,'size'}, '[]');
-            t.assert(tbl{1,'count'} == 1);
+            switch i
+            case {1,2,3}
+                t.assert(tbl{1,'num_recs'} == 1);
+            case 4
+                t.assert(isnan(tbl{1,'num_recs'}));
+            end
+            t.assert(tbl{1,'num_vals'} == 1);
             t.assert(tbl{1,'sparsity'} == 0);
             t.assert(tbl{1,'min_value'} == 4);
             t.assert(tbl{1,'mean_value'} == 4);
@@ -582,12 +608,18 @@ function test_describe(t, cfg)
             t.assertEquals(tbl{2,'domain'}, '[i]');
             t.assertEquals(tbl{2,'size'}, '[5]');
             switch i
-            case {1,2,4}
-                t.assert(tbl{2,'count'} == 3);
+            case {1,2}
+                t.assert(tbl{2,'num_recs'} == 3);
+                t.assert(tbl{2,'num_vals'} == 3);
                 t.assert(tbl{2,'sparsity'} == 0.4);
             case 3
-                t.assert(tbl{2,'count'} == 5);
+                t.assert(tbl{2,'num_recs'} == 5);
+                t.assert(tbl{2,'num_vals'} == 5);
                 t.assert(tbl{2,'sparsity'} == 0);
+            case 4
+                t.assert(isnan(tbl{2,'num_recs'}));
+                t.assert(tbl{2,'num_vals'} == 3);
+                t.assert(tbl{2,'sparsity'} == 0.4);
             end
             switch i
             case {1,2}
@@ -606,7 +638,7 @@ function test_describe(t, cfg)
             t.assert(tbl{2,'num_pinf'} == 0);
         else
             t.assert(isstruct(tbl));
-            t.assert(numel(fieldnames(tbl)) == 16);
+            t.assert(numel(fieldnames(tbl)) == 17);
             t.assert(numel(tbl.name) == 2);
             t.assertEquals(tbl.name{1}, 'a');
             switch i
@@ -620,7 +652,8 @@ function test_describe(t, cfg)
             t.assert(tbl.dim(1) == 0);
             t.assertEquals(tbl.domain{1}, '[]');
             t.assertEquals(tbl.size{1}, '[]');
-            t.assert(tbl.count(1) == 1);
+            t.assert(tbl.num_recs(1) == 1);
+            t.assert(tbl.num_vals(1) == 1);
             t.assert(tbl.sparsity(1) == 0);
             t.assert(tbl.min_value(1) == 4);
             t.assert(tbl.mean_value(1) == 4);
@@ -647,10 +680,12 @@ function test_describe(t, cfg)
             t.assertEquals(tbl.size{2}, '[5]');
             switch i
             case {1,2,4}
-                t.assert(tbl.count(2) == 3);
+                t.assert(tbl.num_recs(2) == 3);
+                t.assert(tbl.num_vals(2) == 3);
                 t.assert(tbl.sparsity(2) == 0.4);
             case 3
-                t.assert(tbl.count(2) == 5);
+                t.assert(tbl.num_recs(2) == 5);
+                t.assert(tbl.num_vals(2) == 5);
                 t.assert(tbl.sparsity(2) == 0);
             end
             switch i
@@ -675,7 +710,7 @@ function test_describe(t, cfg)
         t.add(test_name_describe_variables);
         if gdx.features.table
             t.assert(istable(tbl));
-            t.assert(numel(tbl.Properties.VariableNames) == 21);
+            t.assert(numel(tbl.Properties.VariableNames) == 22);
             t.assert(height(tbl) == 1);
             t.assertEquals(tbl{1,'name'}, 'x');
             t.assertEquals(tbl{1,'type'}, 'positive');
@@ -694,14 +729,17 @@ function test_describe(t, cfg)
             t.assertEquals(tbl{1,'size'}, '[5,5]');
             switch i
             case {1,2}
-                t.assert(tbl{1,'count'} == 6);
+                t.assert(tbl{1,'num_recs'} == 6);
+                t.assert(tbl{1,'num_vals'} == 30);
                 t.assert(tbl{1,'sparsity'} == 0.76);
             case 3
-                t.assert(tbl{1,'count'} == 25);
+                t.assert(tbl{1,'num_recs'} == 25);
+                t.assert(tbl{1,'num_vals'} == 125);
                 t.assert(tbl{1,'sparsity'} == 0);
             case 4
-                t.assert(tbl{1,'count'} == 3);
-                t.assert(tbl{1,'sparsity'} == 0.88);
+                t.assert(isnan(tbl{1,'num_recs'}));
+                t.assert(tbl{1,'num_vals'} == 55);
+                t.assert(tbl{1,'sparsity'} == 0.56);
             end
             t.assert(tbl{1,'min_level'} == 0);
             switch i
@@ -733,7 +771,7 @@ function test_describe(t, cfg)
             end
         else
             t.assert(isstruct(tbl));
-            t.assert(numel(fieldnames(tbl)) == 21);
+            t.assert(numel(fieldnames(tbl)) == 22);
             t.assert(numel(tbl.name) == 1);
             t.assertEquals(tbl.name{1}, 'x');
             t.assertEquals(tbl.type{1}, 'positive');
@@ -752,13 +790,16 @@ function test_describe(t, cfg)
             t.assertEquals(tbl.size{1}, '[5,5]');
             switch i
             case {1,2}
-                t.assert(tbl.count(1) == 6);
+                t.assert(tbl.num_recs(1) == 6);
+                t.assert(tbl.num_vals(1) == 30);
                 t.assert(tbl.sparsity(1) == 0.76);
             case 3
-                t.assert(tbl.count(1) == 25);
+                t.assert(tbl.num_recs(1) == 25);
+                t.assert(tbl.num_vals(1) == 125);
                 t.assert(tbl.sparsity(1) == 0);
             case 4
-                t.assert(tbl.count(1) == 3);
+                t.assert(tbl.num_recs(1) == 3);
+                t.assert(tbl.num_vals(1) == 55);
                 t.assert(tbl.sparsity(1) == 0.88);
             end
             t.assert(tbl.min_level(1) == 0);
@@ -802,31 +843,33 @@ function test_idx_describe(t, cfg)
     t.add('idx_describe_parameters_basic');
     if gdx.features.table
         t.assert(istable(tbl));
-        t.assert(numel(tbl.Properties.VariableNames) == 16);
+        t.assert(numel(tbl.Properties.VariableNames) == 17);
         t.assert(height(tbl) == 3);
         t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
         t.assertEquals(tbl.Properties.VariableNames{2}, 'format');
         t.assertEquals(tbl.Properties.VariableNames{3}, 'dim');
         t.assertEquals(tbl.Properties.VariableNames{4}, 'domain');
         t.assertEquals(tbl.Properties.VariableNames{5}, 'size');
-        t.assertEquals(tbl.Properties.VariableNames{6}, 'count');
-        t.assertEquals(tbl.Properties.VariableNames{7}, 'sparsity');
-        t.assertEquals(tbl.Properties.VariableNames{8}, 'min_value');
-        t.assertEquals(tbl.Properties.VariableNames{9}, 'mean_value');
-        t.assertEquals(tbl.Properties.VariableNames{10}, 'max_value');
-        t.assertEquals(tbl.Properties.VariableNames{11}, 'where_max_abs_value');
-        t.assertEquals(tbl.Properties.VariableNames{12}, 'num_na');
-        t.assertEquals(tbl.Properties.VariableNames{13}, 'num_undef');
-        t.assertEquals(tbl.Properties.VariableNames{14}, 'num_eps');
-        t.assertEquals(tbl.Properties.VariableNames{15}, 'num_minf');
-        t.assertEquals(tbl.Properties.VariableNames{16}, 'num_pinf');
+        t.assertEquals(tbl.Properties.VariableNames{6}, 'num_recs');
+        t.assertEquals(tbl.Properties.VariableNames{7}, 'num_vals');
+        t.assertEquals(tbl.Properties.VariableNames{8}, 'sparsity');
+        t.assertEquals(tbl.Properties.VariableNames{9}, 'min_value');
+        t.assertEquals(tbl.Properties.VariableNames{10}, 'mean_value');
+        t.assertEquals(tbl.Properties.VariableNames{11}, 'max_value');
+        t.assertEquals(tbl.Properties.VariableNames{12}, 'where_max_abs_value');
+        t.assertEquals(tbl.Properties.VariableNames{13}, 'num_na');
+        t.assertEquals(tbl.Properties.VariableNames{14}, 'num_undef');
+        t.assertEquals(tbl.Properties.VariableNames{15}, 'num_eps');
+        t.assertEquals(tbl.Properties.VariableNames{16}, 'num_minf');
+        t.assertEquals(tbl.Properties.VariableNames{17}, 'num_pinf');
         t.assertEquals(tbl{1,'name'}, 'a');
         t.assertEquals(tbl{1,'format'}, 'not_read');
         t.assert(tbl{1,'dim'} == 0);
         t.assertEquals(tbl{1,'domain'}, '[]');
         t.assertEquals(tbl{1,'size'}, '[]');
-        t.assert(tbl{1,'count'} == 1);
-        t.assert(tbl{1,'sparsity'} == 0);
+        t.assert(tbl{1,'num_recs'} == 1);
+        t.assert(isnan(tbl{1,'num_vals'}));
+        t.assert(isnan(tbl{1,'sparsity'}));
         t.assert(isnan(tbl{1,'min_value'}));
         t.assert(isnan(tbl{1,'mean_value'}));
         t.assert(isnan(tbl{1,'max_value'}));
@@ -845,8 +888,9 @@ function test_idx_describe(t, cfg)
         t.assert(tbl{2,'dim'} == 1);
         t.assertEquals(tbl{2,'domain'}, '[dim_1]');
         t.assertEquals(tbl{2,'size'}, '[5]');
-        t.assert(tbl{2,'count'} == 3);
-        t.assert(tbl{2,'sparsity'} == 0.4);
+        t.assert(tbl{2,'num_recs'} == 3);
+        t.assert(isnan(tbl{2,'num_vals'}));
+        t.assert(isnan(tbl{2,'sparsity'}));
         t.assert(isnan(tbl{2,'min_value'}));
         t.assert(isnan(tbl{2,'mean_value'}));
         t.assert(isnan(tbl{2,'max_value'}));
@@ -865,8 +909,9 @@ function test_idx_describe(t, cfg)
         t.assert(tbl{3,'dim'} == 2);
         t.assertEquals(tbl{3,'domain'}, '[dim_1,dim_2]');
         t.assertEquals(tbl{3,'size'}, '[5,10]');
-        t.assert(tbl{3,'count'} == 3);
-        t.assert(tbl{3,'sparsity'} == 0.94);
+        t.assert(tbl{3,'num_recs'} == 3);
+        t.assert(isnan(tbl{3,'num_vals'}));
+        t.assert(isnan(tbl{3,'sparsity'}));
         t.assert(isnan(tbl{3,'min_value'}));
         t.assert(isnan(tbl{3,'mean_value'}));
         t.assert(isnan(tbl{3,'max_value'}));
@@ -889,7 +934,8 @@ function test_idx_describe(t, cfg)
         t.assert(isfield(tbl, 'dim'));
         t.assert(isfield(tbl, 'domain'));
         t.assert(isfield(tbl, 'size'));
-        t.assert(isfield(tbl, 'count'));
+        t.assert(isfield(tbl, 'num_recs'));
+        t.assert(isfield(tbl, 'num_vals'));
         t.assert(isfield(tbl, 'sparsity'));
         t.assert(isfield(tbl, 'min_value'));
         t.assert(isfield(tbl, 'mean_value'));
@@ -905,8 +951,9 @@ function test_idx_describe(t, cfg)
         t.assert(tbl.dim(1) == 0);
         t.assertEquals(tbl.domain{1}, '[]');
         t.assertEquals(tbl.size{1}, '[]');
-        t.assert(tbl.count(1) == 1);
-        t.assert(tbl.sparsity(1) == 0);
+        t.assert(tbl.num_recs(1) == 1);
+        t.assert(isnan(tbl.num_vals(1)));
+        t.assert(isnan(tbl.sparsity(1)));
         t.assert(isnan(tbl.min_value(1)));
         t.assert(isnan(tbl.mean_value(1)));
         t.assert(isnan(tbl.max_value(1)));
@@ -925,8 +972,9 @@ function test_idx_describe(t, cfg)
         t.assert(tbl.dim(2) == 1);
         t.assertEquals(tbl.domain{2}, '[dim_1]');
         t.assertEquals(tbl.size{2}, '[5]');
-        t.assert(tbl.count(2) == 3);
-        t.assert(tbl.sparsity(2) == 0.4);
+        t.assert(tbl.num_recs(2) == 3);
+        t.assert(isnan(tbl.num_vals(2)));
+        t.assert(isnan(tbl.sparsity(2)));
         t.assert(isnan(tbl.min_value(2)));
         t.assert(isnan(tbl.mean_value(2)));
         t.assert(isnan(tbl.max_value(2)));
@@ -945,8 +993,9 @@ function test_idx_describe(t, cfg)
         t.assert(tbl.dim(3) == 2);
         t.assertEquals(tbl.domain{3}, '[dim_1,dim_2]');
         t.assertEquals(tbl.size{3}, '[5,10]');
-        t.assert(tbl.count(3) == 3);
-        t.assert(tbl.sparsity(3) == 0.94);
+        t.assert(tbl.num_recs(3) == 3);
+        t.assert(isnan(tbl.num_vals(3)));
+        t.assert(isnan(tbl.sparsity(3)));
         t.assert(isnan(tbl.min_value(3)));
         t.assert(isnan(tbl.mean_value(3)));
         t.assert(isnan(tbl.max_value(3)));
@@ -987,7 +1036,7 @@ function test_idx_describe(t, cfg)
         t.add(test_name_describe_parameters);
         if gdx.features.table
             t.assert(istable(tbl));
-            t.assert(numel(tbl.Properties.VariableNames) == 16);
+            t.assert(numel(tbl.Properties.VariableNames) == 17);
             t.assert(height(tbl) == 3);
             t.assertEquals(tbl{1,'name'}, 'a');
             switch i
@@ -1001,7 +1050,13 @@ function test_idx_describe(t, cfg)
             t.assert(tbl{1,'dim'} == 0);
             t.assertEquals(tbl{1,'domain'}, '[]');
             t.assertEquals(tbl{1,'size'}, '[]');
-            t.assert(tbl{1,'count'} == 1);
+            switch i
+            case {1,2,3}
+                t.assert(tbl{1,'num_recs'} == 1);
+            case 4
+                t.assert(isnan(tbl{1,'num_recs'}));
+            end
+            t.assert(tbl{1,'num_vals'} == 1);
             t.assert(tbl{1,'sparsity'} == 0);
             t.assert(tbl{1,'min_value'} == 4);
             t.assert(tbl{1,'mean_value'} == 4);
@@ -1027,12 +1082,18 @@ function test_idx_describe(t, cfg)
             t.assertEquals(tbl{2,'domain'}, '[dim_1]');
             t.assertEquals(tbl{2,'size'}, '[5]');
             switch i
-            case {1,2,4}
-                t.assert(tbl{2,'count'} == 3);
+            case {1,2}
+                t.assert(tbl{2,'num_recs'} == 3);
+                t.assert(tbl{2,'num_vals'} == 3);
                 t.assert(tbl{2,'sparsity'} == 0.4);
             case 3
-                t.assert(tbl{2,'count'} == 5);
+                t.assert(tbl{2,'num_recs'} == 5);
+                t.assert(tbl{2,'num_vals'} == 5);
                 t.assert(tbl{2,'sparsity'} == 0);
+            case 4
+                t.assert(isnan(tbl{2,'num_recs'}));
+                t.assert(tbl{2,'num_vals'} == 3);
+                t.assert(tbl{2,'sparsity'} == 0.4);
             end
             switch i
             case {1,2}
@@ -1064,12 +1125,18 @@ function test_idx_describe(t, cfg)
             t.assertEquals(tbl{3,'domain'}, '[dim_1,dim_2]');
             t.assertEquals(tbl{3,'size'}, '[5,10]');
             switch i
-            case {1,2,4}
-                t.assert(tbl{3,'count'} == 3);
+            case {1,2}
+                t.assert(tbl{3,'num_recs'} == 3);
+                t.assert(tbl{3,'num_vals'} == 3);
                 t.assert(tbl{3,'sparsity'} == 0.94);
             case 3
-                t.assert(tbl{3,'count'} == 50);
+                t.assert(tbl{3,'num_recs'} == 50);
+                t.assert(tbl{3,'num_vals'} == 50);
                 t.assert(tbl{3,'sparsity'} == 0);
+            case 4
+                t.assert(isnan(tbl{3,'num_recs'}));
+                t.assert(tbl{3,'num_vals'} == 3);
+                t.assert(tbl{3,'sparsity'} == 0.94);
             end
             switch i
             case {1,2}
@@ -1102,7 +1169,13 @@ function test_idx_describe(t, cfg)
             t.assert(tbl.dim(1) == 0);
             t.assertEquals(tbl.domain{1}, '[]');
             t.assertEquals(tbl.size{1}, '[]');
-            t.assert(tbl.count(1) == 1);
+            switch i
+            case {1,2,3}
+                t.assert(tbl.num_recs(1) == 1);
+            case 4
+                t.assert(isnan(tbl.num_recs(1)));
+            end
+            t.assert(tbl.num_vals(1) == 1);
             t.assert(tbl.sparsity(1) == 0);
             t.assert(tbl.min_value(1) == 4);
             t.assert(tbl.mean_value(1) == 4);
@@ -1128,12 +1201,18 @@ function test_idx_describe(t, cfg)
             t.assertEquals(tbl.domain{2}, '[dim_1]');
             t.assertEquals(tbl.size{2}, '[5]');
             switch i
-            case {1,2,4}
-                t.assert(tbl.count(2) == 3);
+            case {1,2}
+                t.assert(tbl.num_recs(2) == 3);
+                t.assert(tbl.num_vals(2) == 3);
                 t.assert(tbl.sparsity(2) == 0.4);
             case 3
-                t.assert(tbl.count(2) == 5);
+                t.assert(tbl.num_recs(2) == 5);
+                t.assert(tbl.num_vals(2) == 5);
                 t.assert(tbl.sparsity(2) == 0);
+            case 4
+                t.assert(isnan(tbl.num_recs(2)));
+                t.assert(tbl.num_vals(2) == 3);
+                t.assert(tbl.sparsity(2) == 0.4);
             end
             switch i
             case {1,2}
@@ -1165,12 +1244,18 @@ function test_idx_describe(t, cfg)
             t.assertEquals(tbl.domain{3}, '[dim_1,dim_2]');
             t.assertEquals(tbl.size{3}, '[5,10]');
             switch i
-            case {1,2,4}
-                t.assert(tbl.count(3) == 3);
+            case {1,2}
+                t.assert(tbl.num_recs(3) == 3);
+                t.assert(tbl.num_vals(3) == 3);
                 t.assert(tbl.sparsity(3) == 0.94);
             case 3
-                t.assert(tbl.count(3) == 50);
+                t.assert(tbl.num_recs(3) == 50);
+                t.assert(tbl.num_vals(3) == 50);
                 t.assert(tbl.sparsity(3) == 0);
+            case 4
+                t.assert(isnan(tbl.num_recs(3)));
+                t.assert(tbl.num_vals(3) == 3);
+                t.assert(tbl.sparsity(3) == 0.94);
             end
             switch i
             case {1,2}

@@ -46,8 +46,6 @@ function gams_transfer_test(varargin)
     mkdir(p.Results.working_dir)
     olddir = cd(p.Results.working_dir);
 
-    t = GAMSTest('GAMSTransfer');
-
     try
         % test data
         cfg = struct();
@@ -56,21 +54,18 @@ function gams_transfer_test(varargin)
         cfg.filenames = gams_transfer_test_create_gdx(p.Results.working_dir);
 
         % run tests
-        test_general(t, cfg);
-        test_container(t, cfg);
-        test_symbols(t, cfg);
-        test_readwrite(t, cfg);
-        test_idx_symbols(t, cfg);
-        test_idx_readwrite(t, cfg);
-        test_trnsport(t, cfg);
-
-        t.summary();
+        test_general(cfg);
+        test_container(cfg);
+        test_symbols(cfg);
+        test_readwrite(cfg);
+        test_idx_symbols(cfg);
+        test_idx_readwrite(cfg);
+        test_trnsport(cfg);
 
         cd(olddir);
         rmpath(fullfile(current_dir, 'test'));
         rmpath(fullfile(current_dir, 'src'));
     catch e
-        t.summary();
         cd(olddir);
         rmpath(fullfile(current_dir, 'test'));
         rmpath(fullfile(current_dir, 'src'));

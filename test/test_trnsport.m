@@ -23,7 +23,8 @@
 % SOFTWARE.
 %
 
-function test_trnsport(t, cfg)
+function test_trnsport(cfg)
+    t = GAMSTest('GAMSTransfer/trnsport');
 
     geps = GAMSTransfer.SpecialValues.EPS;
 
@@ -596,4 +597,6 @@ function test_trnsport(t, cfg)
             m.write(fullfile(cfg.working_dir, 'write_trnsport_3.gdx'));
         end
     end
+
+    t.summary();
 end

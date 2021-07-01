@@ -56,6 +56,9 @@ classdef Symbol < handle
 
         % number_records Number of records
         number_records
+
+        % number_values Number of record elements (values unequal default value)
+        number_values
     end
 
     properties
@@ -95,6 +98,7 @@ classdef Symbol < handle
         % number_records_ if negative: -1 * number of records - 1; if positive:
         % number of records in symbol data
         number_records_
+        number_values_
     end
 
     methods (Access = protected)
@@ -120,6 +124,7 @@ classdef Symbol < handle
             % a negative number_records signals that we store the number of
             % records of the GDX file
             obj.number_records_ = -read_number_records-1;
+            obj.number_values_ = nan;
 
             % add symbol to container
             obj.container.add(obj);
@@ -397,13 +402,10 @@ classdef Symbol < handle
                 nrecs = height(obj.records);
             case GAMSTransfer.RecordsFormat.STRUCT
                 nrecs = -1;
-                for f = obj.VALUE_FIELDS
-                    if isfield(obj.records, f{1})
-                        nrecs = numel(obj.records.(f{1}));
-                        break;
-                    end
-                end
-                if nrecs < 0
+                fields = obj.availValueFields();
+                if numel(fields) > 0
+                    nrecs = numel(obj.records.(fields{1}));
+                else
                     for i = 1:obj.dimension_
                         label = obj.domain_label_{i};
                         if isfield(obj.records, label)
@@ -414,20 +416,13 @@ classdef Symbol < handle
                 end
             case GAMSTransfer.RecordsFormat.DENSE_MATRIX
                 nrecs = 0;
-                for f = obj.VALUE_FIELDS
-                    if isfield(obj.records, f{1})
-                        nrecs = numel(obj.records.(f{1}));
-                        break;
-                    end
+                fields = obj.availValueFields();
+                for i = 1:numel(fields)
+                    nrecs = numel(obj.records.(fields{i}));
+                    break;
                 end
             case GAMSTransfer.RecordsFormat.SPARSE_MATRIX
-                nrecs = 0;
-                for f = obj.VALUE_FIELDS
-                    if isfield(obj.records, f{1})
-                        nrecs = nnz(obj.records.(f{1}));
-                        break;
-                    end
-                end
+                nrecs = nan;
             otherwise
                 nrecs = nan;
             end
@@ -435,10 +430,41 @@ classdef Symbol < handle
             obj.number_records_ = nrecs;
         end
 
+        function nvals = get.number_values(obj)
+            if ~isnan(obj.number_values_)
+                nvals = obj.number_values_;
+                return
+            end
+            if ~obj.is_valid
+                nvals = nan;
+                return
+            end
+
+            % determine number of records
+            switch obj.format_
+            case GAMSTransfer.RecordsFormat.EMPTY
+                nvals = 0;
+            case {GAMSTransfer.RecordsFormat.TABLE, GAMSTransfer.RecordsFormat.STRUCT, ...
+                GAMSTransfer.RecordsFormat.DENSE_MATRIX}
+                nvals = numel(obj.availValueFields()) * obj.number_records;
+            case GAMSTransfer.RecordsFormat.SPARSE_MATRIX
+                nvals = 0;
+                fields = obj.availValueFields();
+                for i = 1:numel(fields)
+                    nvals = nvals + nnz(obj.records.(fields{i}));
+                end
+            otherwise
+                nvals = nan;
+            end
+
+            obj.number_values_ = nvals;
+        end
+
         function set.records(obj, records)
             obj.records = records;
             obj.format_ = nan;
             obj.number_records_ = nan;
+            obj.number_values_ = nan;
         end
 
         function valid = get.is_valid(obj)
@@ -976,11 +1002,11 @@ classdef Symbol < handle
             % s = getSparsity() returns sparsity s in the symbol records.
             %
 
-            n_dense = prod(obj.size_);
+            n_dense = prod(obj.size_) * numel(obj.VALUE_FIELDS);
             if n_dense == 0
                 sparsity = NaN;
             else
-                sparsity = 1 - double(obj.number_records) / n_dense;
+                sparsity = 1 - obj.number_values / n_dense;
             end
         end
 

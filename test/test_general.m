@@ -23,8 +23,10 @@
 % SOFTWARE.
 %
 
-function test_general(t, cfg)
+function test_general(cfg)
+    t = GAMSTest('GAMSTransfer/general');
     test_specialValues(t, cfg);
+    t.summary();
 end
 
 function test_specialValues(t, cfg)
