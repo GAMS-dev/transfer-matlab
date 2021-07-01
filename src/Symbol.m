@@ -238,6 +238,10 @@ classdef Symbol < handle
                 end
             end
             obj.uels_ = new_uels;
+
+            % indicate that we need to recheck symbol records
+            obj.format_ = nan;
+            obj.number_records_ = nan;
         end
 
         function domain_label = get.domain_label(obj)
@@ -290,6 +294,10 @@ classdef Symbol < handle
             for i = 1:obj.dimension_
                 obj.uels_.(obj.domain_label_{i}) = {};
             end
+
+            % indicate that we need to recheck symbol records
+            obj.format_ = nan;
+            obj.number_records_ = nan;
         end
 
         function form = get.format(obj)
@@ -354,6 +362,10 @@ classdef Symbol < handle
             end
 
             obj.uels_ = uels;
+
+            % indicate that we need to recheck symbol records
+            obj.format_ = nan;
+            obj.number_records_ = nan;
         end
 
         function nrecs = get.number_records(obj)

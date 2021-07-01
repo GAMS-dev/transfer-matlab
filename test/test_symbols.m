@@ -785,22 +785,24 @@ function test_changeSymbol(t, cfg)
 
     gdx = GAMSTransfer.Container();
     i1 = GAMSTransfer.Set(gdx, 'i1');
+    i2 = GAMSTransfer.Set(gdx, 'i2', 'records', {'i21', 'i22', 'i23'});
     x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
     x2 = GAMSTransfer.Variable(gdx, 'x2', 'free', {i1,i1});
+    x3 = GAMSTransfer.Variable(gdx, 'x3', 'free', {i2}, 'records', {{'i21', 'i22', 'i23'}, [1 2 3]});
 
     t.add('change_symbol_name');
     t.assertEquals(x1.name, 'x1');
     t.assert(isfield(gdx.data, 'x1'));
     t.assert(~isfield(gdx.data, 'xx1'));
     vars = gdx.listVariables();
-    t.assert(numel(vars) == 2);
+    t.assert(numel(vars) == 3);
     t.assertEquals(vars{1}, 'x1');
     x1.name = 'xx1';
     t.assertEquals(x1.name, 'xx1');
     t.assert(~isfield(gdx.data, 'x1'));
     t.assert(isfield(gdx.data, 'xx1'));
     vars = gdx.listVariables();
-    t.assert(numel(vars) == 2);
+    t.assert(numel(vars) == 3);
     t.assertEquals(vars{1}, 'xx1');
     try
         t.assert(false);
@@ -888,6 +890,32 @@ function test_changeSymbol(t, cfg)
         t.reset();
         t.assertEquals(e.message, 'Dimension must be within [0,20].');
     end
+
+    t.add('change_symbol_dimension_2');
+    t.assert(x3.dimension == 1);
+    t.assert(numel(x3.domain) == 1);
+    if gdx.features.handle_comparison
+        t.assertEquals(x3.domain{1}, i2);
+    end
+    t.assertEquals(x3.domain{1}.name, 'i2');
+    t.assert(x3.is_valid);
+    x3.dimension = 2;
+    t.assert(x3.dimension == 2);
+    t.assert(numel(x3.domain) == 2);
+    if gdx.features.handle_comparison
+        t.assertEquals(x3.domain{1}, i2);
+    end
+    t.assertEquals(x3.domain{1}.name, 'i2');
+    t.assertEquals(x3.domain{2}, '*');
+    t.assert(~x3.is_valid);
+    x3.dimension = 1;
+    t.assert(x3.dimension == 1);
+    t.assert(numel(x3.domain) == 1);
+    if gdx.features.handle_comparison
+        t.assertEquals(x3.domain{1}, i2);
+    end
+    t.assertEquals(x3.domain{1}.name, 'i2');
+    t.assert(x3.is_valid);
 
     t.add('change_symbol_domain');
     t.assert(numel(x1.domain) == 1);
