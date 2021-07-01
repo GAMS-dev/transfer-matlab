@@ -260,8 +260,8 @@ function test_idx_read(t, cfg)
     t.assert(s.is_valid);
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.value) == s.number_records);
-    t.assert(size(s.records.value, 1) == s.number_records);
+    t.assert(numel(s.records.value) == 5);
+    t.assert(size(s.records.value, 1) == 5);
     t.assert(size(s.records.value, 2) == 1);
     t.assert(s.records.value(1) == 1);
     t.assert(s.records.value(2) == 0);
@@ -280,7 +280,7 @@ function test_idx_read(t, cfg)
     t.assert(s.is_valid);
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.value) == s.number_records);
+    t.assert(numel(s.records.value) == 50);
     t.assert(size(s.records.value, 1) == s.size(1));
     t.assert(size(s.records.value, 2) == s.size(2));
     t.assert(s.records.value(1,6) == 16);

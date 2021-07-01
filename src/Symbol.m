@@ -54,7 +54,7 @@ classdef Symbol < handle
         % format Format in which records are stored in (e.g. struct or dense_matrix)
         format
 
-        % number_records Number of records
+        % number_records Number of records (not available in matrix formats)
         number_records
 
         % number_values Number of record values (values unequal default value)
@@ -414,14 +414,7 @@ classdef Symbol < handle
                         end
                     end
                 end
-            case GAMSTransfer.RecordsFormat.DENSE_MATRIX
-                nrecs = 0;
-                fields = obj.availValueFields();
-                for i = 1:numel(fields)
-                    nrecs = numel(obj.records.(fields{i}));
-                    break;
-                end
-            case GAMSTransfer.RecordsFormat.SPARSE_MATRIX
+            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
                 nrecs = nan;
             otherwise
                 nrecs = nan;
@@ -444,9 +437,10 @@ classdef Symbol < handle
             switch obj.format_
             case GAMSTransfer.RecordsFormat.EMPTY
                 nvals = 0;
-            case {GAMSTransfer.RecordsFormat.TABLE, GAMSTransfer.RecordsFormat.STRUCT, ...
-                GAMSTransfer.RecordsFormat.DENSE_MATRIX}
+            case {GAMSTransfer.RecordsFormat.TABLE, GAMSTransfer.RecordsFormat.STRUCT}
                 nvals = numel(obj.availValueFields()) * obj.number_records;
+            case GAMSTransfer.RecordsFormat.DENSE_MATRIX
+                nvals = numel(obj.availValueFields()) * prod(obj.size_);
             case GAMSTransfer.RecordsFormat.SPARSE_MATRIX
                 nvals = 0;
                 fields = obj.availValueFields();
@@ -1507,7 +1501,11 @@ classdef Symbol < handle
             if ~has_domains && prod(val_size(1:obj.dimension_) == obj.size_) && ...
                 (obj.SUPPORTS_FORMAT_DENSE_MATRIX || obj.SUPPORTS_FORMAT_SPARSE_MATRIX)
                 if val_fields_same_size && val_fields_same_length && val_fields_dense
-                    records_format = GAMSTransfer.RecordsFormat.DENSE_MATRIX;
+                    if obj.dimension_ == 0
+                        records_format = GAMSTransfer.RecordsFormat.STRUCT;
+                    else
+                        records_format = GAMSTransfer.RecordsFormat.DENSE_MATRIX;
+                    end
                 elseif val_fields_same_size && val_fields_sparse
                     records_format = GAMSTransfer.RecordsFormat.SPARSE_MATRIX;
                 end

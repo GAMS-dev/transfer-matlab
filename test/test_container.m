@@ -613,7 +613,7 @@ function test_describe(t, cfg)
                 t.assert(tbl{2,'num_vals'} == 3);
                 t.assert(tbl{2,'sparsity'} == 0.4);
             case 3
-                t.assert(tbl{2,'num_recs'} == 5);
+                t.assert(isnan(tbl{2,'num_recs'}));
                 t.assert(tbl{2,'num_vals'} == 5);
                 t.assert(tbl{2,'sparsity'} == 0);
             case 4
@@ -679,14 +679,18 @@ function test_describe(t, cfg)
             t.assertEquals(tbl.domain{2}, '[i]');
             t.assertEquals(tbl.size{2}, '[5]');
             switch i
-            case {1,2,4}
+            case {1,2}
                 t.assert(tbl.num_recs(2) == 3);
                 t.assert(tbl.num_vals(2) == 3);
                 t.assert(tbl.sparsity(2) == 0.4);
             case 3
-                t.assert(tbl.num_recs(2) == 5);
+                t.assert(isnan(tbl.num_recs(2)));
                 t.assert(tbl.num_vals(2) == 5);
                 t.assert(tbl.sparsity(2) == 0);
+            case 4
+                t.assert(isnan(tbl.num_recs(2)));
+                t.assert(tbl.num_vals(2) == 3);
+                t.assert(tbl.sparsity(2) == 0.4);
             end
             switch i
             case {1,2}
@@ -733,7 +737,7 @@ function test_describe(t, cfg)
                 t.assert(tbl{1,'num_vals'} == 30);
                 t.assert(tbl{1,'sparsity'} == 0.76);
             case 3
-                t.assert(tbl{1,'num_recs'} == 25);
+                t.assert(isnan(tbl{1,'num_recs'}));
                 t.assert(tbl{1,'num_vals'} == 125);
                 t.assert(tbl{1,'sparsity'} == 0);
             case 4
@@ -794,11 +798,11 @@ function test_describe(t, cfg)
                 t.assert(tbl.num_vals(1) == 30);
                 t.assert(tbl.sparsity(1) == 0.76);
             case 3
-                t.assert(tbl.num_recs(1) == 25);
+                t.assert(isnan(tbl.num_recs(1)));
                 t.assert(tbl.num_vals(1) == 125);
                 t.assert(tbl.sparsity(1) == 0);
             case 4
-                t.assert(tbl.num_recs(1) == 3);
+                t.assert(isnan(tbl.num_recs(1)));
                 t.assert(tbl.num_vals(1) == 55);
                 t.assert(tbl.sparsity(1) == 0.88);
             end
@@ -1087,7 +1091,7 @@ function test_idx_describe(t, cfg)
                 t.assert(tbl{2,'num_vals'} == 3);
                 t.assert(tbl{2,'sparsity'} == 0.4);
             case 3
-                t.assert(tbl{2,'num_recs'} == 5);
+                t.assert(isnan(tbl{2,'num_recs'}));
                 t.assert(tbl{2,'num_vals'} == 5);
                 t.assert(tbl{2,'sparsity'} == 0);
             case 4
@@ -1130,7 +1134,7 @@ function test_idx_describe(t, cfg)
                 t.assert(tbl{3,'num_vals'} == 3);
                 t.assert(tbl{3,'sparsity'} == 0.94);
             case 3
-                t.assert(tbl{3,'num_recs'} == 50);
+                t.assert(isnan(tbl{3,'num_recs'}));
                 t.assert(tbl{3,'num_vals'} == 50);
                 t.assert(tbl{3,'sparsity'} == 0);
             case 4
@@ -1206,7 +1210,7 @@ function test_idx_describe(t, cfg)
                 t.assert(tbl.num_vals(2) == 3);
                 t.assert(tbl.sparsity(2) == 0.4);
             case 3
-                t.assert(tbl.num_recs(2) == 5);
+                t.assert(isnan(tbl.num_recs(2)));
                 t.assert(tbl.num_vals(2) == 5);
                 t.assert(tbl.sparsity(2) == 0);
             case 4
@@ -1249,7 +1253,7 @@ function test_idx_describe(t, cfg)
                 t.assert(tbl.num_vals(3) == 3);
                 t.assert(tbl.sparsity(3) == 0.94);
             case 3
-                t.assert(tbl.num_recs(3) == 50);
+                t.assert(isnan(tbl.num_recs(3)));
                 t.assert(tbl.num_vals(3) == 50);
                 t.assert(tbl.sparsity(3) == 0);
             case 4
