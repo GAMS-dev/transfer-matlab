@@ -57,7 +57,7 @@ classdef Symbol < handle
         % number_records Number of records
         number_records
 
-        % number_values Number of record elements (values unequal default value)
+        % number_values Number of record values (values unequal default value)
         number_values
     end
 
