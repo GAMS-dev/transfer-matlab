@@ -28,6 +28,7 @@ function test_container(t, cfg)
     test_describe(t, cfg);
     test_idx_describe(t, cfg);
     test_remove(t, cfg);
+    test_universalset(t, cfg);
 end
 
 function test_getlist(t, cfg)
@@ -1212,5 +1213,43 @@ function test_remove(t, cfg)
     t.assert(~i1.is_valid);
     t.assert(~a1.is_valid);
     t.assert(~x1.is_valid);
+
+end
+
+function test_universalset(t, cfg)
+
+    gdx = GAMSTransfer.Container(cfg.filenames{1});
+    gdx.read();
+
+    t.add('universalset_1');
+    uels = gdx.getUniversalSet();
+    t.assert(iscellstr(uels));
+    t.assert(numel(uels) == 10);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i4');
+    t.assertEquals(uels{4}, 'i6');
+    t.assertEquals(uels{5}, 'i10');
+    t.assertEquals(uels{6}, 'j2');
+    t.assertEquals(uels{7}, 'j5');
+    t.assertEquals(uels{8}, 'j7');
+    t.assertEquals(uels{9}, 'j8');
+    t.assertEquals(uels{10}, 'j9');
+
+    t.add('universalset_2');
+    gdx.data.i.uels.uni_1{end+1} = 'j9';
+    uels = gdx.getUniversalSet();
+    t.assert(iscellstr(uels));
+    t.assert(numel(uels) == 10);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i4');
+    t.assertEquals(uels{4}, 'i6');
+    t.assertEquals(uels{5}, 'i10');
+    t.assertEquals(uels{6}, 'j9');
+    t.assertEquals(uels{7}, 'j2');
+    t.assertEquals(uels{8}, 'j5');
+    t.assertEquals(uels{9}, 'j7');
+    t.assertEquals(uels{10}, 'j8');
 
 end

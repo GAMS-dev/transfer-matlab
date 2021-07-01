@@ -863,6 +863,27 @@ classdef Container < handle
             end
         end
 
+        function list = getUniversalSet(obj)
+            % Generate universal set (UEL order in GDX)
+            %
+
+            map = javaObject('java.util.LinkedHashMap');
+
+            % collect uels
+            symbols = fieldnames(obj.data);
+            for i = 1:numel(symbols)
+                symbol = obj.data.(symbols{i});
+                for j = 1:symbol.dimension
+                    uels = symbol.uels.(symbol.domain_label{j});
+                    for k = 1:numel(uels)
+                        map.put(uels{k}, true);
+                    end
+                end
+            end
+
+            list = cell(map.keySet.toArray);
+        end
+
     end
 
     methods (Hidden)
