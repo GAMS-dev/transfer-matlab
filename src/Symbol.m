@@ -1259,14 +1259,17 @@ classdef Symbol < handle
             if ~obj.is_valid
                 error('Symbol must be valid in order to get used UELs.');
             end
-            if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
-                uels = {};
-                return
-            end
 
             label = obj.domain_label_{dim};
-            uels = obj.uels_.(label);
-            uels = uels(unique(obj.records.(label), 'stable'));
+            switch obj.format_
+            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
+                uels = obj.uels_.(label);
+            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
+                uels = obj.uels_.(label);
+                uels = uels(unique(obj.records.(label), 'stable'));
+            otherwise
+                uels = {};
+            end
         end
 
         function trimUels(obj)

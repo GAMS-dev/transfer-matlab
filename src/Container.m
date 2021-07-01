@@ -728,7 +728,7 @@ classdef Container < handle
             for i = 1:numel(symbols)
                 if ~obj.data.(symbols{i}).is_valid
                     n_invalid = n_invalid + 1;
-                    list{n_invalid} = symbol.name;
+                    list{n_invalid} = obj.data.(symbols{i}).name;
                 end
             end
         end
