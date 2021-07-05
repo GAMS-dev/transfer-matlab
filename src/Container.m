@@ -980,8 +980,8 @@ classdef Container < handle
                 descr.dim(i) = symbol.dimension;
                 descr.domain{i} = GAMSTransfer.Utils.list2str(symbol.domain);
                 descr.size{i} = GAMSTransfer.Utils.list2str(symbol.size);
-                descr.num_recs(i) = symbol.number_records;
-                descr.num_vals(i) = symbol.number_values;
+                descr.num_recs(i) = symbol.getNumRecords();
+                descr.num_vals(i) = symbol.getNumValues();
                 descr.sparsity(i) = symbol.getSparsity();
                 switch symtype
                 case {GAMSTransfer.SymbolType.VARIABLE, GAMSTransfer.SymbolType.EQUATION}

@@ -53,12 +53,6 @@ classdef Symbol < handle
 
         % format Format in which records are stored in (e.g. struct or dense_matrix)
         format
-
-        % number_records Number of records (not available in matrix formats)
-        number_records
-
-        % number_values Number of record values (values unequal default value)
-        number_values
     end
 
     properties
@@ -98,7 +92,6 @@ classdef Symbol < handle
         % number_records_ if negative: -1 * number of records - 1; if positive:
         % number of records in symbol data
         number_records_
-        number_values_
     end
 
     methods (Access = protected)
@@ -124,7 +117,6 @@ classdef Symbol < handle
             % a negative number_records signals that we store the number of
             % records of the GDX file
             obj.number_records_ = -read_number_records-1;
-            obj.number_values_ = nan;
 
             % add symbol to container
             obj.container.add(obj);
@@ -228,7 +220,7 @@ classdef Symbol < handle
             obj.size_ = zeros(1, obj.dimension_);
             for i = 1:obj.dimension_
                 if isa(obj.domain_{i}, 'GAMSTransfer.Set')
-                    obj.size_(i) = obj.domain_{i}.number_records;
+                    obj.size_(i) = obj.domain_{i}.getNumRecords();
                 else
                     obj.size_(i) = nan;
                 end
@@ -380,85 +372,10 @@ classdef Symbol < handle
             obj.number_records_ = nan;
         end
 
-        function nrecs = get.number_records(obj)
-            if ~isnan(obj.number_records_)
-                if obj.number_records_ < 0
-                    nrecs = -obj.number_records_-1;
-                else
-                    nrecs = obj.number_records_;
-                end
-                return
-            end
-            if ~obj.is_valid
-                nrecs = nan;
-                return
-            end
-
-            % determine number of records
-            switch obj.format_
-            case GAMSTransfer.RecordsFormat.EMPTY
-                nrecs = 0;
-            case GAMSTransfer.RecordsFormat.TABLE
-                nrecs = height(obj.records);
-            case GAMSTransfer.RecordsFormat.STRUCT
-                nrecs = -1;
-                fields = obj.availValueFields();
-                if numel(fields) > 0
-                    nrecs = numel(obj.records.(fields{1}));
-                else
-                    for i = 1:obj.dimension_
-                        label = obj.domain_label_{i};
-                        if isfield(obj.records, label)
-                            nrecs = numel(obj.records.(label));
-                            break;
-                        end
-                    end
-                end
-            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
-                nrecs = nan;
-            otherwise
-                nrecs = nan;
-            end
-
-            obj.number_records_ = nrecs;
-        end
-
-        function nvals = get.number_values(obj)
-            if ~isnan(obj.number_values_)
-                nvals = obj.number_values_;
-                return
-            end
-            if ~obj.is_valid
-                nvals = nan;
-                return
-            end
-
-            % determine number of records
-            switch obj.format_
-            case GAMSTransfer.RecordsFormat.EMPTY
-                nvals = 0;
-            case {GAMSTransfer.RecordsFormat.TABLE, GAMSTransfer.RecordsFormat.STRUCT}
-                nvals = numel(obj.availValueFields()) * obj.number_records;
-            case GAMSTransfer.RecordsFormat.DENSE_MATRIX
-                nvals = numel(obj.availValueFields()) * prod(obj.size_);
-            case GAMSTransfer.RecordsFormat.SPARSE_MATRIX
-                nvals = 0;
-                fields = obj.availValueFields();
-                for i = 1:numel(fields)
-                    nvals = nvals + nnz(obj.records.(fields{i}));
-                end
-            otherwise
-                nvals = nan;
-            end
-
-            obj.number_values_ = nvals;
-        end
-
         function set.records(obj, records)
             obj.records = records;
             obj.format_ = nan;
             obj.number_records_ = nan;
-            obj.number_values_ = nan;
         end
 
         function valid = get.is_valid(obj)
@@ -855,6 +772,9 @@ classdef Symbol < handle
                 % Note that format NOT_READ will lead to an invalid symbol
                 if isempty(obj.records) && ~isnan(obj.number_records_) && obj.number_records_ < 0
                     obj.format_ = GAMSTransfer.RecordsFormat.NOT_READ;
+                    if verbose
+                        error('Symbol has not been fully read.');
+                    end
                     return
                 end
 
@@ -987,7 +907,7 @@ classdef Symbol < handle
             if n_dense == 0
                 sparsity = NaN;
             else
-                sparsity = 1 - obj.number_values / n_dense;
+                sparsity = 1 - obj.getNumValues() / n_dense;
             end
         end
 
@@ -1087,7 +1007,7 @@ classdef Symbol < handle
                 else
                     value = value + value_;
                 end
-                n = n + obj.number_records;
+                n = n + obj.getNumRecords();
             end
             switch obj.format_
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
@@ -1250,6 +1170,101 @@ classdef Symbol < handle
             % get count
             for i = 1:numel(values)
                 n = n + sum(GAMSTransfer.SpecialValues.isneginf(obj.records.(values{i})(:)));
+            end
+        end
+
+        function nrecs = getNumRecords(obj)
+            % Returns the number of GDX records (not available for matrix
+            % formats)
+            %
+            % n = getNumRecords() returns the number of records that would be
+            % stored in a GDX file if this symbol would be written to GDX. If
+            % the format is 'not_read' this is the number of symbol records
+            % found in the GDX file to be read. For matrix formats n is NaN.
+            %
+
+            if ~isnan(obj.number_records_)
+                if obj.number_records_ < 0
+                    nrecs = -obj.number_records_-1;
+                else
+                    nrecs = obj.number_records_;
+                end
+                return
+            end
+            if ~obj.is_valid
+                nrecs = nan;
+                return
+            end
+
+            % determine number of records
+            switch obj.format_
+            case GAMSTransfer.RecordsFormat.EMPTY
+                nrecs = 0;
+            case GAMSTransfer.RecordsFormat.TABLE
+                nrecs = height(obj.records);
+            case GAMSTransfer.RecordsFormat.STRUCT
+                nrecs = -1;
+                fields = obj.availValueFields();
+                if numel(fields) > 0
+                    nrecs = numel(obj.records.(fields{1}));
+                else
+                    for i = 1:obj.dimension_
+                        label = obj.domain_label_{i};
+                        if isfield(obj.records, label)
+                            nrecs = numel(obj.records.(label));
+                            break;
+                        end
+                    end
+                end
+            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
+                nrecs = nan;
+            otherwise
+                nrecs = nan;
+            end
+
+            obj.number_records_ = nrecs;
+        end
+
+        function nvals = getNumValues(obj, varargin)
+            % Returns the number of values stored for this symbol.
+            %
+            % n = getNumValues(varargin) is the sum of values stored of the
+            % following fields: level, value, marginal, lower, upper, scale. The
+            % number of values is the basis for the sparsity computation.
+            % varargin can include a list of value fields that should be
+            % considered: level, value, lower, upper, scale. If none is given
+            % all available for the symbol are considered.
+            %
+            % See also: Symbol.getSparsity
+            %
+
+            if ~obj.is_valid
+                nvals = nan;
+                return
+            end
+
+            % get available value fields
+            values = obj.availValueFields(varargin{:});
+            if isempty(values)
+                nvals = 0;
+                return
+            end
+
+            % determine number of records
+            switch obj.format_
+            case GAMSTransfer.RecordsFormat.EMPTY
+                nvals = 0;
+            case {GAMSTransfer.RecordsFormat.TABLE, GAMSTransfer.RecordsFormat.STRUCT}
+                nvals = numel(values) * obj.getNumRecords();
+            case GAMSTransfer.RecordsFormat.DENSE_MATRIX
+                nvals = numel(values) * prod(obj.size_);
+            case GAMSTransfer.RecordsFormat.SPARSE_MATRIX
+                nvals = 0;
+                for i = 1:numel(values)
+                    nvals = nvals + nnz(obj.records.(values{i}));
+                end
+            otherwise
+                nvals = nan;
             end
         end
 
@@ -1575,7 +1590,7 @@ classdef Symbol < handle
                     continue
                 end
                 obj.domain_label_{i} = sprintf('%s_%d', obj.domain_{i}.name, i);
-                obj.size_(i) = obj.domain_{i}.number_records;
+                obj.size_(i) = obj.domain_{i}.getNumRecords();
             end
         end
 

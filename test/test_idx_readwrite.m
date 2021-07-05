@@ -55,7 +55,7 @@ function test_idx_read(t, cfg)
     t.assert(numel(s.size) == 0);
     t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
-    t.assert(s.number_records == 1);
+    t.assert(s.getNumRecords() == 1);
     t.assert(numel(fieldnames(s.uels)) == 0);
     t.assert(~s.is_valid);
 
@@ -76,7 +76,7 @@ function test_idx_read(t, cfg)
     t.assert(s.size(1) == 5);
     t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
-    t.assert(s.number_records == 3);
+    t.assert(s.getNumRecords() == 3);
     t.assert(numel(fieldnames(s.uels)) == 1);
     t.assert(isfield(s.uels, 'dim_1'));
     t.assertEquals(s.uels.dim_1, {});
@@ -102,7 +102,7 @@ function test_idx_read(t, cfg)
     t.assert(s.size(2) == 10);
     t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
-    t.assert(s.number_records == 3);
+    t.assert(s.getNumRecords() == 3);
     t.assert(numel(fieldnames(s.uels)) == 2);
     t.assert(isfield(s.uels, 'dim_1'));
     t.assert(isfield(s.uels, 'dim_2'));
@@ -120,7 +120,7 @@ function test_idx_read(t, cfg)
     t.assert(s.is_valid);
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.value) == s.number_records);
+    t.assert(numel(s.records.value) == s.getNumRecords());
     t.assert(s.records.value == 4);
     t.assert(numel(fieldnames(s.uels)) == 0);
 
@@ -133,8 +133,8 @@ function test_idx_read(t, cfg)
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'dim_1'));
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.dim_1) == s.number_records);
-    t.assert(numel(s.records.value) == s.number_records);
+    t.assert(numel(s.records.dim_1) == s.getNumRecords());
+    t.assert(numel(s.records.value) == s.getNumRecords());
     t.assert(s.records.dim_1(1) == 1);
     t.assert(s.records.dim_1(2) == 3);
     t.assert(s.records.dim_1(3) == 5);
@@ -155,9 +155,9 @@ function test_idx_read(t, cfg)
     t.assert(isfield(s.records, 'dim_1'));
     t.assert(isfield(s.records, 'dim_2'));
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.dim_1) == s.number_records);
-    t.assert(numel(s.records.dim_2) == s.number_records);
-    t.assert(numel(s.records.value) == s.number_records);
+    t.assert(numel(s.records.dim_1) == s.getNumRecords());
+    t.assert(numel(s.records.dim_2) == s.getNumRecords());
+    t.assert(numel(s.records.value) == s.getNumRecords());
     t.assert(s.records.dim_1(1) == 1);
     t.assert(s.records.dim_1(2) == 3);
     t.assert(s.records.dim_1(3) == 4);
@@ -184,7 +184,7 @@ function test_idx_read(t, cfg)
         t.assert(s.is_valid);
         t.assert(numel(s.records.Properties.VariableNames) == 1);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'value');
-        t.assert(numel(s.records.value) == s.number_records);
+        t.assert(numel(s.records.value) == s.getNumRecords());
         t.assert(s.records.value == 4);
         t.assert(numel(fieldnames(s.uels)) == 0);
 
@@ -197,8 +197,8 @@ function test_idx_read(t, cfg)
         t.assert(numel(s.records.Properties.VariableNames) == 2);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'dim_1');
         t.assertEquals(s.records.Properties.VariableNames{2}, 'value');
-        t.assert(numel(s.records.dim_1) == s.number_records);
-        t.assert(numel(s.records.value) == s.number_records);
+        t.assert(numel(s.records.dim_1) == s.getNumRecords());
+        t.assert(numel(s.records.value) == s.getNumRecords());
         t.assert(s.records.dim_1(1) == 1);
         t.assert(s.records.dim_1(2) == 3);
         t.assert(s.records.dim_1(3) == 5);
@@ -219,9 +219,9 @@ function test_idx_read(t, cfg)
         t.assertEquals(s.records.Properties.VariableNames{1}, 'dim_1');
         t.assertEquals(s.records.Properties.VariableNames{2}, 'dim_2');
         t.assertEquals(s.records.Properties.VariableNames{3}, 'value');
-        t.assert(numel(s.records.dim_1) == s.number_records);
-        t.assert(numel(s.records.dim_2) == s.number_records);
-        t.assert(numel(s.records.value) == s.number_records);
+        t.assert(numel(s.records.dim_1) == s.getNumRecords());
+        t.assert(numel(s.records.dim_2) == s.getNumRecords());
+        t.assert(numel(s.records.value) == s.getNumRecords());
         t.assert(s.records.dim_1(1) == 1);
         t.assert(s.records.dim_1(2) == 3);
         t.assert(s.records.dim_1(3) == 4);
@@ -310,7 +310,7 @@ function test_idx_read(t, cfg)
     t.assert(isfield(s.records, 'value'));
     t.assert(issparse(s.records.value));
     t.assert(numel(s.records.value) == 1);
-    t.assert(nnz(s.records.value) == s.number_values);
+    t.assert(nnz(s.records.value) == s.getNumValues());
     t.assert(s.records.value == 4);
     t.assert(numel(fieldnames(s.uels)) == 0);
 
@@ -324,7 +324,7 @@ function test_idx_read(t, cfg)
     t.assert(isfield(s.records, 'value'));
     t.assert(issparse(s.records.value));
     t.assert(numel(s.records.value) == s.size(1));
-    t.assert(nnz(s.records.value) == s.number_values);
+    t.assert(nnz(s.records.value) == s.getNumValues());
     t.assert(size(s.records.value, 1) == s.size(1));
     t.assert(size(s.records.value, 2) == 1);
     t.assert(s.records.value(1) == 1);
@@ -346,7 +346,7 @@ function test_idx_read(t, cfg)
     t.assert(isfield(s.records, 'value'));
     t.assert(issparse(s.records.value));
     t.assert(numel(s.records.value) == s.size(1)*s.size(2));
-    t.assert(nnz(s.records.value) == s.number_values);
+    t.assert(nnz(s.records.value) == s.getNumValues());
     t.assert(size(s.records.value, 1) == s.size(1));
     t.assert(size(s.records.value, 2) == s.size(2));
     t.assert(s.records.value(1,6) == 16);

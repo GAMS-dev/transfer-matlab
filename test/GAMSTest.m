@@ -112,8 +112,8 @@ classdef GAMSTest < handle
                 obj.assert(numel(symbol.size) == symbol.dimension);
                 obj.assert(ischar(symbol.format));
                 obj.assert(strcmp(symbol.format, 'not_read') || strcmp(symbol.format, 'empty'));
-                obj.assert(symbol.number_records >= 0);
-                obj.assert(symbol.number_values == 0 || isnan(symbol.number_values));
+                obj.assert(symbol.getNumRecords() >= 0);
+                obj.assert(symbol.getNumValues() == 0 || isnan(symbol.getNumValues()));
                 obj.assert(isempty(symbol.records));
                 obj.assert(isstruct(symbol.uels));
                 obj.assert(islogical(symbol.is_valid));

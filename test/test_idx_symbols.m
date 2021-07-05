@@ -48,7 +48,7 @@ function test_idx_addSymbols(t, cfg)
     t.assertEquals(p1.domain_info, 'relaxed');
     t.assert(numel(p1.size) == 0);
     t.assert(strcmp(p1.format, 'empty'));
-    t.assert(p1.number_records == 0);
+    t.assert(p1.getNumRecords() == 0);
     t.assert(numel(fieldnames(p1.uels)) == 0);
     t.assert(p1.is_valid);
     t.assert(numel(fieldnames(gdx.data)) == 1);
@@ -71,7 +71,7 @@ function test_idx_addSymbols(t, cfg)
     t.assert(numel(p2.size) == 1);
     t.assert(p2.size(1) == 0);
     t.assert(strcmp(p2.format, 'empty'));
-    t.assert(p2.number_records == 0);
+    t.assert(p2.getNumRecords() == 0);
     t.assert(isfield(p2.uels, 'dim_1'));
     t.assert(numel(p2.uels.dim_1) == 0);
     t.assert(p2.is_valid);
@@ -101,7 +101,7 @@ function test_idx_addSymbols(t, cfg)
     t.assert(p3.size(2) == 2);
     t.assert(p3.size(3) == 3);
     t.assert(strcmp(p3.format, 'empty'));
-    t.assert(p3.number_records == 0);
+    t.assert(p3.getNumRecords() == 0);
     t.assert(isfield(p3.uels, 'dim_1'));
     t.assert(isfield(p3.uels, 'dim_2'));
     t.assert(isfield(p3.uels, 'dim_3'));
@@ -369,20 +369,6 @@ function test_idx_changeSymbol(t, cfg)
     t.add('idx_change_symbol_format');
     try
         p1.format = 'struct';
-        t.assert(false);
-    catch e
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            msg_end = 'has private access and cannot be set in this context';
-            t.assertEquals(e.message(end-numel(msg_end)+1:end), msg_end);
-        else
-            msg_begin = 'You cannot set the read-only property';
-            t.assertEquals(e.message(1:numel(msg_begin)), msg_begin);
-        end
-    end
-
-    t.add('idx_change_symbol_number_records');
-    try
-        p1.number_records = 2;
         t.assert(false);
     catch e
         if exist('OCTAVE_VERSION', 'builtin') > 0

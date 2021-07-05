@@ -55,7 +55,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s1.size) == 1);
     t.assert(isnan(s1.size(1)));
     t.assert(strcmp(s1.format, 'empty'));
-    t.assert(s1.number_records == 0);
+    t.assert(s1.getNumRecords() == 0);
     t.assert(isfield(s1.uels, 'uni_1'));
     t.assert(numel(s1.uels.uni_1) == 0);
     t.assert(s1.is_valid);
@@ -83,7 +83,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s2.size) == 1);
     t.assert(s2.size(1) == 0);
     t.assert(strcmp(s2.format, 'empty'));
-    t.assert(s2.number_records == 0);
+    t.assert(s2.getNumRecords() == 0);
     t.assert(isfield(s2.uels, 's1_1'));
     t.assert(numel(s2.uels.s1_1) == 0);
     t.assert(s2.is_valid);
@@ -114,7 +114,7 @@ function test_addSymbols(t, cfg)
     t.assert(s3.size(1) == 0);
     t.assert(isnan(s3.size(2)));
     t.assert(strcmp(s3.format, 'empty'));
-    t.assert(s3.number_records == 0);
+    t.assert(s3.getNumRecords() == 0);
     t.assert(isfield(s3.uels, 's1_1'));
     t.assert(isfield(s3.uels, 'uni_2'));
     t.assert(numel(s3.uels.s1_1) == 0);
@@ -144,7 +144,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s4.size) == 1);
     t.assert(s4.size(1) == 0);
     t.assert(strcmp(s4.format, 'empty'));
-    t.assert(s4.number_records == 0);
+    t.assert(s4.getNumRecords() == 0);
     t.assert(isfield(s4.uels, 's2_1'));
     t.assert(numel(s4.uels.s2_1) == 0);
     t.assert(s4.is_valid);
@@ -175,7 +175,7 @@ function test_addSymbols(t, cfg)
     t.assert(isnan(s5.size(1)));
     t.assert(s5.size(2) == 0);
     t.assert(strcmp(s5.format, 'empty'));
-    t.assert(s5.number_records == 0);
+    t.assert(s5.getNumRecords() == 0);
     t.assert(isfield(s5.uels, 's1_1'));
     t.assert(isfield(s5.uels, 's2_2'));
     t.assert(numel(s5.uels.s1_1) == 0);
@@ -202,7 +202,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s6.size) == 1);
     t.assert(isnan(s6.size(1)));
     t.assert(strcmp(s6.format, 'empty'));
-    t.assert(s6.number_records == 0);
+    t.assert(s6.getNumRecords() == 0);
     t.assert(isfield(s6.uels, 's1_1'));
     t.assert(numel(s6.uels.s1_1) == 0);
     t.assert(s6.is_valid);
@@ -320,7 +320,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p1.domain_info, 'regular');
     t.assert(numel(p1.size) == 0);
     t.assert(strcmp(p1.format, 'empty'));
-    t.assert(p1.number_records == 0);
+    t.assert(p1.getNumRecords() == 0);
     t.assert(numel(fieldnames(p1.uels)) == 0);
     t.assert(p1.is_valid);
     t.assert(numel(fieldnames(gdx.data)) == 10);
@@ -346,7 +346,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(p2.size) == 1);
     t.assert(p2.size(1) == 0);
     t.assert(strcmp(p2.format, 'empty'));
-    t.assert(p2.number_records == 0);
+    t.assert(p2.getNumRecords() == 0);
     t.assert(isfield(p2.uels, 's1_1'));
     t.assert(numel(p2.uels.s1_1) == 0);
     t.assert(p2.is_valid);
@@ -379,7 +379,7 @@ function test_addSymbols(t, cfg)
     t.assert(isnan(p3.size(2)));
     t.assert(isnan(p3.size(3)));
     t.assert(strcmp(p3.format, 'empty'));
-    t.assert(p3.number_records == 0);
+    t.assert(p3.getNumRecords() == 0);
     t.assert(isfield(p3.uels, 's1_1'));
     t.assert(isfield(p3.uels, 'uni_2'));
     t.assert(isfield(p3.uels, 's2_3'));
@@ -451,7 +451,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(v1.domain_info, 'regular');
     t.assert(numel(v1.size) == 0);
     t.assert(strcmp(v1.format, 'empty'));
-    t.assert(v1.number_records == 0);
+    t.assert(v1.getNumRecords() == 0);
     t.assert(numel(fieldnames(v1.uels)) == 0);
     t.assert(v1.is_valid);
     t.assert(numel(fieldnames(gdx.data)) == 13);
@@ -472,7 +472,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(v2.domain_info, 'regular');
     t.assert(numel(v2.size) == 0);
     t.assert(strcmp(v2.format, 'empty'));
-    t.assert(v2.number_records == 0);
+    t.assert(v2.getNumRecords() == 0);
     t.assert(numel(fieldnames(v2.uels)) == 0);
     t.assert(v2.is_valid);
     t.assert(numel(fieldnames(gdx.data)) == 14);
@@ -502,7 +502,7 @@ function test_addSymbols(t, cfg)
     t.assert(v3.size(1) == 0);
     t.assert(isnan(v3.size(2)));
     t.assert(strcmp(v3.format, 'empty'));
-    t.assert(v3.number_records == 0);
+    t.assert(v3.getNumRecords() == 0);
     t.assert(isfield(v3.uels, 's1_1'));
     t.assert(isfield(v3.uels, 'uni_2'));
     t.assert(numel(v3.uels.s1_1) == 0);
@@ -618,7 +618,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(e1.domain_info, 'regular');
     t.assert(numel(e1.size) == 0);
     t.assert(strcmp(e1.format, 'empty'));
-    t.assert(e1.number_records == 0);
+    t.assert(e1.getNumRecords() == 0);
     t.assert(numel(fieldnames(e1.uels)) == 0);
     t.assert(e1.is_valid);
     t.assert(numel(fieldnames(gdx.data)) == 34);
@@ -639,7 +639,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(e2.domain_info, 'regular');
     t.assert(numel(e2.size) == 0);
     t.assert(strcmp(e2.format, 'empty'));
-    t.assert(e2.number_records == 0);
+    t.assert(e2.getNumRecords() == 0);
     t.assert(numel(fieldnames(e2.uels)) == 0);
     t.assert(e2.is_valid);
     t.assert(numel(fieldnames(gdx.data)) == 35);
@@ -669,7 +669,7 @@ function test_addSymbols(t, cfg)
     t.assert(e3.size(1) == 0);
     t.assert(isnan(e3.size(2)));
     t.assert(strcmp(e3.format, 'empty'));
-    t.assert(e3.number_records == 0);
+    t.assert(e3.getNumRecords() == 0);
     t.assert(isfield(e3.uels, 's1_1'));
     t.assert(isfield(e3.uels, 'uni_2'));
     t.assert(numel(e3.uels.s1_1) == 0);
@@ -992,20 +992,6 @@ function test_changeSymbol(t, cfg)
         end
     end
 
-    t.add('change_symbol_number_records');
-    try
-        x1.number_records = 2;
-        t.assert(false);
-    catch e
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            msg_end = 'has private access and cannot be set in this context';
-            t.assertEquals(e.message(end-numel(msg_end)+1:end), msg_end);
-        else
-            msg_begin = 'You cannot set the read-only property';
-            t.assertEquals(e.message(1:numel(msg_begin)), msg_begin);
-        end
-    end
-
     t.add('change_symbol_is_valid');
     try
         x1.is_valid = false;
@@ -1069,18 +1055,6 @@ end
 function test_defaultvalues(t, cfg)
 
     gdx = GAMSTransfer.Container();
-
-    t.add('default_values_sets');
-    s = GAMSTransfer.Set(gdx, 'i1');
-    def = s.getDefaultValues();
-    t.assert(def(1) == 0);
-    t.assert(all(GAMSTransfer.SpecialValues.isna(def(2:end))));
-
-    t.add('default_values_parameters');
-    s = GAMSTransfer.Parameter(gdx, 'a1');
-    def = s.getDefaultValues();
-    t.assert(def(1) == 0);
-    t.assert(all(GAMSTransfer.SpecialValues.isna(def(2:end))));
 
     t.add('default_values_variables');
     s = GAMSTransfer.Variable(gdx, 'x1', 'binary');
