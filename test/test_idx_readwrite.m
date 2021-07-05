@@ -57,7 +57,7 @@ function test_idx_read(t, cfg)
     t.assert(strcmp(s.format, 'not_read'));
     t.assert(s.getNumRecords() == 1);
     t.assert(numel(fieldnames(s.uels)) == 0);
-    t.assert(~s.is_valid);
+    t.assert(~s.isValid());
 
     t.add('idx_read_parameter_1d_basic');
     t.assert(isfield(gdx.data, 'b'));
@@ -80,7 +80,7 @@ function test_idx_read(t, cfg)
     t.assert(numel(fieldnames(s.uels)) == 1);
     t.assert(isfield(s.uels, 'dim_1'));
     t.assertEquals(s.uels.dim_1, {});
-    t.assert(~s.is_valid);
+    t.assert(~s.isValid());
 
     t.add('indexed_parameter_2d_basic');
     t.assert(isfield(gdx.data, 'c'));
@@ -108,7 +108,7 @@ function test_idx_read(t, cfg)
     t.assert(isfield(s.uels, 'dim_2'));
     t.assertEquals(s.uels.dim_1, {});
     t.assertEquals(s.uels.dim_2, {});
-    t.assert(~s.is_valid);
+    t.assert(~s.isValid());
 
     gdx.read('format', 'struct');
 
@@ -117,7 +117,7 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct') || strcmp(s.format, 'dense_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.value) == s.getNumRecords());
@@ -129,7 +129,7 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'dim_1'));
     t.assert(isfield(s.records, 'value'));
@@ -150,7 +150,7 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 3);
     t.assert(isfield(s.records, 'dim_1'));
     t.assert(isfield(s.records, 'dim_2'));
@@ -181,7 +181,7 @@ function test_idx_read(t, cfg)
         t.assert(~isempty(s.records));
         t.assert(istable(s.records));
         t.assert(strcmp(s.format, 'table'));
-        t.assert(s.is_valid);
+        t.assert(s.isValid());
         t.assert(numel(s.records.Properties.VariableNames) == 1);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'value');
         t.assert(numel(s.records.value) == s.getNumRecords());
@@ -193,7 +193,7 @@ function test_idx_read(t, cfg)
         t.assert(~isempty(s.records));
         t.assert(istable(s.records));
         t.assert(strcmp(s.format, 'table'));
-        t.assert(s.is_valid);
+        t.assert(s.isValid());
         t.assert(numel(s.records.Properties.VariableNames) == 2);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'dim_1');
         t.assertEquals(s.records.Properties.VariableNames{2}, 'value');
@@ -214,7 +214,7 @@ function test_idx_read(t, cfg)
         t.assert(~isempty(s.records));
         t.assert(istable(s.records));
         t.assert(strcmp(s.format, 'table'));
-        t.assert(s.is_valid);
+        t.assert(s.isValid());
         t.assert(numel(s.records.Properties.VariableNames) == 3);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'dim_1');
         t.assertEquals(s.records.Properties.VariableNames{2}, 'dim_2');
@@ -245,7 +245,7 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct') || strcmp(s.format, 'dense_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.value) == 1);
@@ -257,7 +257,7 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'dense_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.value) == 5);
@@ -277,7 +277,7 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'dense_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.value) == 50);
@@ -305,7 +305,7 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'sparse_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(issparse(s.records.value));
@@ -319,7 +319,7 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'sparse_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(issparse(s.records.value));
@@ -341,7 +341,7 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'sparse_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(issparse(s.records.value));

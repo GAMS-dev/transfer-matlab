@@ -1296,16 +1296,16 @@ function test_remove(t, cfg)
     t.assert(isfield(gdx.data, 'i1'));
     t.assert(isfield(gdx.data, 'a1'));
     t.assert(isfield(gdx.data, 'x1'));
-    t.assert(i1.is_valid);
-    t.assert(a1.is_valid);
-    t.assert(x1.is_valid);
+    t.assert(i1.isValid());
+    t.assert(a1.isValid());
+    t.assert(x1.isValid());
     gdx.removeSymbol('i1');
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 'a1'));
     t.assert(isfield(gdx.data, 'x1'));
-    t.assert(~i1.is_valid);
-    t.assert(~a1.is_valid);
-    t.assert(~x1.is_valid);
+    t.assert(~i1.isValid());
+    t.assert(~a1.isValid());
+    t.assert(~x1.isValid());
 
 end
 

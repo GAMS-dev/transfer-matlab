@@ -50,7 +50,7 @@ function test_idx_addSymbols(t, cfg)
     t.assert(strcmp(p1.format, 'empty'));
     t.assert(p1.getNumRecords() == 0);
     t.assert(numel(fieldnames(p1.uels)) == 0);
-    t.assert(p1.is_valid);
+    t.assert(p1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'p1'));
     if gdx.features.handle_comparison
@@ -74,7 +74,7 @@ function test_idx_addSymbols(t, cfg)
     t.assert(p2.getNumRecords() == 0);
     t.assert(isfield(p2.uels, 'dim_1'));
     t.assert(numel(p2.uels.dim_1) == 0);
-    t.assert(p2.is_valid);
+    t.assert(p2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 'p2'));
     if gdx.features.handle_comparison
@@ -108,7 +108,7 @@ function test_idx_addSymbols(t, cfg)
     t.assert(numel(p3.uels.dim_1) == 0);
     t.assert(numel(p3.uels.dim_2) == 0);
     t.assert(numel(p3.uels.dim_3) == 0);
-    t.assert(p3.is_valid);
+    t.assert(p3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'p3'));
     if gdx.features.handle_comparison
@@ -380,20 +380,6 @@ function test_idx_changeSymbol(t, cfg)
         end
     end
 
-    t.add('idx_change_symbol_is_valid');
-    try
-        p1.is_valid = false;
-        t.assert(false);
-    catch e
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            msg_end = 'has private access and cannot be set in this context';
-            t.assertEquals(e.message(end-numel(msg_end)+1:end), msg_end);
-        else
-            msg_begin = 'You cannot set the read-only property';
-            t.assertEquals(e.message(1:numel(msg_begin)), msg_begin);
-        end
-    end
-
     t.add('idx_change_symbol_uels');
     try
         p1.uels = struct();
@@ -448,7 +434,7 @@ function test_idx_setRecords(t, cfg)
     t.assert(p1.records.value(3) == 3);
     t.assert(p1.records.value(4) == 4);
     t.assert(p1.records.value(5) == 5);
-    t.assert(p1.is_valid);
+    t.assert(p1.isValid());
 
     t.add('set_records_numeric_3');
     p1.setRecords(sparse([1; 0; 0; 4; 0]));
@@ -463,7 +449,7 @@ function test_idx_setRecords(t, cfg)
     t.assert(p1.records.value(4) == 4);
     t.assert(p1.records.value(5) == 0);
     t.assert(nnz(p1.records.value) == 2);
-    t.assert(p1.is_valid);
+    t.assert(p1.isValid());
 
     t.add('set_records_cell_1');
     p1.setRecords({[1; 2; 3; 4; 5]});
@@ -477,7 +463,7 @@ function test_idx_setRecords(t, cfg)
     t.assert(p1.records.value(3) == 3);
     t.assert(p1.records.value(4) == 4);
     t.assert(p1.records.value(5) == 5);
-    t.assert(p1.is_valid);
+    t.assert(p1.isValid());
 
     t.add('set_records_cell_2');
     try
@@ -489,13 +475,11 @@ function test_idx_setRecords(t, cfg)
     end
 
     t.add('set_records_cell_3');
-    try
-        t.assert(false);
-        p1.setRecords({[1; 4], [11; 44], [111; 444], [1111; 4444], [11111; 44444]});
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain ''dim_1'' is missing.');
-    end
+    warning('off')
+    p1.setRecords({[1; 4], [11; 44], [111; 444], [1111; 4444], [11111; 44444]});
+    t.assert(~p1.isValid());
+    t.assertEquals(lastwarn(), 'Domain ''dim_1'' is missing.');
+    warning('on')
 
     t.add('set_records_cell_4');
     try
@@ -518,12 +502,12 @@ function test_idx_setRecords(t, cfg)
     t.assert(p1.records.value(3) == 3);
     t.assert(p1.records.value(4) == 4);
     t.assert(p1.records.value(5) == 5);
-    t.assert(p1.is_valid);
+    t.assert(p1.isValid());
 
     t.add('set_records_struct_2');
     p1.setRecords(struct('marginal', [1; 2; 3; 4; 5]));
     t.assertEquals(p1.format, 'empty');
-    t.assert(p1.is_valid);
+    t.assert(p1.isValid());
 
     t.add('set_records_struct_3');
     try
@@ -550,33 +534,29 @@ function test_idx_setRecords(t, cfg)
     t.assert(p1.records.dim_1(2) == 4);
     t.assert(p1.records.value(1) == 1);
     t.assert(p1.records.value(2) == 4);
-    t.assert(p1.is_valid);
+    t.assert(p1.isValid());
 
     t.add('set_records_struct_5');
-    try
-        t.assert(false);
-        p1.setRecords(struct('value', [1, 2, 3]));
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain ''dim_1'' is missing.');
-    end
+    warning('off')
+    p1.setRecords(struct('value', [1, 2, 3]));
+    t.assert(~p1.isValid());
+    t.assertEquals(lastwarn(), 'Domain ''dim_1'' is missing.');
+    warning('on')
 
     if gdx.features.table
         t.add('set_records_table_1');
         tbl = table([1; 2; 3], [1; 2; 3]);
-        try
-            t.assert(false);
-            p1.setRecords(tbl);
-        catch e
-            t.reset();
-        end
+        warning('off')
+        p1.setRecords(tbl);
+        t.assert(~p1.isValid());
+        warning('on')
 
         t.add('set_records_table_2');
         tbl = table([1; 2; 3], [1; 2; 3]);
         tbl.Properties.VariableNames = {'dim_1', 'value'};
         p1.setRecords(tbl);
         t.assertEquals(p1.format, 'table');
-        t.assert(p1.is_valid);
+        t.assert(p1.isValid());
     end
 end
 
@@ -658,9 +638,9 @@ function test_idx_transformRecords(t, cfg)
             gdx.data.a.transformRecords(formats{j});
             gdx.data.b.transformRecords(formats{j});
             gdx.data.c.transformRecords(formats{j});
-            t.assert(gdx.data.a.is_valid);
-            t.assert(gdx.data.b.is_valid);
-            t.assert(gdx.data.c.is_valid);
+            t.assert(gdx.data.a.isValid());
+            t.assert(gdx.data.b.isValid());
+            t.assert(gdx.data.c.isValid());
             t.assertEquals(gdx.data.a.format, a_format{j});
             t.assertEquals(gdx.data.b.format, b_format{j});
             t.assertEquals(gdx.data.c.format, c_format{j});

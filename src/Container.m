@@ -86,11 +86,6 @@ classdef Container < handle
         data
     end
 
-    properties (Dependent, SetAccess = private)
-        % is_valid Indicates if symbols are valid
-        is_valid
-    end
-
     properties (Hidden)
         reorder_after_add = true
         features
@@ -133,17 +128,6 @@ classdef Container < handle
 
             % read basic GDX information
             obj.readBasic();
-        end
-
-        function valid = get.is_valid(obj)
-            valid = true;
-            symbols = fieldnames(obj.data);
-            for i = 1:numel(symbols)
-                if ~obj.data.(symbols{i}).is_valid
-                    valid = false;
-                    return
-                end
-            end
         end
 
     end
@@ -303,7 +287,7 @@ classdef Container < handle
             % See also: GAMSTransfer.Container.getDomainViolations
             %
 
-            if ~obj.is_valid
+            if ~obj.isValid()
                 invalids = GAMSTransfer.Utils.list2str(obj.listInvalidSymbols(), '', '');
                 error('Can''t write invalid container. Invalid symbols: %s.', invalids);
             end
@@ -506,13 +490,10 @@ classdef Container < handle
 
             % force recheck of deleted symbol (it may still live within an
             % alias, domain or in the user's program)
-            symbol.check(false);
+            symbol.isValid('force', true);
 
             % force recheck of all remaining symbols in container
-            names = fieldnames(obj.data);
-            for i = 1:numel(names)
-                obj.data.(names{i}).check(false);
-            end
+            obj.isValid('force', true);
         end
 
         function reorder(obj)
@@ -627,10 +608,7 @@ classdef Container < handle
             obj.data = orderfields(obj.data, perm);
 
             % force recheck of all remaining symbols in container
-            names = fieldnames(obj.data);
-            for i = 1:numel(names)
-                obj.data.(names{i}).check(false);
-            end
+            obj.isValid('force', true);
         end
 
         function list = listSymbols(obj, varargin)
@@ -723,7 +701,7 @@ classdef Container < handle
 
             n_invalid = 0;
             for i = 1:numel(symbols)
-                if ~obj.data.(symbols{i}).is_valid
+                if ~obj.data.(symbols{i}).isValid()
                     n_invalid = n_invalid + 1;
                 end
             end
@@ -732,7 +710,7 @@ classdef Container < handle
 
             n_invalid = 0;
             for i = 1:numel(symbols)
-                if ~obj.data.(symbols{i}).is_valid
+                if ~obj.data.(symbols{i}).isValid()
                     n_invalid = n_invalid + 1;
                     list{n_invalid} = obj.data.(symbols{i}).name;
                 end
@@ -884,6 +862,34 @@ classdef Container < handle
             list = cell(map.keySet.toArray);
         end
 
+        function valid = isValid(obj, varargin)
+            % Checks correctness of container (true, if all symbols are valid)
+            %
+            % Parameter Arguments:
+            % - verbose: logical
+            %   If true, the reason for an invalid symbol is printed
+            % - force: logical
+            %   If true, forces reevaluation of validity (resets cache)
+            %
+            % See also: GAMSTransfer.Symbol/isValid
+            %
+
+            p = inputParser();
+            addParameter(p, 'force', false, @islogical);
+            parse(p, varargin{:});
+
+            valid = true;
+            symbols = fieldnames(obj.data);
+            for i = 1:numel(symbols)
+                if ~obj.data.(symbols{i}).isValid('force', p.Results.force)
+                    valid = false;
+                    if ~p.Results.force
+                        return
+                    end
+                end
+            end
+        end
+
     end
 
     methods (Hidden)
@@ -905,7 +911,7 @@ classdef Container < handle
             obj.data.(symbol.name_) = symbol;
 
             % reorder
-            if ~obj.is_valid && obj.reorder_after_add
+            if ~obj.isValid() && obj.reorder_after_add
                 obj.reorder();
             end
         end

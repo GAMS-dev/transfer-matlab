@@ -114,7 +114,7 @@ classdef GAMSTest < handle
                 obj.assert(symbol.getNumValues() == 0 || isnan(symbol.getNumValues()));
                 obj.assert(isempty(symbol.records));
                 obj.assert(isstruct(symbol.uels));
-                obj.assert(islogical(symbol.is_valid));
+                obj.assert(islogical(symbol.isValid()));
                 obj.assert(ischar(symbol.format));
                 obj.assert(strcmp(symbol.format, 'not_read') || strcmp(symbol.format, 'empty'));
             case 'GAMSTransfer.Alias'
@@ -128,10 +128,10 @@ classdef GAMSTest < handle
                 obj.assert(islogical(symbol.singleton));
             case 'GAMSTransfer.Variable'
                 obj.assert(ischar(symbol.type));
-                obj.assert(GAMSTransfer.VariableType.isvalid(symbol.type));
+                obj.assert(GAMSTransfer.VariableType.isValid(symbol.type));
             case 'GAMSTransfer.Equation'
                 obj.assert(ischar(symbol.type));
-                obj.assert(GAMSTransfer.EquationType.isvalid(symbol.type));
+                obj.assert(GAMSTransfer.EquationType.isValid(symbol.type));
             end
         end
 

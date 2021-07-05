@@ -179,7 +179,7 @@ function test_trnsport(cfg)
         t.assertEquals(i.domain_info, 'regular');
         t.assert(numel(i.size) == 1);
         t.assert(isnan(i.size));
-        t.assert(i.is_valid);
+        t.assert(i.isValid());
         t.assertEquals(i.format, 'struct');
         t.assert(i.getNumRecords() == 2);
         t.assert(isstruct(i.records));
@@ -213,7 +213,7 @@ function test_trnsport(cfg)
         t.assertEquals(j.domain_info, 'regular');
         t.assert(numel(j.size) == 1);
         t.assert(isnan(j.size));
-        t.assert(j.is_valid);
+        t.assert(j.isValid());
         t.assertEquals(j.format, 'struct');
         t.assert(j.getNumRecords() == 3);
         t.assert(isstruct(j.records));
@@ -252,7 +252,7 @@ function test_trnsport(cfg)
         t.assertEquals(a.domain_info, 'regular');
         t.assert(numel(a.size) == 1);
         t.assert(a.size == 2);
-        t.assert(a.is_valid);
+        t.assert(a.isValid());
         t.assertEquals(a.format, 'dense_matrix');
         t.assert(isnan(a.getNumRecords()));
         t.assert(a.getNumValues() == 2);
@@ -284,7 +284,7 @@ function test_trnsport(cfg)
         t.assertEquals(b.domain_info, 'regular');
         t.assert(numel(b.size) == 1);
         t.assert(b.size == 3);
-        t.assert(b.is_valid);
+        t.assert(b.isValid());
         t.assertEquals(b.format, 'dense_matrix');
         t.assert(isnan(b.getNumRecords()));
         t.assert(b.getNumValues() == 3);
@@ -321,7 +321,7 @@ function test_trnsport(cfg)
         t.assertEquals(d.domain_info, 'regular');
         t.assert(numel(d.size) == 2);
         t.assert(all(d.size == [2,3]));
-        t.assert(d.is_valid);
+        t.assert(d.isValid());
         t.assertEquals(d.format, 'dense_matrix');
         t.assert(isnan(d.getNumRecords()));
         t.assert(d.getNumValues() == 6);
@@ -356,7 +356,7 @@ function test_trnsport(cfg)
         t.assert(numel(f.domain_label) == 0);
         t.assertEquals(f.domain_info, 'regular');
         t.assert(numel(f.size) == 0);
-        t.assert(f.is_valid);
+        t.assert(f.isValid());
         t.assertEquals(f.format, 'struct');
         t.assert(f.getNumRecords() == 1);
         t.assert(f.getNumValues() == 1);
@@ -386,7 +386,7 @@ function test_trnsport(cfg)
         t.assertEquals(c.domain_info, 'regular');
         t.assert(numel(c.size) == 2);
         t.assert(all(c.size == [2,3]));
-        t.assert(c.is_valid);
+        t.assert(c.isValid());
         t.assertEquals(c.format, 'dense_matrix');
         t.assert(isnan(c.getNumRecords()));
         t.assert(c.getNumValues() == 6);
@@ -430,7 +430,7 @@ function test_trnsport(cfg)
         t.assertEquals(x.domain_info, 'regular');
         t.assert(numel(x.size) == 2);
         t.assert(all(x.size == [2,3]));
-        t.assert(x.is_valid);
+        t.assert(x.isValid());
         t.assertEquals(x.format, 'dense_matrix');
         t.assert(isnan(x.getNumRecords()));
         t.assert(x.getNumValues() == 12);
@@ -473,7 +473,7 @@ function test_trnsport(cfg)
         t.assert(numel(z.domain_label) == 0);
         t.assertEquals(z.domain_info, 'regular');
         t.assert(numel(z.size) == 0);
-        t.assert(z.is_valid);
+        t.assert(z.isValid());
         t.assertEquals(z.format, 'struct');
         t.assert(z.getNumRecords() == 1);
         t.assert(z.getNumValues() == 1);
@@ -494,7 +494,7 @@ function test_trnsport(cfg)
         t.assert(numel(cost.domain_label) == 0);
         t.assertEquals(cost.domain_info, 'regular');
         t.assert(numel(cost.size) == 0);
-        t.assert(cost.is_valid);
+        t.assert(cost.isValid());
         t.assertEquals(cost.format, 'struct');
         t.assert(cost.getNumRecords() == 1);
         t.assert(cost.getNumValues() == 4);
@@ -530,7 +530,7 @@ function test_trnsport(cfg)
         t.assertEquals(supply.domain_info, 'regular');
         t.assert(numel(supply.size) == 1);
         t.assert(supply.size == 2);
-        t.assert(supply.is_valid);
+        t.assert(supply.isValid());
         t.assertEquals(supply.format, 'dense_matrix');
         t.assert(isnan(supply.getNumRecords()));
         t.assert(supply.getNumValues() == 6);
@@ -570,7 +570,7 @@ function test_trnsport(cfg)
         t.assertEquals(demand.domain_info, 'regular');
         t.assert(numel(demand.size) == 1);
         t.assert(demand.size == 3);
-        t.assert(demand.is_valid);
+        t.assert(demand.isValid());
         t.assertEquals(demand.format, 'dense_matrix');
         t.assert(isnan(demand.getNumRecords()));
         t.assert(demand.getNumValues() == 9);

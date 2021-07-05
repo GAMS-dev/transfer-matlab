@@ -67,7 +67,7 @@ function test_read(t, cfg)
     t.assert(numel(fieldnames(s.uels)) == 1);
     t.assert(isfield(s.uels, 'uni_1'));
     t.assertEquals(s.uels.uni_1, {});
-    t.assert(~s.is_valid);
+    t.assert(~s.isValid());
 
     t.add('read_scalar_basic');
     t.assert(isfield(gdx.data, 'a'));
@@ -85,7 +85,7 @@ function test_read(t, cfg)
     t.assert(strcmp(s.format, 'not_read'));
     t.assert(s.getNumRecords() == 1);
     t.assert(numel(fieldnames(s.uels)) == 0);
-    t.assert(~s.is_valid);
+    t.assert(~s.isValid());
 
     t.add('read_parameter_basic');
     t.assert(isfield(gdx.data, 'b'));
@@ -111,7 +111,7 @@ function test_read(t, cfg)
     t.assert(numel(fieldnames(s.uels)) == 1);
     t.assert(isfield(s.uels, 'i_1'));
     t.assertEquals(s.uels.i_1, {});
-    t.assert(~s.is_valid);
+    t.assert(~s.isValid());
 
     t.add('read_variable_basic');
     t.assert(isfield(gdx.data, 'x'));
@@ -144,7 +144,7 @@ function test_read(t, cfg)
     t.assert(isfield(s.uels, 'j_2'));
     t.assertEquals(s.uels.i_1, {});
     t.assertEquals(s.uels.j_2, {});
-    t.assert(~s.is_valid);
+    t.assert(~s.isValid());
 
     gdx.read('format', 'struct');
 
@@ -153,7 +153,7 @@ function test_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'uni_1'));
     t.assert(isfield(s.records, 'text'));
@@ -199,7 +199,7 @@ function test_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct') || strcmp(s.format, 'dense_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.value) == s.getNumRecords());
@@ -211,7 +211,7 @@ function test_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'i_1'));
     t.assert(isfield(s.records, 'value'));
@@ -243,7 +243,7 @@ function test_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 7);
     t.assert(isfield(s.records, 'i_1'));
     t.assert(isfield(s.records, 'j_2'));
@@ -341,7 +341,7 @@ function test_read(t, cfg)
         t.assert(~isempty(s.records));
         t.assert(istable(s.records));
         t.assert(strcmp(s.format, 'table'));
-        t.assert(s.is_valid);
+        t.assert(s.isValid());
         t.assert(numel(s.records.Properties.VariableNames) == 2);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'uni_1');
         t.assertEquals(s.records.Properties.VariableNames{2}, 'text');
@@ -387,7 +387,7 @@ function test_read(t, cfg)
         t.assert(~isempty(s.records));
         t.assert(istable(s.records));
         t.assert(strcmp(s.format, 'table'));
-        t.assert(s.is_valid);
+        t.assert(s.isValid());
         t.assert(numel(s.records.Properties.VariableNames) == 1);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'value');
         t.assert(numel(s.records.value) == s.getNumRecords());
@@ -399,7 +399,7 @@ function test_read(t, cfg)
         t.assert(~isempty(s.records));
         t.assert(istable(s.records));
         t.assert(strcmp(s.format, 'table'));
-        t.assert(s.is_valid);
+        t.assert(s.isValid());
         t.assert(numel(s.records.Properties.VariableNames) == 2);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'i_1');
         t.assertEquals(s.records.Properties.VariableNames{2}, 'value');
@@ -431,7 +431,7 @@ function test_read(t, cfg)
         t.assert(~isempty(s.records));
         t.assert(istable(s.records));
         t.assert(strcmp(s.format, 'table'));
-        t.assert(s.is_valid);
+        t.assert(s.isValid());
         t.assert(numel(s.records.Properties.VariableNames) == 7);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'i_1');
         t.assertEquals(s.records.Properties.VariableNames{2}, 'j_2');
@@ -529,7 +529,7 @@ function test_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'uni_1'));
     t.assert(isfield(s.records, 'text'));
@@ -575,7 +575,7 @@ function test_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct') || strcmp(s.format, 'dense_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.value) == s.getNumRecords());
@@ -587,7 +587,7 @@ function test_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct') || strcmp(s.format, 'dense_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.value) == gdx.data.i.getNumRecords());
@@ -612,7 +612,7 @@ function test_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'dense_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 5);
     t.assert(isfield(s.records, 'level'));
     t.assert(isfield(s.records, 'marginal'));
@@ -702,7 +702,7 @@ function test_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'uni_1'));
     t.assert(isfield(s.records, 'text'));
@@ -748,7 +748,7 @@ function test_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'sparse_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.value) == 1);
@@ -760,7 +760,7 @@ function test_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'sparse_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(issparse(s.records.value));
@@ -787,7 +787,7 @@ function test_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'sparse_matrix'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 5);
     t.assert(isfield(s.records, 'level'));
     t.assert(isfield(s.records, 'marginal'));
@@ -901,7 +901,7 @@ function test_readPartial(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct' ));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'uni_1'));
     t.assert(isfield(s.records, 'text'));
@@ -939,7 +939,7 @@ function test_readPartial(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 4);
     t.assert(isfield(s.records, 'i_1'));
     t.assert(isfield(s.records, 'j_2'));
@@ -1000,7 +1000,7 @@ function test_readPartial(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct'));
-    t.assert(s.is_valid);
+    t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 3);
     t.assert(isfield(s.records, 'i_1'));
     t.assert(isfield(s.records, 'j_2'));

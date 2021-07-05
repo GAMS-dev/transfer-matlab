@@ -175,7 +175,7 @@ classdef Set < GAMSTransfer.Symbol
             %
 
             bool = false;
-            if ~obj.is_valid
+            if ~obj.isValid()
                 return
             end
             if obj.dimension ~= 1

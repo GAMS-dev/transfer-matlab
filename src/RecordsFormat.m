@@ -116,16 +116,16 @@ classdef RecordsFormat
             end
         end
 
-        function bool = isvalid(value)
+        function bool = isValid(value)
             % Checks if a records format name or identifier is valid
             %
-            % b = RecordsFormat.isvalid(s) returns true if s is a valid records
+            % b = RecordsFormat.isValid(s) returns true if s is a valid records
             % format name or records format identifier and false otherwise.
             %
             % Example:
-            % RecordsFormat.isvalid('dense_matrix') is true
-            % RecordsFormat.isvalid(RecordsFormat.DENSE_MATRIX) is true
-            % RecordsFormat.isvalid('not_a_valid_name') is false
+            % RecordsFormat.isValid('dense_matrix') is true
+            % RecordsFormat.isValid(RecordsFormat.DENSE_MATRIX) is true
+            % RecordsFormat.isValid('not_a_valid_name') is false
             %
 
             if ischar(value) || isstring(value)

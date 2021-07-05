@@ -54,11 +54,6 @@ classdef Alias < handle
         aliased_with
     end
 
-    properties (SetAccess = private)
-        % is_valid indicates if symbol is valid
-        is_valid = true
-    end
-
     properties (Hidden, SetAccess = private)
         container
         read_entry
@@ -126,36 +121,40 @@ classdef Alias < handle
             obj.aliased_with = alias;
         end
 
-        function valid = get.is_valid(obj)
-            valid = obj.check(false);
-        end
-
     end
 
     methods
 
-        function valid = check(obj, verbose)
+        function valid = isValid(obj, varargin)
             % Checks correctness of alias
             %
-            % If the function argument is true, this function will print the
-            % reason why the symbol is invalid.
+            % Parameter Arguments:
+            % - verbose: logical
+            %   If true, the reason for an invalid symbol is printed
+            % - force: logical
+            %   If true, forces reevaluation of validity (resets cache)
             %
-            % See also: GAMSTransfer.Alias/is_valid
-            %
+
+            p = inputParser();
+            addParameter(p, 'verbose', false, @islogical);
+            addParameter(p, 'force', false, @islogical);
+            parse(p, varargin{:});
+            verbose = p.Results.verbose;
+            force = p.Results.force;
 
             valid = false;
 
             % check if symbol is actually contained in container
             if ~isfield(obj.container.data, obj.name)
                 if verbose
-                    error('Symbol is not part of its linked container.');
+                    warning('Symbol is not part of its linked container.');
                 end
                 return
             end
 
-            if ~obj.aliased_with.is_valid
+            if ~obj.aliased_with.isValid()
                 if verbose
-                    error('Linked symbol is invalid.');
+                    warning('Linked symbol is invalid.');
                 end
                 return
             end

@@ -63,13 +63,10 @@ classdef Symbol < handle
     end
 
     properties (Dependent, SetAccess = private)
-        % is_valid Indicates if records are stored in a supported format
-        is_valid
-
         % format Format in which records are stored in
         %
-        % If records are changed, this gets reset to 'unknown'. Calling check()
-        % or is_valid will detect the format again.
+        % If records are changed, this gets reset to 'unknown'. Calling isValid()
+        % will detect the format again.
         format
     end
 
@@ -383,14 +380,6 @@ classdef Symbol < handle
             obj.number_records_ = nan;
         end
 
-        function valid = get.is_valid(obj)
-            if isnan(obj.format_)
-                obj.check(false);
-            end
-            valid = obj.format_ ~= GAMSTransfer.RecordsFormat.UNKNOWN && ...
-                obj.format_ ~= GAMSTransfer.RecordsFormat.NOT_READ;
-        end
-
     end
 
     methods
@@ -530,7 +519,7 @@ classdef Symbol < handle
             end
 
             % check records format
-            obj.check(true);
+            obj.isValid('verbose', true);
         end
 
         function transformRecords(obj, target_format)
@@ -553,7 +542,7 @@ classdef Symbol < handle
             end
 
             % check applicability of transform
-            if ~obj.is_valid
+            if ~obj.isValid()
                 error('Symbol records are invalid.');
             end
             switch obj.format_
@@ -754,14 +743,35 @@ classdef Symbol < handle
                 obj.format, p.Results.target_format);
         end
 
-        function valid = check(obj, verbose)
+        function valid = isValid(obj, varargin)
             % Checks correctness of symbol
             %
-            % If the function argument is true, this function will print the
-            % reason why the symbol is invalid.
+            % Parameter Arguments:
+            % - verbose: logical
+            %   If true, the reason for an invalid symbol is printed
+            % - force: logical
+            %   If true, forces reevaluation of validity (resets cache)
             %
-            % See also: GAMSTransfer.Symbol/is_valid
+            % See also: GAMSTransfer.Container/isValid
             %
+
+            p = inputParser();
+            addParameter(p, 'verbose', false, @islogical);
+            addParameter(p, 'force', false, @islogical);
+            parse(p, varargin{:});
+
+            % delete format information
+            if p.Results.force
+                obj.format_ = nan;
+            end
+
+            % check if format is already available
+            if ~isnan(obj.format_) && ...
+                obj.format_ ~= GAMSTransfer.RecordsFormat.UNKNOWN && ...
+                obj.format_ ~= GAMSTransfer.RecordsFormat.NOT_READ
+                valid = true;
+                return
+            end
 
             valid = false;
             obj.format_ = GAMSTransfer.RecordsFormat.UNKNOWN;
@@ -777,8 +787,8 @@ classdef Symbol < handle
                 % Note that format NOT_READ will lead to an invalid symbol
                 if isempty(obj.records) && ~isnan(obj.number_records_) && obj.number_records_ < 0
                     obj.format_ = GAMSTransfer.RecordsFormat.NOT_READ;
-                    if verbose
-                        error('Symbol has not been fully read.');
+                    if p.Results.verbose
+                        warning('Symbol has not been fully read.');
                     end
                     return
                 end
@@ -827,8 +837,8 @@ classdef Symbol < handle
                 valid = true;
             catch e
                 obj.format_ = GAMSTransfer.RecordsFormat.UNKNOWN;
-                if verbose
-                    error(e.message);
+                if p.Results.verbose
+                    warning(e.message);
                 end
             end
 
@@ -863,7 +873,7 @@ classdef Symbol < handle
             if obj.container.indexed
                 error('Getting domain violations not allowed in indexed mode.');
             end
-            if ~obj.is_valid
+            if ~obj.isValid()
                 error('Symbol must be valid in order to get domain violations.');
             end
 
@@ -1196,7 +1206,7 @@ classdef Symbol < handle
                 end
                 return
             end
-            if ~obj.is_valid
+            if ~obj.isValid()
                 nrecs = nan;
                 return
             end
@@ -1243,7 +1253,7 @@ classdef Symbol < handle
             % See also: Symbol.getSparsity
             %
 
-            if ~obj.is_valid
+            if ~obj.isValid()
                 nvals = nan;
                 return
             end
@@ -1283,7 +1293,7 @@ classdef Symbol < handle
             if dim < 1 || dim > obj.dimension
                 error('Given dimension must be within [1,%d].', obj.dimension);
             end
-            if ~obj.is_valid
+            if ~obj.isValid()
                 error('Symbol must be valid in order to get used UELs.');
             end
 

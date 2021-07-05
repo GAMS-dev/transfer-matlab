@@ -58,7 +58,7 @@ function test_addSymbols(t, cfg)
     t.assert(s1.getNumRecords() == 0);
     t.assert(isfield(s1.uels, 'uni_1'));
     t.assert(numel(s1.uels.uni_1) == 0);
-    t.assert(s1.is_valid);
+    t.assert(s1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 's1'));
     if gdx.features.handle_comparison
@@ -86,7 +86,7 @@ function test_addSymbols(t, cfg)
     t.assert(s2.getNumRecords() == 0);
     t.assert(isfield(s2.uels, 's1_1'));
     t.assert(numel(s2.uels.s1_1) == 0);
-    t.assert(s2.is_valid);
+    t.assert(s2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 's2'));
     if gdx.features.handle_comparison
@@ -119,7 +119,7 @@ function test_addSymbols(t, cfg)
     t.assert(isfield(s3.uels, 'uni_2'));
     t.assert(numel(s3.uels.s1_1) == 0);
     t.assert(numel(s3.uels.uni_2) == 0);
-    t.assert(s3.is_valid);
+    t.assert(s3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 's3'));
     if gdx.features.handle_comparison
@@ -147,7 +147,7 @@ function test_addSymbols(t, cfg)
     t.assert(s4.getNumRecords() == 0);
     t.assert(isfield(s4.uels, 's2_1'));
     t.assert(numel(s4.uels.s2_1) == 0);
-    t.assert(s4.is_valid);
+    t.assert(s4.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 4);
     t.assert(isfield(gdx.data, 's4'));
     if gdx.features.handle_comparison
@@ -180,7 +180,7 @@ function test_addSymbols(t, cfg)
     t.assert(isfield(s5.uels, 's2_2'));
     t.assert(numel(s5.uels.s1_1) == 0);
     t.assert(numel(s5.uels.s2_2) == 0);
-    t.assert(s5.is_valid);
+    t.assert(s5.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 5);
     t.assert(isfield(gdx.data, 's5'));
     if gdx.features.handle_comparison
@@ -205,7 +205,7 @@ function test_addSymbols(t, cfg)
     t.assert(s6.getNumRecords() == 0);
     t.assert(isfield(s6.uels, 's1_1'));
     t.assert(numel(s6.uels.s1_1) == 0);
-    t.assert(s6.is_valid);
+    t.assert(s6.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 6);
     t.assert(isfield(gdx.data, 's6'));
     if gdx.features.handle_comparison
@@ -272,7 +272,7 @@ function test_addSymbols(t, cfg)
         t.assert(a1.aliased_with == s1);
     end
     t.assertEquals(a1.aliased_with.name, 's1');
-    t.assert(a1.is_valid);
+    t.assert(a1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 7);
     t.assert(isfield(gdx.data, 'a1'));
     if gdx.features.handle_comparison
@@ -287,7 +287,7 @@ function test_addSymbols(t, cfg)
         t.assert(a2.aliased_with == s1);
     end
     t.assertEquals(a2.aliased_with.name, 's1');
-    t.assert(a2.is_valid);
+    t.assert(a2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 8);
     t.assert(isfield(gdx.data, 'a2'));
     if gdx.features.handle_comparison
@@ -302,7 +302,7 @@ function test_addSymbols(t, cfg)
         t.assert(a3.aliased_with == s1);
     end
     t.assertEquals(a3.aliased_with.name, 's1');
-    t.assert(a3.is_valid);
+    t.assert(a3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 9);
     t.assert(isfield(gdx.data, 'a3'));
     if gdx.features.handle_comparison
@@ -322,7 +322,7 @@ function test_addSymbols(t, cfg)
     t.assert(strcmp(p1.format, 'empty'));
     t.assert(p1.getNumRecords() == 0);
     t.assert(numel(fieldnames(p1.uels)) == 0);
-    t.assert(p1.is_valid);
+    t.assert(p1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 10);
     t.assert(isfield(gdx.data, 'p1'));
     if gdx.features.handle_comparison
@@ -349,7 +349,7 @@ function test_addSymbols(t, cfg)
     t.assert(p2.getNumRecords() == 0);
     t.assert(isfield(p2.uels, 's1_1'));
     t.assert(numel(p2.uels.s1_1) == 0);
-    t.assert(p2.is_valid);
+    t.assert(p2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 11);
     t.assert(isfield(gdx.data, 'p2'));
     if gdx.features.handle_comparison
@@ -386,7 +386,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(p3.uels.s1_1) == 0);
     t.assert(numel(p3.uels.uni_2) == 0);
     t.assert(numel(p3.uels.s2_3) == 0);
-    t.assert(p3.is_valid);
+    t.assert(p3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 12);
     t.assert(isfield(gdx.data, 'p3'));
     if gdx.features.handle_comparison
@@ -453,7 +453,7 @@ function test_addSymbols(t, cfg)
     t.assert(strcmp(v1.format, 'empty'));
     t.assert(v1.getNumRecords() == 0);
     t.assert(numel(fieldnames(v1.uels)) == 0);
-    t.assert(v1.is_valid);
+    t.assert(v1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 13);
     t.assert(isfield(gdx.data, 'v1'));
     if gdx.features.handle_comparison
@@ -474,7 +474,7 @@ function test_addSymbols(t, cfg)
     t.assert(strcmp(v2.format, 'empty'));
     t.assert(v2.getNumRecords() == 0);
     t.assert(numel(fieldnames(v2.uels)) == 0);
-    t.assert(v2.is_valid);
+    t.assert(v2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 14);
     t.assert(isfield(gdx.data, 'v2'));
     if gdx.features.handle_comparison
@@ -507,7 +507,7 @@ function test_addSymbols(t, cfg)
     t.assert(isfield(v3.uels, 'uni_2'));
     t.assert(numel(v3.uels.s1_1) == 0);
     t.assert(numel(v3.uels.uni_2) == 0);
-    t.assert(v3.is_valid);
+    t.assert(v3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 15);
     t.assert(isfield(gdx.data, 'v3'));
     if gdx.features.handle_comparison
@@ -620,7 +620,7 @@ function test_addSymbols(t, cfg)
     t.assert(strcmp(e1.format, 'empty'));
     t.assert(e1.getNumRecords() == 0);
     t.assert(numel(fieldnames(e1.uels)) == 0);
-    t.assert(e1.is_valid);
+    t.assert(e1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 34);
     t.assert(isfield(gdx.data, 'e1'));
     if gdx.features.handle_comparison
@@ -641,7 +641,7 @@ function test_addSymbols(t, cfg)
     t.assert(strcmp(e2.format, 'empty'));
     t.assert(e2.getNumRecords() == 0);
     t.assert(numel(fieldnames(e2.uels)) == 0);
-    t.assert(e2.is_valid);
+    t.assert(e2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 35);
     t.assert(isfield(gdx.data, 'e2'));
     if gdx.features.handle_comparison
@@ -674,7 +674,7 @@ function test_addSymbols(t, cfg)
     t.assert(isfield(e3.uels, 'uni_2'));
     t.assert(numel(e3.uels.s1_1) == 0);
     t.assert(numel(e3.uels.uni_2) == 0);
-    t.assert(e3.is_valid);
+    t.assert(e3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 36);
     t.assert(isfield(gdx.data, 'e3'));
     if gdx.features.handle_comparison
@@ -900,7 +900,7 @@ function test_changeSymbol(t, cfg)
         t.assertEquals(x3.domain{1}, i2);
     end
     t.assertEquals(x3.domain{1}.name, 'i2');
-    t.assert(x3.is_valid);
+    t.assert(x3.isValid());
     x3.dimension = 2;
     t.assert(x3.dimension == 2);
     t.assert(numel(x3.domain) == 2);
@@ -909,7 +909,7 @@ function test_changeSymbol(t, cfg)
     end
     t.assertEquals(x3.domain{1}.name, 'i2');
     t.assertEquals(x3.domain{2}, '*');
-    t.assert(~x3.is_valid);
+    t.assert(~x3.isValid());
     x3.dimension = 1;
     t.assert(x3.dimension == 1);
     t.assert(numel(x3.domain) == 1);
@@ -917,7 +917,7 @@ function test_changeSymbol(t, cfg)
         t.assertEquals(x3.domain{1}, i2);
     end
     t.assertEquals(x3.domain{1}.name, 'i2');
-    t.assert(x3.is_valid);
+    t.assert(x3.isValid());
 
     t.add('change_symbol_domain');
     t.assert(numel(x1.domain) == 1);
@@ -981,20 +981,6 @@ function test_changeSymbol(t, cfg)
     t.add('change_symbol_format');
     try
         x1.format = 'struct';
-        t.assert(false);
-    catch e
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            msg_end = 'has private access and cannot be set in this context';
-            t.assertEquals(e.message(end-numel(msg_end)+1:end), msg_end);
-        else
-            msg_begin = 'You cannot set the read-only property';
-            t.assertEquals(e.message(1:numel(msg_begin)), msg_begin);
-        end
-    end
-
-    t.add('change_symbol_is_valid');
-    try
-        x1.is_valid = false;
         t.assert(false);
     catch e
         if exist('OCTAVE_VERSION', 'builtin') > 0
@@ -1118,10 +1104,10 @@ function test_domainViolation(t, cfg);
     a3.records = struct('i2_1', [1;2], 'value', [1;2]);
 
     t.add('domain_violation_1');
-    t.assert(i1.is_valid);
-    t.assert(a1.is_valid);
-    t.assert(a2.is_valid);
-    t.assert(a3.is_valid);
+    t.assert(i1.isValid());
+    t.assert(a1.isValid());
+    t.assert(a2.isValid());
+    t.assert(a3.isValid());
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 3);
     t.assert(isa(domviol{1}, 'GAMSTransfer.DomainViolation'));
@@ -1173,10 +1159,10 @@ function test_domainViolation(t, cfg);
     t.assert(elems{5} == 'i0');
     t.assert(elems{6} == 'i5');
     t.assert(elems{7} == 'i7');
-    t.assert(i1.is_valid);
-    t.assert(a1.is_valid);
-    t.assert(a2.is_valid);
-    t.assert(a3.is_valid);
+    t.assert(i1.isValid());
+    t.assert(a1.isValid());
+    t.assert(a2.isValid());
+    t.assert(a3.isValid());
 
 end
 
@@ -1206,7 +1192,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(s1.uels, 'i_1'));
     t.assert(numel(s1.uels.i_1) == 1);
     t.assertEquals(s1.uels.i_1{1}, 'test');
-    t.assert(s1.is_valid);
+    t.assert(s1.isValid());
 
     t.add('set_records_string_2');
     try
@@ -1240,7 +1226,7 @@ function test_setRecords(t, cfg)
     t.assertEquals(s1.uels.i_1{1}, 'test1');
     t.assertEquals(s1.uels.i_1{2}, 'test2');
     t.assertEquals(s1.uels.i_1{3}, 'test3');
-    t.assert(s1.is_valid);
+    t.assert(s1.isValid());
 
     t.add('set_records_cellstr_2');
     try
@@ -1287,7 +1273,7 @@ function test_setRecords(t, cfg)
     t.assertEquals(s2.uels.uni_2{1}, 'test21');
     t.assertEquals(s2.uels.uni_2{2}, 'test22');
     t.assertEquals(s2.uels.uni_2{3}, 'test23');
-    t.assert(s2.is_valid);
+    t.assert(s2.isValid());
 
     gdx.data.i1.setRecords({'i1', 'i2', 'i3', 'i4'});
 
@@ -1311,7 +1297,7 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(2) == 2);
     t.assert(s3.records.level(3) == 3);
     t.assert(s3.records.level(4) == 4);
-    t.assert(s3.is_valid);
+    t.assert(s3.isValid());
 
     t.add('set_records_numeric_3');
     s3.setRecords(sparse([1; 0; 0; 4]));
@@ -1325,7 +1311,7 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(3) == 0);
     t.assert(s3.records.level(4) == 4);
     t.assert(nnz(s3.records.level) == 2);
-    t.assert(s3.is_valid);
+    t.assert(s3.isValid());
 
     t.add('set_records_numeric_4');
     try
@@ -1347,7 +1333,7 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(2) == 2);
     t.assert(s3.records.level(3) == 3);
     t.assert(s3.records.level(4) == 4);
-    t.assert(s3.is_valid);
+    t.assert(s3.isValid());
 
     t.add('set_records_cell_2');
     s3.setRecords({{'i1', 'i4'}, [1; 4]});
@@ -1369,7 +1355,7 @@ function test_setRecords(t, cfg)
     t.assertEquals(s3.uels.i1_1{2}, 'i4');
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
-    t.assert(s3.is_valid);
+    t.assert(s3.isValid());
 
     t.add('set_records_cell_3');
     s3.setRecords({[1; 4], {'i1', 'i4'}, [11; 44]});
@@ -1395,7 +1381,7 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(2) == 4);
     t.assert(s3.records.marginal(1) == 11);
     t.assert(s3.records.marginal(2) == 44);
-    t.assert(s3.is_valid);
+    t.assert(s3.isValid());
 
     t.add('set_records_cell_4');
     s3.setRecords({[1; 4], {'i1', 'i4'}, [11; 44], [111; 444], [1111; 4444], [11111; 44444]});
@@ -1433,16 +1419,14 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.upper(2) == 4444);
     t.assert(s3.records.scale(1) == 11111);
     t.assert(s3.records.scale(2) == 44444);
-    t.assert(s3.is_valid);
+    t.assert(s3.isValid());
 
     t.add('set_records_cell_5');
-    try
-        t.assert(false);
-        s2.setRecords({{'i1', 'i4'}, [1; 4]});
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain ''uni_2'' is missing.');
-    end
+    warning('off')
+    s2.setRecords({{'i1', 'i4'}, [1; 4]});
+    t.assert(~s2.isValid());
+    t.assertEquals(lastwarn(), 'Domain ''uni_2'' is missing.');
+    warning('on')
 
     t.add('set_records_cell_6');
     try
@@ -1473,7 +1457,7 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(2) == 2);
     t.assert(s3.records.level(3) == 3);
     t.assert(s3.records.level(4) == 4);
-    t.assert(s3.is_valid);
+    t.assert(s3.isValid());
 
     t.add('set_records_struct_2');
     s3.setRecords(struct('marginal', [1; 2; 3; 4]));
@@ -1486,7 +1470,7 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.marginal(2) == 2);
     t.assert(s3.records.marginal(3) == 3);
     t.assert(s3.records.marginal(4) == 4);
-    t.assert(s3.is_valid);
+    t.assert(s3.isValid());
 
     t.add('set_records_struct_3');
     try
@@ -1520,7 +1504,7 @@ function test_setRecords(t, cfg)
     t.assertEquals(s3.uels.i1_1{2}, 'i4');
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
-    t.assert(s3.is_valid);
+    t.assert(s3.isValid());
 
     t.add('set_records_struct_5');
     recs = struct();
@@ -1546,7 +1530,7 @@ function test_setRecords(t, cfg)
     t.assertEquals(s3.uels.i1_1{2}, 'i4');
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
-    t.assert(s3.is_valid);
+    t.assert(s3.isValid());
 
     t.add('set_records_struct_6');
     recs = struct();
@@ -1571,19 +1555,17 @@ function test_setRecords(t, cfg)
     t.assertEquals(s3.uels.i1_1{2}, 'i4');
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
-    t.assert(s3.is_valid);
+    t.assert(s3.isValid());
 
     t.add('set_records_struct_7');
     recs = struct();
     recs.i1_1 = {'i1', 'i4'};
     recs.level = [1];
-    try
-        t.assert(false);
-        s3.setRecords(recs);
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Fields need to match matrix format or to be of same length');
-    end
+    warning('off')
+    s3.setRecords(recs);
+    t.assert(~s3.isValid());
+    t.assertEquals(lastwarn(), 'Fields need to match matrix format or to be of same length');
+    warning('on')
 
     t.add('set_records_struct_8');
     s3.setRecords(struct('level', [1, 2, 3, 4]));
@@ -1596,33 +1578,29 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(2) == 2);
     t.assert(s3.records.level(3) == 3);
     t.assert(s3.records.level(4) == 4);
-    t.assert(s3.is_valid);
+    t.assert(s3.isValid());
 
     t.add('set_records_struct_9');
-    try
-        t.assert(false);
-        s3.setRecords(struct('level', [1, 2, 3]));
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain ''i1_1'' is missing.');
-    end
+    warning('off')
+    s3.setRecords(struct('level', [1, 2, 3]));
+    t.assert(~s3.isValid());
+    t.assertEquals(lastwarn(), 'Domain ''i1_1'' is missing.');
+    warning('on')
 
     if gdx.features.table
         t.add('set_records_table_1');
         tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
-        try
-            t.assert(false);
-            s3.setRecords(tbl);
-        catch e
-            t.reset();
-        end
+        warning('off')
+        s3.setRecords(tbl);
+        t.assert(~s3.isValid());
+        warning('on')
 
         t.add('set_records_table_2');
         tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
         tbl.Properties.VariableNames = {'i1_1', 'level'};
         s3.setRecords(tbl);
         t.assertEquals(s3.format, 'table');
-        t.assert(s3.is_valid);
+        t.assert(s3.isValid());
     end
 end
 
@@ -1700,13 +1678,10 @@ function test_reorder(t, cfg)
     t.assertEquals(fields{2}, 's2');
     t.assertEquals(fields{3}, 's3');
     t.assertEquals(fields{4}, 's4');
-    try
-        t.assert(false);
-        s3.check(true);
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain set ''s4'' is out of order: Try calling reorder().');
-    end
+    warning('off')
+    s3.isValid('verbose', true);
+    t.assertEquals(lastwarn(), 'Domain set ''s4'' is out of order: Try calling reorder().');
+    warning('on')
 
     gdx.reorder();
 
@@ -1815,11 +1790,11 @@ function test_transformRecords(t, cfg)
             gdx.data.a.transformRecords(formats{j});
             gdx.data.b.transformRecords(formats{j});
             gdx.data.x.transformRecords(formats{j});
-            t.assert(gdx.data.i.is_valid);
-            t.assert(gdx.data.j.is_valid);
-            t.assert(gdx.data.a.is_valid);
-            t.assert(gdx.data.b.is_valid);
-            t.assert(gdx.data.x.is_valid);
+            t.assert(gdx.data.i.isValid());
+            t.assert(gdx.data.j.isValid());
+            t.assert(gdx.data.a.isValid());
+            t.assert(gdx.data.b.isValid());
+            t.assert(gdx.data.x.isValid());
             if strcmp(formats{j}, 'dense_matrix') || strcmp(formats{j}, 'sparse_matrix')
                 t.assertEquals(gdx.data.i.format, i_format{i});
                 t.assertEquals(gdx.data.j.format, j_format{i});
