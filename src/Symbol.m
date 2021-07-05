@@ -611,24 +611,6 @@ classdef Symbol < handle
             obj.check(true);
         end
 
-        function def = getDefaultValues(obj)
-            % Returns default values for given symbol type (incl. sub type)
-            %
-            % Different GAMS symbols have different default values for level,
-            % marginal, lower, upper and scale. This function returns a vector
-            % of length 5 with these default values.
-            %
-            % Example:
-            % c = Container();
-            % v = Variable(c, 'v', 'binary');
-            % v.getDefaultValues() equals [0, 0, 0, 1, 1]
-            % p = Parameter(c, 'p');
-            % p.getDefaultValues() equals [0, NaN, NaN, NaN, NaN]
-            %
-
-            def = GAMSTransfer.gt_get_defaults(obj);
-        end
-
         function transformRecords(obj, target_format)
             % Transforms symbol records into given format
             %
@@ -641,7 +623,12 @@ classdef Symbol < handle
             parse(p, target_format);
             target_format = GAMSTransfer.RecordsFormat.str2int(p.Results.target_format);
 
-            def_values = obj.getDefaultValues();
+            try
+                def_values = obj.getDefaultValues();
+            catch
+                def_values = GAMSTransfer.SpecialValues.NA * ones(1, 5);
+                def_values(1) = 0;
+            end
 
             % check applicability of transform
             if ~obj.is_valid

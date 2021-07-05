@@ -180,4 +180,24 @@ classdef Variable < GAMSTransfer.Symbol
 
     end
 
+    methods
+
+        function def = getDefaultValues(obj)
+            % Returns default values for given symbol type (incl. sub type)
+            %
+            % Different GAMS symbols have different default values for level,
+            % marginal, lower, upper and scale. This function returns a vector
+            % of length 5 with these default values.
+            %
+            % Example:
+            % c = Container();
+            % v = Variable(c, 'v', 'binary');
+            % v.getDefaultValues() equals [0, 0, 0, 1, 1]
+            %
+
+            def = GAMSTransfer.gt_get_defaults(obj);
+        end
+
+    end
+
 end
