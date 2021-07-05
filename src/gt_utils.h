@@ -87,6 +87,7 @@ double gt_utils_sv_matlab2gams(
 void gt_utils_type_default_values(
     int             type,           /** GDX symbol type */
     int             subtype,        /** GDX symbol subtype */
+    bool            sv_matlab,      /** special values in Matlab form? */
     double*         def_values      /** array of default values (size: GMS_VAL_MAX) */
 );
 

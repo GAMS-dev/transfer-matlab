@@ -199,7 +199,7 @@ void mexFunction(
     }
 
     /* get default values dependent on type */
-    gt_utils_type_default_values(type, subtype, def_values);
+    gt_utils_type_default_values(type, subtype, true, def_values);
 
     /* create format dependent data (e.g. number of nonzeros, domain fields) */
     switch (format)

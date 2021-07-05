@@ -189,6 +189,7 @@ double gt_utils_sv_matlab2gams(
 void gt_utils_type_default_values(
     int             type,           /** GDX symbol type */
     int             subtype,        /** GDX symbol subtype */
+    bool            sv_matlab,      /** special values in Matlab form? */
     double*         def_values      /** array of default values (size: GMS_VAL_MAX) */
 )
 {
@@ -213,15 +214,9 @@ void gt_utils_type_default_values(
         i++;
     }
 
-    for (size_t j = 0; j < GMS_VAL_MAX; j++)
-    {
-        if (def_values[j] == GMS_SV_MINF)
-            def_values[j] = -mxGetInf();
-        else if (def_values[j] == GMS_SV_PINF)
-            def_values[j] = mxGetInf();
-        else if (def_values[j] == GMS_SV_NA)
-            def_values[j] = gt_utils_getna();
-    }
+    if (sv_matlab)
+        for (size_t i = 0; i < GMS_VAL_MAX; i++)
+            def_values[i] = gt_utils_sv_gams2matlab(def_values[i]);
 }
 
 void gt_utils_count_2d_rowmajor_nnz(

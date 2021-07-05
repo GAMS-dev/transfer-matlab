@@ -123,7 +123,7 @@ void mexFunction(
         mx_dom_nrecs[i] = gdx_uel_index[i];
 
     /* get default values dependent on type */
-    gt_utils_type_default_values(GMS_DT_PAR, 0, def_values);
+    gt_utils_type_default_values(GMS_DT_PAR, 0, true, def_values);
 
     /* create format dependent data (e.g. number of nonzeros, domain fields) */
     switch (format)

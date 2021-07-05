@@ -92,6 +92,16 @@ void mexFunction(
 
     for (int i = 0; i < mxGetNumberOfFields(prhs[2]); i++)
     {
+        /* reset pointers */
+        for (size_t j = 0; j < GMS_VAL_MAX; j++)
+        {
+            mx_rows[j] = NULL;
+            mx_cols[j] = NULL;
+            col_nnz[j] = NULL;
+            mx_values[j] = NULL;
+            mx_arr_values[j] = NULL;
+        }
+
         /* get data field */
         mx_arr_data = mxGetFieldByNumber(prhs[2], 0, i);
         data_name = (char*) mxGetFieldNameByNumber(prhs[2], i);
@@ -162,7 +172,7 @@ void mexFunction(
         /* get domain and value fields of record field */
         gt_mex_get_records(data_name, dim, false, mx_arr_records, mx_arr_values,
             mx_values, mx_arr_domains, mx_domains, NULL, (const char**) domain_labels_ptr);
-        gt_utils_type_default_values(type, subtype, def_values);
+        gt_utils_type_default_values(type, subtype, false, def_values);
 
         /* get number of records */
         nrecs = 0;

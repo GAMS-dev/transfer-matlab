@@ -89,5 +89,5 @@ void mexFunction(
     }
 
     /* get defaults */
-    gt_utils_type_default_values(type, subtype, mx_defaults);
+    gt_utils_type_default_values(type, subtype, true, mx_defaults);
 }
