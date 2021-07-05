@@ -46,6 +46,8 @@ function gams_transfer_test(varargin)
     mkdir(p.Results.working_dir)
     olddir = cd(p.Results.working_dir);
 
+    tic;
+
     try
         % test data
         cfg = struct();
@@ -71,6 +73,8 @@ function gams_transfer_test(varargin)
         rmpath(fullfile(current_dir, 'src'));
         rethrow(e);
     end
+
+    toc;
 end
 
 function gdx_filenames = gams_transfer_test_create_gdx(working_dir)

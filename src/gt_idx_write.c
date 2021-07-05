@@ -270,7 +270,7 @@ void mexFunction(
                     if (empty_rec)
                         continue;
                     if (!idxDataWrite(gdx, gdx_uel_index, gdx_values[GMS_VAL_LEVEL]))
-                        gt_gdx_write_record_error(gdx, name, dim, gdx_uel_index);
+                        gt_idx_write_record_error(gdx, name, dim, gdx_uel_index);
                 }
                 break;
 
@@ -315,7 +315,7 @@ void mexFunction(
 
                         /* write values */
                         if (!idxDataWrite(gdx, gdx_uel_index, gdx_values[GMS_VAL_LEVEL]))
-                            gt_gdx_write_record_error(gdx, name, dim, gdx_uel_index);
+                            gt_idx_write_record_error(gdx, name, dim, gdx_uel_index);
                     }
                 }
 

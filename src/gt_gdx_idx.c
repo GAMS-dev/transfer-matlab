@@ -27,6 +27,7 @@
 #include "mex.h"
 
 #include <string.h>
+#include <stdio.h>
 
 #define ERRID "GAMSTransfer:gt_gdx_idx:"
 
@@ -275,6 +276,6 @@ void gt_idx_write_record_error(
     char gdx_err_msg[GMS_SSSIZE], rec_name[GMS_SSSIZE];
 
     idxErrorStr(gdx, idxGetLastError(gdx), gdx_err_msg, GMS_SSSIZE);
-    gt_gdx_get_record_name(gdx, name, dim, false, uel_indices, rec_name);
+    gt_gdx_get_record_name(NULL, name, dim, false, uel_indices, rec_name);
     mexErrMsgIdAndTxt(ERRID"idxDataWriteRaw", "GDX error in record %s: %s", rec_name, gdx_err_msg);
 }
