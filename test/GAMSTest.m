@@ -110,13 +110,13 @@ classdef GAMSTest < handle
                 obj.assert(ischar(symbol.domain_info));
                 obj.assert(isnumeric(symbol.size));
                 obj.assert(numel(symbol.size) == symbol.dimension);
-                obj.assert(ischar(symbol.format));
-                obj.assert(strcmp(symbol.format, 'not_read') || strcmp(symbol.format, 'empty'));
                 obj.assert(symbol.getNumRecords() >= 0);
                 obj.assert(symbol.getNumValues() == 0 || isnan(symbol.getNumValues()));
                 obj.assert(isempty(symbol.records));
                 obj.assert(isstruct(symbol.uels));
                 obj.assert(islogical(symbol.is_valid));
+                obj.assert(ischar(symbol.format));
+                obj.assert(strcmp(symbol.format, 'not_read') || strcmp(symbol.format, 'empty'));
             case 'GAMSTransfer.Alias'
                 obj.assert(ischar(symbol.name));
                 obj.assert(isa(symbol.aliased_with, 'GAMSTransfer.Set'));

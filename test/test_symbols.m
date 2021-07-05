@@ -1815,6 +1815,11 @@ function test_transformRecords(t, cfg)
             gdx.data.a.transformRecords(formats{j});
             gdx.data.b.transformRecords(formats{j});
             gdx.data.x.transformRecords(formats{j});
+            t.assert(gdx.data.i.is_valid);
+            t.assert(gdx.data.j.is_valid);
+            t.assert(gdx.data.a.is_valid);
+            t.assert(gdx.data.b.is_valid);
+            t.assert(gdx.data.x.is_valid);
             if strcmp(formats{j}, 'dense_matrix') || strcmp(formats{j}, 'sparse_matrix')
                 t.assertEquals(gdx.data.i.format, i_format{i});
                 t.assertEquals(gdx.data.j.format, j_format{i});

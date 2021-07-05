@@ -179,6 +179,7 @@ function test_trnsport(cfg)
         t.assertEquals(i.domain_info, 'regular');
         t.assert(numel(i.size) == 1);
         t.assert(isnan(i.size));
+        t.assert(i.is_valid);
         t.assertEquals(i.format, 'struct');
         t.assert(i.getNumRecords() == 2);
         t.assert(isstruct(i.records));
@@ -198,7 +199,6 @@ function test_trnsport(cfg)
         t.assert(numel(i.uels.uni_1) == 2);
         t.assertEquals(i.uels.uni_1{1}, 'seattle');
         t.assertEquals(i.uels.uni_1{2}, 'san-diego');
-        t.assert(i.is_valid);
 
         t.add(sprintf('test_trnsport_symbol_j_%d', k));
         t.assert(isa(j, 'GAMSTransfer.Set'));
@@ -213,6 +213,7 @@ function test_trnsport(cfg)
         t.assertEquals(j.domain_info, 'regular');
         t.assert(numel(j.size) == 1);
         t.assert(isnan(j.size));
+        t.assert(j.is_valid);
         t.assertEquals(j.format, 'struct');
         t.assert(j.getNumRecords() == 3);
         t.assert(isstruct(j.records));
@@ -235,7 +236,6 @@ function test_trnsport(cfg)
         t.assertEquals(j.uels.uni_1{1}, 'new-york');
         t.assertEquals(j.uels.uni_1{2}, 'chicago');
         t.assertEquals(j.uels.uni_1{3}, 'topeka');
-        t.assert(j.is_valid);
 
         t.add(sprintf('test_trnsport_symbol_a_%d', k));
         t.assert(isa(a, 'GAMSTransfer.Parameter'));
@@ -252,6 +252,7 @@ function test_trnsport(cfg)
         t.assertEquals(a.domain_info, 'regular');
         t.assert(numel(a.size) == 1);
         t.assert(a.size == 2);
+        t.assert(a.is_valid);
         t.assertEquals(a.format, 'dense_matrix');
         t.assert(isnan(a.getNumRecords()));
         t.assert(a.getNumValues() == 2);
@@ -267,7 +268,6 @@ function test_trnsport(cfg)
         t.assert(numel(a.uels.i_1) == 2);
         t.assertEquals(a.uels.i_1{1}, 'seattle');
         t.assertEquals(a.uels.i_1{2}, 'san-diego');
-        t.assert(a.is_valid);
 
         t.add(sprintf('test_trnsport_symbol_b_%d', k));
         t.assert(isa(b, 'GAMSTransfer.Parameter'));
@@ -284,6 +284,7 @@ function test_trnsport(cfg)
         t.assertEquals(b.domain_info, 'regular');
         t.assert(numel(b.size) == 1);
         t.assert(b.size == 3);
+        t.assert(b.is_valid);
         t.assertEquals(b.format, 'dense_matrix');
         t.assert(isnan(b.getNumRecords()));
         t.assert(b.getNumValues() == 3);
@@ -301,7 +302,6 @@ function test_trnsport(cfg)
         t.assertEquals(b.uels.j_1{1}, 'new-york');
         t.assertEquals(b.uels.j_1{2}, 'chicago');
         t.assertEquals(b.uels.j_1{3}, 'topeka');
-        t.assert(b.is_valid);
 
         t.add(sprintf('test_trnsport_symbol_d_%d', k));
         t.assert(isa(d, 'GAMSTransfer.Parameter'));
@@ -321,6 +321,7 @@ function test_trnsport(cfg)
         t.assertEquals(d.domain_info, 'regular');
         t.assert(numel(d.size) == 2);
         t.assert(all(d.size == [2,3]));
+        t.assert(d.is_valid);
         t.assertEquals(d.format, 'dense_matrix');
         t.assert(isnan(d.getNumRecords()));
         t.assert(d.getNumValues() == 6);
@@ -345,7 +346,6 @@ function test_trnsport(cfg)
         t.assertEquals(d.uels.j_2{1}, 'new-york');
         t.assertEquals(d.uels.j_2{2}, 'chicago');
         t.assertEquals(d.uels.j_2{3}, 'topeka');
-        t.assert(d.is_valid);
 
         t.add(sprintf('test_trnsport_symbol_f_%d', k));
         t.assert(isa(f, 'GAMSTransfer.Parameter'));
@@ -356,6 +356,7 @@ function test_trnsport(cfg)
         t.assert(numel(f.domain_label) == 0);
         t.assertEquals(f.domain_info, 'regular');
         t.assert(numel(f.size) == 0);
+        t.assert(f.is_valid);
         t.assertEquals(f.format, 'struct');
         t.assert(f.getNumRecords() == 1);
         t.assert(f.getNumValues() == 1);
@@ -366,7 +367,6 @@ function test_trnsport(cfg)
         t.assert(f.records.value(1) == 90);
         t.assert(isstruct(f.uels));
         t.assert(numel(fieldnames(f.uels)) == 0);
-        t.assert(f.is_valid);
 
         t.add(sprintf('test_trnsport_symbol_c_%d', k));
         t.assert(isa(c, 'GAMSTransfer.Parameter'));
@@ -386,6 +386,7 @@ function test_trnsport(cfg)
         t.assertEquals(c.domain_info, 'regular');
         t.assert(numel(c.size) == 2);
         t.assert(all(c.size == [2,3]));
+        t.assert(c.is_valid);
         t.assertEquals(c.format, 'dense_matrix');
         t.assert(isnan(c.getNumRecords()));
         t.assert(c.getNumValues() == 6);
@@ -410,7 +411,6 @@ function test_trnsport(cfg)
         t.assertEquals(c.uels.j_2{1}, 'new-york');
         t.assertEquals(c.uels.j_2{2}, 'chicago');
         t.assertEquals(c.uels.j_2{3}, 'topeka');
-        t.assert(c.is_valid);
 
         t.add(sprintf('test_trnsport_symbol_x_%d', k));
         t.assert(isa(x, 'GAMSTransfer.Variable'));
@@ -430,6 +430,7 @@ function test_trnsport(cfg)
         t.assertEquals(x.domain_info, 'regular');
         t.assert(numel(x.size) == 2);
         t.assert(all(x.size == [2,3]));
+        t.assert(x.is_valid);
         t.assertEquals(x.format, 'dense_matrix');
         t.assert(isnan(x.getNumRecords()));
         t.assert(x.getNumValues() == 12);
@@ -462,7 +463,6 @@ function test_trnsport(cfg)
         t.assertEquals(x.uels.j_2{1}, 'new-york');
         t.assertEquals(x.uels.j_2{2}, 'chicago');
         t.assertEquals(x.uels.j_2{3}, 'topeka');
-        t.assert(x.is_valid);
 
         t.add(sprintf('test_trnsport_symbol_z_%d', k));
         t.assert(isa(z, 'GAMSTransfer.Variable'));
@@ -473,6 +473,7 @@ function test_trnsport(cfg)
         t.assert(numel(z.domain_label) == 0);
         t.assertEquals(z.domain_info, 'regular');
         t.assert(numel(z.size) == 0);
+        t.assert(z.is_valid);
         t.assertEquals(z.format, 'struct');
         t.assert(z.getNumRecords() == 1);
         t.assert(z.getNumValues() == 1);
@@ -483,7 +484,6 @@ function test_trnsport(cfg)
         t.assert(z.records.level(1) == 153.675);
         t.assert(isstruct(z.uels));
         t.assert(numel(fieldnames(z.uels)) == 0);
-        t.assert(z.is_valid);
 
         t.add(sprintf('test_trnsport_symbol_cost_%d', k));
         t.assert(isa(cost, 'GAMSTransfer.Equation'));
@@ -494,6 +494,7 @@ function test_trnsport(cfg)
         t.assert(numel(cost.domain_label) == 0);
         t.assertEquals(cost.domain_info, 'regular');
         t.assert(numel(cost.size) == 0);
+        t.assert(cost.is_valid);
         t.assertEquals(cost.format, 'struct');
         t.assert(cost.getNumRecords() == 1);
         t.assert(cost.getNumValues() == 4);
@@ -513,7 +514,6 @@ function test_trnsport(cfg)
         t.assert(cost.records.upper(1) == 0);
         t.assert(isstruct(cost.uels));
         t.assert(numel(fieldnames(cost.uels)) == 0);
-        t.assert(cost.is_valid);
 
         t.add(sprintf('test_trnsport_symbol_supply_%d', k));
         t.assert(isa(supply, 'GAMSTransfer.Equation'));
@@ -530,6 +530,7 @@ function test_trnsport(cfg)
         t.assertEquals(supply.domain_info, 'regular');
         t.assert(numel(supply.size) == 1);
         t.assert(supply.size == 2);
+        t.assert(supply.is_valid);
         t.assertEquals(supply.format, 'dense_matrix');
         t.assert(isnan(supply.getNumRecords()));
         t.assert(supply.getNumValues() == 6);
@@ -553,7 +554,6 @@ function test_trnsport(cfg)
         t.assert(numel(supply.uels.i_1) == 2);
         t.assertEquals(supply.uels.i_1{1}, 'seattle');
         t.assertEquals(supply.uels.i_1{2}, 'san-diego');
-        t.assert(supply.is_valid);
 
         t.add(sprintf('test_trnsport_symbol_demand_%d', k));
         t.assert(isa(demand, 'GAMSTransfer.Equation'));
@@ -570,6 +570,7 @@ function test_trnsport(cfg)
         t.assertEquals(demand.domain_info, 'regular');
         t.assert(numel(demand.size) == 1);
         t.assert(demand.size == 3);
+        t.assert(demand.is_valid);
         t.assertEquals(demand.format, 'dense_matrix');
         t.assert(isnan(demand.getNumRecords()));
         t.assert(demand.getNumValues() == 9);
@@ -597,7 +598,6 @@ function test_trnsport(cfg)
         t.assertEquals(demand.uels.j_1{1}, 'new-york');
         t.assertEquals(demand.uels.j_1{2}, 'chicago');
         t.assertEquals(demand.uels.j_1{3}, 'topeka');
-        t.assert(demand.is_valid);
 
         if k == 1
             m.write(fullfile(cfg.working_dir, 'write_trnsport_1.gdx'));

@@ -50,9 +50,6 @@ classdef Symbol < handle
 
         % domain_info Specifies if domains are stored 'relaxed' or 'regular'
         domain_info
-
-        % format Format in which records are stored in (e.g. struct or dense_matrix)
-        format
     end
 
     properties
@@ -68,6 +65,12 @@ classdef Symbol < handle
     properties (Dependent, SetAccess = private)
         % is_valid Indicates if records are stored in a supported format
         is_valid
+
+        % format Format in which records are stored in
+        %
+        % If records are changed, this gets reset to 'unknown'. Calling check()
+        % or is_valid will detect the format again.
+        format
     end
 
     properties (Hidden, SetAccess = private)
@@ -116,7 +119,12 @@ classdef Symbol < handle
 
             % a negative number_records signals that we store the number of
             % records of the GDX file
-            obj.number_records_ = -read_number_records-1;
+            if ~isnan(read_number_records)
+                obj.number_records_ = -read_number_records-1;
+                obj.format_ = GAMSTransfer.RecordsFormat.NOT_READ;
+            else
+                obj.number_records_ = nan;
+            end
 
             % add symbol to container
             obj.container.add(obj);
@@ -305,9 +313,6 @@ classdef Symbol < handle
         end
 
         function form = get.format(obj)
-            if isnan(obj.format_)
-                obj.check(false);
-            end
             form = GAMSTransfer.RecordsFormat.int2str(obj.format_);
         end
 

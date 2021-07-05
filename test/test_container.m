@@ -577,9 +577,11 @@ function test_describe(t, cfg)
             t.assertEquals(tbl{1,'domain'}, '[]');
             t.assertEquals(tbl{1,'size'}, '[]');
             switch i
-            case {1,2,3}
+            case {1,3}
+                t.assert(tbl{1,'num_recs'} == 1 || isnan(tbl{1,'num_recs'}));
+            case 2
                 t.assert(tbl{1,'num_recs'} == 1);
-            case 4
+            case {3,4}
                 t.assert(isnan(tbl{1,'num_recs'}));
             end
             t.assert(tbl{1,'num_vals'} == 1);
@@ -1055,7 +1057,9 @@ function test_idx_describe(t, cfg)
             t.assertEquals(tbl{1,'domain'}, '[]');
             t.assertEquals(tbl{1,'size'}, '[]');
             switch i
-            case {1,2,3}
+            case {1,3}
+                t.assert(tbl{1,'num_recs'} == 1 || isnan(tbl{1,'num_recs'}));
+            case 2
                 t.assert(tbl{1,'num_recs'} == 1);
             case 4
                 t.assert(isnan(tbl{1,'num_recs'}));

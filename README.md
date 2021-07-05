@@ -98,20 +98,18 @@ x =
 
   Variable with properties:
 
-              name: 'x'
-       description: 'shipment quantities in cases'
-              type: 'positive'
-         dimension: 2
-              size: [2 3]
-            domain: {[1×1 GAMSTransfer.Set]  [1×1 GAMSTransfer.Set]}
-      domain_label: {'i_1'  'j_2'}
-       domain_info: 'regular'
-            format: 'table'
-    number_records: 6
-     number_values: 12
-           records: [6×4 table]
-              uels: [1×1 struct]
-          is_valid: 1
+            name: 'x'
+     description: 'shipment quantities in cases'
+            type: 'positive'
+       dimension: 2
+            size: [2 3]
+          domain: {[1×1 GAMSTransfer.Set]  [1×1 GAMSTransfer.Set]}
+    domain_label: {'i_1'  'j_2'}
+     domain_info: 'regular'
+         records: [6×4 table]
+            uels: [1×1 struct]
+        is_valid: 1
+          format: 'table'
 
 >> x.records
 

@@ -103,6 +103,10 @@ void mexFunction(
     if (format == GT_FORMAT_SPARSEMAT && dim > 2)
         mexErrMsgIdAndTxt(ERRID"prhs2", "Sparse format only supported with dimension <= 2.");
 
+    /* prefer struct instead of dense_matrix for scalars */
+    if (format == GT_FORMAT_DENSEMAT && dim == 0)
+        format = GT_FORMAT_STRUCT;
+
     /* modify value fields based on type */
     values_flag[GMS_VAL_LEVEL] = true;
     values_flag[GMS_VAL_MARGINAL] = false;
@@ -286,7 +290,7 @@ void mexFunction(
     /* store records in symbol */
     mxSetProperty((mxArray*) prhs[2], 0, "records", mx_arr_records);
     mxSetProperty((mxArray*) prhs[2], 0, "number_records_", mxCreateDoubleScalar(mxGetNaN()));
-    mxSetProperty((mxArray*) prhs[2], 0, "format_", mxCreateDoubleScalar(mxGetNaN()));
+    mxSetProperty((mxArray*) prhs[2], 0, "format_", mxCreateDoubleScalar(format));
 
     /* free */
     switch (format)

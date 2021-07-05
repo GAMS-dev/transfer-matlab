@@ -119,6 +119,10 @@ void mexFunction(
     if (!gdxSymbolGetDomain(gdx, sym_id, dom_symid))
         mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomain", "GDX error (gdxSymbolGetDomain)");
 
+    /* prefer struct instead of dense_matrix for scalars */
+    if (format == GT_FORMAT_DENSEMAT && dim == 0)
+        format = GT_FORMAT_STRUCT;
+
     /* modify value fields based on type */
     switch (type)
     {
@@ -443,7 +447,7 @@ void mexFunction(
     /* store records in symbol */
     mxSetProperty((mxArray*) prhs[2], 0, "records", mx_arr_records);
     mxSetProperty((mxArray*) prhs[2], 0, "number_records_", mxCreateDoubleScalar(mxGetNaN()));
-    mxSetProperty((mxArray*) prhs[2], 0, "format_", mxCreateDoubleScalar(mxGetNaN()));
+    mxSetProperty((mxArray*) prhs[2], 0, "format_", mxCreateDoubleScalar(format));
 
     /* empty uel maps and free */
     for (size_t i = 0; i < dim; i++)

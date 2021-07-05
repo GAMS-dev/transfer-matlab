@@ -658,6 +658,9 @@ function test_idx_transformRecords(t, cfg)
             gdx.data.a.transformRecords(formats{j});
             gdx.data.b.transformRecords(formats{j});
             gdx.data.c.transformRecords(formats{j});
+            t.assert(gdx.data.a.is_valid);
+            t.assert(gdx.data.b.is_valid);
+            t.assert(gdx.data.c.is_valid);
             t.assertEquals(gdx.data.a.format, a_format{j});
             t.assertEquals(gdx.data.b.format, b_format{j});
             t.assertEquals(gdx.data.c.format, c_format{j});
