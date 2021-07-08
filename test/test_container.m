@@ -35,7 +35,7 @@ end
 
 function test_getlist(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{3});
+    gdx = GAMSTransfer.Container(cfg.filenames{3}, 'features', cfg.features);
 
     t.add('get_list_empty')
     l = gdx.getSymbols({});
@@ -132,7 +132,7 @@ end
 
 function test_describe(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1});
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'features', cfg.features);
 
     tbl = gdx.describeSets();
 
@@ -150,18 +150,28 @@ function test_describe(t, cfg)
         t.assertEquals(tbl.Properties.VariableNames{7}, 'num_recs');
         t.assertEquals(tbl.Properties.VariableNames{8}, 'num_vals');
         t.assertEquals(tbl.Properties.VariableNames{9}, 'sparsity');
-        t.assertEquals(tbl{1,'name'}, 'i');
-        t.assertEquals(tbl{1,'format'}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'name'}, 'i');
+            t.assertEquals(tbl{1,'format'}, 'not_read');
+        else
+            t.assertEquals(tbl{1,'name'}{1}, 'i');
+            t.assertEquals(tbl{1,'format'}{1}, 'not_read');
+        end
         t.assert(~tbl{1,'singleton'});
         t.assert(tbl{1,'dim'} == 1);
-        t.assertEquals(tbl{1,'domain'}, '[*]');
-        t.assertEquals(tbl{1,'size'}, '[NaN]');
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'domain'}, '[*]');
+            t.assertEquals(tbl{1,'size'}, '[NaN]');
+        else
+            t.assertEquals(tbl{1,'domain'}{1}, '[*]');
+            t.assertEquals(tbl{1,'size'}{1}, '[NaN]');
+        end
         t.assert(tbl{1,'num_recs'} == 5);
         t.assert(isnan(tbl{1,'num_vals'}));
         t.assert(isnan(tbl{1,'sparsity'}));
     else
         t.assert(isstruct(tbl));
-        t.assert(numel(fieldnames(tbl)) == 8);
+        t.assert(numel(fieldnames(tbl)) == 9);
         t.assert(numel(tbl.name) == 2);
         t.assert(isfield(tbl, 'name'));
         t.assert(isfield(tbl, 'singleton'));
@@ -172,12 +182,22 @@ function test_describe(t, cfg)
         t.assert(isfield(tbl, 'num_recs'));
         t.assert(isfield(tbl, 'num_vals'));
         t.assert(isfield(tbl, 'sparsity'));
-        t.assertEquals(tbl.name{1}, 'i');
-        t.assertEquals(tbl.format{1}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(1), 'i');
+            t.assertEquals(tbl.format(1), 'not_read');
+        else
+            t.assertEquals(tbl.name{1}, 'i');
+            t.assertEquals(tbl.format{1}, 'not_read');
+        end
         t.assert(~tbl.singleton(1));
         t.assert(tbl.dim(1) == 1);
-        t.assertEquals(tbl.domain{1}, '[*]');
-        t.assertEquals(tbl.size{1}, '[NaN]');
+        if gdx.features.categorical
+            t.assertEquals(tbl.domain(1), '[*]');
+            t.assertEquals(tbl.size(1), '[NaN]');
+        else
+            t.assertEquals(tbl.domain{1}, '[*]');
+            t.assertEquals(tbl.size{1}, '[NaN]');
+        end
         t.assert(tbl.num_recs(1) == 5);
         t.assert(isnan(tbl.num_vals(1)));
         t.assert(isnan(tbl.sparsity(1)));
@@ -207,11 +227,21 @@ function test_describe(t, cfg)
         t.assertEquals(tbl.Properties.VariableNames{15}, 'num_eps');
         t.assertEquals(tbl.Properties.VariableNames{16}, 'num_minf');
         t.assertEquals(tbl.Properties.VariableNames{17}, 'num_pinf');
-        t.assertEquals(tbl{1,'name'}, 'a');
-        t.assertEquals(tbl{1,'format'}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'name'}, 'a');
+            t.assertEquals(tbl{1,'format'}, 'not_read');
+        else
+            t.assertEquals(tbl{1,'name'}{1}, 'a');
+            t.assertEquals(tbl{1,'format'}{1}, 'not_read');
+        end
         t.assert(tbl{1,'dim'} == 0);
-        t.assertEquals(tbl{1,'domain'}, '[]');
-        t.assertEquals(tbl{1,'size'}, '[]');
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'domain'}, '[]');
+            t.assertEquals(tbl{1,'size'}, '[]');
+        else
+            t.assertEquals(tbl{1,'domain'}{1}, '[]');
+            t.assertEquals(tbl{1,'size'}{1}, '[]');
+        end
         t.assert(tbl{1,'num_recs'} == 1);
         t.assert(isnan(tbl{1,'num_vals'}));
         t.assert(isnan(tbl{1,'sparsity'}));
@@ -221,18 +251,28 @@ function test_describe(t, cfg)
         if gdx.features.categorical
             t.assert(isundefined(tbl{1,'where_max_abs_value'}));
         else
-            t.assert(isempty(tbl{1,'where_max_abs_value'}));
+            t.assert(isempty(tbl{1,'where_max_abs_value'}{1}));
         end
         t.assert(tbl{1,'num_na'} == 0);
         t.assert(tbl{1,'num_undef'} == 0);
         t.assert(tbl{1,'num_eps'} == 0);
         t.assert(tbl{1,'num_minf'} == 0);
         t.assert(tbl{1,'num_pinf'} == 0);
-        t.assertEquals(tbl{2,'name'}, 'b');
-        t.assertEquals(tbl{2,'format'}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl{2,'name'}, 'b');
+            t.assertEquals(tbl{2,'format'}, 'not_read');
+        else
+            t.assertEquals(tbl{2,'name'}{1}, 'b');
+            t.assertEquals(tbl{2,'format'}{1}, 'not_read');
+        end
         t.assert(tbl{2,'dim'} == 1);
-        t.assertEquals(tbl{2,'domain'}, '[i]');
-        t.assertEquals(tbl{2,'size'}, '[5]');
+        if gdx.features.categorical
+            t.assertEquals(tbl{2,'domain'}, '[i]');
+            t.assertEquals(tbl{2,'size'}, '[5]');
+        else
+            t.assertEquals(tbl{2,'domain'}{1}, '[i]');
+            t.assertEquals(tbl{2,'size'}{1}, '[5]');
+        end
         t.assert(tbl{2,'num_recs'} == 3);
         t.assert(isnan(tbl{2,'num_vals'}));
         t.assert(isnan(tbl{2,'sparsity'}));
@@ -242,7 +282,7 @@ function test_describe(t, cfg)
         if gdx.features.categorical
             t.assert(isundefined(tbl{2,'where_max_abs_value'}));
         else
-            t.assert(isempty(tbl{2,'where_max_abs_value'}));
+            t.assert(isempty(tbl{2,'where_max_abs_value'}{1}));
         end
         t.assert(tbl{2,'num_na'} == 0);
         t.assert(tbl{2,'num_undef'} == 0);
@@ -270,11 +310,21 @@ function test_describe(t, cfg)
         t.assert(isfield(tbl, 'num_eps'));
         t.assert(isfield(tbl, 'num_minf'));
         t.assert(isfield(tbl, 'num_pinf'));
-        t.assertEquals(tbl.name{1}, 'a');
-        t.assertEquals(tbl.format{1}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(1), 'a');
+            t.assertEquals(tbl.format(1), 'not_read');
+        else
+            t.assertEquals(tbl.name{1}, 'a');
+            t.assertEquals(tbl.format{1}, 'not_read');
+        end
         t.assert(tbl.dim(1) == 0);
-        t.assertEquals(tbl.domain{1}, '[]');
-        t.assertEquals(tbl.size{1}, '[]');
+        if gdx.features.categorical
+            t.assertEquals(tbl.domain(1), '[]');
+            t.assertEquals(tbl.size(1), '[]');
+        else
+            t.assertEquals(tbl.domain{1}, '[]');
+            t.assertEquals(tbl.size{1}, '[]');
+        end
         t.assert(tbl.num_recs(1) == 1);
         t.assert(isnan(tbl.num_vals(1)));
         t.assert(isnan(tbl.sparsity(1)));
@@ -282,7 +332,7 @@ function test_describe(t, cfg)
         t.assert(isnan(tbl.mean_value(1)));
         t.assert(isnan(tbl.max_value(1)));
         if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_value{1}));
+            t.assert(isundefined(tbl.where_max_abs_value(1)));
         else
             t.assert(isempty(tbl.where_max_abs_value{1}));
         end
@@ -291,11 +341,21 @@ function test_describe(t, cfg)
         t.assert(tbl.num_eps(1) == 0);
         t.assert(tbl.num_minf(1) == 0);
         t.assert(tbl.num_pinf(1) == 0);
-        t.assertEquals(tbl.name{2}, 'b');
-        t.assertEquals(tbl.format{2}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(2), 'b');
+            t.assertEquals(tbl.format(2), 'not_read');
+        else
+            t.assertEquals(tbl.name{2}, 'b');
+            t.assertEquals(tbl.format{2}, 'not_read');
+        end
         t.assert(tbl.dim(2) == 1);
-        t.assertEquals(tbl.domain{2}, '[i]');
-        t.assertEquals(tbl.size{2}, '[5]');
+        if gdx.features.categorical
+            t.assertEquals(tbl.domain(2), '[i]');
+            t.assertEquals(tbl.size(2), '[5]');
+        else
+            t.assertEquals(tbl.domain{2}, '[i]');
+            t.assertEquals(tbl.size{2}, '[5]');
+        end
         t.assert(tbl.num_recs(2) == 3);
         t.assert(isnan(tbl.num_vals(2)));
         t.assert(isnan(tbl.sparsity(2)));
@@ -303,7 +363,7 @@ function test_describe(t, cfg)
         t.assert(isnan(tbl.mean_value(2)));
         t.assert(isnan(tbl.max_value(2)));
         if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_value{2}));
+            t.assert(isundefined(tbl.where_max_abs_value(2)));
         else
             t.assert(isempty(tbl.where_max_abs_value{2}));
         end
@@ -343,12 +403,23 @@ function test_describe(t, cfg)
         t.assertEquals(tbl.Properties.VariableNames{20}, 'num_eps');
         t.assertEquals(tbl.Properties.VariableNames{21}, 'num_minf');
         t.assertEquals(tbl.Properties.VariableNames{22}, 'num_pinf');
-        t.assertEquals(tbl{1,'name'}, 'x');
-        t.assertEquals(tbl{1,'type'}, 'positive');
-        t.assertEquals(tbl{1,'format'}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'name'}, 'x');
+            t.assertEquals(tbl{1,'type'}, 'positive');
+            t.assertEquals(tbl{1,'format'}, 'not_read');
+        else
+            t.assertEquals(tbl{1,'name'}{1}, 'x');
+            t.assertEquals(tbl{1,'type'}{1}, 'positive');
+            t.assertEquals(tbl{1,'format'}{1}, 'not_read');
+        end
         t.assert(tbl{1,'dim'} == 2);
-        t.assertEquals(tbl{1,'domain'}, '[i,j]');
-        t.assertEquals(tbl{1,'size'}, '[5,5]');
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'domain'}, '[i,j]');
+            t.assertEquals(tbl{1,'size'}, '[5,5]');
+        else
+            t.assertEquals(tbl{1,'domain'}{1}, '[i,j]');
+            t.assertEquals(tbl{1,'size'}{1}, '[5,5]');
+        end
         t.assert(tbl{1,'num_recs'} == 6);
         t.assert(isnan(tbl{1,'num_vals'}));
         t.assert(isnan(tbl{1,'sparsity'}));
@@ -358,7 +429,7 @@ function test_describe(t, cfg)
         if gdx.features.categorical
             t.assert(isundefined(tbl{1,'where_max_abs_level'}));
         else
-            t.assert(isempty(tbl{1,'where_max_abs_level'}));
+            t.assert(isempty(tbl{1,'where_max_abs_level'}{1}));
         end
         t.assert(isnan(tbl{1,'min_marginal'}));
         t.assert(isnan(tbl{1,'mean_marginal'}));
@@ -366,7 +437,7 @@ function test_describe(t, cfg)
         if gdx.features.categorical
             t.assert(isundefined(tbl{1,'where_max_abs_marginal'}));
         else
-            t.assert(isempty(tbl{1,'where_max_abs_marginal'}));
+            t.assert(isempty(tbl{1,'where_max_abs_marginal'}{1}));
         end
         t.assert(tbl.num_na(1) == 0);
         t.assert(tbl.num_undef(1) == 0);
@@ -375,7 +446,7 @@ function test_describe(t, cfg)
         t.assert(tbl.num_pinf(1) == 0);
     else
         t.assert(isstruct(tbl));
-        t.assert(numel(fieldnames(tbl)) == 21);
+        t.assert(numel(fieldnames(tbl)) == 22);
         t.assert(numel(tbl.name) == 1);
         t.assert(isfield(tbl, 'name'));
         t.assert(isfield(tbl, 'type'));
@@ -399,12 +470,23 @@ function test_describe(t, cfg)
         t.assert(isfield(tbl, 'num_eps'));
         t.assert(isfield(tbl, 'num_minf'));
         t.assert(isfield(tbl, 'num_pinf'));
-        t.assertEquals(tbl.name{1}, 'x');
-        t.assertEquals(tbl.type{1}, 'positive');
-        t.assertEquals(tbl.format{1}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(1), 'x');
+            t.assertEquals(tbl.type(1), 'positive');
+            t.assertEquals(tbl.format(1), 'not_read');
+        else
+            t.assertEquals(tbl.name{1}, 'x');
+            t.assertEquals(tbl.type{1}, 'positive');
+            t.assertEquals(tbl.format{1}, 'not_read');
+        end
         t.assert(tbl.dim(1) == 2);
-        t.assertEquals(tbl.domain{1}, '[i,j]');
-        t.assertEquals(tbl.size{1}, '[5,5]');
+        if gdx.features.categorical
+            t.assertEquals(tbl.domain(1), '[i,j]');
+            t.assertEquals(tbl.size(1), '[5,5]');
+        else
+            t.assertEquals(tbl.domain{1}, '[i,j]');
+            t.assertEquals(tbl.size{1}, '[5,5]');
+        end
         t.assert(tbl.num_recs(1) == 6);
         t.assert(isnan(tbl.num_vals(1)));
         t.assert(isnan(tbl.sparsity(1)));
@@ -412,7 +494,7 @@ function test_describe(t, cfg)
         t.assert(isnan(tbl.mean_level(1)));
         t.assert(isnan(tbl.max_level(1)));
         if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_level{1}));
+            t.assert(isundefined(tbl.where_max_abs_level(1)));
         else
             t.assert(isempty(tbl.where_max_abs_level{1}));
         end
@@ -420,7 +502,7 @@ function test_describe(t, cfg)
         t.assert(isnan(tbl.mean_marginal(1)));
         t.assert(isnan(tbl.max_marginal(1)));
         if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_marginal{1}));
+            t.assert(isundefined(tbl.where_max_abs_marginal(1)));
         else
             t.assert(isempty(tbl.where_max_abs_marginal{1}));
         end
@@ -523,17 +605,32 @@ function test_describe(t, cfg)
             t.assert(istable(tbl));
             t.assert(numel(tbl.Properties.VariableNames) == 9);
             t.assert(height(tbl) == 2);
-            t.assertEquals(tbl{1,'name'}, 'i');
-            t.assert(~tbl{1,'singleton'});
-            switch i
-            case {1,3,4}
-                t.assertEquals(tbl{1,'format'}, 'struct');
-            case 2
-                t.assertEquals(tbl{1,'format'}, 'table');
+            if gdx.features.categorical
+                t.assertEquals(tbl{1,'name'}, 'i');
+                switch i
+                case {1,3,4}
+                    t.assertEquals(tbl{1,'format'}, 'struct');
+                case 2
+                    t.assertEquals(tbl{1,'format'}, 'table');
+                end
+            else
+                t.assertEquals(tbl{1,'name'}{1}, 'i');
+                switch i
+                case {1,3,4}
+                    t.assertEquals(tbl{1,'format'}{1}, 'struct');
+                case 2
+                    t.assertEquals(tbl{1,'format'}{1}, 'table');
+                end
             end
+            t.assert(~tbl{1,'singleton'});
             t.assert(tbl{1,'dim'} == 1);
-            t.assertEquals(tbl{1,'domain'}, '[*]');
-            t.assertEquals(tbl{1,'size'}, '[NaN]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{1,'domain'}, '[*]');
+                t.assertEquals(tbl{1,'size'}, '[NaN]');
+            else
+                t.assertEquals(tbl{1,'domain'}{1}, '[*]');
+                t.assertEquals(tbl{1,'size'}{1}, '[NaN]');
+            end
             t.assert(tbl{1,'num_recs'} == 5);
             t.assert(tbl{1,'num_vals'} == 0);
             t.assert(isnan(tbl{1,'sparsity'}));
@@ -541,17 +638,32 @@ function test_describe(t, cfg)
             t.assert(isstruct(tbl));
             t.assert(numel(fieldnames(tbl)) == 9);
             t.assert(numel(tbl.name) == 2);
-            t.assertEquals(tbl.name{1}, 'i');
-            t.assert(~tbl.singleton(1));
-            switch i
-            case {1,3,4}
-                t.assertEquals(tbl.format{1}, 'struct');
-            case 2
-                t.assertEquals(tbl.format{1}, 'table');
+            if gdx.features.categorical
+                t.assertEquals(tbl.name(1), 'i');
+                switch i
+                case {1,3,4}
+                    t.assertEquals(tbl.format(1), 'struct');
+                case 2
+                    t.assertEquals(tbl.format(1), 'table');
+                end
+            else
+                t.assertEquals(tbl.name{1}, 'i');
+                switch i
+                case {1,3,4}
+                    t.assertEquals(tbl.format{1}, 'struct');
+                case 2
+                    t.assertEquals(tbl.format{1}, 'table');
+                end
             end
+            t.assert(~tbl.singleton(1));
             t.assert(tbl.dim(1) == 1);
-            t.assertEquals(tbl.domain{1}, '[*]');
-            t.assertEquals(tbl.size{1}, '[NaN]');
+            if gdx.features.categorical
+                t.assertEquals(tbl.domain(1), '[*]');
+                t.assertEquals(tbl.size(1), '[NaN]');
+            else
+                t.assertEquals(tbl.domain{1}, '[*]');
+                t.assertEquals(tbl.size{1}, '[NaN]');
+            end
             t.assert(tbl.num_recs(1) == 5);
             t.assert(tbl.num_vals(1) == 0);
             t.assert(isnan(tbl.sparsity(1)));
@@ -564,18 +676,35 @@ function test_describe(t, cfg)
             t.assert(istable(tbl));
             t.assert(numel(tbl.Properties.VariableNames) == 17);
             t.assert(height(tbl) == 2);
-            t.assertEquals(tbl{1,'name'}, 'a');
-            switch i
-            case {1,3}
-                t.assert(isequal(tbl{1,'format'}, 'struct') || isequal(tbl{1,'format'}, 'dense_matrix'));
-            case 2
-                t.assertEquals(tbl{1,'format'}, 'table');
-            case 4
-                t.assertEquals(tbl{1,'format'}, 'sparse_matrix');
+            if gdx.features.categorical
+                t.assertEquals(tbl{1,'name'}, 'a');
+                switch i
+                case {1,3}
+                    t.assert(isequal(tbl{1,'format'}, 'struct') || isequal(tbl{1,'format'}, 'dense_matrix'));
+                case 2
+                    t.assertEquals(tbl{1,'format'}, 'table');
+                case 4
+                    t.assertEquals(tbl{1,'format'}, 'sparse_matrix');
+                end
+            else
+                t.assertEquals(tbl{1,'name'}{1}, 'a');
+                switch i
+                case {1,3}
+                    t.assert(isequal(tbl{1,'format'}{1}, 'struct') || isequal(tbl{1,'format'}{1}, 'dense_matrix'));
+                case 2
+                    t.assertEquals(tbl{1,'format'}{1}, 'table');
+                case 4
+                    t.assertEquals(tbl{1,'format'}{1}, 'sparse_matrix');
+                end
             end
             t.assert(tbl{1,'dim'} == 0);
-            t.assertEquals(tbl{1,'domain'}, '[]');
-            t.assertEquals(tbl{1,'size'}, '[]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{1,'domain'}, '[]');
+                t.assertEquals(tbl{1,'size'}, '[]');
+            else
+                t.assertEquals(tbl{1,'domain'}{1}, '[]');
+                t.assertEquals(tbl{1,'size'}{1}, '[]');
+            end
             switch i
             case {1,3}
                 t.assert(tbl{1,'num_recs'} == 1 || isnan(tbl{1,'num_recs'}));
@@ -589,26 +718,49 @@ function test_describe(t, cfg)
             t.assert(tbl{1,'min_value'} == 4);
             t.assert(tbl{1,'mean_value'} == 4);
             t.assert(tbl{1,'max_value'} == 4);
-            t.assertEquals(tbl{1,'where_max_abs_value'}, '[]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{1,'where_max_abs_value'}, '[]');
+            else
+                t.assertEquals(tbl{1,'where_max_abs_value'}{1}, '[]');
+            end
             t.assert(tbl{1,'num_na'} == 0);
             t.assert(tbl{1,'num_undef'} == 0);
             t.assert(tbl{1,'num_eps'} == 0);
             t.assert(tbl{1,'num_minf'} == 0);
             t.assert(tbl{1,'num_pinf'} == 0);
-            t.assertEquals(tbl{2,'name'}, 'b');
-            switch i
-            case 1
-                t.assertEquals(tbl{2,'format'}, 'struct');
-            case 2
-                t.assertEquals(tbl{2,'format'}, 'table');
-            case 3
-                t.assertEquals(tbl{2,'format'}, 'dense_matrix');
-            case 4
-                t.assertEquals(tbl{2,'format'}, 'sparse_matrix');
+            if gdx.features.categorical
+                t.assertEquals(tbl{2,'name'}, 'b');
+                switch i
+                case 1
+                    t.assertEquals(tbl{2,'format'}, 'struct');
+                case 2
+                    t.assertEquals(tbl{2,'format'}, 'table');
+                case 3
+                    t.assertEquals(tbl{2,'format'}, 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl{2,'format'}, 'sparse_matrix');
+                end
+            else
+                t.assertEquals(tbl{2,'name'}{1}, 'b');
+                switch i
+                case 1
+                    t.assertEquals(tbl{2,'format'}{1}, 'struct');
+                case 2
+                    t.assertEquals(tbl{2,'format'}{1}, 'table');
+                case 3
+                    t.assertEquals(tbl{2,'format'}{1}, 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl{2,'format'}{1}, 'sparse_matrix');
+                end
             end
             t.assert(tbl{2,'dim'} == 1);
-            t.assertEquals(tbl{2,'domain'}, '[i]');
-            t.assertEquals(tbl{2,'size'}, '[5]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{2,'domain'}, '[i]');
+                t.assertEquals(tbl{2,'size'}, '[5]');
+            else
+                t.assertEquals(tbl{2,'domain'}{1}, '[i]');
+                t.assertEquals(tbl{2,'size'}{1}, '[5]');
+            end
             switch i
             case {1,2}
                 t.assert(tbl{2,'num_recs'} == 3);
@@ -632,7 +784,11 @@ function test_describe(t, cfg)
                 t.assert(tbl{2,'mean_value'} == 14/5);
             end
             t.assert(tbl{2,'max_value'} == 10);
-            t.assertEquals(tbl{2,'where_max_abs_value'}, '[i10]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{2,'where_max_abs_value'}, '[i10]');
+            else
+                t.assertEquals(tbl{2,'where_max_abs_value'}{1}, '[i10]');
+            end
             t.assert(tbl{2,'num_na'} == 0);
             t.assert(tbl{2,'num_undef'} == 0);
             t.assert(tbl{2,'num_eps'} == 0);
@@ -642,44 +798,91 @@ function test_describe(t, cfg)
             t.assert(isstruct(tbl));
             t.assert(numel(fieldnames(tbl)) == 17);
             t.assert(numel(tbl.name) == 2);
-            t.assertEquals(tbl.name{1}, 'a');
-            switch i
-            case {1,3}
-                t.assert(isequal(tbl.format{1}, 'struct') || isequal(tbl.format{1}, 'dense_matrix'));
-            case 2
-                t.assertEquals(tbl.format{1}, 'table');
-            case 4
-                t.assertEquals(tbl.format{1}, 'sparse_matrix');
+            if gdx.features.categorical
+                t.assertEquals(tbl.name(1), 'a');
+                switch i
+                case {1,3}
+                    t.assert(isequal(tbl.format(1), 'struct') || isequal(tbl.format(1), 'dense_matrix'));
+                case 2
+                    t.assertEquals(tbl.format(1), 'table');
+                case 4
+                    t.assertEquals(tbl.format(1), 'sparse_matrix');
+                end
+            else
+                t.assertEquals(tbl.name{1}, 'a');
+                switch i
+                case {1,3}
+                    t.assert(isequal(tbl.format{1}, 'struct') || isequal(tbl.format{1}, 'dense_matrix'));
+                case 2
+                    t.assertEquals(tbl.format{1}, 'table');
+                case 4
+                    t.assertEquals(tbl.format{1}, 'sparse_matrix');
+                end
             end
             t.assert(tbl.dim(1) == 0);
-            t.assertEquals(tbl.domain{1}, '[]');
-            t.assertEquals(tbl.size{1}, '[]');
-            t.assert(tbl.num_recs(1) == 1);
+            if gdx.features.categorical
+                t.assertEquals(tbl.domain(1), '[]');
+                t.assertEquals(tbl.size(1), '[]');
+            else
+                t.assertEquals(tbl.domain{1}, '[]');
+                t.assertEquals(tbl.size{1}, '[]');
+            end
+            switch i
+            case {1,3}
+                t.assert(tbl.num_recs(1) == 1 || isnan(tbl.num_recs(1)));
+            case 2
+                t.assert(tbl.num_recs(1) == 1);
+            case {3,4}
+                t.assert(isnan(tbl.num_recs(1)));
+            end
             t.assert(tbl.num_vals(1) == 1);
             t.assert(tbl.sparsity(1) == 0);
             t.assert(tbl.min_value(1) == 4);
             t.assert(tbl.mean_value(1) == 4);
             t.assert(tbl.max_value(1) == 4);
-            t.assertEquals(tbl.where_max_abs_value{1}, '[]');
+            if gdx.features.categorical
+                t.assertEquals(tbl.where_max_abs_value(1), '[]');
+            else
+                t.assertEquals(tbl.where_max_abs_value{1}, '[]');
+            end
             t.assert(tbl.num_na(1) == 0);
             t.assert(tbl.num_undef(1) == 0);
             t.assert(tbl.num_eps(1) == 0);
             t.assert(tbl.num_minf(1) == 0);
             t.assert(tbl.num_pinf(1) == 0);
-            t.assertEquals(tbl.name{2}, 'b');
-            switch i
-            case 1
-                t.assertEquals(tbl.format{2}, 'struct');
-            case 2
-                t.assertEquals(tbl.format{2}, 'table');
-            case 3
-                t.assertEquals(tbl.format{2}, 'dense_matrix');
-            case 4
-                t.assertEquals(tbl.format{2}, 'sparse_matrix');
+            if gdx.features.categorical
+                t.assertEquals(tbl.name(2), 'b');
+                switch i
+                case 1
+                    t.assertEquals(tbl.format(2), 'struct');
+                case 2
+                    t.assertEquals(tbl.format(2), 'table');
+                case 3
+                    t.assertEquals(tbl.format(2), 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl.format(2), 'sparse_matrix');
+                end
+            else
+                t.assertEquals(tbl.name{2}, 'b');
+                switch i
+                case 1
+                    t.assertEquals(tbl.format{2}, 'struct');
+                case 2
+                    t.assertEquals(tbl.format{2}, 'table');
+                case 3
+                    t.assertEquals(tbl.format{2}, 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl.format{2}, 'sparse_matrix');
+                end
             end
             t.assert(tbl.dim(2) == 1);
-            t.assertEquals(tbl.domain{2}, '[i]');
-            t.assertEquals(tbl.size{2}, '[5]');
+            if gdx.features.categorical
+                t.assertEquals(tbl.domain(2), '[i]');
+                t.assertEquals(tbl.size(2), '[5]');
+            else
+                t.assertEquals(tbl.domain{2}, '[i]');
+                t.assertEquals(tbl.size{2}, '[5]');
+            end
             switch i
             case {1,2}
                 t.assert(tbl.num_recs(2) == 3);
@@ -703,7 +906,11 @@ function test_describe(t, cfg)
                 t.assert(tbl.mean_value(2) == 14/5);
             end
             t.assert(tbl.max_value(2) == 10);
-            t.assertEquals(tbl.where_max_abs_value{2}, '[i10]');
+            if gdx.features.categorical
+                t.assertEquals(tbl.where_max_abs_value(2), '[i10]');
+            else
+                t.assertEquals(tbl.where_max_abs_value{2}, '[i10]');
+            end
             t.assert(tbl.num_na(2) == 0);
             t.assert(tbl.num_undef(2) == 0);
             t.assert(tbl.num_eps(2) == 0);
@@ -718,21 +925,41 @@ function test_describe(t, cfg)
             t.assert(istable(tbl));
             t.assert(numel(tbl.Properties.VariableNames) == 22);
             t.assert(height(tbl) == 1);
-            t.assertEquals(tbl{1,'name'}, 'x');
-            t.assertEquals(tbl{1,'type'}, 'positive');
-            switch i
-            case 1
-                t.assertEquals(tbl{1,'format'}, 'struct');
-            case 2
-                t.assertEquals(tbl{1,'format'}, 'table');
-            case 3
-                t.assertEquals(tbl{1,'format'}, 'dense_matrix');
-            case 4
-                t.assertEquals(tbl{1,'format'}, 'sparse_matrix');
+            if gdx.features.categorical
+                t.assertEquals(tbl{1,'name'}, 'x');
+                t.assertEquals(tbl{1,'type'}, 'positive');
+                switch i
+                case 1
+                    t.assertEquals(tbl{1,'format'}, 'struct');
+                case 2
+                    t.assertEquals(tbl{1,'format'}, 'table');
+                case 3
+                    t.assertEquals(tbl{1,'format'}, 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl{1,'format'}, 'sparse_matrix');
+                end
+            else
+                t.assertEquals(tbl{1,'name'}{1}, 'x');
+                t.assertEquals(tbl{1,'type'}{1}, 'positive');
+                switch i
+                case 1
+                    t.assertEquals(tbl{1,'format'}{1}, 'struct');
+                case 2
+                    t.assertEquals(tbl{1,'format'}{1}, 'table');
+                case 3
+                    t.assertEquals(tbl{1,'format'}{1}, 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl{1,'format'}{1}, 'sparse_matrix');
+                end
             end
             t.assert(tbl{1,'dim'} == 2);
-            t.assertEquals(tbl{1,'domain'}, '[i,j]');
-            t.assertEquals(tbl{1,'size'}, '[5,5]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{1,'domain'}, '[i,j]');
+                t.assertEquals(tbl{1,'size'}, '[5,5]');
+            else
+                t.assertEquals(tbl{1,'domain'}{1}, '[i,j]');
+                t.assertEquals(tbl{1,'size'}{1}, '[5,5]');
+            end
             switch i
             case {1,2}
                 t.assert(tbl{1,'num_recs'} == 6);
@@ -755,7 +982,11 @@ function test_describe(t, cfg)
                 t.assert(tbl{1,'mean_level'} == 18/25);
             end
             t.assert(tbl{1,'max_level'} == 9);
-            t.assertEquals(tbl{1,'where_max_abs_level'}, '[i3,j9]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{1,'where_max_abs_level'}, '[i3,j9]');
+            else
+                t.assertEquals(tbl{1,'where_max_abs_level'}{1}, '[i3,j9]');
+            end
             t.assert(tbl{1,'min_marginal'} == 0);
             switch i
             case {1,2}
@@ -764,7 +995,11 @@ function test_describe(t, cfg)
                 t.assert(tbl{1,'mean_marginal'} == 13/25);
             end
             t.assert(tbl{1,'max_marginal'} == 8);
-            t.assertEquals(tbl{1,'where_max_abs_marginal'}, '[i3,j8]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{1,'where_max_abs_marginal'}, '[i3,j8]');
+            else
+                t.assertEquals(tbl{1,'where_max_abs_marginal'}{1}, '[i3,j8]');
+            end
             t.assert(tbl{1,'num_na'} == 0);
             t.assert(tbl{1,'num_undef'} == 0);
             t.assert(tbl{1,'num_eps'} == 0);
@@ -779,21 +1014,41 @@ function test_describe(t, cfg)
             t.assert(isstruct(tbl));
             t.assert(numel(fieldnames(tbl)) == 22);
             t.assert(numel(tbl.name) == 1);
-            t.assertEquals(tbl.name{1}, 'x');
-            t.assertEquals(tbl.type{1}, 'positive');
-            switch i
-            case 1
-                t.assertEquals(tbl.format{1}, 'struct');
-            case 2
-                t.assertEquals(tbl.format{1}, 'table');
-            case 3
-                t.assertEquals(tbl.format{1}, 'dense_matrix');
-            case 4
-                t.assertEquals(tbl.format{1}, 'sparse_matrix');
+            if gdx.features.categorical
+                t.assertEquals(tbl.name(1), 'x');
+                t.assertEquals(tbl.type(1), 'positive');
+                switch i
+                case 1
+                    t.assertEquals(tbl.format(1), 'struct');
+                case 2
+                    t.assertEquals(tbl.format(1), 'table');
+                case 3
+                    t.assertEquals(tbl.format(1), 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl.format(1), 'sparse_matrix');
+                end
+            else
+                t.assertEquals(tbl.name{1}, 'x');
+                t.assertEquals(tbl.type{1}, 'positive');
+                switch i
+                case 1
+                    t.assertEquals(tbl.format{1}, 'struct');
+                case 2
+                    t.assertEquals(tbl.format{1}, 'table');
+                case 3
+                    t.assertEquals(tbl.format{1}, 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl.format{1}, 'sparse_matrix');
+                end
             end
             t.assert(tbl.dim(1) == 2);
-            t.assertEquals(tbl.domain{1}, '[i,j]');
-            t.assertEquals(tbl.size{1}, '[5,5]');
+            if gdx.features.categorical
+                t.assertEquals(tbl.domain(1), '[i,j]');
+                t.assertEquals(tbl.size(1), '[5,5]');
+            else
+                t.assertEquals(tbl.domain{1}, '[i,j]');
+                t.assertEquals(tbl.size{1}, '[5,5]');
+            end
             switch i
             case {1,2}
                 t.assert(tbl.num_recs(1) == 6);
@@ -806,7 +1061,7 @@ function test_describe(t, cfg)
             case 4
                 t.assert(isnan(tbl.num_recs(1)));
                 t.assert(tbl.num_vals(1) == 55);
-                t.assert(tbl.sparsity(1) == 0.88);
+                t.assert(tbl.sparsity(1) == 0.56);
             end
             t.assert(tbl.min_level(1) == 0);
             switch i
@@ -816,7 +1071,11 @@ function test_describe(t, cfg)
                 t.assert(tbl.mean_level(1) == 18/25);
             end
             t.assert(tbl.max_level(1) == 9);
-            t.assertEquals(tbl.where_max_abs_level{1}, '[i3,j9]');
+            if gdx.features.categorical
+                t.assertEquals(tbl.where_max_abs_level(1), '[i3,j9]');
+            else
+                t.assertEquals(tbl.where_max_abs_level{1}, '[i3,j9]');
+            end
             t.assert(tbl.min_marginal(1) == 0);
             switch i
             case {1,2}
@@ -825,7 +1084,11 @@ function test_describe(t, cfg)
                 t.assert(tbl.mean_marginal(1) == 13/25);
             end
             t.assert(tbl.max_marginal(1) == 8);
-            t.assertEquals(tbl.where_max_abs_marginal{1}, '[i3,j8]');
+            if gdx.features.categorical
+                t.assertEquals(tbl.where_max_abs_marginal(1), '[i3,j8]');
+            else
+                t.assertEquals(tbl.where_max_abs_marginal{1}, '[i3,j8]');
+            end
             t.assert(tbl.num_na(1) == 0);
             t.assert(tbl.num_undef(1) == 0);
             t.assert(tbl.num_eps(1) == 0);
@@ -842,7 +1105,7 @@ end
 
 function test_idx_describe(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'indexed', true);
+    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'indexed', true, 'features', cfg.features);
 
     tbl = gdx.describeParameters();
 
@@ -868,11 +1131,21 @@ function test_idx_describe(t, cfg)
         t.assertEquals(tbl.Properties.VariableNames{15}, 'num_eps');
         t.assertEquals(tbl.Properties.VariableNames{16}, 'num_minf');
         t.assertEquals(tbl.Properties.VariableNames{17}, 'num_pinf');
-        t.assertEquals(tbl{1,'name'}, 'a');
-        t.assertEquals(tbl{1,'format'}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'name'}, 'a');
+            t.assertEquals(tbl{1,'format'}, 'not_read');
+        else
+            t.assertEquals(tbl{1,'name'}{1}, 'a');
+            t.assertEquals(tbl{1,'format'}{1}, 'not_read');
+        end
         t.assert(tbl{1,'dim'} == 0);
-        t.assertEquals(tbl{1,'domain'}, '[]');
-        t.assertEquals(tbl{1,'size'}, '[]');
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'domain'}, '[]');
+            t.assertEquals(tbl{1,'size'}, '[]');
+        else
+            t.assertEquals(tbl{1,'domain'}{1}, '[]');
+            t.assertEquals(tbl{1,'size'}{1}, '[]');
+        end
         t.assert(tbl{1,'num_recs'} == 1);
         t.assert(isnan(tbl{1,'num_vals'}));
         t.assert(isnan(tbl{1,'sparsity'}));
@@ -882,18 +1155,28 @@ function test_idx_describe(t, cfg)
         if gdx.features.categorical
             t.assert(isundefined(tbl{1,'where_max_abs_value'}));
         else
-            t.assert(isempty(tbl{1,'where_max_abs_value'}));
+            t.assert(isempty(tbl{1,'where_max_abs_value'}{1}));
         end
         t.assert(tbl{1,'num_na'} == 0);
         t.assert(tbl{1,'num_undef'} == 0);
         t.assert(tbl{1,'num_eps'} == 0);
         t.assert(tbl{1,'num_minf'} == 0);
         t.assert(tbl{1,'num_pinf'} == 0);
-        t.assertEquals(tbl{2,'name'}, 'b');
-        t.assertEquals(tbl{2,'format'}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl{2,'name'}, 'b');
+            t.assertEquals(tbl{2,'format'}, 'not_read');
+        else
+            t.assertEquals(tbl{2,'name'}{1}, 'b');
+            t.assertEquals(tbl{2,'format'}{1}, 'not_read');
+        end
         t.assert(tbl{2,'dim'} == 1);
-        t.assertEquals(tbl{2,'domain'}, '[dim_1]');
-        t.assertEquals(tbl{2,'size'}, '[5]');
+        if gdx.features.categorical
+            t.assertEquals(tbl{2,'domain'}, '[dim_1]');
+            t.assertEquals(tbl{2,'size'}, '[5]');
+        else
+            t.assertEquals(tbl{2,'domain'}{1}, '[dim_1]');
+            t.assertEquals(tbl{2,'size'}{1}, '[5]');
+        end
         t.assert(tbl{2,'num_recs'} == 3);
         t.assert(isnan(tbl{2,'num_vals'}));
         t.assert(isnan(tbl{2,'sparsity'}));
@@ -903,18 +1186,28 @@ function test_idx_describe(t, cfg)
         if gdx.features.categorical
             t.assert(isundefined(tbl{2,'where_max_abs_value'}));
         else
-            t.assert(isempty(tbl{2,'where_max_abs_value'}));
+            t.assert(isempty(tbl{2,'where_max_abs_value'}{1}));
         end
         t.assert(tbl{2,'num_na'} == 0);
         t.assert(tbl{2,'num_undef'} == 0);
         t.assert(tbl{2,'num_eps'} == 0);
         t.assert(tbl{2,'num_minf'} == 0);
         t.assert(tbl{2,'num_pinf'} == 0);
-        t.assertEquals(tbl{3,'name'}, 'c');
-        t.assertEquals(tbl{3,'format'}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl{3,'name'}, 'c');
+            t.assertEquals(tbl{3,'format'}, 'not_read');
+        else
+            t.assertEquals(tbl{3,'name'}{1}, 'c');
+            t.assertEquals(tbl{3,'format'}{1}, 'not_read');
+        end
         t.assert(tbl{3,'dim'} == 2);
-        t.assertEquals(tbl{3,'domain'}, '[dim_1,dim_2]');
-        t.assertEquals(tbl{3,'size'}, '[5,10]');
+        if gdx.features.categorical
+            t.assertEquals(tbl{3,'domain'}, '[dim_1,dim_2]');
+            t.assertEquals(tbl{3,'size'}, '[5,10]');
+        else
+            t.assertEquals(tbl{3,'domain'}{1}, '[dim_1,dim_2]');
+            t.assertEquals(tbl{3,'size'}{1}, '[5,10]');
+        end
         t.assert(tbl{3,'num_recs'} == 3);
         t.assert(isnan(tbl{3,'num_vals'}));
         t.assert(isnan(tbl{3,'sparsity'}));
@@ -924,7 +1217,7 @@ function test_idx_describe(t, cfg)
         if gdx.features.categorical
             t.assert(isundefined(tbl{3,'where_max_abs_value'}));
         else
-            t.assert(isempty(tbl{3,'where_max_abs_value'}));
+            t.assert(isempty(tbl{3,'where_max_abs_value'}{1}));
         end
         t.assert(tbl{3,'num_na'} == 0);
         t.assert(tbl{3,'num_undef'} == 0);
@@ -933,7 +1226,7 @@ function test_idx_describe(t, cfg)
         t.assert(tbl{3,'num_pinf'} == 0);
     else
         t.assert(isstruct(tbl));
-        t.assert(numel(fieldnames(tbl)) == 16);
+        t.assert(numel(fieldnames(tbl)) == 17);
         t.assert(numel(tbl.name) == 3);
         t.assert(isfield(tbl, 'name'));
         t.assert(isfield(tbl, 'format'));
@@ -952,11 +1245,21 @@ function test_idx_describe(t, cfg)
         t.assert(isfield(tbl, 'num_eps'));
         t.assert(isfield(tbl, 'num_minf'));
         t.assert(isfield(tbl, 'num_pinf'));
-        t.assertEquals(tbl.name{1}, 'a');
-        t.assertEquals(tbl.format{1}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(1), 'a');
+            t.assertEquals(tbl.format(1), 'not_read');
+        else
+            t.assertEquals(tbl.name{1}, 'a');
+            t.assertEquals(tbl.format{1}, 'not_read');
+        end
         t.assert(tbl.dim(1) == 0);
-        t.assertEquals(tbl.domain{1}, '[]');
-        t.assertEquals(tbl.size{1}, '[]');
+        if gdx.features.categorical
+            t.assertEquals(tbl.domain(1), '[]');
+            t.assertEquals(tbl.size(1), '[]');
+        else
+            t.assertEquals(tbl.domain{1}, '[]');
+            t.assertEquals(tbl.size{1}, '[]');
+        end
         t.assert(tbl.num_recs(1) == 1);
         t.assert(isnan(tbl.num_vals(1)));
         t.assert(isnan(tbl.sparsity(1)));
@@ -964,7 +1267,7 @@ function test_idx_describe(t, cfg)
         t.assert(isnan(tbl.mean_value(1)));
         t.assert(isnan(tbl.max_value(1)));
         if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_value{1}));
+            t.assert(isundefined(tbl.where_max_abs_value(1)));
         else
             t.assert(isempty(tbl.where_max_abs_value{1}));
         end
@@ -973,11 +1276,21 @@ function test_idx_describe(t, cfg)
         t.assert(tbl.num_eps(1) == 0);
         t.assert(tbl.num_minf(1) == 0);
         t.assert(tbl.num_pinf(1) == 0);
-        t.assertEquals(tbl.name{2}, 'b');
-        t.assertEquals(tbl.format{2}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(2), 'b');
+            t.assertEquals(tbl.format(2), 'not_read');
+        else
+            t.assertEquals(tbl.name{2}, 'b');
+            t.assertEquals(tbl.format{2}, 'not_read');
+        end
         t.assert(tbl.dim(2) == 1);
-        t.assertEquals(tbl.domain{2}, '[dim_1]');
-        t.assertEquals(tbl.size{2}, '[5]');
+        if gdx.features.categorical
+            t.assertEquals(tbl.domain(2), '[dim_1]');
+            t.assertEquals(tbl.size(2), '[5]');
+        else
+            t.assertEquals(tbl.domain{2}, '[dim_1]');
+            t.assertEquals(tbl.size{2}, '[5]');
+        end
         t.assert(tbl.num_recs(2) == 3);
         t.assert(isnan(tbl.num_vals(2)));
         t.assert(isnan(tbl.sparsity(2)));
@@ -985,7 +1298,7 @@ function test_idx_describe(t, cfg)
         t.assert(isnan(tbl.mean_value(2)));
         t.assert(isnan(tbl.max_value(2)));
         if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_value{2}));
+            t.assert(isundefined(tbl.where_max_abs_value(2)));
         else
             t.assert(isempty(tbl.where_max_abs_value{2}));
         end
@@ -994,11 +1307,21 @@ function test_idx_describe(t, cfg)
         t.assert(tbl.num_eps(2) == 0);
         t.assert(tbl.num_minf(2) == 0);
         t.assert(tbl.num_pinf(2) == 0);
-        t.assertEquals(tbl.name{3}, 'c');
-        t.assertEquals(tbl.format{3}, 'not_read');
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(3), 'c');
+            t.assertEquals(tbl.format(3), 'not_read');
+        else
+            t.assertEquals(tbl.name{3}, 'c');
+            t.assertEquals(tbl.format{3}, 'not_read');
+        end
         t.assert(tbl.dim(3) == 2);
-        t.assertEquals(tbl.domain{3}, '[dim_1,dim_2]');
-        t.assertEquals(tbl.size{3}, '[5,10]');
+        if gdx.features.categorical
+            t.assertEquals(tbl.domain(3), '[dim_1,dim_2]');
+            t.assertEquals(tbl.size(3), '[5,10]');
+        else
+            t.assertEquals(tbl.domain{3}, '[dim_1,dim_2]');
+            t.assertEquals(tbl.size{3}, '[5,10]');
+        end
         t.assert(tbl.num_recs(3) == 3);
         t.assert(isnan(tbl.num_vals(3)));
         t.assert(isnan(tbl.sparsity(3)));
@@ -1006,7 +1329,7 @@ function test_idx_describe(t, cfg)
         t.assert(isnan(tbl.mean_value(3)));
         t.assert(isnan(tbl.max_value(3)));
         if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_value{3}));
+            t.assert(isundefined(tbl.where_max_abs_value(3)));
         else
             t.assert(isempty(tbl.where_max_abs_value{3}));
         end
@@ -1044,18 +1367,35 @@ function test_idx_describe(t, cfg)
             t.assert(istable(tbl));
             t.assert(numel(tbl.Properties.VariableNames) == 17);
             t.assert(height(tbl) == 3);
-            t.assertEquals(tbl{1,'name'}, 'a');
-            switch i
-            case {1,3}
-                t.assert(isequal(tbl{1,'format'}, 'struct') || isequal(tbl{1,'format'}, 'dense_matrix'));
-            case 2
-                t.assertEquals(tbl{1,'format'}, 'table');
-            case 4
-                t.assertEquals(tbl{1,'format'}, 'sparse_matrix');
+            if gdx.features.categorical
+                t.assertEquals(tbl{1,'name'}, 'a');
+                switch i
+                case {1,3}
+                    t.assert(isequal(tbl{1,'format'}, 'struct') || isequal(tbl{1,'format'}, 'dense_matrix'));
+                case 2
+                    t.assertEquals(tbl{1,'format'}, 'table');
+                case 4
+                    t.assertEquals(tbl{1,'format'}, 'sparse_matrix');
+                end
+            else
+                t.assertEquals(tbl{1,'name'}{1}, 'a');
+                switch i
+                case {1,3}
+                    t.assert(isequal(tbl{1,'format'}{1}, 'struct') || isequal(tbl{1,'format'}{1}, 'dense_matrix'));
+                case 2
+                    t.assertEquals(tbl{1,'format'}{1}, 'table');
+                case 4
+                    t.assertEquals(tbl{1,'format'}{1}, 'sparse_matrix');
+                end
             end
             t.assert(tbl{1,'dim'} == 0);
-            t.assertEquals(tbl{1,'domain'}, '[]');
-            t.assertEquals(tbl{1,'size'}, '[]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{1,'domain'}, '[]');
+                t.assertEquals(tbl{1,'size'}, '[]');
+            else
+                t.assertEquals(tbl{1,'domain'}{1}, '[]');
+                t.assertEquals(tbl{1,'size'}{1}, '[]');
+            end
             switch i
             case {1,3}
                 t.assert(tbl{1,'num_recs'} == 1 || isnan(tbl{1,'num_recs'}));
@@ -1069,26 +1409,49 @@ function test_idx_describe(t, cfg)
             t.assert(tbl{1,'min_value'} == 4);
             t.assert(tbl{1,'mean_value'} == 4);
             t.assert(tbl{1,'max_value'} == 4);
-            t.assertEquals(tbl{1,'where_max_abs_value'}, '[]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{1,'where_max_abs_value'}, '[]');
+            else
+                t.assertEquals(tbl{1,'where_max_abs_value'}{1}, '[]');
+            end
             t.assert(tbl{1,'num_na'} == 0);
             t.assert(tbl{1,'num_undef'} == 0);
             t.assert(tbl{1,'num_eps'} == 0);
             t.assert(tbl{1,'num_minf'} == 0);
             t.assert(tbl{1,'num_pinf'} == 0);
-            t.assertEquals(tbl{2,'name'}, 'b');
-            switch i
-            case 1
-                t.assertEquals(tbl{2,'format'}, 'struct');
-            case 2
-                t.assertEquals(tbl{2,'format'}, 'table');
-            case 3
-                t.assertEquals(tbl{2,'format'}, 'dense_matrix');
-            case 4
-                t.assertEquals(tbl{2,'format'}, 'sparse_matrix');
+            if gdx.features.categorical
+                t.assertEquals(tbl{2,'name'}, 'b');
+                switch i
+                case 1
+                    t.assertEquals(tbl{2,'format'}, 'struct');
+                case 2
+                    t.assertEquals(tbl{2,'format'}, 'table');
+                case 3
+                    t.assertEquals(tbl{2,'format'}, 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl{2,'format'}, 'sparse_matrix');
+                end
+            else
+                t.assertEquals(tbl{2,'name'}{1}, 'b');
+                switch i
+                case 1
+                    t.assertEquals(tbl{2,'format'}{1}, 'struct');
+                case 2
+                    t.assertEquals(tbl{2,'format'}{1}, 'table');
+                case 3
+                    t.assertEquals(tbl{2,'format'}{1}, 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl{2,'format'}{1}, 'sparse_matrix');
+                end
             end
             t.assert(tbl{2,'dim'} == 1);
-            t.assertEquals(tbl{2,'domain'}, '[dim_1]');
-            t.assertEquals(tbl{2,'size'}, '[5]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{2,'domain'}, '[dim_1]');
+                t.assertEquals(tbl{2,'size'}, '[5]');
+            else
+                t.assertEquals(tbl{2,'domain'}{1}, '[dim_1]');
+                t.assertEquals(tbl{2,'size'}{1}, '[5]');
+            end
             switch i
             case {1,2}
                 t.assert(tbl{2,'num_recs'} == 3);
@@ -1112,26 +1475,49 @@ function test_idx_describe(t, cfg)
                 t.assert(tbl{2,'mean_value'} == 9/5);
             end
             t.assert(tbl{2,'max_value'} == 5);
-            t.assertEquals(tbl{2,'where_max_abs_value'}, '[5]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{2,'where_max_abs_value'}, '[5]');
+            else
+                t.assertEquals(tbl{2,'where_max_abs_value'}{1}, '[5]');
+            end
             t.assert(tbl{2,'num_na'} == 0);
             t.assert(tbl{2,'num_undef'} == 0);
             t.assert(tbl{2,'num_eps'} == 0);
             t.assert(tbl{2,'num_minf'} == 0);
             t.assert(tbl{2,'num_pinf'} == 0);
-            t.assertEquals(tbl{3,'name'}, 'c');
-            switch i
-            case 1
-                t.assertEquals(tbl{3,'format'}, 'struct');
-            case 2
-                t.assertEquals(tbl{3,'format'}, 'table');
-            case 3
-                t.assertEquals(tbl{3,'format'}, 'dense_matrix');
-            case 4
-                t.assertEquals(tbl{3,'format'}, 'sparse_matrix');
+            if gdx.features.categorical
+                t.assertEquals(tbl{3,'name'}, 'c');
+                switch i
+                case 1
+                    t.assertEquals(tbl{3,'format'}, 'struct');
+                case 2
+                    t.assertEquals(tbl{3,'format'}, 'table');
+                case 3
+                    t.assertEquals(tbl{3,'format'}, 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl{3,'format'}, 'sparse_matrix');
+                end
+            else
+                t.assertEquals(tbl{3,'name'}{1}, 'c');
+                switch i
+                case 1
+                    t.assertEquals(tbl{3,'format'}{1}, 'struct');
+                case 2
+                    t.assertEquals(tbl{3,'format'}{1}, 'table');
+                case 3
+                    t.assertEquals(tbl{3,'format'}{1}, 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl{3,'format'}{1}, 'sparse_matrix');
+                end
             end
             t.assert(tbl{3,'dim'} == 2);
-            t.assertEquals(tbl{3,'domain'}, '[dim_1,dim_2]');
-            t.assertEquals(tbl{3,'size'}, '[5,10]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{3,'domain'}, '[dim_1,dim_2]');
+                t.assertEquals(tbl{3,'size'}, '[5,10]');
+            else
+                t.assertEquals(tbl{3,'domain'}{1}, '[dim_1,dim_2]');
+                t.assertEquals(tbl{3,'size'}{1}, '[5,10]');
+            end
             switch i
             case {1,2}
                 t.assert(tbl{3,'num_recs'} == 3);
@@ -1155,7 +1541,11 @@ function test_idx_describe(t, cfg)
                 t.assert(tbl{3,'mean_value'} == 102/50);
             end
             t.assert(tbl{3,'max_value'} == 49);
-            t.assertEquals(tbl{3,'where_max_abs_value'}, '[4,9]');
+            if gdx.features.categorical
+                t.assertEquals(tbl{3,'where_max_abs_value'}, '[4,9]');
+            else
+                t.assertEquals(tbl{3,'where_max_abs_value'}{1}, '[4,9]');
+            end
             t.assert(tbl{3,'num_na'} == 0);
             t.assert(tbl{3,'num_undef'} == 0);
             t.assert(tbl{3,'num_eps'} == 0);
@@ -1163,20 +1553,37 @@ function test_idx_describe(t, cfg)
             t.assert(tbl{3,'num_pinf'} == 0);
         else
             t.assert(isstruct(tbl));
-            t.assert(numel(fieldnames(tbl)) == 16);
+            t.assert(numel(fieldnames(tbl)) == 17);
             t.assert(numel(tbl.name) == 3);
-            t.assertEquals(tbl.name{1}, 'a');
-            switch i
-            case {1,3}
-                t.assert(isequal(tbl.format{1}, 'struct') || isequal(tbl.format{1}, 'dense_matrix'));
-            case 2
-                t.assertEquals(tbl.format{1}, 'table');
-            case 4
-                t.assertEquals(tbl.format{1}, 'sparse_matrix');
+            if gdx.features.categorical
+                t.assertEquals(tbl.name(1), 'a');
+                switch i
+                case {1,3}
+                    t.assert(isequal(tbl.format(1), 'struct') || isequal(tbl.format(1), 'dense_matrix'));
+                case 2
+                    t.assertEquals(tbl.format(1), 'table');
+                case 4
+                    t.assertEquals(tbl.format(1), 'sparse_matrix');
+                end
+            else
+                t.assertEquals(tbl.name{1}, 'a');
+                switch i
+                case {1,3}
+                    t.assert(isequal(tbl.format{1}, 'struct') || isequal(tbl.format{1}, 'dense_matrix'));
+                case 2
+                    t.assertEquals(tbl.format{1}, 'table');
+                case 4
+                    t.assertEquals(tbl.format{1}, 'sparse_matrix');
+                end
             end
             t.assert(tbl.dim(1) == 0);
-            t.assertEquals(tbl.domain{1}, '[]');
-            t.assertEquals(tbl.size{1}, '[]');
+            if gdx.features.categorical
+                t.assertEquals(tbl.domain(1), '[]');
+                t.assertEquals(tbl.size(1), '[]');
+            else
+                t.assertEquals(tbl.domain{1}, '[]');
+                t.assertEquals(tbl.size{1}, '[]');
+            end
             switch i
             case {1,2,3}
                 t.assert(tbl.num_recs(1) == 1);
@@ -1188,26 +1595,49 @@ function test_idx_describe(t, cfg)
             t.assert(tbl.min_value(1) == 4);
             t.assert(tbl.mean_value(1) == 4);
             t.assert(tbl.max_value(1) == 4);
-            t.assertEquals(tbl.where_max_abs_value{1}, '[]');
+            if gdx.features.categorical
+                t.assertEquals(tbl.where_max_abs_value(1), '[]');
+            else
+                t.assertEquals(tbl.where_max_abs_value{1}, '[]');
+            end
             t.assert(tbl.num_na(1) == 0);
             t.assert(tbl.num_undef(1) == 0);
             t.assert(tbl.num_eps(1) == 0);
             t.assert(tbl.num_minf(1) == 0);
             t.assert(tbl.num_pinf(1) == 0);
-            t.assertEquals(tbl.name{2}, 'b');
-            switch i
-            case 1
-                t.assertEquals(tbl.format{2}, 'struct');
-            case 2
-                t.assertEquals(tbl.format{2}, 'table');
-            case 3
-                t.assertEquals(tbl.format{2}, 'dense_matrix');
-            case 4
-                t.assertEquals(tbl.format{2}, 'sparse_matrix');
+            if gdx.features.categorical
+                t.assertEquals(tbl.name(2), 'b');
+                switch i
+                case 1
+                    t.assertEquals(tbl.format(2), 'struct');
+                case 2
+                    t.assertEquals(tbl.format(2), 'table');
+                case 3
+                    t.assertEquals(tbl.format(2), 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl.format(2), 'sparse_matrix');
+                end
+            else
+                t.assertEquals(tbl.name{2}, 'b');
+                switch i
+                case 1
+                    t.assertEquals(tbl.format{2}, 'struct');
+                case 2
+                    t.assertEquals(tbl.format{2}, 'table');
+                case 3
+                    t.assertEquals(tbl.format{2}, 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl.format{2}, 'sparse_matrix');
+                end
             end
             t.assert(tbl.dim(2) == 1);
-            t.assertEquals(tbl.domain{2}, '[dim_1]');
-            t.assertEquals(tbl.size{2}, '[5]');
+            if gdx.features.categorical
+                t.assertEquals(tbl.domain(2), '[dim_1]');
+                t.assertEquals(tbl.size(2), '[5]');
+            else
+                t.assertEquals(tbl.domain{2}, '[dim_1]');
+                t.assertEquals(tbl.size{2}, '[5]');
+            end
             switch i
             case {1,2}
                 t.assert(tbl.num_recs(2) == 3);
@@ -1231,26 +1661,49 @@ function test_idx_describe(t, cfg)
                 t.assert(tbl.mean_value(2) == 9/5);
             end
             t.assert(tbl.max_value(2) == 5);
-            t.assertEquals(tbl.where_max_abs_value{2}, '[5]');
+            if gdx.features.categorical
+                t.assertEquals(tbl.where_max_abs_value(2), '[5]');
+            else
+                t.assertEquals(tbl.where_max_abs_value{2}, '[5]');
+            end
             t.assert(tbl.num_na(2) == 0);
             t.assert(tbl.num_undef(2) == 0);
             t.assert(tbl.num_eps(2) == 0);
             t.assert(tbl.num_minf(2) == 0);
             t.assert(tbl.num_pinf(2) == 0);
-            t.assertEquals(tbl.name{3}, 'c');
-            switch i
-            case 1
-                t.assertEquals(tbl.format{3}, 'struct');
-            case 2
-                t.assertEquals(tbl.format{3}, 'table');
-            case 3
-                t.assertEquals(tbl.format{3}, 'dense_matrix');
-            case 4
-                t.assertEquals(tbl.format{3}, 'sparse_matrix');
+            if gdx.features.categorical
+                t.assertEquals(tbl.name(3), 'c');
+                switch i
+                case 1
+                    t.assertEquals(tbl.format(3), 'struct');
+                case 2
+                    t.assertEquals(tbl.format(3), 'table');
+                case 3
+                    t.assertEquals(tbl.format(3), 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl.format(3), 'sparse_matrix');
+                end
+            else
+                t.assertEquals(tbl.name{3}, 'c');
+                switch i
+                case 1
+                    t.assertEquals(tbl.format{3}, 'struct');
+                case 2
+                    t.assertEquals(tbl.format{3}, 'table');
+                case 3
+                    t.assertEquals(tbl.format{3}, 'dense_matrix');
+                case 4
+                    t.assertEquals(tbl.format{3}, 'sparse_matrix');
+                end
             end
             t.assert(tbl.dim(3) == 2);
-            t.assertEquals(tbl.domain{3}, '[dim_1,dim_2]');
-            t.assertEquals(tbl.size{3}, '[5,10]');
+            if gdx.features.categorical
+                t.assertEquals(tbl.domain(3), '[dim_1,dim_2]');
+                t.assertEquals(tbl.size(3), '[5,10]');
+            else
+                t.assertEquals(tbl.domain{3}, '[dim_1,dim_2]');
+                t.assertEquals(tbl.size{3}, '[5,10]');
+            end
             switch i
             case {1,2}
                 t.assert(tbl.num_recs(3) == 3);
@@ -1274,7 +1727,11 @@ function test_idx_describe(t, cfg)
                 t.assert(tbl.mean_value(3) == 102/50);
             end
             t.assert(tbl.max_value(3) == 49);
-            t.assertEquals(tbl.where_max_abs_value{3}, '[4,9]');
+            if gdx.features.categorical
+                t.assertEquals(tbl.where_max_abs_value(3), '[4,9]');
+            else
+                t.assertEquals(tbl.where_max_abs_value{3}, '[4,9]');
+            end
             t.assert(tbl.num_na(3) == 0);
             t.assert(tbl.num_undef(3) == 0);
             t.assert(tbl.num_eps(3) == 0);
@@ -1286,7 +1743,7 @@ end
 
 function test_remove(t, cfg)
 
-    gdx = GAMSTransfer.Container();
+    gdx = GAMSTransfer.Container('features', cfg.features);
     i1 = GAMSTransfer.Set(gdx, 'i1');
     a1 = GAMSTransfer.Alias(gdx, 'a1', i1);
     x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
@@ -1311,7 +1768,7 @@ end
 
 function test_universalset(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1});
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'features', cfg.features);
     gdx.read();
 
     t.add('universalset_1');
@@ -1330,7 +1787,7 @@ function test_universalset(t, cfg)
     t.assertEquals(uels{10}, 'j9');
 
     t.add('universalset_2');
-    gdx.data.i.uels.uni_1{end+1} = 'j9';
+    gdx.data.i.addUELs(1, 'j9');
     uels = gdx.getUniversalSet();
     t.assert(iscellstr(uels));
     t.assert(numel(uels) == 10);

@@ -57,11 +57,6 @@ classdef Symbol < handle
         records
     end
 
-    properties (Dependent)
-        % uels Unique Element Listing (UEL) used for this symbol
-        uels
-    end
-
     properties (Dependent, SetAccess = private)
         % format Format in which records are stored in
         %
@@ -76,6 +71,9 @@ classdef Symbol < handle
 
         % read_entry GDX symbol ID (if symbol was read from GDX)
         read_entry
+
+        % uels Unique Element Lists for each dimension in case categorical arrays are not supported
+        uels
     end
 
     properties (Hidden)
@@ -86,12 +84,14 @@ classdef Symbol < handle
         domain_label_
         domain_info_
         size_
-        uels_
         format_
 
         % number_records_ if negative: -1 * number of records - 1; if positive:
         % number of records in symbol data
         number_records_
+
+        % needed to transfer data to C
+        uels_
     end
 
     methods (Access = protected)
@@ -105,7 +105,7 @@ classdef Symbol < handle
             obj.name_ = char(name);
             obj.description_ = char(description);
 
-            % the following inits dimension_, domain_, domain_label_, domain_info_ and uels_
+            % the following inits dimension_, domain_, domain_label_, domain_info_, uels
             if container.indexed
                 obj.size = domain_size;
             else
@@ -232,21 +232,22 @@ classdef Symbol < handle
             end
 
             % update uels
-            new_uels = struct();
-            for i = 1:obj.dimension_
-                label = obj.domain_label_{i};
-                if isfield(obj.uels_, label)
-                    new_uels.(label) = obj.uels_.(label);
-                elseif isa(obj.domain_{i}, 'GAMSTransfer.Set') && ...
-                    (obj.domain_{i}.format_ == GAMSTransfer.RecordsFormat.STRUCT || ...
-                    obj.domain_{i}.format_ == GAMSTransfer.RecordsFormat.TABLE) && ...
-                    obj.domain_{i}.isValidAsDomain()
-                    new_uels.(label) = obj.domain_{i}.getUsedUels(1);
-                else
-                    new_uels.(label) = {};
+            if ~obj.container.features.categorical
+                uels = struct();
+                for i = 1:obj.dimension_
+                    label = obj.domain_label_{i};
+                    if isfield(obj.uels, label)
+                        uels.(label) = obj.uels.(label);
+                    elseif isa(obj.domain_{i}, 'GAMSTransfer.Set') && ...
+                        obj.domain_{i}.isValidAsDomain()
+                        uels.(label) = GAMSTransfer.UniqueElementList();
+                        uels.(label).set(obj.domain_{i}.getUELs(1, 'ignore_unused', true), []);
+                    else
+                        uels.(label) = GAMSTransfer.UniqueElementList();
+                    end
                 end
+                obj.uels = uels;
             end
-            obj.uels_ = new_uels;
 
             % indicate that we need to recheck symbol records
             obj.format_ = nan;
@@ -298,12 +299,6 @@ classdef Symbol < handle
             % determine domain info type
             obj.domain_info_ = 'relaxed';
 
-            % update uels
-            obj.uels_ = struct();
-            for i = 1:obj.dimension_
-                obj.uels_.(obj.domain_label_{i}) = {};
-            end
-
             % indicate that we need to recheck symbol records
             obj.format_ = nan;
             obj.number_records_ = nan;
@@ -313,71 +308,26 @@ classdef Symbol < handle
             form = GAMSTransfer.RecordsFormat.int2str(obj.format_);
         end
 
-        function uels = get.uels(obj)
-            uels = obj.uels_;
-        end
-
-        function set.uels(obj, uels)
-            if obj.container.indexed
-                error('Setting symbol UELs not allowed in indexed mode.');
-            end
-            if ~isstruct(uels)
-                error('Property uels must be struct.');
-            end
-            if numel(fieldnames(uels)) ~= obj.dimension_
-                error('UEL struct must have %d fields.', obj.dimension_);
-            end
-            for i = 1:obj.dimension_
-                label = obj.domain_label_{i};
-                if ~isfield(uels, label);
-                    error('UEL field ''%s'' is missing.', label);
-                end
-                if ~iscellstr(uels.(label))
-                    error('UEL field ''%s'' must be cell of strings.', label);
-                end
-            end
-
-            % collect categorical arrays
-            is_cat = zeros(1, obj.dimension_);
-            if obj.container.features.categorical
-                label = obj.domain_label_{i};
-                for i = 1:obj.dimension_
-                    try
-                        is_cat(i) = iscategorical(obj.records.(label));
-                    end
-                end
-            end
-
-            % update uel ids in records
-            for i = 1:obj.dimension_
-                label = obj.domain_label_{i};
-                if is_cat(i)
-                    obj.records.(label) = setcats(obj.records.(label), uels.(label));
-                else
-                    new_ids = zeros(numel(obj.uels_.(label)), 1);
-                    for j = 1:numel(new_ids)
-                        newid = find(ismember(uels.(label), obj.uels_.(label){j}), 1);
-                        if ~isempty(newid)
-                            new_ids(j) = newid;
-                        end
-                    end
-                    try
-                        obj.records.(label) = new_ids(obj.records.(label));
-                    end
-                end
-            end
-
-            obj.uels_ = uels;
-
-            % indicate that we need to recheck symbol records
-            obj.format_ = nan;
-            obj.number_records_ = nan;
-        end
-
         function set.records(obj, records)
             obj.records = records;
             obj.format_ = nan;
             obj.number_records_ = nan;
+        end
+
+        function uels = get.uels_(obj)
+            uels = struct();
+            for i = 1:obj.dimension_
+                uels.(obj.domain_label_{i}) = obj.getUELs(i);
+            end
+        end
+
+        function set.uels_(obj, uels)
+            if ~obj.container.features.categorical
+                for i = 1:obj.dimension_
+                    label = obj.domain_label_{i};
+                    obj.uels.(label).set(uels.(label), []);
+                end
+            end
         end
 
     end
@@ -434,6 +384,9 @@ classdef Symbol < handle
                 records = varargin;
             end
 
+            % collect uels
+            uels = cell(1, obj.dimension_);
+
             % string -> recall with cell of strings
             if isstring(records) && numel(records) == 1 || ischar(records)
                 if obj.container.indexed
@@ -442,7 +395,8 @@ classdef Symbol < handle
                 if obj.dimension_ ~= 1
                     error('Single string as records only accepted if symbol dimension equals 1.');
                 end
-                obj.setRecordsDomainField(1, {records});
+                uels{1} = {records};
+                obj.setRecordsDomainField(1, uels{1}, {records});
 
             % cell of strings -> domain entries
             elseif iscellstr(records)
@@ -454,7 +408,8 @@ classdef Symbol < handle
                     error('First dimension of cellstr must equal symbol dimension.');
                 end
                 for i = 1:obj.dimension_
-                    obj.setRecordsDomainField(i, records(i,:));
+                    uels{i} = unique(records(i,:), 'stable');
+                    obj.setRecordsDomainField(i, uels{i}, records(i,:));
                 end
 
             % numeric vector -> interpret as level values in matrix format
@@ -480,7 +435,8 @@ classdef Symbol < handle
                         if n_dom_fields > obj.dimension_
                             error('More domain fields than symbol dimension.');
                         end
-                        obj.setRecordsDomainField(n_dom_fields, records{i});
+                        uels{n_dom_fields} = unique(records{i}, 'stable');
+                        obj.setRecordsDomainField(n_dom_fields, uels{n_dom_fields}, records{i});
                     else
                         error('Cell elements must be cellstr or numeric.');
                     end
@@ -499,7 +455,8 @@ classdef Symbol < handle
                             if strcmp(field, obj.domain_label_{j}) || ...
                                 isa(obj.domain_{j}, 'GAMSTransfer.Set') && ...
                                 strcmp(field, obj.domain_{j}.name)
-                                obj.setRecordsDomainField(j, records.(field));
+                                uels{j} = unique(records.(field), 'stable');
+                                obj.setRecordsDomainField(j, uels{j}, records.(field));
                                 break;
                             end
                         end
@@ -519,7 +476,27 @@ classdef Symbol < handle
             end
 
             % check records format
-            obj.isValid('verbose', true);
+            warning('off');
+            if ~obj.isValid('verbose', true);
+                obj.records = [];
+                error(lastwarn);
+                warning('on')
+                return
+            end
+            warning('on')
+
+            % store uels
+            % Note: we don't need to init when categorical arrays are used, they
+            % are initialized already
+            if ~obj.container.indexed && ~obj.container.features.categorical
+                f = obj.format_;
+                for i = 1:obj.dimension_
+                    if ~isempty(uels{i})
+                        obj.initUELs(i, uels{i});
+                    end
+                end
+                obj.format_ = f;
+            end
         end
 
         function transformRecords(obj, target_format)
@@ -533,6 +510,10 @@ classdef Symbol < handle
             addRequired(p, 'target_format', is_string_char);
             parse(p, target_format);
             target_format = GAMSTransfer.RecordsFormat.str2int(p.Results.target_format);
+            if target_format == GAMSTransfer.RecordsFormat.DENSE_MATRIX && ...
+                obj.dimension == 0
+                target_format = GAMSTransfer.RecordsFormat.STRUCT;
+            end
 
             try
                 def_values = obj.getDefaultValues();
@@ -582,12 +563,14 @@ classdef Symbol < handle
                     return
                 case GAMSTransfer.RecordsFormat.TABLE
                     obj.records = struct2table(obj.records);
+                    obj.format_ = target_format;
                     return
                 end
             case GAMSTransfer.RecordsFormat.TABLE
                 switch target_format
                 case GAMSTransfer.RecordsFormat.STRUCT
                     obj.records = table2struct(obj.records, 'ToScalar', true);
+                    obj.format_ = target_format;
                     return
                 case GAMSTransfer.RecordsFormat.TABLE
                     return
@@ -645,6 +628,7 @@ classdef Symbol < handle
                     end
 
                     obj.records = records;
+                    obj.format_ = target_format;
                     return
                 end
             end
@@ -661,6 +645,7 @@ classdef Symbol < handle
                             obj.records.(f{1}) = sparse(obj.records.(f{1}));
                         end
                     end
+                    obj.format_ = target_format;
                     return
                 end
             case GAMSTransfer.RecordsFormat.SPARSE_MATRIX
@@ -671,6 +656,7 @@ classdef Symbol < handle
                             obj.records.(f{1}) = full(obj.records.(f{1}));
                         end
                     end
+                    obj.format_ = target_format;
                     return
                 case GAMSTransfer.RecordsFormat.SPARSE_MATRIX
                     return
@@ -722,8 +708,9 @@ classdef Symbol < handle
                         label = obj.domain_label_{i};
                         records.(label) = k_sorted(:,i);
                         if ~obj.container.indexed && obj.container.features.categorical
+                            uels = obj.domain_{i}.getUELs(1, 'ignore_unused', true);
                             records.(label) = categorical(records.(label), ...
-                                1:numel(obj.uels_.(label)), obj.uels_.(label));
+                                1:numel(uels), uels);
                         end
                     end
 
@@ -735,6 +722,16 @@ classdef Symbol < handle
                     end
 
                     obj.records = records;
+                    obj.format_ = target_format;
+
+                    % store UELs
+                    % In case of categorical this has already happen
+                    if ~obj.container.indexed && ~obj.container.features.categorical
+                        for i = 1:obj.dimension_
+                            obj.initUELs(i, obj.domain_{i}.getUELs(1, 'ignore_unused', true));
+                        end
+                    end
+
                     return
                 end
             end
@@ -799,6 +796,7 @@ classdef Symbol < handle
                 % check if records are empty
                 if isempty(obj.records)
                     obj.format_ = GAMSTransfer.RecordsFormat.EMPTY;
+                    valid = true;
                     return
                 end
 
@@ -814,6 +812,7 @@ classdef Symbol < handle
                 % check if records are empty
                 if isempty(labels)
                     obj.format_ = GAMSTransfer.RecordsFormat.EMPTY;
+                    valid = true;
                     return
                 end
 
@@ -839,18 +838,6 @@ classdef Symbol < handle
                 obj.format_ = GAMSTransfer.RecordsFormat.UNKNOWN;
                 if p.Results.verbose
                     warning(e.message);
-                end
-            end
-
-            % update uels from categorical arrays
-            if ~obj.container.indexed && obj.container.features.categorical && ...
-                (obj.format_ == GAMSTransfer.RecordsFormat.TABLE || ...
-                obj.format_ == GAMSTransfer.RecordsFormat.STRUCT)
-                for i = 1:obj.dimension_
-                    label = obj.domain_label_{i};
-                    if iscategorical(obj.records.(label))
-                        obj.uels_.(label) = categories(obj.records.(label));
-                    end
                 end
             end
         end
@@ -883,10 +870,11 @@ classdef Symbol < handle
                     continue;
                 end
 
-                added_uels = setdiff(obj.getUsedUels(i), obj.domain_{i}.getUsedUels(1));
-                n_added_uels = numel(added_uels);
-                if n_added_uels > 0
-                    dom_violations{end+1} = GAMSTransfer.DomainViolation(obj, i, obj.domain_{i}, added_uels);
+                added_uels = setdiff(obj.getUELs(i, 'ignore_unused', true), ...
+                    obj.domain_{i}.getUELs(1, 'ignore_unused', true));
+                if numel(added_uels) > 0
+                    dom_violations{end+1} = GAMSTransfer.DomainViolation(obj, ...
+                        i, obj.domain_{i}, added_uels);
                 end
             end
         end
@@ -1283,38 +1271,266 @@ classdef Symbol < handle
             end
         end
 
-        function uels = getUsedUels(obj, dim)
+        function uels = getUELs(obj, varargin)
             % Returns the UELs that are actually used in the symbol records
             %
-            % u = Symbol.getUsedUels(d) returns the actually usesd uels u for
-            % the d-th dimension.
-            %
 
-            if dim < 1 || dim > obj.dimension
-                error('Given dimension must be within [1,%d].', obj.dimension);
-            end
+            p = inputParser();
+            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
+                x <= obj.dimension;
+            addRequired(p, 'dimension', is_dimension);
+            addParameter(p, 'ignore_unused', false, @islogical);
+            parse(p, varargin{:});
+            dim = p.Results.dimension;
+            ignore_unused = p.Results.ignore_unused;
+
             if ~obj.isValid()
-                error('Symbol must be valid in order to get used UELs.');
+                error('Symbol must be valid in order to manage UELs.');
+            end
+            if obj.container.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
+            switch obj.format_
+            case GAMSTransfer.RecordsFormat.EMPTY
+                uels = {};
+                return
+            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
+            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
+                uels = obj.domain_{dim}.getUELs(1, 'ignore_unused', true);
+                return
+            otherwise
+                error('Symbol must be valid in order to manage UELs.');
             end
 
             label = obj.domain_label_{dim};
-            switch obj.format_
-            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
-                uels = obj.uels_.(label);
-            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
-                uels = obj.uels_.(label);
-                uels = uels(unique(obj.records.(label), 'stable'));
-            otherwise
-                uels = {};
+            if obj.container.features.categorical
+                if ignore_unused
+                    uels = categories(removecats(obj.records.(label)));
+                else
+                    uels = categories(obj.records.(label));
+                end
+            else
+                uels = obj.uels.(label).get();
+                if ignore_unused
+                    uels = uels(unique(obj.records.(label)));
+                end
             end
         end
 
-        function trimUels(obj)
-            % Removes unused UELs
-            %
+        function uels = getUELLabels(obj, varargin)
 
-            for i = 1:obj.dimension_
-                obj.uels_.(obj.domain_label_{i}) = obj.getUsedUels(i);
+            p = inputParser();
+            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
+                x <= obj.dimension;
+            addRequired(p, 'dimension', is_dimension);
+            addRequired(p, 'ids', @isnumeric);
+            parse(p, varargin{:});
+            dim = p.Results.dimension;
+            ids = p.Results.ids;
+
+            uel_label = obj.getUELs(dim);
+            idx = ids >= 1 & ids <= numel(uel_label);
+            uels = cell(1, numel(ids));
+            uels(idx) = uel_label(ids(idx));
+            uels(~idx) = {'<undefined>'};
+        end
+
+        function initUELs(obj, varargin)
+
+            p = inputParser();
+            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
+                x <= obj.dimension;
+            is_uels = @(x) isstring(x) && numel(x) == 1 || ischar(x) || iscellstr(x);
+            addRequired(p, 'dimension', is_dimension);
+            addRequired(p, 'uels', is_uels);
+            parse(p, varargin{:});
+            dim = p.Results.dimension;
+            uels = p.Results.uels;
+
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+            if obj.container.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
+            switch obj.format_
+            case GAMSTransfer.RecordsFormat.EMPTY
+                warning('Cannot assign UELs to empty symbol.');
+                return
+            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
+            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
+                error('Matrix formats do not maintain UELs. Modify domain set instead.');
+            otherwise
+                error('Symbol must be valid in order to manage UELs.');
+            end
+
+            label = obj.domain_label_{dim};
+            if obj.container.features.categorical
+                obj.records.(label) = categorical(double(obj.records.(label)), 1:numel(uels), uels);
+            else
+                obj.uels.(label).set(uels, []);
+            end
+        end
+
+        function setUELs(obj, varargin)
+
+            p = inputParser();
+            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
+                x <= obj.dimension;
+            is_uels = @(x) isstring(x) && numel(x) == 1 || ischar(x) || iscellstr(x);
+            addRequired(p, 'dimension', is_dimension);
+            addRequired(p, 'uels', is_uels);
+            parse(p, varargin{:});
+            dim = p.Results.dimension;
+            uels = p.Results.uels;
+
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+            if obj.container.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
+            switch obj.format_
+            case GAMSTransfer.RecordsFormat.EMPTY
+                warning('Cannot assign UELs to empty symbol.');
+                return
+            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
+            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
+                error('Matrix formats do not maintain UELs. Modify domain set instead.');
+            otherwise
+                error('Symbol must be valid in order to manage UELs.');
+            end
+
+            label = obj.domain_label_{dim};
+            if obj.container.features.categorical
+                obj.records.(label) = setcats(obj.records.(label), uels);
+            else
+                obj.records.(label) = obj.uels.(label).set(uels, obj.records.(label));
+            end
+        end
+
+        function addUELs(obj, varargin)
+
+            p = inputParser();
+            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
+                x <= obj.dimension;
+            is_uels = @(x) isstring(x) && numel(x) == 1 || ischar(x) || iscellstr(x);
+            addRequired(p, 'dimension', is_dimension);
+            addRequired(p, 'uels', is_uels);
+            parse(p, varargin{:});
+            dim = p.Results.dimension;
+            uels = p.Results.uels;
+
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+            if obj.container.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
+            switch obj.format_
+            case GAMSTransfer.RecordsFormat.EMPTY
+                warning('Cannot add UELs to empty symbol.');
+                return
+            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
+            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
+                error('Matrix formats do not maintain UELs. Modify domain set instead.');
+            otherwise
+                error('Symbol must be valid in order to manage UELs.');
+            end
+
+            label = obj.domain_label_{dim};
+            if obj.container.features.categorical
+                obj.records.(label) = addcats(obj.records.(label), uels);
+            else
+                obj.uels.(label).add(uels);
+            end
+        end
+
+        function removeUELs(obj, varargin)
+
+            p = inputParser();
+            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
+                x <= obj.dimension;
+            is_uels = @(x) isstring(x) && numel(x) == 1 || ischar(x) || iscellstr(x);
+            addRequired(p, 'dimension', is_dimension);
+            addOptional(p, 'uels', {}, is_uels);
+            parse(p, varargin{:});
+            dim = p.Results.dimension;
+            uels = p.Results.uels;
+            if isstring(uels) || ischar(uels)
+                uels = {uels};
+            end
+
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+            if obj.container.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
+            switch obj.format_
+            case GAMSTransfer.RecordsFormat.EMPTY
+                return
+            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
+            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
+                error('Matrix formats do not maintain UELs. Modify domain set instead.');
+            otherwise
+                error('Symbol must be valid in order to manage UELs.');
+            end
+
+            label = obj.domain_label_{dim};
+            if obj.container.features.categorical
+                if isempty(uels)
+                    obj.records.(label) = removecats(obj.records.(label));
+                else
+                    obj.records.(label) = removecats(obj.records.(label), uels);
+                end
+            else
+                obj.records.(label) = obj.uels.(label).remove(uels, obj.records.(label));
+            end
+
+        end
+
+        function renameUELs(obj, varargin)
+
+            p = inputParser();
+            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
+                x <= obj.dimension;
+            is_uels = @(x) isstring(x) && numel(x) == 1 || ischar(x) || iscellstr(x);
+            addRequired(p, 'dimension', is_dimension);
+            addRequired(p, 'olduels', is_uels);
+            addRequired(p, 'newuels', is_uels);
+            parse(p, varargin{:});
+            dim = p.Results.dimension;
+            olduels = p.Results.olduels;
+            newuels = p.Results.newuels;
+
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+            if obj.container.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
+            switch obj.format_
+            case GAMSTransfer.RecordsFormat.EMPTY
+                return
+            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
+            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
+                error('Matrix formats do not maintain UELs. Modify domain set instead.');
+            otherwise
+                error('Symbol must be valid in order to manage UELs.');
+            end
+
+            label = obj.domain_label_{dim};
+            if obj.container.features.categorical
+                obj.records.(label) = renamecats(obj.records.(label), olduels, newuels);
+            else
+                obj.uels.(label).rename(olduels, newuels);
             end
         end
 
@@ -1352,7 +1568,7 @@ classdef Symbol < handle
             case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
                 for i = 1:obj.dimension_
                     label = obj.domain_label_{i};
-                    domain{i} = obj.records.(label)(idx);
+                    domain{i} = double(obj.records.(label)(idx));
                 end
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
                 k = cell(1, 20);
@@ -1366,7 +1582,8 @@ classdef Symbol < handle
             if ~obj.container.indexed
                 for i = 1:obj.dimension_
                     label = obj.domain_label_{i};
-                    domain{i} = obj.uels_.(label){domain{i}};
+                    d = obj.getUELLabels(i, domain{i});
+                    domain{i} = d{1};
                 end
             end
         end
@@ -1397,9 +1614,6 @@ classdef Symbol < handle
                     if ~is_domain_column
                         error('Field ''%s'' not allowed.', labels{i});
                     end
-                    if ~isfield(obj.uels_, labels{i})
-                        error('Field ''uels'' is missing the entry for ''%s''.', labels{i});
-                    end
                     if obj.container.features.categorical && iscategorical(field)
                         if obj.container.indexed
                             error('Field ''%s'' must not be categorical in indexed mode.', labels{i})
@@ -1408,13 +1622,16 @@ classdef Symbol < handle
                             error('Field ''%s'' has undefined domain entries.', labels{i});
                         end
                     elseif isnumeric(field)
+                        if ~obj.container.indexed && obj.container.features.categorical
+                            error('Field ''%s'' must be categorical.', labels{i});
+                        end
                         if any(isnan(field)) || any(isinf(field))
                             error('Field ''%s'' contains Inf or NaN.', labels{i});
                         end
                         if obj.container.indexed
                             maxuel = obj.size_(i);
                         else
-                            maxuel = numel(obj.uels_.(labels{i}));
+                            maxuel = inf;
                         end
                         if min(field) < 1 || max(field) > maxuel
                             error('Field ''%s'' must have values in [%d,%d].', labels{i}, 1, maxuel);
@@ -1536,7 +1753,7 @@ classdef Symbol < handle
             end
         end
 
-        function setRecordsDomainField(obj, dim, domains)
+        function setRecordsDomainField(obj, dim, uels, domains)
             label = obj.domain_label_{dim};
 
             if numel(size(domains)) > 2
@@ -1550,17 +1767,14 @@ classdef Symbol < handle
                 return;
             end
 
-            % set uels
-            obj.uels_.(label) = unique(domains, 'stable');
-
             % set record values in numerical or categorical format
             if obj.container.features.categorical
-                obj.records.(label) = categorical(domains, obj.uels_.(label));
+                obj.records.(label) = categorical(domains, uels);
             else
-                map = containers.Map(obj.uels_.(label), 1:numel(obj.uels_.(label)));
-                recs = zeros(s(2), 1);
-                for j = 1:s(2)
-                    recs(j) = map(domains{j});
+                map = containers.Map(uels, 1:numel(uels));
+                recs = zeros(numel(domains), 1);
+                for i = 1:numel(domains)
+                    recs(i) = map(domains{i});
                 end
                 obj.records.(label) = recs;
             end

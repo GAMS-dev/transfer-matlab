@@ -86,7 +86,7 @@ classdef Container < handle
         data
     end
 
-    properties (Hidden)
+    properties (Hidden, SetAccess = private)
         reorder_after_add = true
         features
     end
@@ -103,7 +103,8 @@ classdef Container < handle
             % input arguments
             p = inputParser();
             is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-                ~strcmpi(x, 'system_directory') && ~strcmpi(x, 'indexed');
+                ~strcmpi(x, 'system_directory') && ~strcmpi(x, 'indexed') && ...
+                ~strcmpi(x, 'features');
             if obj.features.parser_optional
                 addOptional(p, 'filename', '', is_string_char);
             else
@@ -111,6 +112,7 @@ classdef Container < handle
             end
             addParameter(p, 'system_directory', '', is_string_char);
             addParameter(p, 'indexed', false, @islogical);
+            addParameter(p, 'features', struct(), @isstruct);
 
             % parse input arguments
             if ~obj.features.parser_optional
@@ -121,7 +123,12 @@ classdef Container < handle
             obj.system_directory = GAMSTransfer.Utils.checkSystemDirectory(p.Results.system_directory);
             obj.filename = GAMSTransfer.Utils.checkFilename(p.Results.filename, '.gdx', true);
             obj.indexed = p.Results.indexed;
-
+            feature_names = fieldnames(obj.features);
+            for i = 1:numel(feature_names)
+                if isfield(p.Results.features, feature_names{i})
+                    obj.features.(feature_names{i}) = p.Results.features.(feature_names{i});
+                end
+            end
             if strcmp(obj.filename, '')
                 return
             end
@@ -852,7 +859,7 @@ classdef Container < handle
             for i = 1:numel(symbols)
                 symbol = obj.data.(symbols{i});
                 for j = 1:symbol.dimension
-                    uels = symbol.uels.(symbol.domain_label{j});
+                    uels = symbol.getUELs(j);
                     for k = 1:numel(uels)
                         map.put(uels{k}, true);
                     end

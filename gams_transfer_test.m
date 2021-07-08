@@ -54,10 +54,71 @@ function gams_transfer_test(varargin)
         cfg.working_dir = p.Results.working_dir;
         cfg.system_dir = p.Results.system_dir;
         cfg.filenames = gams_transfer_test_create_gdx(p.Results.working_dir);
+        features = GAMSTransfer.Utils.checkFeatureSupport();
 
         % run tests
         test_general(cfg);
+
+        disp('Configuration: default');
+        cfg.features = features;
         test_container(cfg);
+        test_uels(cfg);
+        test_symbols(cfg);
+        test_readwrite(cfg);
+        test_idx_symbols(cfg);
+        test_idx_readwrite(cfg);
+        test_trnsport(cfg);
+
+        disp('Configuration: disable categorical');
+        cfg.features = features;
+        cfg.features.categorical = false;
+        test_container(cfg);
+        test_uels(cfg);
+        test_symbols(cfg);
+        test_readwrite(cfg);
+        test_idx_symbols(cfg);
+        test_idx_readwrite(cfg);
+        test_trnsport(cfg);
+
+        disp('Configuration: disable table');
+        cfg.features = features;
+        cfg.features.table = false;
+        test_container(cfg);
+        test_uels(cfg);
+        test_symbols(cfg);
+        test_readwrite(cfg);
+        test_idx_symbols(cfg);
+        test_idx_readwrite(cfg);
+        test_trnsport(cfg);
+
+        disp('Configuration: disable table & categorical');
+        cfg.features = features;
+        cfg.features.table = false;
+        cfg.features.categorical = false;
+        test_container(cfg);
+        test_uels(cfg);
+        test_symbols(cfg);
+        test_readwrite(cfg);
+        test_idx_symbols(cfg);
+        test_idx_readwrite(cfg);
+        test_trnsport(cfg);
+
+        disp('Configuration: disable parser_optional');
+        cfg.features = features;
+        cfg.features.parser_optional = false;
+        test_container(cfg);
+        test_uels(cfg);
+        test_symbols(cfg);
+        test_readwrite(cfg);
+        test_idx_symbols(cfg);
+        test_idx_readwrite(cfg);
+        test_trnsport(cfg);
+
+        disp('Configuration: disable handle_comparison');
+        cfg.features = features;
+        cfg.features.handle_comparison = false;
+        test_container(cfg);
+        test_uels(cfg);
         test_symbols(cfg);
         test_readwrite(cfg);
         test_idx_symbols(cfg);

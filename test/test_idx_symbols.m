@@ -35,7 +35,7 @@ end
 
 function test_idx_addSymbols(t, cfg)
 
-    gdx = GAMSTransfer.Container('indexed', true);
+    gdx = GAMSTransfer.Container('indexed', true, 'features', cfg.features);
 
     t.add('idx_add_symbols_parameter_1');
     p1 = GAMSTransfer.Parameter(gdx, 'p1');
@@ -49,7 +49,6 @@ function test_idx_addSymbols(t, cfg)
     t.assert(numel(p1.size) == 0);
     t.assert(strcmp(p1.format, 'empty'));
     t.assert(p1.getNumRecords() == 0);
-    t.assert(numel(fieldnames(p1.uels)) == 0);
     t.assert(p1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'p1'));
@@ -72,8 +71,6 @@ function test_idx_addSymbols(t, cfg)
     t.assert(p2.size(1) == 0);
     t.assert(strcmp(p2.format, 'empty'));
     t.assert(p2.getNumRecords() == 0);
-    t.assert(isfield(p2.uels, 'dim_1'));
-    t.assert(numel(p2.uels.dim_1) == 0);
     t.assert(p2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 'p2'));
@@ -102,12 +99,6 @@ function test_idx_addSymbols(t, cfg)
     t.assert(p3.size(3) == 3);
     t.assert(strcmp(p3.format, 'empty'));
     t.assert(p3.getNumRecords() == 0);
-    t.assert(isfield(p3.uels, 'dim_1'));
-    t.assert(isfield(p3.uels, 'dim_2'));
-    t.assert(isfield(p3.uels, 'dim_3'));
-    t.assert(numel(p3.uels.dim_1) == 0);
-    t.assert(numel(p3.uels.dim_2) == 0);
-    t.assert(numel(p3.uels.dim_3) == 0);
     t.assert(p3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'p3'));
@@ -186,7 +177,7 @@ end
 
 function test_idx_changeSymbol(t, cfg)
 
-    gdx = GAMSTransfer.Container('indexed', true);
+    gdx = GAMSTransfer.Container('indexed', true, 'features', cfg.features);
     p1 = GAMSTransfer.Parameter(gdx, 'p1', 5);
     p2 = GAMSTransfer.Parameter(gdx, 'p2', [5,10]);
 
@@ -379,19 +370,11 @@ function test_idx_changeSymbol(t, cfg)
             t.assertEquals(e.message(1:numel(msg_begin)), msg_begin);
         end
     end
-
-    t.add('idx_change_symbol_uels');
-    try
-        p1.uels = struct();
-        t.assert(false);
-    catch e
-        t.assertEquals(e.message, 'Setting symbol UELs not allowed in indexed mode.');
-    end
 end
 
 function test_idx_setRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container('indexed', true);
+    gdx = GAMSTransfer.Container('indexed', true, 'features', cfg.features);
 
     p1 = GAMSTransfer.Parameter(gdx, 'p1', 5);
 
@@ -475,11 +458,13 @@ function test_idx_setRecords(t, cfg)
     end
 
     t.add('set_records_cell_3');
-    warning('off')
-    p1.setRecords({[1; 4], [11; 44], [111; 444], [1111; 4444], [11111; 44444]});
-    t.assert(~p1.isValid());
-    t.assertEquals(lastwarn(), 'Domain ''dim_1'' is missing.');
-    warning('on')
+    try
+        t.assert(false);
+        p1.setRecords({[1; 4], [11; 44], [111; 444], [1111; 4444], [11111; 44444]});
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain ''dim_1'' is missing.');
+    end
 
     t.add('set_records_cell_4');
     try
@@ -537,19 +522,23 @@ function test_idx_setRecords(t, cfg)
     t.assert(p1.isValid());
 
     t.add('set_records_struct_5');
-    warning('off')
-    p1.setRecords(struct('value', [1, 2, 3]));
-    t.assert(~p1.isValid());
-    t.assertEquals(lastwarn(), 'Domain ''dim_1'' is missing.');
-    warning('on')
+    try
+        t.assert(false);
+        p1.setRecords(struct('value', [1, 2, 3]));
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain ''dim_1'' is missing.');
+    end
 
     if gdx.features.table
         t.add('set_records_table_1');
         tbl = table([1; 2; 3], [1; 2; 3]);
-        warning('off')
-        p1.setRecords(tbl);
-        t.assert(~p1.isValid());
-        warning('on')
+        try
+            t.assert(false);
+            p1.setRecords(tbl);
+        catch
+            t.reset();
+        end
 
         t.add('set_records_table_2');
         tbl = table([1; 2; 3], [1; 2; 3]);
@@ -562,7 +551,7 @@ end
 
 function test_idx_writeUnordered(t, cfg)
 
-    gdx = GAMSTransfer.Container('indexed', true);
+    gdx = GAMSTransfer.Container('indexed', true, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     c = GAMSTransfer.Parameter(gdx, 'c', [5,10]);
@@ -600,7 +589,7 @@ end
 
 function test_idx_transformRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'indexed', true);
+    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'indexed', true, 'features', cfg.features);
 
     formats = {'struct', 'table', 'dense_matrix', 'sparse_matrix'};
     a_recs = cell(1, numel(formats));

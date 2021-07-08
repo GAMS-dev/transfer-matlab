@@ -85,7 +85,7 @@ classdef GAMSTest < handle
                 n_fails = n_fails + numel(fails);
                 n_tests = n_tests + numel(obj.tests{i}.asserts);
             end
-            fprintf('Test Summary (%30s): %3d testsets (%5d tests), %.2f s, %2d failures. ', obj.name, numel(obj.tests), n_tests, time, n_fails);
+            fprintf('Test Summary (%30s): %3d testsets (%5d tests), %.2f s, %3d failures. ', obj.name, numel(obj.tests), n_tests, time, n_fails);
             if n_fails > 0
                 fprintf('FAIL!\n');
             else
@@ -113,7 +113,11 @@ classdef GAMSTest < handle
                 obj.assert(symbol.getNumRecords() >= 0);
                 obj.assert(symbol.getNumValues() == 0 || isnan(symbol.getNumValues()));
                 obj.assert(isempty(symbol.records));
-                obj.assert(isstruct(symbol.uels));
+                if ~symbol.container.indexed
+                    for i = 1:symbol.dimension
+                        obj.assert(strcmp(symbol.format, 'not_read') || iscell(symbol.getUELs(i)) && isempty(symbol.getUELs(i)));
+                    end
+                end
                 obj.assert(islogical(symbol.isValid()));
                 obj.assert(ischar(symbol.format));
                 obj.assert(strcmp(symbol.format, 'not_read') || strcmp(symbol.format, 'empty'));

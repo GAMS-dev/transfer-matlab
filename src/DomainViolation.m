@@ -102,7 +102,7 @@ classdef DomainViolation
             end
 
             % get domain data
-            domain_uels = obj.domain.getUsedUels(1);
+            domain_uels = obj.domain.getUELs(1, 'ignore_unused', true);
 
             % extend domain uels
             n = numel(domain_uels);

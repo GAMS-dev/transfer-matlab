@@ -33,7 +33,7 @@ end
 
 function test_idx_read(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'indexed', true);
+    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'indexed', true, 'features', cfg.features);
 
     t.add('idx_read_basic_info');
     t.assertEquals(gdx.system_directory, cfg.system_dir);
@@ -56,7 +56,6 @@ function test_idx_read(t, cfg)
     t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
     t.assert(s.getNumRecords() == 1);
-    t.assert(numel(fieldnames(s.uels)) == 0);
     t.assert(~s.isValid());
 
     t.add('idx_read_parameter_1d_basic');
@@ -77,9 +76,6 @@ function test_idx_read(t, cfg)
     t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
     t.assert(s.getNumRecords() == 3);
-    t.assert(numel(fieldnames(s.uels)) == 1);
-    t.assert(isfield(s.uels, 'dim_1'));
-    t.assertEquals(s.uels.dim_1, {});
     t.assert(~s.isValid());
 
     t.add('indexed_parameter_2d_basic');
@@ -103,11 +99,6 @@ function test_idx_read(t, cfg)
     t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
     t.assert(s.getNumRecords() == 3);
-    t.assert(numel(fieldnames(s.uels)) == 2);
-    t.assert(isfield(s.uels, 'dim_1'));
-    t.assert(isfield(s.uels, 'dim_2'));
-    t.assertEquals(s.uels.dim_1, {});
-    t.assertEquals(s.uels.dim_2, {});
     t.assert(~s.isValid());
 
     gdx.read('format', 'struct');
@@ -122,7 +113,6 @@ function test_idx_read(t, cfg)
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.value) == s.getNumRecords());
     t.assert(s.records.value == 4);
-    t.assert(numel(fieldnames(s.uels)) == 0);
 
     t.add('idx_read_parameter_1d_records_struct');
     s = gdx.data.b;
@@ -141,9 +131,6 @@ function test_idx_read(t, cfg)
     t.assert(s.records.value(1) == 1);
     t.assert(s.records.value(2) == 3);
     t.assert(s.records.value(3) == 5);
-    t.assert(numel(fieldnames(s.uels)) == 1);
-    t.assert(isfield(s.uels, 'dim_1'));
-    t.assert(numel(s.uels.dim_1) == 0);
 
     t.add('indexed_parameter_2d_records_struct');
     s = gdx.data.c;
@@ -167,11 +154,6 @@ function test_idx_read(t, cfg)
     t.assert(s.records.value(1) == 16);
     t.assert(s.records.value(2) == 37);
     t.assert(s.records.value(3) == 49);
-    t.assert(numel(fieldnames(s.uels)) == 2);
-    t.assert(isfield(s.uels, 'dim_1'));
-    t.assert(isfield(s.uels, 'dim_2'));
-    t.assert(numel(s.uels.dim_1) == 0);
-    t.assert(numel(s.uels.dim_2) == 0);
 
     if gdx.features.table
         gdx.read('format', 'table');
@@ -186,7 +168,6 @@ function test_idx_read(t, cfg)
         t.assertEquals(s.records.Properties.VariableNames{1}, 'value');
         t.assert(numel(s.records.value) == s.getNumRecords());
         t.assert(s.records.value == 4);
-        t.assert(numel(fieldnames(s.uels)) == 0);
 
         t.add('indexed_parameter_1d_records_table');
         s = gdx.data.b;
@@ -205,9 +186,6 @@ function test_idx_read(t, cfg)
         t.assert(s.records.value(1) == 1);
         t.assert(s.records.value(2) == 3);
         t.assert(s.records.value(3) == 5);
-        t.assert(numel(fieldnames(s.uels)) == 1);
-        t.assert(isfield(s.uels, 'dim_1'));
-        t.assert(numel(s.uels.dim_1) == 0);
 
         t.add('indexed_parameter_2d_records_table');
         s = gdx.data.c;
@@ -231,11 +209,6 @@ function test_idx_read(t, cfg)
         t.assert(s.records.value(1) == 16);
         t.assert(s.records.value(2) == 37);
         t.assert(s.records.value(3) == 49);
-        t.assert(numel(fieldnames(s.uels)) == 2);
-        t.assert(isfield(s.uels, 'dim_1'));
-        t.assert(isfield(s.uels, 'dim_2'));
-        t.assert(numel(s.uels.dim_1) == 0);
-        t.assert(numel(s.uels.dim_2) == 0);
     end
 
     gdx.read('format', 'dense_matrix');
@@ -250,7 +223,6 @@ function test_idx_read(t, cfg)
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.value) == 1);
     t.assert(s.records.value == 4);
-    t.assert(numel(fieldnames(s.uels)) == 0);
 
     t.add('indexed_parameter_1d_records_dense_matrix');
     s = gdx.data.b;
@@ -268,9 +240,6 @@ function test_idx_read(t, cfg)
     t.assert(s.records.value(3) == 3);
     t.assert(s.records.value(4) == 0);
     t.assert(s.records.value(5) == 5);
-    t.assert(numel(fieldnames(s.uels)) == 1);
-    t.assert(isfield(s.uels, 'dim_1'));
-    t.assert(numel(s.uels.dim_1) == 0);
 
     t.add('indexed_parameter_2d_records_dense_matrix');
     s = gdx.data.c;
@@ -292,11 +261,6 @@ function test_idx_read(t, cfg)
     t.assert(s.records.value(5,1) == 0);
     t.assert(s.records.value(5,3) == 0);
     t.assert(s.records.value(5,9) == 0);
-    t.assert(numel(fieldnames(s.uels)) == 2);
-    t.assert(isfield(s.uels, 'dim_1'));
-    t.assert(isfield(s.uels, 'dim_2'));
-    t.assert(numel(s.uels.dim_1) == 0);
-    t.assert(numel(s.uels.dim_2) == 0);
 
     gdx.read('format', 'sparse_matrix');
 
@@ -312,7 +276,6 @@ function test_idx_read(t, cfg)
     t.assert(numel(s.records.value) == 1);
     t.assert(nnz(s.records.value) == s.getNumValues());
     t.assert(s.records.value == 4);
-    t.assert(numel(fieldnames(s.uels)) == 0);
 
     t.add('indexed_parameter_1d_records_sparse_matrix');
     s = gdx.data.b;
@@ -332,9 +295,6 @@ function test_idx_read(t, cfg)
     t.assert(s.records.value(3) == 3);
     t.assert(s.records.value(4) == 0);
     t.assert(s.records.value(5) == 5);
-    t.assert(numel(fieldnames(s.uels)) == 1);
-    t.assert(isfield(s.uels, 'dim_1'));
-    t.assert(numel(s.uels.dim_1) == 0);
 
     t.add('indexed_parameter_2d_records_sparse_matrix');
     s = gdx.data.c;
@@ -358,16 +318,11 @@ function test_idx_read(t, cfg)
     t.assert(s.records.value(5,1) == 0);
     t.assert(s.records.value(5,3) == 0);
     t.assert(s.records.value(5,9) == 0);
-    t.assert(numel(fieldnames(s.uels)) == 2);
-    t.assert(isfield(s.uels, 'dim_1'));
-    t.assert(isfield(s.uels, 'dim_2'));
-    t.assert(numel(s.uels.dim_1) == 0);
-    t.assert(numel(s.uels.dim_2) == 0);
 end
 
 function test_idx_readSpecialValues(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{2}, 'indexed', true);
+    gdx = GAMSTransfer.Container(cfg.filenames{2}, 'indexed', true, 'features', cfg.features);
     gdx.read('format', 'struct');
 
     t.add('idx_read_special_values');
@@ -400,7 +355,7 @@ end
 function test_idx_readWrite(t, cfg)
 
     for i = [2,4]
-        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'indexed', true);
+        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'indexed', true, 'features', cfg.features);
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
         t.add(sprintf('idx_read_write_struct_%d', i));

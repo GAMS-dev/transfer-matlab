@@ -30,7 +30,7 @@ function test_trnsport(cfg)
 
     for k = 1:3
         if k == 1
-            m = GAMSTransfer.Container();
+            m = GAMSTransfer.Container('features', cfg.features);
             i = GAMSTransfer.Set(m, 'i', ...
                 'records', {'seattle', 'san-diego'}, ...
                 'description', 'canning plants');
@@ -68,7 +68,7 @@ function test_trnsport(cfg)
                 'records', {[325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]}, ...
                 'description', 'satisfy demand at market j');
         elseif k == 2
-            m = GAMSTransfer.Container();
+            m = GAMSTransfer.Container('features', cfg.features);
             i = GAMSTransfer.Set(m, 'i', 'description', 'canning plants');
             i.setRecords({'seattle', 'san-diego'});
             j = GAMSTransfer.Set(m, 'j', 'description', 'markets');
@@ -94,12 +94,23 @@ function test_trnsport(cfg)
             demand = GAMSTransfer.Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
             demand.setRecords([325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]);
         elseif k == 3
-            m = GAMSTransfer.Container();
+            m = GAMSTransfer.Container('features', cfg.features);
             i = GAMSTransfer.Set(m, 'i', 'description', 'canning plants');
-            i.records = struct('uni_1', categorical({'seattle'; 'san-diego'}, {'seattle'; 'san-diego'}));
+            if m.features.categorical
+                i.records = struct('uni_1', categorical({'seattle'; 'san-diego'}, ...
+                    {'seattle'; 'san-diego'}));
+            else
+                i.records = struct('uni_1', (1:2)');
+                i.initUELs(1, {'seattle'; 'san-diego'});
+            end
             j = GAMSTransfer.Set(m, 'j', 'description', 'markets');
-            j.records = struct('uni_1', categorical({'new-york'; 'chicago'; 'topeka'}, ...
-                {'new-york'; 'chicago'; 'topeka'}));
+            if m.features.categorical
+                j.records = struct('uni_1', categorical({'new-york'; 'chicago'; 'topeka'}, ...
+                    {'new-york'; 'chicago'; 'topeka'}));
+            else
+                j.records = struct('uni_1', (1:3)');
+                j.initUELs(1, {'new-york'; 'chicago'; 'topeka'});
+            end
             a = GAMSTransfer.Parameter(m, 'a', i, 'description', 'capacity of plant i in cases');
             a.records = struct('value', [350; 600]);
             b = GAMSTransfer.Parameter(m, 'b', j, 'description', 'demand at market j in cases');
@@ -121,11 +132,11 @@ function test_trnsport(cfg)
             demand = GAMSTransfer.Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
             demand.records = struct('level', [325; 300; 275], 'marginal', [0.225; 0.153; 0.126], 'lower', [325; 300; 275]);
         elseif k == 4
-            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_1.gdx'));
+            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_1.gdx', 'features', cfg.features));
         elseif k == 5
-            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_2.gdx'));
+            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_2.gdx', 'features', cfg.features));
         elseif k == 6
-            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_3.gdx'));
+            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_3.gdx', 'features', cfg.features));
         end
 
         if k == 4 || k == 5 || k == 6
@@ -190,15 +201,13 @@ function test_trnsport(cfg)
             t.assertEquals(i.records.uni_1(1), 'seattle');
             t.assertEquals(i.records.uni_1(2), 'san-diego');
         else
-            t.assert(i.records.uni_1{1} == 1);
-            t.assert(i.records.uni_1{2} == 2);
+            t.assert(i.records.uni_1(1) == 1);
+            t.assert(i.records.uni_1(2) == 2);
         end
-        t.assert(isstruct(i.uels));
-        t.assert(numel(fieldnames(i.uels)) == 1);
-        t.assert(isfield(i.uels, 'uni_1'));
-        t.assert(numel(i.uels.uni_1) == 2);
-        t.assertEquals(i.uels.uni_1{1}, 'seattle');
-        t.assertEquals(i.uels.uni_1{2}, 'san-diego');
+        uels = i.getUELs(1);
+        t.assert(numel(uels) == 2);
+        t.assertEquals(uels{1}, 'seattle');
+        t.assertEquals(uels{2}, 'san-diego');
 
         t.add(sprintf('test_trnsport_symbol_j_%d', k));
         t.assert(isa(j, 'GAMSTransfer.Set'));
@@ -225,17 +234,15 @@ function test_trnsport(cfg)
             t.assertEquals(j.records.uni_1(2), 'chicago');
             t.assertEquals(j.records.uni_1(3), 'topeka');
         else
-            t.assert(j.records.uni_1{1} == 1);
-            t.assert(j.records.uni_1{2} == 2);
-            t.assert(j.records.uni_1{3} == 3);
+            t.assert(j.records.uni_1(1) == 1);
+            t.assert(j.records.uni_1(2) == 2);
+            t.assert(j.records.uni_1(3) == 3);
         end
-        t.assert(isstruct(j.uels));
-        t.assert(numel(fieldnames(j.uels)) == 1);
-        t.assert(isfield(j.uels, 'uni_1'));
-        t.assert(numel(j.uels.uni_1) == 3);
-        t.assertEquals(j.uels.uni_1{1}, 'new-york');
-        t.assertEquals(j.uels.uni_1{2}, 'chicago');
-        t.assertEquals(j.uels.uni_1{3}, 'topeka');
+        uels = j.getUELs(1);
+        t.assert(numel(uels) == 3);
+        t.assertEquals(uels{1}, 'new-york');
+        t.assertEquals(uels{2}, 'chicago');
+        t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_a_%d', k));
         t.assert(isa(a, 'GAMSTransfer.Parameter'));
@@ -262,12 +269,10 @@ function test_trnsport(cfg)
         t.assert(numel(a.records.value) == 2);
         t.assert(a.records.value(1) == 350);
         t.assert(a.records.value(2) == 600);
-        t.assert(isstruct(a.uels));
-        t.assert(numel(fieldnames(a.uels)) == 1);
-        t.assert(isfield(a.uels, 'i_1'));
-        t.assert(numel(a.uels.i_1) == 2);
-        t.assertEquals(a.uels.i_1{1}, 'seattle');
-        t.assertEquals(a.uels.i_1{2}, 'san-diego');
+        uels = a.getUELs(1);
+        t.assert(numel(uels) == 2);
+        t.assertEquals(uels{1}, 'seattle');
+        t.assertEquals(uels{2}, 'san-diego');
 
         t.add(sprintf('test_trnsport_symbol_b_%d', k));
         t.assert(isa(b, 'GAMSTransfer.Parameter'));
@@ -295,13 +300,11 @@ function test_trnsport(cfg)
         t.assert(b.records.value(1) == 325);
         t.assert(b.records.value(2) == 300);
         t.assert(b.records.value(3) == 275);
-        t.assert(isstruct(b.uels));
-        t.assert(numel(fieldnames(b.uels)) == 1);
-        t.assert(isfield(b.uels, 'j_1'));
-        t.assert(numel(b.uels.j_1) == 3);
-        t.assertEquals(b.uels.j_1{1}, 'new-york');
-        t.assertEquals(b.uels.j_1{2}, 'chicago');
-        t.assertEquals(b.uels.j_1{3}, 'topeka');
+        uels = b.getUELs(1);
+        t.assert(numel(uels) == 3);
+        t.assertEquals(uels{1}, 'new-york');
+        t.assertEquals(uels{2}, 'chicago');
+        t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_d_%d', k));
         t.assert(isa(d, 'GAMSTransfer.Parameter'));
@@ -335,17 +338,15 @@ function test_trnsport(cfg)
         t.assert(d.records.value(2,1) == 2.5);
         t.assert(d.records.value(2,2) == 1.8);
         t.assert(d.records.value(2,3) == 1.4);
-        t.assert(isstruct(d.uels));
-        t.assert(numel(fieldnames(d.uels)) == 2);
-        t.assert(isfield(d.uels, 'i_1'));
-        t.assert(isfield(d.uels, 'j_2'));
-        t.assert(numel(d.uels.i_1) == 2);
-        t.assert(numel(d.uels.j_2) == 3);
-        t.assertEquals(d.uels.i_1{1}, 'seattle');
-        t.assertEquals(d.uels.i_1{2}, 'san-diego');
-        t.assertEquals(d.uels.j_2{1}, 'new-york');
-        t.assertEquals(d.uels.j_2{2}, 'chicago');
-        t.assertEquals(d.uels.j_2{3}, 'topeka');
+        uels = d.getUELs(1);
+        t.assert(numel(uels) == 2);
+        t.assertEquals(uels{1}, 'seattle');
+        t.assertEquals(uels{2}, 'san-diego');
+        uels = d.getUELs(2);
+        t.assert(numel(uels) == 3);
+        t.assertEquals(uels{1}, 'new-york');
+        t.assertEquals(uels{2}, 'chicago');
+        t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_f_%d', k));
         t.assert(isa(f, 'GAMSTransfer.Parameter'));
@@ -365,8 +366,6 @@ function test_trnsport(cfg)
         t.assert(isfield(f.records, 'value'));
         t.assert(numel(f.records.value) == 1);
         t.assert(f.records.value(1) == 90);
-        t.assert(isstruct(f.uels));
-        t.assert(numel(fieldnames(f.uels)) == 0);
 
         t.add(sprintf('test_trnsport_symbol_c_%d', k));
         t.assert(isa(c, 'GAMSTransfer.Parameter'));
@@ -400,17 +399,15 @@ function test_trnsport(cfg)
         t.assert(c.records.value(2,1) == 0.225);
         t.assert(c.records.value(2,2) == 0.162);
         t.assert(c.records.value(2,3) == 0.126);
-        t.assert(isstruct(c.uels));
-        t.assert(numel(fieldnames(c.uels)) == 2);
-        t.assert(isfield(c.uels, 'i_1'));
-        t.assert(isfield(c.uels, 'j_2'));
-        t.assert(numel(c.uels.i_1) == 2);
-        t.assert(numel(c.uels.j_2) == 3);
-        t.assertEquals(c.uels.i_1{1}, 'seattle');
-        t.assertEquals(c.uels.i_1{2}, 'san-diego');
-        t.assertEquals(c.uels.j_2{1}, 'new-york');
-        t.assertEquals(c.uels.j_2{2}, 'chicago');
-        t.assertEquals(c.uels.j_2{3}, 'topeka');
+        uels = c.getUELs(1);
+        t.assert(numel(uels) == 2);
+        t.assertEquals(uels{1}, 'seattle');
+        t.assertEquals(uels{2}, 'san-diego');
+        uels = c.getUELs(2);
+        t.assert(numel(uels) == 3);
+        t.assertEquals(uels{1}, 'new-york');
+        t.assertEquals(uels{2}, 'chicago');
+        t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_x_%d', k));
         t.assert(isa(x, 'GAMSTransfer.Variable'));
@@ -452,17 +449,15 @@ function test_trnsport(cfg)
         t.assert(x.records.marginal(2,1) == 0);
         t.assert(x.records.marginal(2,2) == 0.009);
         t.assert(x.records.marginal(2,3) == 0);
-        t.assert(isstruct(x.uels));
-        t.assert(numel(fieldnames(x.uels)) == 2);
-        t.assert(isfield(x.uels, 'i_1'));
-        t.assert(isfield(x.uels, 'j_2'));
-        t.assert(numel(x.uels.i_1) == 2);
-        t.assert(numel(x.uels.j_2) == 3);
-        t.assertEquals(x.uels.i_1{1}, 'seattle');
-        t.assertEquals(x.uels.i_1{2}, 'san-diego');
-        t.assertEquals(x.uels.j_2{1}, 'new-york');
-        t.assertEquals(x.uels.j_2{2}, 'chicago');
-        t.assertEquals(x.uels.j_2{3}, 'topeka');
+        uels = x.getUELs(1);
+        t.assert(numel(uels) == 2);
+        t.assertEquals(uels{1}, 'seattle');
+        t.assertEquals(uels{2}, 'san-diego');
+        uels = x.getUELs(2);
+        t.assert(numel(uels) == 3);
+        t.assertEquals(uels{1}, 'new-york');
+        t.assertEquals(uels{2}, 'chicago');
+        t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_z_%d', k));
         t.assert(isa(z, 'GAMSTransfer.Variable'));
@@ -482,8 +477,6 @@ function test_trnsport(cfg)
         t.assert(isfield(z.records, 'level'));
         t.assert(numel(z.records.level) == 1);
         t.assert(z.records.level(1) == 153.675);
-        t.assert(isstruct(z.uels));
-        t.assert(numel(fieldnames(z.uels)) == 0);
 
         t.add(sprintf('test_trnsport_symbol_cost_%d', k));
         t.assert(isa(cost, 'GAMSTransfer.Equation'));
@@ -512,8 +505,6 @@ function test_trnsport(cfg)
         t.assert(cost.records.marginal(1) == 1);
         t.assert(cost.records.lower(1) == 0);
         t.assert(cost.records.upper(1) == 0);
-        t.assert(isstruct(cost.uels));
-        t.assert(numel(fieldnames(cost.uels)) == 0);
 
         t.add(sprintf('test_trnsport_symbol_supply_%d', k));
         t.assert(isa(supply, 'GAMSTransfer.Equation'));
@@ -548,12 +539,10 @@ function test_trnsport(cfg)
         t.assert(supply.records.marginal(2) == 0);
         t.assert(supply.records.upper(1) == 350);
         t.assert(supply.records.upper(2) == 600);
-        t.assert(isstruct(supply.uels));
-        t.assert(numel(fieldnames(supply.uels)) == 1);
-        t.assert(isfield(supply.uels, 'i_1'));
-        t.assert(numel(supply.uels.i_1) == 2);
-        t.assertEquals(supply.uels.i_1{1}, 'seattle');
-        t.assertEquals(supply.uels.i_1{2}, 'san-diego');
+        uels = supply.getUELs(1);
+        t.assert(numel(uels) == 2);
+        t.assertEquals(uels{1}, 'seattle');
+        t.assertEquals(uels{2}, 'san-diego');
 
         t.add(sprintf('test_trnsport_symbol_demand_%d', k));
         t.assert(isa(demand, 'GAMSTransfer.Equation'));
@@ -591,13 +580,11 @@ function test_trnsport(cfg)
         t.assert(demand.records.lower(1) == 325);
         t.assert(demand.records.lower(2) == 300);
         t.assert(demand.records.lower(3) == 275);
-        t.assert(isstruct(demand.uels));
-        t.assert(numel(fieldnames(demand.uels)) == 1);
-        t.assert(isfield(demand.uels, 'j_1'));
-        t.assert(numel(demand.uels.j_1) == 3);
-        t.assertEquals(demand.uels.j_1{1}, 'new-york');
-        t.assertEquals(demand.uels.j_1{2}, 'chicago');
-        t.assertEquals(demand.uels.j_1{3}, 'topeka');
+        uels = demand.getUELs(1);
+        t.assert(numel(uels) == 3);
+        t.assertEquals(uels{1}, 'new-york');
+        t.assertEquals(uels{2}, 'chicago');
+        t.assertEquals(uels{3}, 'topeka');
 
         if k == 1
             m.write(fullfile(cfg.working_dir, 'write_trnsport_1.gdx'));

@@ -38,7 +38,7 @@ end
 
 function test_addSymbols(t, cfg)
 
-    gdx = GAMSTransfer.Container();
+    gdx = GAMSTransfer.Container('features', cfg.features);
 
     t.add('add_symbols_set_1');
     s1 = GAMSTransfer.Set(gdx, 's1');
@@ -56,8 +56,7 @@ function test_addSymbols(t, cfg)
     t.assert(isnan(s1.size(1)));
     t.assert(strcmp(s1.format, 'empty'));
     t.assert(s1.getNumRecords() == 0);
-    t.assert(isfield(s1.uels, 'uni_1'));
-    t.assert(numel(s1.uels.uni_1) == 0);
+    t.assert(numel(s1.getUELs(1)) == 0);
     t.assert(s1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 's1'));
@@ -84,8 +83,7 @@ function test_addSymbols(t, cfg)
     t.assert(s2.size(1) == 0);
     t.assert(strcmp(s2.format, 'empty'));
     t.assert(s2.getNumRecords() == 0);
-    t.assert(isfield(s2.uels, 's1_1'));
-    t.assert(numel(s2.uels.s1_1) == 0);
+    t.assert(numel(s2.getUELs(1)) == 0);
     t.assert(s2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 's2'));
@@ -115,10 +113,8 @@ function test_addSymbols(t, cfg)
     t.assert(isnan(s3.size(2)));
     t.assert(strcmp(s3.format, 'empty'));
     t.assert(s3.getNumRecords() == 0);
-    t.assert(isfield(s3.uels, 's1_1'));
-    t.assert(isfield(s3.uels, 'uni_2'));
-    t.assert(numel(s3.uels.s1_1) == 0);
-    t.assert(numel(s3.uels.uni_2) == 0);
+    t.assert(numel(s3.getUELs(1)) == 0);
+    t.assert(numel(s3.getUELs(2)) == 0);
     t.assert(s3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 's3'));
@@ -145,8 +141,7 @@ function test_addSymbols(t, cfg)
     t.assert(s4.size(1) == 0);
     t.assert(strcmp(s4.format, 'empty'));
     t.assert(s4.getNumRecords() == 0);
-    t.assert(isfield(s4.uels, 's2_1'));
-    t.assert(numel(s4.uels.s2_1) == 0);
+    t.assert(numel(s4.getUELs(1)) == 0);
     t.assert(s4.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 4);
     t.assert(isfield(gdx.data, 's4'));
@@ -176,10 +171,8 @@ function test_addSymbols(t, cfg)
     t.assert(s5.size(2) == 0);
     t.assert(strcmp(s5.format, 'empty'));
     t.assert(s5.getNumRecords() == 0);
-    t.assert(isfield(s5.uels, 's1_1'));
-    t.assert(isfield(s5.uels, 's2_2'));
-    t.assert(numel(s5.uels.s1_1) == 0);
-    t.assert(numel(s5.uels.s2_2) == 0);
+    t.assert(numel(s5.getUELs(1)) == 0);
+    t.assert(numel(s5.getUELs(2)) == 0);
     t.assert(s5.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 5);
     t.assert(isfield(gdx.data, 's5'));
@@ -203,8 +196,7 @@ function test_addSymbols(t, cfg)
     t.assert(isnan(s6.size(1)));
     t.assert(strcmp(s6.format, 'empty'));
     t.assert(s6.getNumRecords() == 0);
-    t.assert(isfield(s6.uels, 's1_1'));
-    t.assert(numel(s6.uels.s1_1) == 0);
+    t.assert(numel(s6.getUELs(1)) == 0);
     t.assert(s6.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 6);
     t.assert(isfield(gdx.data, 's6'));
@@ -321,7 +313,6 @@ function test_addSymbols(t, cfg)
     t.assert(numel(p1.size) == 0);
     t.assert(strcmp(p1.format, 'empty'));
     t.assert(p1.getNumRecords() == 0);
-    t.assert(numel(fieldnames(p1.uels)) == 0);
     t.assert(p1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 10);
     t.assert(isfield(gdx.data, 'p1'));
@@ -347,8 +338,7 @@ function test_addSymbols(t, cfg)
     t.assert(p2.size(1) == 0);
     t.assert(strcmp(p2.format, 'empty'));
     t.assert(p2.getNumRecords() == 0);
-    t.assert(isfield(p2.uels, 's1_1'));
-    t.assert(numel(p2.uels.s1_1) == 0);
+    t.assert(numel(p2.getUELs(1)) == 0);
     t.assert(p2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 11);
     t.assert(isfield(gdx.data, 'p2'));
@@ -380,12 +370,9 @@ function test_addSymbols(t, cfg)
     t.assert(isnan(p3.size(3)));
     t.assert(strcmp(p3.format, 'empty'));
     t.assert(p3.getNumRecords() == 0);
-    t.assert(isfield(p3.uels, 's1_1'));
-    t.assert(isfield(p3.uels, 'uni_2'));
-    t.assert(isfield(p3.uels, 's2_3'));
-    t.assert(numel(p3.uels.s1_1) == 0);
-    t.assert(numel(p3.uels.uni_2) == 0);
-    t.assert(numel(p3.uels.s2_3) == 0);
+    t.assert(numel(p3.getUELs(1)) == 0);
+    t.assert(numel(p3.getUELs(2)) == 0);
+    t.assert(numel(p3.getUELs(3)) == 0);
     t.assert(p3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 12);
     t.assert(isfield(gdx.data, 'p3'));
@@ -452,7 +439,6 @@ function test_addSymbols(t, cfg)
     t.assert(numel(v1.size) == 0);
     t.assert(strcmp(v1.format, 'empty'));
     t.assert(v1.getNumRecords() == 0);
-    t.assert(numel(fieldnames(v1.uels)) == 0);
     t.assert(v1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 13);
     t.assert(isfield(gdx.data, 'v1'));
@@ -473,7 +459,6 @@ function test_addSymbols(t, cfg)
     t.assert(numel(v2.size) == 0);
     t.assert(strcmp(v2.format, 'empty'));
     t.assert(v2.getNumRecords() == 0);
-    t.assert(numel(fieldnames(v2.uels)) == 0);
     t.assert(v2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 14);
     t.assert(isfield(gdx.data, 'v2'));
@@ -503,10 +488,8 @@ function test_addSymbols(t, cfg)
     t.assert(isnan(v3.size(2)));
     t.assert(strcmp(v3.format, 'empty'));
     t.assert(v3.getNumRecords() == 0);
-    t.assert(isfield(v3.uels, 's1_1'));
-    t.assert(isfield(v3.uels, 'uni_2'));
-    t.assert(numel(v3.uels.s1_1) == 0);
-    t.assert(numel(v3.uels.uni_2) == 0);
+    t.assert(numel(v3.getUELs(1)) == 0);
+    t.assert(numel(v3.getUELs(2)) == 0);
     t.assert(v3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 15);
     t.assert(isfield(gdx.data, 'v3'));
@@ -619,7 +602,6 @@ function test_addSymbols(t, cfg)
     t.assert(numel(e1.size) == 0);
     t.assert(strcmp(e1.format, 'empty'));
     t.assert(e1.getNumRecords() == 0);
-    t.assert(numel(fieldnames(e1.uels)) == 0);
     t.assert(e1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 34);
     t.assert(isfield(gdx.data, 'e1'));
@@ -640,7 +622,6 @@ function test_addSymbols(t, cfg)
     t.assert(numel(e2.size) == 0);
     t.assert(strcmp(e2.format, 'empty'));
     t.assert(e2.getNumRecords() == 0);
-    t.assert(numel(fieldnames(e2.uels)) == 0);
     t.assert(e2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 35);
     t.assert(isfield(gdx.data, 'e2'));
@@ -670,10 +651,8 @@ function test_addSymbols(t, cfg)
     t.assert(isnan(e3.size(2)));
     t.assert(strcmp(e3.format, 'empty'));
     t.assert(e3.getNumRecords() == 0);
-    t.assert(isfield(e3.uels, 's1_1'));
-    t.assert(isfield(e3.uels, 'uni_2'));
-    t.assert(numel(e3.uels.s1_1) == 0);
-    t.assert(numel(e3.uels.uni_2) == 0);
+    t.assert(numel(e3.getUELs(1)) == 0);
+    t.assert(numel(e3.getUELs(2)) == 0);
     t.assert(e3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 36);
     t.assert(isfield(gdx.data, 'e3'));
@@ -785,7 +764,7 @@ end
 
 function test_changeSymbol(t, cfg)
 
-    gdx = GAMSTransfer.Container();
+    gdx = GAMSTransfer.Container('features', cfg.features);
     i1 = GAMSTransfer.Set(gdx, 'i1');
     i2 = GAMSTransfer.Set(gdx, 'i2', 'records', {'i21', 'i22', 'i23'});
     x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
@@ -992,55 +971,11 @@ function test_changeSymbol(t, cfg)
         end
     end
 
-    t.add('change_symbol_uels');
-    t.assert(isstruct(x1.uels));
-    t.assert(numel(fieldnames(x1.uels)) == 2);
-    t.assert(isfield(x1.uels, 'a_1'));
-    t.assert(isfield(x1.uels, 'b_2'));
-    t.assert(iscell(x1.uels.a_1));
-    t.assert(iscell(x1.uels.b_2));
-    t.assert(isempty(x1.uels.a_1));
-    t.assert(isempty(x1.uels.b_2));
-    x1.uels.a_1 = {'a1', 'a2', 'a3'};
-    t.assert(isstruct(x1.uels));
-    t.assert(numel(fieldnames(x1.uels)) == 2);
-    t.assert(isfield(x1.uels, 'a_1'));
-    t.assert(isfield(x1.uels, 'b_2'));
-    t.assert(iscell(x1.uels.a_1));
-    t.assert(iscell(x1.uels.b_2));
-    t.assertEquals(x1.uels.a_1, {'a1', 'a2', 'a3'});
-    t.assert(isempty(x1.uels.b_2));
-    x1.domain = {'a', 'c'};
-    t.assert(isstruct(x1.uels));
-    t.assert(numel(fieldnames(x1.uels)) == 2);
-    t.assert(isfield(x1.uels, 'a_1'));
-    t.assert(isfield(x1.uels, 'c_2'));
-    t.assert(iscell(x1.uels.a_1));
-    t.assert(iscell(x1.uels.c_2));
-    t.assertEquals(x1.uels.a_1, {'a1', 'a2', 'a3'});
-    t.assert(isempty(x1.uels.c_2));
-    x1.domain = {'c', 'a'};
-    t.assert(isstruct(x1.uels));
-    t.assert(numel(fieldnames(x1.uels)) == 2);
-    t.assert(isfield(x1.uels, 'c_1'));
-    t.assert(isfield(x1.uels, 'a_2'));
-    t.assert(iscell(x1.uels.c_1));
-    t.assert(iscell(x1.uels.a_2));
-    t.assert(isempty(x1.uels.c_1));
-    t.assert(isempty(x1.uels.a_2));
-    try
-        t.assert(false);
-        x1.uels.c_1 = 'c1';
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'UEL field ''c_1'' must be cell of strings.');
-    end
-
 end
 
 function test_defaultvalues(t, cfg)
 
-    gdx = GAMSTransfer.Container();
+    gdx = GAMSTransfer.Container('features', cfg.features);
 
     t.add('default_values_variables');
     s = GAMSTransfer.Variable(gdx, 'x1', 'binary');
@@ -1082,26 +1017,17 @@ end
 
 function test_domainViolation(t, cfg);
 
-    gdx = GAMSTransfer.Container();
+    gdx = GAMSTransfer.Container('features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
-    i1 = GAMSTransfer.Set(gdx, 'i1', '*');
-    i1.uels.uni_1 = {'i1', 'i2', 'i3', 'i4'};
-    i1.records.uni_1 = (1:4)';
-    i2 = GAMSTransfer.Set(gdx, 'i2', i1);
-    i2.uels.i1_1 = {'i1', 'i2'};
-    i2.records.i1_1 = (1:2)';
-    a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1});
-    a1.uels.i1_1 = {'i0', 'i1'};
-    a1.uels.i1_2 = {'i1', 'i2'};
-    a1.records = struct('i1_1', [1;1;2;2], 'i1_2', [1;2;1;2], 'value', [1;2;3;4]);
-    a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'});
-    a2.uels.i1_1 = {'i1', 'i5'};
-    a2.uels.uni_2 = {'i1', 'i5'};
-    a2.records = struct('i1_1', [1;1;2;2], 'uni_2', [1;2;1;2], 'value', [1;2;3;4]);
-    a3 = GAMSTransfer.Parameter(gdx, 'a3', i2);
-    a3.uels.i2_1 = {'i1', 'i7'};
-    a3.records = struct('i2_1', [1;2], 'value', [1;2]);
+    i1 = GAMSTransfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
+    i2 = GAMSTransfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
+    a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
+        {{'i0', 'i0', 'i1', 'i1'}, {'i1', 'i2', 'i1', 'i2'}, [1;2;3;4]});
+    a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
+        {{'i1', 'i1', 'i5', 'i5'}, {'i1', 'i5', 'i1', 'i5'}, [1;2;3;4]});
+    a3 = GAMSTransfer.Parameter(gdx, 'a3', i2, 'records', ...
+        {{'i1', 'i7'}, [1;2]});
 
     t.add('domain_violation_1');
     t.assert(i1.isValid());
@@ -1149,7 +1075,7 @@ function test_domainViolation(t, cfg);
     gdx.resolveDomainViolations();
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 0);
-    elems = i1.uels.uni_1(i1.records.uni_1);
+    elems = i1.getUELs(1);
     t.assert(iscell(elems));
     t.assert(numel(elems) == 7);
     t.assert(elems{1} == 'i1');
@@ -1168,7 +1094,7 @@ end
 
 function test_setRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container();
+    gdx = GAMSTransfer.Container('features', cfg.features);
 
     GAMSTransfer.Set(gdx, 'i1');
     s1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {'i'});
@@ -1187,11 +1113,9 @@ function test_setRecords(t, cfg)
     else
         t.assert(s1.records.i_1(1) == 1);
     end
-    t.assert(isstruct(s1.uels));
-    t.assert(numel(fieldnames(s1.uels)) == 1);
-    t.assert(isfield(s1.uels, 'i_1'));
-    t.assert(numel(s1.uels.i_1) == 1);
-    t.assertEquals(s1.uels.i_1{1}, 'test');
+    uels = s1.getUELs(1);
+    t.assert(numel(uels) == 1);
+    t.assertEquals(uels{1}, 'test');
     t.assert(s1.isValid());
 
     t.add('set_records_string_2');
@@ -1219,13 +1143,11 @@ function test_setRecords(t, cfg)
         t.assert(s1.records.i_1(2) == 2);
         t.assert(s1.records.i_1(3) == 3);
     end
-    t.assert(isstruct(s1.uels));
-    t.assert(numel(fieldnames(s1.uels)) == 1);
-    t.assert(isfield(s1.uels, 'i_1'));
-    t.assert(numel(s1.uels.i_1) == 3);
-    t.assertEquals(s1.uels.i_1{1}, 'test1');
-    t.assertEquals(s1.uels.i_1{2}, 'test2');
-    t.assertEquals(s1.uels.i_1{3}, 'test3');
+    uels = s1.getUELs(1);
+    t.assert(numel(uels) == 3);
+    t.assertEquals(uels{1}, 'test1');
+    t.assertEquals(uels{2}, 'test2');
+    t.assertEquals(uels{3}, 'test3');
     t.assert(s1.isValid());
 
     t.add('set_records_cellstr_2');
@@ -1261,18 +1183,16 @@ function test_setRecords(t, cfg)
         t.assert(s2.records.uni_2(2) == 2);
         t.assert(s2.records.uni_2(3) == 3);
     end
-    t.assert(isstruct(s2.uels));
-    t.assert(numel(fieldnames(s2.uels)) == 2);
-    t.assert(isfield(s2.uels, 'i_1'));
-    t.assert(isfield(s2.uels, 'uni_2'));
-    t.assert(numel(s2.uels.i_1) == 3);
-    t.assert(numel(s2.uels.uni_2) == 3);
-    t.assertEquals(s2.uels.i_1{1}, 'test11');
-    t.assertEquals(s2.uels.i_1{2}, 'test12');
-    t.assertEquals(s2.uels.i_1{3}, 'test13');
-    t.assertEquals(s2.uels.uni_2{1}, 'test21');
-    t.assertEquals(s2.uels.uni_2{2}, 'test22');
-    t.assertEquals(s2.uels.uni_2{3}, 'test23');
+    uels = s2.getUELs(1);
+    t.assert(numel(uels) == 3);
+    t.assertEquals(uels{1}, 'test11');
+    t.assertEquals(uels{2}, 'test12');
+    t.assertEquals(uels{3}, 'test13');
+    uels = s2.getUELs(2);
+    t.assert(numel(uels) == 3);
+    t.assertEquals(uels{1}, 'test21');
+    t.assertEquals(uels{2}, 'test22');
+    t.assertEquals(uels{3}, 'test23');
     t.assert(s2.isValid());
 
     gdx.data.i1.setRecords({'i1', 'i2', 'i3', 'i4'});
@@ -1351,8 +1271,9 @@ function test_setRecords(t, cfg)
         t.assert(s3.records.i1_1(1) == 1);
         t.assert(s3.records.i1_1(2) == 2);
     end
-    t.assertEquals(s3.uels.i1_1{1}, 'i1');
-    t.assertEquals(s3.uels.i1_1{2}, 'i4');
+    uels = s3.getUELs(1);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i4');
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
     t.assert(s3.isValid());
@@ -1375,8 +1296,9 @@ function test_setRecords(t, cfg)
         t.assert(s3.records.i1_1(1) == 1);
         t.assert(s3.records.i1_1(2) == 2);
     end
-    t.assertEquals(s3.uels.i1_1{1}, 'i1');
-    t.assertEquals(s3.uels.i1_1{2}, 'i4');
+    uels = s3.getUELs(1);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i4');
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
     t.assert(s3.records.marginal(1) == 11);
@@ -1407,8 +1329,9 @@ function test_setRecords(t, cfg)
         t.assert(s3.records.i1_1(1) == 1);
         t.assert(s3.records.i1_1(2) == 2);
     end
-    t.assertEquals(s3.uels.i1_1{1}, 'i1');
-    t.assertEquals(s3.uels.i1_1{2}, 'i4');
+    uels = s3.getUELs(1);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i4');
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
     t.assert(s3.records.marginal(1) == 11);
@@ -1422,11 +1345,13 @@ function test_setRecords(t, cfg)
     t.assert(s3.isValid());
 
     t.add('set_records_cell_5');
-    warning('off')
-    s2.setRecords({{'i1', 'i4'}, [1; 4]});
-    t.assert(~s2.isValid());
-    t.assertEquals(lastwarn(), 'Domain ''uni_2'' is missing.');
-    warning('on')
+    try
+        t.assert(false);
+        s2.setRecords({{'i1', 'i4'}, [1; 4]});
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain ''uni_2'' is missing.');
+    end
 
     t.add('set_records_cell_6');
     try
@@ -1500,8 +1425,9 @@ function test_setRecords(t, cfg)
         t.assert(s3.records.i1_1(1) == 1);
         t.assert(s3.records.i1_1(2) == 2);
     end
-    t.assertEquals(s3.uels.i1_1{1}, 'i1');
-    t.assertEquals(s3.uels.i1_1{2}, 'i4');
+    uels = s3.getUELs(1);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i4');
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
     t.assert(s3.isValid());
@@ -1526,8 +1452,9 @@ function test_setRecords(t, cfg)
         t.assert(s3.records.i1_1(1) == 1);
         t.assert(s3.records.i1_1(2) == 2);
     end
-    t.assertEquals(s3.uels.i1_1{1}, 'i1');
-    t.assertEquals(s3.uels.i1_1{2}, 'i4');
+    s3.getUELs(1);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i4');
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
     t.assert(s3.isValid());
@@ -1551,8 +1478,9 @@ function test_setRecords(t, cfg)
         t.assert(s3.records.i1_1(1) == 1);
         t.assert(s3.records.i1_1(2) == 2);
     end
-    t.assertEquals(s3.uels.i1_1{1}, 'i1');
-    t.assertEquals(s3.uels.i1_1{2}, 'i4');
+    uels = s3.getUELs(1);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i4');
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
     t.assert(s3.isValid());
@@ -1561,11 +1489,13 @@ function test_setRecords(t, cfg)
     recs = struct();
     recs.i1_1 = {'i1', 'i4'};
     recs.level = [1];
-    warning('off')
-    s3.setRecords(recs);
-    t.assert(~s3.isValid());
-    t.assertEquals(lastwarn(), 'Fields need to match matrix format or to be of same length');
-    warning('on')
+    try
+        t.assert(false);
+        s3.setRecords(recs);
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Fields need to match matrix format or to be of same length');
+    end
 
     t.add('set_records_struct_8');
     s3.setRecords(struct('level', [1, 2, 3, 4]));
@@ -1581,22 +1511,36 @@ function test_setRecords(t, cfg)
     t.assert(s3.isValid());
 
     t.add('set_records_struct_9');
-    warning('off')
-    s3.setRecords(struct('level', [1, 2, 3]));
-    t.assert(~s3.isValid());
-    t.assertEquals(lastwarn(), 'Domain ''i1_1'' is missing.');
-    warning('on')
+    try
+        t.assert(false);
+        s3.setRecords(struct('level', [1, 2, 3]));
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain ''i1_1'' is missing.');
+    end
 
     if gdx.features.table
         t.add('set_records_table_1');
-        tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
-        warning('off')
-        s3.setRecords(tbl);
-        t.assert(~s3.isValid());
-        warning('on')
+        if gdx.features.categorical
+            tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
+        else
+            tbl = table([1; 2; 3], [1; 2; 3]);
+            s3.initUELs(1, {'i1'; 'i2'; 'i3'});
+        end
+        try
+            t.assert(false);
+            s3.setRecords(tbl);
+        catch
+            t.reset();
+        end
 
         t.add('set_records_table_2');
-        tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
+        if gdx.features.categorical
+            tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
+        else
+            tbl = table([1; 2; 3], [1; 2; 3]);
+            s3.initUELs(1, {'i1'; 'i2'; 'i3'});
+        end
         tbl.Properties.VariableNames = {'i1_1', 'level'};
         s3.setRecords(tbl);
         t.assertEquals(s3.format, 'table');
@@ -1606,7 +1550,7 @@ end
 
 function test_writeUnordered(t, cfg)
 
-    gdx = GAMSTransfer.Container();
+    gdx = GAMSTransfer.Container('features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i = GAMSTransfer.Set(gdx, 'i', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
@@ -1647,7 +1591,7 @@ end
 
 function test_reorder(t, cfg)
 
-    gdx = GAMSTransfer.Container();
+    gdx = GAMSTransfer.Container('features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     s1 = GAMSTransfer.Set(gdx, 's1', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
@@ -1731,7 +1675,7 @@ end
 
 function test_transformRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1});
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'features', cfg.features);
 
     formats = {'struct', 'table', 'dense_matrix', 'sparse_matrix'};
     i_recs = cell(1, numel(formats));

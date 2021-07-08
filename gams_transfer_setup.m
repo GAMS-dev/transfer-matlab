@@ -108,6 +108,8 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir)
         copyfile(fullfile(m_files(i).folder, m_files(i).name), target_file);
     end
 
+    return
+
     for i = 1:numel(c_files)
 
         % create build command
