@@ -1660,7 +1660,7 @@ classdef Symbol < handle
 
                 % check correct order of symbols
                 if ~GAMSTransfer.gt_check_symorder(obj.container.data, obj.domain_{i}.name, obj.name);
-                    error('Domain set ''%s'' is out of order: Try calling reorder().', obj.domain_{i}.name);
+                    error('Domain set ''%s'' is out of order: Try calling the Container method reorderSymbols().', obj.domain_{i}.name);
                 end
             end
         end

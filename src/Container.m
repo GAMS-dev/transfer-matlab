@@ -482,28 +482,34 @@ classdef Container < handle
             obj.data = orderfields(obj.data, perm);
         end
 
-        function removeSymbol(obj, name)
+        function removeSymbols(obj, names)
             % Removes a symbol from container
             %
 
-            if ~isfield(obj.data, name)
-                error('Symbol ''%s'' does not exist', name);
+            if isstring(names) || ischar(names)
+                names = {names};
             end
 
-            symbol = obj.data.(name);
+            for i = 1:numel(names)
+                if ~isfield(obj.data, names{i})
+                    continue;
+                end
 
-            % remove symbol
-            obj.data = rmfield(obj.data, name);
+                symbol = obj.data.(names{i});
 
-            % force recheck of deleted symbol (it may still live within an
-            % alias, domain or in the user's program)
-            symbol.isValid('force', true);
+                % remove symbol
+                obj.data = rmfield(obj.data, names{i});
+
+                % force recheck of deleted symbol (it may still live within an
+                % alias, domain or in the user's program)
+                symbol.isValid('force', true);
+            end
 
             % force recheck of all remaining symbols in container
             obj.isValid('force', true);
         end
 
-        function reorder(obj)
+        function reorderSymbols(obj)
             % Reestablishes a valid GDX symbol order
             %
             % Usually the symbol order is maintained in a valid order when
@@ -917,9 +923,9 @@ classdef Container < handle
             end
             obj.data.(symbol.name_) = symbol;
 
-            % reorder
+            % reorder symbols
             if ~obj.isValid() && obj.reorder_after_add
-                obj.reorder();
+                obj.reorderSymbols();
             end
         end
 

@@ -1756,10 +1756,17 @@ function test_remove(t, cfg)
     t.assert(i1.isValid());
     t.assert(a1.isValid());
     t.assert(x1.isValid());
-    gdx.removeSymbol('i1');
+    gdx.removeSymbols('i1');
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 'a1'));
     t.assert(isfield(gdx.data, 'x1'));
+    t.assert(~i1.isValid());
+    t.assert(~a1.isValid());
+    t.assert(~x1.isValid());
+
+    t.add('remove_2');
+    gdx.removeSymbols({'i1', 'a1', 'x1'});
+    t.assert(numel(fieldnames(gdx.data)) == 0)
     t.assert(~i1.isValid());
     t.assert(~a1.isValid());
     t.assert(~x1.isValid());

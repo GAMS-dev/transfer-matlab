@@ -1624,10 +1624,10 @@ function test_reorder(t, cfg)
     t.assertEquals(fields{4}, 's4');
     warning('off')
     s3.isValid('verbose', true);
-    t.assertEquals(lastwarn(), 'Domain set ''s4'' is out of order: Try calling reorder().');
+    t.assertEquals(lastwarn(), 'Domain set ''s4'' is out of order: Try calling the Container method reorderSymbols().');
     warning('on')
 
-    gdx.reorder();
+    gdx.reorderSymbols();
 
     t.add('reorder_3');
     t.assert(numel(fieldnames(gdx.data)) == 4);
@@ -1644,7 +1644,7 @@ function test_reorder(t, cfg)
 
     s2.domain = {s3};
     s3.domain = {s4};
-    gdx.reorder();
+    gdx.reorderSymbols();
 
     t.add('reorder_4');
     t.assert(numel(fieldnames(gdx.data)) == 4);
@@ -1665,7 +1665,7 @@ function test_reorder(t, cfg)
     t.add('reorder_5');
     try
         t.assert(false);
-        gdx.reorder();
+        gdx.reorderSymbols();
     catch e
         t.reset();
         t.assertEquals(e.message, 'Circular domain set dependency in: [s2,s3].');
