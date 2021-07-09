@@ -478,7 +478,7 @@ function test_symbol_uels(t, cfg)
     c.read('format', 'struct');
     x = c.data.x;
 
-    t.add('symbol_uels_remove');
+    t.add('symbol_uels_remove_1');
     x.removeUELs(1, 'i4');
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
@@ -504,6 +504,34 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 0);
     t.assert(ids(5) == 0);
     t.assert(ids(6) == 2);
+
+    c = GAMSTransfer.Container(cfg.filenames{1}, 'features', cfg.features);
+    c.read('format', 'struct');
+    x = c.data.x;
+
+    t.add('symbol_uels_remove_2');
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 5);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i4');
+    t.assertEquals(uels{4}, 'i6');
+    t.assertEquals(uels{5}, 'i10');
+    x.removeUELs(1);
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 4);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i6');
+    t.assertEquals(uels{4}, 'i10');
+    ids = int64(x.records.i_1);
+    t.assert(numel(ids) == 6);
+    t.assert(ids(1) == 1);
+    t.assert(ids(2) == 2);
+    t.assert(ids(3) == 2);
+    t.assert(ids(4) == 3);
+    t.assert(ids(5) == 3);
+    t.assert(ids(6) == 4);
 
     c = GAMSTransfer.Container(cfg.filenames{1}, 'features', cfg.features);
     c.read('format', 'struct');

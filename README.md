@@ -107,8 +107,6 @@ x =
     domain_label: {'i_1'  'j_2'}
      domain_info: 'regular'
          records: [6×4 table]
-            uels: [1×1 struct]
-        is_valid: 1
           format: 'table'
 
 >> x.records

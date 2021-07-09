@@ -514,9 +514,7 @@ classdef Container < handle
             %
             % Usually the symbol order is maintained in a valid order when
             % adding symbols, but it may become necessary to call this function
-            % if symbol domains have been changed after adding the symbol. An
-            % invalid symbol order can lead to an error: "GDX error: Unknown
-            % domain".
+            % if symbol domains have been changed after adding the symbol.
             %
 
             names = fieldnames(obj.data);
@@ -876,11 +874,9 @@ classdef Container < handle
         end
 
         function valid = isValid(obj, varargin)
-            % Checks correctness of container (true, if all symbols are valid)
+            % Checks correctness of all symbols
             %
             % Parameter Arguments:
-            % - verbose: logical
-            %   If true, the reason for an invalid symbol is printed
             % - force: logical
             %   If true, forces reevaluation of validity (resets cache)
             %

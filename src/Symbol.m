@@ -1272,8 +1272,6 @@ classdef Symbol < handle
         end
 
         function uels = getUELs(obj, varargin)
-            % Returns the UELs that are actually used in the symbol records
-            %
 
             p = inputParser();
             is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
@@ -1490,6 +1488,9 @@ classdef Symbol < handle
                     obj.records.(label) = removecats(obj.records.(label), uels);
                 end
             else
+                if isempty(uels)
+                    uels = setdiff(obj.getUELs(dim), obj.getUELs(dim, 'ignore_unused', true));
+                end
                 obj.records.(label) = obj.uels.(label).remove(uels, obj.records.(label));
             end
 
