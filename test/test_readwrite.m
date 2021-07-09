@@ -30,6 +30,7 @@ function test_readwrite(cfg)
     test_readSpecialValues(t, cfg);
     test_readSymbolTypes(t, cfg);
     test_readWrite(t, cfg);
+    test_readWriteCompress(t, cfg);
     test_readWriteDomainCheck(t, cfg);
     t.summary();
 end
@@ -1152,23 +1153,61 @@ function test_readWrite(t, cfg)
         gdx.read('format', 'struct');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
 
         if gdx.features.table
             t.add(sprintf('read_write_table_%d', i));
             gdx.read('format', 'table');
             gdx.write(write_filename);
             t.testGdxDiff(cfg.filenames{i}, write_filename);
+            t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
         end
 
         t.add(sprintf('read_write_dense_matrix_%d', i));
         gdx.read('format', 'dense_matrix');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
 
         t.add(sprintf('read_write_sparse_matrix_%d', i));
         gdx.read('format', 'sparse_matrix');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
+    end
+end
+
+function test_readWriteCompress(t, cfg)
+
+    for i = [1,2,5]
+        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'features', cfg.features);
+        write_filename = fullfile(cfg.working_dir, 'write.gdx');
+
+        t.add(sprintf('read_write_struct_%d', i));
+        gdx.read('format', 'struct');
+        gdx.write(write_filename, 'compress', true);
+        t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(~system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
+
+        if gdx.features.table
+            t.add(sprintf('read_write_table_%d', i));
+            gdx.read('format', 'table');
+            gdx.write(write_filename, 'compress', true);
+            t.testGdxDiff(cfg.filenames{i}, write_filename);
+            t.assert(~system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
+        end
+
+        t.add(sprintf('read_write_dense_matrix_%d', i));
+        gdx.read('format', 'dense_matrix');
+        gdx.write(write_filename, 'compress', true);
+        t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(~system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
+
+        t.add(sprintf('read_write_sparse_matrix_%d', i));
+        gdx.read('format', 'sparse_matrix');
+        gdx.write(write_filename, 'compress', true);
+        t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(~system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
     end
 end
 

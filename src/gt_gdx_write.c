@@ -456,6 +456,9 @@ void mexFunction(
         mxFree(domain_uel_ids);
     }
 
+    if (compress)
+        gdxAutoConvert(gdx, 0);
+
     /* close gdx */
     gdxClose(gdx);
     gdxFree(&gdx);

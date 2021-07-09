@@ -362,22 +362,26 @@ function test_idx_readWrite(t, cfg)
         gdx.read('format', 'struct');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
 
         if gdx.features.table
             t.add(sprintf('idx_read_write_table_%d', i));
             gdx.read('format', 'table');
             gdx.write(write_filename);
             t.testGdxDiff(cfg.filenames{i}, write_filename);
+            t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
         end
 
         t.add(sprintf('idx_read_write_dense_matrix_%d', i));
         gdx.read('format', 'dense_matrix');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
 
         t.add(sprintf('idx_read_write_sparse_matrix_%d', i));
         gdx.read('format', 'sparse_matrix');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
     end
 end
