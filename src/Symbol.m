@@ -1238,7 +1238,7 @@ classdef Symbol < handle
             % considered: level, value, lower, upper, scale. If none is given
             % all available for the symbol are considered.
             %
-            % See also: Symbol.getSparsity
+            % See also: GAMSTransfer.Symbol.getSparsity
             %
 
             if ~obj.isValid()
@@ -1272,6 +1272,17 @@ classdef Symbol < handle
         end
 
         function uels = getUELs(obj, varargin)
+            % Returns the UELs used in this symbol
+            %
+            % u = getUELs(d) returns the UELs used in dimension d of this symbol
+            % u = getUELs(d, 'ignore_unused', true) returns only those UELs that
+            % are actually used in the records
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+            %
 
             p = inputParser();
             is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
@@ -1317,6 +1328,16 @@ classdef Symbol < handle
         end
 
         function uels = getUELLabels(obj, varargin)
+            % Returns the UELs labels for the given UEL IDs
+            %
+            % u = getUELLabels(d, i) returns the UELs labels u for the given UEL
+            % IDs i for the UELs stored for dimension d.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+            %
 
             p = inputParser();
             is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
@@ -1335,6 +1356,18 @@ classdef Symbol < handle
         end
 
         function initUELs(obj, varargin)
+            % Sets the UELs without modifying UEL IDs in records
+            %
+            % initUELs(d, u) sets the UELs u for dimension d. In contrast to
+            % the method setUELs(d, u), this method does not modify UEL IDs
+            % used in the property records.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid,
+            % GAMSTransfer.Symbol.setUELs
+            %
 
             p = inputParser();
             is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
@@ -1373,6 +1406,19 @@ classdef Symbol < handle
         end
 
         function setUELs(obj, varargin)
+            % Sets the UELs with updating UEL IDs in records
+            %
+            % setUELs(d, u) sets the UELs u for dimension d. In contrast to the
+            % method initUELs(d, u), this method may modify UEL IDs used in the
+            % property records such that records still point to the correct UEL
+            % label when UEL IDs have changed.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid,
+            % GAMSTransfer.Symbol.initUELs
+            %
 
             p = inputParser();
             is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
@@ -1411,6 +1457,15 @@ classdef Symbol < handle
         end
 
         function addUELs(obj, varargin)
+            % Adds UELs to the symbol
+            %
+            % addUELs(d, u) adds the UELs u for dimension d.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+            %
 
             p = inputParser();
             is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
@@ -1449,6 +1504,16 @@ classdef Symbol < handle
         end
 
         function removeUELs(obj, varargin)
+            % Removes UELs from the symbol
+            %
+            % removeUELs(d) removes all unused UELs for dimension d.
+            % removeUELs(d, u) removes the UELs u for dimension d.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+            %
 
             p = inputParser();
             is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
@@ -1497,6 +1562,16 @@ classdef Symbol < handle
         end
 
         function renameUELs(obj, varargin)
+            % Renames UELs in the symbol
+            %
+            % renameUELs(d, u1, u2) renames the UELs u1 to the labels given in
+            % u2 for dimension d. The IDs for these UELs do not change.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+            %
 
             p = inputParser();
             is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
