@@ -285,6 +285,8 @@ classdef Container < handle
             % - sorted: logical
             %   Flag to define records as sorted (true) or not (false). Default
             %   is false.
+            % - uel_priority: cellstr
+            %   UELs to be registered first before any symbol UELs. Default: {}.
             %
             % Example:
             % c.write();
@@ -310,6 +312,7 @@ classdef Container < handle
             end
             addParameter(p, 'compress', false, @islogical);
             addParameter(p, 'sorted', false, @islogical);
+            addParameter(p, 'uel_priority', {}, @iscellstr);
             if ~obj.features.parser_optional
                 varargin = GAMSTransfer.Utils.parserOptional2Parameter(0, ...
                     {'filename'}, {'compress', 'sorted'}, varargin);
@@ -330,8 +333,8 @@ classdef Container < handle
                     p.Results.sorted, obj.features.table);
             else
                 GAMSTransfer.gt_gdx_write(obj.system_directory, filename, obj.data, ...
-                    p.Results.compress, p.Results.sorted, obj.features.table, ...
-                    obj.features.categorical);
+                    p.Results.uel_priority, p.Results.compress, p.Results.sorted, ...
+                    obj.features.table, obj.features.categorical);
             end
         end
 

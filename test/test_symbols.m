@@ -1572,6 +1572,9 @@ function test_writeUnordered(t, cfg)
     t.add('write_unordered_2')
     gdx.write(write_filename, 'sorted', false);
 
+    t.add('write_unordered_3')
+    gdx.write(write_filename, 'uel_priority', {'i1', 'i2', 'i4', 'i3'});
+
     c.setRecords({'i1', 'i1', 'i2', 'i2'}, {'j1', 'j2', 'j2', 'j1'}, ...
         [11, 12, 22, 21]);
 

@@ -82,20 +82,24 @@ void mexFunction(
     GDXSTRINDEXPTRS_INIT(domain_labels, domain_labels_ptr);
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(0, nlhs, 7, nrhs);
+    gt_mex_check_arguments_num(0, nlhs, 8, nrhs);
     gt_mex_check_argument_str(prhs, 0, sysdir);
     gt_mex_check_argument_str(prhs, 1, gdx_filename);
     gt_mex_check_argument_struct(prhs, 2);
-    gt_mex_check_argument_bool(prhs, 3, 1, &compress);
-    gt_mex_check_argument_bool(prhs, 4, 1, &issorted);
-    gt_mex_check_argument_bool(prhs, 5, 1, &support_table);
-    gt_mex_check_argument_bool(prhs, 6, 1, &support_categorical);
+    gt_mex_check_argument_cell(prhs, 3);
+    gt_mex_check_argument_bool(prhs, 4, 1, &compress);
+    gt_mex_check_argument_bool(prhs, 5, 1, &issorted);
+    gt_mex_check_argument_bool(prhs, 6, 1, &support_table);
+    gt_mex_check_argument_bool(prhs, 7, 1, &support_categorical);
 
     /* create output data */
     plhs = NULL;
 
     /* start GDX */
     gt_gdx_init_write(&gdx, sysdir, gdx_filename, compress);
+
+    /* register priority UELs */
+    gt_gdx_register_uels(gdx, prhs[3], NULL);
 
     for (int i = 0; i < mxGetNumberOfFields(prhs[2]); i++)
     {

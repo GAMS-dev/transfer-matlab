@@ -126,6 +126,7 @@ void gt_gdx_register_uels(
     int*            uel_ids         /** array of uel ids returned by GDX */
 )
 {
+    int uel_id;
     char buf[GMS_SSSIZE];
 
     if (!mxIsCell(mx_cell_uels))
@@ -142,8 +143,10 @@ void gt_gdx_register_uels(
             mexErrMsgIdAndTxt(ERRID"register_uels", "UEL array must be of type cell of string.");
         mxGetString(mx_arr_uel, buf, GMS_SSSIZE);
 
-        if (!gdxUELRegisterStr(gdx, buf, &uel_ids[i]))
+        if (!gdxUELRegisterStr(gdx, buf, &uel_id))
             mexErrMsgIdAndTxt(ERRID"gdxUELRegisterRaw", "GDX error (gdxUELRegisterRaw)");
+        if (uel_ids)
+            uel_ids[i] = uel_id;
     }
 
     if (!gdxUELRegisterDone(gdx))
