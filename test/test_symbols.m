@@ -1065,9 +1065,9 @@ function test_domainViolation(t, cfg);
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_gdx_write: GDX error in record a1(i0,i1): Domain violation');
+            t.assertEquals(e.message, 'gt_gdx_write: GDX error for a1: Domain violation');
         else
-            t.assertEquals(e.message, 'GDX error in record a1(i0,i1): Domain violation');
+            t.assertEquals(e.message, 'GDX error for a1: Domain violation');
         end
     end
 

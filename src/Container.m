@@ -304,7 +304,7 @@ classdef Container < handle
             % input arguments
             p = inputParser();
             is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-                ~strcmpi(x, 'compress') && ~strcmpi(x, 'sorted');;
+                ~strcmpi(x, 'compress') && ~strcmpi(x, 'sorted');
             if obj.features.parser_optional
                 addOptional(p, 'filename', obj.filename, is_string_char);
             else
@@ -315,7 +315,7 @@ classdef Container < handle
             addParameter(p, 'uel_priority', {}, @iscellstr);
             if ~obj.features.parser_optional
                 varargin = GAMSTransfer.Utils.parserOptional2Parameter(0, ...
-                    {'filename'}, {'compress', 'sorted'}, varargin);
+                    {'filename'}, {'compress', 'sorted', 'uel_priority'}, varargin);
             end
             parse(p, varargin{:});
 

@@ -60,7 +60,6 @@ void mexFunction(
     mwIndex* mx_rows[GMS_VAL_MAX] = {NULL};
     mwIndex* mx_cols[GMS_VAL_MAX] = {NULL};
     size_t sizes[GLOBAL_MAX_INDEX_DIM];
-    size_t* idx_sorted = NULL;
     size_t* domain_uel_size = NULL;
     size_t* col_nnz[GMS_VAL_MAX] = {NULL};
     int** domain_uel_ids = NULL;
@@ -219,8 +218,16 @@ void mexFunction(
             gt_gdx_register_uels(gdx, mx_field, domain_uel_ids[j]);
         }
 
-        if (!gdxDataWriteRawStart(gdx, name, text, (int) dim, type, subtype))
-            mexErrMsgIdAndTxt(ERRID"gdxDataWriteStrStart", "GDX error (gdxDataWriteStrStart)");
+        if (issorted)
+        {
+            if (!gdxDataWriteRawStart(gdx, name, text, (int) dim, type, subtype))
+                mexErrMsgIdAndTxt(ERRID"gdxDataWriteRawStart", "GDX error (gdxDataWriteRawStart)");
+        }
+        else
+        {
+            if (!gdxDataWriteMapStart(gdx, name, text, (int) dim, type, subtype))
+                mexErrMsgIdAndTxt(ERRID"gdxDataWriteMapStart", "GDX error (gdxDataWriteMapStart)");
+        }
 
         /* write domain information */
         if (dim > 0)
@@ -302,29 +309,16 @@ void mexFunction(
             case GT_FORMAT_TABLE:
                 mxAssert(have_nrecs, "Number of records not available");
 
-                /* sort data if needed */
-                if (!issorted)
+                for (size_t j = 0; j < nrecs; j++)
                 {
-                    idx_sorted = (size_t*) mxMalloc(nrecs * sizeof(size_t));
-                    for (size_t j = 0; j < nrecs; j++)
-                        idx_sorted[j] = j;
-                    gt_utils_sort_domains(name, nrecs, dim, mx_domains, domain_uel_size,
-                        domain_uel_ids, idx_sorted);
-                }
-
-                /* write values */
-                for (size_t j_unsorted = 0, j; j_unsorted < nrecs; j_unsorted++)
-                {
-                    j = (issorted) ? j_unsorted : idx_sorted[j_unsorted];
-
                     for (size_t k = 0; k < dim; k++)
                     {
                         size_t rel_idx = mx_domains[k][j];
                         if (rel_idx <= 0)
-                            mexErrMsgIdAndTxt(ERRID"gdxDataWriteRaw", "Symbol '%s' has "
+                            mexErrMsgIdAndTxt(ERRID"gdxDataWriteMap", "Symbol '%s' has "
                                 "invalid domain index: %d. Missing UEL?", name, rel_idx);
                         if (rel_idx > domain_uel_size[k])
-                            mexErrMsgIdAndTxt(ERRID"gdxDataWriteRaw", "Symbol '%s' has "
+                            mexErrMsgIdAndTxt(ERRID"gdxDataWriteMap", "Symbol '%s' has "
                                 "unregistered UEL.", name);
                         gdx_uel_index[k] = domain_uel_ids[k][rel_idx-1];
                     }
@@ -335,12 +329,17 @@ void mexFunction(
                         else
                             gdx_values[k] = def_values[k];
 
-                    if (!gdxDataWriteRaw(gdx, gdx_uel_index, gdx_values))
-                        gt_gdx_write_record_error(gdx, name, dim, gdx_uel_index);
+                    if (issorted)
+                    {
+                        if (!gdxDataWriteRaw(gdx, gdx_uel_index, gdx_values))
+                            gt_gdx_write_record_error(gdx, name, dim, gdx_uel_index);
+                    }
+                    else
+                    {
+                        if (!gdxDataWriteMap(gdx, gdx_uel_index, gdx_values))
+                            gt_gdx_write_record_error(gdx, name, dim, gdx_uel_index);
+                    }
                 }
-
-                if (!issorted)
-                    mxFree(idx_sorted);
                 break;
 
             case GT_FORMAT_DENSEMAT:
@@ -358,7 +357,7 @@ void mexFunction(
                         k = k1 - 1;
                         mx_idx[k] = ((int) floor((double) j / (double) d)) % sizes[k];
                         if (mx_idx[k] >= domain_uel_size[k])
-                            mexErrMsgIdAndTxt(ERRID"gdxDataWriteRaw", "GDX error: Domain UEL not registered.");
+                            mexErrMsgIdAndTxt(ERRID"gdxDataWriteMap", "GDX error: Domain UEL not registered.");
                         else
                             gdx_uel_index[k] = domain_uel_ids[k][mx_idx[k]];
                         d *= sizes[k];
@@ -384,8 +383,16 @@ void mexFunction(
                     }
                     if (empty_rec)
                         continue;
-                    if (!gdxDataWriteRaw(gdx, gdx_uel_index, gdx_values))
-                        gt_gdx_write_record_error(gdx, name, dim, gdx_uel_index);
+                    if (issorted)
+                    {
+                        if (!gdxDataWriteRaw(gdx, gdx_uel_index, gdx_values))
+                            gt_gdx_write_record_error(gdx, name, dim, gdx_uel_index);
+                    }
+                    else
+                    {
+                        if (!gdxDataWriteMap(gdx, gdx_uel_index, gdx_values))
+                            gt_gdx_write_record_error(gdx, name, dim, gdx_uel_index);
+                    }
                 }
                 break;
 
@@ -429,8 +436,16 @@ void mexFunction(
                         }
 
                         /* write values */
-                        if (!gdxDataWriteRaw(gdx, gdx_uel_index, gdx_values))
-                            gt_gdx_write_record_error(gdx, name, dim, gdx_uel_index);
+                        if (issorted)
+                        {
+                            if (!gdxDataWriteRaw(gdx, gdx_uel_index, gdx_values))
+                                gt_gdx_write_record_error(gdx, name, dim, gdx_uel_index);
+                        }
+                        else
+                        {
+                            if (!gdxDataWriteMap(gdx, gdx_uel_index, gdx_values))
+                                gt_gdx_write_record_error(gdx, name, dim, gdx_uel_index);
+                        }
                     }
                 }
 
@@ -448,9 +463,11 @@ void mexFunction(
             mexErrMsgIdAndTxt(ERRID"gdxDataWriteDone", "GDX error (gdxDataWriteDone)");
 
         /* check GDX errors */
-        err_count = gdxDataErrorCount(gdx);
-        if (err_count)
-            mexWarnMsgTxt("GDX write errors detected. GDX file may be broken.");
+        if (gdxDataErrorCount(gdx))
+        {
+            gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+            mexErrMsgIdAndTxt(ERRID"gdxError", "GDX error for %s: %s", name, buf);
+        }
 
         mxFree(mx_arr_domains);
         mxFree(mx_domains);
