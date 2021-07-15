@@ -89,12 +89,15 @@ classdef Symbol < handle
         % number_records_ if negative: -1 * number of records - 1; if positive:
         % number of records in symbol data
         number_records_
-
-        % needed to transfer data to C
-        uels_
     end
 
-    properties (Constant)
+    % properties for C interface
+    properties (Hidden)
+        uels_c_
+        number_records_c_
+    end
+
+    properties (Hidden, Constant)
         FORMAT_REEVALUATE = -2;
     end
 
@@ -180,60 +183,8 @@ classdef Symbol < handle
             if obj.container.indexed
                 error('Setting symbol domain not allowed in indexed mode.');
             end
-            if ~iscell(domain)
-                error('Domain must be of type ''cell''.');
-            end
-            for i = 1:numel(domain)
-                if ischar(domain{i})
-                    continue;
-                elseif isstring(domain{i})
-                    domain{i} = char(domain{i});
-                elseif isa(domain{i}, 'GAMSTransfer.Set')
-                    if domain{i}.dimension ~= 1
-                        error('Set ''%s'' must have dimension=1 to be valid as domain.', domain{i}.name);
-                    end
-                    if obj.container.features.handle_comparison && ne(obj.container, domain{i}.container)
-                        error('Set ''%s'' must have same container as symbol ''%s''.', domain{i}.name, obj.name);
-                    end
-                    continue;
-                else
-                    error('Domain entry must be of type ''GAMSTransfer.Set'' or ''char''.');
-                end
-            end
-
+            GAMSTransfer.gt_set_sym_domain(obj, domain, obj.container.id);
             obj.domain_ = domain;
-            obj.dimension_ = numel(domain);
-
-            % generate domain labels
-            obj.domain_label_ = cell(1, obj.dimension_);
-            for i = 1:obj.dimension_
-                if strcmp(obj.domain_{i}, '*')
-                    obj.domain_label_{i} = sprintf('uni_%d', i);
-                elseif isa(obj.domain_{i}, 'GAMSTransfer.Set')
-                    obj.domain_label_{i} = sprintf('%s_%d', obj.domain_{i}.name, i);
-                else
-                    obj.domain_label_{i} = sprintf('%s_%d', obj.domain_{i}, i);
-                end
-            end
-
-            % determine domain info type
-            obj.domain_info_ = 'regular';
-            for i = 1:obj.dimension_
-                if (ischar(obj.domain_{i}) || isstring(obj.domain_{i})) && ~strcmp(obj.domain_{i}, '*')
-                    obj.domain_info_ = 'relaxed';
-                    break
-                end
-            end
-
-            % determine size
-            obj.size_ = zeros(1, obj.dimension_);
-            for i = 1:obj.dimension_
-                if isa(obj.domain_{i}, 'GAMSTransfer.Set')
-                    obj.size_(i) = obj.domain_{i}.getNumRecords();
-                else
-                    obj.size_(i) = nan;
-                end
-            end
 
             % update uels
             if ~obj.container.features.categorical
@@ -252,10 +203,6 @@ classdef Symbol < handle
                 end
                 obj.uels = uels;
             end
-
-            % indicate that we need to recheck symbol records
-            obj.format_ = obj.FORMAT_REEVALUATE;
-            obj.number_records_ = nan;
         end
 
         function domain_label = get.domain_label(obj)
@@ -318,19 +265,23 @@ classdef Symbol < handle
             obj.number_records_ = nan;
         end
 
-        function uels = get.uels_(obj)
+        function uels = get.uels_c_(obj)
             uels = cell(1, obj.dimension_);
             for i = 1:obj.dimension_
                 uels{i} = obj.getUELs(i);
             end
         end
 
-        function set.uels_(obj, uels)
+        function set.uels_c_(obj, uels)
             if ~obj.container.features.categorical
                 for i = 1:obj.dimension_
                     obj.uels.(obj.domain_label_{i}).set(uels{i}, []);
                 end
             end
+        end
+
+        function nrecs = get.number_records_c_(obj)
+            nrecs = obj.getNumRecords();
         end
 
     end
@@ -1755,7 +1706,7 @@ classdef Symbol < handle
                 end
 
                 % check correct order of symbols
-                if ~GAMSTransfer.gt_check_symorder(obj.container.data, obj.domain_{i}.name, obj.name);
+                if ~GAMSTransfer.gt_check_sym_order(obj.container.data, obj.domain_{i}.name, obj.name);
                     error('Domain set ''%s'' is out of order: Try calling the Container method reorderSymbols().', obj.domain_{i}.name);
                 end
             end

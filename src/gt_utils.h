@@ -32,6 +32,7 @@
 
 typedef enum
 {
+    GT_FORMAT_REEVALUATE = -2,
     GT_FORMAT_UNKNOWN = -1,
     GT_FORMAT_NOT_READ = 0,
     GT_FORMAT_EMPTY = 1,

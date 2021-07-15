@@ -87,6 +87,7 @@ classdef Container < handle
     end
 
     properties (Hidden, SetAccess = private)
+        id
         reorder_after_add = false
         features
     end
@@ -96,6 +97,8 @@ classdef Container < handle
         function obj = Container(varargin)
             % Constructs a GAMSTransfer Container, see class help.
             %
+
+            obj.id = int32(randi(100000));
 
             % check support of features
             obj.features = GAMSTransfer.Utils.checkFeatureSupport();

@@ -26,7 +26,7 @@
 #include "mex.h"
 #include "gt_mex.h"
 
-#define ERRID "GAMSTransfer:gt_check_symorder:"
+#define ERRID "GAMSTransfer:gt_check_sym_order:"
 
 void mexFunction(
     int             nlhs,

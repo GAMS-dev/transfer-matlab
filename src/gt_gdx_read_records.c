@@ -493,7 +493,7 @@ void mexFunction(
                 mx_arr_uels = mxCreateCellMatrix(1, dim);
                 for (size_t j = 0; j < dim; j++)
                     mxSetCell(mx_arr_uels, j, mx_arr_dom_uels[j]);
-                mxSetProperty(mx_arr_symbol, 0, "uels_", mx_arr_uels);
+                mxSetProperty(mx_arr_symbol, 0, "uels_c_", mx_arr_uels);
                 break;
         }
 
