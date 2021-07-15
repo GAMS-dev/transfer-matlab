@@ -92,9 +92,7 @@ function test_read(t, cfg)
     t.assertEquals(s.description, 'par_b');
     t.assert(s.dimension == 1);
     t.assert(numel(s.domain) == 1);
-    if gdx.features.handle_comparison
-        t.assertEquals(s.domain{1}, gdx.data.i);
-    end
+    t.assertEquals(s.domain{1}.id, gdx.data.i.id);
     t.assertEquals(s.domain{1}.name, 'i');
     t.assert(numel(s.domain_label) == 1);
     t.assertEquals(s.domain_label{1}, 'i_1');
@@ -116,10 +114,8 @@ function test_read(t, cfg)
     t.assertEquals(s.type, 'positive');
     t.assert(s.dimension == 2);
     t.assert(numel(s.domain) == 2);
-    if gdx.features.handle_comparison
-        t.assertEquals(s.domain{1}, gdx.data.i);
-        t.assertEquals(s.domain{2}, gdx.data.j);
-    end
+    t.assertEquals(s.domain{1}.id, gdx.data.i.id);
+    t.assertEquals(s.domain{2}.id, gdx.data.j.id);
     t.assertEquals(s.domain{1}.name, 'i');
     t.assertEquals(s.domain{2}.name, 'j');
     t.assert(numel(s.domain_label) == 2);

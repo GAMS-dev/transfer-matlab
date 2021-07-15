@@ -55,6 +55,7 @@ classdef Alias < handle
     end
 
     properties (Hidden, SetAccess = private)
+        id
         container
         read_entry
     end
@@ -69,21 +70,28 @@ classdef Alias < handle
             % Constructs a GAMS Alias, see class help.
             %
 
-            % input arguments
-            p = inputParser();
-            is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
-            is_container = @(x) isa(x, 'GAMSTransfer.Container');
-            is_alias = @(x) isa(x, 'GAMSTransfer.Set') || isa(x, 'GAMSTransfer.Alias');
-            addRequired(p, 'container', is_container);
-            addRequired(p, 'name', is_string_char);
-            addRequired(p, 'aliased_with', is_alias);
-            addParameter(p, 'read_entry', nan, @isnumeric);
+            obj.id = int32(randi(100000));
 
-            % parse inputs
-            parse(p, container, name, aliased_with, varargin{:});
-            obj.container = p.Results.container;
-            obj.name_ = char(p.Results.name);
-            aliased_with = p.Results.aliased_with;
+            % input arguments
+            if ~isa(container, 'GAMSTransfer.Container')
+                error('Argument ''container'' must be of type ''GAMSTransfer.Container''.');
+            end
+            if ~(isstring(name) && numel(name) == 1) && ~ischar(name)
+                error('Argument ''name'' must be of type ''char''.');
+            end
+            if ~isa(aliased_with, 'GAMSTransfer.Set') && ~isa(aliased_with, 'GAMSTransfer.Alias')
+                error('Argument ''aliased_with'' must be of type ''GAMSTransfer.Set'' or ''GAMSTransfer.Alias''.');
+            end
+            if nargin == 5 && strcmpi(varargin{1}, 'read_entry')
+                read_entry = varargin{2};
+                if ~isnumeric(read_entry)
+                    error('Argument ''read_entry'' must be numeric.');
+                end
+            else
+                read_entry = nan;
+            end
+            obj.container = container;
+            obj.name_ = char(name);
             while isa(aliased_with, 'GAMSTransfer.Alias')
                 aliased_with = aliased_with.aliased_with;
             end
@@ -115,7 +123,7 @@ classdef Alias < handle
             if ~isa(alias, 'GAMSTransfer.Set')
                 error('Can only alias to sets.');
             end
-            if obj.container.features.handle_comparison && ne(obj.container, alias.container)
+            if obj.container.id ~= alias.container.id
                 error('Alias and aliased set must be located in same container');
             end
             obj.aliased_with = alias;

@@ -84,47 +84,65 @@ classdef Set < GAMSTransfer.Symbol
             % Constructs a GAMS Set, see class help.
             %
 
-            % input arguments
-            p = inputParser();
             is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
-            is_container = @(x) isa(x, 'GAMSTransfer.Container');
-            is_domain = @(x) iscell(x) || isa(x, 'GAMSTransfer.Set') || ...
-                is_string_char(x) && ~strcmpi(x, 'description') && ~strcmpi(x, 'singleton') && ...
-                ~strcmpi(x, 'records');
-            addRequired(p, 'container', is_container);
-            addRequired(p, 'name', is_string_char);
-            if container.features.parser_optional
-                addOptional(p, 'domain', {'*'}, is_domain);
-            else
-                addParameter(p, 'domain', {'*'}, is_domain);
-            end
-            addParameter(p, 'records', []);
-            addParameter(p, 'description', '', is_string_char);
-            addParameter(p, 'singleton', false, @islogical);
-            addParameter(p, 'read_entry', nan, @isnumeric);
-            addParameter(p, 'read_number_records', nan, @isnumeric);
+            is_parname = @(x) strcmpi(x, 'records') || strcmpi(x, 'description') || ...
+                strcmpi(x, 'read_entry') || strcmpi(x, 'read_number_records') || ...
+                strcmpi(x, 'singleton');
 
-            % parse input arguments
-            if ~container.features.parser_optional
-                varargin = GAMSTransfer.Utils.parserOptional2Parameter(...
-                    0, {'domain'}, {'records', 'description', 'singleton', ...
-                    'read_entry', 'read_number_records'}, varargin);
+            % check optional arguments
+            i = 1;
+            domain = {'*'};
+            while true
+                term = true;
+                if i == 1 && nargin > 2
+                    if is_string_char(varargin{i}) && ~is_parname(varargin{i}) || ...
+                        iscell(varargin{i}) || isa(varargin{i}, 'GAMSTransfer.Set')
+                        domain = varargin{i};
+                        if ~iscell(domain)
+                            domain = {domain};
+                        end
+                        i = i + 1;
+                        term = false;
+                    elseif ~is_parname(varargin{i})
+                        error('Argument ''domain'' must be ''cell'', ''Set'', or ''char''.');
+                    end
+                end
+                if term || i > 2
+                    break;
+                end
             end
-            parse(p, container, name, varargin{:});
+
+            % check parameter arguments
+            records = [];
+            description = '';
+            read_entry = nan;
+            read_number_records = nan;
+            singleton = false;
+            while i < nargin - 2
+                if strcmpi(varargin{i}, 'records')
+                    records = varargin{i+1};
+                elseif strcmpi(varargin{i}, 'description')
+                    description = varargin{i+1};
+                elseif strcmpi(varargin{i}, 'read_entry')
+                    read_entry = varargin{i+1};
+                elseif strcmpi(varargin{i}, 'read_number_records')
+                    read_number_records = varargin{i+1};
+                elseif strcmpi(varargin{i}, 'singleton')
+                    singleton = varargin{i+1};
+                else
+                    error('Unknown argument name.');
+                end
+                i = i + 2;
+            end
 
             if container.indexed
                 error('Set not allowed in indexed mode.');
             end
 
-            domain = p.Results.domain;
-            if ~iscell(domain)
-                domain = {domain};
-            end
-
             % create object
-            obj = obj@GAMSTransfer.Symbol(container, name, p.Results.description, ...
-                domain, p.Results.records, p.Results.read_entry, p.Results.read_number_records);
-            obj.singleton = p.Results.singleton;
+            obj = obj@GAMSTransfer.Symbol(container, name, description, domain, ...
+                records, read_entry, read_number_records);
+            obj.singleton = singleton;
         end
 
     end

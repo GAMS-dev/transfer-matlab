@@ -52,9 +52,7 @@ function test_idx_addSymbols(t, cfg)
     t.assert(p1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'p1'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.p1 == p1);
-    end
+    t.assert(gdx.data.p1.id == p1.id);
 
     t.add('idx_add_symbols_parameter_2');
     p2 = GAMSTransfer.Parameter(gdx, 'p2', 0, 'description', 'descr par 2');
@@ -74,9 +72,7 @@ function test_idx_addSymbols(t, cfg)
     t.assert(p2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 'p2'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.p2 == p2);
-    end
+    t.assert(gdx.data.p2.id == p2.id);
 
     t.add('idx_add_symbols_parameter_3');
     p3 = GAMSTransfer.Parameter(gdx, 'p3', [1,2,3], 'description', 'descr par 3');
@@ -102,9 +98,7 @@ function test_idx_addSymbols(t, cfg)
     t.assert(p3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'p3'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.p3 == p3);
-    end
+    t.assert(gdx.data.p3.id == p3.id);
 
     t.add('idx_add_symbols_parameter_fails');
     try

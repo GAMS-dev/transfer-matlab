@@ -65,23 +65,25 @@ classdef DomainViolation
             % Constructs a domain violation, see class help.
             %
 
-            % input arguments
-            p = inputParser();
-            is_symbol = @(x) isa(x, 'GAMSTransfer.Symbol');
-            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
-                x <= symbol.dimension;
-            is_domain = @(x) isa(x, 'GAMSTransfer.Set') && ...
-                isa(symbol.domain{dimension}, 'GAMSTransfer.Set') && ...
-                strcmp(x.name, symbol.domain{dimension}.name);
-            addRequired(p, 'symbol', is_symbol);
-            addRequired(p, 'dimension', is_dimension);
-            addRequired(p, 'domain', is_domain);
-            addRequired(p, 'violations', @iscellstr);
-            parse(p, symbol, dimension, domain, violations);
-            obj.symbol = p.Results.symbol;
-            obj.dimension = p.Results.dimension;
-            obj.domain = p.Results.domain;
-            obj.violations = p.Results.violations;
+            if ~isa(symbol, 'GAMSTransfer.Symbol');
+                error('Argument ''symbol'' must be of type ''GAMSTransfer.Symbol''.');
+            end
+            if ~isnumeric(dimension) || dimension ~= round(dimension) || dimension < 1 || ...
+                dimension > symbol.dimension
+                error('Argument ''dimension'' must be integer in [1,%d].', symbol.dimension);
+            end
+            if ~isa(domain, 'GAMSTransfer.Set') || ...
+                ~isa(symbol.domain{dimension}, 'GAMSTransfer.Set') || ...
+                ~strcmp(domain.name, symbol.domain{dimension}.name)
+                error('Argument ''domain'' must be of type ''GAMSTransfer.Set''.');
+            end
+            if ~iscellstr(violations)
+                error('Argument ''violations'' must be of type ''cellstr''.');
+            end
+            obj.symbol = symbol;
+            obj.dimension = dimension;
+            obj.domain = domain;
+            obj.violations = violations;
         end
 
         function resolve(obj)

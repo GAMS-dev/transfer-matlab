@@ -66,6 +66,8 @@ classdef Symbol < handle
     end
 
     properties (Hidden, SetAccess = private)
+        id
+
         % container Container this symbol is stored in
         container
 
@@ -107,7 +109,30 @@ classdef Symbol < handle
             % Constructs a GAMS Symbol, see class help.
             %
 
-            % we rely on the checks of child classes
+            obj.id = int32(randi(100000));
+
+            if ~isa(container, 'GAMSTransfer.Container')
+                error('Argument ''container'' must be of type ''GAMSTransfer.Container''.');
+            end
+            if ~(isstring(name) && numel(name) == 1) && ~ischar(name)
+                error('Argument ''name'' must be of type ''char''.');
+            end
+            if ~(isstring(description) && numel(description) == 1) && ~ischar(description)
+                error('Argument ''description'' must be of type ''char''.');
+            end
+            if container.indexed && ~isnumeric(domain_size)
+                error('Argument ''size'' must be of type ''numeric''.')
+            end
+            if ~container.indexed && ~iscell(domain_size)
+                error('Argument ''domain'' must be of type ''cell''.')
+            end
+            if ~isnumeric(read_entry)
+                error('Argument ''read_entry'' must be of type ''numeric''.');
+            end
+            if ~isnumeric(read_number_records)
+                error('Argument ''read_number_records'' must be of type ''numeric''.');
+            end
+
             obj.container = container;
             obj.name_ = char(name);
             obj.description_ = char(description);
@@ -459,11 +484,10 @@ classdef Symbol < handle
             % See also: GAMSTransfer.RecordsFormat
             %
 
-            p = inputParser();
-            is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
-            addRequired(p, 'target_format', is_string_char);
-            parse(p, target_format);
-            target_format = GAMSTransfer.RecordsFormat.str2int(p.Results.target_format);
+            if ~(isstring(target_format) && numel(target_format) == 1) && ~ischar(target_format);
+                error('Argument ''target_format'' must be ''char''.');
+            end
+            target_format = GAMSTransfer.RecordsFormat.str2int(target_format);
             if target_format == GAMSTransfer.RecordsFormat.DENSE_MATRIX && ...
                 obj.dimension == 0
                 target_format = GAMSTransfer.RecordsFormat.STRUCT;
@@ -1242,7 +1266,7 @@ classdef Symbol < handle
             end
         end
 
-        function uels = getUELs(obj, varargin)
+        function uels = getUELs(obj, dim, varargin)
             % Returns the UELs used in this symbol
             %
             % u = getUELs(d) returns the UELs used in dimension d of this symbol
@@ -1255,14 +1279,17 @@ classdef Symbol < handle
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
             %
 
-            p = inputParser();
-            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
-                x <= obj.dimension;
-            addRequired(p, 'dimension', is_dimension);
-            addParameter(p, 'ignore_unused', false, @islogical);
-            parse(p, varargin{:});
-            dim = p.Results.dimension;
-            ignore_unused = p.Results.ignore_unused;
+            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
+                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            end
+            if nargin == 4 && strcmpi(varargin{1}, 'ignore_unused')
+                ignore_unused = varargin{2};
+                if ~islogical(ignore_unused)
+                    error('Argument ''ignore_unused'' must be logical.');
+                end
+            else
+                ignore_unused = false;
+            end
 
             if ~obj.isValid()
                 error('Symbol must be valid in order to manage UELs.');
@@ -1298,7 +1325,7 @@ classdef Symbol < handle
             end
         end
 
-        function uels = getUELLabels(obj, varargin)
+        function uels = getUELLabels(obj, dim, ids)
             % Returns the UELs labels for the given UEL IDs
             %
             % u = getUELLabels(d, i) returns the UELs labels u for the given UEL
@@ -1310,14 +1337,12 @@ classdef Symbol < handle
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
             %
 
-            p = inputParser();
-            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
-                x <= obj.dimension;
-            addRequired(p, 'dimension', is_dimension);
-            addRequired(p, 'ids', @isnumeric);
-            parse(p, varargin{:});
-            dim = p.Results.dimension;
-            ids = p.Results.ids;
+            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
+                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            end
+            if ~isnumeric(ids)
+                error('Argument ''ids'' must be numeric');
+            end
 
             uel_label = obj.getUELs(dim);
             idx = ids >= 1 & ids <= numel(uel_label);
@@ -1326,7 +1351,7 @@ classdef Symbol < handle
             uels(~idx) = {'<undefined>'};
         end
 
-        function initUELs(obj, varargin)
+        function initUELs(obj, dim, uels)
             % Sets the UELs without modifying UEL IDs in records
             %
             % initUELs(d, u) sets the UELs u for dimension d. In contrast to
@@ -1340,15 +1365,12 @@ classdef Symbol < handle
             % GAMSTransfer.Symbol.setUELs
             %
 
-            p = inputParser();
-            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
-                x <= obj.dimension;
-            is_uels = @(x) isstring(x) && numel(x) == 1 || ischar(x) || iscellstr(x);
-            addRequired(p, 'dimension', is_dimension);
-            addRequired(p, 'uels', is_uels);
-            parse(p, varargin{:});
-            dim = p.Results.dimension;
-            uels = p.Results.uels;
+            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
+                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            end
+            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
+                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            end
 
             if ~obj.isValid()
                 error('Symbol must be valid in order to manage UELs.');
@@ -1376,7 +1398,7 @@ classdef Symbol < handle
             end
         end
 
-        function setUELs(obj, varargin)
+        function setUELs(obj, dim, uels)
             % Sets the UELs with updating UEL IDs in records
             %
             % setUELs(d, u) sets the UELs u for dimension d. In contrast to the
@@ -1391,15 +1413,12 @@ classdef Symbol < handle
             % GAMSTransfer.Symbol.initUELs
             %
 
-            p = inputParser();
-            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
-                x <= obj.dimension;
-            is_uels = @(x) isstring(x) && numel(x) == 1 || ischar(x) || iscellstr(x);
-            addRequired(p, 'dimension', is_dimension);
-            addRequired(p, 'uels', is_uels);
-            parse(p, varargin{:});
-            dim = p.Results.dimension;
-            uels = p.Results.uels;
+            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
+                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            end
+            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
+                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            end
 
             if ~obj.isValid()
                 error('Symbol must be valid in order to manage UELs.');
@@ -1427,7 +1446,7 @@ classdef Symbol < handle
             end
         end
 
-        function addUELs(obj, varargin)
+        function addUELs(obj, dim, uels)
             % Adds UELs to the symbol
             %
             % addUELs(d, u) adds the UELs u for dimension d.
@@ -1438,15 +1457,12 @@ classdef Symbol < handle
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
             %
 
-            p = inputParser();
-            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
-                x <= obj.dimension;
-            is_uels = @(x) isstring(x) && numel(x) == 1 || ischar(x) || iscellstr(x);
-            addRequired(p, 'dimension', is_dimension);
-            addRequired(p, 'uels', is_uels);
-            parse(p, varargin{:});
-            dim = p.Results.dimension;
-            uels = p.Results.uels;
+            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
+                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            end
+            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
+                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            end
 
             if ~obj.isValid()
                 error('Symbol must be valid in order to manage UELs.');
@@ -1474,7 +1490,7 @@ classdef Symbol < handle
             end
         end
 
-        function removeUELs(obj, varargin)
+        function removeUELs(obj, dim, uels)
             % Removes UELs from the symbol
             %
             % removeUELs(d) removes all unused UELs for dimension d.
@@ -1486,17 +1502,15 @@ classdef Symbol < handle
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
             %
 
-            p = inputParser();
-            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
-                x <= obj.dimension;
-            is_uels = @(x) isstring(x) && numel(x) == 1 || ischar(x) || iscellstr(x);
-            addRequired(p, 'dimension', is_dimension);
-            addOptional(p, 'uels', {}, is_uels);
-            parse(p, varargin{:});
-            dim = p.Results.dimension;
-            uels = p.Results.uels;
-            if isstring(uels) || ischar(uels)
-                uels = {uels};
+            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
+                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            end
+            if nargin == 3
+                if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
+                    error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+                end
+            else
+                uels = {};
             end
 
             if ~obj.isValid()
@@ -1532,7 +1546,7 @@ classdef Symbol < handle
 
         end
 
-        function renameUELs(obj, varargin)
+        function renameUELs(obj, dim, olduels, newuels)
             % Renames UELs in the symbol
             %
             % renameUELs(d, u1, u2) renames the UELs u1 to the labels given in
@@ -1544,17 +1558,15 @@ classdef Symbol < handle
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
             %
 
-            p = inputParser();
-            is_dimension = @(x) isnumeric(x) && x == round(x) && x >= 1 && ...
-                x <= obj.dimension;
-            is_uels = @(x) isstring(x) && numel(x) == 1 || ischar(x) || iscellstr(x);
-            addRequired(p, 'dimension', is_dimension);
-            addRequired(p, 'olduels', is_uels);
-            addRequired(p, 'newuels', is_uels);
-            parse(p, varargin{:});
-            dim = p.Results.dimension;
-            olduels = p.Results.olduels;
-            newuels = p.Results.newuels;
+            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
+                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            end
+            if ~(isstring(olduels) && numel(olduels) == 1) && ~ischar(olduels) && ~iscellstr(olduels);
+                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            end
+            if ~(isstring(newuels) && numel(newuels) == 1) && ~ischar(newuels) && ~iscellstr(newuels);
+                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            end
 
             if ~obj.isValid()
                 error('Symbol must be valid in order to manage UELs.');

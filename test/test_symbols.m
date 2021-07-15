@@ -60,9 +60,7 @@ function test_addSymbols(t, cfg)
     t.assert(s1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 's1'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.s1 == s1);
-    end
+    t.assert(gdx.data.s1.id == s1.id);
 
     t.add('add_symbols_set_2');
     s2 = GAMSTransfer.Set(gdx, 's2', {s1}, 'description', 'descr s2');
@@ -72,9 +70,7 @@ function test_addSymbols(t, cfg)
     t.assert(~s2.singleton);
     t.assert(s2.dimension == 1);
     t.assert(numel(s2.domain) == 1);
-    if gdx.features.handle_comparison
-        t.assert(s2.domain{1} == s1);
-    end
+    t.assert(s2.domain{1}.id == s1.id);
     t.assertEquals(s2.domain{1}.name, 's1');
     t.assert(numel(s2.domain_label) == 1);
     t.assert(s2.domain_label{1} == 's1_1');
@@ -87,9 +83,7 @@ function test_addSymbols(t, cfg)
     t.assert(s2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 's2'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.s2 == s2);
-    end
+    t.assert(gdx.data.s2.id == s2.id);
 
     t.add('add_symbols_set_3');
     s3 = GAMSTransfer.Set(gdx, 's3', {s1, '*'}, 'singleton', true);
@@ -99,9 +93,7 @@ function test_addSymbols(t, cfg)
     t.assert(s3.singleton);
     t.assert(s3.dimension == 2);
     t.assert(numel(s3.domain) == 2);
-    if gdx.features.handle_comparison
-        t.assert(s3.domain{1} == s1);
-    end
+    t.assert(s3.domain{1}.id == s1.id);
     t.assertEquals(s3.domain{1}.name, 's1');
     t.assertEquals(s3.domain{2}, '*');
     t.assert(numel(s3.domain_label) == 2);
@@ -118,9 +110,7 @@ function test_addSymbols(t, cfg)
     t.assert(s3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 's3'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.s3 == s3);
-    end
+    t.assert(gdx.data.s3.id == s3.id);
 
     t.add('add_symbols_set_4');
     s4 = GAMSTransfer.Set(gdx, 's4', s2, 'description', 'descr s4', 'singleton', true);
@@ -130,9 +120,7 @@ function test_addSymbols(t, cfg)
     t.assert(s4.singleton);
     t.assert(s4.dimension == 1);
     t.assert(numel(s4.domain) == 1);
-    if gdx.features.handle_comparison
-        t.assert(s4.domain{1} == s2);
-    end
+    t.assert(s4.domain{1}.id == s2.id);
     t.assertEquals(s4.domain{1}.name, 's2');
     t.assert(numel(s4.domain_label) == 1);
     t.assert(s4.domain_label{1} == 's2_1');
@@ -145,9 +133,7 @@ function test_addSymbols(t, cfg)
     t.assert(s4.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 4);
     t.assert(isfield(gdx.data, 's4'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.s4 == s4);
-    end
+    t.assert(gdx.data.s4.id == s4.id);
 
     t.add('add_symbols_set_5');
     s5 = GAMSTransfer.Set(gdx, 's5', {'s1', s2});
@@ -158,9 +144,7 @@ function test_addSymbols(t, cfg)
     t.assert(s5.dimension == 2);
     t.assert(numel(s5.domain) == 2);
     t.assert(s5.domain{1} == 's1');
-    if gdx.features.handle_comparison
-        t.assert(s5.domain{2} == s2);
-    end
+    t.assert(s5.domain{2}.id == s2.id);
     t.assertEquals(s5.domain{2}.name, 's2');
     t.assert(numel(s5.domain_label) == 2);
     t.assert(s5.domain_label{1} == 's1_1');
@@ -176,9 +160,7 @@ function test_addSymbols(t, cfg)
     t.assert(s5.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 5);
     t.assert(isfield(gdx.data, 's5'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.s5 == s5);
-    end
+    t.assert(gdx.data.s5.id == s5.id);
 
     t.add('add_symbols_set_6');
     s6 = GAMSTransfer.Set(gdx, 's6', 's1');
@@ -200,9 +182,7 @@ function test_addSymbols(t, cfg)
     t.assert(s6.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 6);
     t.assert(isfield(gdx.data, 's6'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.s6 == s6);
-    end
+    t.assert(gdx.data.s6.id == s6.id);
 
     t.add('add_symbols_set_fails');
     try
@@ -260,46 +240,34 @@ function test_addSymbols(t, cfg)
     a1 = GAMSTransfer.Alias(gdx, 'a1', s1);
     t.testEmptySymbol(a1);
     t.assertEquals(a1.name, 'a1');
-    if gdx.features.handle_comparison
-        t.assert(a1.aliased_with == s1);
-    end
+    t.assert(a1.aliased_with.id == s1.id);
     t.assertEquals(a1.aliased_with.name, 's1');
     t.assert(a1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 7);
     t.assert(isfield(gdx.data, 'a1'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.a1 == a1);
-    end
+    t.assert(gdx.data.a1.id == a1.id);
 
     t.add('add_symbols_alias_2');
     a2 = GAMSTransfer.Alias(gdx, 'a2', a1);
     t.testEmptySymbol(a2);
     t.assertEquals(a2.name, 'a2');
-    if gdx.features.handle_comparison
-        t.assert(a2.aliased_with == s1);
-    end
+    t.assert(a2.aliased_with.id == s1.id);
     t.assertEquals(a2.aliased_with.name, 's1');
     t.assert(a2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 8);
     t.assert(isfield(gdx.data, 'a2'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.a2 == a2);
-    end
+    t.assert(gdx.data.a2.id == a2.id);
 
     t.add('add_symbols_alias_3');
     a3 = GAMSTransfer.Alias(gdx, 'a3', a2);
     t.testEmptySymbol(a3);
     t.assertEquals(a3.name, 'a3');
-    if gdx.features.handle_comparison
-        t.assert(a3.aliased_with == s1);
-    end
+    t.assert(a3.aliased_with.id == s1.id);
     t.assertEquals(a3.aliased_with.name, 's1');
     t.assert(a3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 9);
     t.assert(isfield(gdx.data, 'a3'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.a3 == a3);
-    end
+    t.assert(gdx.data.a3.id == a3.id);
 
     t.add('add_symbols_parameter_1');
     p1 = GAMSTransfer.Parameter(gdx, 'p1');
@@ -316,9 +284,7 @@ function test_addSymbols(t, cfg)
     t.assert(p1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 10);
     t.assert(isfield(gdx.data, 'p1'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.p1 == p1);
-    end
+    t.assert(gdx.data.p1.id == p1.id);
 
     t.add('add_symbols_parameter_2');
     p2 = GAMSTransfer.Parameter(gdx, 'p2', s1, 'description', 'descr par 2');
@@ -327,9 +293,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p2.description, 'descr par 2');
     t.assert(p2.dimension == 1);
     t.assert(numel(p2.domain) == 1);
-    if gdx.features.handle_comparison
-        t.assert(p2.domain{1} == s1);
-    end
+    t.assert(p2.domain{1}.id == s1.id);
     t.assertEquals(p2.domain{1}.name, 's1');
     t.assert(numel(p2.domain_label) == 1);
     t.assertEquals(p2.domain_label{1}, 's1_1');
@@ -342,9 +306,7 @@ function test_addSymbols(t, cfg)
     t.assert(p2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 11);
     t.assert(isfield(gdx.data, 'p2'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.p2 == p2);
-    end
+    t.assert(gdx.data.p2.id == p2.id);
 
     t.add('add_symbols_parameter_3');
     p3 = GAMSTransfer.Parameter(gdx, 'p3', {s1, '*', 's2'}, 'description', 'descr par 3');
@@ -353,9 +315,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p3.description, 'descr par 3');
     t.assert(p3.dimension == 3);
     t.assert(numel(p3.domain) == 3);
-    if gdx.features.handle_comparison
-        t.assert(p3.domain{1} == s1);
-    end
+    t.assert(p3.domain{1}.id == s1.id);
     t.assertEquals(p3.domain{1}.name, 's1');
     t.assertEquals(p3.domain{2}, '*');
     t.assert(p3.domain{3} == 's2');
@@ -376,9 +336,7 @@ function test_addSymbols(t, cfg)
     t.assert(p3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 12);
     t.assert(isfield(gdx.data, 'p3'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.p3 == p3);
-    end
+    t.assert(gdx.data.p3.id == p3.id);
 
     t.add('add_symbols_parameter_fails');
     try
@@ -442,9 +400,7 @@ function test_addSymbols(t, cfg)
     t.assert(v1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 13);
     t.assert(isfield(gdx.data, 'v1'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.v1 == v1);
-    end
+    t.assert(gdx.data.v1.id == v1.id);
 
     t.add('add_symbols_variable_2');
     v2 = GAMSTransfer.Variable(gdx, 'v2', GAMSTransfer.VariableType.BINARY, {}, 'description', 'descr var 2');
@@ -462,9 +418,7 @@ function test_addSymbols(t, cfg)
     t.assert(v2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 14);
     t.assert(isfield(gdx.data, 'v2'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.v2 == v2);
-    end
+    t.assert(gdx.data.v2.id == v2.id);
 
     t.add('add_symbols_variable_3');
     v3 = GAMSTransfer.Variable(gdx, 'v3', 'sos1', {s1, '*'});
@@ -474,9 +428,7 @@ function test_addSymbols(t, cfg)
     t.assert(v3.type == 'sos1');
     t.assert(v3.dimension == 2);
     t.assert(numel(v3.domain) == 2);
-    if gdx.features.handle_comparison
-        t.assert(v3.domain{1} == s1);
-    end
+    t.assert(v3.domain{1}.id == s1.id);
     t.assertEquals(v3.domain{1}.name, 's1');
     t.assertEquals(v3.domain{2}, '*');
     t.assert(numel(v3.domain_label) == 2);
@@ -493,9 +445,7 @@ function test_addSymbols(t, cfg)
     t.assert(v3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 15);
     t.assert(isfield(gdx.data, 'v3'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.v3 == v3);
-    end
+    t.assert(gdx.data.v3.id == v3.id);
 
     t.add('add_symbols_variable_4');
     v = GAMSTransfer.Variable(gdx, 'v41', 'binary');
@@ -605,9 +555,7 @@ function test_addSymbols(t, cfg)
     t.assert(e1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 34);
     t.assert(isfield(gdx.data, 'e1'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.e1 == e1);
-    end
+    t.assert(gdx.data.e1.id == e1.id);
 
     t.add('add_symbols_equation_2');
     e2 = GAMSTransfer.Equation(gdx, 'e2', GAMSTransfer.EquationType.EQ, {}, 'description', 'descr equ 2');
@@ -625,9 +573,7 @@ function test_addSymbols(t, cfg)
     t.assert(e2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 35);
     t.assert(isfield(gdx.data, 'e2'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.e2 == e2);
-    end
+    t.assert(gdx.data.e2.id == e2.id);
 
     t.add('add_symbols_equation_3');
     e3 = GAMSTransfer.Equation(gdx, 'e3', 'leq', {s1, '*'});
@@ -637,9 +583,7 @@ function test_addSymbols(t, cfg)
     t.assert(e3.type == 'leq');
     t.assert(e3.dimension == 2);
     t.assert(numel(e3.domain) == 2);
-    if gdx.features.handle_comparison
-        t.assert(e3.domain{1} == s1);
-    end
+    t.assert(e3.domain{1}.id == s1.id);
     t.assertEquals(s3.domain{1}.name, 's1');
     t.assertEquals(e3.domain{2}, '*');
     t.assert(numel(e3.domain_label) == 2);
@@ -656,9 +600,7 @@ function test_addSymbols(t, cfg)
     t.assert(e3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 36);
     t.assert(isfield(gdx.data, 'e3'));
-    if gdx.features.handle_comparison
-        t.assert(gdx.data.e3 == e3);
-    end
+    t.assert(gdx.data.e3.id == e3.id);
 
     t.add('add_symbols_equation_4');
     e = GAMSTransfer.Equation(gdx, 'e41', 'eq');
@@ -824,24 +766,18 @@ function test_changeSymbol(t, cfg)
     t.add('change_symbol_dimension');
     t.assert(x1.dimension == 1);
     t.assert(numel(x1.domain) == 1);
-    if gdx.features.handle_comparison
-        t.assertEquals(x1.domain{1}, i1);
-    end
+    t.assertEquals(x1.domain{1}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
     x1.dimension = 2;
     t.assert(x1.dimension == 2);
     t.assert(numel(x1.domain) == 2);
-    if gdx.features.handle_comparison
-        t.assertEquals(x1.domain{1}, i1);
-    end
+    t.assertEquals(x1.domain{1}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assertEquals(x1.domain{2}, '*');
     x1.dimension = 1;
     t.assert(x1.dimension == 1);
     t.assert(numel(x1.domain) == 1);
-    if gdx.features.handle_comparison
-        t.assertEquals(x1.domain{1}, i1);
-    end
+    t.assertEquals(x1.domain{1}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
     try
         t.assert(false);
@@ -875,42 +811,32 @@ function test_changeSymbol(t, cfg)
     t.add('change_symbol_dimension_2');
     t.assert(x3.dimension == 1);
     t.assert(numel(x3.domain) == 1);
-    if gdx.features.handle_comparison
-        t.assertEquals(x3.domain{1}, i2);
-    end
+    t.assertEquals(x3.domain{1}.id, i2.id);
     t.assertEquals(x3.domain{1}.name, 'i2');
     t.assert(x3.isValid());
     x3.dimension = 2;
     t.assert(x3.dimension == 2);
     t.assert(numel(x3.domain) == 2);
-    if gdx.features.handle_comparison
-        t.assertEquals(x3.domain{1}, i2);
-    end
+    t.assertEquals(x3.domain{1}.id, i2.id);
     t.assertEquals(x3.domain{1}.name, 'i2');
     t.assertEquals(x3.domain{2}, '*');
     t.assert(~x3.isValid());
     x3.dimension = 1;
     t.assert(x3.dimension == 1);
     t.assert(numel(x3.domain) == 1);
-    if gdx.features.handle_comparison
-        t.assertEquals(x3.domain{1}, i2);
-    end
+    t.assertEquals(x3.domain{1}.id, i2.id);
     t.assertEquals(x3.domain{1}.name, 'i2');
     t.assert(x3.isValid());
 
     t.add('change_symbol_domain');
     t.assert(numel(x1.domain) == 1);
-    if gdx.features.handle_comparison
-        t.assertEquals(x1.domain{1}, i1);
-    end
+    t.assertEquals(x1.domain{1}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
     x1.domain = {i1,i1};
     t.assert(x1.dimension == 2);
     t.assert(numel(x1.domain) == 2);
-    if gdx.features.handle_comparison
-        t.assertEquals(x1.domain{1}, i1);
-        t.assertEquals(x1.domain{2}, i1);
-    end
+    t.assertEquals(x1.domain{1}.id, i1.id);
+    t.assertEquals(x1.domain{2}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assertEquals(x1.domain{2}.name, 'i1');
     x1.domain = {'*'};

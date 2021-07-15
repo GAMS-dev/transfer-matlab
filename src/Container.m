@@ -108,20 +108,10 @@ classdef Container < handle
             is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
                 ~strcmpi(x, 'system_directory') && ~strcmpi(x, 'indexed') && ...
                 ~strcmpi(x, 'features');
-            if obj.features.parser_optional
-                addOptional(p, 'filename', '', is_string_char);
-            else
-                addParameter(p, 'filename', '', is_string_char);
-            end
+            addOptional(p, 'filename', '', is_string_char);
             addParameter(p, 'system_directory', '', is_string_char);
             addParameter(p, 'indexed', false, @islogical);
             addParameter(p, 'features', struct(), @isstruct);
-
-            % parse input arguments
-            if ~obj.features.parser_optional
-                varargin = GAMSTransfer.Utils.parserOptional2Parameter(0, ...
-                    {'filename'}, {'system_directory', 'indexed'}, varargin);
-            end
             parse(p, varargin{:});
             obj.system_directory = GAMSTransfer.Utils.checkSystemDirectory(p.Results.system_directory);
             obj.filename = GAMSTransfer.Utils.checkFilename(p.Results.filename, '.gdx', true);
@@ -276,18 +266,10 @@ classdef Container < handle
             p = inputParser();
             is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
                 ~strcmpi(x, 'compress') && ~strcmpi(x, 'sorted');
-            if obj.features.parser_optional
-                addOptional(p, 'filename', obj.filename, is_string_char);
-            else
-                addParameter(p, 'filename', obj.filename, is_string_char);
-            end
+            addOptional(p, 'filename', obj.filename, is_string_char);
             addParameter(p, 'compress', false, @islogical);
             addParameter(p, 'sorted', false, @islogical);
             addParameter(p, 'uel_priority', {}, @iscellstr);
-            if ~obj.features.parser_optional
-                varargin = GAMSTransfer.Utils.parserOptional2Parameter(0, ...
-                    {'filename'}, {'compress', 'sorted', 'uel_priority'}, varargin);
-            end
             parse(p, varargin{:});
 
             if p.Results.compress && obj.indexed

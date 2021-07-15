@@ -103,28 +103,6 @@ function gams_transfer_test(varargin)
         test_idx_readwrite(cfg);
         test_trnsport(cfg);
 
-        disp('Configuration: disable parser_optional');
-        cfg.features = features;
-        cfg.features.parser_optional = false;
-        test_container(cfg);
-        test_uels(cfg);
-        test_symbols(cfg);
-        test_readwrite(cfg);
-        test_idx_symbols(cfg);
-        test_idx_readwrite(cfg);
-        test_trnsport(cfg);
-
-        disp('Configuration: disable handle_comparison');
-        cfg.features = features;
-        cfg.features.handle_comparison = false;
-        test_container(cfg);
-        test_uels(cfg);
-        test_symbols(cfg);
-        test_readwrite(cfg);
-        test_idx_symbols(cfg);
-        test_idx_readwrite(cfg);
-        test_trnsport(cfg);
-
         cd(olddir);
         rmpath(fullfile(current_dir, 'test'));
         rmpath(fullfile(current_dir, 'src'));
