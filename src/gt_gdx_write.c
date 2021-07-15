@@ -160,7 +160,7 @@ void mexFunction(
         gt_mex_getfield_sizet(mx_arr_data, data_name, "dimension_", 0, true, GT_FILTER_NONNEGATIVE, 1, &dim);
         gt_mex_getfield_cell_str(mx_arr_data, data_name, "domain_", "", true, dim, domains_ptr, GMS_SSSIZE);
         gt_mex_getfield_cell_str(mx_arr_data, data_name, "domain_label_", "", true, dim, domain_labels_ptr, GMS_SSSIZE);
-        gt_mex_getfield_struct(mx_arr_data, data_name, "uels_", true, &mx_arr_uels);
+        gt_mex_getfield_cell(mx_arr_data, data_name, "uels_", true, &mx_arr_uels);
 
         /* get optional fields */
         gt_mex_getfield_str(mx_arr_data, data_name, "description_", "", false, text, GMS_SSSIZE);
@@ -210,7 +210,7 @@ void mexFunction(
         /* register uels */
         for (size_t j = 0; j < dim; j++)
         {
-            mxArray* mx_field = mxGetField(mx_arr_uels, 0, domain_labels_ptr[j]);
+            mxArray* mx_field = mxGetCell(mx_arr_uels, j);
             domain_uel_size[j] = mxGetNumberOfElements(mx_field);
 
             domain_uel_ids[j] = (int*) mxCalloc(domain_uel_size[j], sizeof(int));
@@ -315,10 +315,10 @@ void mexFunction(
                     {
                         size_t rel_idx = mx_domains[k][j];
                         if (rel_idx <= 0)
-                            mexErrMsgIdAndTxt(ERRID"gdxDataWriteMap", "Symbol '%s' has "
+                            mexErrMsgIdAndTxt(ERRID"gdxDataWrite", "Symbol '%s' has "
                                 "invalid domain index: %d. Missing UEL?", name, rel_idx);
                         if (rel_idx > domain_uel_size[k])
-                            mexErrMsgIdAndTxt(ERRID"gdxDataWriteMap", "Symbol '%s' has "
+                            mexErrMsgIdAndTxt(ERRID"gdxDataWrite", "Symbol '%s' has "
                                 "unregistered UEL.", name);
                         gdx_uel_index[k] = domain_uel_ids[k][rel_idx-1];
                     }

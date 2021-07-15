@@ -87,7 +87,7 @@ classdef Container < handle
     end
 
     properties (Hidden, SetAccess = private)
-        reorder_after_add = true
+        reorder_after_add = false
         features
     end
 
@@ -198,7 +198,7 @@ classdef Container < handle
             values_bool = false(5,1);
             for e = p.Results.values
                 switch e{1}
-                case 'level'
+                case {'level', 'value', 'text'}
                     values_bool(1) = true;
                 case 'marginal'
                     values_bool(2) = true;
@@ -209,53 +209,18 @@ classdef Container < handle
                 case 'scale'
                     values_bool(5) = true;
                 otherwise
-                    error('Invalid value option: %s. Choose from level, marginal, lower, upper, scale.', e{1});
+                    error('Invalid value option: %s. Choose from level, value, text, marginal, lower, upper, scale.', e{1});
                 end
             end
 
             % read records
-            for i = 1:numel(p.Results.symbols)
-                symbol_name = p.Results.symbols{i};
-
-                % check if symbol was loaded from GDX file
-                if ~isfield(obj.data, symbol_name)
-                    warning('Unknown symbol ''%s'' skipped.', symbol_name);
-                end
-                symbol = obj.data.(symbol_name);
-                if isnan(symbol.read_entry)
-                    continue;
-                end
-
-                % don't store anything for an alias
-                if isa(symbol, 'GAMSTransfer.Alias')
-                    continue;
-                end
-
-                % sets can only be read as struct
-                if (format_int == GAMSTransfer.RecordsFormat.DENSE_MATRIX || ...
-                    format_int == GAMSTransfer.RecordsFormat.SPARSE_MATRIX) && ...
-                    isa(symbol, 'GAMSTransfer.Set')
-                    format_int_sym = GAMSTransfer.RecordsFormat.STRUCT;
-                else
-                    format_int_sym = format_int;
-                end
-
-                % check shape of symbol
-                if (format_int_sym == GAMSTransfer.RecordsFormat.DENSE_MATRIX || ...
-                    format_int_sym == GAMSTransfer.RecordsFormat.SPARSE_MATRIX) && ...
-                    any(isnan(symbol.size))
-                    error('Matrix sizes for ''%s'' not available. Can''t read as matrix.', symbol_name);
-                end
-
-                % actual record reading
-                if obj.indexed
-                    GAMSTransfer.gt_idx_read_records(obj.system_directory, ...
-                        obj.filename, symbol, int32(format_int_sym));
-                else
-                    GAMSTransfer.gt_gdx_read_records(obj.system_directory, ...
-                        obj.filename, symbol, int32(format_int_sym), ...
-                        values_bool, obj.features.categorical);
-                end
+            if obj.indexed
+                GAMSTransfer.gt_idx_read_records(obj.system_directory, ...
+                    obj.filename, obj.data, p.Results.symbols, int32(format_int));
+            else
+                GAMSTransfer.gt_gdx_read_records(obj.system_directory, ...
+                    obj.filename, obj.data, p.Results.symbols, int32(format_int), ...
+                    values_bool, obj.features.categorical);
             end
         end
 
@@ -297,8 +262,11 @@ classdef Container < handle
             %
 
             if ~obj.isValid()
-                invalids = GAMSTransfer.Utils.list2str(obj.listInvalidSymbols(), '', '');
-                error('Can''t write invalid container. Invalid symbols: %s.', invalids);
+                obj.reorderSymbols();
+                if ~obj.isValid()
+                    invalids = GAMSTransfer.Utils.list2str(obj.listInvalidSymbols(), '', '');
+                    error('Can''t write invalid container. Invalid symbols: %s.', invalids);
+                end
             end
 
             % input arguments
@@ -505,11 +473,11 @@ classdef Container < handle
 
                 % force recheck of deleted symbol (it may still live within an
                 % alias, domain or in the user's program)
-                symbol.isValid('force', true);
+                symbol.isValid(false, true);
             end
 
             % force recheck of all remaining symbols in container
-            obj.isValid('force', true);
+            obj.isValid(false, true);
         end
 
         function reorderSymbols(obj)
@@ -622,7 +590,7 @@ classdef Container < handle
             obj.data = orderfields(obj.data, perm);
 
             % force recheck of all remaining symbols in container
-            obj.isValid('force', true);
+            obj.isValid(false, true);
         end
 
         function list = listSymbols(obj, varargin)
@@ -879,23 +847,31 @@ classdef Container < handle
         function valid = isValid(obj, varargin)
             % Checks correctness of all symbols
             %
-            % Parameter Arguments:
-            % - force: logical
-            %   If true, forces reevaluation of validity (resets cache)
+            % Optional Arguments:
+            % 1. verbose: logical
+            %    If true, the reason for an invalid symbol is printed
+            % 2. force: logical
+            %    If true, forces reevaluation of validity (resets cache)
+            %
             %
             % See also: GAMSTransfer.Symbol/isValid
             %
 
-            p = inputParser();
-            addParameter(p, 'force', false, @islogical);
-            parse(p, varargin{:});
+            verbose = false;
+            force = false;
+            if nargin > 1 && varargin{1}
+                verbose = true;
+            end
+            if nargin > 2 && varargin{2}
+                force = true;
+            end
 
             valid = true;
             symbols = fieldnames(obj.data);
             for i = 1:numel(symbols)
-                if ~obj.data.(symbols{i}).isValid('force', p.Results.force)
+                if ~obj.data.(symbols{i}).isValid(verbose, force)
                     valid = false;
-                    if ~p.Results.force
+                    if ~force
                         return
                     end
                 end
@@ -904,18 +880,11 @@ classdef Container < handle
 
     end
 
-    methods (Hidden)
+    methods (Hidden, Access = {?GAMSTransfer.Symbol, ?GAMSTransfer.Alias})
 
         function add(obj, symbol)
             if obj.indexed && ~isa(symbol, 'GAMSTransfer.Parameter')
                 error('Symbol must be of type ''GAMSTransfer.Parameter'' in indexed mode.');
-            elseif ~isa(symbol, 'GAMSTransfer.Set') && ~isa(symbol, 'GAMSTransfer.Parameter') && ...
-                ~isa(symbol, 'GAMSTransfer.Variable') && ~isa(symbol, 'GAMSTransfer.Equation') && ...
-                ~isa(symbol, 'GAMSTransfer.Alias')
-                error('Symbol must be of type ''%s'', ''%s'', ''%s'', ''%s'' or ''%s''.', ...
-                    'GAMSTransfer.Set', 'GAMSTransfer.Parameter', ...
-                    'GAMSTransfer.Variable', 'GAMSTransfer.Equation', ...
-                    'GAMSTransfer.Alias');
             end
             if isfield(obj.data, symbol.name_)
                 error('Symbol ''%s'' exists already.', symbol.name);
@@ -923,10 +892,14 @@ classdef Container < handle
             obj.data.(symbol.name_) = symbol;
 
             % reorder symbols
-            if ~obj.isValid() && obj.reorder_after_add
+            if obj.reorder_after_add && ~obj.isValid()
                 obj.reorderSymbols();
             end
         end
+
+    end
+
+    methods (Hidden, Access = private)
 
         function descr = describeSymbols(obj, symtype)
             switch symtype
@@ -1066,10 +1039,6 @@ classdef Container < handle
             end
         end
 
-    end
-
-    methods (Hidden, Access = private)
-
         function readBasic(obj)
             % read data from GDX
             if obj.indexed
@@ -1083,7 +1052,7 @@ classdef Container < handle
             initial_reorder_after_add = obj.reorder_after_add;
             obj.reorder_after_add = false;
 
-            % transform data into GDXSymbol
+            % transform data into Symbol object
             for i = 1:numel(symbols)
                 symbol = rawdata.(symbols{i});
 

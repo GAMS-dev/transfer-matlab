@@ -128,19 +128,21 @@ classdef Alias < handle
         function valid = isValid(obj, varargin)
             % Checks correctness of alias
             %
-            % Parameter Arguments:
-            % - verbose: logical
-            %   If true, the reason for an invalid symbol is printed
-            % - force: logical
-            %   If true, forces reevaluation of validity (resets cache)
+            % Optional Arguments:
+            % 1. verbose: logical
+            %    If true, the reason for an invalid symbol is printed
+            % 2. force: logical
+            %    If true, forces reevaluation of validity (resets cache)
             %
 
-            p = inputParser();
-            addParameter(p, 'verbose', false, @islogical);
-            addParameter(p, 'force', false, @islogical);
-            parse(p, varargin{:});
-            verbose = p.Results.verbose;
-            force = p.Results.force;
+            verbose = false;
+            force = false;
+            if nargin > 1 && varargin{1}
+                verbose = true;
+            end
+            if nargin > 2 && varargin{2}
+                force = true;
+            end
 
             valid = false;
 

@@ -94,6 +94,10 @@ classdef Symbol < handle
         uels_
     end
 
+    properties (Constant)
+        FORMAT_REEVALUATE = -2;
+    end
+
     methods (Access = protected)
 
         function obj = Symbol(container, name, description, domain_size, records, read_entry, read_number_records)
@@ -111,7 +115,7 @@ classdef Symbol < handle
             else
                 obj.domain = domain_size;
             end
-            obj.format_ = nan;
+            obj.format_ = obj.FORMAT_REEVALUATE;
             obj.read_entry = read_entry;
 
             % a negative number_records signals that we store the number of
@@ -250,7 +254,7 @@ classdef Symbol < handle
             end
 
             % indicate that we need to recheck symbol records
-            obj.format_ = nan;
+            obj.format_ = obj.FORMAT_REEVALUATE;
             obj.number_records_ = nan;
         end
 
@@ -300,7 +304,7 @@ classdef Symbol < handle
             obj.domain_info_ = 'relaxed';
 
             % indicate that we need to recheck symbol records
-            obj.format_ = nan;
+            obj.format_ = obj.FORMAT_REEVALUATE;
             obj.number_records_ = nan;
         end
 
@@ -310,22 +314,21 @@ classdef Symbol < handle
 
         function set.records(obj, records)
             obj.records = records;
-            obj.format_ = nan;
+            obj.format_ = obj.FORMAT_REEVALUATE;
             obj.number_records_ = nan;
         end
 
         function uels = get.uels_(obj)
-            uels = struct();
+            uels = cell(1, obj.dimension_);
             for i = 1:obj.dimension_
-                uels.(obj.domain_label_{i}) = obj.getUELs(i);
+                uels{i} = obj.getUELs(i);
             end
         end
 
         function set.uels_(obj, uels)
             if ~obj.container.features.categorical
                 for i = 1:obj.dimension_
-                    label = obj.domain_label_{i};
-                    obj.uels.(label).set(uels.(label), []);
+                    obj.uels.(obj.domain_label_{i}).set(uels{i}, []);
                 end
             end
         end
@@ -477,7 +480,7 @@ classdef Symbol < handle
 
             % check records format
             warning('off');
-            if ~obj.isValid('verbose', true);
+            if ~obj.isValid(true);
                 obj.records = [];
                 error(lastwarn);
                 warning('on')
@@ -591,13 +594,22 @@ classdef Symbol < handle
 
                     records = struct();
 
-                    % get linear indices
+                    % get matrix (linear) indices
                     s = ones(1, max(2, obj.dimension_));
                     s(1:obj.dimension_) = obj.size_;
                     if obj.dimension_ > 0
                         idx_sub = cell(1, obj.dimension_);
                         for i = 1:obj.dimension_
-                            idx_sub{i} = int32(obj.records.(obj.domain_label_{i}));
+                            if obj.container.indexed
+                                idx_sub{i} = obj.records.(obj.domain_label_{i});
+                            else
+                                % get UEL mapping w.r.t. domain set
+                                [~, uel_map] = ismember(obj.getUELs(i), obj.domain_{i}.getUELs(1));
+                                if any(uel_map == 0)
+                                    error('Found domain violation.');
+                                end
+                                idx_sub{i} = uel_map(obj.records.(obj.domain_label_{i}));
+                            end
                         end
                         idx = sub2ind(s, idx_sub{:});
                     else
@@ -732,6 +744,12 @@ classdef Symbol < handle
                         end
                     end
 
+                    % remove unused UELs
+                    if ~obj.container.indexed
+                        for i = 1:obj.dimension_
+                            obj.removeUELs(i);
+                        end
+                    end
                     return
                 end
             end
@@ -743,29 +761,31 @@ classdef Symbol < handle
         function valid = isValid(obj, varargin)
             % Checks correctness of symbol
             %
-            % Parameter Arguments:
-            % - verbose: logical
-            %   If true, the reason for an invalid symbol is printed
-            % - force: logical
-            %   If true, forces reevaluation of validity (resets cache)
+            % Optional Arguments:
+            % 1. verbose: logical
+            %    If true, the reason for an invalid symbol is printed
+            % 2. force: logical
+            %    If true, forces reevaluation of validity (resets cache)
             %
             % See also: GAMSTransfer.Container/isValid
             %
 
-            p = inputParser();
-            addParameter(p, 'verbose', false, @islogical);
-            addParameter(p, 'force', false, @islogical);
-            parse(p, varargin{:});
-
-            % delete format information
-            if p.Results.force
-                obj.format_ = nan;
+            verbose = false;
+            force = false;
+            if nargin > 1 && varargin{1}
+                verbose = true;
+            end
+            if nargin > 2 && varargin{2}
+                force = true;
             end
 
-            % check if format is already available
-            if ~isnan(obj.format_) && ...
-                obj.format_ ~= GAMSTransfer.RecordsFormat.UNKNOWN && ...
-                obj.format_ ~= GAMSTransfer.RecordsFormat.NOT_READ
+            % delete format information
+            if force
+                obj.format_ = obj.FORMAT_REEVALUATE;
+            end
+
+            % check if format is already available (not valid: UNKNOWN: -1; NOT_READ: 0)
+            if obj.format_ > 0
                 valid = true;
                 return
             end
@@ -784,7 +804,7 @@ classdef Symbol < handle
                 % Note that format NOT_READ will lead to an invalid symbol
                 if isempty(obj.records) && ~isnan(obj.number_records_) && obj.number_records_ < 0
                     obj.format_ = GAMSTransfer.RecordsFormat.NOT_READ;
-                    if p.Results.verbose
+                    if verbose
                         warning('Symbol has not been fully read.');
                     end
                     return
@@ -836,7 +856,7 @@ classdef Symbol < handle
                 valid = true;
             catch e
                 obj.format_ = GAMSTransfer.RecordsFormat.UNKNOWN;
-                if p.Results.verbose
+                if verbose
                     warning(e.message);
                 end
             end

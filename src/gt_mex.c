@@ -413,9 +413,9 @@ void gt_mex_getfield_int(
         mxIsClass(mx_struct, "GAMSTransfer.Equation"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);
     else
-        mexErrMsgIdAndTxt(ERRID"getfield_str", "Structure '%s' has invalid type.", structname, fieldname);
+        mexErrMsgIdAndTxt(ERRID"getfield_int", "Structure '%s' has invalid type.", structname, fieldname);
     if (required && !mx_field)
-        mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has no field '%s'.", structname, fieldname);
+        mexErrMsgIdAndTxt(ERRID"getfield_int", "Structure '%s' has no field '%s'.", structname, fieldname);
     else if (!mx_field)
     {
         for (size_t i = 0; i < dim; i++)
@@ -425,9 +425,9 @@ void gt_mex_getfield_int(
 
     /* check field */
     if (!mxIsNumeric(mx_field))
-        mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': not numeric", structname, fieldname);
+        mexErrMsgIdAndTxt(ERRID"getfield_int", "Structure '%s' has invalid field '%s': not numeric", structname, fieldname);
     if (mxGetNumberOfElements(mx_field) != dim)
-        mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': invaid shape", structname, fieldname);
+        mexErrMsgIdAndTxt(ERRID"getfield_int", "Structure '%s' has invalid field '%s': invalid shape", structname, fieldname);
     if (mxIsInt32(mx_field))
     {
 #ifdef WITH_R2018A_OR_NEWER
@@ -448,12 +448,12 @@ void gt_mex_getfield_int(
         for (size_t i = 0; i < dim; i++)
         {
             if (round(mx_values[i]) != mx_values[i])
-                mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': not integer: %g", structname, fieldname, mx_values[i]);
+                mexErrMsgIdAndTxt(ERRID"getfield_int", "Structure '%s' has invalid field '%s': not integer: %g", structname, fieldname, mx_values[i]);
             values[i] = (int) round(mx_values[i]);
         }
     }
     else
-        mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': invaid type", structname, fieldname);
+        mexErrMsgIdAndTxt(ERRID"getfield_int", "Structure '%s' has invalid field '%s': invalid type", structname, fieldname);
 
     /* check field (filter) */
     for (size_t i = 0; i < dim; i++)
@@ -464,14 +464,63 @@ void gt_mex_getfield_int(
                 break;
             case GT_FILTER_NONNEGATIVE:
                 if (values[i] < 0)
-                    mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': not non-negative: %d", structname, fieldname, values[i]);
+                    mexErrMsgIdAndTxt(ERRID"getfield_int", "Structure '%s' has invalid field '%s': not non-negative: %d", structname, fieldname, values[i]);
                 break;
             case GT_FILTER_BOOL:
                 if (values[i] != 0 && values[i] != 1)
-                    mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': not boolean: %d", structname, fieldname, values[i]);
+                    mexErrMsgIdAndTxt(ERRID"getfield_int", "Structure '%s' has invalid field '%s': not boolean: %d", structname, fieldname, values[i]);
                 break;
         }
     }
+}
+
+void gt_mex_getfield_dbl(
+    const mxArray*  mx_struct,      /** mex structure */
+    const char*     structname,     /** structure name */
+    const char*     fieldname,      /** field name to be read */
+    double          defvalue,       /** default value if field is not present */
+    bool            required,       /** true: field is required */
+    size_t          dim,            /** size of value array */
+    double*         values          /** values of field */
+)
+{
+        mxArray* mx_field = NULL;
+
+    /* get field */
+    if (mxIsStruct(mx_struct))
+        mx_field = mxGetField(mx_struct, 0, fieldname);
+    else if (mxIsClass(mx_struct, "GAMSTransfer.Set") || mxIsClass(mx_struct, "GAMSTransfer.Alias") ||
+        mxIsClass(mx_struct, "GAMSTransfer.Parameter") || mxIsClass(mx_struct, "GAMSTransfer.Variable") ||
+        mxIsClass(mx_struct, "GAMSTransfer.Equation"))
+        mx_field = mxGetProperty(mx_struct, 0, fieldname);
+    else
+        mexErrMsgIdAndTxt(ERRID"getfield_dbl", "Structure '%s' has invalid type.", structname, fieldname);
+    if (required && !mx_field)
+        mexErrMsgIdAndTxt(ERRID"getfield_dbl", "Structure '%s' has no field '%s'.", structname, fieldname);
+    else if (!mx_field)
+    {
+        for (size_t i = 0; i < dim; i++)
+            values[i] = defvalue;
+        return;
+    }
+
+    /* check field */
+    if (!mxIsNumeric(mx_field))
+        mexErrMsgIdAndTxt(ERRID"getfield_dbl", "Structure '%s' has invalid field '%s': not numeric", structname, fieldname);
+    if (mxGetNumberOfElements(mx_field) != dim)
+        mexErrMsgIdAndTxt(ERRID"getfield_dbl", "Structure '%s' has invalid field '%s': invalid shape", structname, fieldname);
+    if (mxIsDouble(mx_field))
+    {
+#ifdef WITH_R2018A_OR_NEWER
+        mxDouble* mx_values = mxGetDoubles(mx_field);
+#else
+        double* mx_values = mxGetPr(mx_field);
+#endif
+        for (size_t i = 0; i < dim; i++)
+            values[i] = mx_values[i];
+    }
+    else
+        mexErrMsgIdAndTxt(ERRID"getfield_dbl", "Structure '%s' has invalid field '%s': invalid type", structname, fieldname);
 }
 
 void gt_mex_getfield_sizet(
@@ -509,7 +558,7 @@ void gt_mex_getfield_sizet(
     if (!mxIsNumeric(mx_field))
         mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': not numeric", structname, fieldname);
     if (mxGetNumberOfElements(mx_field) != dim)
-        mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': invaid shape", structname, fieldname);
+        mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': invalid shape", structname, fieldname);
     if (mxIsUint64(mx_field))
     {
 #ifdef WITH_R2018A_OR_NEWER
@@ -535,7 +584,7 @@ void gt_mex_getfield_sizet(
         }
     }
     else
-        mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': invaid type", structname, fieldname);
+        mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': invalid type", structname, fieldname);
 
     /* check field (filter) */
     for (size_t i = 0; i < dim; i++)
@@ -588,7 +637,7 @@ void gt_mex_getfield_bool(
     if (!mxIsLogical(mx_field))
         mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': not logical", structname, fieldname);
     if (mxGetNumberOfElements(mx_field) != dim)
-        mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': invaid shape", structname, fieldname);
+        mexErrMsgIdAndTxt(ERRID"getfield_intvec", "Structure '%s' has invalid field '%s': invalid shape", structname, fieldname);
 #ifdef WITH_R2018A_OR_NEWER
     mx_values = mxGetLogicals(mx_field);
 #else
@@ -625,6 +674,33 @@ void gt_mex_getfield_struct(
         mexErrMsgIdAndTxt(ERRID"getfield_struct", "Structure '%s' has invalid field '%s': not struct", structname, fieldname);
 }
 
+void gt_mex_getfield_cell(
+    const mxArray*  mx_struct,      /** mex structure */
+    const char*     structname,     /** structure name */
+    const char*     fieldname,      /** field name to be read */
+    bool            required,       /** true: field is required */
+    mxArray**       value           /** value of field */
+)
+{
+    /* get field */
+    if (mxIsStruct(mx_struct))
+        *value = mxGetField(mx_struct, 0, fieldname);
+    else if (mxIsClass(mx_struct, "GAMSTransfer.Set") || mxIsClass(mx_struct, "GAMSTransfer.Alias") ||
+        mxIsClass(mx_struct, "GAMSTransfer.Parameter") || mxIsClass(mx_struct, "GAMSTransfer.Variable") ||
+        mxIsClass(mx_struct, "GAMSTransfer.Equation"))
+        *value = mxGetProperty(mx_struct, 0, fieldname);
+    else
+        mexErrMsgIdAndTxt(ERRID"getfield_cell", "Structure '%s' has invalid type.", structname, fieldname);
+    if (required && !*value)
+        mexErrMsgIdAndTxt(ERRID"getfield_cell", "Structure '%s' has no field '%s'.", structname, fieldname);
+    else if (!*value)
+        return;
+
+    /* check field */
+    if (!mxIsCell(*value))
+        mexErrMsgIdAndTxt(ERRID"getfield_cell", "Structure '%s' has invalid field '%s': not struct", structname, fieldname);
+}
+
 void gt_mex_getfield_table2struct(
     const mxArray*  mx_struct,      /** mex structure */
     const char*     structname,     /** structure name */
@@ -647,7 +723,7 @@ void gt_mex_getfield_table2struct(
         mxIsClass(mx_struct, "GAMSTransfer.Equation"))
         *value = mxGetProperty(mx_struct, 0, fieldname);
     else
-        mexErrMsgIdAndTxt(ERRID"getfield_str", "Structure '%s' has invalid type.", structname, fieldname);
+        mexErrMsgIdAndTxt(ERRID"getfield_table2struct", "Structure '%s' has invalid type.", structname, fieldname);
     if (required && !*value)
         mexErrMsgIdAndTxt(ERRID"getfield_table2struct", "Structure '%s' has no field '%s'.", structname, fieldname);
     else if (!*value)
@@ -666,6 +742,32 @@ void gt_mex_getfield_table2struct(
         mexErrMsgIdAndTxt(ERRID"getfield_table2struct", "Calling 'table2struct' failed.");
     *value = call_plhs[0];
     *was_table = true;
+}
+
+void gt_mex_getfield_symbol_obj(
+    const mxArray*  mx_struct,      /** mex structure */
+    const char*     structname,     /** structure name */
+    const char*     fieldname,      /** field name to be read */
+    bool            required,       /** true: field is required */
+    mxArray**       value           /** value of field */
+)
+{
+    if (mxIsStruct(mx_struct))
+        *value = mxGetField(mx_struct, 0, fieldname);
+    else
+        mexErrMsgIdAndTxt(ERRID"getfield_symbol_obj", "Structure '%s' has invalid type.", structname, fieldname);
+    if (required && !*value)
+        mexErrMsgIdAndTxt(ERRID"getfield_symbol_obj", "Structure '%s' has no field '%s'.", structname, fieldname);
+    else if (!*value)
+        return;
+
+    if (mxIsClass(*value, "GAMSTransfer.Set") ||
+        mxIsClass(*value, "GAMSTransfer.Alias") ||
+        mxIsClass(*value, "GAMSTransfer.Parameter") ||
+        mxIsClass(*value, "GAMSTransfer.Variable") ||
+        mxIsClass(*value, "GAMSTransfer.Equation"))
+        return;
+    mexErrMsgIdAndTxt(ERRID"getfield_symbol_obj", "Structure '%s' has invalid field '%s': not Symbol", structname, fieldname);
 }
 
 #ifdef WITH_R2018A_OR_NEWER
@@ -776,7 +878,6 @@ void gt_mex_readdata_addfields(
     bool*           values_flag,    /** indicates which values to be read (length: 5) */
     char**          domains_ptr,    /** labels of domain fields */
     mxArray*        mx_arr_records, /** matlab records structure (will be modified) */
-    mxArray*        mx_arr_uels,    /** matlab uel structure (will be modified) */
     size_t*         n_dom_fields    /** number of domain fields added */
 )
 {
@@ -791,10 +892,6 @@ void gt_mex_readdata_addfields(
             *n_dom_fields = dim;
             break;
     }
-
-    /* add uel fields */
-    for (size_t i = 0; i < dim; i++)
-        mxAddField(mx_arr_uels, domains_ptr[i]);
 
     /* add value fields */
     if (values_flag[GMS_VAL_LEVEL])

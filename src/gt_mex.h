@@ -171,6 +171,17 @@ void gt_mex_getfield_int(
     int*            values          /** values of field */
 );
 
+/** returns the value of structure field with vector double type */
+void gt_mex_getfield_dbl(
+    const mxArray*  mx_struct,      /** mex structure */
+    const char*     structname,     /** structure name */
+    const char*     fieldname,      /** field name to be read */
+    double          defvalue,       /** default value if field is not present */
+    bool            required,       /** true: field is required */
+    size_t          dim,            /** size of value array */
+    double*         values          /** values of field */
+);
+
 /** returns the value of structure field with vector size_t type */
 void gt_mex_getfield_sizet(
     const mxArray*  mx_struct,      /** mex structure */
@@ -203,6 +214,15 @@ void gt_mex_getfield_struct(
     mxArray**       value           /** value of field */
 );
 
+/** returns the value of structrure field with cell type */
+void gt_mex_getfield_cell(
+    const mxArray*  mx_struct,      /** mex structure */
+    const char*     structname,     /** structure name */
+    const char*     fieldname,      /** field name to be read */
+    bool            required,       /** true: field is required */
+    mxArray**       value           /** value of field */
+);
+
 /** returns the value of structure field with struct or table type.
  *  If it is table, the table gets converted to struct. */
 void gt_mex_getfield_table2struct(
@@ -212,6 +232,15 @@ void gt_mex_getfield_table2struct(
     bool            required,       /** true: field is required */
     mxArray**       value,          /** value of field */
     bool*           was_table       /** true if field was table before conversion */
+);
+
+/** returns the value of structrure field with symbol class type */
+void gt_mex_getfield_symbol_obj(
+    const mxArray*  mx_struct,      /** mex structure */
+    const char*     structname,     /** structure name */
+    const char*     fieldname,      /** field name to be read */
+    bool            required,       /** true: field is required */
+    mxArray**       value           /** value of field */
 );
 
 #ifdef WITH_R2018A_OR_NEWER
@@ -250,7 +279,6 @@ void gt_mex_readdata_addfields(
     bool*           values_flag,    /** indicates which values to be read (length: 5) */
     char**          domains_ptr,    /** labels of domain fields */
     mxArray*        mx_arr_records, /** matlab records structure (will be modified) */
-    mxArray*        mx_arr_uels,    /** matlab uel structure (will be modified) */
     size_t*         n_dom_fields    /** number of domain fields added */
 );
 

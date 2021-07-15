@@ -1626,7 +1626,7 @@ function test_reorder(t, cfg)
     t.assertEquals(fields{3}, 's3');
     t.assertEquals(fields{4}, 's4');
     warning('off')
-    s3.isValid('verbose', true);
+    s3.isValid(true);
     t.assertEquals(lastwarn(), 'Domain set ''s4'' is out of order: Try calling the Container method reorderSymbols().');
     warning('on')
 
