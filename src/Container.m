@@ -468,10 +468,6 @@ classdef Container < handle
         function reorderSymbols(obj)
             % Reestablishes a valid GDX symbol order
             %
-            % Usually the symbol order is maintained in a valid order when
-            % adding symbols, but it may become necessary to call this function
-            % if symbol domains have been changed after adding the symbol.
-            %
 
             names = fieldnames(obj.data);
 
@@ -889,13 +885,24 @@ classdef Container < handle
         function descr = describeSymbols(obj, symtype)
             switch symtype
             case GAMSTransfer.SymbolType.SET
-                symbols = obj.listSets();
+                symbol_names = obj.listSets();
+                symbols = obj.getSymbols(symbol_names);
+                symbol_names_a = obj.listAliases();
+                symbols_a = obj.getSymbols(symbol_names_a);
+                for i = 1:numel(symbols_a)
+                    symbols_a{i} = symbols_a{i}.aliased_with;
+                end
+                symbol_names = {symbol_names{:}, symbol_names_a{:}};
+                symbols = {symbols{:}, symbols_a{:}};
             case GAMSTransfer.SymbolType.PARAMETER
-                symbols = obj.listParameters();
+                symbol_names = obj.listParameters();
+                symbols = obj.getSymbols(symbol_names);
             case GAMSTransfer.SymbolType.VARIABLE
-                symbols = obj.listVariables();
+                symbol_names = obj.listVariables();
+                symbols = obj.getSymbols(symbol_names);
             case GAMSTransfer.SymbolType.EQUATION
-                symbols = obj.listEquations();
+                symbol_names = obj.listEquations();
+                symbols = obj.getSymbols(symbol_names);
             otherwise
                 error('Invalid symbol type');
             end
@@ -943,9 +950,9 @@ classdef Container < handle
 
             % collect values
             for i = 1:n_symbols
-                symbol = obj.data.(symbols{i});
+                symbol = symbols{i};
 
-                descr.name{i} = symbol.name;
+                descr.name{i} = symbol_names{i};
                 switch symtype
                 case {GAMSTransfer.SymbolType.VARIABLE, GAMSTransfer.SymbolType.EQUATION}
                     descr.type{i} = symbol.type;
