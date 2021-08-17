@@ -30,7 +30,7 @@ environment variable, respectively.
 
 Make sure that the GAMSTransfer build is part of the Matlab PATH. Then, run:
 ```
-gams_transfer_setup('working_dir', <test_directory>, 'system_dir', <gams_system_directory>);
+gams_transfer_test('working_dir', <test_directory>, 'system_dir', <gams_system_directory>);
 ```
 Both parameters, `working_dir` and `system_dir`, are optional with defaults
 `tempname()` and the GAMS system directory found in the PATH environment

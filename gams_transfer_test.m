@@ -53,7 +53,7 @@ function gams_transfer_test(varargin)
         cfg = struct();
         cfg.working_dir = p.Results.working_dir;
         cfg.system_dir = p.Results.system_dir;
-        cfg.filenames = gams_transfer_test_create_gdx(p.Results.working_dir);
+        cfg.filenames = gams_transfer_test_create_gdx(cfg.system_dir, cfg.working_dir);
         features = GAMSTransfer.Utils.checkFeatureSupport();
 
         % run tests
@@ -116,7 +116,7 @@ function gams_transfer_test(varargin)
     toc;
 end
 
-function gdx_filenames = gams_transfer_test_create_gdx(working_dir)
+function gdx_filenames = gams_transfer_test_create_gdx(gams_dir, working_dir)
 
     gams_data = cell(1, 5);
     gdx_filenames = cell(1, 5);
@@ -194,6 +194,7 @@ function gdx_filenames = gams_transfer_test_create_gdx(working_dir)
     };
 
     for i = 1:5
+        gams_exe = fullfile(gams_dir, 'gams');
         gms_filename = fullfile(working_dir, sprintf('data%d.gms', i));
         gdx_filenames{i} = fullfile(working_dir, sprintf('data%d.gdx', i));
 
@@ -203,7 +204,7 @@ function gdx_filenames = gams_transfer_test_create_gdx(working_dir)
         end
         fclose(fid);
 
-        system(['gams ', gms_filename, ' lo=0']);
+        system([gams_exe, ' ', gms_filename, ' lo=0']);
     end
 
 end
