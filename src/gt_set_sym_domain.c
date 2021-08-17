@@ -23,6 +23,9 @@
  * SOFTWARE.
  */
 
+#include <stdio.h>
+#include <string.h>
+
 #include "mex.h"
 #include "gt_mex.h"
 #include "gt_utils.h"
@@ -37,7 +40,7 @@ void mexFunction(
 )
 {
     int container_id;
-    bool dominfo_regular;
+    bool dominfo_regular, support_setget;
     size_t dim;
     char domname[256], label[265];
     mxArray* mx_arr_domentry = NULL;
@@ -50,11 +53,12 @@ void mexFunction(
 #endif
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(0, nlhs, 3, nrhs);
+    gt_mex_check_arguments_num(0, nlhs, 4, nrhs);
     gt_mex_check_argument_symbol_obj(prhs, 0);
     if (!mxIsCell(prhs[1]))
         mexErrMsgIdAndTxt(ERRID"domain", "Domain must be of type 'cell'.");
     gt_mex_check_argument_int(prhs, 2, GT_FILTER_NONNEGATIVE, 1, &container_id);
+    gt_mex_check_argument_bool(prhs, 3, 1, &support_setget);
 
     dim = mxGetNumberOfElements(prhs[1]);
     mx_arr_domlabels = mxCreateCellMatrix(1, dim);
@@ -75,10 +79,10 @@ void mexFunction(
             /* set domain label */
             mxGetString(mx_arr_domentry, domname, 256);
             if (!strcmp(domname, "*"))
-                sprintf(label, "uni_%d", i+1);
+                sprintf(label, "uni_%ld", i+1);
             else
             {
-                sprintf(label, "%s_%d", domname, i+1);
+                sprintf(label, "%s_%ld", domname, i+1);
                 dominfo_regular = false;
             }
             mxSetCell(mx_arr_domlabels, i, mxCreateString(label));
@@ -99,8 +103,12 @@ void mexFunction(
 
             if (domdim != 1)
                 mexErrMsgIdAndTxt(ERRID"dimension", "Domain set '%s' must have dimension=1 to be valid as domain.", domname);
-            gt_mex_getfield_int(mx_arr_domentry, "domain", "number_records_c_", 0,
-                true, GT_FILTER_NONNEGATIVE, 1, &domnrecs);
+            if (support_setget)
+                gt_mex_getfield_int(mx_arr_domentry, "domain", "number_records_c_setget_",
+                    0, true, GT_FILTER_NONNEGATIVE, 1, &domnrecs);
+            else
+                gt_mex_getfield_int(mx_arr_domentry, "domain", "number_records_c_cache_",
+                    0, true, GT_FILTER_NONNEGATIVE, 1, &domnrecs);
 
             /* check domain set container */
             mx_arr_container = mxGetProperty(mx_arr_domentry, 0, "container");
@@ -115,7 +123,7 @@ void mexFunction(
                 mexErrMsgIdAndTxt(ERRID"container", "Domain set '%s' must have same container as symbol.", domname);
 
             /* set domain label */
-            sprintf(label, "%s_%d", domname, i+1);
+            sprintf(label, "%s_%ld", domname, i+1);
             mxSetCell(mx_arr_domlabels, i, mxCreateString(label));
 
             /* set size */
@@ -125,13 +133,13 @@ void mexFunction(
             mexErrMsgIdAndTxt(ERRID"domain", "Domain entry must be of type 'GAMSTransfer.Set' or 'char'.");
     }
 
-    mxSetProperty(prhs[0], 0, "dimension_", mxCreateDoubleScalar(dim));
-    mxSetProperty(prhs[0], 0, "domain_label_", mx_arr_domlabels);
+    mxSetProperty((mxArray*) prhs[0], 0, "dimension_", mxCreateDoubleScalar(dim));
+    mxSetProperty((mxArray*) prhs[0], 0, "domain_label_", mx_arr_domlabels);
     if (dominfo_regular)
-        mxSetProperty(prhs[0], 0, "domain_info_", mxCreateString("regular"));
+        mxSetProperty((mxArray*) prhs[0], 0, "domain_info_", mxCreateString("regular"));
     else
-        mxSetProperty(prhs[0], 0, "domain_info_", mxCreateString("relaxed"));
-    mxSetProperty(prhs[0], 0, "size_", mx_arr_size);
-    mxSetProperty(prhs[0], 0, "format_", mxCreateDoubleScalar(GT_FORMAT_REEVALUATE));
-    mxSetProperty(prhs[0], 0, "number_records_", mxCreateDoubleScalar(mxGetNaN()));
+        mxSetProperty((mxArray*) prhs[0], 0, "domain_info_", mxCreateString("relaxed"));
+    mxSetProperty((mxArray*) prhs[0], 0, "size_", mx_arr_size);
+    mxSetProperty((mxArray*) prhs[0], 0, "format_", mxCreateDoubleScalar(GT_FORMAT_REEVALUATE));
+    mxSetProperty((mxArray*) prhs[0], 0, "number_records_", mxCreateDoubleScalar(mxGetNaN()));
 }

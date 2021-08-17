@@ -213,7 +213,21 @@ classdef Container < handle
             else
                 GAMSTransfer.gt_gdx_read_records(obj.system_directory, ...
                     obj.filename, obj.data, p.Results.symbols, int32(format_int), ...
-                    values_bool, obj.features.categorical);
+                    values_bool, obj.features.categorical, obj.features.c_prop_setget);
+            end
+
+            % read cache data for C
+            if ~obj.indexed && ~obj.features.c_prop_setget
+                for i = 1:numel(p.Results.symbols)
+                    if ~isfield(obj.data, p.Results.symbols{i})
+                        continue
+                    end
+                    symbol = obj.data.(p.Results.symbols{i});
+                    if isa(symbol, 'GAMSTransfer.Alias')
+                        continue;
+                    end
+                    symbol.getCacheUels();
+                end
             end
         end
 
@@ -280,6 +294,18 @@ classdef Container < handle
             filename = GAMSTransfer.Utils.checkFilename(...
                 char(p.Results.filename), '.gdx', false);
 
+            % cache data for C
+            if ~obj.indexed && ~obj.features.c_prop_setget
+                symbols = fieldnames(obj.data);
+                for i = 1:numel(symbols)
+                    symbol = obj.data.(symbols{i});
+                    if isa(symbol, 'GAMSTransfer.Alias')
+                        continue;
+                    end
+                    symbol.setCacheUels();
+                end
+            end
+
             % write data
             if obj.indexed
                 GAMSTransfer.gt_idx_write(obj.system_directory, filename, obj.data, ...
@@ -287,7 +313,7 @@ classdef Container < handle
             else
                 GAMSTransfer.gt_gdx_write(obj.system_directory, filename, obj.data, ...
                     p.Results.uel_priority, p.Results.compress, p.Results.sorted, ...
-                    obj.features.table, obj.features.categorical);
+                    obj.features.table, obj.features.categorical, obj.features.c_prop_setget);
             end
         end
 
@@ -822,7 +848,14 @@ classdef Container < handle
                 end
             end
 
-            list = cell(map.keySet.toArray);
+            % get list of keys
+            list = cell(1, map.keySet().size());
+            it = map.keySet().iterator();
+            i = 1;
+            while it.hasNext()
+                list{i} = char(it.next());
+                i = i + 1;
+            end
         end
 
         function valid = isValid(obj, varargin)

@@ -81,14 +81,14 @@ classdef UniqueElementList < handle
                 error('Argument #2 must be ''numeric''.');
             end
 
-            list = unique(list, 'stable');
-
             if numel(vals) > 0
                 newvals = zeros(1, obj.uels_label2ids.size(), class(vals));
                 for i = 1:numel(list)
                     if obj.uels_label2ids.containsKey(list{i})
                         id = obj.uels_label2ids.get(list{i});
-                        newvals(id) = i;
+                        if newvals(id) == 0
+                            newvals(id) = i;
+                        end
                     end
                 end
                 vals(vals < 1 | vals > obj.uels_label2ids.size()) = 0;
@@ -114,7 +114,7 @@ classdef UniqueElementList < handle
                 end
             end
             if numel(list) > 0
-                obj.uels_id2labels = cell(obj.uels_label2ids.keySet().toArray());
+                obj.updateId2Label();
             end
         end
 
@@ -141,7 +141,7 @@ classdef UniqueElementList < handle
             for i = 1:numel(list)
                 obj.uels_label2ids.remove(list{i});
             end
-            obj.uels_id2labels = cell(obj.uels_label2ids.keySet().toArray());
+            obj.updateId2Label();
             for i = 1:numel(obj.uels_id2labels)
                 obj.uels_label2ids.put(obj.uels_id2labels{i}, i);
             end
@@ -184,6 +184,20 @@ classdef UniqueElementList < handle
                 end
             end
             obj.set(list, []);
+        end
+
+    end
+
+    methods (Hidden)
+
+        function updateId2Label(obj)
+            obj.uels_id2labels = cell(1, obj.uels_label2ids.keySet().size());
+            it = obj.uels_label2ids.keySet().iterator();
+            i = 1;
+            while it.hasNext()
+                obj.uels_id2labels{i} = char(it.next());
+                i = i + 1;
+            end
         end
 
     end

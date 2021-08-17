@@ -850,14 +850,22 @@ function test_changeSymbol(t, cfg)
         x1.domain = '*';
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain must be of type ''cell''.');
+        if exist('OCTAVE_VERSION', 'builtin') > 0
+            t.assertEquals(e.message, 'gt_set_sym_domain: Domain must be of type ''cell''.');
+        else
+            t.assertEquals(e.message, 'Domain must be of type ''cell''.');
+        end
     end
     try
         t.assert(false);
         x1.domain = {x2};
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain entry must be of type ''GAMSTransfer.Set'' or ''char''.');
+        if exist('OCTAVE_VERSION', 'builtin') > 0
+            t.assertEquals(e.message, 'gt_set_sym_domain: Domain entry must be of type ''GAMSTransfer.Set'' or ''char''.');
+        else
+            t.assertEquals(e.message, 'Domain entry must be of type ''GAMSTransfer.Set'' or ''char''.');
+        end
     end
 
     t.add('change_symbol_domain_label');
@@ -1274,6 +1282,7 @@ function test_setRecords(t, cfg)
     try
         t.assert(false);
         s2.setRecords({{'i1', 'i4'}, [1; 4]});
+        disp('##')
     catch e
         t.reset();
         t.assertEquals(e.message, 'Domain ''uni_2'' is missing.');
@@ -1451,7 +1460,7 @@ function test_setRecords(t, cfg)
             tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
         else
             tbl = table([1; 2; 3], [1; 2; 3]);
-            s3.initUELs(1, {'i1'; 'i2'; 'i3'});
+            % s3.initUELs(1, {'i1'; 'i2'; 'i3'}); % need to set records first
         end
         try
             t.assert(false);
@@ -1465,10 +1474,13 @@ function test_setRecords(t, cfg)
             tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
         else
             tbl = table([1; 2; 3], [1; 2; 3]);
-            s3.initUELs(1, {'i1'; 'i2'; 'i3'});
+            % s3.initUELs(1, {'i1'; 'i2'; 'i3'}); % need to set records first
         end
         tbl.Properties.VariableNames = {'i1_1', 'level'};
         s3.setRecords(tbl);
+        if ~gdx.features.categorical
+            s3.initUELs(1, {'i1'; 'i2'; 'i3'});
+        end
         t.assertEquals(s3.format, 'table');
         t.assert(s3.isValid());
     end
@@ -1492,7 +1504,11 @@ function test_writeUnordered(t, cfg)
         gdx.write(write_filename, 'sorted', true);
     catch e
         t.reset();
-        t.assertEquals(e.message, 'GDX error in record c(i3,j1): Data not sorted when writing raw');
+        if exist('OCTAVE_VERSION', 'builtin') > 0
+            t.assertEquals(e.message, 'gt_gdx_write: GDX error in record c(i3,j1): Data not sorted when writing raw');
+        else
+            t.assertEquals(e.message, 'GDX error in record c(i3,j1): Data not sorted when writing raw');
+        end
     end
 
     t.add('write_unordered_2')
@@ -1510,7 +1526,11 @@ function test_writeUnordered(t, cfg)
         gdx.write(write_filename, 'sorted', true);
     catch e
         t.reset();
-        t.assertEquals(e.message, 'GDX error in record c(i2,j1): Data not sorted when writing raw');
+        if exist('OCTAVE_VERSION', 'builtin') > 0
+            t.assertEquals(e.message, 'gt_gdx_write: GDX error in record c(i2,j1): Data not sorted when writing raw');
+        else
+            t.assertEquals(e.message, 'GDX error in record c(i2,j1): Data not sorted when writing raw');
+        end
     end
 
     t.add('write_unordered_4')
@@ -1551,10 +1571,13 @@ function test_reorder(t, cfg)
     t.assertEquals(fields{2}, 's2');
     t.assertEquals(fields{3}, 's3');
     t.assertEquals(fields{4}, 's4');
-    warning('off')
-    s3.isValid(true);
-    t.assertEquals(lastwarn(), 'Domain set ''s4'' is out of order: Try calling the Container method reorderSymbols().');
-    warning('on')
+    try
+        t.assert(false);
+        s3.isValid(2);
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain set ''s4'' is out of order: Try calling the Container method reorderSymbols().');
+    end
 
     gdx.reorderSymbols();
 

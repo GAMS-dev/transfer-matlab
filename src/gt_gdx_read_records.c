@@ -25,6 +25,7 @@
 
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 
 #include "mex.h"
 
@@ -47,7 +48,7 @@ void mexFunction(
     int sym_id, format, orig_format, type, subtype, lastdim, ival, sym_count, uel_count;
     double dval;
     size_t dim, nrecs, n_dom_fields;
-    bool support_categorical;
+    bool support_categorical, support_setget;
     bool orig_values_flag[GMS_VAL_MAX], values_flag[GMS_VAL_MAX];
     char buf[GMS_SSSIZE], gdx_filename[GMS_SSSIZE], sysdir[GMS_SSSIZE];
     double def_values[GMS_VAL_MAX];
@@ -85,7 +86,7 @@ void mexFunction(
     GDXSTRINDEXPTRS_INIT(domains, domains_ptr);
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(0, nlhs, 7, nrhs);
+    gt_mex_check_arguments_num(0, nlhs, 8, nrhs);
     gt_mex_check_argument_str(prhs, 0, sysdir);
     gt_mex_check_argument_str(prhs, 1, gdx_filename);
     gt_mex_check_argument_struct(prhs, 2);
@@ -93,6 +94,7 @@ void mexFunction(
     gt_mex_check_argument_int(prhs, 4, GT_FILTER_NONE, 1, &orig_format);
     gt_mex_check_argument_bool(prhs, 5, 5, orig_values_flag);
     gt_mex_check_argument_bool(prhs, 6, 1, &support_categorical);
+    gt_mex_check_argument_bool(prhs, 7, 1, &support_setget);
     if (orig_format != GT_FORMAT_STRUCT && orig_format != GT_FORMAT_DENSEMAT &&
         orig_format != GT_FORMAT_SPARSEMAT && orig_format != GT_FORMAT_TABLE)
         mexErrMsgIdAndTxt(ERRID"prhs3", "Invalid record format.");
@@ -493,7 +495,10 @@ void mexFunction(
                 mx_arr_uels = mxCreateCellMatrix(1, dim);
                 for (size_t j = 0; j < dim; j++)
                     mxSetCell(mx_arr_uels, j, mx_arr_dom_uels[j]);
-                mxSetProperty(mx_arr_symbol, 0, "uels_c_", mx_arr_uels);
+                if (support_setget)
+                    mxSetProperty(mx_arr_symbol, 0, "uels_c_setget_", mx_arr_uels);
+                else
+                    mxSetProperty(mx_arr_symbol, 0, "uels_c_cache_", mx_arr_uels);
                 break;
         }
 

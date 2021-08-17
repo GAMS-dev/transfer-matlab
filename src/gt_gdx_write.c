@@ -48,7 +48,7 @@ void mexFunction(
     char text[GMS_SSSIZE], dominfo[10], sysdir[GMS_SSSIZE];
     double def_values[GMS_VAL_MAX];
     bool was_table, support_table, support_categorical, compress, issorted, singleton;
-    bool is_valid, have_nrecs;
+    bool is_valid, have_nrecs, support_setget;
     char* data_name = NULL;
     gdxHandle_t gdx = NULL;
     gdxStrIndexPtrs_t domains_ptr, domain_labels_ptr;
@@ -81,7 +81,7 @@ void mexFunction(
     GDXSTRINDEXPTRS_INIT(domain_labels, domain_labels_ptr);
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(0, nlhs, 8, nrhs);
+    gt_mex_check_arguments_num(0, nlhs, 9, nrhs);
     gt_mex_check_argument_str(prhs, 0, sysdir);
     gt_mex_check_argument_str(prhs, 1, gdx_filename);
     gt_mex_check_argument_struct(prhs, 2);
@@ -90,6 +90,7 @@ void mexFunction(
     gt_mex_check_argument_bool(prhs, 5, 1, &issorted);
     gt_mex_check_argument_bool(prhs, 6, 1, &support_table);
     gt_mex_check_argument_bool(prhs, 7, 1, &support_categorical);
+    gt_mex_check_argument_bool(prhs, 8, 1, &support_setget);
 
     /* create output data */
     plhs = NULL;
@@ -98,7 +99,7 @@ void mexFunction(
     gt_gdx_init_write(&gdx, sysdir, gdx_filename, compress);
 
     /* register priority UELs */
-    gt_gdx_register_uels(gdx, prhs[3], NULL);
+    gt_gdx_register_uels(gdx, (mxArray*) prhs[3], NULL);
 
     for (int i = 0; i < mxGetNumberOfFields(prhs[2]); i++)
     {
@@ -160,7 +161,10 @@ void mexFunction(
         gt_mex_getfield_sizet(mx_arr_data, data_name, "dimension_", 0, true, GT_FILTER_NONNEGATIVE, 1, &dim);
         gt_mex_getfield_cell_str(mx_arr_data, data_name, "domain_", "", true, dim, domains_ptr, GMS_SSSIZE);
         gt_mex_getfield_cell_str(mx_arr_data, data_name, "domain_label_", "", true, dim, domain_labels_ptr, GMS_SSSIZE);
-        gt_mex_getfield_cell(mx_arr_data, data_name, "uels_c_", true, &mx_arr_uels);
+        if (support_setget)
+            gt_mex_getfield_cell(mx_arr_data, data_name, "uels_c_setget_", true, &mx_arr_uels);
+        else
+            gt_mex_getfield_cell(mx_arr_data, data_name, "uels_c_cache_", true, &mx_arr_uels);
 
         /* get optional fields */
         gt_mex_getfield_str(mx_arr_data, data_name, "description_", "", false, text, GMS_SSSIZE);

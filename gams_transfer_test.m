@@ -204,7 +204,9 @@ function gdx_filenames = gams_transfer_test_create_gdx(gams_dir, working_dir)
         end
         fclose(fid);
 
-        system([gams_exe, ' ', gms_filename, ' lo=0']);
+        if system([gams_exe, ' ', gms_filename, ' lo=0'])
+            error('Can''t create GAMS test files. Possibly GAMS executable wasn''t found in specified path.');
+        end
     end
 
 end

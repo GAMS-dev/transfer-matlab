@@ -88,6 +88,12 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir)
     mex_cpp_flags = {
         '-silent COMPFLAGS=''$COMPFLAGS -Wall -DGC_NO_MUTEX''' ...
     };
+    octmex_c_flags = {
+        '-DGC_NO_MUTEX' ...
+    };
+    octmex_cpp_flags = {
+        '-DGC_NO_MUTEX' ...
+    };
     lib_linux = {
         'dl', ...
     };
@@ -162,6 +168,18 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir)
             % output directory
             cmd = sprintf('%s -outdir %s', cmd, target_dir);
         else
+            % defined flags
+            [~,~,ext] = fileparts(c_files{i});
+            if strcmp(ext, '.c')
+                for e = octmex_c_flags
+                    cmd = sprintf('%s %s', cmd, e{1});
+                end
+            elseif strcmp(ext, '.cpp')
+                for e = octmex_cpp_flags
+                    cmd = sprintf('%s %s', cmd, e{1});
+                end
+            end
+
             % output directory
             cmd = sprintf('%s -o %s', cmd, target_file);
         end

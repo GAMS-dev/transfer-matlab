@@ -94,9 +94,13 @@ classdef Symbol < handle
     end
 
     % properties for C interface
+    properties (Hidden, Dependent)
+        uels_c_setget_
+        number_records_c_setget_
+    end
     properties (Hidden)
-        uels_c_
-        number_records_c_
+        uels_c_cache_
+        number_records_c_cache_
     end
 
     properties (Hidden, Constant)
@@ -208,7 +212,22 @@ classdef Symbol < handle
             if obj.container.indexed
                 error('Setting symbol domain not allowed in indexed mode.');
             end
-            GAMSTransfer.gt_set_sym_domain(obj, domain, obj.container.id);
+
+            % cache data for C
+            if ~obj.container.features.c_prop_setget
+                if isa(domain, 'GAMSTransfer.Set')
+                    domain.setCacheNumberRecords();
+                elseif iscell(domain)
+                    for i = 1:numel(domain)
+                        if isa(domain{i}, 'GAMSTransfer.Set')
+                            domain{i}.setCacheNumberRecords();
+                        end
+                    end
+                end
+            end
+
+            GAMSTransfer.gt_set_sym_domain(obj, domain, obj.container.id, ...
+                obj.container.features.c_prop_setget);
             obj.domain_ = domain;
 
             % update uels
@@ -290,14 +309,14 @@ classdef Symbol < handle
             obj.number_records_ = nan;
         end
 
-        function uels = get.uels_c_(obj)
+        function uels = get.uels_c_setget_(obj)
             uels = cell(1, obj.dimension_);
             for i = 1:obj.dimension_
                 uels{i} = obj.getUELs(i);
             end
         end
 
-        function set.uels_c_(obj, uels)
+        function set.uels_c_setget_(obj, uels)
             if ~obj.container.features.categorical
                 for i = 1:obj.dimension_
                     obj.uels.(obj.domain_label_{i}).set(uels{i}, []);
@@ -305,7 +324,7 @@ classdef Symbol < handle
             end
         end
 
-        function nrecs = get.number_records_c_(obj)
+        function nrecs = get.number_records_c_setget_(obj)
             nrecs = obj.getNumRecords();
         end
 
@@ -387,7 +406,8 @@ classdef Symbol < handle
                     error('First dimension of cellstr must equal symbol dimension.');
                 end
                 for i = 1:obj.dimension_
-                    uels{i} = unique(records(i,:), 'stable');
+                    [~,uidx,~] = unique(records(i,:), 'first');
+                    uels{i} = records(i,sort(uidx));
                     obj.setRecordsDomainField(i, uels{i}, records(i,:));
                 end
 
@@ -414,7 +434,8 @@ classdef Symbol < handle
                         if n_dom_fields > obj.dimension_
                             error('More domain fields than symbol dimension.');
                         end
-                        uels{n_dom_fields} = unique(records{i}, 'stable');
+                        [~,uidx,~] = unique(records{i}, 'first');
+                        uels{n_dom_fields} = records{i}(sort(uidx));
                         obj.setRecordsDomainField(n_dom_fields, uels{n_dom_fields}, records{i});
                     else
                         error('Cell elements must be cellstr or numeric.');
@@ -434,8 +455,10 @@ classdef Symbol < handle
                             if strcmp(field, obj.domain_label_{j}) || ...
                                 isa(obj.domain_{j}, 'GAMSTransfer.Set') && ...
                                 strcmp(field, obj.domain_{j}.name)
-                                uels{j} = unique(records.(field), 'stable');
-                                obj.setRecordsDomainField(j, uels{j}, records.(field));
+                                rec_field = records.(field);
+                                [~,uidx,~] = unique(rec_field, 'first');
+                                uels{j} = rec_field(sort(uidx));
+                                obj.setRecordsDomainField(j, uels{j}, rec_field);
                                 break;
                             end
                         end
@@ -455,14 +478,12 @@ classdef Symbol < handle
             end
 
             % check records format
-            warning('off');
-            if ~obj.isValid(true);
+            try
+                obj.isValid(2);
+            catch e
                 obj.records = [];
-                error(lastwarn);
-                warning('on')
-                return
+                rethrow(e);
             end
-            warning('on')
 
             % store uels
             % Note: we don't need to init when categorical arrays are used, they
@@ -745,10 +766,13 @@ classdef Symbol < handle
             % See also: GAMSTransfer.Container/isValid
             %
 
-            verbose = false;
+            verbose = 0;
             force = false;
             if nargin > 1 && varargin{1}
-                verbose = true;
+                verbose = 1;
+            end
+            if nargin > 1 && varargin{1} == 2
+                verbose = 2;
             end
             if nargin > 2 && varargin{2}
                 force = true;
@@ -771,7 +795,7 @@ classdef Symbol < handle
 
             try
                 % check if symbol is actually contained in container
-                if ~isfield(obj.container.data, obj.name)
+                if ~isfield(obj.container.data, obj.name_)
                     error('Symbol is not part of its linked container.');
                 end
 
@@ -779,8 +803,10 @@ classdef Symbol < handle
                 % Note that format NOT_READ will lead to an invalid symbol
                 if isempty(obj.records) && ~isnan(obj.number_records_) && obj.number_records_ < 0
                     obj.format_ = GAMSTransfer.RecordsFormat.NOT_READ;
-                    if verbose
+                    if verbose == 1
                         warning('Symbol has not been fully read.');
+                    elseif verbose == 2
+                        error('Symbol has not been fully read.');
                     end
                     return
                 end
@@ -831,8 +857,10 @@ classdef Symbol < handle
                 valid = true;
             catch e
                 obj.format_ = GAMSTransfer.RecordsFormat.UNKNOWN;
-                if verbose
+                if verbose == 1
                     warning(e.message);
+                elseif verbose == 2
+                    error(e.message);
                 end
             end
         end
@@ -1595,6 +1623,34 @@ classdef Symbol < handle
 
     end
 
+    methods (Hidden)
+
+        function setCacheUels(obj)
+            obj.uels_c_cache_ = cell(1, obj.dimension_);
+            for i = 1:obj.dimension_
+                obj.uels_c_cache_{i} = obj.getUELs(i);
+            end
+        end
+
+        function getCacheUels(obj)
+            if ~obj.container.features.categorical
+                if numel(obj.uels_c_cache_) == 0
+                    return;
+                elseif numel(obj.uels_c_cache_) ~= obj.dimension_
+                    error('Invalid uels cache');
+                end
+                for i = 1:obj.dimension_
+                    obj.uels.(obj.domain_label_{i}).set(obj.uels_c_cache_{i}, []);
+                end
+            end
+        end
+
+        function setCacheNumberRecords(obj)
+            obj.number_records_c_cache_ = obj.getNumRecords();
+        end
+
+    end
+
     methods (Hidden, Access = protected)
 
         function values = availValueFields(obj, values)
@@ -1718,7 +1774,7 @@ classdef Symbol < handle
                 end
 
                 % check correct order of symbols
-                if ~GAMSTransfer.gt_check_sym_order(obj.container.data, obj.domain_{i}.name, obj.name);
+                if ~GAMSTransfer.gt_check_sym_order(obj.container.data, obj.domain_{i}.name, obj.name_);
                     error('Domain set ''%s'' is out of order: Try calling the Container method reorderSymbols().', obj.domain_{i}.name);
                 end
             end

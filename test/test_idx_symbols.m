@@ -558,7 +558,11 @@ function test_idx_writeUnordered(t, cfg)
         gdx.write(write_filename, 'sorted', true);
     catch e
         t.reset();
-        t.assertEquals(e.message, 'GDX error in record c(3,1): Data not sorted when writing raw');
+        if exist('OCTAVE_VERSION', 'builtin') > 0
+            t.assertEquals(e.message, 'gt_idx_write: GDX error in record c(3,1): Data not sorted when writing raw');
+        else
+            t.assertEquals(e.message, 'GDX error in record c(3,1): Data not sorted when writing raw');
+        end
     end
 
     t.add('idx_write_unordered_2')
@@ -573,7 +577,11 @@ function test_idx_writeUnordered(t, cfg)
         gdx.write(write_filename, 'sorted', true);
     catch e
         t.reset();
-        t.assertEquals(e.message, 'GDX error in record c(2,1): Data not sorted when writing raw');
+        if exist('OCTAVE_VERSION', 'builtin') > 0
+            t.assertEquals(e.message, 'gt_idx_write: GDX error in record c(2,1): Data not sorted when writing raw');
+        else
+            t.assertEquals(e.message, 'GDX error in record c(2,1): Data not sorted when writing raw');
+        end
     end
 
     t.add('idx_write_unordered_4')

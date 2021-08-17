@@ -39,16 +39,18 @@ classdef Utils
             % environment. The fields of s are:
             % - categorical:       categorical arrays
             % - table:             data type table
+            % - c_prop_setget:     calling set/get methods when querying data from c
             %
             % Note that a latest Matlab version should return true for all
             % fields.
             %
 
-            feature_support = struct('categorical', true, 'table', true);
+            feature_support = struct('categorical', true, 'table', true, 'c_prop_setget', true);
 
             if exist('OCTAVE_VERSION', 'builtin') > 0
                 feature_support.categorical = false;
                 feature_support.table = false;
+                feature_support.c_prop_setget = false;
                 v_release = strsplit(version(), '.');
                 for i = 1:3
                     v_release{i} = str2double(v_release{i});
