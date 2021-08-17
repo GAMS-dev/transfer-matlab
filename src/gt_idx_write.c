@@ -42,7 +42,7 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
-    int type, subtype, format;
+    int format;
     size_t dim, nrecs;
     char gdx_filename[GMS_SSSIZE], buf[GMS_SSSIZE], sysdir[GMS_SSSIZE], name[GMS_SSSIZE];
     char text[GMS_SSSIZE];
@@ -172,7 +172,7 @@ void mexFunction(
         /* get domain and value fields of record field */
         gt_mex_get_records(data_name, dim, false, mx_arr_records, mx_arr_values,
             mx_values, mx_arr_domains, mx_domains, NULL, (const char**) domain_labels_ptr);
-        gt_utils_type_default_values(type, subtype, false, def_values);
+        gt_utils_type_default_values(GMS_DT_PAR, 0, false, def_values);
 
         /* get number of records */
         nrecs = 0;

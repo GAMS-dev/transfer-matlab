@@ -92,7 +92,7 @@ void mexFunction(
         }
         else if (mxIsClass(mx_arr_domentry, "GAMSTransfer.Set"))
         {
-            int domdim, domnrecs, dom_contid;
+            int domdim, domnrecs;
             mxArray* mx_arr_container;
             mxArray* mx_arr_contid;
 

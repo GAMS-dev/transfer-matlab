@@ -184,7 +184,7 @@ void mexFunction(
                         mexErrMsgIdAndTxt(ERRID"idxDataRead", "GDX error (idxDataRead)");
 
                     /* get row and column index */
-                    memset(mx_idx, 0, GLOBAL_MAX_INDEX_DIM);
+                    memset(mx_idx, 0, sizeof(mx_idx));
                     for (size_t k = 0; k < dim; k++)
                         mx_idx[k] = gdx_uel_index[k]-1;
 
@@ -272,7 +272,7 @@ void mexFunction(
                         mexErrMsgIdAndTxt(ERRID"idxDataRead", "GDX error (idxDataRead)");
 
                     /* get indices in matrix (row: mx_idx[0]; col: mx_idx[1]) and store domain labels */
-                    memset(mx_idx, 0, GLOBAL_MAX_INDEX_DIM * sizeof(mwIndex));
+                    memset(mx_idx, 0, sizeof(mx_idx));
                     for (size_t k = 0; k < dim; k++)
                         mx_idx[k] = gdx_uel_index[k] - 1;
 

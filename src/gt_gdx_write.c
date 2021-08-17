@@ -42,13 +42,13 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
-    int type, subtype, format, err_count;
+    int type, subtype, format;
     size_t dim, nrecs;
     char gdx_filename[GMS_SSSIZE], buf[GMS_SSSIZE], name[GMS_SSSIZE];
     char text[GMS_SSSIZE], dominfo[10], sysdir[GMS_SSSIZE];
     double def_values[GMS_VAL_MAX];
     bool was_table, support_table, support_categorical, compress, issorted, singleton;
-    bool is_valid, have_nrecs, support_setget;
+    bool have_nrecs, support_setget;
     char* data_name = NULL;
     gdxHandle_t gdx = NULL;
     gdxStrIndexPtrs_t domains_ptr, domain_labels_ptr;

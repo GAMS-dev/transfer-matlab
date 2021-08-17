@@ -36,6 +36,7 @@ function gams_transfer_setup(varargin)
         ~strcmpi(x, 'target_dir') && ~strcmpi(x, 'system_dir');
     addParameter(p, 'target_dir', '.', is_string_char);
     addParameter(p, 'system_dir', find_gams(), is_string_char);
+    addParameter(p, 'verbose', 0, @isnumeric)
     parse(p, varargin{:});
     if strcmp(p.Results.system_dir, '')
         error('GAMS system directory not found.');
@@ -46,7 +47,7 @@ function gams_transfer_setup(varargin)
 
     % install GAMS Transfer
     try
-        gams_transfer_setup_internal(p.Results.system_dir, current_dir, target_dir)
+        gams_transfer_setup_internal(p.Results.system_dir, current_dir, target_dir, p.Results.verbose)
         rmpath(fullfile(current_dir, 'src'));
     catch e
         rmpath(fullfile(current_dir, 'src'));
@@ -57,7 +58,7 @@ function gams_transfer_setup(varargin)
 
 end
 
-function gams_transfer_setup_internal(gams_dir, current_dir, target_dir)
+function gams_transfer_setup_internal(gams_dir, current_dir, target_dir, verbose)
 
     m_files = dir(fullfile(current_dir, 'src', '*.m'));
     c_files = {
@@ -87,16 +88,16 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir)
         fullfile(gams_dir, 'apifiles', 'C', 'api'), ...
     };
     mex_c_flags = {
-        '-silent COMPFLAGS=''$COMPFLAGS -Wall -DGC_NO_MUTEX''' ...
+        '-Wall -DGC_NO_MUTEX' ...
     };
     mex_cpp_flags = {
-        '-silent COMPFLAGS=''$COMPFLAGS -Wall -DGC_NO_MUTEX''' ...
+        '-Wall -DGC_NO_MUTEX' ...
     };
     octmex_c_flags = {
-        '-DGC_NO_MUTEX' ...
+        '-Wall -DGC_NO_MUTEX' ...
     };
     octmex_cpp_flags = {
-        '-DGC_NO_MUTEX' ...
+        '-Wall -DGC_NO_MUTEX' ...
     };
     lib_linux = {
         'dl', ...
@@ -158,6 +159,11 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir)
             end
 
             % defined flags
+            if ismac || isunix
+                cmd = strcat(cmd, ' CFLAGS=''$CFLAGS ');
+            else
+                cmd = strcat(cmd, ' COMPFLAGS=''$COMPFLAGS ');
+            end
             [~,~,ext] = fileparts(c_files{i});
             if strcmp(ext, '.c')
                 for e = mex_c_flags
@@ -167,6 +173,14 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir)
                 for e = mex_cpp_flags
                     cmd = sprintf('%s %s', cmd, e{1});
                 end
+            end
+            cmd = strcat(cmd, '''');
+
+            % output level
+            if verbose == 0
+                cmd = strcat(cmd, ' -silent');
+            elseif verbose > 1
+                cmd = strcat(cmd, ' -v');
             end
 
             % output directory
@@ -184,12 +198,20 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir)
                 end
             end
 
+            % output level
+            if verbose > 1
+                cmd = strcat(cmd, ' -v');
+            end
+
             % output directory
             cmd = sprintf('%s -o %s', cmd, target_file);
         end
 
         % build
         fprintf('Compiling (%2d/%2d): %s\n', i, numel(c_files), target_file);
+        if verbose >= 1
+            fprintf('Command: %s\n', cmd);
+        end
         eval(cmd);
     end
 
