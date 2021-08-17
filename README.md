@@ -23,8 +23,8 @@ gams_transfer_setup('target_dir', <install_directory>, 'system_dir', <gams_syste
 ```
 The directory `<install_directory>` must start with `+` to create a valid Matlab
 package. Both parameters, `target_dir` and `system_dir`, are optional with
-defaults `'+GAMSTransfer'` and the GAMS system directory found in the PATH
-environment variable, respectively.
+defaults `'.'` and the GAMS system directory found in the PATH environment
+variable, respectively.
 
 ## Run Unit Tests
 
