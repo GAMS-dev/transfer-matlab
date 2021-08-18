@@ -21,11 +21,10 @@ To build GAMSTransfer, open Matlab and run:
 ```
 gams_transfer_setup('target_dir', <install_directory>, 'system_dir', <gams_system_directory>, 'verbose', <level>);
 ```
-The directory `<install_directory>` must start with `+` to create a valid Matlab
-package. All parameters, `target_dir`, `system_dir` and `verbose`, are optional
-with defaults `'.'`, the GAMS system directory found in the PATH environment
-variable, and 0, respectively. Verbosity level are between 0 (no compiler
-output) to 2 (all compiler output).
+All parameters, `target_dir`, `system_dir` and `verbose`, are optional with
+defaults `'.'` (current directory), the GAMS system directory found in the PATH
+environment variable, and 0, respectively. Verbosity level are between 0 (no
+compiler output) to 2 (all compiler output).
 
 ## Run Unit Tests
 
