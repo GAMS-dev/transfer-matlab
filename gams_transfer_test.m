@@ -43,7 +43,7 @@ function gams_transfer_test(varargin)
     end
 
     % create working directory
-    mkdir(p.Results.working_dir)
+    mkdir(p.Results.working_dir);
     olddir = cd(p.Results.working_dir);
 
     tic;
@@ -204,8 +204,10 @@ function gdx_filenames = gams_transfer_test_create_gdx(gams_dir, working_dir)
         end
         fclose(fid);
 
-        if system([gams_exe, ' ', gms_filename, ' lo=0'])
-            error('Can''t create GAMS test files. Possibly GAMS executable wasn''t found in specified path.');
+        [rc, stdout] = system([gams_exe, ' ', gms_filename]);
+        if rc
+            disp(stdout);
+            error('Can''t create GAMS test files.');
         end
     end
 
