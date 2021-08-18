@@ -76,7 +76,9 @@ bool gt_utils_iseps(
 
 /** translates GAMS double values to Matlab double values */
 double gt_utils_sv_gams2matlab(
-    double          gams_value      /** original GAMS value */
+    double          value,          /** original value */
+    int             n_acronyms,     /** number of acronyms */
+    int*            acronyms        /** acronyms to be converted to GAMS NA */
 );
 
 /** translates Matlab double values to GAMS double values */

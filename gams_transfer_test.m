@@ -118,8 +118,8 @@ end
 
 function gdx_filenames = gams_transfer_test_create_gdx(gams_dir, working_dir)
 
-    gams_data = cell(1, 5);
-    gdx_filenames = cell(1, 5);
+    gams_data = cell(1, 6);
+    gdx_filenames = cell(1, 6);
 
     gams_data{1} = {
     'Set i ''set_i'' / i1, i3 ''expl text 3'', i4, i6, i10 ''expl text 10''/;'
@@ -193,7 +193,14 @@ function gdx_filenames = gams_transfer_test_create_gdx(gams_dir, working_dir)
     'execute_unloaddi ''data5.gdx'', i;'
     };
 
-    for i = 1:5
+    gams_data{6} = {
+    'Set i / i1 * i3 /;'
+    'Acronym small ''baby bear'', medium ''mama bear'', large ''papa bear'';'
+    'Parameter a(i) / i1 1, i2 medium, i3 large /;'
+    'execute_unloaddi ''data6.gdx'', i, a;'
+    };
+
+    for i = 1:6
         gams_exe = fullfile(gams_dir, 'gams');
         gms_filename = fullfile(working_dir, sprintf('data%d.gms', i));
         gdx_filenames{i} = fullfile(working_dir, sprintf('data%d.gdx', i));

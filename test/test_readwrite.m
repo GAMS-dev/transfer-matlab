@@ -28,6 +28,7 @@ function test_readwrite(cfg)
     test_read(t, cfg);
     test_readPartial(t, cfg);
     test_readSpecialValues(t, cfg);
+    test_readAcronyms(t, cfg);
     test_readSymbolTypes(t, cfg);
     test_readWrite(t, cfg);
     test_readWriteCompress(t, cfg);
@@ -1012,6 +1013,30 @@ function test_readSpecialValues(t, cfg)
     t.assert(gdx.data.GMInf.records.value == -Inf);
     t.assert(gdx.data.GEps.records.value == 0);
     t.assert(GAMSTransfer.SpecialValues.iseps(gdx.data.GEps.records.value));
+end
+
+function test_readAcronyms(t, cfg);
+    gdx = GAMSTransfer.Container(cfg.filenames{6}, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
+
+    t.add('read_acronyms_1');
+    stdout = evalc("gdx.read('format', 'struct');");
+    t.assert(~isempty(strfind(stdout, ...
+        'GDX file contains acronyms. Acronyms are not supported and are set to GAMS NA.')));
+
+    t.add('read_acronyms_2');
+    warning('off');
+    gdx.read('format', 'struct');
+    t.assert(isfield(gdx.data, 'i'));
+    t.assert(isfield(gdx.data, 'a'));
+    t.assert(isa(gdx.data.a, 'GAMSTransfer.Parameter'));
+    t.assert(gdx.data.a.isValid());
+    t.assert(numel(gdx.data.a.records.value) == 3);
+    t.assert(gdx.data.a.records.value(1) == 1);
+    t.assert(GAMSTransfer.SpecialValues.isna(gdx.data.a.records.value(2)));
+    t.assert(GAMSTransfer.SpecialValues.isna(gdx.data.a.records.value(3)));
+    warning('on');
+
 end
 
 function test_readSymbolTypes(t, cfg);

@@ -45,7 +45,8 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
-    int sym_id, format, orig_format, type, subtype, lastdim, ival, sym_count, uel_count;
+    int sym_id, format, orig_format, type, subtype, lastdim, ival, sym_count;
+    int n_acronyms, uel_count;
     double dval;
     size_t dim, nrecs, n_dom_fields;
     bool support_categorical, support_setget;
@@ -60,6 +61,7 @@ void mexFunction(
     gdxValues_t gdx_values;
     int** dom_uel_dim_maps = NULL;
     int* dom_uels_used[GLOBAL_MAX_INDEX_DIM] = {NULL};
+    int* acronyms = NULL;
     mwIndex idx;
     mwIndex mx_flat_idx[GMS_VAL_MAX];
     mwIndex mx_idx[GLOBAL_MAX_INDEX_DIM];
@@ -108,6 +110,22 @@ void mexFunction(
         mexErrMsgIdAndTxt(ERRID"gdxSystemInfo", "GDX error (gdxSystemInfo)");
 
     dom_uel_dim_maps = (int**) mxCalloc(sym_count+1, sizeof(int*));
+
+    /* check for acronyms */
+    n_acronyms = gdxAcronymCount(gdx);
+    if (n_acronyms > 0)
+    {
+        char acr_name[GMS_SSSIZE], acr_text[GMS_SSSIZE];
+
+        mexWarnMsgIdAndTxt(ERRID"found_acronyms", "GDX file contains acronyms. "
+            "Acronyms are not supported and are set to GAMS NA.");
+        acronyms = (int*) mxCalloc(n_acronyms, sizeof(int));
+        for (int i = 0; i < n_acronyms; i++)
+        {
+            gdxAcronymGetInfo(gdx, i+1, acr_name, acr_text, &ival);
+            acronyms[i] = ival;
+        }
+    }
 
     for (size_t i = 0; i < mxGetNumberOfElements(prhs[3]); i++)
     {
@@ -337,7 +355,7 @@ void mexFunction(
                     /* parse values */
                     for (size_t k = 0; k < GMS_VAL_MAX; k++)
                         if (values_flag[k])
-                            mx_values[k][j] = gt_utils_sv_gams2matlab(gdx_values[k]);
+                            mx_values[k][j] = gt_utils_sv_gams2matlab(gdx_values[k], n_acronyms, acronyms);
                 }
                 break;
 
@@ -362,7 +380,7 @@ void mexFunction(
                         if (values_flag[k])
                         {
                             idx = (dim > 0) ? mxCalcSingleSubscript(mx_arr_values[k], dim, mx_idx) : 0;
-                            mx_values[k][idx] = gt_utils_sv_gams2matlab(gdx_values[k]);
+                            mx_values[k][idx] = gt_utils_sv_gams2matlab(gdx_values[k], n_acronyms, acronyms);
                         }
                     }
                 }
@@ -401,7 +419,7 @@ void mexFunction(
                     /* store values */
                     for (size_t k = 0; k < GMS_VAL_MAX; k++)
                         if (values_flag[k] && gdx_values[k] != 0.0)
-                            mx_values[k][mx_flat_idx[k]] = gt_utils_sv_gams2matlab(gdx_values[k]);
+                            mx_values[k][mx_flat_idx[k]] = gt_utils_sv_gams2matlab(gdx_values[k], n_acronyms, acronyms);
                 }
                 break;
         }
@@ -536,4 +554,6 @@ void mexFunction(
         if (dom_uel_dim_maps[i])
             mxFree(dom_uel_dim_maps[i]);
     mxFree(dom_uel_dim_maps);
+    if (n_acronyms > 0)
+        mxFree(acronyms);
 }

@@ -228,7 +228,7 @@ void mexFunction(
                     /* parse values */
                     for (size_t k = 0; k < GMS_VAL_MAX; k++)
                         if (values_flag[k])
-                            mx_values[k][j] = gt_utils_sv_gams2matlab(gdx_values[k]);
+                            mx_values[k][j] = gt_utils_sv_gams2matlab(gdx_values[k], 0, NULL);
                 }
                 break;
 
@@ -249,7 +249,7 @@ void mexFunction(
                         if (values_flag[k])
                         {
                             idx = (dim > 0) ? mxCalcSingleSubscript(mx_arr_values[k], dim, mx_idx) : 0;
-                            mx_values[k][idx] = gt_utils_sv_gams2matlab(gdx_values[k]);
+                            mx_values[k][idx] = gt_utils_sv_gams2matlab(gdx_values[k], 0, NULL);
                         }
                     }
                 }
@@ -284,7 +284,7 @@ void mexFunction(
                     /* store values */
                     for (size_t k = 0; k < GMS_VAL_MAX; k++)
                         if (values_flag[k] && gdx_values[k] != 0.0)
-                            mx_values[k][mx_flat_idx[k]] = gt_utils_sv_gams2matlab(gdx_values[k]);
+                            mx_values[k][mx_flat_idx[k]] = gt_utils_sv_gams2matlab(gdx_values[k], 0, NULL);
                 }
                 break;
         }

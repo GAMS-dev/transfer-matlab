@@ -153,7 +153,9 @@ bool gt_utils_iseps(
 }
 
 double gt_utils_sv_gams2matlab(
-    double          value           /** original value */
+    double          value,          /** original value */
+    int             n_acronyms,     /** number of acronyms */
+    int*            acronyms        /** acronyms to be converted to GAMS NA */
 )
 {
     if (value == GMS_SV_UNDEF)
@@ -166,6 +168,9 @@ double gt_utils_sv_gams2matlab(
         return -mxGetInf();
     if (value == GMS_SV_EPS)
         return gt_utils_geteps();
+    for (int i = 0; i < n_acronyms; i++)
+        if (value == acronyms[i] * GMS_SV_ACR)
+            return gt_utils_getna();
     return value;
 }
 
@@ -216,7 +221,7 @@ void gt_utils_type_default_values(
 
     if (sv_matlab)
         for (size_t i = 0; i < GMS_VAL_MAX; i++)
-            def_values[i] = gt_utils_sv_gams2matlab(def_values[i]);
+            def_values[i] = gt_utils_sv_gams2matlab(def_values[i], 0, NULL);
 }
 
 void gt_utils_count_2d_rowmajor_nnz(
