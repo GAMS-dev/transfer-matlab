@@ -38,7 +38,7 @@ end
 
 function test_addSymbols(t, cfg)
 
-    gdx = GAMSTransfer.Container('features', cfg.features);
+    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, 'features', cfg.features);
 
     t.add('add_symbols_set_1');
     s1 = GAMSTransfer.Set(gdx, 's1');
@@ -706,7 +706,8 @@ end
 
 function test_changeSymbol(t, cfg)
 
-    gdx = GAMSTransfer.Container('features', cfg.features);
+    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+        'features', cfg.features);
     i1 = GAMSTransfer.Set(gdx, 'i1');
     i2 = GAMSTransfer.Set(gdx, 'i2', 'records', {'i21', 'i22', 'i23'});
     x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
@@ -909,7 +910,7 @@ end
 
 function test_defaultvalues(t, cfg)
 
-    gdx = GAMSTransfer.Container('features', cfg.features);
+    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, 'features', cfg.features);
 
     t.add('default_values_variables');
     s = GAMSTransfer.Variable(gdx, 'x1', 'binary');
@@ -951,7 +952,7 @@ end
 
 function test_domainViolation(t, cfg);
 
-    gdx = GAMSTransfer.Container('features', cfg.features);
+    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i1 = GAMSTransfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
@@ -1028,7 +1029,7 @@ end
 
 function test_setRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container('features', cfg.features);
+    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, 'features', cfg.features);
 
     GAMSTransfer.Set(gdx, 'i1');
     s1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {'i'});
@@ -1488,7 +1489,7 @@ end
 
 function test_writeUnordered(t, cfg)
 
-    gdx = GAMSTransfer.Container('features', cfg.features);
+    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i = GAMSTransfer.Set(gdx, 'i', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
@@ -1540,7 +1541,7 @@ end
 
 function test_reorder(t, cfg)
 
-    gdx = GAMSTransfer.Container('features', cfg.features);
+    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     s1 = GAMSTransfer.Set(gdx, 's1', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
@@ -1627,7 +1628,8 @@ end
 
 function test_transformRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
 
     formats = {'struct', 'table', 'dense_matrix', 'sparse_matrix'};
     i_recs = cell(1, numel(formats));

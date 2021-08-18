@@ -30,7 +30,8 @@ function test_trnsport(cfg)
 
     for k = 1:3
         if k == 1
-            m = GAMSTransfer.Container('features', cfg.features);
+            m = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+                'features', cfg.features);
             i = GAMSTransfer.Set(m, 'i', ...
                 'records', {'seattle', 'san-diego'}, ...
                 'description', 'canning plants');
@@ -68,7 +69,8 @@ function test_trnsport(cfg)
                 'records', {[325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]}, ...
                 'description', 'satisfy demand at market j');
         elseif k == 2
-            m = GAMSTransfer.Container('features', cfg.features);
+            m = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+                'features', cfg.features);
             i = GAMSTransfer.Set(m, 'i', 'description', 'canning plants');
             i.setRecords({'seattle', 'san-diego'});
             j = GAMSTransfer.Set(m, 'j', 'description', 'markets');
@@ -94,7 +96,8 @@ function test_trnsport(cfg)
             demand = GAMSTransfer.Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
             demand.setRecords([325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]);
         elseif k == 3
-            m = GAMSTransfer.Container('features', cfg.features);
+            m = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+                'features', cfg.features);
             i = GAMSTransfer.Set(m, 'i', 'description', 'canning plants');
             if m.features.categorical
                 i.records = struct('uni_1', categorical({'seattle'; 'san-diego'}, ...
@@ -132,11 +135,14 @@ function test_trnsport(cfg)
             demand = GAMSTransfer.Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
             demand.records = struct('level', [325; 300; 275], 'marginal', [0.225; 0.153; 0.126], 'lower', [325; 300; 275]);
         elseif k == 4
-            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_1.gdx', 'features', cfg.features));
+            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_1.gdx'), ...
+                'system_directory', cfg.system_dir, 'features', cfg.features);
         elseif k == 5
-            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_2.gdx', 'features', cfg.features));
+            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_2.gdx'), ...
+                'system_directory', cfg.system_dir, 'features', cfg.features);
         elseif k == 6
-            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_3.gdx', 'features', cfg.features));
+            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_3.gdx'), ...
+                'system_directory', cfg.system_dir, 'features', cfg.features);
         end
 
         if k == 4 || k == 5 || k == 6

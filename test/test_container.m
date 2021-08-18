@@ -35,7 +35,8 @@ end
 
 function test_getlist(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{3}, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{3}, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
 
     t.add('get_list_empty')
     l = gdx.getSymbols({});
@@ -132,7 +133,8 @@ end
 
 function test_describe(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
 
     tbl = gdx.describeSets();
 
@@ -1105,7 +1107,8 @@ end
 
 function test_idx_describe(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'indexed', true, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'system_directory', ...
+        cfg.system_dir, 'indexed', true, 'features', cfg.features);
 
     tbl = gdx.describeParameters();
 
@@ -1743,7 +1746,8 @@ end
 
 function test_remove(t, cfg)
 
-    gdx = GAMSTransfer.Container('features', cfg.features);
+    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+        'features', cfg.features);
     i1 = GAMSTransfer.Set(gdx, 'i1');
     a1 = GAMSTransfer.Alias(gdx, 'a1', i1);
     x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
@@ -1775,7 +1779,8 @@ end
 
 function test_universalset(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
     gdx.read();
 
     t.add('universalset_1');

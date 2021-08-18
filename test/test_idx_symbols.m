@@ -35,7 +35,8 @@ end
 
 function test_idx_addSymbols(t, cfg)
 
-    gdx = GAMSTransfer.Container('indexed', true, 'features', cfg.features);
+    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+        'indexed', true, 'features', cfg.features);
 
     t.add('idx_add_symbols_parameter_1');
     p1 = GAMSTransfer.Parameter(gdx, 'p1');
@@ -171,7 +172,8 @@ end
 
 function test_idx_changeSymbol(t, cfg)
 
-    gdx = GAMSTransfer.Container('indexed', true, 'features', cfg.features);
+    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+        'indexed', true, 'features', cfg.features);
     p1 = GAMSTransfer.Parameter(gdx, 'p1', 5);
     p2 = GAMSTransfer.Parameter(gdx, 'p2', [5,10]);
 
@@ -368,7 +370,8 @@ end
 
 function test_idx_setRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container('indexed', true, 'features', cfg.features);
+    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+        'indexed', true, 'features', cfg.features);
 
     p1 = GAMSTransfer.Parameter(gdx, 'p1', 5);
 
@@ -545,7 +548,8 @@ end
 
 function test_idx_writeUnordered(t, cfg)
 
-    gdx = GAMSTransfer.Container('indexed', true, 'features', cfg.features);
+    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+        'indexed', true, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     c = GAMSTransfer.Parameter(gdx, 'c', [5,10]);
@@ -591,7 +595,8 @@ end
 
 function test_idx_transformRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'indexed', true, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'system_directory', ...
+        cfg.system_dir, 'indexed', true, 'features', cfg.features);
 
     formats = {'struct', 'table', 'dense_matrix', 'sparse_matrix'};
     a_recs = cell(1, numel(formats));

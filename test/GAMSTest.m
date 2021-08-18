@@ -139,15 +139,17 @@ classdef GAMSTest < handle
             end
         end
 
-        function testGdxDiff(obj, filename1, filename2)
+        function testGdxDiff(obj, sysdir, filename1, filename2)
             filepath = fileparts(filename1);
-            cmd = sprintf('gdxdiff %s %s EPS=1e-20 RELEPS=1e-20', filename1, filename2);
+            gdxdiff = fullfile(sysdir, 'gdxdiff');
+            cmd = sprintf('%s %s %s EPS=1e-20 RELEPS=1e-20', gdxdiff, filename1, filename2);
             oldfolder = cd(filepath);
             [status, stdout] = system(cmd);
             obj.assert(status == 0);
             if status
-                display(stdout)
-                system('gdxdump diffile.gdx');
+                display(stdout);
+                cmd = sprintf('%s diffile.gdx', fullfile(sysdir, 'gdxdump'));
+                system(cmd);
             end
             cd(oldfolder);
         end

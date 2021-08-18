@@ -37,7 +37,8 @@ end
 
 function test_read(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
 
     t.add('read_basic_info');
     t.assertEquals(gdx.system_directory, cfg.system_dir);
@@ -841,7 +842,8 @@ end
 
 function test_readPartial(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
     gdx.read('format', 'struct', 'symbols', {'i', 'j', 'x'}, 'values', {'level', 'marginal'});
 
     t.add('read_partial_basic_info');
@@ -983,7 +985,8 @@ end
 
 function test_readSpecialValues(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{2}, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{2}, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
     gdx.read('format', 'struct');
 
     t.add('read_special_values');
@@ -1013,7 +1016,8 @@ end
 
 function test_readSymbolTypes(t, cfg);
 
-    gdx = GAMSTransfer.Container(cfg.filenames{3}, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{3}, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
 
     t.add('read_symbol_types_vartypes');
     t.assert(isfield(gdx.data, 'x1'));
@@ -1136,68 +1140,72 @@ end
 function test_readWrite(t, cfg)
 
     for i = [1,2,5]
-        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'features', cfg.features);
+        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'system_directory', ...
+            cfg.system_dir, 'features', cfg.features);
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
+        gdxdump = fullfile(cfg.system_dir, 'gdxdump');
 
         t.add(sprintf('read_write_struct_%d', i));
         gdx.read('format', 'struct');
         gdx.write(write_filename);
-        t.testGdxDiff(cfg.filenames{i}, write_filename);
-        t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
+        t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+        t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         if gdx.features.table
             t.add(sprintf('read_write_table_%d', i));
             gdx.read('format', 'table');
             gdx.write(write_filename);
-            t.testGdxDiff(cfg.filenames{i}, write_filename);
-            t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
+            t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+            t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
         end
 
         t.add(sprintf('read_write_dense_matrix_%d', i));
         gdx.read('format', 'dense_matrix');
         gdx.write(write_filename);
-        t.testGdxDiff(cfg.filenames{i}, write_filename);
-        t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
+        t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+        t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         t.add(sprintf('read_write_sparse_matrix_%d', i));
         gdx.read('format', 'sparse_matrix');
         gdx.write(write_filename);
-        t.testGdxDiff(cfg.filenames{i}, write_filename);
-        t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
+        t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+        t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
     end
 end
 
 function test_readWriteCompress(t, cfg)
 
     for i = [1,2,5]
-        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'features', cfg.features);
+        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'system_directory', ...
+            cfg.system_dir, 'features', cfg.features);
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
+        gdxdump = fullfile(cfg.system_dir, 'gdxdump');
 
         t.add(sprintf('read_write_struct_%d', i));
         gdx.read('format', 'struct');
         gdx.write(write_filename, 'compress', true);
-        t.testGdxDiff(cfg.filenames{i}, write_filename);
-        t.assert(~system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
+        t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+        t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         if gdx.features.table
             t.add(sprintf('read_write_table_%d', i));
             gdx.read('format', 'table');
             gdx.write(write_filename, 'compress', true);
-            t.testGdxDiff(cfg.filenames{i}, write_filename);
-            t.assert(~system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
+            t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+            t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
         end
 
         t.add(sprintf('read_write_dense_matrix_%d', i));
         gdx.read('format', 'dense_matrix');
         gdx.write(write_filename, 'compress', true);
-        t.testGdxDiff(cfg.filenames{i}, write_filename);
-        t.assert(~system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
+        t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+        t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         t.add(sprintf('read_write_sparse_matrix_%d', i));
         gdx.read('format', 'sparse_matrix');
         gdx.write(write_filename, 'compress', true);
-        t.testGdxDiff(cfg.filenames{i}, write_filename);
-        t.assert(~system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
+        t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+        t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
     end
 end
 
@@ -1206,16 +1214,19 @@ function test_readWriteDomainCheck(t, cfg)
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     t.add('read_write_domain_check_regular');
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
     gdx.read();
     t.assertEquals(gdx.data.x.domain_info, 'regular');
     gdx.write(write_filename);
-    gdx2 = GAMSTransfer.Container(write_filename, 'features', cfg.features);
+    gdx2 = GAMSTransfer.Container(write_filename, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
     gdx2.read();
     t.assertEquals(gdx2.data.x.domain_info, 'regular');
 
     t.add('read_write_domain_check_relaxed_1');
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
     gdx.read();
     t.assertEquals(gdx.data.x.domain_info, 'regular');
     x = gdx.data.x;
@@ -1223,7 +1234,8 @@ function test_readWriteDomainCheck(t, cfg)
     x.domain{2} = 'j';
     t.assertEquals(gdx.data.x.domain_info, 'relaxed');
     gdx.write(write_filename);
-    gdx2 = GAMSTransfer.Container(write_filename, 'features', cfg.features);
+    gdx2 = GAMSTransfer.Container(write_filename, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
     gdx2.read();
     t.assertEquals(gdx2.data.x.domain_info, 'relaxed');
     x = gdx2.data.x;
@@ -1231,12 +1243,14 @@ function test_readWriteDomainCheck(t, cfg)
     x.domain{2} = gdx2.data.j;
     t.assertEquals(gdx2.data.x.domain_info, 'regular');
     gdx2.write(write_filename);
-    gdx = GAMSTransfer.Container(write_filename, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(write_filename, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
     gdx.read();
     t.assertEquals(gdx.data.x.domain_info, 'regular');
 
     t.add('read_write_domain_check_relaxed_2');
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
     gdx.read('format', 'struct');
     t.assertEquals(gdx.data.x.domain_info, 'regular');
     records = gdx.data.x.records;
@@ -1257,7 +1271,8 @@ function test_readWriteDomainCheck(t, cfg)
     x.initUELs(2, uels2);
     t.assertEquals(gdx.data.x.domain_info, 'relaxed');
     gdx.write(write_filename);
-    gdx2 = GAMSTransfer.Container(write_filename, 'features', cfg.features);
+    gdx2 = GAMSTransfer.Container(write_filename, 'system_directory', ...
+        cfg.system_dir, 'features', cfg.features);
     gdx2.read();
     t.assertEquals(gdx2.data.x.domain_info, 'relaxed');
 
