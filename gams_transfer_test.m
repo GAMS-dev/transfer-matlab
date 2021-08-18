@@ -42,17 +42,21 @@ function gams_transfer_test(varargin)
         error('GAMS system directory not found.');
     end
 
+    % check paths
+    working_dir = Utils.checkFilename(p.Results.working_dir, '', false);
+    system_dir = Utils.checkFilename(p.Results.system_dir, '', false);
+
     % create working directory
-    mkdir(p.Results.working_dir);
-    olddir = cd(p.Results.working_dir);
+    mkdir(working_dir);
+    olddir = cd(working_dir);
 
     tic;
 
     try
         % test data
         cfg = struct();
-        cfg.working_dir = p.Results.working_dir;
-        cfg.system_dir = p.Results.system_dir;
+        cfg.working_dir = working_dir;
+        cfg.system_dir = system_dir;
         cfg.filenames = gams_transfer_test_create_gdx(cfg.system_dir, cfg.working_dir);
         features = GAMSTransfer.Utils.checkFeatureSupport();
 

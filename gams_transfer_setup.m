@@ -42,8 +42,12 @@ function gams_transfer_setup(varargin)
         error('GAMS system directory not found.');
     end
 
+    % check paths
+    target_dir = Utils.checkFilename(p.Results.target_dir, '', false);
+    system_dir = Utils.checkFilename(p.Results.system_dir, '', false);
+
     % get package name
-    target_dir = fullfile(p.Results.target_dir, '+GAMSTransfer');
+    target_dir = fullfile(target_dir, '+GAMSTransfer');
 
     % install GAMS Transfer
     try
@@ -112,11 +116,12 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir, verbose
     if ~strcmp(target_folder(1), '+')
         warning('Target directory ''%s'' does not create a package.', target_dir);
     end
+    fprintf('Package install path: %s\n', target_dir);
 
     for i = 1:numel(m_files)
         target_file = fullfile(target_dir, m_files(i).name);
 
-        fprintf('Copying (%2d/%2d): %s\n', i, numel(m_files), target_file);
+        fprintf('Copying (%2d/%2d): %s\n', i, numel(m_files), m_files(i).name);
         copyfile(fullfile(m_files(i).folder, m_files(i).name), target_file);
     end
 
@@ -208,7 +213,7 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir, verbose
         end
 
         % build
-        fprintf('Compiling (%2d/%2d): %s\n', i, numel(c_files), target_file);
+        fprintf('Compiling (%2d/%2d): %s.c\n', i, numel(c_files), filename);
         if verbose >= 1
             fprintf('Command: %s\n', cmd);
         end

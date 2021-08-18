@@ -115,7 +115,7 @@ classdef Utils
             [filepath, ~, fileext] = fileparts(filename);
 
             % check file extension and if file exists
-            if ~strcmpi(fileext, extension)
+            if ~isempty(extension) && ~strcmpi(fileext, extension)
                 error('Invalid file extension: %s instead of %s', fileext, extension);
             end
             if check_exists && ~isfile(filename)
