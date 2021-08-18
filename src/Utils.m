@@ -104,6 +104,14 @@ classdef Utils
                 return
             end
 
+            % replace ~ with home directory in path
+            if ispc
+                homedir = fullfile(getenv('HOMEDRIVE'), getenv('HOMEPATH'));
+            else
+                homedir = getenv('HOME');
+            end
+            filename = regexprep(filename, '^~', strrep(homedir, '\', '\\'));
+
             [filepath, ~, fileext] = fileparts(filename);
 
             % check file extension and if file exists
