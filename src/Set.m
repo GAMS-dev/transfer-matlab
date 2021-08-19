@@ -139,6 +139,11 @@ classdef Set < GAMSTransfer.Symbol
                 error('Set not allowed in indexed mode.');
             end
 
+            % check number of arguments
+            if i <= nargin - 2
+                error('Invalid number of arguments');
+            end
+
             % create object
             obj = obj@GAMSTransfer.Symbol(container, name, description, domain, ...
                 records, read_entry, read_number_records);

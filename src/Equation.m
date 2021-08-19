@@ -144,6 +144,11 @@ classdef Equation < GAMSTransfer.Symbol
                 i = i + 2;
             end
 
+            % check number of arguments
+            if i <= nargin - 2
+                error('Invalid number of arguments');
+            end
+
             if container.indexed
                 error('Equation not allowed in indexed mode.');
             end
