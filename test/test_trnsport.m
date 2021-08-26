@@ -23,7 +23,7 @@
 % SOFTWARE.
 %
 
-function test_trnsport(cfg)
+function success = test_trnsport(cfg)
     t = GAMSTest('GAMSTransfer/trnsport');
 
     geps = GAMSTransfer.SpecialValues.EPS;
@@ -587,5 +587,6 @@ function test_trnsport(cfg)
         end
     end
 
-    t.summary();
+    [~, n_fails] = t.summary();
+    success = n_fails == 0;
 end

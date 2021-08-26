@@ -23,12 +23,13 @@
 % SOFTWARE.
 %
 
-function test_idx_readwrite(cfg)
+function success = test_idx_readwrite(cfg)
     t = GAMSTest('GAMSTransfer/idx_readwrite');
     test_idx_read(t, cfg);
     test_idx_readSpecialValues(t, cfg);
     test_idx_readWrite(t, cfg);
-    t.summary();
+    [~, n_fails] = t.summary();
+    success = n_fails == 0;
 end
 
 function test_idx_read(t, cfg)

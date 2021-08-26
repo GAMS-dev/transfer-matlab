@@ -23,14 +23,15 @@
 % SOFTWARE.
 %
 
-function test_container(cfg)
+function success = test_container(cfg)
     t = GAMSTest('GAMSTransfer/container');
     test_getlist(t, cfg);
     test_describe(t, cfg);
     test_idx_describe(t, cfg);
     test_remove(t, cfg);
     test_universalset(t, cfg);
-    t.summary();
+    [~, n_fails] = t.summary();
+    success = n_fails == 0;
 end
 
 function test_getlist(t, cfg)
