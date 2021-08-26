@@ -23,14 +23,15 @@
 % SOFTWARE.
 %
 
-function test_idx_symbols(cfg)
+function success = test_idx_symbols(cfg)
     t = GAMSTest('GAMSTransfer/idx_symbols');
     test_idx_addSymbols(t, cfg);
     test_idx_changeSymbol(t, cfg);
     test_idx_setRecords(t, cfg);
     test_idx_writeUnordered(t, cfg);
     test_idx_transformRecords(t, cfg);
-    t.summary();
+    [~, n_fails] = t.summary();
+    success = n_fails == 0;
 end
 
 function test_idx_addSymbols(t, cfg)

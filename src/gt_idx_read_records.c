@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "mex.h"
 
@@ -147,7 +148,7 @@ void mexFunction(
 
         /* get domain information */
         for (size_t j = 0; j < dim; j++)
-            sprintf(domains_ptr[j], "dim_%zu", j+1);
+            sprintf(domains_ptr[j], "dim_%d", (int) j+1);
         for (size_t j = 0; j < GLOBAL_MAX_INDEX_DIM; j++)
             mx_dom_nrecs[j] = 1;
         for (size_t j = 0; j < dim; j++)

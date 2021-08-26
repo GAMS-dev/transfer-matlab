@@ -23,7 +23,7 @@
 % SOFTWARE.
 %
 
-function test_symbols(cfg)
+function success = test_symbols(cfg)
     t = GAMSTest('GAMSTransfer/symbols');
     test_addSymbols(t, cfg);
     test_changeSymbol(t, cfg);
@@ -33,7 +33,8 @@ function test_symbols(cfg)
     test_writeUnordered(t, cfg);
     test_reorder(t, cfg);
     test_transformRecords(t, cfg);
-    t.summary();
+    [~, n_fails] = t.summary();
+    success = n_fails == 0;
 end
 
 function test_addSymbols(t, cfg)

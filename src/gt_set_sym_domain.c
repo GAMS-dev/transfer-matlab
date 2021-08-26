@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "mex.h"
 #include "gt_mex.h"
@@ -42,7 +43,7 @@ void mexFunction(
     int container_id;
     bool dominfo_regular, support_setget;
     size_t dim;
-    char domname[256], label[265];
+    char domname[256], label[512];
     mxArray* mx_arr_domentry = NULL;
     mxArray* mx_arr_domlabels = NULL;
     mxArray* mx_arr_size = NULL;
@@ -79,10 +80,10 @@ void mexFunction(
             /* set domain label */
             mxGetString(mx_arr_domentry, domname, 256);
             if (!strcmp(domname, "*"))
-                sprintf(label, "uni_%ld", i+1);
+                sprintf(label, "uni_%d", (int) i+1);
             else
             {
-                sprintf(label, "%s_%ld", domname, i+1);
+                sprintf(label, "%s_%d", domname, (int) i+1);
                 dominfo_regular = false;
             }
             mxSetCell(mx_arr_domlabels, i, mxCreateString(label));
@@ -123,7 +124,7 @@ void mexFunction(
                 mexErrMsgIdAndTxt(ERRID"container", "Domain set '%s' must have same container as symbol.", domname);
 
             /* set domain label */
-            sprintf(label, "%s_%ld", domname, i+1);
+            sprintf(label, "%s_%d", domname, (int) i+1);
             mxSetCell(mx_arr_domlabels, i, mxCreateString(label));
 
             /* set size */

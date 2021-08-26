@@ -23,11 +23,12 @@
 % SOFTWARE.
 %
 
-function test_uels(cfg)
+function success = test_uels(cfg)
     t = GAMSTest('GAMSTransfer/uels');
     test_uniqueelementlist(t, cfg);
     test_symbol_uels(t, cfg);
-    t.summary();
+    [~, n_fails] = t.summary();
+    success = n_fails == 0;
 end
 
 function test_uniqueelementlist(t, cfg);

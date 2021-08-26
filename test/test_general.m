@@ -23,10 +23,11 @@
 % SOFTWARE.
 %
 
-function test_general(cfg)
+function success = test_general(cfg)
     t = GAMSTest('GAMSTransfer/general');
     test_specialValues(t, cfg);
-    t.summary();
+    [~, n_fails] = t.summary();
+    success = n_fails == 0;
 end
 
 function test_specialValues(t, cfg)

@@ -37,6 +37,8 @@ function gams_transfer_test(varargin)
         ~strcmpi(x, 'working_dir') && ~strcmpi(x, 'system_dir');
     addParameter(p, 'working_dir', tempname, is_string_char);
     addParameter(p, 'system_dir', find_gams(), is_string_char);
+    addParameter(p, 'exit_on_fail', false, @islogical);
+    addParameter(p, 'license', '', is_string_char);
     parse(p, varargin{:});
     if strcmp(p.Results.system_dir, '')
         error('GAMS system directory not found.');
@@ -51,61 +53,62 @@ function gams_transfer_test(varargin)
     olddir = cd(working_dir);
 
     tic;
+    success = true;
 
     try
         % test data
         cfg = struct();
         cfg.working_dir = working_dir;
         cfg.system_dir = system_dir;
-        cfg.filenames = gams_transfer_test_create_gdx(cfg.system_dir, cfg.working_dir);
+        cfg.filenames = gams_transfer_test_create_gdx(cfg.system_dir, cfg.working_dir, p.Results.license);
         features = GAMSTransfer.Utils.checkFeatureSupport();
 
         % run tests
-        test_general(cfg);
+        success = success & test_general(cfg);
 
         disp('Configuration: default');
         cfg.features = features;
-        test_container(cfg);
-        test_uels(cfg);
-        test_symbols(cfg);
-        test_readwrite(cfg);
-        test_idx_symbols(cfg);
-        test_idx_readwrite(cfg);
-        test_trnsport(cfg);
+        success = success & test_container(cfg);
+        success = success & test_uels(cfg);
+        success = success & test_symbols(cfg);
+        success = success & test_readwrite(cfg);
+        success = success & test_idx_symbols(cfg);
+        success = success & test_idx_readwrite(cfg);
+        success = success & test_trnsport(cfg);
 
         disp('Configuration: disable categorical');
         cfg.features = features;
         cfg.features.categorical = false;
-        test_container(cfg);
-        test_uels(cfg);
-        test_symbols(cfg);
-        test_readwrite(cfg);
-        test_idx_symbols(cfg);
-        test_idx_readwrite(cfg);
-        test_trnsport(cfg);
+        success = success & test_container(cfg);
+        success = success & test_uels(cfg);
+        success = success & test_symbols(cfg);
+        success = success & test_readwrite(cfg);
+        success = success & test_idx_symbols(cfg);
+        success = success & test_idx_readwrite(cfg);
+        success = success & test_trnsport(cfg);
 
         disp('Configuration: disable table');
         cfg.features = features;
         cfg.features.table = false;
-        test_container(cfg);
-        test_uels(cfg);
-        test_symbols(cfg);
-        test_readwrite(cfg);
-        test_idx_symbols(cfg);
-        test_idx_readwrite(cfg);
-        test_trnsport(cfg);
+        success = success & test_container(cfg);
+        success = success & test_uels(cfg);
+        success = success & test_symbols(cfg);
+        success = success & test_readwrite(cfg);
+        success = success & test_idx_symbols(cfg);
+        success = success & test_idx_readwrite(cfg);
+        success = success & test_trnsport(cfg);
 
         disp('Configuration: disable table & categorical');
         cfg.features = features;
         cfg.features.table = false;
         cfg.features.categorical = false;
-        test_container(cfg);
-        test_uels(cfg);
-        test_symbols(cfg);
-        test_readwrite(cfg);
-        test_idx_symbols(cfg);
-        test_idx_readwrite(cfg);
-        test_trnsport(cfg);
+        success = success & test_container(cfg);
+        success = success & test_uels(cfg);
+        success = success & test_symbols(cfg);
+        success = success & test_readwrite(cfg);
+        success = success & test_idx_symbols(cfg);
+        success = success & test_idx_readwrite(cfg);
+        success = success & test_trnsport(cfg);
 
         cd(olddir);
         rmpath(fullfile(current_dir, 'test'));
@@ -118,9 +121,13 @@ function gams_transfer_test(varargin)
     end
 
     toc;
+
+    if p.Results.exit_on_fail && ~success
+        exit(1);
+    end
 end
 
-function gdx_filenames = gams_transfer_test_create_gdx(gams_dir, working_dir)
+function gdx_filenames = gams_transfer_test_create_gdx(gams_dir, working_dir, license)
 
     gams_data = cell(1, 6);
     gdx_filenames = cell(1, 6);
@@ -210,12 +217,19 @@ function gdx_filenames = gams_transfer_test_create_gdx(gams_dir, working_dir)
         gdx_filenames{i} = fullfile(working_dir, sprintf('data%d.gdx', i));
 
         fid = fopen(gms_filename, 'w');
+        if fid < 0
+            error('Can''t write file: %s', gms_filename);
+        end
         for j = 1:numel(gams_data{i})
             fprintf(fid, '%s\n', gams_data{i}{j});
         end
         fclose(fid);
 
-        [rc, stdout] = system([gams_exe, ' ', gms_filename]);
+        cmd = [gams_exe, ' ', gms_filename];
+        if ~isempty(license)
+            cmd = sprintf('%s license=%s', cmd, license);
+        end
+        [rc, stdout] = system(cmd);
         if rc
             disp(stdout);
             error('Can''t create GAMS test files.');

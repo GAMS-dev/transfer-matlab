@@ -75,7 +75,7 @@ classdef GAMSTest < handle
             end
         end
 
-        function summary(obj)
+        function [n_tests, n_fails] = summary(obj)
             obj.result();
             time = toc(obj.start_time);
             n_fails = 0;

@@ -23,7 +23,7 @@
 % SOFTWARE.
 %
 
-function test_readwrite(cfg)
+function success = test_readwrite(cfg)
     t = GAMSTest('GAMSTransfer/readwrite');
     test_read(t, cfg);
     test_readPartial(t, cfg);
@@ -33,7 +33,8 @@ function test_readwrite(cfg)
     test_readWrite(t, cfg);
     test_readWriteCompress(t, cfg);
     test_readWriteDomainCheck(t, cfg);
-    t.summary();
+    [~, n_fails] = t.summary();
+    success = n_fails == 0;
 end
 
 function test_read(t, cfg)
