@@ -39,11 +39,11 @@ end
 
 function test_read(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
 
     t.add('read_basic_info');
-    t.assertEquals(gdx.system_directory, cfg.system_dir);
+    t.assertEquals(gdx.gams_dir, cfg.gams_dir);
     t.assertEquals(gdx.filename, cfg.filenames{1});
     t.assert(~gdx.indexed);
     t.assert(numel(fieldnames(gdx.data)) == 5);
@@ -55,18 +55,19 @@ function test_read(t, cfg)
     t.assert(isa(s, 'GAMSTransfer.Set'));
     t.assertEquals(s.name, 'i');
     t.assertEquals(s.description, 'set_i');
-    t.assert(~s.singleton);
+    t.assert(~s.is_singleton);
     t.assert(s.dimension == 1);
     t.assert(numel(s.domain) == 1);
     t.assertEquals(s.domain{1}, '*');
     t.assert(numel(s.domain_label) == 1);
     t.assertEquals(s.domain_label{1}, 'uni_1');
-    t.assertEquals(s.domain_info, 'regular');
+    t.assertEquals(s.domain_info, 'none');
     t.assert(numel(s.size) == 1);
     t.assert(isnan(s.size(1)));
+    t.assert(isnan(s.getCardenality()));
     t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
-    t.assert(s.getNumRecords() == 5);
+    t.assert(s.getNumberRecords() == 5);
     t.assert(~s.isValid());
 
     t.add('read_scalar_basic');
@@ -79,11 +80,12 @@ function test_read(t, cfg)
     t.assert(s.dimension == 0);
     t.assert(numel(s.domain) == 0);
     t.assert(numel(s.domain_label) == 0);
-    t.assertEquals(s.domain_info, 'regular');
+    t.assertEquals(s.domain_info, 'none');
     t.assert(numel(s.size) == 0);
+    t.assert(s.getCardenality() == 1);
     t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
-    t.assert(s.getNumRecords() == 1);
+    t.assert(s.getNumberRecords() == 1);
     t.assert(~s.isValid());
 
     t.add('read_parameter_basic');
@@ -102,9 +104,10 @@ function test_read(t, cfg)
     t.assertEquals(s.domain_info, 'regular');
     t.assert(numel(s.size) == 1);
     t.assert(s.size(1) == 5);
+    t.assert(s.getCardenality() == 5);
     t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
-    t.assert(s.getNumRecords() == 3);
+    t.assert(s.getNumberRecords() == 3);
     t.assert(~s.isValid());
 
     t.add('read_variable_basic');
@@ -128,9 +131,10 @@ function test_read(t, cfg)
     t.assert(numel(s.size) == 2);
     t.assert(s.size(1) == 5);
     t.assert(s.size(2) == 5);
+    t.assert(s.getCardenality() == 25);
     t.assert(isnan(s.getSparsity()));
     t.assert(strcmp(s.format, 'not_read'));
-    t.assert(s.getNumRecords() == 6);
+    t.assert(s.getNumberRecords() == 6);
     t.assert(~s.isValid());
 
     gdx.read('format', 'struct');
@@ -144,8 +148,8 @@ function test_read(t, cfg)
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'uni_1'));
     t.assert(isfield(s.records, 'text'));
-    t.assert(numel(s.records.uni_1) == s.getNumRecords());
-    t.assert(numel(s.records.text) == s.getNumRecords());
+    t.assert(numel(s.records.uni_1) == s.getNumberRecords());
+    t.assert(numel(s.records.text) == s.getNumberRecords());
     if gdx.features.categorical
         t.assertEquals(s.records.uni_1(1), 'i1');
         t.assertEquals(s.records.uni_1(2), 'i3');
@@ -187,7 +191,7 @@ function test_read(t, cfg)
     t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.value) == s.getNumRecords());
+    t.assert(numel(s.records.value) == s.getNumberRecords());
     t.assert(s.records.value == 4);
 
     t.add('read_parameter_records_struct');
@@ -199,8 +203,8 @@ function test_read(t, cfg)
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'i_1'));
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.i_1) == s.getNumRecords());
-    t.assert(numel(s.records.value) == s.getNumRecords());
+    t.assert(numel(s.records.i_1) == s.getNumberRecords());
+    t.assert(numel(s.records.value) == s.getNumberRecords());
     if gdx.features.categorical
         t.assertEquals(s.records.i_1(1), 'i1');
         t.assertEquals(s.records.i_1(2), 'i3');
@@ -233,13 +237,13 @@ function test_read(t, cfg)
     t.assert(isfield(s.records, 'lower'));
     t.assert(isfield(s.records, 'upper'));
     t.assert(isfield(s.records, 'scale'));
-    t.assert(numel(s.records.i_1) == s.getNumRecords());
-    t.assert(numel(s.records.j_2) == s.getNumRecords());
-    t.assert(numel(s.records.level) == s.getNumRecords());
-    t.assert(numel(s.records.marginal) == s.getNumRecords());
-    t.assert(numel(s.records.lower) == s.getNumRecords());
-    t.assert(numel(s.records.upper) == s.getNumRecords());
-    t.assert(numel(s.records.scale) == s.getNumRecords());
+    t.assert(numel(s.records.i_1) == s.getNumberRecords());
+    t.assert(numel(s.records.j_2) == s.getNumberRecords());
+    t.assert(numel(s.records.level) == s.getNumberRecords());
+    t.assert(numel(s.records.marginal) == s.getNumberRecords());
+    t.assert(numel(s.records.lower) == s.getNumberRecords());
+    t.assert(numel(s.records.upper) == s.getNumberRecords());
+    t.assert(numel(s.records.scale) == s.getNumberRecords());
     if gdx.features.categorical
         t.assertEquals(s.records.i_1(1), 'i1');
         t.assertEquals(s.records.i_1(2), 'i3');
@@ -324,8 +328,8 @@ function test_read(t, cfg)
         t.assert(numel(s.records.Properties.VariableNames) == 2);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'uni_1');
         t.assertEquals(s.records.Properties.VariableNames{2}, 'text');
-        t.assert(numel(s.records.uni_1) == s.getNumRecords());
-        t.assert(numel(s.records.text) == s.getNumRecords());
+        t.assert(numel(s.records.uni_1) == s.getNumberRecords());
+        t.assert(numel(s.records.text) == s.getNumberRecords());
         if gdx.features.categorical
             t.assertEquals(s.records.uni_1(1), 'i1');
             t.assertEquals(s.records.uni_1(2), 'i3');
@@ -368,7 +372,7 @@ function test_read(t, cfg)
         t.assert(s.isValid());
         t.assert(numel(s.records.Properties.VariableNames) == 1);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'value');
-        t.assert(numel(s.records.value) == s.getNumRecords());
+        t.assert(numel(s.records.value) == s.getNumberRecords());
         t.assert(s.records.value == 4);
 
         t.add('read_parameter_records_table');
@@ -380,8 +384,8 @@ function test_read(t, cfg)
         t.assert(numel(s.records.Properties.VariableNames) == 2);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'i_1');
         t.assertEquals(s.records.Properties.VariableNames{2}, 'value');
-        t.assert(numel(s.records.i_1) == s.getNumRecords());
-        t.assert(numel(s.records.value) == s.getNumRecords());
+        t.assert(numel(s.records.i_1) == s.getNumberRecords());
+        t.assert(numel(s.records.value) == s.getNumberRecords());
         if gdx.features.categorical
             t.assertEquals(s.records.i_1(1), 'i1');
             t.assertEquals(s.records.i_1(2), 'i3');
@@ -414,13 +418,13 @@ function test_read(t, cfg)
         t.assertEquals(s.records.Properties.VariableNames{5}, 'lower');
         t.assertEquals(s.records.Properties.VariableNames{6}, 'upper');
         t.assertEquals(s.records.Properties.VariableNames{7}, 'scale');
-        t.assert(numel(s.records.i_1) == s.getNumRecords());
-        t.assert(numel(s.records.j_2) == s.getNumRecords());
-        t.assert(numel(s.records.level) == s.getNumRecords());
-        t.assert(numel(s.records.marginal) == s.getNumRecords());
-        t.assert(numel(s.records.lower) == s.getNumRecords());
-        t.assert(numel(s.records.upper) == s.getNumRecords());
-        t.assert(numel(s.records.scale) == s.getNumRecords());
+        t.assert(numel(s.records.i_1) == s.getNumberRecords());
+        t.assert(numel(s.records.j_2) == s.getNumberRecords());
+        t.assert(numel(s.records.level) == s.getNumberRecords());
+        t.assert(numel(s.records.marginal) == s.getNumberRecords());
+        t.assert(numel(s.records.lower) == s.getNumberRecords());
+        t.assert(numel(s.records.upper) == s.getNumberRecords());
+        t.assert(numel(s.records.scale) == s.getNumberRecords());
         if gdx.features.categorical
             t.assertEquals(s.records.i_1(1), 'i1');
             t.assertEquals(s.records.i_1(2), 'i3');
@@ -505,8 +509,8 @@ function test_read(t, cfg)
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'uni_1'));
     t.assert(isfield(s.records, 'text'));
-    t.assert(numel(s.records.uni_1) == s.getNumRecords());
-    t.assert(numel(s.records.text) == s.getNumRecords());
+    t.assert(numel(s.records.uni_1) == s.getNumberRecords());
+    t.assert(numel(s.records.text) == s.getNumberRecords());
     if gdx.features.categorical
         t.assertEquals(s.records.uni_1(1), 'i1');
         t.assertEquals(s.records.uni_1(2), 'i3');
@@ -549,7 +553,7 @@ function test_read(t, cfg)
     t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.value) == s.getNumRecords());
+    t.assert(numel(s.records.value) == s.getNumberRecords());
     t.assert(s.records.value == 4);
 
     t.add('read_parameter_records_dense_matrix');
@@ -560,8 +564,8 @@ function test_read(t, cfg)
     t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.value) == gdx.data.i.getNumRecords());
-    t.assert(size(s.records.value, 1) == gdx.data.i.getNumRecords());
+    t.assert(numel(s.records.value) == gdx.data.i.getNumberRecords());
+    t.assert(size(s.records.value, 1) == gdx.data.i.getNumberRecords());
     t.assert(size(s.records.value, 2) == 1);
     t.assert(s.records.value(1) == 1);
     t.assert(s.records.value(2) == 3);
@@ -588,21 +592,21 @@ function test_read(t, cfg)
     t.assert(isfield(s.records, 'lower'));
     t.assert(isfield(s.records, 'upper'));
     t.assert(isfield(s.records, 'scale'));
-    t.assert(numel(s.records.level) == gdx.data.i.getNumRecords() * gdx.data.j.getNumRecords());
-    t.assert(numel(s.records.marginal) == gdx.data.i.getNumRecords() * gdx.data.j.getNumRecords());
-    t.assert(numel(s.records.lower) == gdx.data.i.getNumRecords() * gdx.data.j.getNumRecords());
-    t.assert(numel(s.records.upper) == gdx.data.i.getNumRecords() * gdx.data.j.getNumRecords());
-    t.assert(numel(s.records.scale) == gdx.data.i.getNumRecords() * gdx.data.j.getNumRecords());
-    t.assert(size(s.records.level, 1) == gdx.data.i.getNumRecords());
-    t.assert(size(s.records.level, 2) == gdx.data.j.getNumRecords());
-    t.assert(size(s.records.marginal, 1) == gdx.data.i.getNumRecords());
-    t.assert(size(s.records.marginal, 2) == gdx.data.j.getNumRecords());
-    t.assert(size(s.records.lower, 1) == gdx.data.i.getNumRecords());
-    t.assert(size(s.records.lower, 2) == gdx.data.j.getNumRecords());
-    t.assert(size(s.records.upper, 1) == gdx.data.i.getNumRecords());
-    t.assert(size(s.records.upper, 2) == gdx.data.j.getNumRecords());
-    t.assert(size(s.records.scale, 1) == gdx.data.i.getNumRecords());
-    t.assert(size(s.records.scale, 2) == gdx.data.j.getNumRecords());
+    t.assert(numel(s.records.level) == gdx.data.i.getNumberRecords() * gdx.data.j.getNumberRecords());
+    t.assert(numel(s.records.marginal) == gdx.data.i.getNumberRecords() * gdx.data.j.getNumberRecords());
+    t.assert(numel(s.records.lower) == gdx.data.i.getNumberRecords() * gdx.data.j.getNumberRecords());
+    t.assert(numel(s.records.upper) == gdx.data.i.getNumberRecords() * gdx.data.j.getNumberRecords());
+    t.assert(numel(s.records.scale) == gdx.data.i.getNumberRecords() * gdx.data.j.getNumberRecords());
+    t.assert(size(s.records.level, 1) == gdx.data.i.getNumberRecords());
+    t.assert(size(s.records.level, 2) == gdx.data.j.getNumberRecords());
+    t.assert(size(s.records.marginal, 1) == gdx.data.i.getNumberRecords());
+    t.assert(size(s.records.marginal, 2) == gdx.data.j.getNumberRecords());
+    t.assert(size(s.records.lower, 1) == gdx.data.i.getNumberRecords());
+    t.assert(size(s.records.lower, 2) == gdx.data.j.getNumberRecords());
+    t.assert(size(s.records.upper, 1) == gdx.data.i.getNumberRecords());
+    t.assert(size(s.records.upper, 2) == gdx.data.j.getNumberRecords());
+    t.assert(size(s.records.scale, 1) == gdx.data.i.getNumberRecords());
+    t.assert(size(s.records.scale, 2) == gdx.data.j.getNumberRecords());
     t.assert(s.records.level(1,1) == 2);
     t.assert(s.records.level(2,4) == 0);
     t.assert(s.records.level(2,5) == 9);
@@ -674,8 +678,8 @@ function test_read(t, cfg)
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'uni_1'));
     t.assert(isfield(s.records, 'text'));
-    t.assert(numel(s.records.uni_1) == s.getNumRecords());
-    t.assert(numel(s.records.text) == s.getNumRecords());
+    t.assert(numel(s.records.uni_1) == s.getNumberRecords());
+    t.assert(numel(s.records.text) == s.getNumberRecords());
     if gdx.features.categorical
         t.assertEquals(s.records.uni_1(1), 'i1');
         t.assertEquals(s.records.uni_1(2), 'i3');
@@ -730,10 +734,10 @@ function test_read(t, cfg)
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(issparse(s.records.value));
-    t.assert(numel(s.records.value) == gdx.data.i.getNumRecords());
-    t.assert(size(s.records.value, 1) == gdx.data.i.getNumRecords());
+    t.assert(numel(s.records.value) == gdx.data.i.getNumberRecords());
+    t.assert(size(s.records.value, 1) == gdx.data.i.getNumberRecords());
     t.assert(size(s.records.value, 2) == 1);
-    t.assert(nnz(s.records.value) == s.getNumValues());
+    t.assert(nnz(s.records.value) == s.getNumberValues());
     t.assert(s.records.value(1) == 1);
     t.assert(s.records.value(2) == 3);
     t.assert(s.records.value(3) == 0);
@@ -764,23 +768,23 @@ function test_read(t, cfg)
     t.assert(issparse(s.records.lower));
     t.assert(issparse(s.records.upper));
     t.assert(issparse(s.records.scale));
-    t.assert(numel(s.records.level) == gdx.data.i.getNumRecords() * gdx.data.j.getNumRecords());
-    t.assert(numel(s.records.marginal) == gdx.data.i.getNumRecords() * gdx.data.j.getNumRecords());
-    t.assert(numel(s.records.lower) == gdx.data.i.getNumRecords() * gdx.data.j.getNumRecords());
-    t.assert(numel(s.records.upper) == gdx.data.i.getNumRecords() * gdx.data.j.getNumRecords());
-    t.assert(numel(s.records.scale) == gdx.data.i.getNumRecords() * gdx.data.j.getNumRecords());
-    t.assert(size(s.records.level, 1) == gdx.data.i.getNumRecords());
-    t.assert(size(s.records.level, 2) == gdx.data.j.getNumRecords());
-    t.assert(size(s.records.marginal, 1) == gdx.data.i.getNumRecords());
-    t.assert(size(s.records.marginal, 2) == gdx.data.j.getNumRecords());
-    t.assert(size(s.records.lower, 1) == gdx.data.i.getNumRecords());
-    t.assert(size(s.records.lower, 2) == gdx.data.j.getNumRecords());
-    t.assert(size(s.records.upper, 1) == gdx.data.i.getNumRecords());
-    t.assert(size(s.records.upper, 2) == gdx.data.j.getNumRecords());
-    t.assert(size(s.records.scale, 1) == gdx.data.i.getNumRecords());
-    t.assert(size(s.records.scale, 2) == gdx.data.j.getNumRecords());
+    t.assert(numel(s.records.level) == gdx.data.i.getNumberRecords() * gdx.data.j.getNumberRecords());
+    t.assert(numel(s.records.marginal) == gdx.data.i.getNumberRecords() * gdx.data.j.getNumberRecords());
+    t.assert(numel(s.records.lower) == gdx.data.i.getNumberRecords() * gdx.data.j.getNumberRecords());
+    t.assert(numel(s.records.upper) == gdx.data.i.getNumberRecords() * gdx.data.j.getNumberRecords());
+    t.assert(numel(s.records.scale) == gdx.data.i.getNumberRecords() * gdx.data.j.getNumberRecords());
+    t.assert(size(s.records.level, 1) == gdx.data.i.getNumberRecords());
+    t.assert(size(s.records.level, 2) == gdx.data.j.getNumberRecords());
+    t.assert(size(s.records.marginal, 1) == gdx.data.i.getNumberRecords());
+    t.assert(size(s.records.marginal, 2) == gdx.data.j.getNumberRecords());
+    t.assert(size(s.records.lower, 1) == gdx.data.i.getNumberRecords());
+    t.assert(size(s.records.lower, 2) == gdx.data.j.getNumberRecords());
+    t.assert(size(s.records.upper, 1) == gdx.data.i.getNumberRecords());
+    t.assert(size(s.records.upper, 2) == gdx.data.j.getNumberRecords());
+    t.assert(size(s.records.scale, 1) == gdx.data.i.getNumberRecords());
+    t.assert(size(s.records.scale, 2) == gdx.data.j.getNumberRecords());
     t.assert(nnz(s.records.level) + nnz(s.records.marginal) + nnz(s.records.lower) + ...
-        nnz(s.records.upper) + nnz(s.records.scale) == s.getNumValues());
+        nnz(s.records.upper) + nnz(s.records.scale) == s.getNumberValues());
     t.assert(s.records.level(1,1) == 2);
     t.assert(s.records.level(2,4) == 0);
     t.assert(s.records.level(2,5) == 9);
@@ -844,12 +848,12 @@ end
 
 function test_readPartial(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     gdx.read('format', 'struct', 'symbols', {'i', 'j', 'x'}, 'values', {'level', 'marginal'});
 
     t.add('read_partial_basic_info');
-    t.assertEquals(gdx.system_directory, cfg.system_dir);
+    t.assertEquals(gdx.gams_dir, cfg.gams_dir);
     t.assertEquals(gdx.filename, cfg.filenames{1});
     t.assert(~gdx.indexed);
     t.assert(numel(fieldnames(gdx.data)) == 5);
@@ -870,8 +874,8 @@ function test_readPartial(t, cfg)
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'uni_1'));
     t.assert(isfield(s.records, 'text'));
-    t.assert(numel(s.records.uni_1) == s.getNumRecords());
-    t.assert(numel(s.records.text) == s.getNumRecords());
+    t.assert(numel(s.records.uni_1) == s.getNumberRecords());
+    t.assert(numel(s.records.text) == s.getNumberRecords());
     if gdx.features.categorical
         t.assertEquals(s.records.uni_1(1), 'i1');
         t.assertEquals(s.records.uni_1(2), 'i3');
@@ -913,10 +917,10 @@ function test_readPartial(t, cfg)
     t.assert(~isfield(s.records, 'lower'));
     t.assert(~isfield(s.records, 'upper'));
     t.assert(~isfield(s.records, 'scale'));
-    t.assert(numel(s.records.i_1) == s.getNumRecords());
-    t.assert(numel(s.records.j_2) == s.getNumRecords());
-    t.assert(numel(s.records.level) == s.getNumRecords());
-    t.assert(numel(s.records.marginal) == s.getNumRecords());
+    t.assert(numel(s.records.i_1) == s.getNumberRecords());
+    t.assert(numel(s.records.j_2) == s.getNumberRecords());
+    t.assert(numel(s.records.level) == s.getNumberRecords());
+    t.assert(numel(s.records.marginal) == s.getNumberRecords());
     if gdx.features.categorical
         t.assertEquals(s.records.i_1(1), 'i1');
         t.assertEquals(s.records.i_1(2), 'i3');
@@ -974,9 +978,9 @@ function test_readPartial(t, cfg)
     t.assert(~isfield(s.records, 'lower'));
     t.assert(~isfield(s.records, 'upper'));
     t.assert(~isfield(s.records, 'scale'));
-    t.assert(numel(s.records.i_1) == s.getNumRecords());
-    t.assert(numel(s.records.j_2) == s.getNumRecords());
-    t.assert(numel(s.records.marginal) == s.getNumRecords());
+    t.assert(numel(s.records.i_1) == s.getNumberRecords());
+    t.assert(numel(s.records.j_2) == s.getNumberRecords());
+    t.assert(numel(s.records.marginal) == s.getNumberRecords());
     t.assert(s.records.marginal(1) == 0);
     t.assert(s.records.marginal(2) == 8);
     t.assert(s.records.marginal(3) == 0);
@@ -987,8 +991,8 @@ end
 
 function test_readSpecialValues(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{2}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{2}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     gdx.read('format', 'struct');
 
     t.add('read_special_values');
@@ -1009,16 +1013,16 @@ function test_readSpecialValues(t, cfg)
     t.assert(isstruct(gdx.data.GEps.records));
     t.assert(isnan(gdx.data.GUndef.records.value));
     t.assert(isnan(gdx.data.GNA.records.value));
-    t.assert(GAMSTransfer.SpecialValues.isna(gdx.data.GNA.records.value));
+    t.assert(GAMSTransfer.SpecialValues.isNa(gdx.data.GNA.records.value));
     t.assert(gdx.data.GPInf.records.value == Inf);
     t.assert(gdx.data.GMInf.records.value == -Inf);
     t.assert(gdx.data.GEps.records.value == 0);
-    t.assert(GAMSTransfer.SpecialValues.iseps(gdx.data.GEps.records.value));
+    t.assert(GAMSTransfer.SpecialValues.isEps(gdx.data.GEps.records.value));
 end
 
 function test_readAcronyms(t, cfg);
-    gdx = GAMSTransfer.Container(cfg.filenames{6}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{6}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
 
     t.add('read_acronyms_1');
     stdout = evalc("gdx.read('format', 'struct');");
@@ -1034,16 +1038,16 @@ function test_readAcronyms(t, cfg);
     t.assert(gdx.data.a.isValid());
     t.assert(numel(gdx.data.a.records.value) == 3);
     t.assert(gdx.data.a.records.value(1) == 1);
-    t.assert(GAMSTransfer.SpecialValues.isna(gdx.data.a.records.value(2)));
-    t.assert(GAMSTransfer.SpecialValues.isna(gdx.data.a.records.value(3)));
+    t.assert(GAMSTransfer.SpecialValues.isNa(gdx.data.a.records.value(2)));
+    t.assert(GAMSTransfer.SpecialValues.isNa(gdx.data.a.records.value(3)));
     warning('on');
 
 end
 
 function test_readSymbolTypes(t, cfg);
 
-    gdx = GAMSTransfer.Container(cfg.filenames{3}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{3}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
 
     t.add('read_symbol_types_vartypes');
     t.assert(isfield(gdx.data, 'x1'));
@@ -1166,35 +1170,35 @@ end
 function test_readWrite(t, cfg)
 
     for i = [1,2,5]
-        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'system_directory', ...
-            cfg.system_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
-        gdxdump = fullfile(cfg.system_dir, 'gdxdump');
+        gdxdump = fullfile(cfg.gams_dir, 'gdxdump');
 
         t.add(sprintf('read_write_struct_%d', i));
         gdx.read('format', 'struct');
         gdx.write(write_filename);
-        t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+        t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         if gdx.features.table
             t.add(sprintf('read_write_table_%d', i));
             gdx.read('format', 'table');
             gdx.write(write_filename);
-            t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+            t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
             t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
         end
 
         t.add(sprintf('read_write_dense_matrix_%d', i));
         gdx.read('format', 'dense_matrix');
         gdx.write(write_filename);
-        t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+        t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         t.add(sprintf('read_write_sparse_matrix_%d', i));
         gdx.read('format', 'sparse_matrix');
         gdx.write(write_filename);
-        t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+        t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
     end
 end
@@ -1202,35 +1206,35 @@ end
 function test_readWriteCompress(t, cfg)
 
     for i = [1,2,5]
-        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'system_directory', ...
-            cfg.system_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
-        gdxdump = fullfile(cfg.system_dir, 'gdxdump');
+        gdxdump = fullfile(cfg.gams_dir, 'gdxdump');
 
         t.add(sprintf('read_write_struct_%d', i));
         gdx.read('format', 'struct');
         gdx.write(write_filename, 'compress', true);
-        t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+        t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         if gdx.features.table
             t.add(sprintf('read_write_table_%d', i));
             gdx.read('format', 'table');
             gdx.write(write_filename, 'compress', true);
-            t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+            t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
             t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
         end
 
         t.add(sprintf('read_write_dense_matrix_%d', i));
         gdx.read('format', 'dense_matrix');
         gdx.write(write_filename, 'compress', true);
-        t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+        t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         t.add(sprintf('read_write_sparse_matrix_%d', i));
         gdx.read('format', 'sparse_matrix');
         gdx.write(write_filename, 'compress', true);
-        t.testGdxDiff(cfg.system_dir, cfg.filenames{i}, write_filename);
+        t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
     end
 end
@@ -1240,19 +1244,19 @@ function test_readWriteDomainCheck(t, cfg)
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     t.add('read_write_domain_check_regular');
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     gdx.read();
     t.assertEquals(gdx.data.x.domain_info, 'regular');
     gdx.write(write_filename);
-    gdx2 = GAMSTransfer.Container(write_filename, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    gdx2 = GAMSTransfer.Container(write_filename, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     gdx2.read();
     t.assertEquals(gdx2.data.x.domain_info, 'regular');
 
     t.add('read_write_domain_check_relaxed_1');
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     gdx.read();
     t.assertEquals(gdx.data.x.domain_info, 'regular');
     x = gdx.data.x;
@@ -1260,8 +1264,8 @@ function test_readWriteDomainCheck(t, cfg)
     x.domain{2} = 'j';
     t.assertEquals(gdx.data.x.domain_info, 'relaxed');
     gdx.write(write_filename);
-    gdx2 = GAMSTransfer.Container(write_filename, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    gdx2 = GAMSTransfer.Container(write_filename, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     gdx2.read();
     t.assertEquals(gdx2.data.x.domain_info, 'relaxed');
     x = gdx2.data.x;
@@ -1269,14 +1273,14 @@ function test_readWriteDomainCheck(t, cfg)
     x.domain{2} = gdx2.data.j;
     t.assertEquals(gdx2.data.x.domain_info, 'regular');
     gdx2.write(write_filename);
-    gdx = GAMSTransfer.Container(write_filename, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(write_filename, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     gdx.read();
     t.assertEquals(gdx.data.x.domain_info, 'regular');
 
     t.add('read_write_domain_check_relaxed_2');
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     gdx.read('format', 'struct');
     t.assertEquals(gdx.data.x.domain_info, 'regular');
     records = gdx.data.x.records;
@@ -1297,8 +1301,8 @@ function test_readWriteDomainCheck(t, cfg)
     x.initUELs(2, uels2);
     t.assertEquals(gdx.data.x.domain_info, 'relaxed');
     gdx.write(write_filename);
-    gdx2 = GAMSTransfer.Container(write_filename, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    gdx2 = GAMSTransfer.Container(write_filename, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     gdx2.read();
     t.assertEquals(gdx2.data.x.domain_info, 'relaxed');
 

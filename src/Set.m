@@ -19,8 +19,8 @@ classdef Set < GAMSTransfer.Symbol
     %   Set records, e.g. a list of strings. Default is [].
     % - description: string
     %   Description of symbol. Default is ''.
-    % - singleton: logical
-    %   Indicates if set is a singleton set (true) or not (false). Default is false.
+    % - is_singleton: logical
+    %   Indicates if set is a is_singleton set (true) or not (false). Default is false.
     %
     % Example:
     % c = Container();
@@ -65,8 +65,8 @@ classdef Set < GAMSTransfer.Symbol
     end
 
     properties
-        % singleton indicator if Set is singleton
-        singleton
+        % is_singleton indicator if Set is is_singleton
+        is_singleton
     end
 
     properties (Hidden, Constant)
@@ -87,7 +87,7 @@ classdef Set < GAMSTransfer.Symbol
             is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
             is_parname = @(x) strcmpi(x, 'records') || strcmpi(x, 'description') || ...
                 strcmpi(x, 'read_entry') || strcmpi(x, 'read_number_records') || ...
-                strcmpi(x, 'singleton');
+                strcmpi(x, 'is_singleton');
 
             % check optional arguments
             i = 1;
@@ -117,7 +117,7 @@ classdef Set < GAMSTransfer.Symbol
             description = '';
             read_entry = nan;
             read_number_records = nan;
-            singleton = false;
+            is_singleton = false;
             while i < nargin - 2
                 if strcmpi(varargin{i}, 'records')
                     records = varargin{i+1};
@@ -127,8 +127,8 @@ classdef Set < GAMSTransfer.Symbol
                     read_entry = varargin{i+1};
                 elseif strcmpi(varargin{i}, 'read_number_records')
                     read_number_records = varargin{i+1};
-                elseif strcmpi(varargin{i}, 'singleton')
-                    singleton = varargin{i+1};
+                elseif strcmpi(varargin{i}, 'is_singleton')
+                    is_singleton = varargin{i+1};
                 else
                     error('Unknown argument name.');
                 end
@@ -147,7 +147,7 @@ classdef Set < GAMSTransfer.Symbol
             % create object
             obj = obj@GAMSTransfer.Symbol(container, name, description, domain, ...
                 records, read_entry, read_number_records);
-            obj.singleton = singleton;
+            obj.is_singleton = is_singleton;
         end
 
     end
@@ -161,6 +161,10 @@ classdef Set < GAMSTransfer.Symbol
         function set.name(obj, name)
             if ~isstring(name) && ~ischar(name)
                 error('Name must be of type ''char''.');
+            end
+            name = char(name);
+            if numel(name) >= 64
+                error('Symbol name too long. Name length must be smaller than 64.');
             end
             if strcmp(obj.name_, name)
                 return
@@ -176,19 +180,23 @@ classdef Set < GAMSTransfer.Symbol
             if ~isstring(descr) && ~ischar(descr)
                 error('Description must be of type ''char''.');
             end
-            obj.description_ = char(descr);
+            descr = char(descr);
+            if numel(descr) >= 256
+                error('Symbol description too long. Name length must be smaller than 256.');
+            end
+            obj.description_ = descr;
         end
 
-        function set.singleton(obj, singleton)
-            if ~islogical(singleton)
-                error('Singleton must be of type ''logical''.');
+        function set.is_singleton(obj, is_singleton)
+            if ~islogical(is_singleton)
+                error('is_singleton must be of type ''logical''.');
             end
-            obj.singleton = singleton;
+            obj.is_singleton = is_singleton;
         end
 
     end
 
-    methods
+    methods (Hidden)
 
         function bool = isValidAsDomain(obj)
             % Checks if set could be used as a domain of a different symbol

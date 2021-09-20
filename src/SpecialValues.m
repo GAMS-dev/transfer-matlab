@@ -48,65 +48,65 @@ classdef SpecialValues
 
     methods (Static)
 
-        function bool = isundef(value)
+        function bool = isUndef(value)
             % Checks if values are GAMS UNDEF
             %
-            % b = isundef(v) checks if the values v are GAMS UNDEF values
+            % b = isUndef(v) checks if the values v are GAMS UNDEF values
             %
             % Example:
-            % b = SpecialValues.isundef([0, 1, SpecialValues.NA, SpecialValues.UNDEF])
+            % b = SpecialValues.isUndef([0, 1, SpecialValues.NA, SpecialValues.UNDEF])
             % b equals [0, 0, 0, 1]
             %
 
             bool = isnan(value) & ~GAMSTransfer.gt_isna(value);
         end
 
-        function bool = isna(value)
+        function bool = isNa(value)
             % Checks if values are GAMS NA
             %
-            % b = isna(v) checks if the values v are GAMS NA values
+            % b = isNa(v) checks if the values v are GAMS NA values
             %
             % Example:
-            % b = SpecialValues.isna([0, 1, SpecialValues.NA, SpecialValues.UNDEF])
+            % b = SpecialValues.isNa([0, 1, SpecialValues.NA, SpecialValues.UNDEF])
             % b equals [0, 0, 1, 0]
             %
 
             bool = GAMSTransfer.gt_isna(value);
         end
 
-        function bool = iseps(value)
+        function bool = isEps(value)
             % Checks if values are GAMS EPS
             %
-            % b = iseps(v) checks if the values v are GAMS EPS values
+            % b = isEps(v) checks if the values v are GAMS EPS values
             %
             % Example:
-            % b = SpecialValues.iseps([0, 1, SpecialValues.EPS, SpecialValues.UNDEF])
+            % b = SpecialValues.isEps([0, 1, SpecialValues.EPS, SpecialValues.UNDEF])
             % b equals [0, 0, 1, 0]
             %
 
             bool = GAMSTransfer.gt_iseps(value);
         end
 
-        function bool = isposinf(value)
+        function bool = isPosInf(value)
             % Checks if values are GAMS PINF
             %
-            % b = isposinf(v) checks if the values v are GAMS POSINF values
+            % b = isPosInf(v) checks if the values v are GAMS POSINF values
             %
             % Example:
-            % b = SpecialValues.isposinf([0, 1, SpecialValues.POSINF, SpecialValues.NEGINF])
+            % b = SpecialValues.isPosInf([0, 1, SpecialValues.POSINF, SpecialValues.NEGINF])
             % b equals [0, 0, 1, 0]
             %
 
             bool = isinf(value) & value > 0;
         end
 
-        function bool = isneginf(value)
+        function bool = isNegInf(value)
             % Checks if values are GAMS MINF
             %
-            % b = isneginf(v) checks if the values v are GAMS MINF values
+            % b = isNegInf(v) checks if the values v are GAMS MINF values
             %
             % Example:
-            % b = SpecialValues.isneginf([0, 1, SpecialValues.POSINF, SpecialValues.NEGINF])
+            % b = SpecialValues.isNegInf([0, 1, SpecialValues.POSINF, SpecialValues.NEGINF])
             % b equals [0, 0, 0, 1]
             %
 

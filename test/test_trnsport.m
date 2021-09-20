@@ -30,7 +30,7 @@ function success = test_trnsport(cfg)
 
     for k = 1:3
         if k == 1
-            m = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+            m = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
                 'features', cfg.features);
             i = GAMSTransfer.Set(m, 'i', ...
                 'records', {'seattle', 'san-diego'}, ...
@@ -69,7 +69,7 @@ function success = test_trnsport(cfg)
                 'records', {[325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]}, ...
                 'description', 'satisfy demand at market j');
         elseif k == 2
-            m = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+            m = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
                 'features', cfg.features);
             i = GAMSTransfer.Set(m, 'i', 'description', 'canning plants');
             i.setRecords({'seattle', 'san-diego'});
@@ -96,7 +96,7 @@ function success = test_trnsport(cfg)
             demand = GAMSTransfer.Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
             demand.setRecords([325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]);
         elseif k == 3
-            m = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+            m = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
                 'features', cfg.features);
             i = GAMSTransfer.Set(m, 'i', 'description', 'canning plants');
             if m.features.categorical
@@ -136,13 +136,13 @@ function success = test_trnsport(cfg)
             demand.records = struct('level', [325; 300; 275], 'marginal', [0.225; 0.153; 0.126], 'lower', [325; 300; 275]);
         elseif k == 4
             m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_1.gdx'), ...
-                'system_directory', cfg.system_dir, 'features', cfg.features);
+                'gams_dir', cfg.gams_dir, 'features', cfg.features);
         elseif k == 5
             m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_2.gdx'), ...
-                'system_directory', cfg.system_dir, 'features', cfg.features);
+                'gams_dir', cfg.gams_dir, 'features', cfg.features);
         elseif k == 6
             m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_3.gdx'), ...
-                'system_directory', cfg.system_dir, 'features', cfg.features);
+                'gams_dir', cfg.gams_dir, 'features', cfg.features);
         end
 
         if k == 4 || k == 5 || k == 6
@@ -187,18 +187,18 @@ function success = test_trnsport(cfg)
         t.assert(isa(i, 'GAMSTransfer.Set'));
         t.assertEquals(i.name, 'i');
         t.assertEquals(i.description, 'canning plants');
-        t.assert(~i.singleton);
+        t.assert(~i.is_singleton);
         t.assert(i.dimension == 1);
         t.assert(numel(i.domain) == 1);
         t.assertEquals(i.domain{1}, '*');
         t.assert(numel(i.domain_label) == 1);
         t.assertEquals(i.domain_label{1}, 'uni_1');
-        t.assertEquals(i.domain_info, 'regular');
+        t.assertEquals(i.domain_info, 'none');
         t.assert(numel(i.size) == 1);
         t.assert(isnan(i.size));
         t.assert(i.isValid());
         t.assertEquals(i.format, 'struct');
-        t.assert(i.getNumRecords() == 2);
+        t.assert(i.getNumberRecords() == 2);
         t.assert(isstruct(i.records));
         t.assert(numel(fieldnames(i.records)) == 1);
         t.assert(isfield(i.records, 'uni_1'));
@@ -219,18 +219,18 @@ function success = test_trnsport(cfg)
         t.assert(isa(j, 'GAMSTransfer.Set'));
         t.assertEquals(j.name, 'j');
         t.assertEquals(j.description, 'markets');
-        t.assert(~j.singleton);
+        t.assert(~j.is_singleton);
         t.assert(j.dimension == 1);
         t.assert(numel(j.domain) == 1);
         t.assertEquals(j.domain{1}, '*');
         t.assert(numel(j.domain_label) == 1);
         t.assertEquals(j.domain_label{1}, 'uni_1');
-        t.assertEquals(j.domain_info, 'regular');
+        t.assertEquals(j.domain_info, 'none');
         t.assert(numel(j.size) == 1);
         t.assert(isnan(j.size));
         t.assert(j.isValid());
         t.assertEquals(j.format, 'struct');
-        t.assert(j.getNumRecords() == 3);
+        t.assert(j.getNumberRecords() == 3);
         t.assert(isstruct(j.records));
         t.assert(numel(fieldnames(j.records)) == 1);
         t.assert(isfield(j.records, 'uni_1'));
@@ -265,8 +265,8 @@ function success = test_trnsport(cfg)
         t.assert(a.size == 2);
         t.assert(a.isValid());
         t.assertEquals(a.format, 'dense_matrix');
-        t.assert(isnan(a.getNumRecords()));
-        t.assert(a.getNumValues() == 2);
+        t.assert(isnan(a.getNumberRecords()));
+        t.assert(a.getNumberValues() == 2);
         t.assert(isstruct(a.records));
         t.assert(numel(fieldnames(a.records)) == 1);
         t.assert(isfield(a.records, 'value'));
@@ -293,8 +293,8 @@ function success = test_trnsport(cfg)
         t.assert(b.size == 3);
         t.assert(b.isValid());
         t.assertEquals(b.format, 'dense_matrix');
-        t.assert(isnan(b.getNumRecords()));
-        t.assert(b.getNumValues() == 3);
+        t.assert(isnan(b.getNumberRecords()));
+        t.assert(b.getNumberValues() == 3);
         t.assert(isstruct(b.records));
         t.assert(numel(fieldnames(b.records)) == 1);
         t.assert(isfield(b.records, 'value'));
@@ -326,8 +326,8 @@ function success = test_trnsport(cfg)
         t.assert(all(d.size == [2,3]));
         t.assert(d.isValid());
         t.assertEquals(d.format, 'dense_matrix');
-        t.assert(isnan(d.getNumRecords()));
-        t.assert(d.getNumValues() == 6);
+        t.assert(isnan(d.getNumberRecords()));
+        t.assert(d.getNumberValues() == 6);
         t.assert(isstruct(d.records));
         t.assert(numel(fieldnames(d.records)) == 1);
         t.assert(isfield(d.records, 'value'));
@@ -355,12 +355,12 @@ function success = test_trnsport(cfg)
         t.assert(f.dimension == 0);
         t.assert(numel(f.domain) == 0);
         t.assert(numel(f.domain_label) == 0);
-        t.assertEquals(f.domain_info, 'regular');
+        t.assertEquals(f.domain_info, 'none');
         t.assert(numel(f.size) == 0);
         t.assert(f.isValid());
         t.assertEquals(f.format, 'struct');
-        t.assert(f.getNumRecords() == 1);
-        t.assert(f.getNumValues() == 1);
+        t.assert(f.getNumberRecords() == 1);
+        t.assert(f.getNumberValues() == 1);
         t.assert(isstruct(f.records));
         t.assert(numel(fieldnames(f.records)) == 1);
         t.assert(isfield(f.records, 'value'));
@@ -385,8 +385,8 @@ function success = test_trnsport(cfg)
         t.assert(all(c.size == [2,3]));
         t.assert(c.isValid());
         t.assertEquals(c.format, 'dense_matrix');
-        t.assert(isnan(c.getNumRecords()));
-        t.assert(c.getNumValues() == 6);
+        t.assert(isnan(c.getNumberRecords()));
+        t.assert(c.getNumberValues() == 6);
         t.assert(isstruct(c.records));
         t.assert(numel(fieldnames(c.records)) == 1);
         t.assert(isfield(c.records, 'value'));
@@ -425,8 +425,8 @@ function success = test_trnsport(cfg)
         t.assert(all(x.size == [2,3]));
         t.assert(x.isValid());
         t.assertEquals(x.format, 'dense_matrix');
-        t.assert(isnan(x.getNumRecords()));
-        t.assert(x.getNumValues() == 12);
+        t.assert(isnan(x.getNumberRecords()));
+        t.assert(x.getNumberValues() == 12);
         t.assert(isstruct(x.records));
         t.assert(numel(fieldnames(x.records)) == 2);
         t.assert(isfield(x.records, 'level'));
@@ -462,12 +462,12 @@ function success = test_trnsport(cfg)
         t.assert(z.dimension == 0);
         t.assert(numel(z.domain) == 0);
         t.assert(numel(z.domain_label) == 0);
-        t.assertEquals(z.domain_info, 'regular');
+        t.assertEquals(z.domain_info, 'none');
         t.assert(numel(z.size) == 0);
         t.assert(z.isValid());
         t.assertEquals(z.format, 'struct');
-        t.assert(z.getNumRecords() == 1);
-        t.assert(z.getNumValues() == 1);
+        t.assert(z.getNumberRecords() == 1);
+        t.assert(z.getNumberValues() == 1);
         t.assert(isstruct(z.records));
         t.assert(numel(fieldnames(z.records)) == 1);
         t.assert(isfield(z.records, 'level'));
@@ -481,12 +481,12 @@ function success = test_trnsport(cfg)
         t.assert(cost.dimension == 0);
         t.assert(numel(cost.domain) == 0);
         t.assert(numel(cost.domain_label) == 0);
-        t.assertEquals(cost.domain_info, 'regular');
+        t.assertEquals(cost.domain_info, 'none');
         t.assert(numel(cost.size) == 0);
         t.assert(cost.isValid());
         t.assertEquals(cost.format, 'struct');
-        t.assert(cost.getNumRecords() == 1);
-        t.assert(cost.getNumValues() == 4);
+        t.assert(cost.getNumberRecords() == 1);
+        t.assert(cost.getNumberValues() == 4);
         t.assert(isstruct(cost.records));
         t.assert(numel(fieldnames(cost.records)) == 4);
         t.assert(isfield(cost.records, 'level'));
@@ -517,8 +517,8 @@ function success = test_trnsport(cfg)
         t.assert(supply.size == 2);
         t.assert(supply.isValid());
         t.assertEquals(supply.format, 'dense_matrix');
-        t.assert(isnan(supply.getNumRecords()));
-        t.assert(supply.getNumValues() == 6);
+        t.assert(isnan(supply.getNumberRecords()));
+        t.assert(supply.getNumberValues() == 6);
         t.assert(isstruct(supply.records));
         t.assert(numel(fieldnames(supply.records)) == 3);
         t.assert(isfield(supply.records, 'level'));
@@ -529,7 +529,7 @@ function success = test_trnsport(cfg)
         t.assert(numel(supply.records.upper) == 2);
         t.assert(supply.records.level(1) == 350);
         t.assert(supply.records.level(2) == 550);
-        t.assert(GAMSTransfer.SpecialValues.iseps(supply.records.marginal(1)));
+        t.assert(GAMSTransfer.SpecialValues.isEps(supply.records.marginal(1)));
         t.assert(supply.records.marginal(2) == 0);
         t.assert(supply.records.upper(1) == 350);
         t.assert(supply.records.upper(2) == 600);
@@ -553,8 +553,8 @@ function success = test_trnsport(cfg)
         t.assert(demand.size == 3);
         t.assert(demand.isValid());
         t.assertEquals(demand.format, 'dense_matrix');
-        t.assert(isnan(demand.getNumRecords()));
-        t.assert(demand.getNumValues() == 9);
+        t.assert(isnan(demand.getNumberRecords()));
+        t.assert(demand.getNumberValues() == 9);
         t.assert(isstruct(demand.records));
         t.assert(numel(fieldnames(demand.records)) == 3);
         t.assert(isfield(demand.records, 'level'));

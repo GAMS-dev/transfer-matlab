@@ -121,13 +121,13 @@ void mexFunction(
         if (mxIsClass(mx_arr_data, "GAMSTransfer.Alias"))
         {
             gt_mex_getfield_str(mx_arr_data, data_name, "name", "", true, name, GMS_SSSIZE);
-            gt_mex_getfield_str(mx_arr_data, data_name, "aliased_with", "", true, buf, GMS_SSSIZE);
+            gt_mex_getfield_str(mx_arr_data, data_name, "alias_with", "", true, buf, GMS_SSSIZE);
             gt_gdx_addalias(gdx, name, buf);
             continue;
         }
         else if (mxIsClass(mx_arr_data, "GAMSTransfer.Set"))
         {
-            gt_mex_getfield_bool(mx_arr_data, data_name, "singleton", false, true, 1, &singleton);
+            gt_mex_getfield_bool(mx_arr_data, data_name, "is_singleton", false, true, 1, &singleton);
             type = GMS_DT_SET;
             subtype = (singleton) ? GMS_SETTYPE_SINGLETON : GMS_SETTYPE_DEFAULT;
         }

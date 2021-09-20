@@ -156,11 +156,11 @@ void gt_gdx_register_uels(
 void gt_gdx_addalias(
     gdxHandle_t     gdx,            /** GDX handle */
     const char*     name,           /** name of alias symbol */
-    const char*     aliased_with    /** text of alias symbol */
+    const char*     alias_with      /** text of alias symbol */
 )
 {
-    if (!gdxAddAlias(gdx, name, aliased_with))
-        mexErrMsgIdAndTxt(ERRID"addalias", "Symbol '%s' can't add alias: %s", name, aliased_with);
+    if (!gdxAddAlias(gdx, name, alias_with))
+        mexErrMsgIdAndTxt(ERRID"addalias", "Symbol '%s' can't add alias: %s", name, alias_with);
 }
 
 void gt_gdx_addsettext(
@@ -209,7 +209,7 @@ void gt_gdx_setdomain(
 {
     char buf[GMS_SSSIZE];
 
-    if (!strcmp(mode, "regular"))
+    if (!strcmp(mode, "regular") || !strcmp(mode, "none"))
     {
         if (!gdxSymbolSetDomain(gdx, (const char**) domains))
         {

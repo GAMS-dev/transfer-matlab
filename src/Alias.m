@@ -8,7 +8,7 @@ classdef Alias < handle
     %    GAMSTransfer container object this symbol should be stored in
     % 2. name: string
     %    name of alias
-    % 3. aliased_with: Set or Alias
+    % 3. alias_with: Set or Alias
     %    GAMS Set to be linked to
     %
     % Example:
@@ -50,8 +50,8 @@ classdef Alias < handle
     end
 
     properties
-        % aliased_with linked GAMS Set
-        aliased_with
+        % alias_with linked GAMS Set
+        alias_with
     end
 
     properties (Hidden, SetAccess = private)
@@ -66,7 +66,7 @@ classdef Alias < handle
 
     methods
 
-        function obj = Alias(container, name, aliased_with, varargin)
+        function obj = Alias(container, name, alias_with, varargin)
             % Constructs a GAMS Alias, see class help.
             %
 
@@ -79,8 +79,8 @@ classdef Alias < handle
             if ~(isstring(name) && numel(name) == 1) && ~ischar(name)
                 error('Argument ''name'' must be of type ''char''.');
             end
-            if ~isa(aliased_with, 'GAMSTransfer.Set') && ~isa(aliased_with, 'GAMSTransfer.Alias')
-                error('Argument ''aliased_with'' must be of type ''GAMSTransfer.Set'' or ''GAMSTransfer.Alias''.');
+            if ~isa(alias_with, 'GAMSTransfer.Set') && ~isa(alias_with, 'GAMSTransfer.Alias')
+                error('Argument ''alias_with'' must be of type ''GAMSTransfer.Set'' or ''GAMSTransfer.Alias''.');
             end
             if nargin == 5 && strcmpi(varargin{1}, 'read_entry')
                 read_entry = varargin{2};
@@ -92,10 +92,10 @@ classdef Alias < handle
             end
             obj.container = container;
             obj.name_ = char(name);
-            while isa(aliased_with, 'GAMSTransfer.Alias')
-                aliased_with = aliased_with.aliased_with;
+            while isa(alias_with, 'GAMSTransfer.Alias')
+                alias_with = alias_with.alias_with;
             end
-            obj.aliased_with = aliased_with;
+            obj.alias_with = alias_with;
 
             if container.indexed
                 error('Alias not allowed in indexed mode.');
@@ -113,20 +113,24 @@ classdef Alias < handle
             if ~isstring(name) && ~ischar(name)
                 error('Name must be of type ''char''.');
             end
+            name = char(name);
+            if numel(name) >= 64
+                error('Symbol name too long. Name length must be smaller than 64.');
+            end
             if strcmp(obj.name_, name)
                 return
             end
             obj.container.renameSymbol(obj.name_, name);
         end
 
-        function set.aliased_with(obj, alias)
+        function set.alias_with(obj, alias)
             if ~isa(alias, 'GAMSTransfer.Set')
                 error('Can only alias to sets.');
             end
             if obj.container.id ~= alias.container.id
                 error('Alias and aliased set must be located in same container');
             end
-            obj.aliased_with = alias;
+            obj.alias_with = alias;
         end
 
     end
@@ -162,7 +166,7 @@ classdef Alias < handle
                 return
             end
 
-            if ~obj.aliased_with.isValid()
+            if ~obj.alias_with.isValid()
                 if verbose
                     warning('Linked symbol is invalid.');
                 end

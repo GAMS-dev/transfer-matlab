@@ -8,11 +8,11 @@ classdef Equation < GAMSTransfer.Symbol
     %    GAMSTransfer container object this symbol should be stored in
     % 2. name: string
     %    Name of equation
-    %
-    % Optional Arguments:
     % 3. type: string or int
     %    Specifies the equation type, either as string or as integer given by
-    %    any of the constants in EquationType. Default is 'nonbinding'.
+    %    any of the constants in EquationType.
+    %
+    % Optional Arguments:
     % 4. domain: cell of string or Set
     %    List of domains given either as string or as reference to a Set
     %    object. Default is {} (for scalar).
@@ -25,7 +25,6 @@ classdef Equation < GAMSTransfer.Symbol
     %
     % Example:
     % c = Container();
-    % e1 = Equation(c, 'e1');
     % e2 = Equation(c, 'e2', 'l', {'*', '*'});
     % e3 = Equation(c, 'e3', EquationType.EQ, '*', 'description', 'equ e3');
     %
@@ -66,6 +65,9 @@ classdef Equation < GAMSTransfer.Symbol
 
         % type Equation type, e.g. 'leq'
         type
+
+        % default_values Equation default values
+        default_values
     end
 
     properties (Hidden, SetAccess = private)
@@ -83,7 +85,7 @@ classdef Equation < GAMSTransfer.Symbol
 
     methods
 
-        function obj = Equation(container, name, varargin)
+        function obj = Equation(container, name, etype, varargin)
             % Constructs a GAMS Equation, see class help.
             %
 
@@ -91,22 +93,23 @@ classdef Equation < GAMSTransfer.Symbol
             is_parname = @(x) strcmpi(x, 'records') || strcmpi(x, 'description') || ...
                 strcmpi(x, 'read_entry') || strcmpi(x, 'read_number_records');
 
+            % check required arguments
+            if ischar(etype) || isstring(etype)
+                etype = GAMSTransfer.EquationType.str2int(etype);
+            elseif isnumeric(etype)
+                if ~GAMSTransfer.EquationType.isValid(etype)
+                    error("Invalid variable type: %d", etype);
+                end
+            else
+                error('Equation type must be of type ''char'' or ''numeric''.');
+            end
+
             % check optional arguments
             i = 1;
-            etype = GAMSTransfer.EquationType.NONBINDING;
             domain = {};
             while true
                 term = true;
-                if i == 1 && nargin > 2
-                    if is_string_char(varargin{i}) && ~is_parname(varargin{i}) || ...
-                        isnumeric(varargin{i})
-                        etype = varargin{i};
-                        i = i + 1;
-                        term = false;
-                    elseif ~is_parname(varargin{i})
-                        error('Argument ''type'' must be ''numeric'' or ''char''.');
-                    end
-                elseif i == 2 && nargin > 3
+                if i == 1 && nargin > 3
                     if is_string_char(varargin{i}) && ~is_parname(varargin{i}) || ...
                         iscell(varargin{i}) || isa(varargin{i}, 'GAMSTransfer.Set')
                         domain = varargin{i};
@@ -119,7 +122,7 @@ classdef Equation < GAMSTransfer.Symbol
                         error('Argument ''domain'' must be ''cell'', ''Set'', or ''char''.');
                     end
                 end
-                if term || i > 2
+                if term || i > 1
                     break;
                 end
             end
@@ -129,7 +132,7 @@ classdef Equation < GAMSTransfer.Symbol
             description = '';
             read_entry = nan;
             read_number_records = nan;
-            while i < nargin - 2
+            while i < nargin - 3
                 if strcmpi(varargin{i}, 'records')
                     records = varargin{i+1};
                 elseif strcmpi(varargin{i}, 'description')
@@ -145,7 +148,7 @@ classdef Equation < GAMSTransfer.Symbol
             end
 
             % check number of arguments
-            if i <= nargin - 2
+            if i <= nargin - 3
                 error('Invalid number of arguments');
             end
 
@@ -171,6 +174,10 @@ classdef Equation < GAMSTransfer.Symbol
             if ~isstring(name) && ~ischar(name)
                 error('Name must be of type ''char''.');
             end
+            name = char(name);
+            if numel(name) >= 64
+                error('Symbol name too long. Name length must be smaller than 64.');
+            end
             if strcmp(obj.name_, name)
                 return
             end
@@ -185,7 +192,11 @@ classdef Equation < GAMSTransfer.Symbol
             if ~isstring(descr) && ~ischar(descr)
                 error('Description must be of type ''char''.');
             end
-            obj.description_ = char(descr);
+            descr = char(descr);
+            if numel(descr) >= 256
+                error('Symbol description too long. Name length must be smaller than 256.');
+            end
+            obj.description_ = descr;
         end
 
         function typ = get.type(obj)
@@ -201,28 +212,18 @@ classdef Equation < GAMSTransfer.Symbol
                 end
                 obj.type_ = typ;
             else
-                error('Variable type must be of type ''char'' or ''numeric''.');
+                error('Equation type must be of type ''char'' or ''numeric''.');
             end
         end
 
-    end
-
-    methods
-
-        function def = getDefaultValues(obj)
-            % Returns default values for given symbol type (incl. sub type)
-            %
-            % Different GAMS symbols have different default values for level,
-            % marginal, lower, upper and scale. This function returns a vector
-            % of length 5 with these default values.
-            %
-            % Example:
-            % c = Container();
-            % v = Variable(c, 'v', 'binary');
-            % v.getDefaultValues() equals [0, 0, 0, 1, 1]
-            %
-
-            def = GAMSTransfer.gt_get_defaults(obj);
+        function def = get.default_values(obj)
+            def_vals = GAMSTransfer.gt_get_defaults(obj);
+            def = struct();
+            def.level = def_vals(1);
+            def.marginal = def_vals(2);
+            def.lower = def_vals(3);
+            def.upper = def_vals(4);
+            def.scale = def_vals(5);
         end
 
     end

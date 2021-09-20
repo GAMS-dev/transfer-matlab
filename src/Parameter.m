@@ -152,6 +152,10 @@ classdef Parameter < GAMSTransfer.Symbol
             if ~isstring(name) && ~ischar(name)
                 error('Name must be of type ''char''.');
             end
+            name = char(name);
+            if numel(name) >= 64
+                error('Symbol name too long. Name length must be smaller than 64.');
+            end
             if strcmp(obj.name_, name)
                 return
             end
@@ -166,7 +170,11 @@ classdef Parameter < GAMSTransfer.Symbol
             if ~isstring(descr) && ~ischar(descr)
                 error('Description must be of type ''char''.');
             end
-            obj.description_ = char(descr);
+            descr = char(descr);
+            if numel(descr) >= 256
+                error('Symbol description too long. Name length must be smaller than 256.');
+            end
+            obj.description_ = descr;
         end
 
     end

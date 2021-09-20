@@ -45,6 +45,9 @@ classdef Symbol < handle
     end
 
     properties (Dependent, SetAccess = private)
+        % domain_names Domain names of symbol
+        domain_names
+
         % domain_label Expected domain labels in records
         domain_label
 
@@ -83,6 +86,7 @@ classdef Symbol < handle
         description_
         dimension_
         domain_
+        domain_names_
         domain_label_
         domain_info_
         size_
@@ -121,8 +125,16 @@ classdef Symbol < handle
             if ~(isstring(name) && numel(name) == 1) && ~ischar(name)
                 error('Argument ''name'' must be of type ''char''.');
             end
+            name = char(name);
+            if numel(name) >= 64
+                error('Symbol name too long. Name length must be smaller than 64.');
+            end
             if ~(isstring(description) && numel(description) == 1) && ~ischar(description)
                 error('Argument ''description'' must be of type ''char''.');
+            end
+            description = char(description);
+            if numel(description) >= 256
+                error('Symbol description too long. Name length must be smaller than 256.');
             end
             if container.indexed && ~isnumeric(domain_size)
                 error('Argument ''size'' must be of type ''numeric''.')
@@ -138,10 +150,11 @@ classdef Symbol < handle
             end
 
             obj.container = container;
-            obj.name_ = char(name);
-            obj.description_ = char(description);
+            obj.name_ = name;
+            obj.description_ = description;
 
-            % the following inits dimension_, domain_, domain_label_, domain_info_, uels
+            % the following inits dimension_, domain_, domain_names_, domain_label_,
+            % domain_info_, uels
             if container.indexed
                 obj.size = domain_size;
             else
@@ -249,6 +262,10 @@ classdef Symbol < handle
             end
         end
 
+        function domain_names = get.domain_names(obj)
+            domain_names = obj.domain_names_;
+        end
+
         function domain_label = get.domain_label(obj)
             domain_label = obj.domain_label_;
         end
@@ -284,11 +301,13 @@ classdef Symbol < handle
             obj.dimension_ = numel(sizes);
 
             % generate domain (labels)
+            obj.domain_names_ = cell(1, obj.dimension_);
             obj.domain_label_ = cell(1, obj.dimension_);
             obj.domain_ = cell(1, obj.dimension_);
             for i = 1:obj.dimension_
                 obj.domain_{i} = sprintf('dim_%d', i);
-                obj.domain_label_{i} = sprintf('dim_%d', i);
+                obj.domain_names_{i} = obj.domain_{i};
+                obj.domain_label_{i} = obj.domain_{i};
             end
 
             % determine domain info type
@@ -325,7 +344,7 @@ classdef Symbol < handle
         end
 
         function nrecs = get.number_records_c_setget_(obj)
-            nrecs = obj.getNumRecords();
+            nrecs = obj.getNumberRecords();
         end
 
     end
@@ -515,7 +534,12 @@ classdef Symbol < handle
             end
 
             try
-                def_values = obj.getDefaultValues();
+                def_vals = obj.default_values;
+                def_values(1) = def_vals.level;
+                def_values(2) = def_vals.marginal;
+                def_values(3) = def_vals.lower;
+                def_values(4) = def_vals.upper;
+                def_values(5) = def_vals.scale;
             catch
                 def_values = GAMSTransfer.SpecialValues.NA * ones(1, 5);
                 def_values(1) = 0;
@@ -933,8 +957,18 @@ classdef Symbol < handle
             if n_dense == 0
                 sparsity = NaN;
             else
-                sparsity = 1 - obj.getNumValues() / n_dense;
+                sparsity = 1 - obj.getNumberValues() / n_dense;
             end
+        end
+
+        function card = getCardenality(obj)
+            % Returns the cardenality of symbol records
+            %
+            % s = getCardenality() returns cardenality s (maximum number of
+            % values) in the symbol records.
+            %
+
+            card = prod(obj.size_);
         end
 
         function [value, where] = getMaxValue(obj, varargin)
@@ -1033,7 +1067,7 @@ classdef Symbol < handle
                 else
                     value = value + value_;
                 end
-                n = n + obj.getNumRecords();
+                n = n + obj.getNumberRecords();
             end
             switch obj.format_
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
@@ -1078,10 +1112,10 @@ classdef Symbol < handle
             end
         end
 
-        function n = getNumNa(obj, varargin)
+        function n = countNa(obj, varargin)
             % Returns the number of GAMS NA values in records
             %
-            % n = getNumNa(varargin) returns the number of GAMS NA values n in
+            % n = countNa(varargin) returns the number of GAMS NA values n in
             % records. varargin can include a list of value fields that should
             % be considered: level, value, lower, upper, scale. If none is given
             % all available for the symbol are considered.
@@ -1099,14 +1133,14 @@ classdef Symbol < handle
 
             % get count
             for i = 1:numel(values)
-                n = n + sum(GAMSTransfer.SpecialValues.isna(obj.records.(values{i})(:)));
+                n = n + sum(GAMSTransfer.SpecialValues.isNa(obj.records.(values{i})(:)));
             end
         end
 
-        function n = getNumUndef(obj, varargin)
+        function n = countUndef(obj, varargin)
             % Returns the number of GAMS UNDEF values in records
             %
-            % n = getNumUndef(varargin) returns the number of GAMS UNDEF values
+            % n = countUndef(varargin) returns the number of GAMS UNDEF values
             % n in records. varargin can include a list of value fields that
             % should be considered: level, value, lower, upper, scale. If none
             % is given all available for the symbol are considered.
@@ -1122,14 +1156,14 @@ classdef Symbol < handle
 
             % get count
             for i = 1:numel(values)
-                n = n + sum(GAMSTransfer.SpecialValues.isundef(obj.records.(values{i})(:)));
+                n = n + sum(GAMSTransfer.SpecialValues.isUndef(obj.records.(values{i})(:)));
             end
         end
 
-        function n = getNumEps(obj, varargin)
+        function n = countEps(obj, varargin)
             % Returns the number of GAMS EPS values in records
             %
-            % n = getNumEps(varargin) returns the number of GAMS EPS values n in
+            % n = countEps(varargin) returns the number of GAMS EPS values n in
             % records. varargin can include a list of value fields that should
             % be considered: level, value, lower, upper, scale. If none is given
             % all available for the symbol are considered.
@@ -1147,15 +1181,15 @@ classdef Symbol < handle
 
             % get count
             for i = 1:numel(values)
-                n = n + sum(GAMSTransfer.SpecialValues.iseps(obj.records.(values{i})(:)));
+                n = n + sum(GAMSTransfer.SpecialValues.isEps(obj.records.(values{i})(:)));
             end
         end
 
-        function n = getNumPosInf(obj, varargin)
+        function n = countPosInf(obj, varargin)
             % Returns the number of GAMS PINF (positive infinity) values in
             % records
             %
-            % n = getNumPosInf(varargin) returns the number of GAMS PINF values
+            % n = countPosInf(varargin) returns the number of GAMS PINF values
             % n in records. varargin can include a list of value fields that
             % should be considered: level, value, lower, upper, scale. If none
             % is given all available for the symbol are considered.
@@ -1171,15 +1205,15 @@ classdef Symbol < handle
 
             % get count
             for i = 1:numel(values)
-                n = n + sum(GAMSTransfer.SpecialValues.isposinf(obj.records.(values{i})(:)));
+                n = n + sum(GAMSTransfer.SpecialValues.isPosInf(obj.records.(values{i})(:)));
             end
         end
 
-        function n = getNumNegInf(obj, varargin)
+        function n = countNegInf(obj, varargin)
             % Returns the number of GAMS MINF (negative infinity) values in
             % records
             %
-            % n = getNumNegInf(varargin) returns the number of GAMS MINF values
+            % n = countNegInf(varargin) returns the number of GAMS MINF values
             % n in records. varargin can include a list of value fields that
             % should be considered: level, value, lower, upper, scale. If none
             % is given all available for the symbol are considered.
@@ -1195,15 +1229,15 @@ classdef Symbol < handle
 
             % get count
             for i = 1:numel(values)
-                n = n + sum(GAMSTransfer.SpecialValues.isneginf(obj.records.(values{i})(:)));
+                n = n + sum(GAMSTransfer.SpecialValues.isNegInf(obj.records.(values{i})(:)));
             end
         end
 
-        function nrecs = getNumRecords(obj)
+        function nrecs = getNumberRecords(obj)
             % Returns the number of GDX records (not available for matrix
             % formats)
             %
-            % n = getNumRecords() returns the number of records that would be
+            % n = getNumberRecords() returns the number of records that would be
             % stored in a GDX file if this symbol would be written to GDX. If
             % the format is 'not_read' this is the number of symbol records
             % found in the GDX file to be read. For matrix formats n is NaN.
@@ -1251,10 +1285,10 @@ classdef Symbol < handle
             obj.number_records_ = nrecs;
         end
 
-        function nvals = getNumValues(obj, varargin)
+        function nvals = getNumberValues(obj, varargin)
             % Returns the number of values stored for this symbol.
             %
-            % n = getNumValues(varargin) is the sum of values stored of the
+            % n = getNumberValues(varargin) is the sum of values stored of the
             % following fields: level, value, marginal, lower, upper, scale. The
             % number of values is the basis for the sparsity computation.
             % varargin can include a list of value fields that should be
@@ -1281,7 +1315,7 @@ classdef Symbol < handle
             case GAMSTransfer.RecordsFormat.EMPTY
                 nvals = 0;
             case {GAMSTransfer.RecordsFormat.TABLE, GAMSTransfer.RecordsFormat.STRUCT}
-                nvals = numel(values) * obj.getNumRecords();
+                nvals = numel(values) * obj.getNumberRecords();
             case GAMSTransfer.RecordsFormat.DENSE_MATRIX
                 nvals = numel(values) * prod(obj.size_);
             case GAMSTransfer.RecordsFormat.SPARSE_MATRIX
@@ -1646,7 +1680,7 @@ classdef Symbol < handle
         end
 
         function setCacheNumberRecords(obj)
-            obj.number_records_c_cache_ = obj.getNumRecords();
+            obj.number_records_c_cache_ = obj.getNumberRecords();
         end
 
     end
@@ -1934,7 +1968,7 @@ classdef Symbol < handle
                     continue
                 end
                 obj.domain_label_{i} = sprintf('%s_%d', obj.domain_{i}.name, i);
-                obj.size_(i) = obj.domain_{i}.getNumRecords();
+                obj.size_(i) = obj.domain_{i}.getNumberRecords();
             end
         end
 

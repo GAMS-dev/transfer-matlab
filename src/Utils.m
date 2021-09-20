@@ -70,10 +70,10 @@ classdef Utils
             end
         end
 
-        function system_directory = checkSystemDirectory(system_directory)
+        function gams_dir = checkGamsDirectory(gams_dir)
             % Checks if given path is a valid GAMS system directory
             %
-            % Utils.checkSystemDirectory(d) returns the given system
+            % Utils.checkGamsDirectory(d) returns the given system
             % directory, finds a system directory if none is given or raises an
             % error if the given system directory is invalid.
             %
@@ -83,11 +83,11 @@ classdef Utils
             else
                 gams_exe = 'gams';
             end
-            if strcmp(system_directory, '')
-                system_directory = GAMSTransfer.find_gams();
+            if strcmp(gams_dir, '')
+                gams_dir = GAMSTransfer.find_gams();
             end
-            if ~isfile(fullfile(system_directory, gams_exe))
-                error('Invalid GAMS system directory: %s', system_directory);
+            if ~isfile(fullfile(gams_dir, gams_exe))
+                error('Invalid GAMS system directory: %s', gams_dir);
             end
         end
 

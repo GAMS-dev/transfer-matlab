@@ -33,25 +33,25 @@ function gams_transfer_setup(varargin)
 
     p = inputParser();
     is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-        ~strcmpi(x, 'target_dir') && ~strcmpi(x, 'system_dir');
+        ~strcmpi(x, 'target_dir') && ~strcmpi(x, 'gams_dir');
     addParameter(p, 'target_dir', '.', is_string_char);
-    addParameter(p, 'system_dir', find_gams(), is_string_char);
+    addParameter(p, 'gams_dir', find_gams(), is_string_char);
     addParameter(p, 'verbose', 0, @isnumeric)
     parse(p, varargin{:});
-    if strcmp(p.Results.system_dir, '')
+    if strcmp(p.Results.gams_dir, '')
         error('GAMS system directory not found.');
     end
 
     % check paths
     target_dir = Utils.checkFilename(p.Results.target_dir, '', false);
-    system_dir = Utils.checkFilename(p.Results.system_dir, '', false);
+    gams_dir = Utils.checkFilename(p.Results.gams_dir, '', false);
 
     % get package name
     target_dir = fullfile(target_dir, '+GAMSTransfer');
 
     % install GAMS Transfer
     try
-        gams_transfer_setup_internal(p.Results.system_dir, current_dir, target_dir, p.Results.verbose)
+        gams_transfer_setup_internal(p.Results.gams_dir, current_dir, target_dir, p.Results.verbose)
         rmpath(fullfile(current_dir, 'src'));
     catch e
         rmpath(fullfile(current_dir, 'src'));

@@ -32,7 +32,7 @@ classdef Container < handle
     %    Path to GDX file to be read
     %
     % Parameter Arguments:
-    % - system_directory: string
+    % - gams_dir: string
     %   Path to GAMS system directory. Default is determined from PATH
     %   environment variable
     % - indexed: logical
@@ -41,7 +41,7 @@ classdef Container < handle
     % Example:
     % c = Container();
     % c = Container('path/to/file.gdx');
-    % c = Container('indexed', true, 'system_directory', 'C:\GAMS');
+    % c = Container('indexed', true, 'gams_dir', 'C:\GAMS');
     %
     % See also: GAMSTransfer.Set, GAMSTransfer.Alias, GAMSTransfer.Parameter,
     % GAMSTransfer.Variable, GAMSTransfer.Equation
@@ -73,8 +73,8 @@ classdef Container < handle
     %
 
     properties (SetAccess = private)
-        % system_directory GAMS system directory
-        system_directory = ''
+        % gams_dir GAMS system directory
+        gams_dir = ''
 
         % filename GDX file name to be read
         filename = ''
@@ -106,14 +106,14 @@ classdef Container < handle
             % input arguments
             p = inputParser();
             is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-                ~strcmpi(x, 'system_directory') && ~strcmpi(x, 'indexed') && ...
+                ~strcmpi(x, 'gams_dir') && ~strcmpi(x, 'indexed') && ...
                 ~strcmpi(x, 'features');
             addOptional(p, 'filename', '', is_string_char);
-            addParameter(p, 'system_directory', '', is_string_char);
+            addParameter(p, 'gams_dir', '', is_string_char);
             addParameter(p, 'indexed', false, @islogical);
             addParameter(p, 'features', struct(), @isstruct);
             parse(p, varargin{:});
-            obj.system_directory = GAMSTransfer.Utils.checkSystemDirectory(p.Results.system_directory);
+            obj.gams_dir = GAMSTransfer.Utils.checkGamsDirectory(p.Results.gams_dir);
             obj.filename = GAMSTransfer.Utils.checkFilename(p.Results.filename, '.gdx', true);
             obj.indexed = p.Results.indexed;
             feature_names = fieldnames(obj.features);
@@ -208,10 +208,10 @@ classdef Container < handle
 
             % read records
             if obj.indexed
-                GAMSTransfer.gt_idx_read_records(obj.system_directory, ...
+                GAMSTransfer.gt_idx_read_records(obj.gams_dir, ...
                     obj.filename, obj.data, p.Results.symbols, int32(format_int));
             else
-                GAMSTransfer.gt_gdx_read_records(obj.system_directory, ...
+                GAMSTransfer.gt_gdx_read_records(obj.gams_dir, ...
                     obj.filename, obj.data, p.Results.symbols, int32(format_int), ...
                     values_bool, obj.features.categorical, obj.features.c_prop_setget);
             end
@@ -308,10 +308,10 @@ classdef Container < handle
 
             % write data
             if obj.indexed
-                GAMSTransfer.gt_idx_write(obj.system_directory, filename, obj.data, ...
+                GAMSTransfer.gt_idx_write(obj.gams_dir, filename, obj.data, ...
                     p.Results.sorted, obj.features.table);
             else
-                GAMSTransfer.gt_gdx_write(obj.system_directory, filename, obj.data, ...
+                GAMSTransfer.gt_gdx_write(obj.gams_dir, filename, obj.data, ...
                     p.Results.uel_priority, p.Results.compress, p.Results.sorted, ...
                     obj.features.table, obj.features.categorical, obj.features.c_prop_setget);
             end
@@ -396,7 +396,7 @@ classdef Container < handle
             symbol = GAMSTransfer.Variable(obj, name, varargin{:});
         end
 
-        function symbol = addEquation(obj, name, varargin)
+        function symbol = addEquation(obj, name, etype, varargin)
             % Adds an equation to the container
             %
             % Arguments are identical to the GAMSTransfer.Equation constructor.
@@ -404,17 +404,16 @@ classdef Container < handle
             %
             % Example:
             % c = Container();
-            % e1 = c.addEquation('e1');
             % e2 = c.addEquation('e2', 'l', {'*', '*'});
             % e3 = c.addEquation('e3', EquationType.EQ, '*', 'description', 'equ e3');
             %
             % See also: GAMSTransfer.Equation, GAMSTransfer.EquationType
             %
 
-            symbol = GAMSTransfer.Equation(obj, name, varargin{:});
+            symbol = GAMSTransfer.Equation(obj, name, etype, varargin{:});
         end
 
-        function symbol = addAlias(obj, name, aliased_with, varargin)
+        function symbol = addAlias(obj, name, alias_with, varargin)
             % Adds an alias to the container
             %
             % Arguments are identical to the GAMSTransfer.Alias constructor.
@@ -428,7 +427,7 @@ classdef Container < handle
             % See also: GAMSTransfer.Alias, GAMSTransfer.Set
             %
 
-            symbol = GAMSTransfer.Alias(obj, name, aliased_with, varargin{:});
+            symbol = GAMSTransfer.Alias(obj, name, alias_with, varargin{:});
         end
 
         function renameSymbol(obj, oldname, newname)
@@ -759,19 +758,19 @@ classdef Container < handle
             % init describe table
             descr = struct();
             descr.name = cell(n_symbols, 1);
-            descr.aliased_with = cell(n_symbols, 1);
+            descr.alias_with = cell(n_symbols, 1);
 
             % collect values
             for i = 1:n_symbols
                 symbol = obj.data.(symbols{i});
                 descr.name{i} = symbol.name;
-                descr.aliased_with{i} = symbol.aliased_with.name;
+                descr.alias_with{i} = symbol.alias_with.name;
             end
 
             % convert to categorical if possible
             if obj.features.categorical
                 descr.name = categorical(descr.name);
-                descr.aliased_with = categorical(descr.aliased_with);
+                descr.alias_with = categorical(descr.alias_with);
             end
 
             % convert to table if possible
@@ -830,8 +829,8 @@ classdef Container < handle
             end
         end
 
-        function list = getUniversalSet(obj)
-            % Generate universal set (UEL order in GDX)
+        function list = getUniverseSet(obj)
+            % Generate universe set (UEL order in GDX)
             %
 
             map = javaObject('java.util.LinkedHashMap');
@@ -923,7 +922,7 @@ classdef Container < handle
                 symbol_names_a = obj.listAliases();
                 symbols_a = obj.getSymbols(symbol_names_a);
                 for i = 1:numel(symbols_a)
-                    symbols_a{i} = symbols_a{i}.aliased_with;
+                    symbols_a{i} = symbols_a{i}.alias_with;
                 end
                 symbol_names = {symbol_names{:}, symbol_names_a{:}};
                 symbols = {symbols{:}, symbols_a{:}};
@@ -948,10 +947,12 @@ classdef Container < handle
             case {GAMSTransfer.SymbolType.VARIABLE, GAMSTransfer.SymbolType.EQUATION}
                 descr.type = cell(n_symbols, 1);
             case GAMSTransfer.SymbolType.SET
-                descr.singleton = true(n_symbols, 1);
+                descr.is_alias = true(n_symbols, 1);
+                descr.is_singleton = true(n_symbols, 1);
             end
             descr.format = cell(n_symbols, 1);
             descr.dim = zeros(n_symbols, 1);
+            descr.domain_info = cell(n_symbols, 1);
             descr.domain = cell(n_symbols, 1);
             descr.size = cell(n_symbols, 1);
             descr.num_recs = zeros(n_symbols, 1);
@@ -963,22 +964,24 @@ classdef Container < handle
                 descr.mean_level = zeros(n_symbols, 1);
                 descr.max_level = zeros(n_symbols, 1);
                 descr.where_max_abs_level = cell(n_symbols, 1);
+                descr.count_na_level = zeros(n_symbols, 1);
+                descr.count_undef_level = zeros(n_symbols, 1);
+                descr.count_eps_level = zeros(n_symbols, 1);
                 descr.min_marginal = zeros(n_symbols, 1);
                 descr.mean_marginal = zeros(n_symbols, 1);
                 descr.max_marginal = zeros(n_symbols, 1);
                 descr.where_max_abs_marginal = cell(n_symbols, 1);
+                descr.count_na_marginal = zeros(n_symbols, 1);
+                descr.count_undef_marginal = zeros(n_symbols, 1);
+                descr.count_eps_marginal = zeros(n_symbols, 1);
             case GAMSTransfer.SymbolType.PARAMETER
                 descr.min_value = zeros(n_symbols, 1);
                 descr.mean_value = zeros(n_symbols, 1);
                 descr.max_value = zeros(n_symbols, 1);
                 descr.where_max_abs_value = cell(n_symbols, 1);
-            end
-            if symtype ~= GAMSTransfer.SymbolType.SET
-                descr.num_na = zeros(n_symbols, 1);
-                descr.num_undef = zeros(n_symbols, 1);
-                descr.num_eps = zeros(n_symbols, 1);
-                descr.num_minf = zeros(n_symbols, 1);
-                descr.num_pinf = zeros(n_symbols, 1);
+                descr.count_na = zeros(n_symbols, 1);
+                descr.count_undef = zeros(n_symbols, 1);
+                descr.count_eps = zeros(n_symbols, 1);
             end
 
             % collect values
@@ -990,14 +993,16 @@ classdef Container < handle
                 case {GAMSTransfer.SymbolType.VARIABLE, GAMSTransfer.SymbolType.EQUATION}
                     descr.type{i} = symbol.type;
                 case GAMSTransfer.SymbolType.SET
-                    descr.singleton(i) = symbol.singleton;
+                    descr.is_alias(i) = isa(symbol, 'GAMSTransfer.Alias');
+                    descr.is_singleton(i) = symbol.is_singleton;
                 end
                 descr.format{i} = symbol.format;
                 descr.dim(i) = symbol.dimension;
+                descr.domain_info{i} = symbol.domain_info;
                 descr.domain{i} = GAMSTransfer.Utils.list2str(symbol.domain);
                 descr.size{i} = GAMSTransfer.Utils.list2str(symbol.size);
-                descr.num_recs(i) = symbol.getNumRecords();
-                descr.num_vals(i) = symbol.getNumValues();
+                descr.num_recs(i) = symbol.getNumberRecords();
+                descr.num_vals(i) = symbol.getNumberValues();
                 descr.sparsity(i) = symbol.getSparsity();
                 switch symtype
                 case {GAMSTransfer.SymbolType.VARIABLE, GAMSTransfer.SymbolType.EQUATION}
@@ -1010,6 +1015,9 @@ classdef Container < handle
                     else
                         descr.where_max_abs_level{i} = GAMSTransfer.Utils.list2str(descr.where_max_abs_level{i});
                     end
+                    descr.count_na_level(i) = symbol.countNa({'level'});
+                    descr.count_undef_level(i) = symbol.countUndef({'level'});
+                    descr.count_eps_level(i) = symbol.countEps({'level'});
                     descr.min_marginal(i) = symbol.getMinValue('marginal');
                     descr.mean_marginal(i) = symbol.getMeanValue('marginal');
                     descr.max_marginal(i) = symbol.getMaxValue('marginal');
@@ -1019,11 +1027,9 @@ classdef Container < handle
                     else
                         descr.where_max_abs_marginal{i} = GAMSTransfer.Utils.list2str(descr.where_max_abs_marginal{i});
                     end
-                    descr.num_na(i) = symbol.getNumNa({'level', 'marginal', 'lower', 'upper', 'scale'});
-                    descr.num_undef(i) = symbol.getNumUndef({'level', 'marginal', 'lower', 'upper', 'scale'});
-                    descr.num_eps(i) = symbol.getNumEps({'level', 'marginal', 'lower', 'upper', 'scale'});
-                    descr.num_minf(i) = symbol.getNumNegInf({'level', 'marginal', 'lower', 'upper', 'scale'});
-                    descr.num_pinf(i) = symbol.getNumPosInf({'level', 'marginal', 'lower', 'upper', 'scale'});
+                    descr.count_na_marginal(i) = symbol.countNa({'marginal'});
+                    descr.count_undef_marginal(i) = symbol.countUndef({'marginal'});
+                    descr.count_eps_marginal(i) = symbol.countEps({'marginal'});
                 case GAMSTransfer.SymbolType.PARAMETER
                     descr.min_value(i) = symbol.getMinValue();
                     descr.mean_value(i) = symbol.getMeanValue();
@@ -1034,11 +1040,9 @@ classdef Container < handle
                     else
                         descr.where_max_abs_value{i} = GAMSTransfer.Utils.list2str(descr.where_max_abs_value{i});
                     end
-                    descr.num_na(i) = symbol.getNumNa();
-                    descr.num_undef(i) = symbol.getNumUndef();
-                    descr.num_eps(i) = symbol.getNumEps();
-                    descr.num_minf(i) = symbol.getNumNegInf();
-                    descr.num_pinf(i) = symbol.getNumPosInf();
+                    descr.count_na(i) = symbol.countNa();
+                    descr.count_undef(i) = symbol.countUndef();
+                    descr.count_eps(i) = symbol.countEps();
                 end
             end
 
@@ -1046,6 +1050,7 @@ classdef Container < handle
             if obj.features.categorical
                 descr.name = categorical(descr.name);
                 descr.format = categorical(descr.format);
+                descr.domain_info = categorical(descr.domain_info);
                 descr.domain = categorical(descr.domain);
                 descr.size = categorical(descr.size);
                 switch symtype
@@ -1067,9 +1072,9 @@ classdef Container < handle
         function readBasic(obj)
             % read data from GDX
             if obj.indexed
-                rawdata = GAMSTransfer.gt_idx_read_basics(obj.system_directory, obj.filename);
+                rawdata = GAMSTransfer.gt_idx_read_basics(obj.gams_dir, obj.filename);
             else
-                rawdata = GAMSTransfer.gt_gdx_read_basics(obj.system_directory, obj.filename);
+                rawdata = GAMSTransfer.gt_gdx_read_basics(obj.gams_dir, obj.filename);
             end
             symbols = fieldnames(rawdata);
 
@@ -1105,7 +1110,7 @@ classdef Container < handle
                     obj.data.(symbols{i}) = GAMSTransfer.Set(obj, symbol.name, ...
                         domain, 'description', symbol.description, 'read_entry', i, ...
                         'read_number_records', double(symbol.number_records), ...
-                        'singleton', symbol.subtype == 1);
+                        'is_singleton', symbol.subtype == 1);
                 case GAMSTransfer.SymbolType.PARAMETER
                     obj.data.(symbols{i}) = GAMSTransfer.Parameter(obj, symbol.name, ...
                         domain, 'description', symbol.description, 'read_entry', i, ...
@@ -1119,13 +1124,13 @@ classdef Container < handle
                         symbol.subtype, domain, 'description', symbol.description, ...
                         'read_entry', i, 'read_number_records', double(symbol.number_records));
                 case GAMSTransfer.SymbolType.ALIAS
-                    aliased_with = regexp(symbol.description, '(?<=Aliased with )[a-zA-Z]*', 'match');
-                    if numel(aliased_with) ~= 1 || ~isfield(obj.data, aliased_with{1})
+                    alias_with = regexp(symbol.description, '(?<=Aliased with )[a-zA-Z]*', 'match');
+                    if numel(alias_with) ~= 1 || ~isfield(obj.data, alias_with{1})
                         error('Alias reference for symbol ''%s'' not found: %s.', ...
                             symbol.name, symbol.description);
                     end
                     obj.data.(symbols{i}) = GAMSTransfer.Alias(obj, symbol.name, ...
-                        obj.data.(aliased_with{1}), 'read_entry', i);
+                        obj.data.(alias_with{1}), 'read_entry', i);
                 otherwise
                     error('Invalid symbol type');
                 end

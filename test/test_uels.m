@@ -307,8 +307,8 @@ end
 
 function test_symbol_uels(t, cfg)
 
-    c = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    c = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     c.read('format', 'struct');
     x = c.data.x;
 
@@ -406,8 +406,8 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 0);
     t.assert(ids(6) == 3);
 
-    c = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    c = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     c.read('format', 'struct');
     x = c.data.x;
 
@@ -423,8 +423,8 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 0);
     t.assert(ids(6) == 0);
 
-    c = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    c = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     c.read('format', 'struct');
     x = c.data.x;
 
@@ -472,8 +472,8 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{4}, 'i10');
     t.assertEquals(uels{5}, 'i5');
 
-    c = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    c = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     c.read('format', 'struct');
     x = c.data.x;
 
@@ -504,8 +504,8 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 0);
     t.assert(ids(6) == 2);
 
-    c = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    c = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     c.read('format', 'struct');
     x = c.data.x;
 
@@ -534,8 +534,8 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
 
-    c = GAMSTransfer.Container(cfg.filenames{1}, 'system_directory', ...
-        cfg.system_dir, 'features', cfg.features);
+    c = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
     c.read('format', 'struct');
     x = c.data.x;
 

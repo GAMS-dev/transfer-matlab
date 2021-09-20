@@ -19,9 +19,9 @@ the high performance of this package.
 
 To build GAMSTransfer, open Matlab and run:
 ```
-gams_transfer_setup('target_dir', <install_directory>, 'system_dir', <gams_system_directory>, 'verbose', <level>);
+gams_transfer_setup('target_dir', <install_directory>, 'gams_dir', <gams_gams_dir>, 'verbose', <level>);
 ```
-All parameters, `target_dir`, `system_dir` and `verbose`, are optional with
+All parameters, `target_dir`, `gams_dir` and `verbose`, are optional with
 defaults `'.'` (current directory), the GAMS system directory found in the PATH
 environment variable, and 0, respectively. Verbosity level are between 0 (no
 compiler output) to 2 (all compiler output).
@@ -30,9 +30,9 @@ compiler output) to 2 (all compiler output).
 
 Make sure that the GAMSTransfer build is part of the Matlab PATH. Then, run:
 ```
-gams_transfer_test('working_dir', <test_directory>, 'system_dir', <gams_system_directory>);
+gams_transfer_test('working_dir', <test_directory>, 'gams_dir', <gams_gams_dir>);
 ```
-Both parameters, `working_dir` and `system_dir`, are optional with defaults
+Both parameters, `working_dir` and `gams_dir`, are optional with defaults
 `tempname()` and the GAMS system directory found in the PATH environment
 variable, respectively.
 

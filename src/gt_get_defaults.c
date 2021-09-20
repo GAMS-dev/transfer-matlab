@@ -62,7 +62,7 @@ void mexFunction(
     /* get symbol type */
     if (mxIsClass(prhs[0], "GAMSTransfer.Set"))
     {
-        gt_mex_getfield_bool(prhs[0], "symbol", "singleton", false, true, 1, &singleton);
+        gt_mex_getfield_bool(prhs[0], "symbol", "is_singleton", false, true, 1, &singleton);
         type = GMS_DT_SET;
         subtype = (singleton) ? GMS_SETTYPE_SINGLETON : GMS_SETTYPE_DEFAULT;
     }

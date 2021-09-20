@@ -74,7 +74,7 @@ void gt_gdx_register_uels(
 void gt_gdx_addalias(
     gdxHandle_t     gdx,            /** GDX handle */
     const char*     name,           /** name of alias symbol */
-    const char*     aliased_with    /** name of aliased symbol */
+    const char*     alias_with      /** name of aliased symbol */
 );
 
 /** adds an explanatory text to GDX */

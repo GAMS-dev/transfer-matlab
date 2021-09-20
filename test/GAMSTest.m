@@ -110,8 +110,8 @@ classdef GAMSTest < handle
                 obj.assert(ischar(symbol.domain_info));
                 obj.assert(isnumeric(symbol.size));
                 obj.assert(numel(symbol.size) == symbol.dimension);
-                obj.assert(symbol.getNumRecords() >= 0);
-                obj.assert(symbol.getNumValues() == 0 || isnan(symbol.getNumValues()));
+                obj.assert(symbol.getNumberRecords() >= 0);
+                obj.assert(symbol.getNumberValues() == 0 || isnan(symbol.getNumberValues()));
                 obj.assert(isempty(symbol.records));
                 if ~symbol.container.indexed
                     for i = 1:symbol.dimension
@@ -123,13 +123,13 @@ classdef GAMSTest < handle
                 obj.assert(strcmp(symbol.format, 'not_read') || strcmp(symbol.format, 'empty'));
             case 'GAMSTransfer.Alias'
                 obj.assert(ischar(symbol.name));
-                obj.assert(isa(symbol.aliased_with, 'GAMSTransfer.Set'));
+                obj.assert(isa(symbol.alias_with, 'GAMSTransfer.Set'));
             otherwise
                 obj.assert(false);
             end
             switch class(symbol)
             case 'GAMSTransfer.Set'
-                obj.assert(islogical(symbol.singleton));
+                obj.assert(islogical(symbol.is_singleton));
             case 'GAMSTransfer.Variable'
                 obj.assert(ischar(symbol.type));
                 obj.assert(GAMSTransfer.VariableType.isValid(symbol.type));

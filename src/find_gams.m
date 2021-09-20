@@ -29,8 +29,8 @@
 % SOFTWARE.
 %
 
-function systemDirectory = find_gams()
-    systemDirectory = '';
+function gamsDirectory = find_gams()
+    gamsDirectory = '';
 
     % name of GAMS executable
     if ispc
@@ -45,13 +45,13 @@ function systemDirectory = find_gams()
     for i = 1:numel(idx)-1
         p = paths(idx(i)+1:idx(i+1)-1);
         if isfile([p, filesep, gams_exe])
-            systemDirectory = p;
+            gamsDirectory = p;
             break;
         end
     end
 
     % trim path
-    if numel(systemDirectory) > 0 && strcmp(systemDirectory(end), filesep)
-        systemDirectory = systemDirectory(1:end-1);
+    if numel(gamsDirectory) > 0 && strcmp(gamsDirectory(end), filesep)
+        gamsDirectory = gamsDirectory(1:end-1);
     end
 end

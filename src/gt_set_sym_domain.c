@@ -41,10 +41,11 @@ void mexFunction(
 )
 {
     int container_id;
-    bool dominfo_regular, support_setget;
+    bool dominfo_regular, dominfo_none, support_setget;
     size_t dim;
     char domname[256], label[512];
     mxArray* mx_arr_domentry = NULL;
+    mxArray* mx_arr_domnames = NULL;
     mxArray* mx_arr_domlabels = NULL;
     mxArray* mx_arr_size = NULL;
 #ifdef WITH_R2018A_OR_NEWER
@@ -62,8 +63,10 @@ void mexFunction(
     gt_mex_check_argument_bool(prhs, 3, 1, &support_setget);
 
     dim = mxGetNumberOfElements(prhs[1]);
+    mx_arr_domnames = mxCreateCellMatrix(1, dim);
     mx_arr_domlabels = mxCreateCellMatrix(1, dim);
     mx_arr_size = mxCreateDoubleMatrix(1, dim, mxREAL);
+    dominfo_none = true;
     dominfo_regular = true;
 
 #ifdef WITH_R2018A_OR_NEWER
@@ -85,7 +88,9 @@ void mexFunction(
             {
                 sprintf(label, "%s_%d", domname, (int) i+1);
                 dominfo_regular = false;
+                dominfo_none = false;
             }
+            mxSetCell(mx_arr_domnames, i, mxCreateString(domname));
             mxSetCell(mx_arr_domlabels, i, mxCreateString(label));
 
             /* set size */
@@ -125,18 +130,23 @@ void mexFunction(
 
             /* set domain label */
             sprintf(label, "%s_%d", domname, (int) i+1);
+            mxSetCell(mx_arr_domnames, i, mxCreateString(domname));
             mxSetCell(mx_arr_domlabels, i, mxCreateString(label));
 
             /* set size */
             mx_size[i] = domnrecs;
+            dominfo_none = false;
         }
         else
             mexErrMsgIdAndTxt(ERRID"domain", "Domain entry must be of type 'GAMSTransfer.Set' or 'char'.");
     }
 
     mxSetProperty((mxArray*) prhs[0], 0, "dimension_", mxCreateDoubleScalar(dim));
+    mxSetProperty((mxArray*) prhs[0], 0, "domain_names_", mx_arr_domnames);
     mxSetProperty((mxArray*) prhs[0], 0, "domain_label_", mx_arr_domlabels);
-    if (dominfo_regular)
+    if (dominfo_none)
+        mxSetProperty((mxArray*) prhs[0], 0, "domain_info_", mxCreateString("none"));
+    else if (dominfo_regular)
         mxSetProperty((mxArray*) prhs[0], 0, "domain_info_", mxCreateString("regular"));
     else
         mxSetProperty((mxArray*) prhs[0], 0, "domain_info_", mxCreateString("relaxed"));

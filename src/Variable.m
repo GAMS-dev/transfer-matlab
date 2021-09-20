@@ -66,6 +66,9 @@ classdef Variable < GAMSTransfer.Symbol
 
         % type Variable type, e.g. 'free'
         type
+
+        % default_values Equation default values
+        default_values
     end
 
     properties (Hidden, SetAccess = private)
@@ -171,6 +174,10 @@ classdef Variable < GAMSTransfer.Symbol
             if ~isstring(name) && ~ischar(name)
                 error('Name must be of type ''char''.');
             end
+            name = char(name);
+            if numel(name) >= 64
+                error('Symbol name too long. Name length must be smaller than 64.');
+            end
             if strcmp(obj.name_, name)
                 return
             end
@@ -185,7 +192,11 @@ classdef Variable < GAMSTransfer.Symbol
             if ~isstring(descr) && ~ischar(descr)
                 error('Description must be of type ''char''.');
             end
-            obj.description_ = char(descr);
+            descr = char(descr);
+            if numel(descr) >= 256
+                error('Symbol description too long. Name length must be smaller than 256.');
+            end
+            obj.description_ = descr;
         end
 
         function typ = get.type(obj)
@@ -205,24 +216,14 @@ classdef Variable < GAMSTransfer.Symbol
             end
         end
 
-    end
-
-    methods
-
-        function def = getDefaultValues(obj)
-            % Returns default values for given symbol type (incl. sub type)
-            %
-            % Different GAMS symbols have different default values for level,
-            % marginal, lower, upper and scale. This function returns a vector
-            % of length 5 with these default values.
-            %
-            % Example:
-            % c = Container();
-            % v = Variable(c, 'v', 'binary');
-            % v.getDefaultValues() equals [0, 0, 0, 1, 1]
-            %
-
-            def = GAMSTransfer.gt_get_defaults(obj);
+        function def = get.default_values(obj)
+            def_vals = GAMSTransfer.gt_get_defaults(obj);
+            def = struct();
+            def.level = def_vals(1);
+            def.marginal = def_vals(2);
+            def.lower = def_vals(3);
+            def.upper = def_vals(4);
+            def.scale = def_vals(5);
         end
 
     end

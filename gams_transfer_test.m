@@ -34,19 +34,19 @@ function gams_transfer_test(varargin)
 
     p = inputParser();
     is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-        ~strcmpi(x, 'working_dir') && ~strcmpi(x, 'system_dir');
+        ~strcmpi(x, 'working_dir') && ~strcmpi(x, 'gams_dir');
     addParameter(p, 'working_dir', tempname, is_string_char);
-    addParameter(p, 'system_dir', find_gams(), is_string_char);
+    addParameter(p, 'gams_dir', find_gams(), is_string_char);
     addParameter(p, 'exit_on_fail', false, @islogical);
     addParameter(p, 'license', '', is_string_char);
     parse(p, varargin{:});
-    if strcmp(p.Results.system_dir, '')
+    if strcmp(p.Results.gams_dir, '')
         error('GAMS system directory not found.');
     end
 
     % check paths
     working_dir = Utils.checkFilename(p.Results.working_dir, '', false);
-    system_dir = Utils.checkFilename(p.Results.system_dir, '', false);
+    gams_dir = Utils.checkFilename(p.Results.gams_dir, '', false);
 
     % create working directory
     mkdir(working_dir);
@@ -59,8 +59,8 @@ function gams_transfer_test(varargin)
         % test data
         cfg = struct();
         cfg.working_dir = working_dir;
-        cfg.system_dir = system_dir;
-        cfg.filenames = gams_transfer_test_create_gdx(cfg.system_dir, cfg.working_dir, p.Results.license);
+        cfg.gams_dir = gams_dir;
+        cfg.filenames = gams_transfer_test_create_gdx(cfg.gams_dir, cfg.working_dir, p.Results.license);
         features = GAMSTransfer.Utils.checkFeatureSupport();
 
         % run tests

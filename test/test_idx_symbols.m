@@ -36,7 +36,7 @@ end
 
 function test_idx_addSymbols(t, cfg)
 
-    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
         'indexed', true, 'features', cfg.features);
 
     t.add('idx_add_symbols_parameter_1');
@@ -46,11 +46,12 @@ function test_idx_addSymbols(t, cfg)
     t.assertEquals(p1.description, '');
     t.assert(p1.dimension == 0);
     t.assert(numel(p1.domain) == 0);
+    t.assert(numel(p1.domain_names) == 0);
     t.assert(numel(p1.domain_label) == 0);
     t.assertEquals(p1.domain_info, 'relaxed');
     t.assert(numel(p1.size) == 0);
     t.assert(strcmp(p1.format, 'empty'));
-    t.assert(p1.getNumRecords() == 0);
+    t.assert(p1.getNumberRecords() == 0);
     t.assert(p1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'p1'));
@@ -64,13 +65,15 @@ function test_idx_addSymbols(t, cfg)
     t.assert(p2.dimension == 1);
     t.assert(numel(p2.domain) == 1);
     t.assertEquals(p2.domain{1}, 'dim_1');
+    t.assert(numel(p2.domain_names) == 1);
+    t.assertEquals(p2.domain_names{1}, 'dim_1');
     t.assert(numel(p2.domain_label) == 1);
     t.assertEquals(p2.domain_label{1}, 'dim_1');
     t.assertEquals(p2.domain_info, 'relaxed');
     t.assert(numel(p2.size) == 1);
     t.assert(p2.size(1) == 0);
     t.assert(strcmp(p2.format, 'empty'));
-    t.assert(p2.getNumRecords() == 0);
+    t.assert(p2.getNumberRecords() == 0);
     t.assert(p2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 'p2'));
@@ -86,6 +89,10 @@ function test_idx_addSymbols(t, cfg)
     t.assertEquals(p3.domain{1}, 'dim_1');
     t.assertEquals(p3.domain{2}, 'dim_2');
     t.assertEquals(p3.domain{3}, 'dim_3');
+    t.assert(numel(p3.domain_names) == 3);
+    t.assertEquals(p3.domain_names{1}, 'dim_1');
+    t.assertEquals(p3.domain_names{2}, 'dim_2');
+    t.assertEquals(p3.domain_names{3}, 'dim_3');
     t.assert(numel(p3.domain_label) == 3);
     t.assertEquals(p3.domain_label{1}, 'dim_1');
     t.assertEquals(p3.domain_label{2}, 'dim_2');
@@ -96,7 +103,7 @@ function test_idx_addSymbols(t, cfg)
     t.assert(p3.size(2) == 2);
     t.assert(p3.size(3) == 3);
     t.assert(strcmp(p3.format, 'empty'));
-    t.assert(p3.getNumRecords() == 0);
+    t.assert(p3.getNumberRecords() == 0);
     t.assert(p3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'p3'));
@@ -163,7 +170,7 @@ function test_idx_addSymbols(t, cfg)
     t.add('idx_add_symbols_equation');
     try
         t.assert(false);
-        GAMSTransfer.Equation(gdx, 'e1');
+        GAMSTransfer.Equation(gdx, 'e1', 'n');
     catch e
         t.reset();
         t.assertEquals(e.message, 'Equation not allowed in indexed mode.');
@@ -173,7 +180,7 @@ end
 
 function test_idx_changeSymbol(t, cfg)
 
-    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
         'indexed', true, 'features', cfg.features);
     p1 = GAMSTransfer.Parameter(gdx, 'p1', 5);
     p2 = GAMSTransfer.Parameter(gdx, 'p2', [5,10]);
@@ -371,7 +378,7 @@ end
 
 function test_idx_setRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
         'indexed', true, 'features', cfg.features);
 
     p1 = GAMSTransfer.Parameter(gdx, 'p1', 5);
@@ -549,7 +556,7 @@ end
 
 function test_idx_writeUnordered(t, cfg)
 
-    gdx = GAMSTransfer.Container('system_directory', cfg.system_dir, ...
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
         'indexed', true, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
@@ -596,8 +603,8 @@ end
 
 function test_idx_transformRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'system_directory', ...
-        cfg.system_dir, 'indexed', true, 'features', cfg.features);
+    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'gams_dir', ...
+        cfg.gams_dir, 'indexed', true, 'features', cfg.features);
 
     formats = {'struct', 'table', 'dense_matrix', 'sparse_matrix'};
     a_recs = cell(1, numel(formats));
