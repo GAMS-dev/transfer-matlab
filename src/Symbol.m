@@ -51,8 +51,8 @@ classdef Symbol < handle
         % domain_labels Expected domain labels in records
         domain_labels
 
-        % domain_info Specifies if domains are stored 'relaxed' or 'regular'
-        domain_info
+        % domain_type Specifies if domains are stored 'relaxed' or 'regular'
+        domain_type
     end
 
     properties
@@ -88,7 +88,7 @@ classdef Symbol < handle
         domain_
         domain_names_
         domain_labels_
-        domain_info_
+        domain_type_
         size_
         format_
 
@@ -154,7 +154,7 @@ classdef Symbol < handle
             obj.description_ = description;
 
             % the following inits dimension_, domain_, domain_names_, domain_labels_,
-            % domain_info_, uels
+            % domain_type_, uels
             if container.indexed
                 obj.size = domain_size;
             else
@@ -271,8 +271,8 @@ classdef Symbol < handle
             domain_labels = obj.domain_labels_;
         end
 
-        function domain_info = get.domain_info(obj)
-            domain_info = obj.domain_info_;
+        function domain_type = get.domain_type(obj)
+            domain_type = obj.domain_type_;
         end
 
         function sizes = get.size(obj)
@@ -312,7 +312,7 @@ classdef Symbol < handle
             end
 
             % determine domain info type
-            obj.domain_info_ = 'relaxed';
+            obj.domain_type_ = 'relaxed';
 
             % indicate that we need to recheck symbol records
             obj.format_ = obj.FORMAT_REEVALUATE;

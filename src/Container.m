@@ -1127,7 +1127,7 @@ classdef Container < handle
             end
             descr.format = cell(n_symbols, 1);
             descr.dim = zeros(n_symbols, 1);
-            descr.domain_info = cell(n_symbols, 1);
+            descr.domain_type = cell(n_symbols, 1);
             descr.domain = cell(n_symbols, 1);
             descr.size = cell(n_symbols, 1);
             descr.num_recs = zeros(n_symbols, 1);
@@ -1173,7 +1173,7 @@ classdef Container < handle
                 end
                 descr.format{i} = symbol.format;
                 descr.dim(i) = symbol.dimension;
-                descr.domain_info{i} = symbol.domain_info;
+                descr.domain_type{i} = symbol.domain_type;
                 descr.domain{i} = GAMSTransfer.Utils.list2str(symbol.domain);
                 descr.size{i} = GAMSTransfer.Utils.list2str(symbol.size);
                 descr.num_recs(i) = symbol.getNumberRecords();
@@ -1225,7 +1225,7 @@ classdef Container < handle
             if obj.features.categorical
                 descr.name = categorical(descr.name);
                 descr.format = categorical(descr.format);
-                descr.domain_info = categorical(descr.domain_info);
+                descr.domain_type = categorical(descr.domain_type);
                 descr.domain = categorical(descr.domain);
                 descr.size = categorical(descr.size);
                 switch symtype
@@ -1269,7 +1269,7 @@ classdef Container < handle
                     for j = 1:numel(domain)
                         if strcmp(domain{j}, '*')
                             continue
-                        elseif symbol.domain_info == 2
+                        elseif symbol.domain_type == 2
                             continue
                         elseif isfield(obj.data, domain{j})
                             domain{j} = obj.data.(domain{j});

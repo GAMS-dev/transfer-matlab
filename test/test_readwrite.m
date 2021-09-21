@@ -62,7 +62,7 @@ function test_read(t, cfg)
     t.assertEquals(s.domain{1}, '*');
     t.assert(numel(s.domain_labels) == 1);
     t.assertEquals(s.domain_labels{1}, 'uni_1');
-    t.assertEquals(s.domain_info, 'none');
+    t.assertEquals(s.domain_type, 'none');
     t.assert(numel(s.size) == 1);
     t.assert(isnan(s.size(1)));
     t.assert(isnan(s.getCardenality()));
@@ -81,7 +81,7 @@ function test_read(t, cfg)
     t.assert(s.dimension == 0);
     t.assert(numel(s.domain) == 0);
     t.assert(numel(s.domain_labels) == 0);
-    t.assertEquals(s.domain_info, 'none');
+    t.assertEquals(s.domain_type, 'none');
     t.assert(numel(s.size) == 0);
     t.assert(s.getCardenality() == 1);
     t.assert(isnan(s.getSparsity()));
@@ -102,7 +102,7 @@ function test_read(t, cfg)
     t.assertEquals(s.domain{1}.name, 'i');
     t.assert(numel(s.domain_labels) == 1);
     t.assertEquals(s.domain_labels{1}, 'i_1');
-    t.assertEquals(s.domain_info, 'regular');
+    t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 1);
     t.assert(s.size(1) == 5);
     t.assert(s.getCardenality() == 5);
@@ -128,7 +128,7 @@ function test_read(t, cfg)
     t.assert(numel(s.domain_labels) == 2);
     t.assertEquals(s.domain_labels{1}, 'i_1');
     t.assertEquals(s.domain_labels{2}, 'j_2');
-    t.assertEquals(s.domain_info, 'regular');
+    t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 2);
     t.assert(s.size(1) == 5);
     t.assert(s.size(2) == 5);
@@ -1366,42 +1366,42 @@ function test_readWriteDomainCheck(t, cfg)
     gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
     gdx.read();
-    t.assertEquals(gdx.data.x.domain_info, 'regular');
+    t.assertEquals(gdx.data.x.domain_type, 'regular');
     gdx.write(write_filename);
     gdx2 = GAMSTransfer.Container(write_filename, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
     gdx2.read();
-    t.assertEquals(gdx2.data.x.domain_info, 'regular');
+    t.assertEquals(gdx2.data.x.domain_type, 'regular');
 
     t.add('read_write_domain_check_relaxed_1');
     gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
     gdx.read();
-    t.assertEquals(gdx.data.x.domain_info, 'regular');
+    t.assertEquals(gdx.data.x.domain_type, 'regular');
     x = gdx.data.x;
     x.domain{1} = 'i';
     x.domain{2} = 'j';
-    t.assertEquals(gdx.data.x.domain_info, 'relaxed');
+    t.assertEquals(gdx.data.x.domain_type, 'relaxed');
     gdx.write(write_filename);
     gdx2 = GAMSTransfer.Container(write_filename, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
     gdx2.read();
-    t.assertEquals(gdx2.data.x.domain_info, 'relaxed');
+    t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
     x = gdx2.data.x;
     x.domain{1} = gdx2.data.i;
     x.domain{2} = gdx2.data.j;
-    t.assertEquals(gdx2.data.x.domain_info, 'regular');
+    t.assertEquals(gdx2.data.x.domain_type, 'regular');
     gdx2.write(write_filename);
     gdx = GAMSTransfer.Container(write_filename, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
     gdx.read();
-    t.assertEquals(gdx.data.x.domain_info, 'regular');
+    t.assertEquals(gdx.data.x.domain_type, 'regular');
 
     t.add('read_write_domain_check_relaxed_2');
     gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
     gdx.read('format', 'struct');
-    t.assertEquals(gdx.data.x.domain_info, 'regular');
+    t.assertEquals(gdx.data.x.domain_type, 'regular');
     records = gdx.data.x.records;
     x = gdx.data.x;
     uels1 = x.getUELs(1);
@@ -1418,11 +1418,11 @@ function test_readWriteDomainCheck(t, cfg)
     x.records.scale = records.scale;
     x.initUELs(1, uels1);
     x.initUELs(2, uels2);
-    t.assertEquals(gdx.data.x.domain_info, 'relaxed');
+    t.assertEquals(gdx.data.x.domain_type, 'relaxed');
     gdx.write(write_filename);
     gdx2 = GAMSTransfer.Container(write_filename, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
     gdx2.read();
-    t.assertEquals(gdx2.data.x.domain_info, 'relaxed');
+    t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
 
 end

@@ -191,7 +191,7 @@ void gt_mex_addsymbol(
     gt_mex_addfield_int(mx_arr_sym_struct, "subtype", 1, &subtype);
     gt_mex_addfield_sizet(mx_arr_sym_struct, "dimension", 1, &dim);
     gt_mex_addfield_cell_str(mx_arr_sym_struct, "domain", dim, domains);
-    gt_mex_addfield_int(mx_arr_sym_struct, "domain_info", 1, &domain_type);
+    gt_mex_addfield_int(mx_arr_sym_struct, "domain_type", 1, &domain_type);
     if (sizes)
         gt_mex_addfield_sizet(mx_arr_sym_struct, "size", dim, sizes);
     gt_mex_addfield_sizet(mx_arr_sym_struct, "number_records", 1, &nrecs);

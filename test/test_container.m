@@ -262,7 +262,7 @@ function test_describe(t, cfg)
         t.assertEquals(tbl.Properties.VariableNames{3}, 'is_singleton');
         t.assertEquals(tbl.Properties.VariableNames{4}, 'format');
         t.assertEquals(tbl.Properties.VariableNames{5}, 'dim');
-        t.assertEquals(tbl.Properties.VariableNames{6}, 'domain_info');
+        t.assertEquals(tbl.Properties.VariableNames{6}, 'domain_type');
         t.assertEquals(tbl.Properties.VariableNames{7}, 'domain');
         t.assertEquals(tbl.Properties.VariableNames{8}, 'size');
         t.assertEquals(tbl.Properties.VariableNames{9}, 'num_recs');
@@ -279,11 +279,11 @@ function test_describe(t, cfg)
         t.assert(~tbl{1,'is_singleton'});
         t.assert(tbl{1,'dim'} == 1);
         if gdx.features.categorical
-            t.assertEquals(tbl{1,'domain_info'}, 'none');
+            t.assertEquals(tbl{1,'domain_type'}, 'none');
             t.assertEquals(tbl{1,'domain'}, '[*]');
             t.assertEquals(tbl{1,'size'}, '[NaN]');
         else
-            t.assertEquals(tbl{1,'domain_info'}{1}, 'none');
+            t.assertEquals(tbl{1,'domain_type'}{1}, 'none');
             t.assertEquals(tbl{1,'domain'}{1}, '[*]');
             t.assertEquals(tbl{1,'size'}{1}, '[NaN]');
         end
@@ -315,11 +315,11 @@ function test_describe(t, cfg)
         t.assert(~tbl.is_singleton(1));
         t.assert(tbl.dim(1) == 1);
         if gdx.features.categorical
-            t.assertEquals(tbl.domain_info(1), 'none');
+            t.assertEquals(tbl.domain_type(1), 'none');
             t.assertEquals(tbl.domain(1), '[*]');
             t.assertEquals(tbl.size(1), '[NaN]');
         else
-            t.assertEquals(tbl.domain_info{1}, 'none');
+            t.assertEquals(tbl.domain_type{1}, 'none');
             t.assertEquals(tbl.domain{1}, '[*]');
             t.assertEquals(tbl.size{1}, '[NaN]');
         end
@@ -338,7 +338,7 @@ function test_describe(t, cfg)
         t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
         t.assertEquals(tbl.Properties.VariableNames{2}, 'format');
         t.assertEquals(tbl.Properties.VariableNames{3}, 'dim');
-        t.assertEquals(tbl.Properties.VariableNames{4}, 'domain_info');
+        t.assertEquals(tbl.Properties.VariableNames{4}, 'domain_type');
         t.assertEquals(tbl.Properties.VariableNames{5}, 'domain');
         t.assertEquals(tbl.Properties.VariableNames{6}, 'size');
         t.assertEquals(tbl.Properties.VariableNames{7}, 'num_recs');
@@ -360,11 +360,11 @@ function test_describe(t, cfg)
         end
         t.assert(tbl{1,'dim'} == 0);
         if gdx.features.categorical
-            t.assertEquals(tbl{1,'domain_info'}, 'none');
+            t.assertEquals(tbl{1,'domain_type'}, 'none');
             t.assertEquals(tbl{1,'domain'}, '[]');
             t.assertEquals(tbl{1,'size'}, '[]');
         else
-            t.assertEquals(tbl{1,'domain_info'}{1}, 'none');
+            t.assertEquals(tbl{1,'domain_type'}{1}, 'none');
             t.assertEquals(tbl{1,'domain'}{1}, '[]');
             t.assertEquals(tbl{1,'size'}{1}, '[]');
         end
@@ -391,11 +391,11 @@ function test_describe(t, cfg)
         end
         t.assert(tbl{2,'dim'} == 1);
         if gdx.features.categorical
-            t.assertEquals(tbl{2,'domain_info'}, 'regular');
+            t.assertEquals(tbl{2,'domain_type'}, 'regular');
             t.assertEquals(tbl{2,'domain'}, '[i]');
             t.assertEquals(tbl{2,'size'}, '[5]');
         else
-            t.assertEquals(tbl{2,'domain_info'}{1}, 'regular');
+            t.assertEquals(tbl{2,'domain_type'}{1}, 'regular');
             t.assertEquals(tbl{2,'domain'}{1}, '[i]');
             t.assertEquals(tbl{2,'size'}{1}, '[5]');
         end
@@ -420,7 +420,7 @@ function test_describe(t, cfg)
         t.assert(isfield(tbl, 'name'));
         t.assert(isfield(tbl, 'format'));
         t.assert(isfield(tbl, 'dim'));
-        t.assert(isfield(tbl, 'domain_info'));
+        t.assert(isfield(tbl, 'domain_type'));
         t.assert(isfield(tbl, 'domain'));
         t.assert(isfield(tbl, 'size'));
         t.assert(isfield(tbl, 'num_recs'));
@@ -442,11 +442,11 @@ function test_describe(t, cfg)
         end
         t.assert(tbl.dim(1) == 0);
         if gdx.features.categorical
-            t.assertEquals(tbl.domain_info(1), 'none');
+            t.assertEquals(tbl.domain_type(1), 'none');
             t.assertEquals(tbl.domain(1), '[]');
             t.assertEquals(tbl.size(1), '[]');
         else
-            t.assertEquals(tbl.domain_info{1}, 'none');
+            t.assertEquals(tbl.domain_type{1}, 'none');
             t.assertEquals(tbl.domain{1}, '[]');
             t.assertEquals(tbl.size{1}, '[]');
         end
@@ -473,11 +473,11 @@ function test_describe(t, cfg)
         end
         t.assert(tbl.dim(2) == 1);
         if gdx.features.categorical
-            t.assertEquals(tbl.domain_info(2), 'regular');
+            t.assertEquals(tbl.domain_type(2), 'regular');
             t.assertEquals(tbl.domain(2), '[i]');
             t.assertEquals(tbl.size(2), '[5]');
         else
-            t.assertEquals(tbl.domain_info{2}, 'regular');
+            t.assertEquals(tbl.domain_type{2}, 'regular');
             t.assertEquals(tbl.domain{2}, '[i]');
             t.assertEquals(tbl.size{2}, '[5]');
         end
@@ -508,7 +508,7 @@ function test_describe(t, cfg)
         t.assertEquals(tbl.Properties.VariableNames{2}, 'type');
         t.assertEquals(tbl.Properties.VariableNames{3}, 'format');
         t.assertEquals(tbl.Properties.VariableNames{4}, 'dim');
-        t.assertEquals(tbl.Properties.VariableNames{5}, 'domain_info');
+        t.assertEquals(tbl.Properties.VariableNames{5}, 'domain_type');
         t.assertEquals(tbl.Properties.VariableNames{6}, 'domain');
         t.assertEquals(tbl.Properties.VariableNames{7}, 'size');
         t.assertEquals(tbl.Properties.VariableNames{8}, 'num_recs');
@@ -539,11 +539,11 @@ function test_describe(t, cfg)
         end
         t.assert(tbl{1,'dim'} == 2);
         if gdx.features.categorical
-            t.assertEquals(tbl{1,'domain_info'}, 'regular');
+            t.assertEquals(tbl{1,'domain_type'}, 'regular');
             t.assertEquals(tbl{1,'domain'}, '[i,j]');
             t.assertEquals(tbl{1,'size'}, '[5,5]');
         else
-            t.assertEquals(tbl{1,'domain_info'}{1}, 'regular');
+            t.assertEquals(tbl{1,'domain_type'}{1}, 'regular');
             t.assertEquals(tbl{1,'domain'}{1}, '[i,j]');
             t.assertEquals(tbl{1,'size'}{1}, '[5,5]');
         end
@@ -580,7 +580,7 @@ function test_describe(t, cfg)
         t.assert(isfield(tbl, 'type'));
         t.assert(isfield(tbl, 'format'));
         t.assert(isfield(tbl, 'dim'));
-        t.assert(isfield(tbl, 'domain_info'));
+        t.assert(isfield(tbl, 'domain_type'));
         t.assert(isfield(tbl, 'domain'));
         t.assert(isfield(tbl, 'size'));
         t.assert(isfield(tbl, 'num_recs'));
@@ -611,11 +611,11 @@ function test_describe(t, cfg)
         end
         t.assert(tbl.dim(1) == 2);
         if gdx.features.categorical
-            t.assertEquals(tbl.domain_info(1), 'regular');
+            t.assertEquals(tbl.domain_type(1), 'regular');
             t.assertEquals(tbl.domain(1), '[i,j]');
             t.assertEquals(tbl.size(1), '[5,5]');
         else
-            t.assertEquals(tbl.domain_info{1}, 'regular');
+            t.assertEquals(tbl.domain_type{1}, 'regular');
             t.assertEquals(tbl.domain{1}, '[i,j]');
             t.assertEquals(tbl.size{1}, '[5,5]');
         end
@@ -657,7 +657,7 @@ function test_describe(t, cfg)
         t.assertEquals(tbl.Properties.VariableNames{2}, 'type');
         t.assertEquals(tbl.Properties.VariableNames{3}, 'format');
         t.assertEquals(tbl.Properties.VariableNames{4}, 'dim');
-        t.assertEquals(tbl.Properties.VariableNames{5}, 'domain_info');
+        t.assertEquals(tbl.Properties.VariableNames{5}, 'domain_type');
         t.assertEquals(tbl.Properties.VariableNames{6}, 'domain');
         t.assertEquals(tbl.Properties.VariableNames{7}, 'size');
         t.assertEquals(tbl.Properties.VariableNames{8}, 'num_recs');
@@ -685,7 +685,7 @@ function test_describe(t, cfg)
         t.assert(isfield(tbl, 'type'));
         t.assert(isfield(tbl, 'format'));
         t.assert(isfield(tbl, 'dim'));
-        t.assert(isfield(tbl, 'domain_info'));
+        t.assert(isfield(tbl, 'domain_type'));
         t.assert(isfield(tbl, 'domain'));
         t.assert(isfield(tbl, 'size'));
         t.assert(isfield(tbl, 'num_recs'));
@@ -763,11 +763,11 @@ function test_describe(t, cfg)
             t.assert(~tbl{1,'is_singleton'});
             t.assert(tbl{1,'dim'} == 1);
             if gdx.features.categorical
-                t.assertEquals(tbl{1,'domain_info'}, 'none');
+                t.assertEquals(tbl{1,'domain_type'}, 'none');
                 t.assertEquals(tbl{1,'domain'}, '[*]');
                 t.assertEquals(tbl{1,'size'}, '[NaN]');
             else
-                t.assertEquals(tbl{1,'domain_info'}{1}, 'none');
+                t.assertEquals(tbl{1,'domain_type'}{1}, 'none');
                 t.assertEquals(tbl{1,'domain'}{1}, '[*]');
                 t.assertEquals(tbl{1,'size'}{1}, '[NaN]');
             end
@@ -799,11 +799,11 @@ function test_describe(t, cfg)
             t.assert(~tbl.is_singleton(1));
             t.assert(tbl.dim(1) == 1);
             if gdx.features.categorical
-                t.assertEquals(tbl.domain_info(1), 'none');
+                t.assertEquals(tbl.domain_type(1), 'none');
                 t.assertEquals(tbl.domain(1), '[*]');
                 t.assertEquals(tbl.size(1), '[NaN]');
             else
-                t.assertEquals(tbl.domain_info{1}, 'none');
+                t.assertEquals(tbl.domain_type{1}, 'none');
                 t.assertEquals(tbl.domain{1}, '[*]');
                 t.assertEquals(tbl.size{1}, '[NaN]');
             end
@@ -842,11 +842,11 @@ function test_describe(t, cfg)
             end
             t.assert(tbl{1,'dim'} == 0);
             if gdx.features.categorical
-                t.assertEquals(tbl{1,'domain_info'}, 'none');
+                t.assertEquals(tbl{1,'domain_type'}, 'none');
                 t.assertEquals(tbl{1,'domain'}, '[]');
                 t.assertEquals(tbl{1,'size'}, '[]');
             else
-                t.assertEquals(tbl{1,'domain_info'}{1}, 'none');
+                t.assertEquals(tbl{1,'domain_type'}{1}, 'none');
                 t.assertEquals(tbl{1,'domain'}{1}, '[]');
                 t.assertEquals(tbl{1,'size'}{1}, '[]');
             end
@@ -898,11 +898,11 @@ function test_describe(t, cfg)
             end
             t.assert(tbl{2,'dim'} == 1);
             if gdx.features.categorical
-                t.assertEquals(tbl{2,'domain_info'}, 'regular');
+                t.assertEquals(tbl{2,'domain_type'}, 'regular');
                 t.assertEquals(tbl{2,'domain'}, '[i]');
                 t.assertEquals(tbl{2,'size'}, '[5]');
             else
-                t.assertEquals(tbl{2,'domain_info'}{1}, 'regular');
+                t.assertEquals(tbl{2,'domain_type'}{1}, 'regular');
                 t.assertEquals(tbl{2,'domain'}{1}, '[i]');
                 t.assertEquals(tbl{2,'size'}{1}, '[5]');
             end
@@ -964,11 +964,11 @@ function test_describe(t, cfg)
             end
             t.assert(tbl.dim(1) == 0);
             if gdx.features.categorical
-                t.assertEquals(tbl.domain_info(1), 'none');
+                t.assertEquals(tbl.domain_type(1), 'none');
                 t.assertEquals(tbl.domain(1), '[]');
                 t.assertEquals(tbl.size(1), '[]');
             else
-                t.assertEquals(tbl.domain_info{1}, 'none');
+                t.assertEquals(tbl.domain_type{1}, 'none');
                 t.assertEquals(tbl.domain{1}, '[]');
                 t.assertEquals(tbl.size{1}, '[]');
             end
@@ -1020,11 +1020,11 @@ function test_describe(t, cfg)
             end
             t.assert(tbl.dim(2) == 1);
             if gdx.features.categorical
-                t.assertEquals(tbl.domain_info(2), 'regular');
+                t.assertEquals(tbl.domain_type(2), 'regular');
                 t.assertEquals(tbl.domain(2), '[i]');
                 t.assertEquals(tbl.size(2), '[5]');
             else
-                t.assertEquals(tbl.domain_info{2}, 'regular');
+                t.assertEquals(tbl.domain_type{2}, 'regular');
                 t.assertEquals(tbl.domain{2}, '[i]');
                 t.assertEquals(tbl.size{2}, '[5]');
             end
@@ -1097,11 +1097,11 @@ function test_describe(t, cfg)
             end
             t.assert(tbl{1,'dim'} == 2);
             if gdx.features.categorical
-                t.assertEquals(tbl{1,'domain_info'}, 'regular');
+                t.assertEquals(tbl{1,'domain_type'}, 'regular');
                 t.assertEquals(tbl{1,'domain'}, '[i,j]');
                 t.assertEquals(tbl{1,'size'}, '[5,5]');
             else
-                t.assertEquals(tbl{1,'domain_info'}{1}, 'regular');
+                t.assertEquals(tbl{1,'domain_type'}{1}, 'regular');
                 t.assertEquals(tbl{1,'domain'}{1}, '[i,j]');
                 t.assertEquals(tbl{1,'size'}{1}, '[5,5]');
             end
@@ -1184,11 +1184,11 @@ function test_describe(t, cfg)
             end
             t.assert(tbl.dim(1) == 2);
             if gdx.features.categorical
-                t.assertEquals(tbl.domain_info(1), 'regular');
+                t.assertEquals(tbl.domain_type(1), 'regular');
                 t.assertEquals(tbl.domain(1), '[i,j]');
                 t.assertEquals(tbl.size(1), '[5,5]');
             else
-                t.assertEquals(tbl.domain_info{1}, 'regular');
+                t.assertEquals(tbl.domain_type{1}, 'regular');
                 t.assertEquals(tbl.domain{1}, '[i,j]');
                 t.assertEquals(tbl.size{1}, '[5,5]');
             end
@@ -1510,7 +1510,7 @@ function test_idx_describe(t, cfg)
         t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
         t.assertEquals(tbl.Properties.VariableNames{2}, 'format');
         t.assertEquals(tbl.Properties.VariableNames{3}, 'dim');
-        t.assertEquals(tbl.Properties.VariableNames{4}, 'domain_info');
+        t.assertEquals(tbl.Properties.VariableNames{4}, 'domain_type');
         t.assertEquals(tbl.Properties.VariableNames{5}, 'domain');
         t.assertEquals(tbl.Properties.VariableNames{6}, 'size');
         t.assertEquals(tbl.Properties.VariableNames{7}, 'num_recs');
@@ -1532,11 +1532,11 @@ function test_idx_describe(t, cfg)
         end
         t.assert(tbl{1,'dim'} == 0);
         if gdx.features.categorical
-            t.assertEquals(tbl{1,'domain_info'}, 'relaxed');
+            t.assertEquals(tbl{1,'domain_type'}, 'relaxed');
             t.assertEquals(tbl{1,'domain'}, '[]');
             t.assertEquals(tbl{1,'size'}, '[]');
         else
-            t.assertEquals(tbl{1,'domain_info'}{1}, 'relaxed');
+            t.assertEquals(tbl{1,'domain_type'}{1}, 'relaxed');
             t.assertEquals(tbl{1,'domain'}{1}, '[]');
             t.assertEquals(tbl{1,'size'}{1}, '[]');
         end
@@ -1563,11 +1563,11 @@ function test_idx_describe(t, cfg)
         end
         t.assert(tbl{2,'dim'} == 1);
         if gdx.features.categorical
-            t.assertEquals(tbl{2,'domain_info'}, 'relaxed');
+            t.assertEquals(tbl{2,'domain_type'}, 'relaxed');
             t.assertEquals(tbl{2,'domain'}, '[dim_1]');
             t.assertEquals(tbl{2,'size'}, '[5]');
         else
-            t.assertEquals(tbl{2,'domain_info'}{1}, 'relaxed');
+            t.assertEquals(tbl{2,'domain_type'}{1}, 'relaxed');
             t.assertEquals(tbl{2,'domain'}{1}, '[dim_1]');
             t.assertEquals(tbl{2,'size'}{1}, '[5]');
         end
@@ -1594,11 +1594,11 @@ function test_idx_describe(t, cfg)
         end
         t.assert(tbl{3,'dim'} == 2);
         if gdx.features.categorical
-            t.assertEquals(tbl{3,'domain_info'}, 'relaxed');
+            t.assertEquals(tbl{3,'domain_type'}, 'relaxed');
             t.assertEquals(tbl{3,'domain'}, '[dim_1,dim_2]');
             t.assertEquals(tbl{3,'size'}, '[5,10]');
         else
-            t.assertEquals(tbl{3,'domain_info'}{1}, 'relaxed');
+            t.assertEquals(tbl{3,'domain_type'}{1}, 'relaxed');
             t.assertEquals(tbl{3,'domain'}{1}, '[dim_1,dim_2]');
             t.assertEquals(tbl{3,'size'}{1}, '[5,10]');
         end
@@ -1623,7 +1623,7 @@ function test_idx_describe(t, cfg)
         t.assert(isfield(tbl, 'name'));
         t.assert(isfield(tbl, 'format'));
         t.assert(isfield(tbl, 'dim'));
-        t.assert(isfield(tbl, 'domain_info'));
+        t.assert(isfield(tbl, 'domain_type'));
         t.assert(isfield(tbl, 'domain'));
         t.assert(isfield(tbl, 'size'));
         t.assert(isfield(tbl, 'num_recs'));
@@ -1645,11 +1645,11 @@ function test_idx_describe(t, cfg)
         end
         t.assert(tbl.dim(1) == 0);
         if gdx.features.categorical
-            t.assertEquals(tbl.domain_info(1), 'relaxed');
+            t.assertEquals(tbl.domain_type(1), 'relaxed');
             t.assertEquals(tbl.domain(1), '[]');
             t.assertEquals(tbl.size(1), '[]');
         else
-            t.assertEquals(tbl.domain_info{1}, 'relaxed');
+            t.assertEquals(tbl.domain_type{1}, 'relaxed');
             t.assertEquals(tbl.domain{1}, '[]');
             t.assertEquals(tbl.size{1}, '[]');
         end
@@ -1676,11 +1676,11 @@ function test_idx_describe(t, cfg)
         end
         t.assert(tbl.dim(2) == 1);
         if gdx.features.categorical
-            t.assertEquals(tbl.domain_info(2), 'relaxed');
+            t.assertEquals(tbl.domain_type(2), 'relaxed');
             t.assertEquals(tbl.domain(2), '[dim_1]');
             t.assertEquals(tbl.size(2), '[5]');
         else
-            t.assertEquals(tbl.domain_info{2}, 'relaxed');
+            t.assertEquals(tbl.domain_type{2}, 'relaxed');
             t.assertEquals(tbl.domain{2}, '[dim_1]');
             t.assertEquals(tbl.size{2}, '[5]');
         end
@@ -1707,11 +1707,11 @@ function test_idx_describe(t, cfg)
         end
         t.assert(tbl.dim(3) == 2);
         if gdx.features.categorical
-            t.assertEquals(tbl.domain_info(3), 'relaxed');
+            t.assertEquals(tbl.domain_type(3), 'relaxed');
             t.assertEquals(tbl.domain(3), '[dim_1,dim_2]');
             t.assertEquals(tbl.size(3), '[5,10]');
         else
-            t.assertEquals(tbl.domain_info{3}, 'relaxed');
+            t.assertEquals(tbl.domain_type{3}, 'relaxed');
             t.assertEquals(tbl.domain{3}, '[dim_1,dim_2]');
             t.assertEquals(tbl.size{3}, '[5,10]');
         end
@@ -1781,11 +1781,11 @@ function test_idx_describe(t, cfg)
             end
             t.assert(tbl{1,'dim'} == 0);
             if gdx.features.categorical
-                t.assertEquals(tbl{1,'domain_info'}, 'relaxed');
+                t.assertEquals(tbl{1,'domain_type'}, 'relaxed');
                 t.assertEquals(tbl{1,'domain'}, '[]');
                 t.assertEquals(tbl{1,'size'}, '[]');
             else
-                t.assertEquals(tbl{1,'domain_info'}{1}, 'relaxed');
+                t.assertEquals(tbl{1,'domain_type'}{1}, 'relaxed');
                 t.assertEquals(tbl{1,'domain'}{1}, '[]');
                 t.assertEquals(tbl{1,'size'}{1}, '[]');
             end
@@ -1837,11 +1837,11 @@ function test_idx_describe(t, cfg)
             end
             t.assert(tbl{2,'dim'} == 1);
             if gdx.features.categorical
-                t.assertEquals(tbl{2,'domain_info'}, 'relaxed');
+                t.assertEquals(tbl{2,'domain_type'}, 'relaxed');
                 t.assertEquals(tbl{2,'domain'}, '[dim_1]');
                 t.assertEquals(tbl{2,'size'}, '[5]');
             else
-                t.assertEquals(tbl{2,'domain_info'}{1}, 'relaxed');
+                t.assertEquals(tbl{2,'domain_type'}{1}, 'relaxed');
                 t.assertEquals(tbl{2,'domain'}{1}, '[dim_1]');
                 t.assertEquals(tbl{2,'size'}{1}, '[5]');
             end
@@ -1903,11 +1903,11 @@ function test_idx_describe(t, cfg)
             end
             t.assert(tbl{3,'dim'} == 2);
             if gdx.features.categorical
-                t.assertEquals(tbl{3,'domain_info'}, 'relaxed');
+                t.assertEquals(tbl{3,'domain_type'}, 'relaxed');
                 t.assertEquals(tbl{3,'domain'}, '[dim_1,dim_2]');
                 t.assertEquals(tbl{3,'size'}, '[5,10]');
             else
-                t.assertEquals(tbl{3,'domain_info'}{1}, 'relaxed');
+                t.assertEquals(tbl{3,'domain_type'}{1}, 'relaxed');
                 t.assertEquals(tbl{3,'domain'}{1}, '[dim_1,dim_2]');
                 t.assertEquals(tbl{3,'size'}{1}, '[5,10]');
             end
@@ -1969,11 +1969,11 @@ function test_idx_describe(t, cfg)
             end
             t.assert(tbl.dim(1) == 0);
             if gdx.features.categorical
-                t.assertEquals(tbl.domain_info(1), 'relaxed');
+                t.assertEquals(tbl.domain_type(1), 'relaxed');
                 t.assertEquals(tbl.domain(1), '[]');
                 t.assertEquals(tbl.size(1), '[]');
             else
-                t.assertEquals(tbl.domain_info{1}, 'relaxed');
+                t.assertEquals(tbl.domain_type{1}, 'relaxed');
                 t.assertEquals(tbl.domain{1}, '[]');
                 t.assertEquals(tbl.size{1}, '[]');
             end
@@ -2023,11 +2023,11 @@ function test_idx_describe(t, cfg)
             end
             t.assert(tbl.dim(2) == 1);
             if gdx.features.categorical
-                t.assertEquals(tbl.domain_info(2), 'relaxed');
+                t.assertEquals(tbl.domain_type(2), 'relaxed');
                 t.assertEquals(tbl.domain(2), '[dim_1]');
                 t.assertEquals(tbl.size(2), '[5]');
             else
-                t.assertEquals(tbl.domain_info{2}, 'relaxed');
+                t.assertEquals(tbl.domain_type{2}, 'relaxed');
                 t.assertEquals(tbl.domain{2}, '[dim_1]');
                 t.assertEquals(tbl.size{2}, '[5]');
             end
@@ -2089,11 +2089,11 @@ function test_idx_describe(t, cfg)
             end
             t.assert(tbl.dim(3) == 2);
             if gdx.features.categorical
-                t.assertEquals(tbl.domain_info(3), 'relaxed');
+                t.assertEquals(tbl.domain_type(3), 'relaxed');
                 t.assertEquals(tbl.domain(3), '[dim_1,dim_2]');
                 t.assertEquals(tbl.size(3), '[5,10]');
             else
-                t.assertEquals(tbl.domain_info{3}, 'relaxed');
+                t.assertEquals(tbl.domain_type{3}, 'relaxed');
                 t.assertEquals(tbl.domain{3}, '[dim_1,dim_2]');
                 t.assertEquals(tbl.size{3}, '[5,10]');
             end

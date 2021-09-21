@@ -149,11 +149,11 @@ void mexFunction(
     mxSetProperty((mxArray*) prhs[0], 0, "domain_names_", mx_arr_domnames);
     mxSetProperty((mxArray*) prhs[0], 0, "domain_labels_", mx_arr_domlabels);
     if (dominfo_none)
-        mxSetProperty((mxArray*) prhs[0], 0, "domain_info_", mxCreateString("none"));
+        mxSetProperty((mxArray*) prhs[0], 0, "domain_type_", mxCreateString("none"));
     else if (dominfo_regular)
-        mxSetProperty((mxArray*) prhs[0], 0, "domain_info_", mxCreateString("regular"));
+        mxSetProperty((mxArray*) prhs[0], 0, "domain_type_", mxCreateString("regular"));
     else
-        mxSetProperty((mxArray*) prhs[0], 0, "domain_info_", mxCreateString("relaxed"));
+        mxSetProperty((mxArray*) prhs[0], 0, "domain_type_", mxCreateString("relaxed"));
     mxSetProperty((mxArray*) prhs[0], 0, "size_", mx_arr_size);
     mxSetProperty((mxArray*) prhs[0], 0, "format_", mxCreateDoubleScalar(GT_FORMAT_REEVALUATE));
     mxSetProperty((mxArray*) prhs[0], 0, "number_records_", mxCreateDoubleScalar(mxGetNaN()));

@@ -48,7 +48,7 @@ function test_idx_addSymbols(t, cfg)
     t.assert(numel(p1.domain) == 0);
     t.assert(numel(p1.domain_names) == 0);
     t.assert(numel(p1.domain_labels) == 0);
-    t.assertEquals(p1.domain_info, 'relaxed');
+    t.assertEquals(p1.domain_type, 'relaxed');
     t.assert(numel(p1.size) == 0);
     t.assert(strcmp(p1.format, 'empty'));
     t.assert(p1.getNumberRecords() == 0);
@@ -69,7 +69,7 @@ function test_idx_addSymbols(t, cfg)
     t.assertEquals(p2.domain_names{1}, 'dim_1');
     t.assert(numel(p2.domain_labels) == 1);
     t.assertEquals(p2.domain_labels{1}, 'dim_1');
-    t.assertEquals(p2.domain_info, 'relaxed');
+    t.assertEquals(p2.domain_type, 'relaxed');
     t.assert(numel(p2.size) == 1);
     t.assert(p2.size(1) == 0);
     t.assert(strcmp(p2.format, 'empty'));
@@ -97,7 +97,7 @@ function test_idx_addSymbols(t, cfg)
     t.assertEquals(p3.domain_labels{1}, 'dim_1');
     t.assertEquals(p3.domain_labels{2}, 'dim_2');
     t.assertEquals(p3.domain_labels{3}, 'dim_3');
-    t.assertEquals(p3.domain_info, 'relaxed');
+    t.assertEquals(p3.domain_type, 'relaxed');
     t.assert(numel(p3.size) == 3);
     t.assert(p3.size(1) == 1);
     t.assert(p3.size(2) == 2);

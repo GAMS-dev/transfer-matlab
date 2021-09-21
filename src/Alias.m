@@ -76,8 +76,8 @@ classdef Alias < handle
         % domain_labels Expected domain labels in records
         domain_labels
 
-        % domain_info Specifies if domains are stored 'relaxed' or 'regular'
-        domain_info
+        % domain_type Specifies if domains are stored 'relaxed' or 'regular'
+        domain_type
 
         % records Storage of aliased Set records
         records
@@ -216,8 +216,8 @@ classdef Alias < handle
             domain_labels = obj.alias_with.domain_labels;
         end
 
-        function domain_info = get.domain_info(obj)
-            domain_info = obj.alias_with.domain_info;
+        function domain_type = get.domain_type(obj)
+            domain_type = obj.alias_with.domain_type;
         end
 
         function records = get.records(obj)

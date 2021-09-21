@@ -54,7 +54,7 @@ function test_addSymbols(t, cfg)
     t.assert(s1.domain_names{1} == '*');
     t.assert(numel(s1.domain_labels) == 1);
     t.assert(s1.domain_labels{1} == 'uni_1');
-    t.assertEquals(s1.domain_info, 'none');
+    t.assertEquals(s1.domain_type, 'none');
     t.assert(numel(s1.size) == 1);
     t.assert(isnan(s1.size(1)));
     t.assert(strcmp(s1.format, 'empty'));
@@ -79,7 +79,7 @@ function test_addSymbols(t, cfg)
     t.assert(s2.domain_names{1} == 's1');
     t.assert(numel(s2.domain_labels) == 1);
     t.assert(s2.domain_labels{1} == 's1_1');
-    t.assertEquals(s2.domain_info, 'regular');
+    t.assertEquals(s2.domain_type, 'regular');
     t.assert(numel(s2.size) == 1);
     t.assert(s2.size(1) == 0);
     t.assert(strcmp(s2.format, 'empty'));
@@ -107,7 +107,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s3.domain_labels) == 2);
     t.assert(s3.domain_labels{1} == 's1_1');
     t.assert(s3.domain_labels{2} == 'uni_2');
-    t.assertEquals(s3.domain_info, 'regular');
+    t.assertEquals(s3.domain_type, 'regular');
     t.assert(numel(s3.size) == 2);
     t.assert(s3.size(1) == 0);
     t.assert(isnan(s3.size(2)));
@@ -134,7 +134,7 @@ function test_addSymbols(t, cfg)
     t.assert(s4.domain_names{1} == 's2');
     t.assert(numel(s4.domain_labels) == 1);
     t.assert(s4.domain_labels{1} == 's2_1');
-    t.assertEquals(s4.domain_info, 'regular');
+    t.assertEquals(s4.domain_type, 'regular');
     t.assert(numel(s4.size) == 1);
     t.assert(s4.size(1) == 0);
     t.assert(strcmp(s4.format, 'empty'));
@@ -162,7 +162,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s5.domain_labels) == 2);
     t.assert(s5.domain_labels{1} == 's1_1');
     t.assert(s5.domain_labels{2} == 's2_2');
-    t.assertEquals(s5.domain_info, 'relaxed');
+    t.assertEquals(s5.domain_type, 'relaxed');
     t.assert(numel(s5.size) == 2);
     t.assert(isnan(s5.size(1)));
     t.assert(s5.size(2) == 0);
@@ -188,7 +188,7 @@ function test_addSymbols(t, cfg)
     t.assert(s6.domain_names{1} == 's1');
     t.assert(numel(s6.domain_labels) == 1);
     t.assert(s6.domain_labels{1} == 's1_1');
-    t.assertEquals(s6.domain_info, 'relaxed');
+    t.assertEquals(s6.domain_type, 'relaxed');
     t.assert(numel(s6.size) == 1);
     t.assert(isnan(s6.size(1)));
     t.assert(strcmp(s6.format, 'empty'));
@@ -280,7 +280,7 @@ function test_addSymbols(t, cfg)
     t.assert(a1.domain_names{1} == '*');
     t.assert(numel(a1.domain_labels) == 1);
     t.assert(a1.domain_labels{1} == 'uni_1');
-    t.assertEquals(a1.domain_info, 'none');
+    t.assertEquals(a1.domain_type, 'none');
     t.assert(numel(a1.size) == 1);
     t.assert(isnan(a1.size(1)));
     t.assert(strcmp(a1.format, 'empty'));
@@ -322,7 +322,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(p1.domain) == 0);
     t.assert(numel(p1.domain_names) == 0);
     t.assert(numel(p1.domain_labels) == 0);
-    t.assertEquals(p1.domain_info, 'none');
+    t.assertEquals(p1.domain_type, 'none');
     t.assert(numel(p1.size) == 0);
     t.assert(strcmp(p1.format, 'empty'));
     t.assert(p1.getNumberRecords() == 0);
@@ -344,7 +344,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p2.domain_names{1}, 's1');
     t.assert(numel(p2.domain_labels) == 1);
     t.assertEquals(p2.domain_labels{1}, 's1_1');
-    t.assertEquals(p2.domain_info, 'regular');
+    t.assertEquals(p2.domain_type, 'regular');
     t.assert(numel(p2.size) == 1);
     t.assert(p2.size(1) == 0);
     t.assert(strcmp(p2.format, 'empty'));
@@ -374,7 +374,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p3.domain_labels{1}, 's1_1');
     t.assertEquals(p3.domain_labels{2}, 'uni_2');
     t.assertEquals(p3.domain_labels{3}, 's2_3');
-    t.assertEquals(p3.domain_info, 'relaxed');
+    t.assertEquals(p3.domain_type, 'relaxed');
     t.assert(numel(p3.size) == 3);
     t.assert(p3.size(1) == 0);
     t.assert(isnan(p3.size(2)));
@@ -459,7 +459,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(v1.domain) == 0);
     t.assert(numel(v1.domain_names) == 0);
     t.assert(numel(v1.domain_labels) == 0);
-    t.assertEquals(v1.domain_info, 'none');
+    t.assertEquals(v1.domain_type, 'none');
     t.assert(numel(v1.size) == 0);
     t.assert(strcmp(v1.format, 'empty'));
     t.assert(v1.getNumberRecords() == 0);
@@ -478,7 +478,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(v2.domain) == 0);
     t.assert(numel(v2.domain_names) == 0);
     t.assert(numel(v2.domain_labels) == 0);
-    t.assertEquals(v2.domain_info, 'none');
+    t.assertEquals(v2.domain_type, 'none');
     t.assert(numel(v2.size) == 0);
     t.assert(strcmp(v2.format, 'empty'));
     t.assert(v2.getNumberRecords() == 0);
@@ -504,7 +504,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(v3.domain_labels) == 2);
     t.assertEquals(v3.domain_labels{1}, 's1_1');
     t.assertEquals(v3.domain_labels{2}, 'uni_2');
-    t.assertEquals(v3.domain_info, 'regular');
+    t.assertEquals(v3.domain_type, 'regular');
     t.assert(numel(v3.size) == 2);
     t.assert(v3.size(1) == 0);
     t.assert(isnan(v3.size(2)));
@@ -633,7 +633,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(e1.domain) == 0);
     t.assert(numel(e1.domain_names) == 0);
     t.assert(numel(e1.domain_labels) == 0);
-    t.assertEquals(e1.domain_info, 'none');
+    t.assertEquals(e1.domain_type, 'none');
     t.assert(numel(e1.size) == 0);
     t.assert(strcmp(e1.format, 'empty'));
     t.assert(e1.getNumberRecords() == 0);
@@ -652,7 +652,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(e2.domain) == 0);
     t.assert(numel(e2.domain_names) == 0);
     t.assert(numel(e2.domain_labels) == 0);
-    t.assertEquals(e2.domain_info, 'none');
+    t.assertEquals(e2.domain_type, 'none');
     t.assert(numel(e2.size) == 0);
     t.assert(strcmp(e2.format, 'empty'));
     t.assert(e2.getNumberRecords() == 0);
@@ -678,7 +678,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(e3.domain_labels) == 2);
     t.assertEquals(e3.domain_labels{1}, 's1_1');
     t.assertEquals(e3.domain_labels{2}, 'uni_2');
-    t.assertEquals(e3.domain_info, 'regular');
+    t.assertEquals(e3.domain_type, 'regular');
     t.assert(numel(e3.size) == 2);
     t.assert(e3.size(1) == 0);
     t.assert(isnan(e3.size(2)));

@@ -181,7 +181,7 @@ void mexFunction(
 
         /* get optional fields */
         gt_mex_getfield_str(mx_arr_data, data_name, "description_", "", false, text, GMS_SSSIZE);
-        gt_mex_getfield_str(mx_arr_data, data_name, "domain_info_", "relaxed", false, dominfo, 10);
+        gt_mex_getfield_str(mx_arr_data, data_name, "domain_type_", "relaxed", false, dominfo, 10);
 
         domain_uel_size = (size_t*) mxCalloc(dim, sizeof(*domain_uel_size));
         domain_uel_ids = (int**) mxCalloc(dim, sizeof(*domain_uel_ids));
