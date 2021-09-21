@@ -169,7 +169,7 @@ classdef Container < handle
             else
                 def_format = 'struct';
             end
-            addParameter(p, 'symbols', fieldnames(obj.data), @iscellstr);
+            addParameter(p, 'symbols', false, @iscellstr);
             addParameter(p, 'format', def_format, is_string_char);
             addParameter(p, 'values', {'level', 'marginal', 'lower', 'upper', 'scale'}, ...
                 is_values);
@@ -205,28 +205,45 @@ classdef Container < handle
                     error('Invalid value option: %s. Choose from level, value, text, marginal, lower, upper, scale.', e{1});
                 end
             end
+            if ~iscellstr(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = p.Results.symbols;
+            end
 
             % read records
             if obj.indexed
                 GAMSTransfer.gt_idx_read_records(obj.gams_dir, ...
-                    obj.filename, obj.data, p.Results.symbols, int32(format_int));
+                    obj.filename, obj.data, symbols, int32(format_int));
             else
                 GAMSTransfer.gt_gdx_read_records(obj.gams_dir, ...
-                    obj.filename, obj.data, p.Results.symbols, int32(format_int), ...
+                    obj.filename, obj.data, symbols, int32(format_int), ...
                     values_bool, obj.features.categorical, obj.features.c_prop_setget);
             end
 
             % read cache data for C
             if ~obj.indexed && ~obj.features.c_prop_setget
-                for i = 1:numel(p.Results.symbols)
-                    if ~isfield(obj.data, p.Results.symbols{i})
+                for i = 1:numel(symbols)
+                    if ~isfield(obj.data, symbols{i})
                         continue
                     end
-                    symbol = obj.data.(p.Results.symbols{i});
+                    symbol = obj.data.(symbols{i});
                     if isa(symbol, 'GAMSTransfer.Alias')
                         continue;
                     end
                     symbol.getCacheUels();
+                end
+            end
+
+            % check for format of read symbols in case of partial read (done by
+            % forced call to isValid). Domains may not be read and may cause
+            % invalid symbols.
+            if iscellstr(p.Results.symbols)
+                for i = 1:numel(symbols)
+                    if ~isfield(obj.data, symbols{i})
+                        continue
+                    end
+                    obj.data.(symbols{i}).isValid(false, true);
                 end
             end
         end
@@ -271,8 +288,10 @@ classdef Container < handle
             if ~obj.isValid()
                 obj.reorderSymbols();
                 if ~obj.isValid()
-                    invalids = GAMSTransfer.Utils.list2str(obj.listInvalidSymbols(), '', '');
-                    error('Can''t write invalid container. Invalid symbols: %s.', invalids);
+                    invalid_symbols = GAMSTransfer.Utils.list2str(setdiff(...
+                        obj.listSymbols('only_loaded', true), obj.listSymbols(...
+                        'only_valid', true, 'only_loaded', true)), '', '');
+                    error('Can''t write invalid container. Invalid loaded symbols: %s.', invalid_symbols);
                 end
             end
 
@@ -602,107 +621,223 @@ classdef Container < handle
         function list = listSymbols(obj, varargin)
             % Lists all symbols in container
             %
+            % Parameter Arguments:
+            % - only_loaded: logical
+            %   Only include symbols with records loaded from GDX or added
+            %   through interface. Default: false.
+            % - only_valid: logical
+            %   Only include symbols that are valid. Default: false.
+            %
+            % See also: GAMSTransfer.Container.listSets,
+            % GAMSTransfer.Container.listParameters,
+            % GAMSTransfer.Container.listVariables,
+            % GAMSTransfer.Container.listEquations,
+            % GAMSTransfer.Container.listAliases
+            %
+
+            p = inputParser();
+            addParameter(p, 'only_types', [], @isnumeric);
+            addParameter(p, 'only_loaded', false, @islogical);
+            addParameter(p, 'only_valid', false, @islogical);
+            parse(p, varargin{:});
+            only_types = p.Results.only_types;
+            only_loaded = p.Results.only_loaded;
+            only_valid = p.Results.only_valid;
 
             names = fieldnames(obj.data);
-            switch nargin
-            case 1
+            if isempty(only_types) && ~only_loaded && ~only_valid
                 list = names;
-            case 2
-                switch varargin{1}
-                case GAMSTransfer.SymbolType.SET
-                    cls = 'GAMSTransfer.Set';
-                case GAMSTransfer.SymbolType.PARAMETER
-                    cls = 'GAMSTransfer.Parameter';
-                case GAMSTransfer.SymbolType.VARIABLE
-                    cls = 'GAMSTransfer.Variable';
-                case GAMSTransfer.SymbolType.EQUATION
-                    cls = 'GAMSTransfer.Equation';
-                case GAMSTransfer.SymbolType.ALIAS
-                    cls = 'GAMSTransfer.Alias';
-                otherwise
-                    error('Invalid symbol type.');
-                end
+                return
+            end
 
-                % count matched symbols
+            % count matched symbols
+            for k = 1:2
                 n = 0;
                 for i = 1:numel(names)
-                    if isa(obj.data.(names{i}), cls)
-                        n = n + 1;
+                    symbol = obj.data.(names{i});
+
+                    % check type
+                    matched_type = isempty(only_types);
+                    for j = 1:numel(only_types)
+                        switch only_types(j)
+                        case GAMSTransfer.SymbolType.SET
+                            matched_type = isa(symbol, 'GAMSTransfer.Set');
+                        case GAMSTransfer.SymbolType.PARAMETER
+                            matched_type = isa(symbol, 'GAMSTransfer.Parameter');
+                        case GAMSTransfer.SymbolType.VARIABLE
+                            matched_type = isa(symbol, 'GAMSTransfer.Variable');
+                        case GAMSTransfer.SymbolType.EQUATION
+                            matched_type = isa(symbol, 'GAMSTransfer.Equation');
+                        case GAMSTransfer.SymbolType.ALIAS
+                            matched_type = isa(symbol, 'GAMSTransfer.Alias');
+                        otherwise
+                            error('Invalid symbol type.');
+                        end
+                        if matched_type
+                            break;
+                        end
                     end
-                end
+                    if ~matched_type
+                        continue
+                    end
 
-                list = cell(n, 1);
+                    % check loaded
+                    if only_loaded && ~isa(symbol, 'GAMSTransfer.Alias') && ...
+                        ~isnan(symbol.read_entry) && ...
+                        symbol.format_ == GAMSTransfer.RecordsFormat.NOT_READ
+                        continue
+                    end
 
-                % create list of matched symbols
-                n = 0;
-                for i = 1:numel(names)
-                    if isa(obj.data.(names{i}), cls)
-                        n = n + 1;
+                    % check invalid
+                    if only_valid && ~symbol.isValid()
+                        continue
+                    end
+
+                    % add name to list
+                    n = n + 1;
+                    if k == 2
                         list{n} = names{i};
                     end
                 end
-            otherwise
-                error('Invalid number of arguments. Requires 1 or 3.');
+                if k == 1
+                    list = cell(n, 1);
+                end
             end
         end
 
-        function list = listSets(obj)
+        function list = listSets(obj, varargin)
             % Lists all sets in container
             %
+            % Parameter Arguments:
+            % - only_loaded: logical
+            %   Only include symbols with records loaded from GDX or added
+            %   through interface. Default: false.
+            % - only_valid: logical
+            %   Only include symbols that are valid. Default: false.
+            %
+            % See also: GAMSTransfer.Container.listSymbols,
+            % GAMSTransfer.Container.listParameters,
+            % GAMSTransfer.Container.listVariables,
+            % GAMSTransfer.Container.listEquations,
+            % GAMSTransfer.Container.listAliases
+            %
 
-            list = obj.listSymbols(GAMSTransfer.SymbolType.SET);
+            p = inputParser();
+            addParameter(p, 'only_loaded', false, @islogical);
+            addParameter(p, 'only_valid', false, @islogical);
+            parse(p, varargin{:});
+
+            list = obj.listSymbols('only_types', [GAMSTransfer.SymbolType.SET, ...
+                GAMSTransfer.SymbolType.ALIAS], 'only_loaded', p.Results.only_loaded, ...
+                'only_valid', p.Results.only_valid);
         end
 
-        function list = listParameters(obj)
+        function list = listParameters(obj, varargin)
             % Lists all parameters in container
             %
+            % Parameter Arguments:
+            % - only_loaded: logical
+            %   Only include symbols with records loaded from GDX or added
+            %   through interface. Default: false.
+            % - only_valid: logical
+            %   Only include symbols that are valid. Default: false.
+            %
+            % See also: GAMSTransfer.Container.listSymbols,
+            % GAMSTransfer.Container.listSets,
+            % GAMSTransfer.Container.listVariables,
+            % GAMSTransfer.Container.listEquations,
+            % GAMSTransfer.Container.listAliases
+            %
 
-            list = obj.listSymbols(GAMSTransfer.SymbolType.PARAMETER);
+            p = inputParser();
+            addParameter(p, 'only_loaded', false, @islogical);
+            addParameter(p, 'only_valid', false, @islogical);
+            parse(p, varargin{:});
+
+            list = obj.listSymbols('only_types', GAMSTransfer.SymbolType.PARAMETER, ...
+                'only_loaded', p.Results.only_loaded, 'only_valid', ...
+                p.Results.only_valid);
         end
 
-        function list = listVariables(obj)
+        function list = listVariables(obj, varargin)
             % Lists all variables in container
             %
+            % Parameter Arguments:
+            % - only_loaded: logical
+            %   Only include symbols with records loaded from GDX or added
+            %   through interface. Default: false.
+            % - only_valid: logical
+            %   Only include symbols that are valid. Default: false.
+            %
+            % See also: GAMSTransfer.Container.listSymbols,
+            % GAMSTransfer.Container.listSets,
+            % GAMSTransfer.Container.listParameters,
+            % GAMSTransfer.Container.listEquations,
+            % GAMSTransfer.Container.listAliases
+            %
 
-            list = obj.listSymbols(GAMSTransfer.SymbolType.VARIABLE);
+            p = inputParser();
+            addParameter(p, 'only_loaded', false, @islogical);
+            addParameter(p, 'only_valid', false, @islogical);
+            parse(p, varargin{:});
+
+            list = obj.listSymbols('only_types', GAMSTransfer.SymbolType.VARIABLE, ...
+                'only_loaded', p.Results.only_loaded, 'only_valid', ...
+                p.Results.only_valid);
         end
 
-        function list = listEquations(obj)
+        function list = listEquations(obj, varargin)
             % Lists all equations in container
             %
+            % Parameter Arguments:
+            % - only_loaded: logical
+            %   Only include symbols with records loaded from GDX or added
+            %   through interface. Default: false.
+            % - only_valid: logical
+            %   Only include symbols that are valid. Default: false.
+            %
+            % See also: GAMSTransfer.Container.listSymbols,
+            % GAMSTransfer.Container.listSets,
+            % GAMSTransfer.Container.listParameters,
+            % GAMSTransfer.Container.listVariables,
+            % GAMSTransfer.Container.listAliases
+            %
 
-            list = obj.listSymbols(GAMSTransfer.SymbolType.EQUATION);
+            p = inputParser();
+            addParameter(p, 'only_loaded', false, @islogical);
+            addParameter(p, 'only_valid', false, @islogical);
+            parse(p, varargin{:});
+
+            list = obj.listSymbols('only_types', GAMSTransfer.SymbolType.EQUATION, ...
+                'only_loaded', p.Results.only_loaded, 'only_valid', ...
+                p.Results.only_valid);
         end
 
-        function list = listAliases(obj)
+        function list = listAliases(obj, varargin)
             % Lists all aliases in container
             %
-
-            list = obj.listSymbols(GAMSTransfer.SymbolType.ALIAS);
-        end
-
-        function list = listInvalidSymbols(obj)
-            % List all symbols with invalid records
+            % Parameter Arguments:
+            % - only_loaded: logical
+            %   Only include symbols with records loaded from GDX or added
+            %   through interface. Default: false.
+            % - only_valid: logical
+            %   Only include symbols that are valid. Default: false.
+            %
+            % See also: GAMSTransfer.Container.listSymbols,
+            % GAMSTransfer.Container.listSets,
+            % GAMSTransfer.Container.listParameters,
+            % GAMSTransfer.Container.listVariables,
+            % GAMSTransfer.Container.listEquations,
             %
 
-            symbols = fieldnames(obj.data);
+            p = inputParser();
+            addParameter(p, 'only_loaded', false, @islogical);
+            addParameter(p, 'only_valid', false, @islogical);
+            parse(p, varargin{:});
 
-            n_invalid = 0;
-            for i = 1:numel(symbols)
-                if ~obj.data.(symbols{i}).isValid()
-                    n_invalid = n_invalid + 1;
-                end
-            end
-
-            list = cell(1, n_invalid);
-
-            n_invalid = 0;
-            for i = 1:numel(symbols)
-                if ~obj.data.(symbols{i}).isValid()
-                    n_invalid = n_invalid + 1;
-                    list{n_invalid} = obj.data.(symbols{i}).name;
-                end
-            end
+            list = obj.listSymbols('only_types', GAMSTransfer.SymbolType.ALIAS, ...
+                'only_loaded', p.Results.only_loaded, 'only_valid', ...
+                p.Results.only_valid);
         end
 
         function descr = describeSets(obj)
@@ -860,6 +995,8 @@ classdef Container < handle
         function valid = isValid(obj, varargin)
             % Checks correctness of all symbols
             %
+            % Note: Not yet read symbols will be ignored.
+            %
             % Optional Arguments:
             % 1. verbose: logical
             %    If true, the reason for an invalid symbol is printed
@@ -882,11 +1019,17 @@ classdef Container < handle
             valid = true;
             symbols = fieldnames(obj.data);
             for i = 1:numel(symbols)
-                if ~obj.data.(symbols{i}).isValid(verbose, force)
-                    valid = false;
-                    if ~force
-                        return
-                    end
+                symbol = obj.data.(symbols{i});
+                if symbol.isValid(verbose, force)
+                    continue
+                end
+                if ~isa(symbol, 'GAMSTransfer.Alias') && ...
+                    symbol.format_ == GAMSTransfer.RecordsFormat.NOT_READ
+                    continue
+                end
+                valid = false;
+                if ~force
+                    return
                 end
             end
         end

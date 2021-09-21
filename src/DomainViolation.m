@@ -128,7 +128,7 @@ classdef DomainViolation
             domain_uels = reshape(domain_uels, 1, numel(domain_uels));
             obj.domain.setRecords(domain_uels);
             if has_text
-                expl_text(end+1:numel(obj.domain.records.(obj.domain.domain_label{1}))) = '';
+                expl_text(end+1:numel(obj.domain.records.(obj.domain.domain_labels{1}))) = '';
                 obj.domain.records.text = expl_text;
             end
             if was_table

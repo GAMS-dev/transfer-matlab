@@ -156,6 +156,19 @@ void mexFunction(
         for (size_t j = 0; j < GLOBAL_MAX_INDEX_DIM; j++)
             sizes[j] = 1;
 
+        /* get records format (ignore unsupported formats) */
+        gt_mex_getfield_int(mx_arr_data, data_name, "format_", GT_FORMAT_UNKNOWN, false, GT_FILTER_NONE, 1, &format);
+        switch (format)
+        {
+            case GT_FORMAT_STRUCT:
+            case GT_FORMAT_DENSEMAT:
+            case GT_FORMAT_SPARSEMAT:
+            case GT_FORMAT_TABLE:
+                break;
+            default:
+                continue;
+        }
+
         /* get fields */
         gt_mex_getfield_str(mx_arr_data, data_name, "name_", "", true, name, GMS_SSSIZE);
         gt_mex_getfield_sizet(mx_arr_data, data_name, "dimension_", 0, true, GT_FILTER_NONNEGATIVE, 1, &dim);
@@ -169,19 +182,6 @@ void mexFunction(
         /* get optional fields */
         gt_mex_getfield_str(mx_arr_data, data_name, "description_", "", false, text, GMS_SSSIZE);
         gt_mex_getfield_str(mx_arr_data, data_name, "domain_info_", "relaxed", false, dominfo, 10);
-        gt_mex_getfield_int(mx_arr_data, data_name, "format_", GT_FORMAT_UNKNOWN, false, GT_FILTER_NONE, 1, &format);
-        switch (format)
-        {
-            case GT_FORMAT_UNKNOWN:
-            case GT_FORMAT_NOT_READ:
-                mexErrMsgIdAndTxt(ERRID"valid", "Symbol '%s' is marked as invalid.", data_name);
-                break;
-            case GT_FORMAT_STRUCT:
-            case GT_FORMAT_DENSEMAT:
-            case GT_FORMAT_SPARSEMAT:
-            case GT_FORMAT_TABLE:
-                break;
-        }
 
         domain_uel_size = (size_t*) mxCalloc(dim, sizeof(*domain_uel_size));
         domain_uel_ids = (int**) mxCalloc(dim, sizeof(*domain_uel_ids));

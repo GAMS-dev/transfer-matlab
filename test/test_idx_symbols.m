@@ -47,7 +47,7 @@ function test_idx_addSymbols(t, cfg)
     t.assert(p1.dimension == 0);
     t.assert(numel(p1.domain) == 0);
     t.assert(numel(p1.domain_names) == 0);
-    t.assert(numel(p1.domain_label) == 0);
+    t.assert(numel(p1.domain_labels) == 0);
     t.assertEquals(p1.domain_info, 'relaxed');
     t.assert(numel(p1.size) == 0);
     t.assert(strcmp(p1.format, 'empty'));
@@ -67,8 +67,8 @@ function test_idx_addSymbols(t, cfg)
     t.assertEquals(p2.domain{1}, 'dim_1');
     t.assert(numel(p2.domain_names) == 1);
     t.assertEquals(p2.domain_names{1}, 'dim_1');
-    t.assert(numel(p2.domain_label) == 1);
-    t.assertEquals(p2.domain_label{1}, 'dim_1');
+    t.assert(numel(p2.domain_labels) == 1);
+    t.assertEquals(p2.domain_labels{1}, 'dim_1');
     t.assertEquals(p2.domain_info, 'relaxed');
     t.assert(numel(p2.size) == 1);
     t.assert(p2.size(1) == 0);
@@ -93,10 +93,10 @@ function test_idx_addSymbols(t, cfg)
     t.assertEquals(p3.domain_names{1}, 'dim_1');
     t.assertEquals(p3.domain_names{2}, 'dim_2');
     t.assertEquals(p3.domain_names{3}, 'dim_3');
-    t.assert(numel(p3.domain_label) == 3);
-    t.assertEquals(p3.domain_label{1}, 'dim_1');
-    t.assertEquals(p3.domain_label{2}, 'dim_2');
-    t.assertEquals(p3.domain_label{3}, 'dim_3');
+    t.assert(numel(p3.domain_labels) == 3);
+    t.assertEquals(p3.domain_labels{1}, 'dim_1');
+    t.assertEquals(p3.domain_labels{2}, 'dim_2');
+    t.assertEquals(p3.domain_labels{3}, 'dim_3');
     t.assertEquals(p3.domain_info, 'relaxed');
     t.assert(numel(p3.size) == 3);
     t.assert(p3.size(1) == 1);
@@ -292,7 +292,7 @@ function test_idx_changeSymbol(t, cfg)
 
     t.add('idx_change_symbol_domain_label');
     try
-        p1.domain_label = {'dim_1'};
+        p1.domain_labels = {'dim_1'};
         t.assert(false);
     catch e
         if exist('OCTAVE_VERSION', 'builtin') > 0
@@ -309,12 +309,12 @@ function test_idx_changeSymbol(t, cfg)
     t.assert(p1.size == 5);
     t.assert(p1.dimension == 1);
     t.assert(numel(p1.domain) == 1);
-    t.assert(numel(p1.domain_label) == 1);
+    t.assert(numel(p1.domain_labels) == 1);
     p1.size = 10;
     t.assert(p1.size == 10);
     t.assert(p1.dimension == 1);
     t.assert(numel(p1.domain) == 1);
-    t.assert(numel(p1.domain_label) == 1);
+    t.assert(numel(p1.domain_labels) == 1);
     p1.size = [10, 20];
     t.assert(p1.size(1) == 10);
     t.assert(p1.size(2) == 20);
@@ -322,9 +322,9 @@ function test_idx_changeSymbol(t, cfg)
     t.assert(numel(p1.domain) == 2);
     t.assertEquals(p1.domain{1}, 'dim_1');
     t.assertEquals(p1.domain{2}, 'dim_2');
-    t.assert(numel(p1.domain_label) == 2);
-    t.assertEquals(p1.domain_label{1}, 'dim_1');
-    t.assertEquals(p1.domain_label{2}, 'dim_2');
+    t.assert(numel(p1.domain_labels) == 2);
+    t.assertEquals(p1.domain_labels{1}, 'dim_1');
+    t.assertEquals(p1.domain_labels{2}, 'dim_2');
     try
         t.assert(false);
         p1.size = '2';

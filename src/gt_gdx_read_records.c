@@ -266,7 +266,7 @@ void mexFunction(
                 mexErrMsgIdAndTxt(ERRID"gdxDataReadDone", "GDX error (gdxDataReadDone)");
         }
 
-        /* load domains and transform to domain_label */
+        /* load domains and transform to domain_labels */
         if (!gdxSymbolGetDomainX(gdx, sym_id, domains_ptr))
             mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomainX", "GDX error (gdxSymbolGetDomainX)");
         for (size_t j = 0; j < dim; j++)

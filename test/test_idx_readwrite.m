@@ -52,7 +52,7 @@ function test_idx_read(t, cfg)
     t.assertEquals(s.description, 'par_a');
     t.assert(s.dimension == 0);
     t.assert(numel(s.domain) == 0);
-    t.assert(numel(s.domain_label) == 0);
+    t.assert(numel(s.domain_labels) == 0);
     t.assertEquals(s.domain_info, 'relaxed');
     t.assert(numel(s.size) == 0);
     t.assert(s.getCardenality() == 1);
@@ -71,8 +71,8 @@ function test_idx_read(t, cfg)
     t.assert(s.dimension == 1);
     t.assert(numel(s.domain) == 1);
     t.assertEquals(s.domain{1}, 'dim_1');
-    t.assert(numel(s.domain_label) == 1);
-    t.assertEquals(s.domain_label{1}, 'dim_1');
+    t.assert(numel(s.domain_labels) == 1);
+    t.assertEquals(s.domain_labels{1}, 'dim_1');
     t.assertEquals(s.domain_info, 'relaxed');
     t.assert(numel(s.size) == 1);
     t.assert(s.size(1) == 5);
@@ -93,9 +93,9 @@ function test_idx_read(t, cfg)
     t.assert(numel(s.domain) == 2);
     t.assertEquals(s.domain{1}, 'dim_1');
     t.assertEquals(s.domain{2}, 'dim_2');
-    t.assert(numel(s.domain_label) == 2);
-    t.assertEquals(s.domain_label{1}, 'dim_1');
-    t.assertEquals(s.domain_label{2}, 'dim_2');
+    t.assert(numel(s.domain_labels) == 2);
+    t.assertEquals(s.domain_labels{1}, 'dim_1');
+    t.assertEquals(s.domain_labels{2}, 'dim_2');
     t.assertEquals(s.domain_info, 'relaxed');
     t.assert(numel(s.size) == 2);
     t.assert(s.size(1) == 5);

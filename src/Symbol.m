@@ -48,8 +48,8 @@ classdef Symbol < handle
         % domain_names Domain names of symbol
         domain_names
 
-        % domain_label Expected domain labels in records
-        domain_label
+        % domain_labels Expected domain labels in records
+        domain_labels
 
         % domain_info Specifies if domains are stored 'relaxed' or 'regular'
         domain_info
@@ -266,8 +266,8 @@ classdef Symbol < handle
             domain_names = obj.domain_names_;
         end
 
-        function domain_label = get.domain_label(obj)
-            domain_label = obj.domain_label_;
+        function domain_labels = get.domain_labels(obj)
+            domain_labels = obj.domain_label_;
         end
 
         function domain_info = get.domain_info(obj)
