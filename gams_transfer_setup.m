@@ -37,6 +37,7 @@ function gams_transfer_setup(varargin)
     addParameter(p, 'target_dir', '.', is_string_char);
     addParameter(p, 'gams_dir', find_gams(), is_string_char);
     addParameter(p, 'verbose', 0, @isnumeric)
+    addParameter(p, 'skip_compilation', false, @islogical);
     parse(p, varargin{:});
     if strcmp(p.Results.gams_dir, '')
         error('GAMS system directory not found.');
@@ -51,7 +52,8 @@ function gams_transfer_setup(varargin)
 
     % install GAMS Transfer
     try
-        gams_transfer_setup_internal(p.Results.gams_dir, current_dir, target_dir, p.Results.verbose)
+        gams_transfer_setup_internal(p.Results.gams_dir, current_dir, target_dir, ...
+            p.Results.verbose, p.Results.skip_compilation);
         rmpath(fullfile(current_dir, 'src'));
     catch e
         rmpath(fullfile(current_dir, 'src'));
@@ -62,7 +64,7 @@ function gams_transfer_setup(varargin)
 
 end
 
-function gams_transfer_setup_internal(gams_dir, current_dir, target_dir, verbose)
+function gams_transfer_setup_internal(gams_dir, current_dir, target_dir, verbose, skip_compilation)
 
     m_files = dir(fullfile(current_dir, 'src', '*.m'));
     c_files = {
@@ -123,6 +125,10 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir, verbose
 
         fprintf('Copying (%2d/%2d): %s\n', i, numel(m_files), m_files(i).name);
         copyfile(fullfile(m_files(i).folder, m_files(i).name), target_file);
+    end
+
+    if skip_compilation
+        return
     end
 
     for i = 1:numel(c_files)
