@@ -96,17 +96,21 @@ void mexFunction(
             /* set size */
             mx_size[i] = mxGetNaN();
         }
-        else if (mxIsClass(mx_arr_domentry, "GAMSTransfer.Set"))
+        else if (mxIsClass(mx_arr_domentry, "GAMSTransfer.Set") ||
+            mxIsClass(mx_arr_domentry, "GAMSTransfer.Alias"))
         {
             int domdim, domnrecs;
             mxArray* mx_arr_container;
             mxArray* mx_arr_contid;
 
-            /* check domain set */
+            /* get domain attributes */
             gt_mex_getfield_str(mx_arr_domentry, "domain", "name_", "", true, domname, 256);
+            if (mxIsClass(mx_arr_domentry, "GAMSTransfer.Alias"))
+                mx_arr_domentry = mxGetProperty(mx_arr_domentry, 0, "alias_with");
             gt_mex_getfield_int(mx_arr_domentry, "domain", "dimension_", 0, true,
                 GT_FILTER_NONNEGATIVE, 1, &domdim);
 
+            /* check domain set */
             if (domdim != 1)
                 mexErrMsgIdAndTxt(ERRID"dimension", "Domain set '%s' must have dimension=1 to be valid as domain.", domname);
             if (support_setget)
@@ -143,7 +147,7 @@ void mexFunction(
 
     mxSetProperty((mxArray*) prhs[0], 0, "dimension_", mxCreateDoubleScalar(dim));
     mxSetProperty((mxArray*) prhs[0], 0, "domain_names_", mx_arr_domnames);
-    mxSetProperty((mxArray*) prhs[0], 0, "domain_label_", mx_arr_domlabels);
+    mxSetProperty((mxArray*) prhs[0], 0, "domain_labels_", mx_arr_domlabels);
     if (dominfo_none)
         mxSetProperty((mxArray*) prhs[0], 0, "domain_info_", mxCreateString("none"));
     else if (dominfo_regular)

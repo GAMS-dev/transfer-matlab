@@ -128,7 +128,7 @@ void mexFunction(
         /* get fields */
         gt_mex_getfield_str(mx_arr_data, data_name, "name_", "", true, name, GMS_SSSIZE);
         gt_mex_getfield_sizet(mx_arr_data, data_name, "dimension_", 0, true, GT_FILTER_NONNEGATIVE, 1, &dim);
-        gt_mex_getfield_cell_str(mx_arr_data, data_name, "domain_label_", "", true, dim, domain_labels_ptr, GMS_SSSIZE);
+        gt_mex_getfield_cell_str(mx_arr_data, data_name, "domain_labels_", "", true, dim, domain_labels_ptr, GMS_SSSIZE);
         gt_mex_getfield_sizet(mx_arr_data, data_name, "size_", 1, true, GT_FILTER_NONNEGATIVE, dim, sizes);
 
         /* get optional fields */

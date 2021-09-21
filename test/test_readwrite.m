@@ -1231,7 +1231,7 @@ end
 
 function test_readWrite(t, cfg)
 
-    for i = [1,2,5]
+    for i = [1,2,5,7]
         gdx = GAMSTransfer.Container(cfg.filenames{i}, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
