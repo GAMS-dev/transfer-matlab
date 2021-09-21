@@ -840,78 +840,99 @@ classdef Container < handle
                 p.Results.only_valid);
         end
 
-        function descr = describeSets(obj)
+        function descr = describeSets(obj, varargin)
             % Returns an overview over all sets in container
             %
+            % Optional Arguments:
+            % 1. symbols: cellstr
+            %    List of symbols to include. Default: listSets().
+            %
             % The overview is in form of a table listing for each symbol its
             % main characteristics and some statistics.
             %
 
-            descr = obj.describeSymbols(GAMSTransfer.SymbolType.SET);
+            p = inputParser();
+            addOptional(p, 'symbols', obj.listSets(), @iscellstr);
+            parse(p, varargin{:});
+
+            descr = obj.describeSymbols(GAMSTransfer.SymbolType.SET, ...
+                p.Results.symbols);
         end
 
-        function descr = describeParameters(obj)
+        function descr = describeParameters(obj, varargin)
             % Returns an overview over all parameters in container
             %
+            % Optional Arguments:
+            % 1. symbols: cellstr
+            %    List of symbols to include. Default: listParameters().
+            %
             % The overview is in form of a table listing for each symbol its
             % main characteristics and some statistics.
             %
 
-            descr = obj.describeSymbols(GAMSTransfer.SymbolType.PARAMETER);
+            p = inputParser();
+            addOptional(p, 'symbols', obj.listParameters(), @iscellstr);
+            parse(p, varargin{:});
+
+            descr = obj.describeSymbols(GAMSTransfer.SymbolType.PARAMETER, ...
+                p.Results.symbols);
         end
 
-        function descr = describeVariables(obj)
+        function descr = describeVariables(obj, varargin)
             % Returns an overview over all variables in container
             %
+            % Optional Arguments:
+            % 1. symbols: cellstr
+            %    List of symbols to include. Default: listVariables().
+            %
             % The overview is in form of a table listing for each symbol its
             % main characteristics and some statistics.
             %
 
-            descr = obj.describeSymbols(GAMSTransfer.SymbolType.VARIABLE);
+            p = inputParser();
+            addOptional(p, 'symbols', obj.listVariables(), @iscellstr);
+            parse(p, varargin{:});
+
+            descr = obj.describeSymbols(GAMSTransfer.SymbolType.VARIABLE, ...
+                p.Results.symbols);
         end
 
-        function descr = describeEquations(obj)
+        function descr = describeEquations(obj, varargin)
             % Returns an overview over all equations in container
             %
+            % Optional Arguments:
+            % 1. symbols: cellstr
+            %    List of symbols to include. Default: listEquations().
+            %
             % The overview is in form of a table listing for each symbol its
             % main characteristics and some statistics.
             %
 
-            descr = obj.describeSymbols(GAMSTransfer.SymbolType.EQUATION);
+            p = inputParser();
+            addOptional(p, 'symbols', obj.listEquations(), @iscellstr);
+            parse(p, varargin{:});
+
+            descr = obj.describeSymbols(GAMSTransfer.SymbolType.EQUATION, ...
+                p.Results.symbols);
         end
 
-        function descr = describeAliases(obj)
+        function descr = describeAliases(obj, varargin)
             % Returns an overview over all aliases in container
+            %
+            % Optional Arguments:
+            % 1. symbols: cellstr
+            %    List of symbols to include. Default: listAliases().
             %
             % The overview is in form of a table listing for each symbol its
             % main characteristics and some statistics.
             %
 
-            symbols = obj.listAliases();
-            n_symbols = numel(symbols);
+            p = inputParser();
+            addOptional(p, 'symbols', obj.listAliases(), @iscellstr);
+            parse(p, varargin{:});
 
-            % init describe table
-            descr = struct();
-            descr.name = cell(n_symbols, 1);
-            descr.alias_with = cell(n_symbols, 1);
-
-            % collect values
-            for i = 1:n_symbols
-                symbol = obj.data.(symbols{i});
-                descr.name{i} = symbol.name;
-                descr.alias_with{i} = symbol.alias_with.name;
-            end
-
-            % convert to categorical if possible
-            if obj.features.categorical
-                descr.name = categorical(descr.name);
-                descr.alias_with = categorical(descr.alias_with);
-            end
-
-            % convert to table if possible
-            if obj.features.table
-                descr = struct2table(descr);
-            end
+            descr = obj.describeSymbols(GAMSTransfer.SymbolType.ALIAS, ...
+                p.Results.symbols);
         end
 
         function dom_violations = getDomainViolations(obj)
@@ -1057,24 +1078,42 @@ classdef Container < handle
 
     methods (Hidden, Access = private)
 
-        function descr = describeSymbols(obj, symtype)
-            switch symtype
-            case GAMSTransfer.SymbolType.SET
-                symbol_names = obj.listSets();
-                symbols = obj.getSymbols(symbol_names);
-            case GAMSTransfer.SymbolType.PARAMETER
-                symbol_names = obj.listParameters();
-                symbols = obj.getSymbols(symbol_names);
-            case GAMSTransfer.SymbolType.VARIABLE
-                symbol_names = obj.listVariables();
-                symbols = obj.getSymbols(symbol_names);
-            case GAMSTransfer.SymbolType.EQUATION
-                symbol_names = obj.listEquations();
-                symbols = obj.getSymbols(symbol_names);
-            otherwise
-                error('Invalid symbol type');
+        function descr = describeSymbols(obj, symtype, wanted_symbols)
+            % get list of elements (ignore invalid labels)
+            symbols = cell(1, numel(wanted_symbols));
+            n_symbols = 0;
+            for i = 1:numel(wanted_symbols)
+                if ~isfield(obj.data, wanted_symbols{i})
+                    continue;
+                end
+                symbol = obj.data.(wanted_symbols{i});
+
+                if symtype == GAMSTransfer.SymbolType.SET && ...
+                    ~isa(symbol, 'GAMSTransfer.Set') && ...
+                    ~isa(symbol, 'GAMSTransfer.Alias')
+                    continue
+                end
+                if symtype == GAMSTransfer.SymbolType.PARAMETER && ...
+                    ~isa(symbol, 'GAMSTransfer.Parameter')
+                    continue
+                end
+                if symtype == GAMSTransfer.SymbolType.VARIABLE && ...
+                    ~isa(symbol, 'GAMSTransfer.Variable')
+                    continue
+                end
+                if symtype == GAMSTransfer.SymbolType.EQUATION && ...
+                    ~isa(symbol, 'GAMSTransfer.Equation')
+                    continue
+                end
+                if symtype == GAMSTransfer.SymbolType.ALIAS && ...
+                    ~isa(symbol, 'GAMSTransfer.Alias')
+                    continue
+                end
+
+                n_symbols = n_symbols + 1;
+                symbols{n_symbols} = symbol;
             end
-            n_symbols = numel(symbols);
+            symbols = symbols(1:n_symbols);
 
             % init describe table
             descr = struct();
@@ -1124,7 +1163,7 @@ classdef Container < handle
             for i = 1:n_symbols
                 symbol = symbols{i};
 
-                descr.name{i} = symbol_names{i};
+                descr.name{i} = symbol.name;
                 switch symtype
                 case {GAMSTransfer.SymbolType.VARIABLE, GAMSTransfer.SymbolType.EQUATION}
                     descr.type{i} = symbol.type;

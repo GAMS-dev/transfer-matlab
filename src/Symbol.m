@@ -372,10 +372,12 @@ classdef Symbol < handle
             %   be the domain entries for the i-th domain. If element is the j-th
             %   numeric vector/matrix, it is interpreted as the j-th element of
             %   the following: level or value, marginal, lower, upper, scale.
+            %   If symbol is a Set, the (dim+1)-th cellstr is considered to be
+            %   the set element texts.
             % - struct: Fields which names match domain labels, are interpreted
             %   as domain entries of the given domain. Other supported fields are
-            %   level, value, marginal, lower, upper, scale. Unsopprted fields
-            %   are ignored.
+            %   level, value, marginal, lower, upper, scale, text. Unsopprted
+            %   fields are ignored.
             % - table: used as is.
             %
             % Note: Instead of a cell, it is possible to provide the elements as

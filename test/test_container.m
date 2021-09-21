@@ -27,6 +27,7 @@ function success = test_container(cfg)
     t = GAMSTest('GAMSTransfer/container');
     test_getlist(t, cfg);
     test_describe(t, cfg);
+    test_describePartial(t, cfg)
     test_idx_describe(t, cfg);
     test_remove(t, cfg);
     test_universalset(t, cfg);
@@ -1239,6 +1240,259 @@ function test_describe(t, cfg)
             t.assert(tbl.count_eps_marginal(1) == 0);
         end
     end
+end
+
+function test_describePartial(t, cfg)
+
+    gdx = GAMSTransfer.Container(cfg.filenames{3}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
+
+    t.add('describe_partial_sets_1');
+    tbl = gdx.describeSets();
+    if gdx.features.table
+        t.assert(height(tbl) == 4);
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'name'}, 'i');
+            t.assertEquals(tbl{2,'name'}, 'j');
+            t.assertEquals(tbl{3,'name'}, 'i2');
+            t.assertEquals(tbl{4,'name'}, 'j2');
+        else
+            t.assertEquals(tbl{1,'name'}{1}, 'i');
+            t.assertEquals(tbl{2,'name'}{1}, 'j');
+            t.assertEquals(tbl{3,'name'}{1}, 'i2');
+            t.assertEquals(tbl{4,'name'}{1}, 'j2');
+        end
+    else
+        t.assert(numel(tbl.name) == 4);
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(1), 'i');
+            t.assertEquals(tbl.name(2), 'j');
+            t.assertEquals(tbl.name(3), 'i2');
+            t.assertEquals(tbl.name(4), 'j2');
+        else
+            t.assertEquals(tbl.name{1}, 'i');
+            t.assertEquals(tbl.name{2}, 'j');
+            t.assertEquals(tbl.name{3}, 'i2');
+            t.assertEquals(tbl.name{4}, 'j2');
+        end
+    end
+
+    t.add('describe_partial_sets_2');
+    tbl = gdx.describeSets('symbols', {'i', 'i2'});
+    if gdx.features.table
+        t.assert(height(tbl) == 2);
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'name'}, 'i');
+            t.assertEquals(tbl{2,'name'}, 'i2');
+        else
+            t.assertEquals(tbl{1,'name'}{1}, 'i');
+            t.assertEquals(tbl{2,'name'}{1}, 'i2');
+        end
+    else
+        t.assert(numel(tbl.name) == 2);
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(1), 'i');
+            t.assertEquals(tbl.name(2), 'i2');
+        else
+            t.assertEquals(tbl.name{1}, 'i');
+            t.assertEquals(tbl.name{2}, 'i2');
+        end
+    end
+
+    t.add('describe_partial_alias_1');
+    tbl = gdx.describeAliases();
+    if gdx.features.table
+        t.assert(height(tbl) == 2);
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'name'}, 'i2');
+            t.assertEquals(tbl{2,'name'}, 'j2');
+        else
+            t.assertEquals(tbl{1,'name'}{1}, 'i2');
+            t.assertEquals(tbl{2,'name'}{1}, 'j2');
+        end
+    else
+        t.assert(numel(tbl.name) == 2);
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(1), 'i2');
+            t.assertEquals(tbl.name(2), 'j2');
+        else
+            t.assertEquals(tbl.name{1}, 'i2');
+            t.assertEquals(tbl.name{2}, 'j2');
+        end
+    end
+
+    t.add('describe_partial_sets_2');
+    tbl = gdx.describeAliases('symbols', {'i2'});
+    if gdx.features.table
+        t.assert(height(tbl) == 1);
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'name'}, 'i2');
+        else
+            t.assertEquals(tbl{1,'name'}{1}, 'i2');
+        end
+    else
+        t.assert(numel(tbl.name) == 1);
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(1), 'i2');
+        else
+            t.assertEquals(tbl.name{1}, 'i2');
+        end
+    end
+
+    t.add('describe_partial_parameters_1');
+    tbl = gdx.describeParameters();
+    if gdx.features.table
+        t.assert(height(tbl) == 1);
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'name'}, 'a');
+        else
+            t.assertEquals(tbl{1,'name'}{1}, 'a');
+        end
+    else
+        t.assert(numel(tbl.name) == 1);
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(1), 'a');
+        else
+            t.assertEquals(tbl.name{1}, 'a');
+        end
+    end
+
+    t.add('describe_partial_parameters_2');
+    tbl = gdx.describeParameters('symbols', {});
+    if gdx.features.table
+        t.assert(height(tbl) == 0);
+    else
+        t.assert(numel(tbl.name) == 0);
+    end
+
+    t.add('describe_partial_variables_1');
+    tbl = gdx.describeVariables();
+    if gdx.features.table
+        t.assert(height(tbl) == 10);
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'name'}, 'x1');
+            t.assertEquals(tbl{2,'name'}, 'x2');
+            t.assertEquals(tbl{3,'name'}, 'x3');
+            t.assertEquals(tbl{4,'name'}, 'x4');
+            t.assertEquals(tbl{5,'name'}, 'x5');
+            t.assertEquals(tbl{6,'name'}, 'x6');
+            t.assertEquals(tbl{7,'name'}, 'x7');
+            t.assertEquals(tbl{8,'name'}, 'x8');
+            t.assertEquals(tbl{9,'name'}, 'x9');
+            t.assertEquals(tbl{10,'name'}, 'x10');
+        else
+            t.assertEquals(tbl{1,'name'}{1}, 'x1');
+            t.assertEquals(tbl{2,'name'}{1}, 'x2');
+            t.assertEquals(tbl{3,'name'}{1}, 'x3');
+            t.assertEquals(tbl{4,'name'}{1}, 'x4');
+            t.assertEquals(tbl{5,'name'}{1}, 'x5');
+            t.assertEquals(tbl{6,'name'}{1}, 'x6');
+            t.assertEquals(tbl{7,'name'}{1}, 'x7');
+            t.assertEquals(tbl{8,'name'}{1}, 'x8');
+            t.assertEquals(tbl{9,'name'}{1}, 'x9');
+            t.assertEquals(tbl{10,'name'}{1}, 'x10');
+        end
+    else
+        t.assert(numel(tbl.name) == 10);
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(1), 'x1');
+            t.assertEquals(tbl.name(2), 'x2');
+            t.assertEquals(tbl.name(3), 'x3');
+            t.assertEquals(tbl.name(4), 'x4');
+            t.assertEquals(tbl.name(5), 'x5');
+            t.assertEquals(tbl.name(6), 'x6');
+            t.assertEquals(tbl.name(7), 'x7');
+            t.assertEquals(tbl.name(8), 'x8');
+            t.assertEquals(tbl.name(9), 'x9');
+            t.assertEquals(tbl.name(10), 'x10');
+        else
+            t.assertEquals(tbl.name{1}, 'x1');
+            t.assertEquals(tbl.name{2}, 'x2');
+            t.assertEquals(tbl.name{3}, 'x3');
+            t.assertEquals(tbl.name{4}, 'x4');
+            t.assertEquals(tbl.name{5}, 'x5');
+            t.assertEquals(tbl.name{6}, 'x6');
+            t.assertEquals(tbl.name{7}, 'x7');
+            t.assertEquals(tbl.name{8}, 'x8');
+            t.assertEquals(tbl.name{9}, 'x9');
+            t.assertEquals(tbl.name{10}, 'x10');
+        end
+    end
+
+    t.add('describe_partial_variables_2');
+    tbl = gdx.describeVariables('symbols', {'x9', 'x4', 'x2'});
+    if gdx.features.table
+        t.assert(height(tbl) == 3);
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'name'}, 'x9');
+            t.assertEquals(tbl{2,'name'}, 'x4');
+            t.assertEquals(tbl{3,'name'}, 'x2');
+        else
+            t.assertEquals(tbl{1,'name'}{1}, 'x9');
+            t.assertEquals(tbl{2,'name'}{1}, 'x4');
+            t.assertEquals(tbl{3,'name'}{1}, 'x2');
+        end
+    else
+        t.assert(numel(tbl.name) == 3);
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(1), 'x9');
+            t.assertEquals(tbl.name(2), 'x4');
+            t.assertEquals(tbl.name(3), 'x2');
+        else
+            t.assertEquals(tbl.name{1}, 'x9');
+            t.assertEquals(tbl.name{2}, 'x4');
+            t.assertEquals(tbl.name{3}, 'x2');
+        end
+    end
+
+    t.add('describe_partial_equations_1');
+    tbl = gdx.describeEquations();
+    if gdx.features.table
+        t.assert(height(tbl) == 3);
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'name'}, 'e1');
+            t.assertEquals(tbl{2,'name'}, 'e2');
+            t.assertEquals(tbl{3,'name'}, 'e3');
+        else
+            t.assertEquals(tbl{1,'name'}{1}, 'e1');
+            t.assertEquals(tbl{2,'name'}{1}, 'e2');
+            t.assertEquals(tbl{3,'name'}{1}, 'e3');
+        end
+    else
+        t.assert(numel(tbl.name) == 3);
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(1), 'e1');
+            t.assertEquals(tbl.name(2), 'e2');
+            t.assertEquals(tbl.name(3), 'e3');
+        else
+            t.assertEquals(tbl.name{1}, 'e1');
+            t.assertEquals(tbl.name{2}, 'e2');
+            t.assertEquals(tbl.name{3}, 'e3');
+        end
+    end
+
+    t.add('describe_partial_equations_2');
+    tbl = gdx.describeEquations('symbols', {'e1', 'e1'});
+    if gdx.features.table
+        t.assert(height(tbl) == 2);
+        if gdx.features.categorical
+            t.assertEquals(tbl{1,'name'}, 'e1');
+            t.assertEquals(tbl{2,'name'}, 'e1');
+        else
+            t.assertEquals(tbl{1,'name'}{1}, 'e1');
+            t.assertEquals(tbl{2,'name'}{1}, 'e1');
+        end
+    else
+        t.assert(numel(tbl.name) == 2);
+        if gdx.features.categorical
+            t.assertEquals(tbl.name(1), 'e1');
+            t.assertEquals(tbl.name(2), 'e1');
+        else
+            t.assertEquals(tbl.name{1}, 'e1');
+            t.assertEquals(tbl.name{2}, 'e1');
+        end
+    end
+
 end
 
 function test_idx_describe(t, cfg)
