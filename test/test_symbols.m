@@ -1204,7 +1204,7 @@ function test_setRecords(t, cfg)
 
     gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
 
-    GAMSTransfer.Set(gdx, 'i1');
+    i1 = GAMSTransfer.Set(gdx, 'i1');
     s1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {'i'});
     s2 = GAMSTransfer.Variable(gdx, 'x2', 'free', {'i', '*'});
     s3 = GAMSTransfer.Variable(gdx, 'x3', 'free', {gdx.data.i1});
@@ -1303,7 +1303,7 @@ function test_setRecords(t, cfg)
     t.assertEquals(uels{3}, 'test23');
     t.assert(s2.isValid());
 
-    gdx.data.i1.setRecords({'i1', 'i2', 'i3', 'i4'});
+    i1.setRecords({'i1', 'i2', 'i3', 'i4'});
 
     t.add('set_records_numeric_1');
     try
@@ -1658,6 +1658,80 @@ function test_setRecords(t, cfg)
         t.assertEquals(s3.format, 'table');
         t.assert(s3.isValid());
     end
+
+    t.add('set_records_set_element_text_1');
+    i1.setRecords({'i1', 'i2', 'i3', 'i4'}, {'text_i1', 'text_i2', 'text_i3', 'text_i4'});
+    t.assert(i1.isValid());
+    t.assertEquals(i1.format, 'struct');
+    t.assert(numel(fieldnames(i1.records)) == 2);
+    t.assert(isfield(i1.records, 'uni_1'));
+    t.assert(isfield(i1.records, 'text'));
+    t.assert(numel(i1.records.uni_1) == 4);
+    t.assert(numel(i1.records.text) == 4);
+    if gdx.features.categorical
+        t.assertEquals(i1.records.uni_1(1), 'i1');
+        t.assertEquals(i1.records.uni_1(2), 'i2');
+        t.assertEquals(i1.records.uni_1(3), 'i3');
+        t.assertEquals(i1.records.uni_1(4), 'i4');
+        t.assertEquals(i1.records.text(1), 'text_i1');
+        t.assertEquals(i1.records.text(2), 'text_i2');
+        t.assertEquals(i1.records.text(3), 'text_i3');
+        t.assertEquals(i1.records.text(4), 'text_i4');
+    else
+        t.assert(i1.records.uni_1(1) == 1);
+        t.assert(i1.records.uni_1(2) == 2);
+        t.assert(i1.records.uni_1(3) == 3);
+        t.assert(i1.records.uni_1(4) == 4);
+        t.assertEquals(i1.records.text{1}, 'text_i1');
+        t.assertEquals(i1.records.text{2}, 'text_i2');
+        t.assertEquals(i1.records.text{3}, 'text_i3');
+        t.assertEquals(i1.records.text{4}, 'text_i4');
+    end
+    uels = i1.getUELs(1);
+    t.assert(numel(uels) == 4);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i2');
+    t.assertEquals(uels{3}, 'i3');
+    t.assertEquals(uels{4}, 'i4');
+
+    t.add('set_records_set_element_text_2');
+    recs = struct();
+    recs.uni_1 = {'i1', 'i2', 'i3', 'i4'};
+    recs.text = {'text_i1', 'text_i2', 'text_i3', 'text_i4'};
+    i1.setRecords(recs);
+    t.assert(i1.isValid());
+    t.assertEquals(i1.format, 'struct');
+    t.assert(numel(fieldnames(i1.records)) == 2);
+    t.assert(isfield(i1.records, 'uni_1'));
+    t.assert(isfield(i1.records, 'text'));
+    t.assert(numel(i1.records.uni_1) == 4);
+    t.assert(numel(i1.records.text) == 4);
+    if gdx.features.categorical
+        t.assertEquals(i1.records.uni_1(1), 'i1');
+        t.assertEquals(i1.records.uni_1(2), 'i2');
+        t.assertEquals(i1.records.uni_1(3), 'i3');
+        t.assertEquals(i1.records.uni_1(4), 'i4');
+        t.assertEquals(i1.records.text(1), 'text_i1');
+        t.assertEquals(i1.records.text(2), 'text_i2');
+        t.assertEquals(i1.records.text(3), 'text_i3');
+        t.assertEquals(i1.records.text(4), 'text_i4');
+    else
+        t.assert(i1.records.uni_1(1) == 1);
+        t.assert(i1.records.uni_1(2) == 2);
+        t.assert(i1.records.uni_1(3) == 3);
+        t.assert(i1.records.uni_1(4) == 4);
+        t.assertEquals(i1.records.text{1}, 'text_i1');
+        t.assertEquals(i1.records.text{2}, 'text_i2');
+        t.assertEquals(i1.records.text{3}, 'text_i3');
+        t.assertEquals(i1.records.text{4}, 'text_i4');
+    end
+    uels = i1.getUELs(1);
+    t.assert(numel(uels) == 4);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i2');
+    t.assertEquals(uels{3}, 'i3');
+    t.assertEquals(uels{4}, 'i4');
+
 end
 
 function test_writeUnordered(t, cfg)

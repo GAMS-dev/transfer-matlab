@@ -1062,13 +1062,6 @@ classdef Container < handle
             case GAMSTransfer.SymbolType.SET
                 symbol_names = obj.listSets();
                 symbols = obj.getSymbols(symbol_names);
-                symbol_names_a = obj.listAliases();
-                symbols_a = obj.getSymbols(symbol_names_a);
-                for i = 1:numel(symbols_a)
-                    symbols_a{i} = symbols_a{i}.alias_with;
-                end
-                symbol_names = {symbol_names{:}, symbol_names_a{:}};
-                symbols = {symbols{:}, symbols_a{:}};
             case GAMSTransfer.SymbolType.PARAMETER
                 symbol_names = obj.listParameters();
                 symbols = obj.getSymbols(symbol_names);

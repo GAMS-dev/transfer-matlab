@@ -435,7 +435,8 @@ classdef Symbol < handle
             elseif isnumeric(records)
                 obj.setRecordsValueField(1, records, true);
 
-            % cell -> cellstr elements to domains and numeric vector to values
+            % cell -> cellstr elements to domains or set element texts and
+            % numeric vector to values
             elseif iscell(records)
                 n_value_fields = 0;
                 n_dom_fields = 0;
@@ -451,6 +452,10 @@ classdef Symbol < handle
                             error('Strings not allowed in indexed mode.');
                         end
                         n_dom_fields = n_dom_fields + 1;
+                        if n_dom_fields == obj.dimension_ + 1 && isa(obj, 'GAMSTransfer.Set')
+                            obj.setRecordsTextField(records{i});
+                            continue
+                        end
                         if n_dom_fields > obj.dimension_
                             error('More domain fields than symbol dimension.');
                         end
@@ -470,18 +475,23 @@ classdef Symbol < handle
                     j = find(ismember(obj.VALUE_FIELDS, field));
                     if ~isempty(j)
                         obj.setRecordsValueField(j, records.(field), false);
-                    else
-                        for j = 1:obj.dimension_
-                            if strcmp(field, obj.domain_labels_{j}) || ...
-                                (isa(obj.domain_{j}, 'GAMSTransfer.Set') || ...
-                                isa(obj.domain_{j}, 'GAMSTransfer.Alias')) && ...
-                                strcmp(field, obj.domain_{j}.name)
-                                rec_field = records.(field);
-                                [~,uidx,~] = unique(rec_field, 'first');
-                                uels{j} = rec_field(sort(uidx));
-                                obj.setRecordsDomainField(j, uels{j}, rec_field);
-                                break;
-                            end
+                        continue
+                    end
+                    j = find(ismember(obj.TEXT_FIELDS, field));
+                    if ~isempty(j)
+                        obj.setRecordsTextField(records.(field));
+                        continue
+                    end
+                    for j = 1:obj.dimension_
+                        if strcmp(field, obj.domain_labels_{j}) || ...
+                            (isa(obj.domain_{j}, 'GAMSTransfer.Set') || ...
+                            isa(obj.domain_{j}, 'GAMSTransfer.Alias')) && ...
+                            strcmp(field, obj.domain_{j}.name)
+                            rec_field = records.(field);
+                            [~,uidx,~] = unique(rec_field, 'first');
+                            uels{j} = rec_field(sort(uidx));
+                            obj.setRecordsDomainField(j, uels{j}, rec_field);
+                            break;
                         end
                     end
                 end
@@ -503,7 +513,7 @@ classdef Symbol < handle
                 obj.isValid(2);
             catch e
                 obj.records = [];
-                rethrow(e);
+                error(e.message);
             end
 
             % store uels
@@ -1930,6 +1940,21 @@ classdef Symbol < handle
                     recs(i) = map(domains{i});
                 end
                 obj.records.(label) = recs;
+            end
+        end
+
+        function setRecordsTextField(obj, texts)
+            if ~isa(obj, 'GAMSTransfer.Set')
+                error('Element texts only allowed for Sets.');
+            end
+            if numel(size(texts)) > 2
+                error('Element texts have invalid shape.');
+            end
+            texts = reshape(texts, [numel(texts), 1]);
+
+            obj.records.text = texts;
+            if obj.container.features.categorical
+                obj.records.text = categorical(obj.records.text);
             end
         end
 
