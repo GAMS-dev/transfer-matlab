@@ -1127,10 +1127,10 @@ classdef Symbol < handle
             end
         end
 
-        function n = countNa(obj, varargin)
+        function n = countNA(obj, varargin)
             % Returns the number of GAMS NA values in records
             %
-            % n = countNa(varargin) returns the number of GAMS NA values n in
+            % n = countNA(varargin) returns the number of GAMS NA values n in
             % records. varargin can include a list of value fields that should
             % be considered: level, value, lower, upper, scale. If none is given
             % all available for the symbol are considered.
@@ -1148,7 +1148,7 @@ classdef Symbol < handle
 
             % get count
             for i = 1:numel(values)
-                n = n + sum(GAMSTransfer.SpecialValues.isNa(obj.records.(values{i})(:)));
+                n = n + sum(GAMSTransfer.SpecialValues.isNA(obj.records.(values{i})(:)));
             end
         end
 

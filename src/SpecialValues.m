@@ -61,13 +61,13 @@ classdef SpecialValues
             bool = isnan(value) & ~GAMSTransfer.gt_isna(value);
         end
 
-        function bool = isNa(value)
+        function bool = isNA(value)
             % Checks if values are GAMS NA
             %
-            % b = isNa(v) checks if the values v are GAMS NA values
+            % b = isNA(v) checks if the values v are GAMS NA values
             %
             % Example:
-            % b = SpecialValues.isNa([0, 1, SpecialValues.NA, SpecialValues.UNDEF])
+            % b = SpecialValues.isNA([0, 1, SpecialValues.NA, SpecialValues.UNDEF])
             % b equals [0, 0, 1, 0]
             %
 

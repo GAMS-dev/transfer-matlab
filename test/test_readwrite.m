@@ -1075,7 +1075,7 @@ function test_readSpecialValues(t, cfg)
     t.assert(isstruct(gdx.data.GEps.records));
     t.assert(isnan(gdx.data.GUndef.records.value));
     t.assert(isnan(gdx.data.GNA.records.value));
-    t.assert(GAMSTransfer.SpecialValues.isNa(gdx.data.GNA.records.value));
+    t.assert(GAMSTransfer.SpecialValues.isNA(gdx.data.GNA.records.value));
     t.assert(gdx.data.GPInf.records.value == Inf);
     t.assert(gdx.data.GMInf.records.value == -Inf);
     t.assert(gdx.data.GEps.records.value == 0);
@@ -1100,8 +1100,8 @@ function test_readAcronyms(t, cfg);
     t.assert(gdx.data.a.isValid());
     t.assert(numel(gdx.data.a.records.value) == 3);
     t.assert(gdx.data.a.records.value(1) == 1);
-    t.assert(GAMSTransfer.SpecialValues.isNa(gdx.data.a.records.value(2)));
-    t.assert(GAMSTransfer.SpecialValues.isNa(gdx.data.a.records.value(3)));
+    t.assert(GAMSTransfer.SpecialValues.isNA(gdx.data.a.records.value(2)));
+    t.assert(GAMSTransfer.SpecialValues.isNA(gdx.data.a.records.value(3)));
     warning('on');
 
 end

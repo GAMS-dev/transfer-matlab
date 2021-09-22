@@ -349,7 +349,7 @@ function test_idx_readSpecialValues(t, cfg)
     t.assert(isstruct(gdx.data.GEps.records));
     t.assert(isnan(gdx.data.GUndef.records.value));
     t.assert(isnan(gdx.data.GNA.records.value));
-    t.assert(GAMSTransfer.SpecialValues.isNa(gdx.data.GNA.records.value));
+    t.assert(GAMSTransfer.SpecialValues.isNA(gdx.data.GNA.records.value));
     t.assert(gdx.data.GPInf.records.value == Inf);
     t.assert(gdx.data.GMInf.records.value == -Inf);
 

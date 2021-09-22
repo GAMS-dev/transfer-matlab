@@ -40,7 +40,7 @@ function test_specialValues(t, cfg)
     t.assert(GAMSTransfer.SpecialValues.isEps([1, 2, 0, -0, geps, nan, gna]) == [0, 0, 0, 1, 1, 0, 0]);
 
     t.add('special_values_na');
-    t.assert(GAMSTransfer.SpecialValues.isNa(gna));
-    t.assert(~GAMSTransfer.SpecialValues.isNa(nan));
-    t.assert(GAMSTransfer.SpecialValues.isNa([1, 2, 0, -0, geps, nan, gna]) == [0, 0, 0, 0, 0, 0, 1]);
+    t.assert(GAMSTransfer.SpecialValues.isNA(gna));
+    t.assert(~GAMSTransfer.SpecialValues.isNA(nan));
+    t.assert(GAMSTransfer.SpecialValues.isNA([1, 2, 0, -0, geps, nan, gna]) == [0, 0, 0, 0, 0, 0, 1]);
 end

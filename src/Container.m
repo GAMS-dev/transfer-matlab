@@ -1194,7 +1194,7 @@ classdef Container < handle
                     else
                         descr.where_max_abs_level{i} = GAMSTransfer.Utils.list2str(descr.where_max_abs_level{i});
                     end
-                    descr.count_na_level(i) = symbol.countNa({'level'});
+                    descr.count_na_level(i) = symbol.countNA({'level'});
                     descr.count_undef_level(i) = symbol.countUndef({'level'});
                     descr.count_eps_level(i) = symbol.countEps({'level'});
                     descr.min_marginal(i) = symbol.getMinValue('marginal');
@@ -1206,7 +1206,7 @@ classdef Container < handle
                     else
                         descr.where_max_abs_marginal{i} = GAMSTransfer.Utils.list2str(descr.where_max_abs_marginal{i});
                     end
-                    descr.count_na_marginal(i) = symbol.countNa({'marginal'});
+                    descr.count_na_marginal(i) = symbol.countNA({'marginal'});
                     descr.count_undef_marginal(i) = symbol.countUndef({'marginal'});
                     descr.count_eps_marginal(i) = symbol.countEps({'marginal'});
                 case GAMSTransfer.SymbolType.PARAMETER
@@ -1219,7 +1219,7 @@ classdef Container < handle
                     else
                         descr.where_max_abs_value{i} = GAMSTransfer.Utils.list2str(descr.where_max_abs_value{i});
                     end
-                    descr.count_na(i) = symbol.countNa();
+                    descr.count_na(i) = symbol.countNA();
                     descr.count_undef(i) = symbol.countUndef();
                     descr.count_eps(i) = symbol.countEps();
                 end

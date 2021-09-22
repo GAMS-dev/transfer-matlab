@@ -365,13 +365,13 @@ classdef Alias < handle
             [value, where] = obj.alias_with.getMaxAbsValue(varargin{:});
         end
 
-        function n = countNa(obj, varargin)
+        function n = countNA(obj, varargin)
             % Returns the number of GAMS NA values in records
             %
-            % See also: GAMSTransfer.Symbol.countNa
+            % See also: GAMSTransfer.Symbol.countNA
             %
 
-            n = obj.alias_with.countNa(varargin{:});
+            n = obj.alias_with.countNA(varargin{:});
         end
 
         function n = countUndef(obj, varargin)
