@@ -708,6 +708,8 @@ classdef Container < handle
         function list = listSets(obj, varargin)
             % Lists all sets in container
             %
+            % Note: This method includes set aliases.
+            %
             % Parameter Arguments:
             % - only_loaded: logical
             %   Only include symbols with records loaded from GDX or added
@@ -842,6 +844,8 @@ classdef Container < handle
 
         function descr = describeSets(obj, varargin)
             % Returns an overview over all sets in container
+            %
+            % Note: This method includes set aliases.
             %
             % Optional Arguments:
             % 1. symbols: cellstr

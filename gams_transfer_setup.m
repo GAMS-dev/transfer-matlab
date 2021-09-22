@@ -93,17 +93,20 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir, verbose
     c_include = {
         fullfile(gams_dir, 'apifiles', 'C', 'api'), ...
     };
+    defines = {
+        '-DGC_NO_MUTEX', ...
+    };
     mex_c_flags = {
-        '-Wall -DGC_NO_MUTEX' ...
+        '-Wall', ...
     };
     mex_cpp_flags = {
-        '-Wall -DGC_NO_MUTEX' ...
+        '-Wall', ...
     };
     octmex_c_flags = {
-        '-Wall -DGC_NO_MUTEX' ...
+        '-Wall', ...
     };
     octmex_cpp_flags = {
-        '-Wall -DGC_NO_MUTEX' ...
+        '-Wall', ...
     };
     lib_linux = {
         'dl', ...
@@ -170,6 +173,9 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir, verbose
             end
 
             % defined flags
+            for e = defines
+                cmd = sprintf('%s %s', cmd, e{1});
+            end
             if ismac || isunix
                 cmd = strcat(cmd, ' CFLAGS=''$CFLAGS ');
             else
@@ -198,6 +204,9 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir, verbose
             cmd = sprintf('%s -outdir %s', cmd, target_dir);
         else
             % defined flags
+            for e = defines
+                cmd = sprintf('%s %s', cmd, e{1});
+            end
             [~,~,ext] = fileparts(c_files{i});
             if strcmp(ext, '.c')
                 for e = octmex_c_flags
