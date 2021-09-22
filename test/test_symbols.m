@@ -987,8 +987,7 @@ function test_changeSymbol(t, cfg)
             msg_end = 'has private access and cannot be set in this context';
             t.assertEquals(e.message(end-numel(msg_end)+1:end), msg_end);
         else
-            msg_begin = 'You cannot set the read-only property';
-            t.assertEquals(e.message(1:numel(msg_begin)), msg_begin);
+            t.assert(~isempty(strfind(e.message, 'read-only')));
         end
     end
 
@@ -1010,8 +1009,7 @@ function test_changeSymbol(t, cfg)
             msg_end = 'has private access and cannot be set in this context';
             t.assertEquals(e.message(end-numel(msg_end)+1:end), msg_end);
         else
-            msg_begin = 'You cannot set the read-only property';
-            t.assertEquals(e.message(1:numel(msg_begin)), msg_begin);
+            t.assert(~isempty(strfind(e.message, 'read-only')));
         end
     end
 
