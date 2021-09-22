@@ -1128,6 +1128,10 @@ classdef Container < handle
             case GAMSTransfer.SymbolType.SET
                 descr.is_alias = true(n_symbols, 1);
                 descr.is_singleton = true(n_symbols, 1);
+            case GAMSTransfer.SymbolType.ALIAS
+                descr.is_alias = true(n_symbols, 1);
+                descr.is_singleton = true(n_symbols, 1);
+                descr.alias_with = cell(n_symbols, 1);
             end
             descr.format = cell(n_symbols, 1);
             descr.dim = zeros(n_symbols, 1);
@@ -1174,6 +1178,10 @@ classdef Container < handle
                 case GAMSTransfer.SymbolType.SET
                     descr.is_alias(i) = isa(symbol, 'GAMSTransfer.Alias');
                     descr.is_singleton(i) = symbol.is_singleton;
+                case GAMSTransfer.SymbolType.ALIAS
+                    descr.is_alias(i) = isa(symbol, 'GAMSTransfer.Alias');
+                    descr.is_singleton(i) = symbol.is_singleton;
+                    descr.alias_with{i} = symbol.alias_with.name;
                 end
                 descr.format{i} = symbol.format;
                 descr.dim(i) = symbol.dimension;
@@ -1239,6 +1247,8 @@ classdef Container < handle
                     descr.where_max_abs_marginal = categorical(descr.where_max_abs_marginal);
                 case GAMSTransfer.SymbolType.PARAMETER
                     descr.where_max_abs_value = categorical(descr.where_max_abs_value);
+                case GAMSTransfer.SymbolType.ALIAS
+                    descr.alias_with = categorical(descr.alias_with);
                 end
             end
 
