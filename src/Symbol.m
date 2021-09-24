@@ -55,6 +55,10 @@ classdef Symbol < handle
         domain_type
     end
 
+    properties (Dependent)
+        grow_domain
+    end
+
     properties
         % records Storage of symbol records
         records
@@ -89,6 +93,7 @@ classdef Symbol < handle
         domain_names_
         domain_labels_
         domain_type_
+        grow_domain_
         size_
         format_
 
@@ -113,7 +118,7 @@ classdef Symbol < handle
 
     methods (Access = protected)
 
-        function obj = Symbol(container, name, description, domain_size, records, read_entry, read_number_records)
+        function obj = Symbol(container, name, description, domain_size, records, grow_domain, read_entry, read_number_records)
             % Constructs a GAMS Symbol, see class help.
             %
 
@@ -142,6 +147,9 @@ classdef Symbol < handle
             if ~container.indexed && ~iscell(domain_size)
                 error('Argument ''domain'' must be of type ''cell''.')
             end
+            if ~islogical(grow_domain)
+                error('Argument ''grow_domain'' must be of type ''logical''.');
+            end
             if ~isnumeric(read_entry)
                 error('Argument ''read_entry'' must be of type ''numeric''.');
             end
@@ -152,6 +160,7 @@ classdef Symbol < handle
             obj.container = container;
             obj.name_ = name;
             obj.description_ = description;
+            obj.grow_domain_ = grow_domain;
 
             % the following inits dimension_, domain_, domain_names_, domain_labels_,
             % domain_type_, uels
@@ -520,15 +529,21 @@ classdef Symbol < handle
 
             % store uels
             % Note: we don't need to init when categorical arrays are used, they
-            % are initialized already
+            % are initialized already. Moreover, resolving domain violations for
+            % grow_domain happens automatically in isValid if categorical arrays
+            % are used. However, if not, UELs are set now, so we need to update
+            % domains now, too.
             if ~obj.container.indexed && ~obj.container.features.categorical
-                f = obj.format_;
                 for i = 1:obj.dimension_
                     if ~isempty(uels{i})
                         obj.initUELs(i, uels{i});
                     end
                 end
-                obj.format_ = f;
+
+                % resolve domain violations
+                if obj.grow_domain_
+                    obj.resolveDomainViolations();
+                end
             end
         end
 
@@ -821,19 +836,13 @@ classdef Symbol < handle
                 obj.format_ = obj.FORMAT_REEVALUATE;
             end
 
-            % check if format is already available (not valid: UNKNOWN: -1; NOT_READ: 0)
-            if obj.format_ > 0
-                valid = true;
-                return
-            end
-
             valid = false;
-            obj.format_ = GAMSTransfer.RecordsFormat.UNKNOWN;
             obj.updateDomainSetDependentData();
 
             try
                 % check if symbol is actually contained in container
                 if ~isfield(obj.container.data, obj.name_)
+                    obj.format_ = GAMSTransfer.RecordsFormat.UNKNOWN;
                     error('Symbol is not part of its linked container.');
                 end
 
@@ -852,6 +861,13 @@ classdef Symbol < handle
                 % check domains
                 obj.checkDomains();
 
+                % check if format is already available (not valid: UNKNOWN: -1; NOT_READ: 0)
+                if obj.format_ > 0
+                    valid = true;
+                    return
+                end
+                obj.format_ = GAMSTransfer.RecordsFormat.UNKNOWN;
+
                 % check if records are empty
                 if isempty(obj.records)
                     obj.format_ = GAMSTransfer.RecordsFormat.EMPTY;
@@ -860,7 +876,7 @@ classdef Symbol < handle
                 end
 
                 % check data type of records (must be table or struct) and get column names
-                if obj.container.features.table && istable(obj.records);
+                if obj.container.features.table && istable(obj.records)
                     labels = obj.records.Properties.VariableNames;
                 elseif isstruct(obj.records)
                     labels = fieldnames(obj.records);
@@ -900,6 +916,11 @@ classdef Symbol < handle
                 elseif verbose == 2
                     error(e.message);
                 end
+            end
+
+            % resolve domain violations
+            if obj.grow_domain_
+                obj.resolveDomainViolations();
             end
         end
 
@@ -1458,8 +1479,10 @@ classdef Symbol < handle
 
             switch obj.format_
             case GAMSTransfer.RecordsFormat.EMPTY
-                warning('Cannot assign UELs to empty symbol.');
-                return
+                if obj.container.features.categorical
+                    warning('Cannot init UELs to empty symbol.');
+                    return
+                end
             case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
                 error('Matrix formats do not maintain UELs. Modify domain set instead.');
@@ -1506,8 +1529,10 @@ classdef Symbol < handle
 
             switch obj.format_
             case GAMSTransfer.RecordsFormat.EMPTY
-                warning('Cannot assign UELs to empty symbol.');
-                return
+                if obj.container.features.categorical
+                    warning('Cannot set UELs to empty symbol.');
+                    return
+                end
             case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
                 error('Matrix formats do not maintain UELs. Modify domain set instead.');
@@ -1519,7 +1544,11 @@ classdef Symbol < handle
             if obj.container.features.categorical
                 obj.records.(label) = setcats(obj.records.(label), uels);
             else
-                obj.records.(label) = obj.uels.(label).set(uels, obj.records.(label));
+                if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
+                    obj.uels.(label).set(uels, []);
+                else
+                    obj.records.(label) = obj.uels.(label).set(uels, obj.records.(label));
+                end
             end
         end
 
@@ -1550,8 +1579,10 @@ classdef Symbol < handle
 
             switch obj.format_
             case GAMSTransfer.RecordsFormat.EMPTY
-                warning('Cannot add UELs to empty symbol.');
-                return
+                if obj.container.features.categorical
+                    warning('Cannot add UELs to empty symbol.');
+                    return
+                end
             case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
                 error('Matrix formats do not maintain UELs. Modify domain set instead.');
@@ -1599,7 +1630,9 @@ classdef Symbol < handle
 
             switch obj.format_
             case GAMSTransfer.RecordsFormat.EMPTY
-                return
+                if obj.container.features.categorical
+                    return
+                end
             case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
                 error('Matrix formats do not maintain UELs. Modify domain set instead.');
@@ -1618,7 +1651,11 @@ classdef Symbol < handle
                 if isempty(uels)
                     uels = setdiff(obj.getUELs(dim), obj.getUELs(dim, 'ignore_unused', true));
                 end
-                obj.records.(label) = obj.uels.(label).remove(uels, obj.records.(label));
+                if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
+                    obj.records.(label) = obj.uels.(label).remove(uels, []);
+                else
+                    obj.records.(label) = obj.uels.(label).remove(uels, obj.records.(label));
+                end
             end
 
         end
@@ -1654,7 +1691,9 @@ classdef Symbol < handle
 
             switch obj.format_
             case GAMSTransfer.RecordsFormat.EMPTY
-                return
+                if obj.container.features.categorical
+                    return
+                end
             case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
                 error('Matrix formats do not maintain UELs. Modify domain set instead.');
@@ -1818,14 +1857,14 @@ classdef Symbol < handle
                     continue
                 end
 
-                % check domain set
-                if ~obj.domain_{i}.isValidAsDomain()
-                    error('Set ''%s'' is not valid as domain.', obj.domain_{i}.name);
-                end
-
                 % check correct order of symbols
                 if ~GAMSTransfer.gt_check_sym_order(obj.container.data, obj.domain_{i}.name, obj.name_);
                     error('Domain set ''%s'' is out of order: Try calling the Container method reorderSymbols().', obj.domain_{i}.name);
+                end
+
+                % check domain set
+                if ~obj.domain_{i}.isValidAsDomain()
+                    error('Set ''%s'' is not valid as domain.', obj.domain_{i}.name);
                 end
             end
         end

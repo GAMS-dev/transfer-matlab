@@ -21,6 +21,10 @@ classdef Set < GAMSTransfer.Symbol
     %   Description of symbol. Default is ''.
     % - is_singleton: logical
     %   Indicates if set is a is_singleton set (true) or not (false). Default is false.
+    % - grow_domain: logical
+    %   If true, domain entries in records will recursively be added to the
+    %   domains in case they are not present in the domains already. Default:
+    %   false.
     %
     % Example:
     % c = Container();
@@ -118,6 +122,7 @@ classdef Set < GAMSTransfer.Symbol
             read_entry = nan;
             read_number_records = nan;
             is_singleton = false;
+            grow_domain = false;
             while i < nargin - 2
                 if strcmpi(varargin{i}, 'records')
                     records = varargin{i+1};
@@ -129,6 +134,8 @@ classdef Set < GAMSTransfer.Symbol
                     read_number_records = varargin{i+1};
                 elseif strcmpi(varargin{i}, 'is_singleton')
                     is_singleton = varargin{i+1};
+                elseif strcmpi(varargin{i}, 'grow_domain')
+                    grow_domain = varargin{i+1};
                 else
                     error('Unknown argument name.');
                 end
@@ -146,7 +153,7 @@ classdef Set < GAMSTransfer.Symbol
 
             % create object
             obj = obj@GAMSTransfer.Symbol(container, name, description, domain, ...
-                records, read_entry, read_number_records);
+                records, grow_domain, read_entry, read_number_records);
             obj.is_singleton = is_singleton;
         end
 

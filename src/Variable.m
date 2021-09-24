@@ -22,6 +22,10 @@ classdef Variable < GAMSTransfer.Symbol
     %   Set records, e.g. a list of strings. Default is [].
     % - description: string
     %   Description of symbol. Default is ''.
+    % - grow_domain: logical
+    %   If true, domain entries in records will recursively be added to the
+    %   domains in case they are not present in the domains already. Default:
+    %   false.
     %
     % Example:
     % c = Container();
@@ -132,6 +136,7 @@ classdef Variable < GAMSTransfer.Symbol
             description = '';
             read_entry = nan;
             read_number_records = nan;
+            grow_domain = false;
             while i < nargin - 2
                 if strcmpi(varargin{i}, 'records')
                     records = varargin{i+1};
@@ -141,6 +146,8 @@ classdef Variable < GAMSTransfer.Symbol
                     read_entry = varargin{i+1};
                 elseif strcmpi(varargin{i}, 'read_number_records')
                     read_number_records = varargin{i+1};
+                elseif strcmpi(varargin{i}, 'grow_domain')
+                    grow_domain = varargin{i+1};
                 else
                     error('Unknown argument name.');
                 end
@@ -158,7 +165,7 @@ classdef Variable < GAMSTransfer.Symbol
 
             % create object
             obj = obj@GAMSTransfer.Symbol(container, name, description, domain, ...
-                records, read_entry, read_number_records);
+                records, grow_domain, read_entry, read_number_records);
             obj.type = vtype;
         end
 

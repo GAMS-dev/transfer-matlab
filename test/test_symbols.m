@@ -1196,6 +1196,37 @@ function test_domainViolation(t, cfg);
     t.assert(a2.isValid());
     t.assert(a3.isValid());
 
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    write_filename = fullfile(cfg.working_dir, 'write.gdx');
+
+    i1 = GAMSTransfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
+    i2 = GAMSTransfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
+    a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
+        {{'i0', 'i0', 'i1', 'i1'}, {'i1', 'i2', 'i1', 'i2'}, [1;2;3;4]}, ...
+        'grow_domain', true);
+    a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
+        {{'i1', 'i1', 'i5', 'i5'}, {'i1', 'i5', 'i1', 'i5'}, [1;2;3;4]}, ...
+        'grow_domain', true);
+    a3 = GAMSTransfer.Parameter(gdx, 'a3', i2, 'records', ...
+        {{'i1', 'i7'}, [1;2]}, 'grow_domain', true);
+
+    t.add('domain_violation_with_grow_1');
+    t.assert(numel(domviol) == 0);
+    elems = i1.getUELs(1);
+    t.assert(iscell(elems));
+    t.assert(numel(elems) == 7);
+    t.assert(elems{1} == 'i1');
+    t.assert(elems{2} == 'i2');
+    t.assert(elems{3} == 'i3');
+    t.assert(elems{4} == 'i4');
+    t.assert(elems{5} == 'i0');
+    t.assert(elems{6} == 'i5');
+    t.assert(elems{7} == 'i7');
+    t.assert(i1.isValid());
+    t.assert(a1.isValid());
+    t.assert(a2.isValid());
+    t.assert(a3.isValid());
+
 end
 
 function test_setRecords(t, cfg)
@@ -1454,7 +1485,6 @@ function test_setRecords(t, cfg)
     try
         t.assert(false);
         s2.setRecords({{'i1', 'i4'}, [1; 4]});
-        disp('##')
     catch e
         t.reset();
         t.assertEquals(e.message, 'Domain ''uni_2'' is missing.');
