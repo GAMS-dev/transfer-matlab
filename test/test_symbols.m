@@ -1140,6 +1140,9 @@ function test_domainViolation(t, cfg);
     t.assert(a1.isValid());
     t.assert(a2.isValid());
     t.assert(a3.isValid());
+    t.assert(~a1.grow_domain);
+    t.assert(~a2.grow_domain);
+    t.assert(~a3.grow_domain);
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 3);
     t.assert(isa(domviol{1}, 'GAMSTransfer.DomainViolation'));
@@ -1202,6 +1205,74 @@ function test_domainViolation(t, cfg);
     i1 = GAMSTransfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
     i2 = GAMSTransfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
     a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
+        {{'i0', 'i0', 'i1', 'i1'}, {'i1', 'i2', 'i1', 'i2'}, [1;2;3;4]});
+    a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
+        {{'i1', 'i1', 'i5', 'i5'}, {'i1', 'i5', 'i1', 'i5'}, [1;2;3;4]});
+    a3 = GAMSTransfer.Parameter(gdx, 'a3', i2, 'records', ...
+        {{'i1', 'i7'}, [1;2]});
+
+    t.add('domain_violation_with_grow_1');
+    t.assert(i1.isValid());
+    t.assert(a1.isValid());
+    t.assert(a2.isValid());
+    t.assert(a3.isValid());
+    t.assert(~a1.grow_domain);
+    t.assert(~a2.grow_domain);
+    t.assert(~a3.grow_domain);
+    domviol = gdx.getDomainViolations();
+    t.assert(numel(domviol) == 3);
+    t.assert(isa(domviol{1}, 'GAMSTransfer.DomainViolation'));
+    t.assert(isa(domviol{2}, 'GAMSTransfer.DomainViolation'));
+    t.assert(isa(domviol{3}, 'GAMSTransfer.DomainViolation'));
+    t.assertEquals(domviol{1}.symbol.name, 'a1');
+    t.assertEquals(domviol{2}.symbol.name, 'a2');
+    t.assertEquals(domviol{3}.symbol.name, 'a3');
+    t.assert(domviol{1}.dimension == 1);
+    t.assert(domviol{2}.dimension == 1);
+    t.assert(domviol{3}.dimension == 1);
+    t.assertEquals(domviol{1}.domain.name, 'i1');
+    t.assertEquals(domviol{2}.domain.name, 'i1');
+    t.assertEquals(domviol{3}.domain.name, 'i2');
+    t.assert(iscellstr(domviol{1}.violations));
+    t.assert(iscellstr(domviol{2}.violations));
+    t.assert(iscellstr(domviol{3}.violations));
+    t.assert(numel(domviol{1}.violations) == 1);
+    t.assert(numel(domviol{2}.violations) == 1);
+    t.assert(numel(domviol{3}.violations) == 1);
+    t.assertEquals(domviol{1}.violations{1}, 'i0');
+    t.assertEquals(domviol{2}.violations{1}, 'i5');
+    t.assertEquals(domviol{3}.violations{1}, 'i7');
+
+    t.add('domain_violation_with_grow_2');
+    a1.grow_domain = true;
+    a2.grow_domain = true;
+    a3.grow_domain = true;
+    t.assert(a1.grow_domain);
+    t.assert(a2.grow_domain);
+    t.assert(a3.grow_domain);
+    domviol = gdx.getDomainViolations();
+    t.assert(numel(domviol) == 0);
+    elems = i1.getUELs(1);
+    t.assert(iscell(elems));
+    t.assert(numel(elems) == 7);
+    t.assert(elems{1} == 'i1');
+    t.assert(elems{2} == 'i2');
+    t.assert(elems{3} == 'i3');
+    t.assert(elems{4} == 'i4');
+    t.assert(elems{5} == 'i0');
+    t.assert(elems{6} == 'i5');
+    t.assert(elems{7} == 'i7');
+    t.assert(i1.isValid());
+    t.assert(a1.isValid());
+    t.assert(a2.isValid());
+    t.assert(a3.isValid());
+
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    write_filename = fullfile(cfg.working_dir, 'write.gdx');
+
+    i1 = GAMSTransfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
+    i2 = GAMSTransfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
+    a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
         {{'i0', 'i0', 'i1', 'i1'}, {'i1', 'i2', 'i1', 'i2'}, [1;2;3;4]}, ...
         'grow_domain', true);
     a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
@@ -1210,7 +1281,10 @@ function test_domainViolation(t, cfg);
     a3 = GAMSTransfer.Parameter(gdx, 'a3', i2, 'records', ...
         {{'i1', 'i7'}, [1;2]}, 'grow_domain', true);
 
-    t.add('domain_violation_with_grow_1');
+    t.add('domain_violation_with_grow_3');
+    t.assert(a1.grow_domain);
+    t.assert(a2.grow_domain);
+    t.assert(a3.grow_domain);
     t.assert(numel(domviol) == 0);
     elems = i1.getUELs(1);
     t.assert(iscell(elems));

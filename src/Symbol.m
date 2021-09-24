@@ -284,6 +284,20 @@ classdef Symbol < handle
             domain_type = obj.domain_type_;
         end
 
+        function grow_domain = get.grow_domain(obj)
+            grow_domain = obj.grow_domain_;
+        end
+
+        function set.grow_domain(obj, grow_domain)
+            if ~islogical(grow_domain)
+                error('grow_domain must be logical.');
+            end
+            if ~obj.grow_domain_ && grow_domain
+                obj.resolveDomainViolations();
+            end
+            obj.grow_domain_ = grow_domain;
+        end
+
         function sizes = get.size(obj)
             sizes = obj.size_;
         end
