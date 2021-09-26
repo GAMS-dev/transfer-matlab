@@ -315,7 +315,7 @@ classdef Container < handle
 
             % cache data for C
             if ~obj.indexed && ~obj.features.c_prop_setget
-                symbols = fieldnames(obj.data);
+                symbols = obj.listSymbols('only_loaded', true);
                 for i = 1:numel(symbols)
                     symbol = obj.data.(symbols{i});
                     if isa(symbol, 'GAMSTransfer.Alias')
@@ -855,12 +855,13 @@ classdef Container < handle
             % main characteristics and some statistics.
             %
 
-            p = inputParser();
-            addOptional(p, 'symbols', obj.listSets(), @iscellstr);
-            parse(p, varargin{:});
+            if nargin == 2
+                symbols = varargin{1};
+            else
+                symbols = obj.listSets();
+            end
 
-            descr = obj.describeSymbols(GAMSTransfer.SymbolType.SET, ...
-                p.Results.symbols);
+            descr = obj.describeSymbols(GAMSTransfer.SymbolType.SET, symbols);
         end
 
         function descr = describeParameters(obj, varargin)
@@ -874,12 +875,13 @@ classdef Container < handle
             % main characteristics and some statistics.
             %
 
-            p = inputParser();
-            addOptional(p, 'symbols', obj.listParameters(), @iscellstr);
-            parse(p, varargin{:});
+            if nargin == 2
+                symbols = varargin{1};
+            else
+                symbols = obj.listParameters();
+            end
 
-            descr = obj.describeSymbols(GAMSTransfer.SymbolType.PARAMETER, ...
-                p.Results.symbols);
+            descr = obj.describeSymbols(GAMSTransfer.SymbolType.PARAMETER, symbols);
         end
 
         function descr = describeVariables(obj, varargin)
@@ -893,12 +895,13 @@ classdef Container < handle
             % main characteristics and some statistics.
             %
 
-            p = inputParser();
-            addOptional(p, 'symbols', obj.listVariables(), @iscellstr);
-            parse(p, varargin{:});
+            if nargin == 2
+                symbols = varargin{1};
+            else
+                symbols = obj.listVariables();
+            end
 
-            descr = obj.describeSymbols(GAMSTransfer.SymbolType.VARIABLE, ...
-                p.Results.symbols);
+            descr = obj.describeSymbols(GAMSTransfer.SymbolType.VARIABLE, symbols);
         end
 
         function descr = describeEquations(obj, varargin)
@@ -912,12 +915,13 @@ classdef Container < handle
             % main characteristics and some statistics.
             %
 
-            p = inputParser();
-            addOptional(p, 'symbols', obj.listEquations(), @iscellstr);
-            parse(p, varargin{:});
+            if nargin == 2
+                symbols = varargin{1};
+            else
+                symbols = obj.listEquations();
+            end
 
-            descr = obj.describeSymbols(GAMSTransfer.SymbolType.EQUATION, ...
-                p.Results.symbols);
+            descr = obj.describeSymbols(GAMSTransfer.SymbolType.EQUATION, symbols);
         end
 
         function descr = describeAliases(obj, varargin)
@@ -931,12 +935,13 @@ classdef Container < handle
             % main characteristics and some statistics.
             %
 
-            p = inputParser();
-            addOptional(p, 'symbols', obj.listAliases(), @iscellstr);
-            parse(p, varargin{:});
+            if nargin == 2
+                symbols = varargin{1};
+            else
+                symbols = obj.listAliases();
+            end
 
-            descr = obj.describeSymbols(GAMSTransfer.SymbolType.ALIAS, ...
-                p.Results.symbols);
+            descr = obj.describeSymbols(GAMSTransfer.SymbolType.ALIAS, symbols);
         end
 
         function dom_violations = getDomainViolations(obj)

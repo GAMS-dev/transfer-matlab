@@ -239,10 +239,14 @@ classdef Symbol < handle
             if ~obj.container.features.c_prop_setget
                 if isa(domain, 'GAMSTransfer.Set')
                     domain.setCacheNumberRecords();
+                elseif isa(domain, 'GAMSTransfer.Alias')
+                    domain.alias_with.setCacheNumberRecords();
                 elseif iscell(domain)
                     for i = 1:numel(domain)
                         if isa(domain{i}, 'GAMSTransfer.Set')
                             domain{i}.setCacheNumberRecords();
+                        elseif isa(domain{i}, 'GAMSTransfer.Alias')
+                            domain{i}.alias_with.setCacheNumberRecords();
                         end
                     end
                 end

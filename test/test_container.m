@@ -1278,7 +1278,7 @@ function test_describePartial(t, cfg)
     end
 
     t.add('describe_partial_sets_2');
-    tbl = gdx.describeSets('symbols', {'i', 'i2'});
+    tbl = gdx.describeSets({'i', 'i2'});
     if gdx.features.table
         t.assert(height(tbl) == 2);
         if gdx.features.categorical
@@ -1322,7 +1322,7 @@ function test_describePartial(t, cfg)
     end
 
     t.add('describe_partial_sets_2');
-    tbl = gdx.describeAliases('symbols', {'i2'});
+    tbl = gdx.describeAliases({'i2'});
     if gdx.features.table
         t.assert(height(tbl) == 1);
         if gdx.features.categorical
@@ -1358,7 +1358,7 @@ function test_describePartial(t, cfg)
     end
 
     t.add('describe_partial_parameters_2');
-    tbl = gdx.describeParameters('symbols', {});
+    tbl = gdx.describeParameters({});
     if gdx.features.table
         t.assert(height(tbl) == 0);
     else
@@ -1420,7 +1420,7 @@ function test_describePartial(t, cfg)
     end
 
     t.add('describe_partial_variables_2');
-    tbl = gdx.describeVariables('symbols', {'x9', 'x4', 'x2'});
+    tbl = gdx.describeVariables({'x9', 'x4', 'x2'});
     if gdx.features.table
         t.assert(height(tbl) == 3);
         if gdx.features.categorical
@@ -1472,7 +1472,7 @@ function test_describePartial(t, cfg)
     end
 
     t.add('describe_partial_equations_2');
-    tbl = gdx.describeEquations('symbols', {'e1', 'e1'});
+    tbl = gdx.describeEquations({'e1', 'e1'});
     if gdx.features.table
         t.assert(height(tbl) == 2);
         if gdx.features.categorical

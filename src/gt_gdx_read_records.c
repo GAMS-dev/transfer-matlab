@@ -233,7 +233,7 @@ void mexFunction(
             /* get domain info */
             if (!gdxSymbolInfo(gdx, dom_symid[j], buf, &dom_dim, &dom_type))
                 mexErrMsgIdAndTxt(ERRID"gdxSymbolInfo", "GDX error (gdxSymbolInfo)");
-            mxAssert(dom_type == GMS_DT_SET, "Invalid domain data type.");
+            mxAssert(dom_type == GMS_DT_SET || dom_type == GMS_DT_ALIAS, "Invalid domain data type.");
             mxAssert(dom_dim == 1, "Invalid domain dimension.");
 
             /* get number of records in domain and start reading */

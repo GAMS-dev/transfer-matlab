@@ -120,7 +120,7 @@ void mexFunction(
         /* get symbol type */
         if (mxIsClass(mx_arr_data, "GAMSTransfer.Alias"))
         {
-            gt_mex_getfield_str(mx_arr_data, data_name, "name", "", true, name, GMS_SSSIZE);
+            gt_mex_getfield_str(mx_arr_data, data_name, "name_", "", true, name, GMS_SSSIZE);
             gt_mex_getfield_str(mx_arr_data, data_name, "alias_with", "", true, buf, GMS_SSSIZE);
             gt_gdx_addalias(gdx, name, buf);
             continue;
