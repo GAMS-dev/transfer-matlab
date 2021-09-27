@@ -514,104 +514,79 @@ classdef Container < handle
 
             names = fieldnames(obj.data);
 
-            % get number of
-            n = zeros(1, 5);
+            % get number of set/alias
+            n_sets = 0;
             for i = 1:numel(names)
                 symbol = obj.data.(names{i});
-                if isa(symbol, 'GAMSTransfer.Set')
-                    n(1) = n(1) + 1;
-                elseif isa(symbol, 'GAMSTransfer.Parameter')
-                    n(2) = n(2) + 1;
-                elseif isa(symbol, 'GAMSTransfer.Variable')
-                    n(3) = n(3) + 1;
-                elseif isa(symbol, 'GAMSTransfer.Equation')
-                    n(4) = n(4) + 1;
-                elseif isa(symbol, 'GAMSTransfer.Alias')
-                    n(5) = n(5) + 1;
-                else
-                    error('Invalid symbol type');
+                if isa(symbol, 'GAMSTransfer.Set') || isa(symbol, 'GAMSTransfer.Alias')
+                    n_sets = n_sets + 1;
                 end
             end
+            n_other = numel(names) - n_sets;
 
-            sets = cell(1, n(1));
-            idx_sets = zeros(1, n(1));
-            idx_pars = zeros(1, n(2));
-            idx_vars = zeros(1, n(3));
-            idx_equs = zeros(1, n(4));
-            idx_alis = zeros(1, n(5));
-            n = zeros(1, 5);
+            sets = cell(1, n_sets);
+            idx_sets = zeros(1, n_sets);
+            idx_other = zeros(1, n_other);
+            n_sets = 0;
+            n_other = 0;
 
             % get index by type
             for i = 1:numel(names)
                 symbol = obj.data.(names{i});
-                if isa(symbol, 'GAMSTransfer.Set')
-                    n(1) = n(1) + 1;
-                    idx_sets(n(1)) = i;
-                    sets{n(1)} = symbol;
-                elseif isa(symbol, 'GAMSTransfer.Parameter')
-                    n(2) = n(2) + 1;
-                    idx_pars(n(2)) = i;
-                elseif isa(symbol, 'GAMSTransfer.Variable')
-                    n(3) = n(3) + 1;
-                    idx_vars(n(3)) = i;
-                elseif isa(symbol, 'GAMSTransfer.Equation')
-                    n(4) = n(4) + 1;
-                    idx_equs(n(4)) = i;
-                elseif isa(symbol, 'GAMSTransfer.Alias')
-                    n(5) = n(5) + 1;
-                    idx_alis(n(5)) = i;
+                if isa(symbol, 'GAMSTransfer.Set') || isa(symbol, 'GAMSTransfer.Alias')
+                    n_sets = n_sets + 1;
+                    idx_sets(n_sets) = i;
+                    sets{n_sets} = names{i};
                 else
-                    error('Invalid symbol type');
+                    n_other = n_other + 1;
+                    idx_other(n_other) = i;
                 end
             end
 
             % handle set dependencies
-            if n(1) > 1
+            if n_sets > 1
                 n_handled = 0;
-                set_handled = containers.Map(obj.listSets(), false(1, n(1)));
-                set_avail = true(1, n(1));
+                set_handled = containers.Map(sets, false(1, n_sets));
+                set_avail = true(1, n_sets);
+                idx = 1:n_sets;
 
-                while n_handled < n(1)
+                while n_handled < n_sets
                     % check if we can add the next set
                     curr_is_next = true;
-                    current_set = sets{n_handled+1};
+                    current_set = obj.data.(sets{idx(n_handled+1)});
                     for i = 1:current_set.dimension
-                        if isa(current_set.domain{i}, 'GAMSTransfer.Set') && ...
+                        if (isa(current_set.domain{i}, 'GAMSTransfer.Set') || ...
+                            isa(current_set.domain{i}, 'GAMSTransfer.Alias')) && ...
                             ~set_handled(current_set.domain{i}.name)
                             curr_is_next = false;
                             break;
                         end
                     end
-                    set_avail(n_handled+1) = false;
+                    set_avail(idx(n_handled+1)) = false;
                     if curr_is_next
                         n_handled = n_handled + 1;
                         set_handled(current_set.name) = true;
-                        set_avail(n_handled+1:end) = true;
+                        set_avail(idx(n_handled+1:end)) = true;
                         continue;
                     end
 
                     % find next available
-                    next_avail = find(set_avail(n_handled+1:end), 1);
+                    next_avail = find(set_avail(idx(n_handled+1:end)), 1);
                     if isempty(next_avail)
-                        l = GAMSTransfer.Utils.list2str(sets(n_handled+1:end));
+                        l = GAMSTransfer.Utils.list2str(sets(idx(n_handled+1:end)));
                         error('Circular domain set dependency in: %s.', l);
                     end
                     next_avail = next_avail + n_handled;
-                    tmp = sets{next_avail};
-                    sets(n_handled+2:next_avail) = sets(n_handled+1:next_avail-1);
-                    sets{n_handled+1} = tmp;
-                    tmp = idx_sets(next_avail);
-                    idx_sets(n_handled+2:next_avail) = idx_sets(n_handled+1:next_avail-1);
-                    idx_sets(n_handled+1) = tmp;
-                    tmp = set_avail(next_avail);
-                    set_avail(n_handled+2:next_avail) = set_avail(n_handled+1:next_avail-1);
-                    set_avail(n_handled+1) = tmp;
+                    tmp = idx(next_avail);
+                    idx(n_handled+2:next_avail) = idx(n_handled+1:next_avail-1);
+                    idx(n_handled+1) = tmp;
                 end
+
+                idx_sets = idx_sets(idx);
             end
 
             % apply permutation
-            perm = [idx_sets, idx_alis, idx_pars, idx_vars, idx_equs];
-            obj.data = orderfields(obj.data, perm);
+            obj.data = orderfields(obj.data, [idx_sets, idx_other]);
 
             % force recheck of all remaining symbols in container
             obj.isValid(false, true);
