@@ -133,30 +133,30 @@ function test_getlist(t, cfg)
     t.assertEquals(l{1}.name, 'i2');
     t.assertEquals(l{2}.name, 'j2');
 
-    t.add('get_list_sets_only_loaded_1');
-    l = gdx.listSets('only_loaded', true);
+    t.add('get_list_sets_is_loaded_1');
+    l = gdx.listSets('is_loaded', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 2);
     t.assertEquals(l{1}, 'i2');
     t.assertEquals(l{2}, 'j2');
 
-    t.add('get_list_variables_only_loaded_1');
-    l = gdx.listVariables('only_loaded', true);
+    t.add('get_list_variables_is_loaded_1');
+    l = gdx.listVariables('is_loaded', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 0);
 
-    t.add('get_list_equations_only_loaded_1');
-    l = gdx.listEquations('only_loaded', true);
+    t.add('get_list_equations_is_loaded_1');
+    l = gdx.listEquations('is_loaded', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 0);
 
-    t.add('get_list_parameters_only_loaded_1');
-    l = gdx.listParameters('only_loaded', true);
+    t.add('get_list_parameters_is_loaded_1');
+    l = gdx.listParameters('is_loaded', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 0);
 
-    t.add('get_list_alias_only_loaded_1');
-    l = gdx.listAliases('only_loaded', true);
+    t.add('get_list_alias_is_loaded_1');
+    l = gdx.listAliases('is_loaded', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 2);
     t.assertEquals(l{1}, 'i2');
@@ -164,36 +164,36 @@ function test_getlist(t, cfg)
 
     gdx.read('symbols', {'i', 'x1', 'x4', 'x8', 'a', 'e1'});
 
-    t.add('get_list_sets_only_loaded_2');
-    l = gdx.listSets('only_loaded', true);
+    t.add('get_list_sets_is_loaded_2');
+    l = gdx.listSets('is_loaded', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 3);
     t.assertEquals(l{1}, 'i');
     t.assertEquals(l{2}, 'i2');
     t.assertEquals(l{3}, 'j2');
 
-    t.add('get_list_variables_only_loaded_2');
-    l = gdx.listVariables('only_loaded', true);
+    t.add('get_list_variables_is_loaded_2');
+    l = gdx.listVariables('is_loaded', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 3);
     t.assertEquals(l{1}, 'x1');
     t.assertEquals(l{2}, 'x4');
     t.assertEquals(l{3}, 'x8');
 
-    t.add('get_list_equations_only_loaded_2');
-    l = gdx.listEquations('only_loaded', true);
+    t.add('get_list_equations_is_loaded_2');
+    l = gdx.listEquations('is_loaded', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 1);
     t.assertEquals(l{1}, 'e1');
 
-    t.add('get_list_parameters_only_loaded_2');
-    l = gdx.listParameters('only_loaded', true);
+    t.add('get_list_parameters_is_loaded_2');
+    l = gdx.listParameters('is_loaded', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 1);
     t.assertEquals(l{1}, 'a');
 
-    t.add('get_list_alias_only_loaded_2');
-    l = gdx.listAliases('only_loaded', true);
+    t.add('get_list_alias_is_loaded_2');
+    l = gdx.listAliases('is_loaded', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 2);
     t.assertEquals(l{1}, 'i2');
@@ -202,43 +202,43 @@ function test_getlist(t, cfg)
     gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
 
-    t.add('get_list_sets_only_loaded_and_valid_1');
-    l = gdx.listSets('only_loaded', true, 'only_valid', true);
+    t.add('get_list_sets_is_loaded_and_valid_1');
+    l = gdx.listSets('is_loaded', true, 'is_valid', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 0);
 
-    t.add('get_list_sets_only_loaded_and_valid_1');
-    l = gdx.listVariables('only_loaded', true, 'only_valid', true);
+    t.add('get_list_sets_is_loaded_and_valid_1');
+    l = gdx.listVariables('is_loaded', true, 'is_valid', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 0);
 
     gdx.read('symbols', {'x'});
 
-    t.add('get_list_sets_only_loaded_and_valid_2');
-    l = gdx.listSets('only_loaded', true, 'only_valid', true);
+    t.add('get_list_sets_is_loaded_and_valid_2');
+    l = gdx.listSets('is_loaded', true, 'is_valid', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 0);
 
-    t.add('get_list_sets_only_loaded_and_valid_2');
-    l = gdx.listVariables('only_loaded', true);
+    t.add('get_list_sets_is_loaded_and_valid_2');
+    l = gdx.listVariables('is_loaded', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 1);
     t.assertEquals(l{1}, 'x');
-    l = gdx.listVariables('only_loaded', true, 'only_valid', true);
+    l = gdx.listVariables('is_loaded', true, 'is_valid', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 0);
 
     gdx.read('symbols', {'i', 'j'});
 
-    t.add('get_list_sets_only_loaded_and_valid_3');
-    l = gdx.listSets('only_loaded', true, 'only_valid', true);
+    t.add('get_list_sets_is_loaded_and_valid_3');
+    l = gdx.listSets('is_loaded', true, 'is_valid', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 2);
     t.assertEquals(l{1}, 'i');
     t.assertEquals(l{2}, 'j');
 
-    t.add('get_list_sets_only_loaded_and_valid_3');
-    l = gdx.listVariables('only_loaded', true, 'only_valid', true);
+    t.add('get_list_sets_is_loaded_and_valid_3');
+    l = gdx.listVariables('is_loaded', true, 'is_valid', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 1);
     t.assertEquals(l{1}, 'x');

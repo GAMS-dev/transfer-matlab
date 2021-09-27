@@ -139,7 +139,7 @@ function test_read(t, cfg)
     t.assert(~s.isValid());
 
     t.add('read_loadedsymbols_basic');
-    t.assert(numel(gdx.listSymbols('only_loaded', true)) == 0);
+    t.assert(numel(gdx.listSymbols('is_loaded', true)) == 0);
 
     gdx.read('format', 'struct');
 
@@ -321,7 +321,7 @@ function test_read(t, cfg)
     t.assertEquals(uels{5}, 'j9');
 
     t.add('read_loadedsymbols_struct');
-    loaded_symbols = gdx.listSymbols('only_loaded', true);
+    loaded_symbols = gdx.listSymbols('is_loaded', true);
     t.assert(numel(loaded_symbols) == 5);
     t.assertEquals(loaded_symbols{1}, 'i');
     t.assertEquals(loaded_symbols{2}, 'j');
@@ -511,7 +511,7 @@ function test_read(t, cfg)
         t.assertEquals(uels{5}, 'j9');
 
         t.add('read_loadedsymbols_table');
-        loaded_symbols = gdx.listSymbols('only_loaded', true);
+        loaded_symbols = gdx.listSymbols('is_loaded', true);
         t.assert(numel(loaded_symbols) == 5);
         t.assertEquals(loaded_symbols{1}, 'i');
         t.assertEquals(loaded_symbols{2}, 'j');
@@ -690,7 +690,7 @@ function test_read(t, cfg)
     t.assertEquals(uels{5}, 'j9');
 
     t.add('read_loadedsymbols_dense_matrix');
-    loaded_symbols = gdx.listSymbols('only_loaded', true);
+    loaded_symbols = gdx.listSymbols('is_loaded', true);
     t.assert(numel(loaded_symbols) == 5);
     t.assertEquals(loaded_symbols{1}, 'i');
     t.assertEquals(loaded_symbols{2}, 'j');
@@ -877,7 +877,7 @@ function test_read(t, cfg)
     t.assertEquals(uels{5}, 'j9');
 
     t.add('read_loadedsymbols_sparse_matrix');
-    loaded_symbols = gdx.listSymbols('only_loaded', true);
+    loaded_symbols = gdx.listSymbols('is_loaded', true);
     t.assert(numel(loaded_symbols) == 5);
     t.assertEquals(loaded_symbols{1}, 'i');
     t.assertEquals(loaded_symbols{2}, 'j');
@@ -904,7 +904,7 @@ function test_readPartial(t, cfg)
     t.assert(isfield(gdx.data, 'x'));
     t.testEmptySymbol(gdx.data.a);
     t.testEmptySymbol(gdx.data.b);
-    loaded_symbols = gdx.listSymbols('only_loaded', true);
+    loaded_symbols = gdx.listSymbols('is_loaded', true);
     t.assert(numel(loaded_symbols) == 3);
     t.assertEquals(loaded_symbols{1}, 'i');
     t.assertEquals(loaded_symbols{2}, 'j');
@@ -1280,7 +1280,7 @@ function test_readWritePartial(t, cfg)
     t.assert(isfield(gdx.data, 'x'));
     t.testEmptySymbol(gdx.data.a);
     t.testEmptySymbol(gdx.data.b);
-    loaded_symbols = gdx.listSymbols('only_loaded', true);
+    loaded_symbols = gdx.listSymbols('is_loaded', true);
     t.assert(numel(loaded_symbols) == 1);
     t.assertEquals(loaded_symbols{1}, 'x');
     t.assert(~gdx.isValid());
@@ -1296,7 +1296,7 @@ function test_readWritePartial(t, cfg)
     t.assert(isfield(gdx.data, 'x'));
     t.testEmptySymbol(gdx.data.a);
     t.testEmptySymbol(gdx.data.b);
-    loaded_symbols = gdx.listSymbols('only_loaded', true);
+    loaded_symbols = gdx.listSymbols('is_loaded', true);
     t.assert(numel(loaded_symbols) == 3);
     t.assertEquals(loaded_symbols{1}, 'i');
     t.assertEquals(loaded_symbols{2}, 'j');
@@ -1314,7 +1314,7 @@ function test_readWritePartial(t, cfg)
     t.assert(isfield(gdx.data, 'i'));
     t.assert(isfield(gdx.data, 'j'));
     t.assert(isfield(gdx.data, 'x'));
-    loaded_symbols = gdx.listSymbols('only_loaded', true);
+    loaded_symbols = gdx.listSymbols('is_loaded', true);
     t.assert(numel(loaded_symbols) == 3);
     t.assertEquals(loaded_symbols{1}, 'i');
     t.assertEquals(loaded_symbols{2}, 'j');

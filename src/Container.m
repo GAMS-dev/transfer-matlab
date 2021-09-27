@@ -288,9 +288,8 @@ classdef Container < handle
             if ~obj.isValid()
                 obj.reorderSymbols();
                 if ~obj.isValid()
-                    invalid_symbols = GAMSTransfer.Utils.list2str(setdiff(...
-                        obj.listSymbols('only_loaded', true), obj.listSymbols(...
-                        'only_valid', true, 'only_loaded', true)), '', '');
+                    invalid_symbols = GAMSTransfer.Utils.list2str(...
+                        obj.listSymbols('is_loaded', true, 'is_valid', false));
                     error('Can''t write invalid container. Invalid loaded symbols: %s.', invalid_symbols);
                 end
             end
@@ -315,7 +314,7 @@ classdef Container < handle
 
             % cache data for C
             if ~obj.indexed && ~obj.features.c_prop_setget
-                symbols = obj.listSymbols('only_loaded', true);
+                symbols = obj.listSymbols('is_loaded', true);
                 for i = 1:numel(symbols)
                     symbol = obj.data.(symbols{i});
                     if isa(symbol, 'GAMSTransfer.Alias')
@@ -622,11 +621,15 @@ classdef Container < handle
             % Lists all symbols in container
             %
             % Parameter Arguments:
-            % - only_loaded: logical
-            %   Only include symbols with records loaded from GDX or added
-            %   through interface. Default: false.
-            % - only_valid: logical
-            %   Only include symbols that are valid. Default: false.
+            % - is_loaded: logical or any
+            %   Enable loaded filter if argument is of type logical. If true,
+            %   only include symbols with records loaded from GDX or added
+            %   through interface and, if false, only symbols that are not yet
+            %   loaded. Default: not logical.
+            % - is_valid: logical or any
+            %   Enable valid filter if argument is of type logical. If true,
+            %   only include symbols that are valid and, if false, only invalid
+            %   symbols. Default: not logical.
             %
             % See also: GAMSTransfer.Container.listSets,
             % GAMSTransfer.Container.listParameters,
@@ -636,16 +639,16 @@ classdef Container < handle
             %
 
             p = inputParser();
-            addParameter(p, 'only_types', [], @isnumeric);
-            addParameter(p, 'only_loaded', false, @islogical);
-            addParameter(p, 'only_valid', false, @islogical);
+            addParameter(p, 'types', [], @isnumeric);
+            addParameter(p, 'is_loaded', nan);
+            addParameter(p, 'is_valid', nan);
             parse(p, varargin{:});
-            only_types = p.Results.only_types;
-            only_loaded = p.Results.only_loaded;
-            only_valid = p.Results.only_valid;
+            types = p.Results.types;
+            is_loaded = p.Results.is_loaded;
+            is_valid = p.Results.is_valid;
 
             names = fieldnames(obj.data);
-            if isempty(only_types) && ~only_loaded && ~only_valid
+            if isempty(types) && ~islogical(is_loaded) && ~islogical(is_valid)
                 list = names;
                 return
             end
@@ -657,9 +660,9 @@ classdef Container < handle
                     symbol = obj.data.(names{i});
 
                     % check type
-                    matched_type = isempty(only_types);
-                    for j = 1:numel(only_types)
-                        switch only_types(j)
+                    matched_type = isempty(types);
+                    for j = 1:numel(types)
+                        switch types(j)
                         case GAMSTransfer.SymbolType.SET
                             matched_type = isa(symbol, 'GAMSTransfer.Set');
                         case GAMSTransfer.SymbolType.PARAMETER
@@ -682,14 +685,15 @@ classdef Container < handle
                     end
 
                     % check loaded
-                    if only_loaded && ~isa(symbol, 'GAMSTransfer.Alias') && ...
-                        ~isnan(symbol.read_entry) && ...
-                        symbol.format_ == GAMSTransfer.RecordsFormat.NOT_READ
-                        continue
+                    if ~isa(symbol, 'GAMSTransfer.Alias') && ~isnan(symbol.read_entry)
+                        if islogical(is_loaded) && xor(is_loaded, ...
+                            symbol.format_ ~= GAMSTransfer.RecordsFormat.NOT_READ)
+                            continue
+                        end
                     end
 
                     % check invalid
-                    if only_valid && ~symbol.isValid()
+                    if islogical(is_valid) && xor(is_valid, symbol.isValid())
                         continue
                     end
 
@@ -711,11 +715,15 @@ classdef Container < handle
             % Note: This method includes set aliases.
             %
             % Parameter Arguments:
-            % - only_loaded: logical
-            %   Only include symbols with records loaded from GDX or added
-            %   through interface. Default: false.
-            % - only_valid: logical
-            %   Only include symbols that are valid. Default: false.
+            % - is_loaded: logical or any
+            %   Enable loaded filter if argument is of type logical. If true,
+            %   only include symbols with records loaded from GDX or added
+            %   through interface and, if false, only symbols that are not yet
+            %   loaded. Default: not logical.
+            % - is_valid: logical or any
+            %   Enable valid filter if argument is of type logical. If true,
+            %   only include symbols that are valid and, if false, only invalid
+            %   symbols. Default: not logical.
             %
             % See also: GAMSTransfer.Container.listSymbols,
             % GAMSTransfer.Container.listParameters,
@@ -725,24 +733,28 @@ classdef Container < handle
             %
 
             p = inputParser();
-            addParameter(p, 'only_loaded', false, @islogical);
-            addParameter(p, 'only_valid', false, @islogical);
+            addParameter(p, 'is_loaded', nan);
+            addParameter(p, 'is_valid', nan);
             parse(p, varargin{:});
 
-            list = obj.listSymbols('only_types', [GAMSTransfer.SymbolType.SET, ...
-                GAMSTransfer.SymbolType.ALIAS], 'only_loaded', p.Results.only_loaded, ...
-                'only_valid', p.Results.only_valid);
+            list = obj.listSymbols('types', [GAMSTransfer.SymbolType.SET, ...
+                GAMSTransfer.SymbolType.ALIAS], 'is_loaded', p.Results.is_loaded, ...
+                'is_valid', p.Results.is_valid);
         end
 
         function list = listParameters(obj, varargin)
             % Lists all parameters in container
             %
             % Parameter Arguments:
-            % - only_loaded: logical
-            %   Only include symbols with records loaded from GDX or added
-            %   through interface. Default: false.
-            % - only_valid: logical
-            %   Only include symbols that are valid. Default: false.
+            % - is_loaded: logical or any
+            %   Enable loaded filter if argument is of type logical. If true,
+            %   only include symbols with records loaded from GDX or added
+            %   through interface and, if false, only symbols that are not yet
+            %   loaded. Default: not logical.
+            % - is_valid: logical or any
+            %   Enable valid filter if argument is of type logical. If true,
+            %   only include symbols that are valid and, if false, only invalid
+            %   symbols. Default: not logical.
             %
             % See also: GAMSTransfer.Container.listSymbols,
             % GAMSTransfer.Container.listSets,
@@ -752,24 +764,28 @@ classdef Container < handle
             %
 
             p = inputParser();
-            addParameter(p, 'only_loaded', false, @islogical);
-            addParameter(p, 'only_valid', false, @islogical);
+            addParameter(p, 'is_loaded', nan);
+            addParameter(p, 'is_valid', nan);
             parse(p, varargin{:});
 
-            list = obj.listSymbols('only_types', GAMSTransfer.SymbolType.PARAMETER, ...
-                'only_loaded', p.Results.only_loaded, 'only_valid', ...
-                p.Results.only_valid);
+            list = obj.listSymbols('types', GAMSTransfer.SymbolType.PARAMETER, ...
+                'is_loaded', p.Results.is_loaded, 'is_valid', ...
+                p.Results.is_valid);
         end
 
         function list = listVariables(obj, varargin)
             % Lists all variables in container
             %
             % Parameter Arguments:
-            % - only_loaded: logical
-            %   Only include symbols with records loaded from GDX or added
-            %   through interface. Default: false.
-            % - only_valid: logical
-            %   Only include symbols that are valid. Default: false.
+            % - is_loaded: logical or any
+            %   Enable loaded filter if argument is of type logical. If true,
+            %   only include symbols with records loaded from GDX or added
+            %   through interface and, if false, only symbols that are not yet
+            %   loaded. Default: not logical.
+            % - is_valid: logical or any
+            %   Enable valid filter if argument is of type logical. If true,
+            %   only include symbols that are valid and, if false, only invalid
+            %   symbols. Default: not logical.
             %
             % See also: GAMSTransfer.Container.listSymbols,
             % GAMSTransfer.Container.listSets,
@@ -779,24 +795,28 @@ classdef Container < handle
             %
 
             p = inputParser();
-            addParameter(p, 'only_loaded', false, @islogical);
-            addParameter(p, 'only_valid', false, @islogical);
+            addParameter(p, 'is_loaded', nan);
+            addParameter(p, 'is_valid', nan);
             parse(p, varargin{:});
 
-            list = obj.listSymbols('only_types', GAMSTransfer.SymbolType.VARIABLE, ...
-                'only_loaded', p.Results.only_loaded, 'only_valid', ...
-                p.Results.only_valid);
+            list = obj.listSymbols('types', GAMSTransfer.SymbolType.VARIABLE, ...
+                'is_loaded', p.Results.is_loaded, 'is_valid', ...
+                p.Results.is_valid);
         end
 
         function list = listEquations(obj, varargin)
             % Lists all equations in container
             %
             % Parameter Arguments:
-            % - only_loaded: logical
-            %   Only include symbols with records loaded from GDX or added
-            %   through interface. Default: false.
-            % - only_valid: logical
-            %   Only include symbols that are valid. Default: false.
+            % - is_loaded: logical or any
+            %   Enable loaded filter if argument is of type logical. If true,
+            %   only include symbols with records loaded from GDX or added
+            %   through interface and, if false, only symbols that are not yet
+            %   loaded. Default: not logical.
+            % - is_valid: logical or any
+            %   Enable valid filter if argument is of type logical. If true,
+            %   only include symbols that are valid and, if false, only invalid
+            %   symbols. Default: not logical.
             %
             % See also: GAMSTransfer.Container.listSymbols,
             % GAMSTransfer.Container.listSets,
@@ -806,24 +826,28 @@ classdef Container < handle
             %
 
             p = inputParser();
-            addParameter(p, 'only_loaded', false, @islogical);
-            addParameter(p, 'only_valid', false, @islogical);
+            addParameter(p, 'is_loaded', nan);
+            addParameter(p, 'is_valid', nan);
             parse(p, varargin{:});
 
-            list = obj.listSymbols('only_types', GAMSTransfer.SymbolType.EQUATION, ...
-                'only_loaded', p.Results.only_loaded, 'only_valid', ...
-                p.Results.only_valid);
+            list = obj.listSymbols('types', GAMSTransfer.SymbolType.EQUATION, ...
+                'is_loaded', p.Results.is_loaded, 'is_valid', ...
+                p.Results.is_valid);
         end
 
         function list = listAliases(obj, varargin)
             % Lists all aliases in container
             %
             % Parameter Arguments:
-            % - only_loaded: logical
-            %   Only include symbols with records loaded from GDX or added
-            %   through interface. Default: false.
-            % - only_valid: logical
-            %   Only include symbols that are valid. Default: false.
+            % - is_loaded: logical or any
+            %   Enable loaded filter if argument is of type logical. If true,
+            %   only include symbols with records loaded from GDX or added
+            %   through interface and, if false, only symbols that are not yet
+            %   loaded. Default: not logical.
+            % - is_valid: logical or any
+            %   Enable valid filter if argument is of type logical. If true,
+            %   only include symbols that are valid and, if false, only invalid
+            %   symbols. Default: not logical.
             %
             % See also: GAMSTransfer.Container.listSymbols,
             % GAMSTransfer.Container.listSets,
@@ -833,13 +857,13 @@ classdef Container < handle
             %
 
             p = inputParser();
-            addParameter(p, 'only_loaded', false, @islogical);
-            addParameter(p, 'only_valid', false, @islogical);
+            addParameter(p, 'is_loaded', nan);
+            addParameter(p, 'is_valid', nan);
             parse(p, varargin{:});
 
-            list = obj.listSymbols('only_types', GAMSTransfer.SymbolType.ALIAS, ...
-                'only_loaded', p.Results.only_loaded, 'only_valid', ...
-                p.Results.only_valid);
+            list = obj.listSymbols('types', GAMSTransfer.SymbolType.ALIAS, ...
+                'is_loaded', p.Results.is_loaded, 'is_valid', ...
+                p.Results.is_valid);
         end
 
         function descr = describeSets(obj, varargin)
