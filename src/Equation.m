@@ -22,7 +22,7 @@ classdef Equation < GAMSTransfer.Symbol
     %   Set records, e.g. a list of strings. Default is [].
     % - description: string
     %   Description of symbol. Default is ''.
-    % - grow_domain: logical
+    % - domain_forwarding: logical
     %   If true, domain entries in records will recursively be added to the
     %   domains in case they are not present in the domains already. Default:
     %   false.
@@ -136,7 +136,7 @@ classdef Equation < GAMSTransfer.Symbol
             description = '';
             read_entry = nan;
             read_number_records = nan;
-            grow_domain = false;
+            domain_forwarding = false;
             while i < nargin - 3
                 if strcmpi(varargin{i}, 'records')
                     records = varargin{i+1};
@@ -146,8 +146,8 @@ classdef Equation < GAMSTransfer.Symbol
                     read_entry = varargin{i+1};
                 elseif strcmpi(varargin{i}, 'read_number_records')
                     read_number_records = varargin{i+1};
-                elseif strcmpi(varargin{i}, 'grow_domain')
-                    grow_domain = varargin{i+1};
+                elseif strcmpi(varargin{i}, 'domain_forwarding')
+                    domain_forwarding = varargin{i+1};
                 else
                     error('Unknown argument name.');
                 end
@@ -165,7 +165,7 @@ classdef Equation < GAMSTransfer.Symbol
 
             % create object
             obj = obj@GAMSTransfer.Symbol(container, name, description, domain, ...
-                records, grow_domain, read_entry, read_number_records);
+                records, domain_forwarding, read_entry, read_number_records);
             obj.type = etype;
         end
 

@@ -56,7 +56,7 @@ classdef Symbol < handle
     end
 
     properties (Dependent)
-        grow_domain
+        domain_forwarding
     end
 
     properties
@@ -93,7 +93,7 @@ classdef Symbol < handle
         domain_names_
         domain_labels_
         domain_type_
-        grow_domain_
+        domain_forwarding_
         size_
         format_
 
@@ -118,7 +118,7 @@ classdef Symbol < handle
 
     methods (Access = protected)
 
-        function obj = Symbol(container, name, description, domain_size, records, grow_domain, read_entry, read_number_records)
+        function obj = Symbol(container, name, description, domain_size, records, domain_forwarding, read_entry, read_number_records)
             % Constructs a GAMS Symbol, see class help.
             %
 
@@ -147,8 +147,8 @@ classdef Symbol < handle
             if ~container.indexed && ~iscell(domain_size)
                 error('Argument ''domain'' must be of type ''cell''.')
             end
-            if ~islogical(grow_domain)
-                error('Argument ''grow_domain'' must be of type ''logical''.');
+            if ~islogical(domain_forwarding)
+                error('Argument ''domain_forwarding'' must be of type ''logical''.');
             end
             if ~isnumeric(read_entry)
                 error('Argument ''read_entry'' must be of type ''numeric''.');
@@ -160,7 +160,7 @@ classdef Symbol < handle
             obj.container = container;
             obj.name_ = name;
             obj.description_ = description;
-            obj.grow_domain_ = grow_domain;
+            obj.domain_forwarding_ = domain_forwarding;
 
             % the following inits dimension_, domain_, domain_names_, domain_labels_,
             % domain_type_, uels
@@ -288,18 +288,18 @@ classdef Symbol < handle
             domain_type = obj.domain_type_;
         end
 
-        function grow_domain = get.grow_domain(obj)
-            grow_domain = obj.grow_domain_;
+        function domain_forwarding = get.domain_forwarding(obj)
+            domain_forwarding = obj.domain_forwarding_;
         end
 
-        function set.grow_domain(obj, grow_domain)
-            if ~islogical(grow_domain)
-                error('grow_domain must be logical.');
+        function set.domain_forwarding(obj, domain_forwarding)
+            if ~islogical(domain_forwarding)
+                error('domain_forwarding must be logical.');
             end
-            if ~obj.grow_domain_ && grow_domain
+            if ~obj.domain_forwarding_ && domain_forwarding
                 obj.resolveDomainViolations();
             end
-            obj.grow_domain_ = grow_domain;
+            obj.domain_forwarding_ = domain_forwarding;
         end
 
         function sizes = get.size(obj)
@@ -548,9 +548,9 @@ classdef Symbol < handle
             % store uels
             % Note: we don't need to init when categorical arrays are used, they
             % are initialized already. Moreover, resolving domain violations for
-            % grow_domain happens automatically in isValid if categorical arrays
-            % are used. However, if not, UELs are set now, so we need to update
-            % domains now, too.
+            % domain_forwarding happens automatically in isValid if categorical
+            % arrays are used. However, if not, UELs are set now, so we need to
+            % update domains now, too.
             if ~obj.container.indexed && ~obj.container.features.categorical
                 for i = 1:obj.dimension_
                     if ~isempty(uels{i})
@@ -559,7 +559,7 @@ classdef Symbol < handle
                 end
 
                 % resolve domain violations
-                if obj.grow_domain_
+                if obj.domain_forwarding_
                     obj.resolveDomainViolations();
                 end
             end
@@ -937,7 +937,7 @@ classdef Symbol < handle
             end
 
             % resolve domain violations
-            if obj.grow_domain_
+            if obj.domain_forwarding_
                 obj.resolveDomainViolations();
             end
         end

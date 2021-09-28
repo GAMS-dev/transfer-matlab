@@ -1140,9 +1140,9 @@ function test_domainViolation(t, cfg);
     t.assert(a1.isValid());
     t.assert(a2.isValid());
     t.assert(a3.isValid());
-    t.assert(~a1.grow_domain);
-    t.assert(~a2.grow_domain);
-    t.assert(~a3.grow_domain);
+    t.assert(~a1.domain_forwarding);
+    t.assert(~a2.domain_forwarding);
+    t.assert(~a3.domain_forwarding);
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 3);
     t.assert(isa(domviol{1}, 'GAMSTransfer.DomainViolation'));
@@ -1216,9 +1216,9 @@ function test_domainViolation(t, cfg);
     t.assert(a1.isValid());
     t.assert(a2.isValid());
     t.assert(a3.isValid());
-    t.assert(~a1.grow_domain);
-    t.assert(~a2.grow_domain);
-    t.assert(~a3.grow_domain);
+    t.assert(~a1.domain_forwarding);
+    t.assert(~a2.domain_forwarding);
+    t.assert(~a3.domain_forwarding);
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 3);
     t.assert(isa(domviol{1}, 'GAMSTransfer.DomainViolation'));
@@ -1244,12 +1244,12 @@ function test_domainViolation(t, cfg);
     t.assertEquals(domviol{3}.violations{1}, 'i7');
 
     t.add('domain_violation_with_grow_2');
-    a1.grow_domain = true;
-    a2.grow_domain = true;
-    a3.grow_domain = true;
-    t.assert(a1.grow_domain);
-    t.assert(a2.grow_domain);
-    t.assert(a3.grow_domain);
+    a1.domain_forwarding = true;
+    a2.domain_forwarding = true;
+    a3.domain_forwarding = true;
+    t.assert(a1.domain_forwarding);
+    t.assert(a2.domain_forwarding);
+    t.assert(a3.domain_forwarding);
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 0);
     elems = i1.getUELs(1);
@@ -1274,17 +1274,17 @@ function test_domainViolation(t, cfg);
     i2 = GAMSTransfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
     a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
         {{'i0', 'i0', 'i1', 'i1'}, {'i1', 'i2', 'i1', 'i2'}, [1;2;3;4]}, ...
-        'grow_domain', true);
+        'domain_forwarding', true);
     a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
         {{'i1', 'i1', 'i5', 'i5'}, {'i1', 'i5', 'i1', 'i5'}, [1;2;3;4]}, ...
-        'grow_domain', true);
+        'domain_forwarding', true);
     a3 = GAMSTransfer.Parameter(gdx, 'a3', i2, 'records', ...
-        {{'i1', 'i7'}, [1;2]}, 'grow_domain', true);
+        {{'i1', 'i7'}, [1;2]}, 'domain_forwarding', true);
 
     t.add('domain_violation_with_grow_3');
-    t.assert(a1.grow_domain);
-    t.assert(a2.grow_domain);
-    t.assert(a3.grow_domain);
+    t.assert(a1.domain_forwarding);
+    t.assert(a2.domain_forwarding);
+    t.assert(a3.domain_forwarding);
     t.assert(numel(domviol) == 0);
     elems = i1.getUELs(1);
     t.assert(iscell(elems));
