@@ -252,7 +252,7 @@ classdef Symbol < handle
                 end
             end
 
-            GAMSTransfer.gt_set_sym_domain(obj, domain, obj.container.id, ...
+            GAMSTransfer.gt_cmex_set_sym_domain(obj, domain, obj.container.id, ...
                 obj.container.features.c_prop_setget);
             obj.domain_ = domain;
 
@@ -1876,7 +1876,7 @@ classdef Symbol < handle
                 end
 
                 % check correct order of symbols
-                if ~GAMSTransfer.gt_check_sym_order(obj.container.data, obj.domain_{i}.name, obj.name_);
+                if ~GAMSTransfer.gt_cmex_check_sym_order(obj.container.data, obj.domain_{i}.name, obj.name_);
                     error('Domain set ''%s'' is out of order: Try calling the Container method reorderSymbols().', obj.domain_{i}.name);
                 end
 

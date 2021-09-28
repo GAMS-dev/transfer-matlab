@@ -961,7 +961,7 @@ function test_changeSymbol(t, cfg)
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_set_sym_domain: Domain must be of type ''cell''.');
+            t.assertEquals(e.message, 'gt_cmex_set_sym_domain: Domain must be of type ''cell''.');
         else
             t.assertEquals(e.message, 'Domain must be of type ''cell''.');
         end
@@ -972,7 +972,7 @@ function test_changeSymbol(t, cfg)
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_set_sym_domain: Domain entry must be of type ''GAMSTransfer.Set'' or ''char''.');
+            t.assertEquals(e.message, 'gt_cmex_set_sym_domain: Domain entry must be of type ''GAMSTransfer.Set'' or ''char''.');
         else
             t.assertEquals(e.message, 'Domain entry must be of type ''GAMSTransfer.Set'' or ''char''.');
         end
@@ -1174,7 +1174,7 @@ function test_domainViolation(t, cfg);
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_gdx_write: GDX error for a1: Domain violation');
+            t.assertEquals(e.message, 'gt_cmex_gdx_write: GDX error for a1: Domain violation');
         else
             t.assertEquals(e.message, 'GDX error for a1: Domain violation');
         end
@@ -1855,7 +1855,7 @@ function test_writeUnordered(t, cfg)
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_gdx_write: GDX error in record c(i3,j1): Data not sorted when writing raw');
+            t.assertEquals(e.message, 'gt_cmex_gdx_write: GDX error in record c(i3,j1): Data not sorted when writing raw');
         else
             t.assertEquals(e.message, 'GDX error in record c(i3,j1): Data not sorted when writing raw');
         end
@@ -1877,7 +1877,7 @@ function test_writeUnordered(t, cfg)
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_gdx_write: GDX error in record c(i2,j1): Data not sorted when writing raw');
+            t.assertEquals(e.message, 'gt_cmex_gdx_write: GDX error in record c(i2,j1): Data not sorted when writing raw');
         else
             t.assertEquals(e.message, 'GDX error in record c(i2,j1): Data not sorted when writing raw');
         end

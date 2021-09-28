@@ -25,13 +25,13 @@
 
 #include "gdxcc.h"
 #include "mex.h"
-#include "gt_utils.h"
-#include "gt_mex.h"
-#include "gt_gdx_idx.h"
+#include "gt_cmex_utils.h"
+#include "gt_cmex_mex.h"
+#include "gt_cmex_gdx_idx.h"
 
 #include <string.h>
 
-#define ERRID "GAMSTransfer:gt_gdx_read_basics:"
+#define ERRID "GAMSTransfer:gt_cmex_gdx_read_basics:"
 
 void mexFunction(
     int             nlhs,

@@ -33,10 +33,10 @@ classdef SpecialValues
         UNDEF = nan
 
         % NA Value not available (in Matlab: special nan value)
-        NA = GAMSTransfer.gt_getna()
+        NA = GAMSTransfer.gt_cmex_getna()
 
         % EPS Explicit zero (in Matlab: negative zero)
-        EPS = GAMSTransfer.gt_geteps()
+        EPS = GAMSTransfer.gt_cmex_geteps()
 
         % POSINF positive infinity
         POSINF = inf
@@ -58,7 +58,7 @@ classdef SpecialValues
             % b equals [0, 0, 0, 1]
             %
 
-            bool = isnan(value) & ~GAMSTransfer.gt_isna(value);
+            bool = isnan(value) & ~GAMSTransfer.gt_cmex_isna(value);
         end
 
         function bool = isNA(value)
@@ -71,7 +71,7 @@ classdef SpecialValues
             % b equals [0, 0, 1, 0]
             %
 
-            bool = GAMSTransfer.gt_isna(value);
+            bool = GAMSTransfer.gt_cmex_isna(value);
         end
 
         function bool = isEps(value)
@@ -84,7 +84,7 @@ classdef SpecialValues
             % b equals [0, 0, 1, 0]
             %
 
-            bool = GAMSTransfer.gt_iseps(value);
+            bool = GAMSTransfer.gt_cmex_iseps(value);
         end
 
         function bool = isPosInf(value)

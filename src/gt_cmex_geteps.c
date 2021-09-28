@@ -24,12 +24,11 @@
  */
 
 #include "mex.h"
+#include "gt_cmex_utils.h"
 
-#include "gdxcc.h"
-#include "gt_mex.h"
-#include "gt_utils.h"
+#include <time.h>
 
-#define ERRID "GAMSTransfer:gt_get_defaults:"
+#define ERRID "GAMSTransfer:gt_cmex_geteps:"
 
 void mexFunction(
     int             nlhs,
@@ -38,56 +37,26 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
-    int type, subtype;
-    bool singleton;
 #ifdef WITH_R2018A_OR_NEWER
-    mxDouble* mx_defaults = NULL;
+    mxDouble* mx_value = NULL;
 #else
-    double* mx_defaults = NULL;
+    double* mx_value = NULL;
 #endif
 
-    /* check input / outputs */
-    gt_mex_check_arguments_num(1, nlhs, 1, nrhs);
-    gt_mex_check_argument_symbol_obj(prhs, 0);
+    if (nlhs != 1 && nlhs != 0)
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of outputs (%d). 0 or 1 required.", nlhs);
+    if (nrhs != 0)
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of inputs (%d). 0 required.", nrhs);
 
     /* create output data */
-    plhs[0] = mxCreateDoubleMatrix(1, 5, mxREAL);
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
 
+    /* access data */
 #ifdef WITH_R2018A_OR_NEWER
-    mx_defaults = mxGetDoubles(plhs[0]);
+    mx_value = mxGetDoubles(plhs[0]);
 #else
-    mx_defaults = mxGetPr(plhs[0]);
+    mx_value = mxGetPr(plhs[0]);
 #endif
 
-    /* get symbol type */
-    if (mxIsClass(prhs[0], "GAMSTransfer.Set"))
-    {
-        gt_mex_getfield_bool(prhs[0], "symbol", "is_singleton", false, true, 1, &singleton);
-        type = GMS_DT_SET;
-        subtype = (singleton) ? GMS_SETTYPE_SINGLETON : GMS_SETTYPE_DEFAULT;
-    }
-    else if (mxIsClass(prhs[0], "GAMSTransfer.Parameter"))
-    {
-        type = GMS_DT_PAR;
-        subtype = 0;
-    }
-    else if (mxIsClass(prhs[0], "GAMSTransfer.Variable"))
-    {
-        gt_mex_getfield_int(prhs[0], "symbol", "type_", 0, true, GT_FILTER_NONE, 1, &subtype);
-        type = GMS_DT_VAR;
-    }
-    else if (mxIsClass(prhs[0], "GAMSTransfer.Equation"))
-    {
-        gt_mex_getfield_int(prhs[0], "symbol", "type_", 0, true, GT_FILTER_NONE, 1, &subtype);
-        type = GMS_DT_EQU;
-        subtype += GMS_EQU_USERINFO_BASE;
-    }
-    else
-    {
-        mexErrMsgIdAndTxt(ERRID"type", "Symbol has invalid type.");
-        return;
-    }
-
-    /* get defaults */
-    gt_utils_type_default_values(type, subtype, true, mx_defaults);
+    mx_value[0] = gt_utils_geteps();
 }

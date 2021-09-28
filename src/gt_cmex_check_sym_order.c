@@ -24,11 +24,9 @@
  */
 
 #include "mex.h"
-#include "gt_utils.h"
+#include "gt_cmex_mex.h"
 
-#include <time.h>
-
-#define ERRID "GAMSTransfer:gt_getna:"
+#define ERRID "GAMSTransfer:gt_cmex_check_sym_order:"
 
 void mexFunction(
     int             nlhs,
@@ -37,26 +35,18 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
-#ifdef WITH_R2018A_OR_NEWER
-    mxDouble* mx_value = NULL;
-#else
-    double* mx_value = NULL;
-#endif
+    int first_symbol_pos, second_symbol_pos;
+    char first_symbol[256], second_symbol[256];
 
-    if (nlhs != 1 && nlhs != 0)
-        mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of outputs (%d). 0 or 1 required.", nlhs);
-    if (nrhs != 0)
-        mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of inputs (%d). 0 required.", nrhs);
+    /* check input / outputs */
+    gt_mex_check_arguments_num(1, nlhs, 3, nrhs);
+    gt_mex_check_argument_struct(prhs, 0);
+    gt_mex_check_argument_str(prhs, 1, first_symbol);
+    gt_mex_check_argument_str(prhs, 2, second_symbol);
+
+    first_symbol_pos = mxGetFieldNumber(prhs[0], first_symbol);
+    second_symbol_pos = mxGetFieldNumber(prhs[0], second_symbol);
 
     /* create output data */
-    plhs[0] = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
-
-    /* access data */
-#ifdef WITH_R2018A_OR_NEWER
-    mx_value = mxGetDoubles(plhs[0]);
-#else
-    mx_value = mxGetPr(plhs[0]);
-#endif
-
-    mx_value[0] = gt_utils_getna();
+    plhs[0] = mxCreateLogicalScalar(first_symbol_pos < second_symbol_pos);
 }

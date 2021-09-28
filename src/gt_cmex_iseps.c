@@ -24,9 +24,9 @@
  */
 
 #include "mex.h"
-#include "gt_mex.h"
+#include "gt_cmex_utils.h"
 
-#define ERRID "GAMSTransfer:gt_check_sym_order:"
+#define ERRID "GAMSTransfer:gt_cmex_isna:"
 
 void mexFunction(
     int             nlhs,
@@ -35,18 +35,32 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
-    int first_symbol_pos, second_symbol_pos;
-    char first_symbol[256], second_symbol[256];
+    mxLogical* mx_outputs;
+#ifdef WITH_R2018A_OR_NEWER
+    mxDouble* mx_inputs = NULL;
+#else
+    double* mx_inputs = NULL;
+#endif
 
-    /* check input / outputs */
-    gt_mex_check_arguments_num(1, nlhs, 3, nrhs);
-    gt_mex_check_argument_struct(prhs, 0);
-    gt_mex_check_argument_str(prhs, 1, first_symbol);
-    gt_mex_check_argument_str(prhs, 2, second_symbol);
-
-    first_symbol_pos = mxGetFieldNumber(prhs[0], first_symbol);
-    second_symbol_pos = mxGetFieldNumber(prhs[0], second_symbol);
+    if (nlhs != 1 && nlhs != 0)
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of outputs (%d). 0 or 1 required.", nlhs);
+    if (nrhs != 1)
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of inputs (%d). 1 required.", nrhs);
+    if (!mxIsDouble(prhs[0]))
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Argument has invalid type: need double");
 
     /* create output data */
-    plhs[0] = mxCreateLogicalScalar(first_symbol_pos < second_symbol_pos);
+    plhs[0] = mxCreateLogicalArray(mxGetNumberOfDimensions(prhs[0]), mxGetDimensions(prhs[0]));
+
+    /* access data */
+#ifdef WITH_R2018A_OR_NEWER
+    mx_inputs = mxGetDoubles(prhs[0]);
+    mx_outputs = mxGetLogicals(plhs[0]);
+#else
+    mx_inputs = mxGetPr(prhs[0]);
+    mx_outputs = (mxLogical*) mxGetData(plhs[0]);
+#endif
+
+    for (size_t i = 0; i < mxGetNumberOfElements(plhs[0]); i++)
+        mx_outputs[i] = gt_utils_iseps(mx_inputs[i]);
 }

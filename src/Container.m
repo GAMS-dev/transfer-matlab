@@ -213,10 +213,10 @@ classdef Container < handle
 
             % read records
             if obj.indexed
-                GAMSTransfer.gt_idx_read_records(obj.gams_dir, ...
+                GAMSTransfer.gt_cmex_idx_read_records(obj.gams_dir, ...
                     obj.filename, obj.data, symbols, int32(format_int));
             else
-                GAMSTransfer.gt_gdx_read_records(obj.gams_dir, ...
+                GAMSTransfer.gt_cmex_gdx_read_records(obj.gams_dir, ...
                     obj.filename, obj.data, symbols, int32(format_int), ...
                     values_bool, obj.features.categorical, obj.features.c_prop_setget);
             end
@@ -326,10 +326,10 @@ classdef Container < handle
 
             % write data
             if obj.indexed
-                GAMSTransfer.gt_idx_write(obj.gams_dir, filename, obj.data, ...
+                GAMSTransfer.gt_cmex_idx_write(obj.gams_dir, filename, obj.data, ...
                     p.Results.sorted, obj.features.table);
             else
-                GAMSTransfer.gt_gdx_write(obj.gams_dir, filename, obj.data, ...
+                GAMSTransfer.gt_cmex_gdx_write(obj.gams_dir, filename, obj.data, ...
                     p.Results.uel_priority, p.Results.compress, p.Results.sorted, ...
                     obj.features.table, obj.features.categorical, obj.features.c_prop_setget);
             end
@@ -1265,9 +1265,9 @@ classdef Container < handle
         function readBasic(obj)
             % read data from GDX
             if obj.indexed
-                rawdata = GAMSTransfer.gt_idx_read_basics(obj.gams_dir, obj.filename);
+                rawdata = GAMSTransfer.gt_cmex_idx_read_basics(obj.gams_dir, obj.filename);
             else
-                rawdata = GAMSTransfer.gt_gdx_read_basics(obj.gams_dir, obj.filename);
+                rawdata = GAMSTransfer.gt_cmex_gdx_read_basics(obj.gams_dir, obj.filename);
             end
             symbols = fieldnames(rawdata);
 

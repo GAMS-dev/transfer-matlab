@@ -23,11 +23,11 @@
  * SOFTWARE.
  */
 
-#ifndef _GT_MEX_H_
-#define _GT_MEX_H_
+#ifndef _GT_CMEX_MEX_H_
+#define _GT_CMEX_MEX_H_
 
 #include "mex.h"
-#include "gt_utils.h"
+#include "gt_cmex_utils.h"
 
 #ifdef __cplusplus
 extern "C" {

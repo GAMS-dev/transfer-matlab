@@ -31,11 +31,11 @@
 #include "mex.h"
 
 #include "gdxcc.h"
-#include "gt_utils.h"
-#include "gt_mex.h"
-#include "gt_gdx_idx.h"
+#include "gt_cmex_utils.h"
+#include "gt_cmex_mex.h"
+#include "gt_cmex_gdx_idx.h"
 
-#define ERRID "GAMSTransfer:gt_gdx_read_records:"
+#define ERRID "GAMSTransfer:gt_cmex_gdx_read_records:"
 
 #define GET_DOM_MAP(dim,idx) ((dom_symid[dim] <= 0) ? idx-1 : dom_uel_dim_maps[dom_symid[dim]][idx])
 

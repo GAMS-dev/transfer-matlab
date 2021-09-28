@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _GT_UTILS_H_
-#define _GT_UTILS_H_
+#ifndef _GT_CMEX_UTILS_H_
+#define _GT_CMEX_UTILS_H_
 
 #include <stdbool.h>
 

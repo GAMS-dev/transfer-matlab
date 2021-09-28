@@ -28,10 +28,10 @@
 #include <inttypes.h>
 
 #include "mex.h"
-#include "gt_mex.h"
-#include "gt_utils.h"
+#include "gt_cmex_mex.h"
+#include "gt_cmex_utils.h"
 
-#define ERRID "GAMSTransfer:gt_set_sym_domain:"
+#define ERRID "GAMSTransfer:gt_cmex_set_sym_domain:"
 
 void mexFunction(
     int             nlhs,

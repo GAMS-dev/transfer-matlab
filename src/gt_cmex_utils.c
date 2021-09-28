@@ -23,14 +23,14 @@
  * SOFTWARE.
  */
 
-#include "gt_utils.h"
+#include "gt_cmex_utils.h"
 #include "gclgms.h"
 
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
 
-#define ERRID "GAMSTransfer:gt_utils:"
+#define ERRID "GAMSTransfer:gt_cmex_utils:"
 
 #if defined(_WIN32)
 #include <windows.h>

@@ -24,13 +24,13 @@
  */
 
 #include "mex.h"
-#include "gt_utils.h"
-#include "gt_mex.h"
-#include "gt_gdx_idx.h"
+#include "gt_cmex_utils.h"
+#include "gt_cmex_mex.h"
+#include "gt_cmex_gdx_idx.h"
 
 #include <stdio.h>
 
-#define ERRID "GAMSTransfer:gt_idx_read_basics:"
+#define ERRID "GAMSTransfer:gt_cmex_idx_read_basics:"
 
 void mexFunction(
     int             nlhs,

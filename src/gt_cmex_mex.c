@@ -23,14 +23,14 @@
  * SOFTWARE.
  */
 
-#include "gt_mex.h"
+#include "gt_cmex_mex.h"
 #include "gclgms.h"
 
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
 
-#define ERRID "GAMSTransfer:gt_mex:"
+#define ERRID "GAMSTransfer:gt_cmex_mex:"
 
 void gt_mex_check_arguments_num(
     int             n_out_required,/** number of required output arguments */

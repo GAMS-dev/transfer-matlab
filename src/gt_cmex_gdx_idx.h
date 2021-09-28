@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _GT_GDX_IDX_H_
-#define _GT_GDX_IDX_H_
+#ifndef _GT_CMEX_GDX_IDX_H_
+#define _GT_CMEX_GDX_IDX_H_
 
 #include "gdxcc.h"
 #include "idxcc.h"

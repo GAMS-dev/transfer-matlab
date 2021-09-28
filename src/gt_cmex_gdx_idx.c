@@ -23,13 +23,13 @@
  * SOFTWARE.
  */
 
-#include "gt_gdx_idx.h"
+#include "gt_cmex_gdx_idx.h"
 #include "mex.h"
 
 #include <string.h>
 #include <stdio.h>
 
-#define ERRID "GAMSTransfer:gt_gdx_idx:"
+#define ERRID "GAMSTransfer:gt_cmex_gdx_idx:"
 
 void gt_gdx_init_read(
     gdxHandle_t*    gdx,            /** GDX handle */

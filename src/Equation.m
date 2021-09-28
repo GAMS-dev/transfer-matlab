@@ -224,7 +224,7 @@ classdef Equation < GAMSTransfer.Symbol
         end
 
         function def = get.default_values(obj)
-            def_vals = GAMSTransfer.gt_get_defaults(obj);
+            def_vals = GAMSTransfer.gt_cmex_get_defaults(obj);
             def = struct();
             def.level = def_vals(1);
             def.marginal = def_vals(2);
