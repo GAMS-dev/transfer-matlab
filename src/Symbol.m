@@ -423,6 +423,7 @@ classdef Symbol < handle
             %
 
             obj.records = struct();
+            obj.checkDomains();
             obj.updateDomainSetDependentData();
 
             if nargin == 2
@@ -855,8 +856,6 @@ classdef Symbol < handle
             end
 
             valid = false;
-            obj.updateDomainSetDependentData();
-
             try
                 % check if symbol is actually contained in container
                 if ~isfield(obj.container.data, obj.name_)
@@ -878,6 +877,7 @@ classdef Symbol < handle
 
                 % check domains
                 obj.checkDomains();
+                obj.updateDomainSetDependentData();
 
                 % check if format is already available (not valid: UNKNOWN: -1; NOT_READ: 0)
                 if obj.format_ > 0

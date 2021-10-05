@@ -544,7 +544,7 @@ classdef Container < handle
             end
 
             % handle set dependencies
-            if n_sets > 1
+            if n_sets > 0
                 n_handled = 0;
                 set_handled = containers.Map(sets, false(1, n_sets));
                 set_avail = true(1, n_sets);
@@ -1291,8 +1291,6 @@ classdef Container < handle
                             continue
                         elseif isfield(obj.data, domain{j})
                             domain{j} = obj.data.(domain{j});
-                        else
-                            error('Domain %s is not available.', domain{j});
                         end
                     end
                 end

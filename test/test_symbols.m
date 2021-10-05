@@ -1973,6 +1973,27 @@ function test_reorder(t, cfg)
         t.assertEquals(e.message, 'Circular domain set dependency in: [s2,s3].');
     end
 
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+
+    s1 = GAMSTransfer.Set(gdx, 's1', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
+    s1.domain = {s1};
+
+    t.add('reorder_6');
+    try
+        t.assert(false);
+        s1.isValid(2);
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain set ''s1'' is out of order: Try calling the Container method reorderSymbols().');
+    end
+    try
+        t.assert(false);
+        gdx.reorderSymbols();
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Circular domain set dependency in: [s1].');
+    end
+
 end
 
 function test_transformRecords(t, cfg)

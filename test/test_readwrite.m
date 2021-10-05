@@ -28,6 +28,7 @@ function success = test_readwrite(cfg)
     test_read(t, cfg);
     test_readPartial(t, cfg);
     test_readSpecialValues(t, cfg);
+    test_readDomainCycle(t, cfg);
     test_readAcronyms(t, cfg);
     test_readSymbolTypes(t, cfg);
     test_readWrite(t, cfg);
@@ -1080,6 +1081,23 @@ function test_readSpecialValues(t, cfg)
     t.assert(gdx.data.GMInf.records.value == -Inf);
     t.assert(gdx.data.GEps.records.value == 0);
     t.assert(GAMSTransfer.SpecialValues.isEps(gdx.data.GEps.records.value));
+end
+
+function test_readDomainCycle(t, cfg)
+
+    gdx = GAMSTransfer.Container(cfg.filenames{8}, 'gams_dir', ...
+        cfg.gams_dir, 'features', cfg.features);
+    gdx.read('format', 'struct');
+
+    t.add('read_domain_cycle_i_of_i');
+    t.assert(isfield(gdx.data, 'i'));
+    t.assert(gdx.data.i.isValid());
+    t.assertEquals(gdx.data.i.format, 'struct');
+    t.assertEquals(gdx.data.i.domain_type, 'relaxed');
+    t.assert(gdx.data.i.dimension == 1);
+    t.assert(numel(gdx.data.i.domain) == 1);
+    t.assertEquals(gdx.data.i.domain{1}, 'i');
+
 end
 
 function test_readAcronyms(t, cfg);
