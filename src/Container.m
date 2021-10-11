@@ -238,7 +238,7 @@ classdef Container < handle
                             continue
                         elseif symbol.domain_type == 2
                             continue
-                        elseif isfield(obj.data, domain{j})
+                        elseif isfield(obj.data, domain{j}) && isfield(rawdata, domain{j})
                             domain{j} = obj.data.(domain{j});
                         end
                     end
