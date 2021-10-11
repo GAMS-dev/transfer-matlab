@@ -99,9 +99,16 @@ void mexFunction(
         else if (mxIsClass(mx_arr_domentry, "GAMSTransfer.Set") ||
             mxIsClass(mx_arr_domentry, "GAMSTransfer.Alias"))
         {
-            int domdim, domnrecs;
+            int domdim;
             mxArray* mx_arr_container;
             mxArray* mx_arr_contid;
+            mxArray* call_plhs[1] = {NULL};
+            mxArray* call_prhs[1] = {NULL};
+#ifdef WITH_R2018A_OR_NEWER
+            mxDouble* mx_domnrecs;
+#else
+            double* mx_domnrecs;
+#endif
 
             /* get domain attributes */
             gt_mex_getfield_str(mx_arr_domentry, "domain", "name_", "", true, domname, 256);
@@ -113,12 +120,17 @@ void mexFunction(
             /* check domain set */
             if (domdim != 1)
                 mexErrMsgIdAndTxt(ERRID"dimension", "Domain set '%s' must have dimension=1 to be valid as domain.", domname);
-            if (support_setget)
-                gt_mex_getfield_int(mx_arr_domentry, "domain", "number_records_c_setget_",
-                    0, true, GT_FILTER_NONNEGATIVE, 1, &domnrecs);
-            else
-                gt_mex_getfield_int(mx_arr_domentry, "domain", "number_records_c_cache_",
-                    0, true, GT_FILTER_NONNEGATIVE, 1, &domnrecs);
+
+            /* get number of records */
+            call_prhs[0] = mx_arr_domentry;
+            if (mexCallMATLAB(1, call_plhs, 1, call_prhs, "getNumberRecords"))
+                mexErrMsgIdAndTxt(ERRID"number_records", "Calling 'getNumberRecords' failed.");
+#ifdef WITH_R2018A_OR_NEWER
+    mx_domnrecs = mxGetDoubles(call_plhs[0]);
+#else
+    mx_domnrecs = mxGetPr(call_plhs[0]);
+#endif
+            mx_size[i] = mx_domnrecs[0];
 
             /* check domain set container */
             mx_arr_container = mxGetProperty(mx_arr_domentry, 0, "container");
@@ -128,7 +140,6 @@ void mexFunction(
 #else
             INT32_T* mx_contid = (INT32_T*) mxGetData(mx_arr_contid);
 #endif
-
             if (mx_contid[0] != container_id)
                 mexErrMsgIdAndTxt(ERRID"container", "Domain set '%s' must have same container as symbol.", domname);
 
@@ -136,9 +147,6 @@ void mexFunction(
             sprintf(label, "%s_%d", domname, (int) i+1);
             mxSetCell(mx_arr_domnames, i, mxCreateString(domname));
             mxSetCell(mx_arr_domlabels, i, mxCreateString(label));
-
-            /* set size */
-            mx_size[i] = domnrecs;
             dominfo_none = false;
         }
         else

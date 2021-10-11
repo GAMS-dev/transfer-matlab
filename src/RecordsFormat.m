@@ -35,9 +35,6 @@ classdef RecordsFormat
         % UNKNOWN identifier for unknown records format
         UNKNOWN = -1
 
-        % NOT_READ identifier for records that haven't been read yet
-        NOT_READ = 0
-
         % EMPTY identifier for empty records
         EMPTY = 1
 
@@ -69,8 +66,6 @@ classdef RecordsFormat
             %
 
             switch value_int
-            case GAMSTransfer.RecordsFormat.NOT_READ
-                value_str = 'not_read';
             case GAMSTransfer.RecordsFormat.EMPTY
                 value_str = 'empty';
             case GAMSTransfer.RecordsFormat.STRUCT
@@ -101,8 +96,6 @@ classdef RecordsFormat
             switch lower(char(value_str))
             case 'empty'
                 value_int = GAMSTransfer.RecordsFormat.EMPTY;
-            case 'not_read'
-                value_int = GAMSTransfer.RecordsFormat.NOT_READ;
             case 'struct'
                 value_int = GAMSTransfer.RecordsFormat.STRUCT;
             case 'dense_matrix'
@@ -132,8 +125,6 @@ classdef RecordsFormat
                 switch lower(char(value))
                 case 'empty'
                     bool = true;
-                case 'not_read'
-                    bool = true;
                 case 'struct'
                     bool = true;
                 case 'dense_matrix'
@@ -149,8 +140,6 @@ classdef RecordsFormat
                 end
             elseif isnumeric(value)
                 switch value
-                case GAMSTransfer.RecordsFormat.NOT_READ
-                    bool = true;
                 case GAMSTransfer.RecordsFormat.EMPTY
                     bool = true;
                 case GAMSTransfer.RecordsFormat.STRUCT

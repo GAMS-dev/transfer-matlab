@@ -95,8 +95,7 @@ classdef Variable < GAMSTransfer.Symbol
             %
 
             is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
-            is_parname = @(x) strcmpi(x, 'records') || strcmpi(x, 'description') || ...
-                strcmpi(x, 'read_entry') || strcmpi(x, 'read_number_records');
+            is_parname = @(x) strcmpi(x, 'records') || strcmpi(x, 'description');
 
             % check optional arguments
             i = 1;
@@ -134,18 +133,12 @@ classdef Variable < GAMSTransfer.Symbol
             % check parameter arguments
             records = [];
             description = '';
-            read_entry = nan;
-            read_number_records = nan;
             domain_forwarding = false;
             while i < nargin - 2
                 if strcmpi(varargin{i}, 'records')
                     records = varargin{i+1};
                 elseif strcmpi(varargin{i}, 'description')
                     description = varargin{i+1};
-                elseif strcmpi(varargin{i}, 'read_entry')
-                    read_entry = varargin{i+1};
-                elseif strcmpi(varargin{i}, 'read_number_records')
-                    read_number_records = varargin{i+1};
                 elseif strcmpi(varargin{i}, 'domain_forwarding')
                     domain_forwarding = varargin{i+1};
                 else
@@ -165,7 +158,7 @@ classdef Variable < GAMSTransfer.Symbol
 
             % create object
             obj = obj@GAMSTransfer.Symbol(container, name, description, domain, ...
-                records, domain_forwarding, read_entry, read_number_records);
+                records, domain_forwarding);
             obj.type = vtype;
         end
 

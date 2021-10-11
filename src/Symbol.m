@@ -78,9 +78,6 @@ classdef Symbol < handle
         % container Container this symbol is stored in
         container
 
-        % read_entry GDX symbol ID (if symbol was read from GDX)
-        read_entry
-
         % uels Unique Element Lists for each dimension in case categorical arrays are not supported
         uels
     end
@@ -96,20 +93,7 @@ classdef Symbol < handle
         domain_forwarding_
         size_
         format_
-
-        % number_records_ if negative: -1 * number of records - 1; if positive:
-        % number of records in symbol data
         number_records_
-    end
-
-    % properties for C interface
-    properties (Hidden, Dependent)
-        uels_c_setget_
-        number_records_c_setget_
-    end
-    properties (Hidden)
-        uels_c_cache_
-        number_records_c_cache_
     end
 
     properties (Hidden, Constant)
@@ -118,7 +102,7 @@ classdef Symbol < handle
 
     methods (Access = protected)
 
-        function obj = Symbol(container, name, description, domain_size, records, domain_forwarding, read_entry, read_number_records)
+        function obj = Symbol(container, name, description, domain_size, records, domain_forwarding)
             % Constructs a GAMS Symbol, see class help.
             %
 
@@ -150,17 +134,12 @@ classdef Symbol < handle
             if ~islogical(domain_forwarding)
                 error('Argument ''domain_forwarding'' must be of type ''logical''.');
             end
-            if ~isnumeric(read_entry)
-                error('Argument ''read_entry'' must be of type ''numeric''.');
-            end
-            if ~isnumeric(read_number_records)
-                error('Argument ''read_number_records'' must be of type ''numeric''.');
-            end
 
             obj.container = container;
             obj.name_ = name;
             obj.description_ = description;
             obj.domain_forwarding_ = domain_forwarding;
+            obj.number_records_ = nan;
 
             % the following inits dimension_, domain_, domain_names_, domain_labels_,
             % domain_type_, uels
@@ -170,16 +149,6 @@ classdef Symbol < handle
                 obj.domain = domain_size;
             end
             obj.format_ = obj.FORMAT_REEVALUATE;
-            obj.read_entry = read_entry;
-
-            % a negative number_records signals that we store the number of
-            % records of the GDX file
-            if ~isnan(read_number_records)
-                obj.number_records_ = -read_number_records-1;
-                obj.format_ = GAMSTransfer.RecordsFormat.NOT_READ;
-            else
-                obj.number_records_ = nan;
-            end
 
             % add symbol to container
             obj.container.add(obj);
@@ -233,23 +202,6 @@ classdef Symbol < handle
         function set.domain(obj, domain)
             if obj.container.indexed
                 error('Setting symbol domain not allowed in indexed mode.');
-            end
-
-            % cache data for C
-            if ~obj.container.features.c_prop_setget
-                if isa(domain, 'GAMSTransfer.Set')
-                    domain.setCacheNumberRecords();
-                elseif isa(domain, 'GAMSTransfer.Alias')
-                    domain.alias_with.setCacheNumberRecords();
-                elseif iscell(domain)
-                    for i = 1:numel(domain)
-                        if isa(domain{i}, 'GAMSTransfer.Set')
-                            domain{i}.setCacheNumberRecords();
-                        elseif isa(domain{i}, 'GAMSTransfer.Alias')
-                            domain{i}.alias_with.setCacheNumberRecords();
-                        end
-                    end
-                end
             end
 
             GAMSTransfer.gt_cmex_set_sym_domain(obj, domain, obj.container.id, ...
@@ -354,25 +306,6 @@ classdef Symbol < handle
             obj.records = records;
             obj.format_ = obj.FORMAT_REEVALUATE;
             obj.number_records_ = nan;
-        end
-
-        function uels = get.uels_c_setget_(obj)
-            uels = cell(1, obj.dimension_);
-            for i = 1:obj.dimension_
-                uels{i} = obj.getUELs(i);
-            end
-        end
-
-        function set.uels_c_setget_(obj, uels)
-            if ~obj.container.features.categorical
-                for i = 1:obj.dimension_
-                    obj.uels.(obj.domain_labels_{i}).set(uels{i}, []);
-                end
-            end
-        end
-
-        function nrecs = get.number_records_c_setget_(obj)
-            nrecs = obj.getNumberRecords();
         end
 
     end
@@ -600,13 +533,13 @@ classdef Symbol < handle
             switch obj.format_
             case GAMSTransfer.RecordsFormat.EMPTY
                 return
-            case {GAMSTransfer.RecordsFormat.UNKNOWN, GAMSTransfer.RecordsFormat.NOT_READ}
+            case GAMSTransfer.RecordsFormat.UNKNOWN
                 error('Cannot transform current format: %s', obj.format);
             end
             switch target_format
             case GAMSTransfer.RecordsFormat.EMPTY
                 obj.records = [];
-            case {GAMSTransfer.RecordsFormat.UNKNOWN, GAMSTransfer.RecordsFormat.NOT_READ}
+            case GAMSTransfer.RecordsFormat.UNKNOWN
                 error('Invalid target format: %s', p.Results.target_format);
             case GAMSTransfer.RecordsFormat.STRUCT
                 if ~obj.SUPPORTS_FORMAT_STRUCT
@@ -863,23 +796,11 @@ classdef Symbol < handle
                     error('Symbol is not part of its linked container.');
                 end
 
-                % if the symbol has not been properly read, we don't check any further
-                % Note that format NOT_READ will lead to an invalid symbol
-                if isempty(obj.records) && ~isnan(obj.number_records_) && obj.number_records_ < 0
-                    obj.format_ = GAMSTransfer.RecordsFormat.NOT_READ;
-                    if verbose == 1
-                        warning('Symbol has not been fully read.');
-                    elseif verbose == 2
-                        error('Symbol has not been fully read.');
-                    end
-                    return
-                end
-
                 % check domains
                 obj.checkDomains();
                 obj.updateDomainSetDependentData();
 
-                % check if format is already available (not valid: UNKNOWN: -1; NOT_READ: 0)
+                % check if format is already available
                 if obj.format_ > 0
                     valid = true;
                     return
@@ -1048,7 +969,7 @@ classdef Symbol < handle
             idx = nan;
             for i = 1:numel(values)
                 [value_, idx_] = max(obj.records.(values{i})(:));
-                if isnan(value) || value < value_
+                if ~isempty(value_) && (isnan(value) || value < value_)
                     value = value_;
                     idx = idx_;
                 end
@@ -1083,7 +1004,7 @@ classdef Symbol < handle
             idx = nan;
             for i = 1:numel(values)
                 [value_, idx_] = min(obj.records.(values{i})(:));
-                if isnan(value) || value > value_
+                if ~isempty(value_) && (isnan(value) || value > value_)
                     value = value_;
                     idx = idx_;
                 end
@@ -1122,6 +1043,10 @@ classdef Symbol < handle
                     value = value + value_;
                 end
                 n = n + obj.getNumberRecords();
+            end
+            if n == 0
+                value = nan;
+                return
             end
             switch obj.format_
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
@@ -1292,17 +1217,12 @@ classdef Symbol < handle
             % formats)
             %
             % n = getNumberRecords() returns the number of records that would be
-            % stored in a GDX file if this symbol would be written to GDX. If
-            % the format is 'not_read' this is the number of symbol records
-            % found in the GDX file to be read. For matrix formats n is NaN.
+            % stored in a GDX file if this symbol would be written to GDX. For
+            % matrix formats n is NaN.
             %
 
             if ~isnan(obj.number_records_)
-                if obj.number_records_ < 0
-                    nrecs = -obj.number_records_-1;
-                else
-                    nrecs = obj.number_records_;
-                end
+                nrecs = obj.number_records_;
                 return
             end
             if ~obj.isValid()
@@ -1336,6 +1256,8 @@ classdef Symbol < handle
                 nrecs = nan;
             end
 
+            % we need to convert to double to have a common data type for C
+            nrecs = double(nrecs);
             obj.number_records_ = nrecs;
         end
 
@@ -1729,40 +1651,11 @@ classdef Symbol < handle
 
     end
 
-    methods (Hidden)
-
-        function setCacheUels(obj)
-            obj.uels_c_cache_ = cell(1, obj.dimension_);
-            for i = 1:obj.dimension_
-                obj.uels_c_cache_{i} = obj.getUELs(i);
-            end
-        end
-
-        function getCacheUels(obj)
-            if ~obj.container.features.categorical
-                if numel(obj.uels_c_cache_) == 0
-                    return;
-                elseif numel(obj.uels_c_cache_) ~= obj.dimension_
-                    error('Invalid uels cache');
-                end
-                for i = 1:obj.dimension_
-                    obj.uels.(obj.domain_labels_{i}).set(obj.uels_c_cache_{i}, []);
-                end
-            end
-        end
-
-        function setCacheNumberRecords(obj)
-            obj.number_records_c_cache_ = obj.getNumberRecords();
-        end
-
-    end
-
     methods (Hidden, Access = protected)
 
         function values = availValueFields(obj, values)
             switch obj.format_
-            case {GAMSTransfer.RecordsFormat.NOT_READ, GAMSTransfer.RecordsFormat.EMPTY, ...
-                GAMSTransfer.RecordsFormat.UNKNOWN}
+            case {GAMSTransfer.RecordsFormat.EMPTY, GAMSTransfer.RecordsFormat.UNKNOWN}
                 values = {};
                 return
             case GAMSTransfer.RecordsFormat.TABLE

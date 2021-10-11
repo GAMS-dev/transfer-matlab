@@ -133,112 +133,44 @@ function test_getlist(t, cfg)
     t.assertEquals(l{1}.name, 'i2');
     t.assertEquals(l{2}.name, 'j2');
 
-    t.add('get_list_sets_is_loaded_1');
-    l = gdx.listSets('is_loaded', true);
-    t.assert(iscell(l));
-    t.assert(numel(l) == 2);
-    t.assertEquals(l{1}, 'i2');
-    t.assertEquals(l{2}, 'j2');
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
 
-    t.add('get_list_variables_is_loaded_1');
-    l = gdx.listVariables('is_loaded', true);
+    t.add('get_list_sets_is_valid_1');
+    l = gdx.listSets('is_valid', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 0);
 
-    t.add('get_list_equations_is_loaded_1');
-    l = gdx.listEquations('is_loaded', true);
+    t.add('get_list_sets_is_valid_2');
+    l = gdx.listVariables('is_valid', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 0);
 
-    t.add('get_list_parameters_is_loaded_1');
-    l = gdx.listParameters('is_loaded', true);
+    gdx.read(cfg.filenames{1}, 'symbols', {'x'});
+
+    t.add('get_list_sets_is_valid_3');
+    l = gdx.listSets('is_valid', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 0);
 
-    t.add('get_list_alias_is_loaded_1');
-    l = gdx.listAliases('is_loaded', true);
-    t.assert(iscell(l));
-    t.assert(numel(l) == 2);
-    t.assertEquals(l{1}, 'i2');
-    t.assertEquals(l{2}, 'j2');
-
-    gdx.read('symbols', {'i', 'x1', 'x4', 'x8', 'a', 'e1'});
-
-    t.add('get_list_sets_is_loaded_2');
-    l = gdx.listSets('is_loaded', true);
-    t.assert(iscell(l));
-    t.assert(numel(l) == 3);
-    t.assertEquals(l{1}, 'i');
-    t.assertEquals(l{2}, 'i2');
-    t.assertEquals(l{3}, 'j2');
-
-    t.add('get_list_variables_is_loaded_2');
-    l = gdx.listVariables('is_loaded', true);
-    t.assert(iscell(l));
-    t.assert(numel(l) == 3);
-    t.assertEquals(l{1}, 'x1');
-    t.assertEquals(l{2}, 'x4');
-    t.assertEquals(l{3}, 'x8');
-
-    t.add('get_list_equations_is_loaded_2');
-    l = gdx.listEquations('is_loaded', true);
-    t.assert(iscell(l));
-    t.assert(numel(l) == 1);
-    t.assertEquals(l{1}, 'e1');
-
-    t.add('get_list_parameters_is_loaded_2');
-    l = gdx.listParameters('is_loaded', true);
-    t.assert(iscell(l));
-    t.assert(numel(l) == 1);
-    t.assertEquals(l{1}, 'a');
-
-    t.add('get_list_alias_is_loaded_2');
-    l = gdx.listAliases('is_loaded', true);
-    t.assert(iscell(l));
-    t.assert(numel(l) == 2);
-    t.assertEquals(l{1}, 'i2');
-    t.assertEquals(l{2}, 'j2');
-
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-
-    t.add('get_list_sets_is_loaded_and_valid_1');
-    l = gdx.listSets('is_loaded', true, 'is_valid', true);
-    t.assert(iscell(l));
-    t.assert(numel(l) == 0);
-
-    t.add('get_list_sets_is_loaded_and_valid_1');
-    l = gdx.listVariables('is_loaded', true, 'is_valid', true);
-    t.assert(iscell(l));
-    t.assert(numel(l) == 0);
-
-    gdx.read('symbols', {'x'});
-
-    t.add('get_list_sets_is_loaded_and_valid_2');
-    l = gdx.listSets('is_loaded', true, 'is_valid', true);
-    t.assert(iscell(l));
-    t.assert(numel(l) == 0);
-
-    t.add('get_list_sets_is_loaded_and_valid_2');
-    l = gdx.listVariables('is_loaded', true);
+    t.add('get_list_sets_is_valid_4');
+    l = gdx.listVariables();
     t.assert(iscell(l));
     t.assert(numel(l) == 1);
     t.assertEquals(l{1}, 'x');
-    l = gdx.listVariables('is_loaded', true, 'is_valid', true);
+    l = gdx.listVariables('is_valid', true);
     t.assert(iscell(l));
-    t.assert(numel(l) == 0);
+    t.assert(numel(l) == 1);
+    t.assertEquals(l{1}, 'x');
 
-    gdx.read('symbols', {'i', 'j'});
+    gdx.read(cfg.filenames{1}, 'symbols', {'i', 'j'});
 
-    t.add('get_list_sets_is_loaded_and_valid_3');
-    l = gdx.listSets('is_loaded', true, 'is_valid', true);
+    t.add('get_list_sets_is_valid_5');
+    l = gdx.listSets('is_valid', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 2);
     t.assertEquals(l{1}, 'i');
     t.assertEquals(l{2}, 'j');
-
-    t.add('get_list_sets_is_loaded_and_valid_3');
-    l = gdx.listVariables('is_loaded', true, 'is_valid', true);
+    l = gdx.listVariables('is_valid', true);
     t.assert(iscell(l));
     t.assert(numel(l) == 1);
     t.assertEquals(l{1}, 'x');
@@ -247,489 +179,30 @@ end
 
 function test_describe(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-
-    tbl = gdx.describeSets();
-
-    t.add('describe_sets_basic');
-    if gdx.features.table
-        t.assert(istable(tbl));
-        t.assert(numel(tbl.Properties.VariableNames) == 11);
-        t.assert(height(tbl) == 2);
-        t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
-        t.assertEquals(tbl.Properties.VariableNames{2}, 'is_alias');
-        t.assertEquals(tbl.Properties.VariableNames{3}, 'is_singleton');
-        t.assertEquals(tbl.Properties.VariableNames{4}, 'format');
-        t.assertEquals(tbl.Properties.VariableNames{5}, 'dim');
-        t.assertEquals(tbl.Properties.VariableNames{6}, 'domain_type');
-        t.assertEquals(tbl.Properties.VariableNames{7}, 'domain');
-        t.assertEquals(tbl.Properties.VariableNames{8}, 'size');
-        t.assertEquals(tbl.Properties.VariableNames{9}, 'num_recs');
-        t.assertEquals(tbl.Properties.VariableNames{10}, 'num_vals');
-        t.assertEquals(tbl.Properties.VariableNames{11}, 'sparsity');
-        if gdx.features.categorical
-            t.assertEquals(tbl{1,'name'}, 'i');
-            t.assertEquals(tbl{1,'format'}, 'not_read');
-        else
-            t.assertEquals(tbl{1,'name'}{1}, 'i');
-            t.assertEquals(tbl{1,'format'}{1}, 'not_read');
-        end
-        t.assert(~tbl{1,'is_alias'});
-        t.assert(~tbl{1,'is_singleton'});
-        t.assert(tbl{1,'dim'} == 1);
-        if gdx.features.categorical
-            t.assertEquals(tbl{1,'domain_type'}, 'none');
-            t.assertEquals(tbl{1,'domain'}, '[*]');
-            t.assertEquals(tbl{1,'size'}, '[NaN]');
-        else
-            t.assertEquals(tbl{1,'domain_type'}{1}, 'none');
-            t.assertEquals(tbl{1,'domain'}{1}, '[*]');
-            t.assertEquals(tbl{1,'size'}{1}, '[NaN]');
-        end
-        t.assert(tbl{1,'num_recs'} == 5);
-        t.assert(isnan(tbl{1,'num_vals'}));
-        t.assert(isnan(tbl{1,'sparsity'}));
-    else
-        t.assert(isstruct(tbl));
-        t.assert(numel(fieldnames(tbl)) == 11);
-        t.assert(numel(tbl.name) == 2);
-        t.assert(isfield(tbl, 'name'));
-        t.assert(isfield(tbl, 'is_alias'));
-        t.assert(isfield(tbl, 'is_singleton'));
-        t.assert(isfield(tbl, 'format'));
-        t.assert(isfield(tbl, 'dim'));
-        t.assert(isfield(tbl, 'domain'));
-        t.assert(isfield(tbl, 'size'));
-        t.assert(isfield(tbl, 'num_recs'));
-        t.assert(isfield(tbl, 'num_vals'));
-        t.assert(isfield(tbl, 'sparsity'));
-        if gdx.features.categorical
-            t.assertEquals(tbl.name(1), 'i');
-            t.assertEquals(tbl.format(1), 'not_read');
-        else
-            t.assertEquals(tbl.name{1}, 'i');
-            t.assertEquals(tbl.format{1}, 'not_read');
-        end
-        t.assert(~tbl.is_alias(1));
-        t.assert(~tbl.is_singleton(1));
-        t.assert(tbl.dim(1) == 1);
-        if gdx.features.categorical
-            t.assertEquals(tbl.domain_type(1), 'none');
-            t.assertEquals(tbl.domain(1), '[*]');
-            t.assertEquals(tbl.size(1), '[NaN]');
-        else
-            t.assertEquals(tbl.domain_type{1}, 'none');
-            t.assertEquals(tbl.domain{1}, '[*]');
-            t.assertEquals(tbl.size{1}, '[NaN]');
-        end
-        t.assert(tbl.num_recs(1) == 5);
-        t.assert(isnan(tbl.num_vals(1)));
-        t.assert(isnan(tbl.sparsity(1)));
-    end
-
-    tbl = gdx.describeParameters();
-
-    t.add('describe_parameters_basic');
-    if gdx.features.table
-        t.assert(istable(tbl));
-        t.assert(numel(tbl.Properties.VariableNames) == 16);
-        t.assert(height(tbl) == 2);
-        t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
-        t.assertEquals(tbl.Properties.VariableNames{2}, 'format');
-        t.assertEquals(tbl.Properties.VariableNames{3}, 'dim');
-        t.assertEquals(tbl.Properties.VariableNames{4}, 'domain_type');
-        t.assertEquals(tbl.Properties.VariableNames{5}, 'domain');
-        t.assertEquals(tbl.Properties.VariableNames{6}, 'size');
-        t.assertEquals(tbl.Properties.VariableNames{7}, 'num_recs');
-        t.assertEquals(tbl.Properties.VariableNames{8}, 'num_vals');
-        t.assertEquals(tbl.Properties.VariableNames{9}, 'sparsity');
-        t.assertEquals(tbl.Properties.VariableNames{10}, 'min_value');
-        t.assertEquals(tbl.Properties.VariableNames{11}, 'mean_value');
-        t.assertEquals(tbl.Properties.VariableNames{12}, 'max_value');
-        t.assertEquals(tbl.Properties.VariableNames{13}, 'where_max_abs_value');
-        t.assertEquals(tbl.Properties.VariableNames{14}, 'count_na');
-        t.assertEquals(tbl.Properties.VariableNames{15}, 'count_undef');
-        t.assertEquals(tbl.Properties.VariableNames{16}, 'count_eps');
-        if gdx.features.categorical
-            t.assertEquals(tbl{1,'name'}, 'a');
-            t.assertEquals(tbl{1,'format'}, 'not_read');
-        else
-            t.assertEquals(tbl{1,'name'}{1}, 'a');
-            t.assertEquals(tbl{1,'format'}{1}, 'not_read');
-        end
-        t.assert(tbl{1,'dim'} == 0);
-        if gdx.features.categorical
-            t.assertEquals(tbl{1,'domain_type'}, 'none');
-            t.assertEquals(tbl{1,'domain'}, '[]');
-            t.assertEquals(tbl{1,'size'}, '[]');
-        else
-            t.assertEquals(tbl{1,'domain_type'}{1}, 'none');
-            t.assertEquals(tbl{1,'domain'}{1}, '[]');
-            t.assertEquals(tbl{1,'size'}{1}, '[]');
-        end
-        t.assert(tbl{1,'num_recs'} == 1);
-        t.assert(isnan(tbl{1,'num_vals'}));
-        t.assert(isnan(tbl{1,'sparsity'}));
-        t.assert(isnan(tbl{1,'min_value'}));
-        t.assert(isnan(tbl{1,'mean_value'}));
-        t.assert(isnan(tbl{1,'max_value'}));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl{1,'where_max_abs_value'}));
-        else
-            t.assert(isempty(tbl{1,'where_max_abs_value'}{1}));
-        end
-        t.assert(tbl{1,'count_na'} == 0);
-        t.assert(tbl{1,'count_undef'} == 0);
-        t.assert(tbl{1,'count_eps'} == 0);
-        if gdx.features.categorical
-            t.assertEquals(tbl{2,'name'}, 'b');
-            t.assertEquals(tbl{2,'format'}, 'not_read');
-        else
-            t.assertEquals(tbl{2,'name'}{1}, 'b');
-            t.assertEquals(tbl{2,'format'}{1}, 'not_read');
-        end
-        t.assert(tbl{2,'dim'} == 1);
-        if gdx.features.categorical
-            t.assertEquals(tbl{2,'domain_type'}, 'regular');
-            t.assertEquals(tbl{2,'domain'}, '[i]');
-            t.assertEquals(tbl{2,'size'}, '[5]');
-        else
-            t.assertEquals(tbl{2,'domain_type'}{1}, 'regular');
-            t.assertEquals(tbl{2,'domain'}{1}, '[i]');
-            t.assertEquals(tbl{2,'size'}{1}, '[5]');
-        end
-        t.assert(tbl{2,'num_recs'} == 3);
-        t.assert(isnan(tbl{2,'num_vals'}));
-        t.assert(isnan(tbl{2,'sparsity'}));
-        t.assert(isnan(tbl{2,'min_value'}));
-        t.assert(isnan(tbl{2,'mean_value'}));
-        t.assert(isnan(tbl{2,'max_value'}));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl{2,'where_max_abs_value'}));
-        else
-            t.assert(isempty(tbl{2,'where_max_abs_value'}{1}));
-        end
-        t.assert(tbl{2,'count_na'} == 0);
-        t.assert(tbl{2,'count_undef'} == 0);
-        t.assert(tbl{2,'count_eps'} == 0);
-    else
-        t.assert(isstruct(tbl));
-        t.assert(numel(fieldnames(tbl)) == 16);
-        t.assert(numel(tbl.name) == 2);
-        t.assert(isfield(tbl, 'name'));
-        t.assert(isfield(tbl, 'format'));
-        t.assert(isfield(tbl, 'dim'));
-        t.assert(isfield(tbl, 'domain_type'));
-        t.assert(isfield(tbl, 'domain'));
-        t.assert(isfield(tbl, 'size'));
-        t.assert(isfield(tbl, 'num_recs'));
-        t.assert(isfield(tbl, 'num_vals'));
-        t.assert(isfield(tbl, 'sparsity'));
-        t.assert(isfield(tbl, 'min_value'));
-        t.assert(isfield(tbl, 'mean_value'));
-        t.assert(isfield(tbl, 'max_value'));
-        t.assert(isfield(tbl, 'where_max_abs_value'));
-        t.assert(isfield(tbl, 'count_na'));
-        t.assert(isfield(tbl, 'count_undef'));
-        t.assert(isfield(tbl, 'count_eps'));
-        if gdx.features.categorical
-            t.assertEquals(tbl.name(1), 'a');
-            t.assertEquals(tbl.format(1), 'not_read');
-        else
-            t.assertEquals(tbl.name{1}, 'a');
-            t.assertEquals(tbl.format{1}, 'not_read');
-        end
-        t.assert(tbl.dim(1) == 0);
-        if gdx.features.categorical
-            t.assertEquals(tbl.domain_type(1), 'none');
-            t.assertEquals(tbl.domain(1), '[]');
-            t.assertEquals(tbl.size(1), '[]');
-        else
-            t.assertEquals(tbl.domain_type{1}, 'none');
-            t.assertEquals(tbl.domain{1}, '[]');
-            t.assertEquals(tbl.size{1}, '[]');
-        end
-        t.assert(tbl.num_recs(1) == 1);
-        t.assert(isnan(tbl.num_vals(1)));
-        t.assert(isnan(tbl.sparsity(1)));
-        t.assert(isnan(tbl.min_value(1)));
-        t.assert(isnan(tbl.mean_value(1)));
-        t.assert(isnan(tbl.max_value(1)));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_value(1)));
-        else
-            t.assert(isempty(tbl.where_max_abs_value{1}));
-        end
-        t.assert(tbl.count_na(1) == 0);
-        t.assert(tbl.count_undef(1) == 0);
-        t.assert(tbl.count_eps(1) == 0);
-        if gdx.features.categorical
-            t.assertEquals(tbl.name(2), 'b');
-            t.assertEquals(tbl.format(2), 'not_read');
-        else
-            t.assertEquals(tbl.name{2}, 'b');
-            t.assertEquals(tbl.format{2}, 'not_read');
-        end
-        t.assert(tbl.dim(2) == 1);
-        if gdx.features.categorical
-            t.assertEquals(tbl.domain_type(2), 'regular');
-            t.assertEquals(tbl.domain(2), '[i]');
-            t.assertEquals(tbl.size(2), '[5]');
-        else
-            t.assertEquals(tbl.domain_type{2}, 'regular');
-            t.assertEquals(tbl.domain{2}, '[i]');
-            t.assertEquals(tbl.size{2}, '[5]');
-        end
-        t.assert(tbl.num_recs(2) == 3);
-        t.assert(isnan(tbl.num_vals(2)));
-        t.assert(isnan(tbl.sparsity(2)));
-        t.assert(isnan(tbl.min_value(2)));
-        t.assert(isnan(tbl.mean_value(2)));
-        t.assert(isnan(tbl.max_value(2)));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_value(2)));
-        else
-            t.assert(isempty(tbl.where_max_abs_value{2}));
-        end
-        t.assert(tbl.count_na(2) == 0);
-        t.assert(tbl.count_undef(2) == 0);
-        t.assert(tbl.count_eps(2) == 0);
-    end
-
-    tbl = gdx.describeVariables();
-
-    t.add('describe_variables_basic');
-    if gdx.features.table
-        t.assert(istable(tbl));
-        t.assert(numel(tbl.Properties.VariableNames) == 24);
-        t.assert(height(tbl) == 1);
-        t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
-        t.assertEquals(tbl.Properties.VariableNames{2}, 'type');
-        t.assertEquals(tbl.Properties.VariableNames{3}, 'format');
-        t.assertEquals(tbl.Properties.VariableNames{4}, 'dim');
-        t.assertEquals(tbl.Properties.VariableNames{5}, 'domain_type');
-        t.assertEquals(tbl.Properties.VariableNames{6}, 'domain');
-        t.assertEquals(tbl.Properties.VariableNames{7}, 'size');
-        t.assertEquals(tbl.Properties.VariableNames{8}, 'num_recs');
-        t.assertEquals(tbl.Properties.VariableNames{9}, 'num_vals');
-        t.assertEquals(tbl.Properties.VariableNames{10}, 'sparsity');
-        t.assertEquals(tbl.Properties.VariableNames{11}, 'min_level');
-        t.assertEquals(tbl.Properties.VariableNames{12}, 'mean_level');
-        t.assertEquals(tbl.Properties.VariableNames{13}, 'max_level');
-        t.assertEquals(tbl.Properties.VariableNames{14}, 'where_max_abs_level');
-        t.assertEquals(tbl.Properties.VariableNames{15}, 'count_na_level');
-        t.assertEquals(tbl.Properties.VariableNames{16}, 'count_undef_level');
-        t.assertEquals(tbl.Properties.VariableNames{17}, 'count_eps_level');
-        t.assertEquals(tbl.Properties.VariableNames{18}, 'min_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{19}, 'mean_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{20}, 'max_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{21}, 'where_max_abs_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{22}, 'count_na_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{23}, 'count_undef_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{24}, 'count_eps_marginal');
-        if gdx.features.categorical
-            t.assertEquals(tbl{1,'name'}, 'x');
-            t.assertEquals(tbl{1,'type'}, 'positive');
-            t.assertEquals(tbl{1,'format'}, 'not_read');
-        else
-            t.assertEquals(tbl{1,'name'}{1}, 'x');
-            t.assertEquals(tbl{1,'type'}{1}, 'positive');
-            t.assertEquals(tbl{1,'format'}{1}, 'not_read');
-        end
-        t.assert(tbl{1,'dim'} == 2);
-        if gdx.features.categorical
-            t.assertEquals(tbl{1,'domain_type'}, 'regular');
-            t.assertEquals(tbl{1,'domain'}, '[i,j]');
-            t.assertEquals(tbl{1,'size'}, '[5,5]');
-        else
-            t.assertEquals(tbl{1,'domain_type'}{1}, 'regular');
-            t.assertEquals(tbl{1,'domain'}{1}, '[i,j]');
-            t.assertEquals(tbl{1,'size'}{1}, '[5,5]');
-        end
-        t.assert(tbl{1,'num_recs'} == 6);
-        t.assert(isnan(tbl{1,'num_vals'}));
-        t.assert(isnan(tbl{1,'sparsity'}));
-        t.assert(isnan(tbl{1,'min_level'}));
-        t.assert(isnan(tbl{1,'mean_level'}));
-        t.assert(isnan(tbl{1,'max_level'}));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl{1,'where_max_abs_level'}));
-        else
-            t.assert(isempty(tbl{1,'where_max_abs_level'}{1}));
-        end
-        t.assert(tbl.count_na_level(1) == 0);
-        t.assert(tbl.count_undef_level(1) == 0);
-        t.assert(tbl.count_eps_level(1) == 0);
-        t.assert(isnan(tbl{1,'min_marginal'}));
-        t.assert(isnan(tbl{1,'mean_marginal'}));
-        t.assert(isnan(tbl{1,'max_marginal'}));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl{1,'where_max_abs_marginal'}));
-        else
-            t.assert(isempty(tbl{1,'where_max_abs_marginal'}{1}));
-        end
-        t.assert(tbl.count_na_marginal(1) == 0);
-        t.assert(tbl.count_undef_marginal(1) == 0);
-        t.assert(tbl.count_eps_marginal(1) == 0);
-    else
-        t.assert(isstruct(tbl));
-        t.assert(numel(fieldnames(tbl)) == 24);
-        t.assert(numel(tbl.name) == 1);
-        t.assert(isfield(tbl, 'name'));
-        t.assert(isfield(tbl, 'type'));
-        t.assert(isfield(tbl, 'format'));
-        t.assert(isfield(tbl, 'dim'));
-        t.assert(isfield(tbl, 'domain_type'));
-        t.assert(isfield(tbl, 'domain'));
-        t.assert(isfield(tbl, 'size'));
-        t.assert(isfield(tbl, 'num_recs'));
-        t.assert(isfield(tbl, 'num_vals'));
-        t.assert(isfield(tbl, 'sparsity'));
-        t.assert(isfield(tbl, 'min_level'));
-        t.assert(isfield(tbl, 'mean_level'));
-        t.assert(isfield(tbl, 'max_level'));
-        t.assert(isfield(tbl, 'where_max_abs_level'));
-        t.assert(isfield(tbl, 'count_na_level'));
-        t.assert(isfield(tbl, 'count_undef_level'));
-        t.assert(isfield(tbl, 'count_eps_level'));
-        t.assert(isfield(tbl, 'min_marginal'));
-        t.assert(isfield(tbl, 'mean_marginal'));
-        t.assert(isfield(tbl, 'max_marginal'));
-        t.assert(isfield(tbl, 'where_max_abs_marginal'));
-        t.assert(isfield(tbl, 'count_na_marginal'));
-        t.assert(isfield(tbl, 'count_undef_marginal'));
-        t.assert(isfield(tbl, 'count_eps_marginal'));
-        if gdx.features.categorical
-            t.assertEquals(tbl.name(1), 'x');
-            t.assertEquals(tbl.type(1), 'positive');
-            t.assertEquals(tbl.format(1), 'not_read');
-        else
-            t.assertEquals(tbl.name{1}, 'x');
-            t.assertEquals(tbl.type{1}, 'positive');
-            t.assertEquals(tbl.format{1}, 'not_read');
-        end
-        t.assert(tbl.dim(1) == 2);
-        if gdx.features.categorical
-            t.assertEquals(tbl.domain_type(1), 'regular');
-            t.assertEquals(tbl.domain(1), '[i,j]');
-            t.assertEquals(tbl.size(1), '[5,5]');
-        else
-            t.assertEquals(tbl.domain_type{1}, 'regular');
-            t.assertEquals(tbl.domain{1}, '[i,j]');
-            t.assertEquals(tbl.size{1}, '[5,5]');
-        end
-        t.assert(tbl.num_recs(1) == 6);
-        t.assert(isnan(tbl.num_vals(1)));
-        t.assert(isnan(tbl.sparsity(1)));
-        t.assert(isnan(tbl.min_level(1)));
-        t.assert(isnan(tbl.mean_level(1)));
-        t.assert(isnan(tbl.max_level(1)));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_level(1)));
-        else
-            t.assert(isempty(tbl.where_max_abs_level{1}));
-        end
-        t.assert(tbl.count_na_level(1) == 0);
-        t.assert(tbl.count_undef_level(1) == 0);
-        t.assert(tbl.count_eps_level(1) == 0);
-        t.assert(isnan(tbl.min_marginal(1)));
-        t.assert(isnan(tbl.mean_marginal(1)));
-        t.assert(isnan(tbl.max_marginal(1)));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_marginal(1)));
-        else
-            t.assert(isempty(tbl.where_max_abs_marginal{1}));
-        end
-        t.assert(tbl.count_na_marginal(1) == 0);
-        t.assert(tbl.count_undef_marginal(1) == 0);
-        t.assert(tbl.count_eps_marginal(1) == 0);
-    end
-
-    tbl = gdx.describeEquations();
-
-    t.add('describe_equations_basic');
-    if gdx.features.table
-        t.assert(istable(tbl));
-        t.assert(numel(tbl.Properties.VariableNames) == 24);
-        t.assert(height(tbl) == 0);
-        t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
-        t.assertEquals(tbl.Properties.VariableNames{2}, 'type');
-        t.assertEquals(tbl.Properties.VariableNames{3}, 'format');
-        t.assertEquals(tbl.Properties.VariableNames{4}, 'dim');
-        t.assertEquals(tbl.Properties.VariableNames{5}, 'domain_type');
-        t.assertEquals(tbl.Properties.VariableNames{6}, 'domain');
-        t.assertEquals(tbl.Properties.VariableNames{7}, 'size');
-        t.assertEquals(tbl.Properties.VariableNames{8}, 'num_recs');
-        t.assertEquals(tbl.Properties.VariableNames{9}, 'num_vals');
-        t.assertEquals(tbl.Properties.VariableNames{10}, 'sparsity');
-        t.assertEquals(tbl.Properties.VariableNames{11}, 'min_level');
-        t.assertEquals(tbl.Properties.VariableNames{12}, 'mean_level');
-        t.assertEquals(tbl.Properties.VariableNames{13}, 'max_level');
-        t.assertEquals(tbl.Properties.VariableNames{14}, 'where_max_abs_level');
-        t.assertEquals(tbl.Properties.VariableNames{15}, 'count_na_level');
-        t.assertEquals(tbl.Properties.VariableNames{16}, 'count_undef_level');
-        t.assertEquals(tbl.Properties.VariableNames{17}, 'count_eps_level');
-        t.assertEquals(tbl.Properties.VariableNames{18}, 'min_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{19}, 'mean_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{20}, 'max_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{21}, 'where_max_abs_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{22}, 'count_na_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{23}, 'count_undef_marginal');
-        t.assertEquals(tbl.Properties.VariableNames{24}, 'count_eps_marginal');
-    else
-        t.assert(isstruct(tbl));
-        t.assert(numel(fieldnames(tbl)) == 24);
-        t.assert(numel(tbl.name) == 0);
-        t.assert(isfield(tbl, 'name'));
-        t.assert(isfield(tbl, 'type'));
-        t.assert(isfield(tbl, 'format'));
-        t.assert(isfield(tbl, 'dim'));
-        t.assert(isfield(tbl, 'domain_type'));
-        t.assert(isfield(tbl, 'domain'));
-        t.assert(isfield(tbl, 'size'));
-        t.assert(isfield(tbl, 'num_recs'));
-        t.assert(isfield(tbl, 'num_vals'));
-        t.assert(isfield(tbl, 'sparsity'));
-        t.assert(isfield(tbl, 'min_level'));
-        t.assert(isfield(tbl, 'mean_level'));
-        t.assert(isfield(tbl, 'max_level'));
-        t.assert(isfield(tbl, 'where_max_abs_level'));
-        t.assert(isfield(tbl, 'count_na_level'));
-        t.assert(isfield(tbl, 'count_undef_level'));
-        t.assert(isfield(tbl, 'count_eps_level'));
-        t.assert(isfield(tbl, 'min_marginal'));
-        t.assert(isfield(tbl, 'mean_marginal'));
-        t.assert(isfield(tbl, 'max_marginal'));
-        t.assert(isfield(tbl, 'where_max_abs_marginal'));
-        t.assert(isfield(tbl, 'count_na_marginal'));
-        t.assert(isfield(tbl, 'count_undef_marginal'));
-        t.assert(isfield(tbl, 'count_eps_marginal'));
-    end
-
     for i = 1:4
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         if ~gdx.features.table && i == 2
             continue
         end
 
         switch i
         case 1
-            gdx.read('format', 'struct');
+            gdx.read(cfg.filenames{1}, 'format', 'struct');
             test_name_describe_sets = 'describe_sets_struct';
             test_name_describe_parameters = 'describe_parameters_struct';
             test_name_describe_variables = 'describe_variables_struct';
         case 2
-            gdx.read('format', 'table');
+            gdx.read(cfg.filenames{1}, 'format', 'table');
             test_name_describe_sets = 'describe_sets_table';
             test_name_describe_parameters = 'describe_parameters_table';
             test_name_describe_variables = 'describe_variables_table';
         case 3
-            gdx.read('format', 'dense_matrix');
+            gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
             test_name_describe_sets = 'describe_sets_dense_matrix';
             test_name_describe_parameters = 'describe_parameters_dense_matrix';
             test_name_describe_variables = 'describe_variables_dense_matrix';
         case 4
-            gdx.read('format', 'sparse_matrix');
+            gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
             test_name_describe_sets = 'describe_sets_sparse_matrix';
             test_name_describe_parameters = 'describe_parameters_sparse_matrix';
             test_name_describe_variables = 'describe_variables_sparse_matrix';
@@ -742,6 +215,17 @@ function test_describe(t, cfg)
             t.assert(istable(tbl));
             t.assert(numel(tbl.Properties.VariableNames) == 11);
             t.assert(height(tbl) == 2);
+            t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
+            t.assertEquals(tbl.Properties.VariableNames{2}, 'is_alias');
+            t.assertEquals(tbl.Properties.VariableNames{3}, 'is_singleton');
+            t.assertEquals(tbl.Properties.VariableNames{4}, 'format');
+            t.assertEquals(tbl.Properties.VariableNames{5}, 'dim');
+            t.assertEquals(tbl.Properties.VariableNames{6}, 'domain_type');
+            t.assertEquals(tbl.Properties.VariableNames{7}, 'domain');
+            t.assertEquals(tbl.Properties.VariableNames{8}, 'size');
+            t.assertEquals(tbl.Properties.VariableNames{9}, 'num_recs');
+            t.assertEquals(tbl.Properties.VariableNames{10}, 'num_vals');
+            t.assertEquals(tbl.Properties.VariableNames{11}, 'sparsity');
             if gdx.features.categorical
                 t.assertEquals(tbl{1,'name'}, 'i');
                 switch i
@@ -778,6 +262,16 @@ function test_describe(t, cfg)
             t.assert(isstruct(tbl));
             t.assert(numel(fieldnames(tbl)) == 11);
             t.assert(numel(tbl.name) == 2);
+            t.assert(isfield(tbl, 'name'));
+            t.assert(isfield(tbl, 'is_alias'));
+            t.assert(isfield(tbl, 'is_singleton'));
+            t.assert(isfield(tbl, 'format'));
+            t.assert(isfield(tbl, 'dim'));
+            t.assert(isfield(tbl, 'domain'));
+            t.assert(isfield(tbl, 'size'));
+            t.assert(isfield(tbl, 'num_recs'));
+            t.assert(isfield(tbl, 'num_vals'));
+            t.assert(isfield(tbl, 'sparsity'));
             if gdx.features.categorical
                 t.assertEquals(tbl.name(1), 'i');
                 switch i
@@ -819,6 +313,22 @@ function test_describe(t, cfg)
             t.assert(istable(tbl));
             t.assert(numel(tbl.Properties.VariableNames) == 16);
             t.assert(height(tbl) == 2);
+            t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
+            t.assertEquals(tbl.Properties.VariableNames{2}, 'format');
+            t.assertEquals(tbl.Properties.VariableNames{3}, 'dim');
+            t.assertEquals(tbl.Properties.VariableNames{4}, 'domain_type');
+            t.assertEquals(tbl.Properties.VariableNames{5}, 'domain');
+            t.assertEquals(tbl.Properties.VariableNames{6}, 'size');
+            t.assertEquals(tbl.Properties.VariableNames{7}, 'num_recs');
+            t.assertEquals(tbl.Properties.VariableNames{8}, 'num_vals');
+            t.assertEquals(tbl.Properties.VariableNames{9}, 'sparsity');
+            t.assertEquals(tbl.Properties.VariableNames{10}, 'min_value');
+            t.assertEquals(tbl.Properties.VariableNames{11}, 'mean_value');
+            t.assertEquals(tbl.Properties.VariableNames{12}, 'max_value');
+            t.assertEquals(tbl.Properties.VariableNames{13}, 'where_max_abs_value');
+            t.assertEquals(tbl.Properties.VariableNames{14}, 'count_na');
+            t.assertEquals(tbl.Properties.VariableNames{15}, 'count_undef');
+            t.assertEquals(tbl.Properties.VariableNames{16}, 'count_eps');
             if gdx.features.categorical
                 t.assertEquals(tbl{1,'name'}, 'a');
                 switch i
@@ -941,6 +451,22 @@ function test_describe(t, cfg)
             t.assert(isstruct(tbl));
             t.assert(numel(fieldnames(tbl)) == 16);
             t.assert(numel(tbl.name) == 2);
+            t.assert(isfield(tbl, 'name'));
+            t.assert(isfield(tbl, 'format'));
+            t.assert(isfield(tbl, 'dim'));
+            t.assert(isfield(tbl, 'domain_type'));
+            t.assert(isfield(tbl, 'domain'));
+            t.assert(isfield(tbl, 'size'));
+            t.assert(isfield(tbl, 'num_recs'));
+            t.assert(isfield(tbl, 'num_vals'));
+            t.assert(isfield(tbl, 'sparsity'));
+            t.assert(isfield(tbl, 'min_value'));
+            t.assert(isfield(tbl, 'mean_value'));
+            t.assert(isfield(tbl, 'max_value'));
+            t.assert(isfield(tbl, 'where_max_abs_value'));
+            t.assert(isfield(tbl, 'count_na'));
+            t.assert(isfield(tbl, 'count_undef'));
+            t.assert(isfield(tbl, 'count_eps'));
             if gdx.features.categorical
                 t.assertEquals(tbl.name(1), 'a');
                 switch i
@@ -1068,6 +594,30 @@ function test_describe(t, cfg)
             t.assert(istable(tbl));
             t.assert(numel(tbl.Properties.VariableNames) == 24);
             t.assert(height(tbl) == 1);
+            t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
+            t.assertEquals(tbl.Properties.VariableNames{2}, 'type');
+            t.assertEquals(tbl.Properties.VariableNames{3}, 'format');
+            t.assertEquals(tbl.Properties.VariableNames{4}, 'dim');
+            t.assertEquals(tbl.Properties.VariableNames{5}, 'domain_type');
+            t.assertEquals(tbl.Properties.VariableNames{6}, 'domain');
+            t.assertEquals(tbl.Properties.VariableNames{7}, 'size');
+            t.assertEquals(tbl.Properties.VariableNames{8}, 'num_recs');
+            t.assertEquals(tbl.Properties.VariableNames{9}, 'num_vals');
+            t.assertEquals(tbl.Properties.VariableNames{10}, 'sparsity');
+            t.assertEquals(tbl.Properties.VariableNames{11}, 'min_level');
+            t.assertEquals(tbl.Properties.VariableNames{12}, 'mean_level');
+            t.assertEquals(tbl.Properties.VariableNames{13}, 'max_level');
+            t.assertEquals(tbl.Properties.VariableNames{14}, 'where_max_abs_level');
+            t.assertEquals(tbl.Properties.VariableNames{15}, 'count_na_level');
+            t.assertEquals(tbl.Properties.VariableNames{16}, 'count_undef_level');
+            t.assertEquals(tbl.Properties.VariableNames{17}, 'count_eps_level');
+            t.assertEquals(tbl.Properties.VariableNames{18}, 'min_marginal');
+            t.assertEquals(tbl.Properties.VariableNames{19}, 'mean_marginal');
+            t.assertEquals(tbl.Properties.VariableNames{20}, 'max_marginal');
+            t.assertEquals(tbl.Properties.VariableNames{21}, 'where_max_abs_marginal');
+            t.assertEquals(tbl.Properties.VariableNames{22}, 'count_na_marginal');
+            t.assertEquals(tbl.Properties.VariableNames{23}, 'count_undef_marginal');
+            t.assertEquals(tbl.Properties.VariableNames{24}, 'count_eps_marginal');
             if gdx.features.categorical
                 t.assertEquals(tbl{1,'name'}, 'x');
                 t.assertEquals(tbl{1,'type'}, 'positive');
@@ -1155,6 +705,30 @@ function test_describe(t, cfg)
             t.assert(isstruct(tbl));
             t.assert(numel(fieldnames(tbl)) == 24);
             t.assert(numel(tbl.name) == 1);
+            t.assert(isfield(tbl, 'name'));
+            t.assert(isfield(tbl, 'type'));
+            t.assert(isfield(tbl, 'format'));
+            t.assert(isfield(tbl, 'dim'));
+            t.assert(isfield(tbl, 'domain_type'));
+            t.assert(isfield(tbl, 'domain'));
+            t.assert(isfield(tbl, 'size'));
+            t.assert(isfield(tbl, 'num_recs'));
+            t.assert(isfield(tbl, 'num_vals'));
+            t.assert(isfield(tbl, 'sparsity'));
+            t.assert(isfield(tbl, 'min_level'));
+            t.assert(isfield(tbl, 'mean_level'));
+            t.assert(isfield(tbl, 'max_level'));
+            t.assert(isfield(tbl, 'where_max_abs_level'));
+            t.assert(isfield(tbl, 'count_na_level'));
+            t.assert(isfield(tbl, 'count_undef_level'));
+            t.assert(isfield(tbl, 'count_eps_level'));
+            t.assert(isfield(tbl, 'min_marginal'));
+            t.assert(isfield(tbl, 'mean_marginal'));
+            t.assert(isfield(tbl, 'max_marginal'));
+            t.assert(isfield(tbl, 'where_max_abs_marginal'));
+            t.assert(isfield(tbl, 'count_na_marginal'));
+            t.assert(isfield(tbl, 'count_undef_marginal'));
+            t.assert(isfield(tbl, 'count_eps_marginal'));
             if gdx.features.categorical
                 t.assertEquals(tbl.name(1), 'x');
                 t.assertEquals(tbl.type(1), 'positive');
@@ -1239,6 +813,67 @@ function test_describe(t, cfg)
             t.assert(tbl.count_undef_marginal(1) == 0);
             t.assert(tbl.count_eps_marginal(1) == 0);
         end
+    end
+
+    tbl = gdx.describeEquations();
+
+    t.add('describe_equations');
+    if gdx.features.table
+        t.assert(istable(tbl));
+        t.assert(numel(tbl.Properties.VariableNames) == 24);
+        t.assert(height(tbl) == 0);
+        t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
+        t.assertEquals(tbl.Properties.VariableNames{2}, 'type');
+        t.assertEquals(tbl.Properties.VariableNames{3}, 'format');
+        t.assertEquals(tbl.Properties.VariableNames{4}, 'dim');
+        t.assertEquals(tbl.Properties.VariableNames{5}, 'domain_type');
+        t.assertEquals(tbl.Properties.VariableNames{6}, 'domain');
+        t.assertEquals(tbl.Properties.VariableNames{7}, 'size');
+        t.assertEquals(tbl.Properties.VariableNames{8}, 'num_recs');
+        t.assertEquals(tbl.Properties.VariableNames{9}, 'num_vals');
+        t.assertEquals(tbl.Properties.VariableNames{10}, 'sparsity');
+        t.assertEquals(tbl.Properties.VariableNames{11}, 'min_level');
+        t.assertEquals(tbl.Properties.VariableNames{12}, 'mean_level');
+        t.assertEquals(tbl.Properties.VariableNames{13}, 'max_level');
+        t.assertEquals(tbl.Properties.VariableNames{14}, 'where_max_abs_level');
+        t.assertEquals(tbl.Properties.VariableNames{15}, 'count_na_level');
+        t.assertEquals(tbl.Properties.VariableNames{16}, 'count_undef_level');
+        t.assertEquals(tbl.Properties.VariableNames{17}, 'count_eps_level');
+        t.assertEquals(tbl.Properties.VariableNames{18}, 'min_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{19}, 'mean_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{20}, 'max_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{21}, 'where_max_abs_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{22}, 'count_na_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{23}, 'count_undef_marginal');
+        t.assertEquals(tbl.Properties.VariableNames{24}, 'count_eps_marginal');
+    else
+        t.assert(isstruct(tbl));
+        t.assert(numel(fieldnames(tbl)) == 24);
+        t.assert(numel(tbl.name) == 0);
+        t.assert(isfield(tbl, 'name'));
+        t.assert(isfield(tbl, 'type'));
+        t.assert(isfield(tbl, 'format'));
+        t.assert(isfield(tbl, 'dim'));
+        t.assert(isfield(tbl, 'domain_type'));
+        t.assert(isfield(tbl, 'domain'));
+        t.assert(isfield(tbl, 'size'));
+        t.assert(isfield(tbl, 'num_recs'));
+        t.assert(isfield(tbl, 'num_vals'));
+        t.assert(isfield(tbl, 'sparsity'));
+        t.assert(isfield(tbl, 'min_level'));
+        t.assert(isfield(tbl, 'mean_level'));
+        t.assert(isfield(tbl, 'max_level'));
+        t.assert(isfield(tbl, 'where_max_abs_level'));
+        t.assert(isfield(tbl, 'count_na_level'));
+        t.assert(isfield(tbl, 'count_undef_level'));
+        t.assert(isfield(tbl, 'count_eps_level'));
+        t.assert(isfield(tbl, 'min_marginal'));
+        t.assert(isfield(tbl, 'mean_marginal'));
+        t.assert(isfield(tbl, 'max_marginal'));
+        t.assert(isfield(tbl, 'where_max_abs_marginal'));
+        t.assert(isfield(tbl, 'count_na_marginal'));
+        t.assert(isfield(tbl, 'count_undef_marginal'));
+        t.assert(isfield(tbl, 'count_eps_marginal'));
     end
 end
 
@@ -1497,257 +1132,25 @@ end
 
 function test_idx_describe(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'gams_dir', ...
-        cfg.gams_dir, 'indexed', true, 'features', cfg.features);
-
-    tbl = gdx.describeParameters();
-
-    t.add('idx_describe_parameters_basic');
-    if gdx.features.table
-        t.assert(istable(tbl));
-        t.assert(numel(tbl.Properties.VariableNames) == 16);
-        t.assert(height(tbl) == 3);
-        t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
-        t.assertEquals(tbl.Properties.VariableNames{2}, 'format');
-        t.assertEquals(tbl.Properties.VariableNames{3}, 'dim');
-        t.assertEquals(tbl.Properties.VariableNames{4}, 'domain_type');
-        t.assertEquals(tbl.Properties.VariableNames{5}, 'domain');
-        t.assertEquals(tbl.Properties.VariableNames{6}, 'size');
-        t.assertEquals(tbl.Properties.VariableNames{7}, 'num_recs');
-        t.assertEquals(tbl.Properties.VariableNames{8}, 'num_vals');
-        t.assertEquals(tbl.Properties.VariableNames{9}, 'sparsity');
-        t.assertEquals(tbl.Properties.VariableNames{10}, 'min_value');
-        t.assertEquals(tbl.Properties.VariableNames{11}, 'mean_value');
-        t.assertEquals(tbl.Properties.VariableNames{12}, 'max_value');
-        t.assertEquals(tbl.Properties.VariableNames{13}, 'where_max_abs_value');
-        t.assertEquals(tbl.Properties.VariableNames{14}, 'count_na');
-        t.assertEquals(tbl.Properties.VariableNames{15}, 'count_undef');
-        t.assertEquals(tbl.Properties.VariableNames{16}, 'count_eps');
-        if gdx.features.categorical
-            t.assertEquals(tbl{1,'name'}, 'a');
-            t.assertEquals(tbl{1,'format'}, 'not_read');
-        else
-            t.assertEquals(tbl{1,'name'}{1}, 'a');
-            t.assertEquals(tbl{1,'format'}{1}, 'not_read');
-        end
-        t.assert(tbl{1,'dim'} == 0);
-        if gdx.features.categorical
-            t.assertEquals(tbl{1,'domain_type'}, 'relaxed');
-            t.assertEquals(tbl{1,'domain'}, '[]');
-            t.assertEquals(tbl{1,'size'}, '[]');
-        else
-            t.assertEquals(tbl{1,'domain_type'}{1}, 'relaxed');
-            t.assertEquals(tbl{1,'domain'}{1}, '[]');
-            t.assertEquals(tbl{1,'size'}{1}, '[]');
-        end
-        t.assert(tbl{1,'num_recs'} == 1);
-        t.assert(isnan(tbl{1,'num_vals'}));
-        t.assert(isnan(tbl{1,'sparsity'}));
-        t.assert(isnan(tbl{1,'min_value'}));
-        t.assert(isnan(tbl{1,'mean_value'}));
-        t.assert(isnan(tbl{1,'max_value'}));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl{1,'where_max_abs_value'}));
-        else
-            t.assert(isempty(tbl{1,'where_max_abs_value'}{1}));
-        end
-        t.assert(tbl{1,'count_na'} == 0);
-        t.assert(tbl{1,'count_undef'} == 0);
-        t.assert(tbl{1,'count_eps'} == 0);
-        if gdx.features.categorical
-            t.assertEquals(tbl{2,'name'}, 'b');
-            t.assertEquals(tbl{2,'format'}, 'not_read');
-        else
-            t.assertEquals(tbl{2,'name'}{1}, 'b');
-            t.assertEquals(tbl{2,'format'}{1}, 'not_read');
-        end
-        t.assert(tbl{2,'dim'} == 1);
-        if gdx.features.categorical
-            t.assertEquals(tbl{2,'domain_type'}, 'relaxed');
-            t.assertEquals(tbl{2,'domain'}, '[dim_1]');
-            t.assertEquals(tbl{2,'size'}, '[5]');
-        else
-            t.assertEquals(tbl{2,'domain_type'}{1}, 'relaxed');
-            t.assertEquals(tbl{2,'domain'}{1}, '[dim_1]');
-            t.assertEquals(tbl{2,'size'}{1}, '[5]');
-        end
-        t.assert(tbl{2,'num_recs'} == 3);
-        t.assert(isnan(tbl{2,'num_vals'}));
-        t.assert(isnan(tbl{2,'sparsity'}));
-        t.assert(isnan(tbl{2,'min_value'}));
-        t.assert(isnan(tbl{2,'mean_value'}));
-        t.assert(isnan(tbl{2,'max_value'}));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl{2,'where_max_abs_value'}));
-        else
-            t.assert(isempty(tbl{2,'where_max_abs_value'}{1}));
-        end
-        t.assert(tbl{2,'count_na'} == 0);
-        t.assert(tbl{2,'count_undef'} == 0);
-        t.assert(tbl{2,'count_eps'} == 0);
-        if gdx.features.categorical
-            t.assertEquals(tbl{3,'name'}, 'c');
-            t.assertEquals(tbl{3,'format'}, 'not_read');
-        else
-            t.assertEquals(tbl{3,'name'}{1}, 'c');
-            t.assertEquals(tbl{3,'format'}{1}, 'not_read');
-        end
-        t.assert(tbl{3,'dim'} == 2);
-        if gdx.features.categorical
-            t.assertEquals(tbl{3,'domain_type'}, 'relaxed');
-            t.assertEquals(tbl{3,'domain'}, '[dim_1,dim_2]');
-            t.assertEquals(tbl{3,'size'}, '[5,10]');
-        else
-            t.assertEquals(tbl{3,'domain_type'}{1}, 'relaxed');
-            t.assertEquals(tbl{3,'domain'}{1}, '[dim_1,dim_2]');
-            t.assertEquals(tbl{3,'size'}{1}, '[5,10]');
-        end
-        t.assert(tbl{3,'num_recs'} == 3);
-        t.assert(isnan(tbl{3,'num_vals'}));
-        t.assert(isnan(tbl{3,'sparsity'}));
-        t.assert(isnan(tbl{3,'min_value'}));
-        t.assert(isnan(tbl{3,'mean_value'}));
-        t.assert(isnan(tbl{3,'max_value'}));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl{3,'where_max_abs_value'}));
-        else
-            t.assert(isempty(tbl{3,'where_max_abs_value'}{1}));
-        end
-        t.assert(tbl{3,'count_na'} == 0);
-        t.assert(tbl{3,'count_undef'} == 0);
-        t.assert(tbl{3,'count_eps'} == 0);
-    else
-        t.assert(isstruct(tbl));
-        t.assert(numel(fieldnames(tbl)) == 16);
-        t.assert(numel(tbl.name) == 3);
-        t.assert(isfield(tbl, 'name'));
-        t.assert(isfield(tbl, 'format'));
-        t.assert(isfield(tbl, 'dim'));
-        t.assert(isfield(tbl, 'domain_type'));
-        t.assert(isfield(tbl, 'domain'));
-        t.assert(isfield(tbl, 'size'));
-        t.assert(isfield(tbl, 'num_recs'));
-        t.assert(isfield(tbl, 'num_vals'));
-        t.assert(isfield(tbl, 'sparsity'));
-        t.assert(isfield(tbl, 'min_value'));
-        t.assert(isfield(tbl, 'mean_value'));
-        t.assert(isfield(tbl, 'max_value'));
-        t.assert(isfield(tbl, 'where_max_abs_value'));
-        t.assert(isfield(tbl, 'count_na'));
-        t.assert(isfield(tbl, 'count_undef'));
-        t.assert(isfield(tbl, 'count_eps'));
-        if gdx.features.categorical
-            t.assertEquals(tbl.name(1), 'a');
-            t.assertEquals(tbl.format(1), 'not_read');
-        else
-            t.assertEquals(tbl.name{1}, 'a');
-            t.assertEquals(tbl.format{1}, 'not_read');
-        end
-        t.assert(tbl.dim(1) == 0);
-        if gdx.features.categorical
-            t.assertEquals(tbl.domain_type(1), 'relaxed');
-            t.assertEquals(tbl.domain(1), '[]');
-            t.assertEquals(tbl.size(1), '[]');
-        else
-            t.assertEquals(tbl.domain_type{1}, 'relaxed');
-            t.assertEquals(tbl.domain{1}, '[]');
-            t.assertEquals(tbl.size{1}, '[]');
-        end
-        t.assert(tbl.num_recs(1) == 1);
-        t.assert(isnan(tbl.num_vals(1)));
-        t.assert(isnan(tbl.sparsity(1)));
-        t.assert(isnan(tbl.min_value(1)));
-        t.assert(isnan(tbl.mean_value(1)));
-        t.assert(isnan(tbl.max_value(1)));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_value(1)));
-        else
-            t.assert(isempty(tbl.where_max_abs_value{1}));
-        end
-        t.assert(tbl.count_na(1) == 0);
-        t.assert(tbl.count_undef(1) == 0);
-        t.assert(tbl.count_eps(1) == 0);
-        if gdx.features.categorical
-            t.assertEquals(tbl.name(2), 'b');
-            t.assertEquals(tbl.format(2), 'not_read');
-        else
-            t.assertEquals(tbl.name{2}, 'b');
-            t.assertEquals(tbl.format{2}, 'not_read');
-        end
-        t.assert(tbl.dim(2) == 1);
-        if gdx.features.categorical
-            t.assertEquals(tbl.domain_type(2), 'relaxed');
-            t.assertEquals(tbl.domain(2), '[dim_1]');
-            t.assertEquals(tbl.size(2), '[5]');
-        else
-            t.assertEquals(tbl.domain_type{2}, 'relaxed');
-            t.assertEquals(tbl.domain{2}, '[dim_1]');
-            t.assertEquals(tbl.size{2}, '[5]');
-        end
-        t.assert(tbl.num_recs(2) == 3);
-        t.assert(isnan(tbl.num_vals(2)));
-        t.assert(isnan(tbl.sparsity(2)));
-        t.assert(isnan(tbl.min_value(2)));
-        t.assert(isnan(tbl.mean_value(2)));
-        t.assert(isnan(tbl.max_value(2)));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_value(2)));
-        else
-            t.assert(isempty(tbl.where_max_abs_value{2}));
-        end
-        t.assert(tbl.count_na(2) == 0);
-        t.assert(tbl.count_undef(2) == 0);
-        t.assert(tbl.count_eps(2) == 0);
-        if gdx.features.categorical
-            t.assertEquals(tbl.name(3), 'c');
-            t.assertEquals(tbl.format(3), 'not_read');
-        else
-            t.assertEquals(tbl.name{3}, 'c');
-            t.assertEquals(tbl.format{3}, 'not_read');
-        end
-        t.assert(tbl.dim(3) == 2);
-        if gdx.features.categorical
-            t.assertEquals(tbl.domain_type(3), 'relaxed');
-            t.assertEquals(tbl.domain(3), '[dim_1,dim_2]');
-            t.assertEquals(tbl.size(3), '[5,10]');
-        else
-            t.assertEquals(tbl.domain_type{3}, 'relaxed');
-            t.assertEquals(tbl.domain{3}, '[dim_1,dim_2]');
-            t.assertEquals(tbl.size{3}, '[5,10]');
-        end
-        t.assert(tbl.num_recs(3) == 3);
-        t.assert(isnan(tbl.num_vals(3)));
-        t.assert(isnan(tbl.sparsity(3)));
-        t.assert(isnan(tbl.min_value(3)));
-        t.assert(isnan(tbl.mean_value(3)));
-        t.assert(isnan(tbl.max_value(3)));
-        if gdx.features.categorical
-            t.assert(isundefined(tbl.where_max_abs_value(3)));
-        else
-            t.assert(isempty(tbl.where_max_abs_value{3}));
-        end
-        t.assert(tbl.count_na(3) == 0);
-        t.assert(tbl.count_undef(3) == 0);
-        t.assert(tbl.count_eps(3) == 0);
-    end
-
     for i = 1:4
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
         if ~gdx.features.table && i == 2
             continue
         end
 
         switch i
         case 1
-            gdx.read('format', 'struct');
+            gdx.read(cfg.filenames{4}, 'format', 'struct');
             test_name_describe_parameters = 'idx_describe_parameters_struct';
         case 2
-            gdx.read('format', 'table');
+            gdx.read(cfg.filenames{4}, 'format', 'table');
             test_name_describe_parameters = 'idx_describe_parameters_table';
         case 3
-            gdx.read('format', 'dense_matrix');
+            gdx.read(cfg.filenames{4}, 'format', 'dense_matrix');
             test_name_describe_parameters = 'idx_describe_parameters_dense_matrix';
         case 4
-            gdx.read('format', 'sparse_matrix');
+            gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix');
             test_name_describe_parameters = 'idx_describe_parameters_sparse_matrix';
         end
 
@@ -1758,6 +1161,22 @@ function test_idx_describe(t, cfg)
             t.assert(istable(tbl));
             t.assert(numel(tbl.Properties.VariableNames) == 16);
             t.assert(height(tbl) == 3);
+            t.assertEquals(tbl.Properties.VariableNames{1}, 'name');
+            t.assertEquals(tbl.Properties.VariableNames{2}, 'format');
+            t.assertEquals(tbl.Properties.VariableNames{3}, 'dim');
+            t.assertEquals(tbl.Properties.VariableNames{4}, 'domain_type');
+            t.assertEquals(tbl.Properties.VariableNames{5}, 'domain');
+            t.assertEquals(tbl.Properties.VariableNames{6}, 'size');
+            t.assertEquals(tbl.Properties.VariableNames{7}, 'num_recs');
+            t.assertEquals(tbl.Properties.VariableNames{8}, 'num_vals');
+            t.assertEquals(tbl.Properties.VariableNames{9}, 'sparsity');
+            t.assertEquals(tbl.Properties.VariableNames{10}, 'min_value');
+            t.assertEquals(tbl.Properties.VariableNames{11}, 'mean_value');
+            t.assertEquals(tbl.Properties.VariableNames{12}, 'max_value');
+            t.assertEquals(tbl.Properties.VariableNames{13}, 'where_max_abs_value');
+            t.assertEquals(tbl.Properties.VariableNames{14}, 'count_na');
+            t.assertEquals(tbl.Properties.VariableNames{15}, 'count_undef');
+            t.assertEquals(tbl.Properties.VariableNames{16}, 'count_eps');
             if gdx.features.categorical
                 t.assertEquals(tbl{1,'name'}, 'a');
                 switch i
@@ -1946,6 +1365,22 @@ function test_idx_describe(t, cfg)
             t.assert(isstruct(tbl));
             t.assert(numel(fieldnames(tbl)) == 16);
             t.assert(numel(tbl.name) == 3);
+            t.assert(isfield(tbl, 'name'));
+            t.assert(isfield(tbl, 'format'));
+            t.assert(isfield(tbl, 'dim'));
+            t.assert(isfield(tbl, 'domain_type'));
+            t.assert(isfield(tbl, 'domain'));
+            t.assert(isfield(tbl, 'size'));
+            t.assert(isfield(tbl, 'num_recs'));
+            t.assert(isfield(tbl, 'num_vals'));
+            t.assert(isfield(tbl, 'sparsity'));
+            t.assert(isfield(tbl, 'min_value'));
+            t.assert(isfield(tbl, 'mean_value'));
+            t.assert(isfield(tbl, 'max_value'));
+            t.assert(isfield(tbl, 'where_max_abs_value'));
+            t.assert(isfield(tbl, 'count_na'));
+            t.assert(isfield(tbl, 'count_undef'));
+            t.assert(isfield(tbl, 'count_eps'));
             if gdx.features.categorical
                 t.assertEquals(tbl.name(1), 'a');
                 switch i
@@ -2169,7 +1604,6 @@ function test_universalset(t, cfg)
 
     gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
-    gdx.read();
 
     t.add('universalset_1');
     uels = gdx.getUniverseSet();

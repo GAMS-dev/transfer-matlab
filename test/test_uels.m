@@ -307,9 +307,8 @@ end
 
 function test_symbol_uels(t, cfg)
 
-    c = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-    c.read('format', 'struct');
+    c = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
     t.add('symbol_uels');
@@ -406,9 +405,8 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 0);
     t.assert(ids(6) == 3);
 
-    c = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-    c.read('format', 'struct');
+    c = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
     t.add('symbol_uels_set_2');
@@ -423,9 +421,8 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 0);
     t.assert(ids(6) == 0);
 
-    c = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-    c.read('format', 'struct');
+    c = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
     t.add('symbol_uels_init');
@@ -472,9 +469,8 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{4}, 'i10');
     t.assertEquals(uels{5}, 'i5');
 
-    c = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-    c.read('format', 'struct');
+    c = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
     t.add('symbol_uels_remove_1');
@@ -504,9 +500,8 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 0);
     t.assert(ids(6) == 2);
 
-    c = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-    c.read('format', 'struct');
+    c = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
     t.add('symbol_uels_remove_2');
@@ -534,9 +529,8 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
 
-    c = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-    c.read('format', 'struct');
+    c = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
     t.add('symbol_uels_rename');
