@@ -47,22 +47,23 @@ void mexFunction(
 )
 {
     int sym_id, format, orig_format, type, subtype, lastdim, ival, sym_count;
-    int n_acronyms, uel_count;
-    double dval;
+    int n_acronyms, uel_count, n_symbols, dom_type;
     size_t dim, nrecs, n_dom_fields;
     bool support_categorical, support_setget;
     bool orig_values_flag[GMS_VAL_MAX], values_flag[GMS_VAL_MAX];
     char buf[GMS_SSSIZE], gdx_filename[GMS_SSSIZE], sysdir[GMS_SSSIZE];
+    char name[GMS_SSSIZE], text[GMS_SSSIZE];
     double def_values[GMS_VAL_MAX];
     gdxHandle_t gdx = NULL;
-    gdxStrIndexPtrs_t domains_ptr;
-    gdxStrIndex_t domains;
+    gdxStrIndexPtrs_t domains_ptr, domain_labels_ptr;
+    gdxStrIndex_t domains, domain_labels;
     gdxUelIndex_t gdx_uel_index;
     gdxUelIndex_t dom_symid;
     gdxValues_t gdx_values;
     int** dom_uel_dim_maps = NULL;
     int* dom_uels_used[GLOBAL_MAX_INDEX_DIM] = {NULL};
     int* acronyms = NULL;
+    int* sym_ids = NULL;
     mwIndex idx;
     mwIndex mx_flat_idx[GMS_VAL_MAX];
     mwIndex mx_idx[GLOBAL_MAX_INDEX_DIM];
@@ -79,7 +80,6 @@ void mexFunction(
     double* mx_values[GMS_VAL_MAX] = {NULL};
 #endif
     mxArray* mx_arr_symbol_name = NULL;
-    mxArray* mx_arr_symbol = NULL;
     mxArray* mx_arr_records = NULL;
     mxArray* mx_arr_uels = NULL;
     mxArray* mx_arr_dom_uels[GLOBAL_MAX_INDEX_DIM] = {NULL};
@@ -87,23 +87,23 @@ void mexFunction(
     mxArray** mx_arr_dom_idx = NULL;
 
     GDXSTRINDEXPTRS_INIT(domains, domains_ptr);
+    GDXSTRINDEXPTRS_INIT(domain_labels, domain_labels_ptr);
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(0, nlhs, 8, nrhs);
+    gt_mex_check_arguments_num(1, nlhs, 7, nrhs);
     gt_mex_check_argument_str(prhs, 0, sysdir);
     gt_mex_check_argument_str(prhs, 1, gdx_filename);
-    gt_mex_check_argument_struct(prhs, 2);
-    gt_mex_check_argument_cell(prhs, 3);
-    gt_mex_check_argument_int(prhs, 4, GT_FILTER_NONE, 1, &orig_format);
-    gt_mex_check_argument_bool(prhs, 5, 5, orig_values_flag);
-    gt_mex_check_argument_bool(prhs, 6, 1, &support_categorical);
-    gt_mex_check_argument_bool(prhs, 7, 1, &support_setget);
+    gt_mex_check_argument_cell(prhs, 2);
+    gt_mex_check_argument_int(prhs, 3, GT_FILTER_NONE, 1, &orig_format);
+    gt_mex_check_argument_bool(prhs, 4, 5, orig_values_flag);
+    gt_mex_check_argument_bool(prhs, 5, 1, &support_categorical);
+    gt_mex_check_argument_bool(prhs, 6, 1, &support_setget);
     if (orig_format != GT_FORMAT_STRUCT && orig_format != GT_FORMAT_DENSEMAT &&
         orig_format != GT_FORMAT_SPARSEMAT && orig_format != GT_FORMAT_TABLE)
-        mexErrMsgIdAndTxt(ERRID"prhs3", "Invalid record format.");
+        mexErrMsgIdAndTxt(ERRID"format", "Invalid record format.");
 
     /* create output data */
-    plhs = NULL;
+    plhs[0] = mxCreateStructMatrix(1, 1, 0, NULL);
 
     /* start GDX */
     gt_gdx_init_read(&gdx, sysdir, gdx_filename);
@@ -111,6 +111,32 @@ void mexFunction(
         mexErrMsgIdAndTxt(ERRID"gdxSystemInfo", "GDX error (gdxSystemInfo)");
 
     dom_uel_dim_maps = (int**) mxCalloc(sym_count+1, sizeof(int*));
+    sym_ids = (int*) mxCalloc(sym_count+1, sizeof(int));
+
+    /* get symbol ids */
+    if (mxGetNumberOfElements(prhs[2]) == 0)
+    {
+        n_symbols = sym_count;
+        for (int i = 0; i < sym_count; i++)
+            sym_ids[i] = i+1;
+    }
+    else
+    {
+        n_symbols = 0;
+        for (size_t i = 0; i < mxGetNumberOfElements(prhs[2]); i++)
+        {
+            mx_arr_symbol_name = mxGetCell(prhs[2], i);
+            if (!mxIsChar(mx_arr_symbol_name))
+                mexErrMsgIdAndTxt(ERRID"symbol", "Symbol name must be of type 'char'.");
+            mxGetString(mx_arr_symbol_name, buf, GMS_SSSIZE);
+            if (!gdxFindSymbol(gdx, buf, &sym_ids[n_symbols]))
+            {
+                mexWarnMsgIdAndTxt(ERRID"symbol", "Symbol %s not found in GDX file. ", buf);
+                continue;
+            }
+            n_symbols++;
+        }
+    }
 
     /* check for acronyms */
     n_acronyms = gdxAcronymCount(gdx);
@@ -128,7 +154,7 @@ void mexFunction(
         }
     }
 
-    for (size_t i = 0; i < mxGetNumberOfElements(prhs[3]); i++)
+    for (int i = 0; i < n_symbols; i++)
     {
         /* reset data */
         for (size_t j = 0; j < GMS_VAL_MAX; j++)
@@ -147,57 +173,47 @@ void mexFunction(
         }
         format = orig_format;
 
-        /* get symbol and symbol id */
-        mx_arr_symbol_name = mxGetCell(prhs[3], i);
-        if (!mxIsChar(mx_arr_symbol_name))
-            mexErrMsgIdAndTxt(ERRID"symbol", "Symbol name must be of type 'char'.");
-        mxGetString(mx_arr_symbol_name, buf, GMS_SSSIZE);
-        gt_mex_getfield_symbol_obj(prhs[2], "Container.data", buf, true, &mx_arr_symbol);
-        if (mxIsClass(mx_arr_symbol, "GAMSTransfer.Alias"))
-            continue;
-        gt_mex_getfield_dbl(mx_arr_symbol, "symbol", "read_entry", mxGetNaN(), true, 1, &dval);
-        if (mxIsNaN(dval))
-            continue;
-        gt_mex_getfield_int(mx_arr_symbol, "symbol", "read_entry", 0, true,
-            GT_FILTER_NONNEGATIVE, 1, &sym_id);
+        /* read symbol gdx data */
+        sym_id = sym_ids[i];
+        if (!gdxSymbolInfo(gdx, sym_id, name, &ival, &type))
+            mexErrMsgIdAndTxt(ERRID"gdxSymbolInfo", "GDX error (gdxSymbolInfo)");
+        mxAssert(ival >= 0 && ival <= GLOBAL_MAX_INDEX_DIM, "Invalid dimension of symbol.");
+        dim = (size_t) ival;
+        if (!gdxSymbolInfoX(gdx, sym_id, &ival, &subtype, text))
+            mexErrMsgIdAndTxt(ERRID"gdxSymbolInfoX", "GDX error (gdxSymbolInfoX)");
+        mxAssert(ival >= 0, "Invalid number of records");
+        nrecs = (size_t) ival;
+
+        /* read symbol domain info */
+        if (!gdxSymbolGetDomain(gdx, sym_id, dom_symid))
+            mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomain", "GDX error (gdxSymbolGetDomain)");
+        dom_type = gdxSymbolGetDomainX(gdx, sym_id, domains_ptr);
+        if (dom_type < 1 || dom_type > 3)
+            mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomainX", "GDX error (gdxSymbolGetDomainX)");
+
+        /* prefer struct instead of dense_matrix for scalars */
+        if (format == GT_FORMAT_DENSEMAT && dim == 0)
+            format = GT_FORMAT_STRUCT;
 
         /* check format: sets can be read as table and struct only */
-        if (mxIsClass(mx_arr_symbol, "GAMSTransfer.Set") &&
-            (format == GT_FORMAT_DENSEMAT || format == GT_FORMAT_SPARSEMAT))
-            format = GT_FORMAT_STRUCT;
         switch (format)
         {
             case GT_FORMAT_STRUCT:
             case GT_FORMAT_TABLE:
                 break;
             case GT_FORMAT_DENSEMAT:
+                if (type == GMS_DT_SET)
+                    format = GT_FORMAT_STRUCT;
+                break;
             case GT_FORMAT_SPARSEMAT:
-                if (mxIsClass(mx_arr_symbol, "GAMSTransfer.Set"))
+                if (dim > 2)
+                    mexErrMsgIdAndTxt(ERRID"format", "Sparse format only supported with dimension <= 2.");
+                if (type == GMS_DT_SET)
                     format = GT_FORMAT_STRUCT;
                 break;
             default:
                 mexErrMsgIdAndTxt(ERRID"format", "Invalid records format");
         }
-
-        /* read symbol gdx data */
-        if (!gdxSymbolInfo(gdx, sym_id, buf, &ival, &type))
-            mexErrMsgIdAndTxt(ERRID"gdxSymbolInfo", "GDX error (gdxSymbolInfo)");
-        mxAssert(ival >= 0 && ival <= GLOBAL_MAX_INDEX_DIM, "Invalid dimension of symbol.");
-        dim = (size_t) ival;
-        if (format == GT_FORMAT_SPARSEMAT && dim > 2)
-            mexErrMsgIdAndTxt(ERRID"prhs3", "Sparse format only supported with dimension <= 2.");
-        if (type == GMS_DT_SET && format != GT_FORMAT_STRUCT && format != GT_FORMAT_TABLE)
-            mexErrMsgIdAndTxt(ERRID"prhs3", "GAMS Sets only supported with format 'struct' or 'table'.");
-        if (!gdxSymbolInfoX(gdx, sym_id, &ival, &subtype, buf))
-            mexErrMsgIdAndTxt(ERRID"gdxSymbolInfoX", "GDX error (gdxSymbolInfoX)");
-        mxAssert(ival >= 0, "Invalid number of records");
-        nrecs = (size_t) ival;
-        if (!gdxSymbolGetDomain(gdx, sym_id, dom_symid))
-            mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomain", "GDX error (gdxSymbolGetDomain)");
-
-        /* prefer struct instead of dense_matrix for scalars */
-        if (format == GT_FORMAT_DENSEMAT && dim == 0)
-            format = GT_FORMAT_STRUCT;
 
         /* modify value fields based on type */
         switch (type)
@@ -215,9 +231,9 @@ void mexFunction(
                 values_flag[GMS_VAL_SCALE] = false;
                 break;
             case GMS_DT_ALIAS:
-                gdxClose(gdx);
-                gdxFree(&gdx);
-                return;
+                gt_mex_addsymbol(plhs[0], name, text, type, subtype, format, dim,
+                    NULL, (const char**) domains_ptr, dom_type, nrecs, NULL, NULL);
+                continue;
         }
 
         /* records struct */
@@ -267,14 +283,14 @@ void mexFunction(
         }
 
         /* load domains and transform to domain_labels */
-        if (!gdxSymbolGetDomainX(gdx, sym_id, domains_ptr))
+        if (!gdxSymbolGetDomainX(gdx, sym_id, domain_labels_ptr))
             mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomainX", "GDX error (gdxSymbolGetDomainX)");
         for (size_t j = 0; j < dim; j++)
         {
-            if (!strcmp(domains_ptr[j], "*"))
-                strcpy(domains_ptr[j], "uni");
+            if (!strcmp(domain_labels_ptr[j], "*"))
+                strcpy(domain_labels_ptr[j], "uni");
             sprintf(buf, "_%d", (int) j+1);
-            strcat(domains_ptr[j], buf);
+            strcat(domain_labels_ptr[j], buf);
         }
 
         /* get default values dependent on type */
@@ -324,7 +340,7 @@ void mexFunction(
         }
 
         /* add fields to records / uels and create record data structure */
-        gt_mex_readdata_addfields(type, dim, format, values_flag, domains_ptr,
+        gt_mex_readdata_addfields(type, dim, format, values_flag, domain_labels_ptr,
             mx_arr_records, &n_dom_fields);
         gt_mex_readdata_create(dim, nrecs, format, values_flag, def_values,
             mx_dom_nrecs, col_nnz, mx_arr_dom_idx, mx_dom_idx, mx_arr_values,
@@ -505,19 +521,15 @@ void mexFunction(
                 mxSetFieldByNumber(mx_arr_records, 0, (int) (n_dom_fields + k++), mx_arr_values[j]);
 
         /* set uel fields (only needed if categorical is not used) */
+        mx_arr_uels = mxCreateCellMatrix(1, dim);
         switch (format)
         {
             case GT_FORMAT_STRUCT:
             case GT_FORMAT_TABLE:
                 if (support_categorical)
                     break;
-                mx_arr_uels = mxCreateCellMatrix(1, dim);
                 for (size_t j = 0; j < dim; j++)
                     mxSetCell(mx_arr_uels, j, mx_arr_dom_uels[j]);
-                if (support_setget)
-                    mxSetProperty(mx_arr_symbol, 0, "uels_c_setget_", mx_arr_uels);
-                else
-                    mxSetProperty(mx_arr_symbol, 0, "uels_c_cache_", mx_arr_uels);
                 break;
         }
 
@@ -526,9 +538,10 @@ void mexFunction(
             gt_mex_struct2table(&mx_arr_records);
 
         /* store records in symbol */
-        mxSetProperty(mx_arr_symbol, 0, "records", mx_arr_records);
-        mxSetProperty(mx_arr_symbol, 0, "number_records_", mxCreateDoubleScalar(mxGetNaN()));
-        mxSetProperty(mx_arr_symbol, 0, "format_", mxCreateDoubleScalar(format));
+        if (type == GMS_DT_EQU)
+            subtype -= GMS_EQU_USERINFO_BASE;
+        gt_mex_addsymbol(plhs[0], name, text, type, subtype, format, dim, NULL,
+            (const char**) domains_ptr, dom_type, nrecs, mx_arr_records, mx_arr_uels);
 
         /* free */
         for (size_t j = 0; j < dim; j++)
@@ -555,6 +568,7 @@ void mexFunction(
         if (dom_uel_dim_maps[i])
             mxFree(dom_uel_dim_maps[i]);
     mxFree(dom_uel_dim_maps);
+    mxFree(sym_ids);
     if (n_acronyms > 0)
         mxFree(acronyms);
 }

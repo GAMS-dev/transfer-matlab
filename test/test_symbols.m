@@ -1998,10 +1998,8 @@ end
 
 function test_transformRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-
     formats = {'struct', 'table', 'dense_matrix', 'sparse_matrix'};
+    gdx = cell(1, numel(formats));
     i_recs = cell(1, numel(formats));
     j_recs = cell(1, numel(formats));
     a_recs = cell(1, numel(formats));
@@ -2017,7 +2015,8 @@ function test_transformRecords(t, cfg)
         if strcmp(formats{i}, 'table') && ~gdx.features.table
             continue
         end
-        gdx.read('format', formats{i});
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', formats{i});
         i_recs{i} = gdx.data.i.records;
         j_recs{i} = gdx.data.j.records;
         a_recs{i} = gdx.data.a.records;
@@ -2041,7 +2040,8 @@ function test_transformRecords(t, cfg)
             end
 
             t.add(sprintf('transform_records_%s_to_%s', formats{i}, formats{j}));
-            gdx.read('format', formats{i});
+            gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx.read(cfg.filenames{1}, 'format', formats{i});
             try
                 if strcmp(formats{j}, 'dense_matrix') || strcmp(formats{j}, 'sparse_matrix')
                     t.assert(false);

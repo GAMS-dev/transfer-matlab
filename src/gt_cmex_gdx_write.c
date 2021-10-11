@@ -75,6 +75,8 @@ void mexFunction(
     mxArray* mx_arr_text = NULL;
     mxArray* mx_arr_uels = NULL;
     mxArray* mx_arr_values[GMS_VAL_MAX] = {NULL};
+    mxArray* call_plhs[1] = {NULL};
+    mxArray* call_prhs[2] = {NULL};
     mxArray** mx_arr_domains = NULL;
 
     GDXSTRINDEXPTRS_INIT(domains, domains_ptr);
@@ -174,10 +176,17 @@ void mexFunction(
         gt_mex_getfield_sizet(mx_arr_data, data_name, "dimension_", 0, true, GT_FILTER_NONNEGATIVE, 1, &dim);
         gt_mex_getfield_cell_str(mx_arr_data, data_name, "domain_", "", true, dim, domains_ptr, GMS_SSSIZE);
         gt_mex_getfield_cell_str(mx_arr_data, data_name, "domain_labels_", "", true, dim, domain_labels_ptr, GMS_SSSIZE);
-        if (support_setget)
-            gt_mex_getfield_cell(mx_arr_data, data_name, "uels_c_setget_", true, &mx_arr_uels);
-        else
-            gt_mex_getfield_cell(mx_arr_data, data_name, "uels_c_cache_", true, &mx_arr_uels);
+
+        /* get UELs */
+        mx_arr_uels = mxCreateCellMatrix(1, dim);
+        for (size_t j = 0; j < dim; j++)
+        {
+            call_prhs[0] = mx_arr_data;
+            call_prhs[1] = mxCreateDoubleScalar(j+1);
+            if (mexCallMATLAB(1, call_plhs, 2, call_prhs, "getUELs"))
+                mexErrMsgIdAndTxt(ERRID"number_records", "Calling 'getUELs' failed.");
+            mxSetCell(mx_arr_uels, j, call_plhs[0]);
+        }
 
         /* get optional fields */
         gt_mex_getfield_str(mx_arr_data, data_name, "description_", "", false, text, GMS_SSSIZE);

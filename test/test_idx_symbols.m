@@ -601,9 +601,6 @@ end
 
 function test_idx_transformRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'gams_dir', ...
-        cfg.gams_dir, 'indexed', true, 'features', cfg.features);
-
     formats = {'struct', 'table', 'dense_matrix', 'sparse_matrix'};
     a_recs = cell(1, numel(formats));
     b_recs = cell(1, numel(formats));
@@ -616,7 +613,9 @@ function test_idx_transformRecords(t, cfg)
         if strcmp(formats{i}, 'table') && ~gdx.features.table
             continue
         end
-        gdx.read('format', formats{i});
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', formats{i});
         a_recs{i} = gdx.data.a.records;
         b_recs{i} = gdx.data.b.records;
         c_recs{i} = gdx.data.c.records;
@@ -636,7 +635,9 @@ function test_idx_transformRecords(t, cfg)
             end
 
             t.add(sprintf('idx_transform_records_%s_to_%s', formats{i}, formats{j}));
-            gdx.read('format', formats{i});
+            gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+                'features', cfg.features);
+            gdx.read(cfg.filenames{4}, 'format', formats{i});
             gdx.data.a.transformRecords(formats{j});
             gdx.data.b.transformRecords(formats{j});
             gdx.data.c.transformRecords(formats{j});

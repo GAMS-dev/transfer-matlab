@@ -172,11 +172,14 @@ void gt_mex_addsymbol(
     const char*     descr,          /** description of symbol */
     int             type,           /** GAMS type of symbol */
     int             subtype,        /** GAMS subtype of symbol */
+    int             format,         /** record format */
     size_t          dim,            /** dimension of symbol */
     size_t*         sizes,          /** sizes of domains (length = dim) */
     const char**    domains,        /** domains of symbol (length = dim) */
     int             domain_type,    /** domain type (e.g. 3: regular or 2: relaxed) */
-    size_t          nrecs           /** number of records */
+    size_t          nrecs,          /** number of records */
+    mxArray*        mx_arr_records, /** records structure */
+    mxArray*        mx_arr_uels     /** list of uels to be stored */
 )
 {
     mxArray* mx_arr_sym_struct = NULL;
@@ -189,12 +192,17 @@ void gt_mex_addsymbol(
     gt_mex_addfield_str(mx_arr_sym_struct, "description", descr);
     gt_mex_addfield_int(mx_arr_sym_struct, "type", 1, &type);
     gt_mex_addfield_int(mx_arr_sym_struct, "subtype", 1, &subtype);
+    gt_mex_addfield_int(mx_arr_sym_struct, "format", 1, &format);
     gt_mex_addfield_sizet(mx_arr_sym_struct, "dimension", 1, &dim);
     gt_mex_addfield_cell_str(mx_arr_sym_struct, "domain", dim, domains);
     gt_mex_addfield_int(mx_arr_sym_struct, "domain_type", 1, &domain_type);
     if (sizes)
         gt_mex_addfield_sizet(mx_arr_sym_struct, "size", dim, sizes);
     gt_mex_addfield_sizet(mx_arr_sym_struct, "number_records", 1, &nrecs);
+    if (mx_arr_records)
+        mxSetFieldByNumber(mx_arr_sym_struct, 0, mxAddField(mx_arr_sym_struct, "records"), mx_arr_records);
+    if (mx_arr_uels)
+        mxSetFieldByNumber(mx_arr_sym_struct, 0, mxAddField(mx_arr_sym_struct, "uels"), mx_arr_uels);
 
     /* add symbol structure to data structure */
     mxSetFieldByNumber(mx_struct, 0, mxAddField(mx_struct, name), mx_arr_sym_struct);

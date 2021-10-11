@@ -39,14 +39,12 @@ function test_idx_read(t, cfg)
 
     t.add('idx_read_basic_info');
     t.assertEquals(gdx.gams_dir, cfg.gams_dir);
-    t.assertEquals(gdx.filename, cfg.filenames{4});
     t.assert(gdx.indexed);
     t.assert(numel(fieldnames(gdx.data)) == 3);
 
     t.add('idx_read_scalar_basic');
     t.assert(isfield(gdx.data, 'a'));
     s = gdx.data.a;
-    t.testEmptySymbol(s);
     t.assert(isa(s, 'GAMSTransfer.Parameter'));
     t.assertEquals(s.name, 'a');
     t.assertEquals(s.description, 'par_a');
@@ -56,15 +54,13 @@ function test_idx_read(t, cfg)
     t.assertEquals(s.domain_type, 'relaxed');
     t.assert(numel(s.size) == 0);
     t.assert(s.getCardenality() == 1);
-    t.assert(isnan(s.getSparsity()));
-    t.assert(strcmp(s.format, 'not_read'));
+    t.assert(~isnan(s.getSparsity()));
     t.assert(s.getNumberRecords() == 1);
-    t.assert(~s.isValid());
+    t.assert(s.isValid());
 
     t.add('idx_read_parameter_1d_basic');
     t.assert(isfield(gdx.data, 'b'));
     s = gdx.data.b;
-    t.testEmptySymbol(s);
     t.assert(isa(s, 'GAMSTransfer.Parameter'));
     t.assertEquals(s.name, 'b');
     t.assertEquals(s.description, 'par_b');
@@ -77,15 +73,13 @@ function test_idx_read(t, cfg)
     t.assert(numel(s.size) == 1);
     t.assert(s.size(1) == 5);
     t.assert(s.getCardenality() == 5);
-    t.assert(isnan(s.getSparsity()));
-    t.assert(strcmp(s.format, 'not_read'));
+    t.assert(~isnan(s.getSparsity()));
     t.assert(s.getNumberRecords() == 3);
-    t.assert(~s.isValid());
+    t.assert(s.isValid());
 
     t.add('indexed_parameter_2d_basic');
     t.assert(isfield(gdx.data, 'c'));
     s = gdx.data.c;
-    t.testEmptySymbol(s);
     t.assert(isa(s, 'GAMSTransfer.Parameter'));
     t.assertEquals(s.name, 'c');
     t.assertEquals(s.description, 'par_c');
@@ -101,12 +95,13 @@ function test_idx_read(t, cfg)
     t.assert(s.size(1) == 5);
     t.assert(s.size(2) == 10);
     t.assert(s.getCardenality() == 50);
-    t.assert(isnan(s.getSparsity()));
-    t.assert(strcmp(s.format, 'not_read'));
+    t.assert(~isnan(s.getSparsity()));
     t.assert(s.getNumberRecords() == 3);
-    t.assert(~s.isValid());
+    t.assert(s.isValid());
 
-    gdx.read('format', 'struct');
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+        'features', cfg.features);
+    gdx.read(cfg.filenames{4}, 'format', 'struct');
 
     t.add('idx_read_scalar_records_struct');
     s = gdx.data.a;
@@ -161,7 +156,9 @@ function test_idx_read(t, cfg)
     t.assert(s.records.value(3) == 49);
 
     if gdx.features.table
-        gdx.read('format', 'table');
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', 'table');
 
         t.add('indexed_scalar_records_table');
         s = gdx.data.a;
@@ -216,7 +213,9 @@ function test_idx_read(t, cfg)
         t.assert(s.records.value(3) == 49);
     end
 
-    gdx.read('format', 'dense_matrix');
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+        'features', cfg.features);
+    gdx.read(cfg.filenames{4}, 'format', 'dense_matrix');
 
     t.add('indexed_scalar_records_dense_matrix');
     s = gdx.data.a;
@@ -267,7 +266,9 @@ function test_idx_read(t, cfg)
     t.assert(s.records.value(5,3) == 0);
     t.assert(s.records.value(5,9) == 0);
 
-    gdx.read('format', 'sparse_matrix');
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+        'features', cfg.features);
+    gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix');
 
     t.add('indexed_scalar_records_sparse_matrix');
     s = gdx.data.a;
@@ -327,9 +328,9 @@ end
 
 function test_idx_readSpecialValues(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{2}, 'gams_dir', ...
-        cfg.gams_dir, 'indexed', true, 'features', cfg.features);
-    gdx.read('format', 'struct');
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+        'features', cfg.features);
+    gdx.read(cfg.filenames{2}, 'format', 'struct');
 
     t.add('idx_read_special_values');
     t.assert(isfield(gdx.data, 'GUndef'));
@@ -353,7 +354,7 @@ function test_idx_readSpecialValues(t, cfg)
     t.assert(gdx.data.GPInf.records.value == Inf);
     t.assert(gdx.data.GMInf.records.value == -Inf);
 
-    % doesn't return 0 (bug in IDX API (special values already translated): steve says 'no bug'; renke says 'definitely bug')
+    % doesn't return 0 ("bug" in IDX API (special values already translated))
     % t.assert(gdx.data.GEps.records.value == 0);
     % t.assert(GAMSTransfer.SpecialValues.iseps(gdx.data.GEps.records.value));
 end
@@ -361,33 +362,39 @@ end
 function test_idx_readWrite(t, cfg)
 
     for i = [2,4]
-        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'gams_dir', ...
-            cfg.gams_dir, 'indexed', true, 'features', cfg.features);
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
         gdxdump = fullfile(cfg.gams_dir, 'gdxdump');
 
         t.add(sprintf('idx_read_write_struct_%d', i));
-        gdx.read('format', 'struct');
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{i}, 'format', 'struct');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         if gdx.features.table
             t.add(sprintf('idx_read_write_table_%d', i));
-            gdx.read('format', 'table');
+            gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+                'features', cfg.features);
+            gdx.read(cfg.filenames{i}, 'format', 'table');
             gdx.write(write_filename);
             t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
             t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
         end
 
         t.add(sprintf('idx_read_write_dense_matrix_%d', i));
-        gdx.read('format', 'dense_matrix');
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{i}, 'format', 'dense_matrix');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         t.add(sprintf('idx_read_write_sparse_matrix_%d', i));
-        gdx.read('format', 'sparse_matrix');
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{i}, 'format', 'sparse_matrix');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));

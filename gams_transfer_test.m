@@ -39,6 +39,7 @@ function gams_transfer_test(varargin)
     addParameter(p, 'gams_dir', find_gams(), is_string_char);
     addParameter(p, 'exit_on_fail', false, @islogical);
     addParameter(p, 'license', '', is_string_char);
+    addParameter(p, 'only_default_config', false, @islogical);
     parse(p, varargin{:});
     if strcmp(p.Results.gams_dir, '')
         error('GAMS system directory not found.');
@@ -76,39 +77,41 @@ function gams_transfer_test(varargin)
         success = success & test_idx_readwrite(cfg);
         success = success & test_trnsport(cfg);
 
-        disp('Configuration: disable categorical');
-        cfg.features = features;
-        cfg.features.categorical = false;
-        success = success & test_container(cfg);
-        success = success & test_uels(cfg);
-        success = success & test_symbols(cfg);
-        success = success & test_readwrite(cfg);
-        success = success & test_idx_symbols(cfg);
-        success = success & test_idx_readwrite(cfg);
-        success = success & test_trnsport(cfg);
+        if ~p.Results.only_default_config
+            disp('Configuration: disable categorical');
+            cfg.features = features;
+            cfg.features.categorical = false;
+            success = success & test_container(cfg);
+            success = success & test_uels(cfg);
+            success = success & test_symbols(cfg);
+            success = success & test_readwrite(cfg);
+            success = success & test_idx_symbols(cfg);
+            success = success & test_idx_readwrite(cfg);
+            success = success & test_trnsport(cfg);
 
-        disp('Configuration: disable table');
-        cfg.features = features;
-        cfg.features.table = false;
-        success = success & test_container(cfg);
-        success = success & test_uels(cfg);
-        success = success & test_symbols(cfg);
-        success = success & test_readwrite(cfg);
-        success = success & test_idx_symbols(cfg);
-        success = success & test_idx_readwrite(cfg);
-        success = success & test_trnsport(cfg);
+            disp('Configuration: disable table');
+            cfg.features = features;
+            cfg.features.table = false;
+            success = success & test_container(cfg);
+            success = success & test_uels(cfg);
+            success = success & test_symbols(cfg);
+            success = success & test_readwrite(cfg);
+            success = success & test_idx_symbols(cfg);
+            success = success & test_idx_readwrite(cfg);
+            success = success & test_trnsport(cfg);
 
-        disp('Configuration: disable table & categorical');
-        cfg.features = features;
-        cfg.features.table = false;
-        cfg.features.categorical = false;
-        success = success & test_container(cfg);
-        success = success & test_uels(cfg);
-        success = success & test_symbols(cfg);
-        success = success & test_readwrite(cfg);
-        success = success & test_idx_symbols(cfg);
-        success = success & test_idx_readwrite(cfg);
-        success = success & test_trnsport(cfg);
+            disp('Configuration: disable table & categorical');
+            cfg.features = features;
+            cfg.features.table = false;
+            cfg.features.categorical = false;
+            success = success & test_container(cfg);
+            success = success & test_uels(cfg);
+            success = success & test_symbols(cfg);
+            success = success & test_readwrite(cfg);
+            success = success & test_idx_symbols(cfg);
+            success = success & test_idx_readwrite(cfg);
+            success = success & test_trnsport(cfg);
+        end
 
         cd(olddir);
         rmpath(fullfile(current_dir, 'test'));

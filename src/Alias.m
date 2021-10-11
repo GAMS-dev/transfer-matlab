@@ -92,7 +92,6 @@ classdef Alias < handle
     properties (Hidden, SetAccess = private)
         id
         container
-        read_entry
     end
 
     properties (Hidden)
@@ -101,7 +100,7 @@ classdef Alias < handle
 
     methods
 
-        function obj = Alias(container, name, alias_with, varargin)
+        function obj = Alias(container, name, alias_with)
             % Constructs a GAMS Alias, see class help.
             %
 
@@ -116,14 +115,6 @@ classdef Alias < handle
             end
             if ~isa(alias_with, 'GAMSTransfer.Set') && ~isa(alias_with, 'GAMSTransfer.Alias')
                 error('Argument ''alias_with'' must be of type ''GAMSTransfer.Set'' or ''GAMSTransfer.Alias''.');
-            end
-            if nargin == 5 && strcmpi(varargin{1}, 'read_entry')
-                read_entry = varargin{2};
-                if ~isnumeric(read_entry)
-                    error('Argument ''read_entry'' must be numeric.');
-                end
-            else
-                read_entry = nan;
             end
             obj.container = container;
             obj.name_ = char(name);
