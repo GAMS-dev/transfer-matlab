@@ -356,18 +356,6 @@ classdef Container < handle
             filename = GAMSTransfer.Utils.checkFilename(...
                 char(p.Results.filename), '.gdx', false);
 
-            % cache data for C
-            if ~obj.indexed && ~obj.features.c_prop_setget
-                symbols = obj.listSymbols();
-                for i = 1:numel(symbols)
-                    symbol = obj.data.(symbols{i});
-                    if isa(symbol, 'GAMSTransfer.Alias')
-                        continue;
-                    end
-                    symbol.setCacheUels();
-                end
-            end
-
             % write data
             if obj.indexed
                 GAMSTransfer.gt_cmex_idx_write(obj.gams_dir, filename, obj.data, ...

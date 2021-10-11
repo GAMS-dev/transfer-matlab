@@ -44,9 +44,8 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
-    int sym_id, format, orig_format, lastdim, ival, ival2, ival3, n_symbols;
+    int format, orig_format, lastdim, ival, ival2, ival3, n_symbols;
     int sym_count;
-    double dval;
     size_t dim, nrecs, n_dom_fields;
     bool values_flag[GMS_VAL_MAX];
     char buf[GMS_SSSIZE], name[GMS_SSSIZE], gdx_filename[GMS_SSSIZE], sysdir[GMS_SSSIZE];
@@ -75,7 +74,6 @@ void mexFunction(
     double* mx_values[GMS_VAL_MAX] = {NULL};
 #endif
     mxArray* mx_arr_symbol_name = NULL;
-    mxArray* mx_arr_symbol = NULL;
     mxArray* mx_arr_records = NULL;
     mxArray** mx_arr_dom_idx = NULL;
     mxArray* mx_arr_values[GMS_VAL_MAX] = {NULL};

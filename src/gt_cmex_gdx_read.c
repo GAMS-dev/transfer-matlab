@@ -48,7 +48,6 @@ void mexFunction(
 {
     int sym_id, format, orig_format, type, subtype, lastdim, ival, sym_count;
     int n_acronyms, uel_count, n_symbols, dom_type;
-    double dval;
     size_t dim, nrecs, n_dom_fields;
     bool support_categorical, support_setget;
     bool orig_values_flag[GMS_VAL_MAX], values_flag[GMS_VAL_MAX];
@@ -81,7 +80,6 @@ void mexFunction(
     double* mx_values[GMS_VAL_MAX] = {NULL};
 #endif
     mxArray* mx_arr_symbol_name = NULL;
-    mxArray* mx_arr_symbol = NULL;
     mxArray* mx_arr_records = NULL;
     mxArray* mx_arr_uels = NULL;
     mxArray* mx_arr_dom_uels[GLOBAL_MAX_INDEX_DIM] = {NULL};

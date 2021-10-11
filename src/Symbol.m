@@ -1044,6 +1044,10 @@ classdef Symbol < handle
                 end
                 n = n + obj.getNumberRecords();
             end
+            if n == 0
+                value = nan;
+                return
+            end
             switch obj.format_
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
                 value = value / prod(obj.size_);
