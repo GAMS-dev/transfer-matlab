@@ -137,7 +137,7 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - symbols: cell
-            %   List of symbols to be read. Default is all.
+            %   List of symbols to be read. All if empty. Default is {}.
             % - format: string
             %   Records format symbols should be stored in. Default is table.
             % - values: cell
@@ -145,10 +145,10 @@ classdef Container < handle
             %   defines what value fields should be read. Default is all.
             %
             % Example:
-            % c = Container('path/to/file.gdx');
-            % c.read();
-            % c.read('format', 'dense_matrix');
-            % c.read('symbols', {'x', 'z'}, 'format', 'struct', 'values', {'level'});
+            % c = Container();
+            % c.read('path/to/file.gdx');
+            % c.read('path/to/file.gdx', 'format', 'dense_matrix');
+            % c.read('path/to/file.gdx', 'symbols', {'x', 'z'}, 'format', 'struct', 'values', {'level'});
             %
             % See also: GAMSTransfer.RecordsFormat
             %
@@ -215,6 +215,14 @@ classdef Container < handle
                     obj.features.categorical, obj.features.c_prop_setget);
             end
             symbols = fieldnames(rawdata);
+
+            % check for duplicate symbols
+            for i = 1:numel(symbols)
+                symbol = rawdata.(symbols{i});
+                if isfield(obj.data, symbol.name)
+                    error('Symbol ''%s'' already exists. Read aborted.', symbol.name);
+                end
+            end
 
             % transform data into Symbol object
             for i = 1:numel(symbols)
@@ -322,9 +330,8 @@ classdef Container < handle
             %   UELs to be registered first before any symbol UELs. Default: {}.
             %
             % Example:
-            % c.write();
             % c.write('path/to/file.gdx');
-            % c.write('compress', true, 'sorted', true);
+            % c.write('path/to/file.gdx', 'compress', true, 'sorted', true);
             %
             % See also: GAMSTransfer.Container.getDomainViolations
             %
