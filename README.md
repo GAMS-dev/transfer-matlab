@@ -1,10 +1,10 @@
 # GAMS Transfer Matlab
 
-GAMSTransfer is a package to maintain GAMS data outside a GAMS script in a
+GAMS Transfer is a package to maintain GAMS data outside a GAMS script in a
 programming language like Python or Matlab. It allows the user to add GAMS
 symbols (Sets, Parameters, Variables and Equations), to manipulate GAMS symbols,
 read symbols from a GDX file or write them to one. While keeping those
-operations as simple as possible for the user, GAMSTransfer’s main focus is the
+operations as simple as possible for the user, GAMS Transfer’s main focus is the
 highly efficient transfer of data between GAMS and the target programming
 language. In order to achieve this, symbol records – the actual and potentially
 large-scale data sets – are stored in native data structures of the

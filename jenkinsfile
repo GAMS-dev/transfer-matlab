@@ -31,7 +31,7 @@ pipeline {
                             flatpak run --filesystem=${WORKSPACE} org.octave.Octave \
                                 --no-gui --no-window-system --path ${WORKSPACE} \
                                 --eval "gams_transfer_setup( \
-                                    'system_dir', '${GAMS_CORE_PATH}' \
+                                    'gams_dir', '${GAMS_CORE_PATH}' \
                                 )"
                         '''
                     }
@@ -51,7 +51,7 @@ pipeline {
                         bat '''
                             octave --no-gui --no-window-system \
                                 --eval "gams_transfer_setup( \
-                                    'system_dir', '%GAMS_CORE_PATH%' \
+                                    'gams_dir', '%GAMS_CORE_PATH%' \
                                 )"
                         '''
                     }
@@ -71,7 +71,7 @@ pipeline {
                         sh'''
                             octave --no-gui --no-window-system \
                                 --eval "gams_transfer_setup( \
-                                    'system_dir', '${GAMS_CORE_PATH}' \
+                                    'gams_dir', '${GAMS_CORE_PATH}' \
                                 )"
                         '''
                     }
@@ -93,7 +93,7 @@ pipeline {
                             flatpak run --filesystem=${WORKSPACE} org.octave.Octave \
                                 --no-gui --no-window-system --path ${WORKSPACE} \
                                 --eval "gams_transfer_test( \
-                                    'system_dir', '${GAMS_CORE_PATH}', \
+                                    'gams_dir', '${GAMS_CORE_PATH}', \
                                     'working_dir', '${WORKSPACE}/test_linux', \
                                     'license', '${WORKSPACE}/gamslice.txt', \
                                     'exit_on_fail', true \
@@ -111,7 +111,7 @@ pipeline {
                         bat '''
                             octave --no-gui --no-window-system --path %WORKSPACE% \
                                 --eval "gams_transfer_test( \
-                                    'system_dir', '%GAMS_CORE_PATH%', \
+                                    'gams_dir', '%GAMS_CORE_PATH%', \
                                     'working_dir', '%WORKSPACE%/test_windows', \
                                     'exit_on_fail', true \
                                 )"
@@ -128,7 +128,7 @@ pipeline {
                         sh'''
                             octave --no-gui --no-window-system --path ${WORKSPACE} \
                                 --eval "gams_transfer_test( \
-                                    'system_dir', '${GAMS_CORE_PATH}', \
+                                    'gams_dir', '${GAMS_CORE_PATH}', \
                                     'working_dir', '${WORKSPACE}/test_linux', \
                                     'exit_on_fail', true \
                                 )"
