@@ -76,19 +76,15 @@ classdef Container < handle
         % gams_dir GAMS system directory
         gams_dir = ''
 
-        % filename GDX file name to be read
-        filename = ''
-
         % indexed Flag for indexed mode
         indexed = false
 
         % data GAMS (GDX) symbols
-        data
+        data = struct()
     end
 
     properties (Hidden, SetAccess = private)
         id
-        reorder_after_add = false
         features
     end
 
@@ -114,7 +110,6 @@ classdef Container < handle
             addParameter(p, 'features', struct(), @isstruct);
             parse(p, varargin{:});
             obj.gams_dir = GAMSTransfer.Utils.checkGamsDirectory(p.Results.gams_dir);
-            obj.filename = GAMSTransfer.Utils.checkFilename(p.Results.filename, '.gdx', true);
             obj.indexed = p.Results.indexed;
             feature_names = fieldnames(obj.features);
             for i = 1:numel(feature_names)
@@ -122,12 +117,11 @@ classdef Container < handle
                     obj.features.(feature_names{i}) = p.Results.features.(feature_names{i});
                 end
             end
-            if strcmp(obj.filename, '')
-                return
-            end
 
-            % read basic GDX information
-            obj.readBasic();
+            % read GDX file
+            if ~strcmp(p.Results.filename, '')
+                obj.read(p.Results.filename);
+            end
         end
 
     end
@@ -136,6 +130,10 @@ classdef Container < handle
 
         function read(obj, varargin)
             % Reads symbol records from GDX file
+            %
+            % Required Arguments:
+            % 1. filename: string
+            %    Path to GDX file to be read
             %
             % Parameter Arguments:
             % - symbols: cell
@@ -155,11 +153,6 @@ classdef Container < handle
             % See also: GAMSTransfer.RecordsFormat
             %
 
-            if strcmp(obj.filename, '')
-                warning('GDX file to read has not been specified. No action taken.');
-                return
-            end
-
             % input arguments
             p = inputParser();
             is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
@@ -169,11 +162,16 @@ classdef Container < handle
             else
                 def_format = 'struct';
             end
-            addParameter(p, 'symbols', false, @iscellstr);
+            addRequired(p, 'filename', is_string_char);
+            addParameter(p, 'symbols', {}, @iscellstr);
             addParameter(p, 'format', def_format, is_string_char);
             addParameter(p, 'values', {'level', 'marginal', 'lower', 'upper', 'scale'}, ...
                 is_values);
             parse(p, varargin{:});
+
+            % get full path
+            filename = GAMSTransfer.Utils.checkFilename(...
+                char(p.Results.filename), '.gdx', false);
 
             % parsing input arguments
             switch p.Results.format
@@ -205,45 +203,91 @@ classdef Container < handle
                     error('Invalid value option: %s. Choose from level, value, text, marginal, lower, upper, scale.', e{1});
                 end
             end
-            if ~iscellstr(p.Results.symbols)
-                symbols = fieldnames(obj.data);
-            else
-                symbols = p.Results.symbols;
-            end
+            is_partial_read = numel(p.Results.symbols) > 0;
 
             % read records
             if obj.indexed
-                GAMSTransfer.gt_cmex_idx_read_records(obj.gams_dir, ...
-                    obj.filename, obj.data, symbols, int32(format_int));
+                rawdata = GAMSTransfer.gt_cmex_idx_read(obj.gams_dir, filename, ...
+                    p.Results.symbols, int32(format_int));
             else
-                GAMSTransfer.gt_cmex_gdx_read_records(obj.gams_dir, ...
-                    obj.filename, obj.data, symbols, int32(format_int), ...
-                    values_bool, obj.features.categorical, obj.features.c_prop_setget);
+                rawdata = GAMSTransfer.gt_cmex_gdx_read(obj.gams_dir, filename, ...
+                    p.Results.symbols, int32(format_int), values_bool, ...
+                    obj.features.categorical, obj.features.c_prop_setget);
             end
+            symbols = fieldnames(rawdata);
 
-            % read cache data for C
-            if ~obj.indexed && ~obj.features.c_prop_setget
-                for i = 1:numel(symbols)
-                    if ~isfield(obj.data, symbols{i})
-                        continue
+            % transform data into Symbol object
+            for i = 1:numel(symbols)
+                symbol = rawdata.(symbols{i});
+
+                % create cross-referenced domain if possible
+                if obj.indexed
+                    domain = symbol.size;
+                else
+                    domain = symbol.domain;
+                    for j = 1:numel(domain)
+                        if strcmp(domain{j}, '*')
+                            continue
+                        elseif symbol.domain_type == 2
+                            continue
+                        elseif isfield(obj.data, domain{j})
+                            domain{j} = obj.data.(domain{j});
+                        end
                     end
-                    symbol = obj.data.(symbols{i});
-                    if isa(symbol, 'GAMSTransfer.Alias')
-                        continue;
+                end
+
+                % convert symbol to GDXSymbol
+                switch symbol.type
+                case GAMSTransfer.SymbolType.SET
+                    GAMSTransfer.Set(obj, symbol.name, domain, 'description', ...
+                        symbol.description, 'is_singleton', symbol.subtype == 1);
+                case GAMSTransfer.SymbolType.PARAMETER
+                    GAMSTransfer.Parameter(obj, symbol.name, domain, 'description', ...
+                        symbol.description);
+                case GAMSTransfer.SymbolType.VARIABLE
+                    GAMSTransfer.Variable(obj, symbol.name, symbol.subtype, domain, ...
+                        'description', symbol.description);
+                case GAMSTransfer.SymbolType.EQUATION
+                    GAMSTransfer.Equation(obj, symbol.name, symbol.subtype, domain, ...
+                        'description', symbol.description);
+                case GAMSTransfer.SymbolType.ALIAS
+                    alias_with = regexp(symbol.description, '(?<=Aliased with )[a-zA-Z]*', 'match');
+                    if numel(alias_with) ~= 1 || ~isfield(obj.data, alias_with{1})
+                        error('Alias reference for symbol ''%s'' not found: %s.', ...
+                            symbol.name, symbol.description);
                     end
-                    symbol.getCacheUels();
+                    GAMSTransfer.Alias(obj, symbol.name, obj.data.(alias_with{1}));
+                otherwise
+                    error('Invalid symbol type');
+                end
+
+                % set records and store format (no need to call isValid to
+                % detect the format because at this point, we know it)
+                if symbol.type ~= GAMSTransfer.SymbolType.ALIAS
+                    obj.data.(symbol.name).records = symbol.records;
+                    obj.data.(symbol.name).format_ = symbol.format;
+                end
+
+                % set uels
+                if isfield(symbol, 'uels')
+                    for j = 1:numel(symbol.domain)
+                        if isempty(symbol.uels{j})
+                            continue
+                        end
+                        obj.data.(symbol.name).initUELs(j, symbol.uels{j});
+                    end
                 end
             end
 
             % check for format of read symbols in case of partial read (done by
             % forced call to isValid). Domains may not be read and may cause
             % invalid symbols.
-            if iscellstr(p.Results.symbols)
-                for i = 1:numel(symbols)
-                    if ~isfield(obj.data, symbols{i})
+            if is_partial_read
+                for j = 1:numel(symbols)
+                    if ~isfield(obj.data, symbols{j})
                         continue
                     end
-                    obj.data.(symbols{i}).isValid(false, true);
+                    obj.data.(symbols{j}).isValid(false, true);
                 end
             end
         end
@@ -263,9 +307,9 @@ classdef Container < handle
             % internally. Note, that the case of 'sorted' being true and the
             % data not being sorted will lead to an error.
             %
-            % Optional Arguments:
+            % Required Arguments:
             % 1. filename: string
-            %    Path to GDX file to write to. Default is read file.
+            %    Path to GDX file to write to.
             %
             % Parameter Arguments:
             % - compress: logical
@@ -289,8 +333,8 @@ classdef Container < handle
                 obj.reorderSymbols();
                 if ~obj.isValid()
                     invalid_symbols = GAMSTransfer.Utils.list2str(...
-                        obj.listSymbols('is_loaded', true, 'is_valid', false));
-                    error('Can''t write invalid container. Invalid loaded symbols: %s.', invalid_symbols);
+                        obj.listSymbols('is_valid', false));
+                    error('Can''t write invalid container. Invalid symbols: %s.', invalid_symbols);
                 end
             end
 
@@ -298,7 +342,7 @@ classdef Container < handle
             p = inputParser();
             is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
                 ~strcmpi(x, 'compress') && ~strcmpi(x, 'sorted');
-            addOptional(p, 'filename', obj.filename, is_string_char);
+            addRequired(p, 'filename', is_string_char);
             addParameter(p, 'compress', false, @islogical);
             addParameter(p, 'sorted', false, @islogical);
             addParameter(p, 'uel_priority', {}, @iscellstr);
@@ -314,7 +358,7 @@ classdef Container < handle
 
             % cache data for C
             if ~obj.indexed && ~obj.features.c_prop_setget
-                symbols = obj.listSymbols('is_loaded', true);
+                symbols = obj.listSymbols();
                 for i = 1:numel(symbols)
                     symbol = obj.data.(symbols{i});
                     if isa(symbol, 'GAMSTransfer.Alias')
@@ -431,7 +475,7 @@ classdef Container < handle
             symbol = GAMSTransfer.Equation(obj, name, etype, varargin{:});
         end
 
-        function symbol = addAlias(obj, name, alias_with, varargin)
+        function symbol = addAlias(obj, name, alias_with)
             % Adds an alias to the container
             %
             % Arguments are identical to the GAMSTransfer.Alias constructor.
@@ -445,7 +489,7 @@ classdef Container < handle
             % See also: GAMSTransfer.Alias, GAMSTransfer.Set
             %
 
-            symbol = GAMSTransfer.Alias(obj, name, alias_with, varargin{:});
+            symbol = GAMSTransfer.Alias(obj, name, alias_with);
         end
 
         function renameSymbol(obj, oldname, newname)
@@ -596,11 +640,6 @@ classdef Container < handle
             % Lists all symbols in container
             %
             % Parameter Arguments:
-            % - is_loaded: logical or any
-            %   Enable loaded filter if argument is of type logical. If true,
-            %   only include symbols with records loaded from GDX or added
-            %   through interface and, if false, only symbols that are not yet
-            %   loaded. Default: not logical.
             % - is_valid: logical or any
             %   Enable valid filter if argument is of type logical. If true,
             %   only include symbols that are valid and, if false, only invalid
@@ -615,15 +654,13 @@ classdef Container < handle
 
             p = inputParser();
             addParameter(p, 'types', [], @isnumeric);
-            addParameter(p, 'is_loaded', nan);
             addParameter(p, 'is_valid', nan);
             parse(p, varargin{:});
             types = p.Results.types;
-            is_loaded = p.Results.is_loaded;
             is_valid = p.Results.is_valid;
 
             names = fieldnames(obj.data);
-            if isempty(types) && ~islogical(is_loaded) && ~islogical(is_valid)
+            if isempty(types) && ~islogical(is_valid)
                 list = names;
                 return
             end
@@ -659,14 +696,6 @@ classdef Container < handle
                         continue
                     end
 
-                    % check loaded
-                    if ~isa(symbol, 'GAMSTransfer.Alias') && ~isnan(symbol.read_entry)
-                        if islogical(is_loaded) && xor(is_loaded, ...
-                            symbol.format_ ~= GAMSTransfer.RecordsFormat.NOT_READ)
-                            continue
-                        end
-                    end
-
                     % check invalid
                     if islogical(is_valid) && xor(is_valid, symbol.isValid())
                         continue
@@ -690,11 +719,6 @@ classdef Container < handle
             % Note: This method includes set aliases.
             %
             % Parameter Arguments:
-            % - is_loaded: logical or any
-            %   Enable loaded filter if argument is of type logical. If true,
-            %   only include symbols with records loaded from GDX or added
-            %   through interface and, if false, only symbols that are not yet
-            %   loaded. Default: not logical.
             % - is_valid: logical or any
             %   Enable valid filter if argument is of type logical. If true,
             %   only include symbols that are valid and, if false, only invalid
@@ -708,24 +732,17 @@ classdef Container < handle
             %
 
             p = inputParser();
-            addParameter(p, 'is_loaded', nan);
             addParameter(p, 'is_valid', nan);
             parse(p, varargin{:});
 
             list = obj.listSymbols('types', [GAMSTransfer.SymbolType.SET, ...
-                GAMSTransfer.SymbolType.ALIAS], 'is_loaded', p.Results.is_loaded, ...
-                'is_valid', p.Results.is_valid);
+                GAMSTransfer.SymbolType.ALIAS], 'is_valid', p.Results.is_valid);
         end
 
         function list = listParameters(obj, varargin)
             % Lists all parameters in container
             %
             % Parameter Arguments:
-            % - is_loaded: logical or any
-            %   Enable loaded filter if argument is of type logical. If true,
-            %   only include symbols with records loaded from GDX or added
-            %   through interface and, if false, only symbols that are not yet
-            %   loaded. Default: not logical.
             % - is_valid: logical or any
             %   Enable valid filter if argument is of type logical. If true,
             %   only include symbols that are valid and, if false, only invalid
@@ -739,24 +756,17 @@ classdef Container < handle
             %
 
             p = inputParser();
-            addParameter(p, 'is_loaded', nan);
             addParameter(p, 'is_valid', nan);
             parse(p, varargin{:});
 
             list = obj.listSymbols('types', GAMSTransfer.SymbolType.PARAMETER, ...
-                'is_loaded', p.Results.is_loaded, 'is_valid', ...
-                p.Results.is_valid);
+                'is_valid', p.Results.is_valid);
         end
 
         function list = listVariables(obj, varargin)
             % Lists all variables in container
             %
             % Parameter Arguments:
-            % - is_loaded: logical or any
-            %   Enable loaded filter if argument is of type logical. If true,
-            %   only include symbols with records loaded from GDX or added
-            %   through interface and, if false, only symbols that are not yet
-            %   loaded. Default: not logical.
             % - is_valid: logical or any
             %   Enable valid filter if argument is of type logical. If true,
             %   only include symbols that are valid and, if false, only invalid
@@ -770,24 +780,17 @@ classdef Container < handle
             %
 
             p = inputParser();
-            addParameter(p, 'is_loaded', nan);
             addParameter(p, 'is_valid', nan);
             parse(p, varargin{:});
 
             list = obj.listSymbols('types', GAMSTransfer.SymbolType.VARIABLE, ...
-                'is_loaded', p.Results.is_loaded, 'is_valid', ...
-                p.Results.is_valid);
+                'is_valid', p.Results.is_valid);
         end
 
         function list = listEquations(obj, varargin)
             % Lists all equations in container
             %
             % Parameter Arguments:
-            % - is_loaded: logical or any
-            %   Enable loaded filter if argument is of type logical. If true,
-            %   only include symbols with records loaded from GDX or added
-            %   through interface and, if false, only symbols that are not yet
-            %   loaded. Default: not logical.
             % - is_valid: logical or any
             %   Enable valid filter if argument is of type logical. If true,
             %   only include symbols that are valid and, if false, only invalid
@@ -801,24 +804,17 @@ classdef Container < handle
             %
 
             p = inputParser();
-            addParameter(p, 'is_loaded', nan);
             addParameter(p, 'is_valid', nan);
             parse(p, varargin{:});
 
             list = obj.listSymbols('types', GAMSTransfer.SymbolType.EQUATION, ...
-                'is_loaded', p.Results.is_loaded, 'is_valid', ...
-                p.Results.is_valid);
+                'is_valid', p.Results.is_valid);
         end
 
         function list = listAliases(obj, varargin)
             % Lists all aliases in container
             %
             % Parameter Arguments:
-            % - is_loaded: logical or any
-            %   Enable loaded filter if argument is of type logical. If true,
-            %   only include symbols with records loaded from GDX or added
-            %   through interface and, if false, only symbols that are not yet
-            %   loaded. Default: not logical.
             % - is_valid: logical or any
             %   Enable valid filter if argument is of type logical. If true,
             %   only include symbols that are valid and, if false, only invalid
@@ -832,13 +828,11 @@ classdef Container < handle
             %
 
             p = inputParser();
-            addParameter(p, 'is_loaded', nan);
             addParameter(p, 'is_valid', nan);
             parse(p, varargin{:});
 
             list = obj.listSymbols('types', GAMSTransfer.SymbolType.ALIAS, ...
-                'is_loaded', p.Results.is_loaded, 'is_valid', ...
-                p.Results.is_valid);
+                'is_valid', p.Results.is_valid);
         end
 
         function descr = describeSets(obj, varargin)
@@ -1052,10 +1046,6 @@ classdef Container < handle
                 if symbol.isValid(verbose, force)
                     continue
                 end
-                if ~isa(symbol, 'GAMSTransfer.Alias') && ...
-                    symbol.format_ == GAMSTransfer.RecordsFormat.NOT_READ
-                    continue
-                end
                 valid = false;
                 if ~force
                     return
@@ -1072,14 +1062,9 @@ classdef Container < handle
                 error('Symbol must be of type ''GAMSTransfer.Parameter'' in indexed mode.');
             end
             if isfield(obj.data, symbol.name_)
-                error('Symbol ''%s'' exists already.', symbol.name);
+                error('Symbol ''%s'' already exists.', symbol.name);
             end
             obj.data.(symbol.name_) = symbol;
-
-            % reorder symbols
-            if obj.reorder_after_add && ~obj.isValid()
-                obj.reorderSymbols();
-            end
         end
 
     end
@@ -1260,75 +1245,6 @@ classdef Container < handle
             if obj.features.table
                 descr = struct2table(descr);
             end
-        end
-
-        function readBasic(obj)
-            % read data from GDX
-            if obj.indexed
-                rawdata = GAMSTransfer.gt_cmex_idx_read_basics(obj.gams_dir, obj.filename);
-            else
-                rawdata = GAMSTransfer.gt_cmex_gdx_read_basics(obj.gams_dir, obj.filename);
-            end
-            symbols = fieldnames(rawdata);
-
-            % turn off to reorder symbols after an addition
-            initial_reorder_after_add = obj.reorder_after_add;
-            obj.reorder_after_add = false;
-
-            % transform data into Symbol object
-            for i = 1:numel(symbols)
-                symbol = rawdata.(symbols{i});
-
-                % create cross-referenced domain if possible
-                if obj.indexed
-                    domain = symbol.size;
-                else
-                    domain = symbol.domain;
-                    for j = 1:numel(domain)
-                        if strcmp(domain{j}, '*')
-                            continue
-                        elseif symbol.domain_type == 2
-                            continue
-                        elseif isfield(obj.data, domain{j})
-                            domain{j} = obj.data.(domain{j});
-                        end
-                    end
-                end
-
-                % convert symbol to GDXSymbol
-                switch symbol.type
-                case GAMSTransfer.SymbolType.SET
-                    obj.data.(symbols{i}) = GAMSTransfer.Set(obj, symbol.name, ...
-                        domain, 'description', symbol.description, 'read_entry', i, ...
-                        'read_number_records', double(symbol.number_records), ...
-                        'is_singleton', symbol.subtype == 1);
-                case GAMSTransfer.SymbolType.PARAMETER
-                    obj.data.(symbols{i}) = GAMSTransfer.Parameter(obj, symbol.name, ...
-                        domain, 'description', symbol.description, 'read_entry', i, ...
-                        'read_number_records', double(symbol.number_records));
-                case GAMSTransfer.SymbolType.VARIABLE
-                    obj.data.(symbols{i}) = GAMSTransfer.Variable(obj, symbol.name, ...
-                        symbol.subtype, domain, 'description', symbol.description, ...
-                        'read_entry', i, 'read_number_records', double(symbol.number_records));
-                case GAMSTransfer.SymbolType.EQUATION
-                    obj.data.(symbols{i}) = GAMSTransfer.Equation(obj, symbol.name, ...
-                        symbol.subtype, domain, 'description', symbol.description, ...
-                        'read_entry', i, 'read_number_records', double(symbol.number_records));
-                case GAMSTransfer.SymbolType.ALIAS
-                    alias_with = regexp(symbol.description, '(?<=Aliased with )[a-zA-Z]*', 'match');
-                    if numel(alias_with) ~= 1 || ~isfield(obj.data, alias_with{1})
-                        error('Alias reference for symbol ''%s'' not found: %s.', ...
-                            symbol.name, symbol.description);
-                    end
-                    obj.data.(symbols{i}) = GAMSTransfer.Alias(obj, symbol.name, ...
-                        obj.data.(alias_with{1}), 'read_entry', i);
-                otherwise
-                    error('Invalid symbol type');
-                end
-            end
-
-            % reset reorder after addition
-            obj.reorder_after_add = initial_reorder_after_add;
         end
 
     end

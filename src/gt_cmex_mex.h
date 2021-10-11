@@ -90,11 +90,14 @@ void gt_mex_addsymbol(
     const char*     descr,          /** description of symbol */
     int             type,           /** GAMS type of symbol */
     int             subtype,        /** GAMS subtype of symbol */
+    int             format,         /** record format */
     size_t          dim,            /** dimension of symbol */
     size_t*         sizes,          /** sizes of domains (length = dim) */
     const char**    domains,        /** domains of symbol (length = dim) */
     int             domain_type,    /** domain type (e.g. 3: regular or 2: relaxed) */
-    size_t          nrecs           /** number of records */
+    size_t          nrecs,          /** number of records */
+    mxArray*        mx_arr_records, /** records structure */
+    mxArray*        mx_arr_uels     /** list of uels to be stored */
 );
 
 /** adds a field to a structure with string type */

@@ -90,7 +90,6 @@ classdef Set < GAMSTransfer.Symbol
 
             is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
             is_parname = @(x) strcmpi(x, 'records') || strcmpi(x, 'description') || ...
-                strcmpi(x, 'read_entry') || strcmpi(x, 'read_number_records') || ...
                 strcmpi(x, 'is_singleton');
 
             % check optional arguments
@@ -119,8 +118,6 @@ classdef Set < GAMSTransfer.Symbol
             % check parameter arguments
             records = [];
             description = '';
-            read_entry = nan;
-            read_number_records = nan;
             is_singleton = false;
             domain_forwarding = false;
             while i < nargin - 2
@@ -128,10 +125,6 @@ classdef Set < GAMSTransfer.Symbol
                     records = varargin{i+1};
                 elseif strcmpi(varargin{i}, 'description')
                     description = varargin{i+1};
-                elseif strcmpi(varargin{i}, 'read_entry')
-                    read_entry = varargin{i+1};
-                elseif strcmpi(varargin{i}, 'read_number_records')
-                    read_number_records = varargin{i+1};
                 elseif strcmpi(varargin{i}, 'is_singleton')
                     is_singleton = varargin{i+1};
                 elseif strcmpi(varargin{i}, 'domain_forwarding')
@@ -153,7 +146,7 @@ classdef Set < GAMSTransfer.Symbol
 
             % create object
             obj = obj@GAMSTransfer.Symbol(container, name, description, domain, ...
-                records, domain_forwarding, read_entry, read_number_records);
+                records, domain_forwarding);
             obj.is_singleton = is_singleton;
         end
 

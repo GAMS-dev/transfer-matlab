@@ -46,14 +46,12 @@ function test_read(t, cfg)
 
     t.add('read_basic_info');
     t.assertEquals(gdx.gams_dir, cfg.gams_dir);
-    t.assertEquals(gdx.filename, cfg.filenames{1});
     t.assert(~gdx.indexed);
     t.assert(numel(fieldnames(gdx.data)) == 5);
 
     t.add('read_set_basic');
     t.assert(isfield(gdx.data, 'i'));
     s = gdx.data.i;
-    t.testEmptySymbol(s);
     t.assert(isa(s, 'GAMSTransfer.Set'));
     t.assertEquals(s.name, 'i');
     t.assertEquals(s.description, 'set_i');
@@ -68,14 +66,12 @@ function test_read(t, cfg)
     t.assert(isnan(s.size(1)));
     t.assert(isnan(s.getCardenality()));
     t.assert(isnan(s.getSparsity()));
-    t.assert(strcmp(s.format, 'not_read'));
     t.assert(s.getNumberRecords() == 5);
-    t.assert(~s.isValid());
+    t.assert(s.isValid());
 
     t.add('read_scalar_basic');
     t.assert(isfield(gdx.data, 'a'));
     s = gdx.data.a;
-    t.testEmptySymbol(s);
     t.assert(isa(s, 'GAMSTransfer.Parameter'));
     t.assertEquals(s.name, 'a');
     t.assertEquals(s.description, 'par_a');
@@ -85,15 +81,13 @@ function test_read(t, cfg)
     t.assertEquals(s.domain_type, 'none');
     t.assert(numel(s.size) == 0);
     t.assert(s.getCardenality() == 1);
-    t.assert(isnan(s.getSparsity()));
-    t.assert(strcmp(s.format, 'not_read'));
+    t.assert(~isnan(s.getSparsity()));
     t.assert(s.getNumberRecords() == 1);
-    t.assert(~s.isValid());
+    t.assert(s.isValid());
 
     t.add('read_parameter_basic');
     t.assert(isfield(gdx.data, 'b'));
     s = gdx.data.b;
-    t.testEmptySymbol(s);
     t.assert(isa(s, 'GAMSTransfer.Parameter'));
     t.assertEquals(s.name, 'b');
     t.assertEquals(s.description, 'par_b');
@@ -107,15 +101,13 @@ function test_read(t, cfg)
     t.assert(numel(s.size) == 1);
     t.assert(s.size(1) == 5);
     t.assert(s.getCardenality() == 5);
-    t.assert(isnan(s.getSparsity()));
-    t.assert(strcmp(s.format, 'not_read'));
+    t.assert(~isnan(s.getSparsity()));
     t.assert(s.getNumberRecords() == 3);
-    t.assert(~s.isValid());
+    t.assert(s.isValid());
 
     t.add('read_variable_basic');
     t.assert(isfield(gdx.data, 'x'));
     s = gdx.data.x;
-    t.testEmptySymbol(s);
     t.assert(isa(s, 'GAMSTransfer.Variable'));
     t.assertEquals(s.name, 'x');
     t.assertEquals(s.description, 'var_x');
@@ -134,15 +126,12 @@ function test_read(t, cfg)
     t.assert(s.size(1) == 5);
     t.assert(s.size(2) == 5);
     t.assert(s.getCardenality() == 25);
-    t.assert(isnan(s.getSparsity()));
-    t.assert(strcmp(s.format, 'not_read'));
+    t.assert(~isnan(s.getSparsity()));
     t.assert(s.getNumberRecords() == 6);
-    t.assert(~s.isValid());
+    t.assert(s.isValid());
 
-    t.add('read_loadedsymbols_basic');
-    t.assert(numel(gdx.listSymbols('is_loaded', true)) == 0);
-
-    gdx.read('format', 'struct');
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx.read(cfg.filenames{1}, 'format', 'struct');
 
     t.add('read_set_records_struct');
     s = gdx.data.i;
@@ -321,17 +310,9 @@ function test_read(t, cfg)
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
 
-    t.add('read_loadedsymbols_struct');
-    loaded_symbols = gdx.listSymbols('is_loaded', true);
-    t.assert(numel(loaded_symbols) == 5);
-    t.assertEquals(loaded_symbols{1}, 'i');
-    t.assertEquals(loaded_symbols{2}, 'j');
-    t.assertEquals(loaded_symbols{3}, 'a');
-    t.assertEquals(loaded_symbols{4}, 'b');
-    t.assertEquals(loaded_symbols{5}, 'x');
-
     if gdx.features.table
-        gdx.read('format', 'table');
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'table');
 
         t.add('read_set_records_table');
         s = gdx.data.i;
@@ -510,18 +491,10 @@ function test_read(t, cfg)
         t.assertEquals(uels{3}, 'j7');
         t.assertEquals(uels{4}, 'j8');
         t.assertEquals(uels{5}, 'j9');
-
-        t.add('read_loadedsymbols_table');
-        loaded_symbols = gdx.listSymbols('is_loaded', true);
-        t.assert(numel(loaded_symbols) == 5);
-        t.assertEquals(loaded_symbols{1}, 'i');
-        t.assertEquals(loaded_symbols{2}, 'j');
-        t.assertEquals(loaded_symbols{3}, 'a');
-        t.assertEquals(loaded_symbols{4}, 'b');
-        t.assertEquals(loaded_symbols{5}, 'x');
     end
 
-    gdx.read('format', 'dense_matrix');
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
 
     t.add('read_set_records_dense_matrix');
     s = gdx.data.i;
@@ -690,16 +663,8 @@ function test_read(t, cfg)
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
 
-    t.add('read_loadedsymbols_dense_matrix');
-    loaded_symbols = gdx.listSymbols('is_loaded', true);
-    t.assert(numel(loaded_symbols) == 5);
-    t.assertEquals(loaded_symbols{1}, 'i');
-    t.assertEquals(loaded_symbols{2}, 'j');
-    t.assertEquals(loaded_symbols{3}, 'a');
-    t.assertEquals(loaded_symbols{4}, 'b');
-    t.assertEquals(loaded_symbols{5}, 'x');
-
-    gdx.read('format', 'sparse_matrix');
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
 
     t.add('read_set_records_sparse_matrix');
     s = gdx.data.i;
@@ -876,40 +841,21 @@ function test_read(t, cfg)
     t.assertEquals(uels{3}, 'j7');
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
-
-    t.add('read_loadedsymbols_sparse_matrix');
-    loaded_symbols = gdx.listSymbols('is_loaded', true);
-    t.assert(numel(loaded_symbols) == 5);
-    t.assertEquals(loaded_symbols{1}, 'i');
-    t.assertEquals(loaded_symbols{2}, 'j');
-    t.assertEquals(loaded_symbols{3}, 'a');
-    t.assertEquals(loaded_symbols{4}, 'b');
-    t.assertEquals(loaded_symbols{5}, 'x');
 end
 
 function test_readPartial(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-    gdx.read('format', 'struct', 'symbols', {'i', 'j', 'x'}, 'values', {'level', 'marginal'});
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'i', 'j', 'x'}, ...
+        'values', {'level', 'marginal'});
 
     t.add('read_partial_basic_info');
     t.assertEquals(gdx.gams_dir, cfg.gams_dir);
-    t.assertEquals(gdx.filename, cfg.filenames{1});
     t.assert(~gdx.indexed);
-    t.assert(numel(fieldnames(gdx.data)) == 5);
+    t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'i'));
     t.assert(isfield(gdx.data, 'j'));
-    t.assert(isfield(gdx.data, 'a'));
-    t.assert(isfield(gdx.data, 'b'));
     t.assert(isfield(gdx.data, 'x'));
-    t.testEmptySymbol(gdx.data.a);
-    t.testEmptySymbol(gdx.data.b);
-    loaded_symbols = gdx.listSymbols('is_loaded', true);
-    t.assert(numel(loaded_symbols) == 3);
-    t.assertEquals(loaded_symbols{1}, 'i');
-    t.assertEquals(loaded_symbols{2}, 'j');
-    t.assertEquals(loaded_symbols{3}, 'x');
 
     t.add('read_partial_set_records_struct');
     s = gdx.data.i;
@@ -1008,24 +954,14 @@ function test_readPartial(t, cfg)
     t.assert(s.records.marginal(5) == 0);
     t.assert(s.records.marginal(6) == 0);
 
-    gdx.read('format', 'struct', 'symbols', {'x'}, 'values', {'marginal'});
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'x'}, 'values', {'marginal'});
 
     t.add('read_partial_basic_info_2');
     t.assertEquals(gdx.gams_dir, cfg.gams_dir);
-    t.assertEquals(gdx.filename, cfg.filenames{1});
     t.assert(~gdx.indexed);
-    t.assert(numel(fieldnames(gdx.data)) == 5);
-    t.assert(isfield(gdx.data, 'i'));
-    t.assert(isfield(gdx.data, 'j'));
-    t.assert(isfield(gdx.data, 'a'));
-    t.assert(isfield(gdx.data, 'b'));
+    t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'x'));
-    t.testEmptySymbol(gdx.data.a);
-    t.testEmptySymbol(gdx.data.b);
-    t.assert(numel(loaded_symbols) == 3);
-    t.assertEquals(loaded_symbols{1}, 'i');
-    t.assertEquals(loaded_symbols{2}, 'j');
-    t.assertEquals(loaded_symbols{3}, 'x');
 
     t.add('read_partial_variable_records_struct_2');
     s = gdx.data.x;
@@ -1054,9 +990,8 @@ end
 
 function test_readSpecialValues(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{2}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-    gdx.read('format', 'struct');
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx.read(cfg.filenames{2}, 'format', 'struct');
 
     t.add('read_special_values');
     t.assert(isfield(gdx.data, 'GUndef'));
@@ -1085,9 +1020,8 @@ end
 
 function test_readDomainCycle(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{8}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-    gdx.read('format', 'struct');
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx.read(cfg.filenames{8}, 'format', 'struct');
 
     t.add('read_domain_cycle_i_of_i');
     t.assert(isfield(gdx.data, 'i'));
@@ -1101,17 +1035,17 @@ function test_readDomainCycle(t, cfg)
 end
 
 function test_readAcronyms(t, cfg);
-    gdx = GAMSTransfer.Container(cfg.filenames{6}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
 
     t.add('read_acronyms_1');
-    stdout = evalc("gdx.read('format', 'struct');");
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    stdout = evalc("gdx.read(cfg.filenames{6}, 'format', 'struct');");
     t.assert(~isempty(strfind(stdout, ...
         'GDX file contains acronyms. Acronyms are not supported and are set to GAMS NA.')));
 
     t.add('read_acronyms_2');
     warning('off');
-    gdx.read('format', 'struct');
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx.read(cfg.filenames{6}, 'format', 'struct');
     t.assert(isfield(gdx.data, 'i'));
     t.assert(isfield(gdx.data, 'a'));
     t.assert(isa(gdx.data.a, 'GAMSTransfer.Parameter'));
@@ -1140,16 +1074,6 @@ function test_readSymbolTypes(t, cfg);
     t.assert(isfield(gdx.data, 'x8'));
     t.assert(isfield(gdx.data, 'x9'));
     t.assert(isfield(gdx.data, 'x10'));
-    t.testEmptySymbol(gdx.data.x1);
-    t.testEmptySymbol(gdx.data.x2);
-    t.testEmptySymbol(gdx.data.x3);
-    t.testEmptySymbol(gdx.data.x4);
-    t.testEmptySymbol(gdx.data.x5);
-    t.testEmptySymbol(gdx.data.x6);
-    t.testEmptySymbol(gdx.data.x7);
-    t.testEmptySymbol(gdx.data.x8);
-    t.testEmptySymbol(gdx.data.x9);
-    t.testEmptySymbol(gdx.data.x10);
     t.assertEquals(gdx.data.x1.type, 'free');
     t.assertEquals(gdx.data.x2.type, 'free');
     t.assertEquals(gdx.data.x3.type, 'binary');
@@ -1165,9 +1089,6 @@ function test_readSymbolTypes(t, cfg);
     t.assert(isfield(gdx.data, 'e1'));
     t.assert(isfield(gdx.data, 'e2'));
     t.assert(isfield(gdx.data, 'e3'));
-    t.testEmptySymbol(gdx.data.e1);
-    t.testEmptySymbol(gdx.data.e2);
-    t.testEmptySymbol(gdx.data.e3);
     t.assertEquals(gdx.data.e1.description, 'equ_1');
     t.assertEquals(gdx.data.e2.description, 'equ_2');
     t.assertEquals(gdx.data.e3.description, 'equ_3');
@@ -1175,7 +1096,8 @@ function test_readSymbolTypes(t, cfg);
     t.assertEquals(gdx.data.e2.type, 'geq');
     t.assertEquals(gdx.data.e3.type, 'leq');
 
-    gdx.read('format', 'dense_matrix');
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx.read(cfg.filenames{3}, 'format', 'dense_matrix');
 
     t.add('read_symbol_types_vartypes_default_values');
     t.assert(gdx.data.x1.records.level(2) == 0);
@@ -1250,33 +1172,35 @@ end
 function test_readWrite(t, cfg)
 
     for i = [1,2,5,7]
-        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
         gdxdump = fullfile(cfg.gams_dir, 'gdxdump');
 
         t.add(sprintf('read_write_struct_%d', i));
-        gdx.read('format', 'struct');
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{i}, 'format', 'struct');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         if gdx.features.table
             t.add(sprintf('read_write_table_%d', i));
-            gdx.read('format', 'table');
+            gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx.read(cfg.filenames{i}, 'format', 'table');
             gdx.write(write_filename);
             t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
             t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
         end
 
         t.add(sprintf('read_write_dense_matrix_%d', i));
-        gdx.read('format', 'dense_matrix');
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{i}, 'format', 'dense_matrix');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         t.add(sprintf('read_write_sparse_matrix_%d', i));
-        gdx.read('format', 'sparse_matrix');
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{i}, 'format', 'sparse_matrix');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
@@ -1285,91 +1209,72 @@ end
 
 function test_readWritePartial(t, cfg)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-    gdx.read('format', 'struct', 'symbols', {'x'});
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'x'});
 
     t.add('read_write_partial_1');
-    t.assert(numel(fieldnames(gdx.data)) == 5);
-    t.assert(isfield(gdx.data, 'i'));
-    t.assert(isfield(gdx.data, 'j'));
-    t.assert(isfield(gdx.data, 'a'));
-    t.assert(isfield(gdx.data, 'b'));
+    t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'x'));
-    t.testEmptySymbol(gdx.data.a);
-    t.testEmptySymbol(gdx.data.b);
-    loaded_symbols = gdx.listSymbols('is_loaded', true);
-    t.assert(numel(loaded_symbols) == 1);
-    t.assertEquals(loaded_symbols{1}, 'x');
-    t.assert(~gdx.isValid());
+    t.assert(gdx.isValid());
+    t.assertEquals(gdx.data.x.domain_type, 'relaxed');
 
-    gdx.read('format', 'struct', 'symbols', {'i', 'j'});
+    gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'i', 'j'});
 
     t.add('read_write_partial_2');
-    t.assert(numel(fieldnames(gdx.data)) == 5);
+    t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'i'));
     t.assert(isfield(gdx.data, 'j'));
-    t.assert(isfield(gdx.data, 'a'));
-    t.assert(isfield(gdx.data, 'b'));
     t.assert(isfield(gdx.data, 'x'));
-    t.testEmptySymbol(gdx.data.a);
-    t.testEmptySymbol(gdx.data.b);
-    loaded_symbols = gdx.listSymbols('is_loaded', true);
-    t.assert(numel(loaded_symbols) == 3);
-    t.assertEquals(loaded_symbols{1}, 'i');
-    t.assertEquals(loaded_symbols{2}, 'j');
-    t.assertEquals(loaded_symbols{3}, 'x');
     t.assert(gdx.isValid());
+    t.assertEquals(gdx.data.i.domain_type, 'none');
+    t.assertEquals(gdx.data.j.domain_type, 'none');
+    t.assertEquals(gdx.data.x.domain_type, 'relaxed');
 
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
     gdx.write(write_filename);
     gdx = GAMSTransfer.Container(write_filename, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
-    gdx.read('format', 'struct');
 
     t.add('read_write_partial_3');
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'i'));
     t.assert(isfield(gdx.data, 'j'));
     t.assert(isfield(gdx.data, 'x'));
-    loaded_symbols = gdx.listSymbols('is_loaded', true);
-    t.assert(numel(loaded_symbols) == 3);
-    t.assertEquals(loaded_symbols{1}, 'i');
-    t.assertEquals(loaded_symbols{2}, 'j');
-    t.assertEquals(loaded_symbols{3}, 'x');
     t.assert(gdx.isValid());
 end
 
 function test_readWriteCompress(t, cfg)
 
     for i = [1,2,5]
-        gdx = GAMSTransfer.Container(cfg.filenames{i}, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
         gdxdump = fullfile(cfg.gams_dir, 'gdxdump');
 
         t.add(sprintf('read_write_struct_%d', i));
-        gdx.read('format', 'struct');
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{i}, 'format', 'struct');
         gdx.write(write_filename, 'compress', true);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         if gdx.features.table
             t.add(sprintf('read_write_table_%d', i));
-            gdx.read('format', 'table');
+            gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx.read(cfg.filenames{i}, 'format', 'table');
             gdx.write(write_filename, 'compress', true);
             t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
             t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
         end
 
         t.add(sprintf('read_write_dense_matrix_%d', i));
-        gdx.read('format', 'dense_matrix');
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{i}, 'format', 'dense_matrix');
         gdx.write(write_filename, 'compress', true);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         t.add(sprintf('read_write_sparse_matrix_%d', i));
-        gdx.read('format', 'sparse_matrix');
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{i}, 'format', 'sparse_matrix');
         gdx.write(write_filename, 'compress', true);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
@@ -1383,18 +1288,15 @@ function test_readWriteDomainCheck(t, cfg)
     t.add('read_write_domain_check_regular');
     gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
-    gdx.read();
     t.assertEquals(gdx.data.x.domain_type, 'regular');
     gdx.write(write_filename);
     gdx2 = GAMSTransfer.Container(write_filename, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
-    gdx2.read();
     t.assertEquals(gdx2.data.x.domain_type, 'regular');
 
     t.add('read_write_domain_check_relaxed_1');
     gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
-    gdx.read();
     t.assertEquals(gdx.data.x.domain_type, 'regular');
     x = gdx.data.x;
     x.domain{1} = 'i';
@@ -1403,7 +1305,6 @@ function test_readWriteDomainCheck(t, cfg)
     gdx.write(write_filename);
     gdx2 = GAMSTransfer.Container(write_filename, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
-    gdx2.read();
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
     x = gdx2.data.x;
     x.domain{1} = gdx2.data.i;
@@ -1412,13 +1313,11 @@ function test_readWriteDomainCheck(t, cfg)
     gdx2.write(write_filename);
     gdx = GAMSTransfer.Container(write_filename, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
-    gdx.read();
     t.assertEquals(gdx.data.x.domain_type, 'regular');
 
     t.add('read_write_domain_check_relaxed_2');
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-    gdx.read('format', 'struct');
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx.read(cfg.filenames{1}, 'format', 'struct');
     t.assertEquals(gdx.data.x.domain_type, 'regular');
     records = gdx.data.x.records;
     x = gdx.data.x;
@@ -1440,7 +1339,6 @@ function test_readWriteDomainCheck(t, cfg)
     gdx.write(write_filename);
     gdx2 = GAMSTransfer.Container(write_filename, 'gams_dir', ...
         cfg.gams_dir, 'features', cfg.features);
-    gdx2.read();
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
 
 end

@@ -44,17 +44,21 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
-    int sym_id, format, orig_format, lastdim, ival, ival2;
+    int sym_id, format, orig_format, lastdim, ival, ival2, ival3, n_symbols;
+    int sym_count;
     double dval;
     size_t dim, nrecs, n_dom_fields;
     bool values_flag[GMS_VAL_MAX];
     char buf[GMS_SSSIZE], name[GMS_SSSIZE], gdx_filename[GMS_SSSIZE], sysdir[GMS_SSSIZE];
+    char text[GMS_SSSIZE];
     double def_values[GMS_VAL_MAX];
     idxHandle_t gdx = NULL;
     gdxStrIndexPtrs_t domains_ptr;
     gdxStrIndex_t domains;
     gdxUelIndex_t gdx_uel_index;
     gdxValues_t gdx_values;
+    gdxUelIndex_t sizes_int;
+    size_t sizes[GLOBAL_MAX_INDEX_DIM];
     mwIndex idx;
     mwIndex mx_flat_idx[GMS_VAL_MAX];
     mwIndex mx_idx[GLOBAL_MAX_INDEX_DIM];
@@ -79,23 +83,28 @@ void mexFunction(
     GDXSTRINDEXPTRS_INIT(domains, domains_ptr);
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(0, nlhs, 5, nrhs);
+    gt_mex_check_arguments_num(1, nlhs, 4, nrhs);
     gt_mex_check_argument_str(prhs, 0, sysdir);
     gt_mex_check_argument_str(prhs, 1, gdx_filename);
-    gt_mex_check_argument_struct(prhs, 2);
-    gt_mex_check_argument_cell(prhs, 3);
-    gt_mex_check_argument_int(prhs, 4, GT_FILTER_NONE, 1, &orig_format);
+    gt_mex_check_argument_cell(prhs, 2);
+    gt_mex_check_argument_int(prhs, 3, GT_FILTER_NONE, 1, &orig_format);
     if (orig_format != GT_FORMAT_STRUCT && orig_format != GT_FORMAT_DENSEMAT &&
         orig_format != GT_FORMAT_SPARSEMAT && orig_format != GT_FORMAT_TABLE)
-        mexErrMsgIdAndTxt(ERRID"prhs3", "Invalid record format.");
+        mexErrMsgIdAndTxt(ERRID"format", "Invalid record format.");
 
     /* create output data */
-    plhs = NULL;
+    plhs[0] = mxCreateStructMatrix(1, 1, 0, NULL);
 
     /* start GDX */
     gt_idx_init_read(&gdx, sysdir, gdx_filename);
+    if (!idxGetSymCount(gdx, &sym_count))
+        mexErrMsgIdAndTxt(ERRID"gdxSystemInfo", "GDX error (idxGetSymCount)");
+    if (mxGetNumberOfElements(prhs[2]) == 0)
+        n_symbols = sym_count;
+    else
+        n_symbols = mxGetNumberOfElements(prhs[2]);
 
-    for (size_t i = 0; i < mxGetNumberOfElements(prhs[3]); i++)
+    for (int i = 0; i < n_symbols; i++)
     {
         /* reset data */
         for (size_t j = 0; j < GMS_VAL_MAX; j++)
@@ -108,29 +117,32 @@ void mexFunction(
         }
         format = orig_format;
 
-        /* get symbol and symbol id */
-        mx_arr_symbol_name = mxGetCell(prhs[3], i);
-        if (!mxIsChar(mx_arr_symbol_name))
-            mexErrMsgIdAndTxt(ERRID"symbol", "Symbol name must be of type 'char'.");
-        mxGetString(mx_arr_symbol_name, buf, GMS_SSSIZE);
-        gt_mex_getfield_symbol_obj(prhs[2], "Container.data", buf, true, &mx_arr_symbol);
-        if (mxIsClass(mx_arr_symbol, "GAMSTransfer.Alias"))
-            continue;
-        gt_mex_getfield_dbl(mx_arr_symbol, "symbol", "read_entry", mxGetNaN(), true, 1, &dval);
-        if (mxIsNaN(dval))
-            continue;
-        gt_mex_getfield_int(mx_arr_symbol, "symbol", "read_entry", 0, true,
-            GT_FILTER_NONNEGATIVE, 1, &sym_id);
-
         /* read symbol gdx data */
-        if (!idxGetSymbolInfo(gdx, sym_id-1, name, GMS_SSSIZE, &ival, gdx_uel_index, &ival2, buf, GMS_SSSIZE))
-            mexErrMsgIdAndTxt(ERRID"idxGetSymbolInfo", "GDX error (idxGetSymbolInfo)");
+        if (mxGetNumberOfElements(prhs[2]) == 0)
+        {
+            if (!idxGetSymbolInfo(gdx, i, name, GMS_SSSIZE, &ival, sizes_int, &ival2, text, GMS_SSSIZE))
+                mexErrMsgIdAndTxt(ERRID"idxGetSymbolInfo", "GDX error (idxGetSymbolInfo)");
+        }
+        else
+        {
+            mx_arr_symbol_name = mxGetCell(prhs[2], i);
+            if (!mxIsChar(mx_arr_symbol_name))
+                mexErrMsgIdAndTxt(ERRID"symbol", "Symbol name must be of type 'char'.");
+            mxGetString(mx_arr_symbol_name, name, GMS_SSSIZE);
+            if (!idxGetSymbolInfoByName(gdx, name, &ival, &ival3, sizes_int, &ival2, text, GMS_SSSIZE))
+            {
+                mexWarnMsgIdAndTxt(ERRID"symbol", "Symbol %s not found in GDX file. ", name);
+                continue;
+            }
+        }
         mxAssert(ival >= 0 && ival <= GLOBAL_MAX_INDEX_DIM, "Invalid dimension of symbol.");
         mxAssert(ival2 >= 0, "Invalid number of records");
         dim = (size_t) ival;
         nrecs = (size_t) ival2;
         if (format == GT_FORMAT_SPARSEMAT && dim > 2)
-            mexErrMsgIdAndTxt(ERRID"prhs2", "Sparse format only supported with dimension <= 2.");
+            mexErrMsgIdAndTxt(ERRID"format", "Sparse format only supported with dimension <= 2.");
+        for (size_t j = 0; j < dim; j++)
+            sizes[j] = sizes_int[j];
 
         /* prefer struct instead of dense_matrix for scalars */
         if (format == GT_FORMAT_DENSEMAT && dim == 0)
@@ -152,7 +164,7 @@ void mexFunction(
         for (size_t j = 0; j < GLOBAL_MAX_INDEX_DIM; j++)
             mx_dom_nrecs[j] = 1;
         for (size_t j = 0; j < dim; j++)
-            mx_dom_nrecs[j] = gdx_uel_index[j];
+            mx_dom_nrecs[j] = sizes_int[j];
 
         /* get default values dependent on type */
         gt_utils_type_default_values(GMS_DT_PAR, 0, true, def_values);
@@ -175,7 +187,7 @@ void mexFunction(
                     if (values_flag[j])
                         col_nnz[j] = (mwIndex*) mxCalloc(mx_dom_nrecs[1], sizeof(mwIndex));
 
-                if (!idxDataReadStart(gdx, name, &ival, gdx_uel_index, &ival2, buf, GMS_SSSIZE))
+                if (!idxDataReadStart(gdx, name, &ival, sizes_int, &ival2, buf, GMS_SSSIZE))
                     mexErrMsgIdAndTxt(ERRID"idxDataReadStart", "GDX error (idxDataReadStart)");
 
                 /* nonzero counts depent on data, thus we need to loop through it */
@@ -208,7 +220,7 @@ void mexFunction(
             mx_values, mx_rows, mx_cols);
 
         /* start reading records */
-        if (!idxDataReadStart(gdx, name, &ival, gdx_uel_index, &ival2, buf, GMS_SSSIZE))
+        if (!idxDataReadStart(gdx, name, &ival, sizes_int, &ival2, buf, GMS_SSSIZE))
             mexErrMsgIdAndTxt(ERRID"idxDataReadStart", "GDX error (idxDataReadStart)");
 
         /* store record values */
@@ -314,9 +326,8 @@ void mexFunction(
             gt_mex_struct2table(&mx_arr_records);
 
         /* store records in symbol */
-        mxSetProperty(mx_arr_symbol, 0, "records", mx_arr_records);
-        mxSetProperty(mx_arr_symbol, 0, "number_records_", mxCreateDoubleScalar(mxGetNaN()));
-        mxSetProperty(mx_arr_symbol, 0, "format_", mxCreateDoubleScalar(format));
+        gt_mex_addsymbol(plhs[0], name, text, GMS_DT_PAR, 0, format, dim, sizes,
+            (const char**) domains_ptr, 2, nrecs, mx_arr_records, NULL);
 
         /* free */
         switch (format)
