@@ -21,6 +21,9 @@ See [GAMS Transfer Matlab Tutorial](https://www.gams.com/37/docs/API_MATLAB_GAMS
 
 ## Install
 
+Note, GAMS comes with a precompiled GAMS Transfer Matlab version. For custom or 
+Octave builds, follow the steps below.
+
 To build GAMSTransfer, open Matlab and run `gams_transfer_setup`:
 ```matlab
 gams_transfer_setup()
