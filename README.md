@@ -15,26 +15,37 @@ large tool box for various data operations, and (3) optimized methods for
 reading from and writing to GDX can transfer the data as a bulk – resulting in
 the high performance of this package.
 
+## Documentation
+
+See [GAMS Transfer Matlab Tutorial](https://www.gams.com/37/docs/API_MATLAB_GAMSTRANSFER_TUTORIAL.html).
+
 ## Install
 
-To build GAMSTransfer, open Matlab and run:
+To build GAMSTransfer, open Matlab and run `gams_transfer_setup`:
+```matlab
+gams_transfer_setup()
+gams_transfer_setup(_, 'target_dir', <install_directory>)
+gams_transfer_setup(_, 'gams_dir', <gams_gams_dir>)
+gams_transfer_setup(_, 'verbose', <level>)
 ```
-gams_transfer_setup('target_dir', <install_directory>, 'gams_dir', <gams_gams_dir>, 'verbose', <level>);
-```
-All parameters, `target_dir`, `gams_dir` and `verbose`, are optional with
-defaults `'.'` (current directory), the GAMS system directory found in the PATH
-environment variable, and 0, respectively. Verbosity level are between 0 (no
-compiler output) to 2 (all compiler output).
+Description of parameters:
+- `target_dir`: Installation directory. Default: `'.'`.
+- `gams_dir`: GAMS system directory. Default: found from PATH environment variable.
+- `verbose`: Compilation verbosity level from 0 (no compiler output) to 2 (all 
+  compiler output). Default: 0.
 
 ## Run Unit Tests
 
-Make sure that the GAMSTransfer build is part of the Matlab PATH. Then, run:
+Make sure that the GAMSTransfer build is part of the Matlab PATH. Then, run
+`gams_transfer_test`:
+```matlab
+gams_transfer_test()
+gams_transfer_test(_, 'working_dir', <test_directory>)
+gams_transfer_test(_, 'gams_dir', <gams_gams_dir>)
 ```
-gams_transfer_test('working_dir', <test_directory>, 'gams_dir', <gams_gams_dir>);
-```
-Both parameters, `working_dir` and `gams_dir`, are optional with defaults
-`tempname()` and the GAMS system directory found in the PATH environment
-variable, respectively.
+Description of parameters:
+- `working_dir`: Directory for test example GAMS / GDX files. Default: `tempname()`.
+- `gams_dir`: GAMS system directory. Default: found from PATH environment variable.
 
 ## Example
 
