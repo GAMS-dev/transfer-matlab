@@ -37,6 +37,11 @@ Description of parameters:
 - `verbose`: Compilation verbosity level from 0 (no compiler output) to 2 (all 
   compiler output). Default: 0.
 
+Add the GAMS Transfer installtion directory to the Matlab Path: 
+```matlab
+addpath(<install_directory>)
+```
+
 ## Run Unit Tests
 
 Make sure that the GAMSTransfer build is part of the Matlab PATH. Then, run
