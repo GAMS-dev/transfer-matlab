@@ -21,6 +21,9 @@ See [GAMS Transfer Matlab Tutorial](https://www.gams.com/37/docs/API_MATLAB_GAMS
 
 ## Install
 
+Note, GAMS comes with a precompiled GAMS Transfer Matlab version. For custom or 
+Octave builds, follow the steps below.
+
 To build GAMSTransfer, open Matlab and run `gams_transfer_setup`:
 ```matlab
 gams_transfer_setup()
@@ -33,6 +36,11 @@ Description of parameters:
 - `gams_dir`: GAMS system directory. Default: found from PATH environment variable.
 - `verbose`: Compilation verbosity level from 0 (no compiler output) to 2 (all 
   compiler output). Default: 0.
+
+Add the GAMS Transfer installtion directory to the Matlab Path: 
+```matlab
+addpath(<install_directory>)
+```
 
 ## Run Unit Tests
 
