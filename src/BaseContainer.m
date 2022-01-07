@@ -174,8 +174,8 @@ classdef BaseContainer < handle
             addParameter(p, 'is_valid', nan);
             parse(p, varargin{:});
 
-            list = obj.listSymbols('types', [GAMSTransfer.SymbolType.SET, ...
-                GAMSTransfer.SymbolType.ALIAS], 'is_valid', p.Results.is_valid);
+            list = obj.listSymbols('types', GAMSTransfer.SymbolType.SET, ...
+                'is_valid', p.Results.is_valid);
         end
 
         function list = listParameters(obj, varargin)

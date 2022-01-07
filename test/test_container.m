@@ -87,13 +87,11 @@ function test_getlist(t, cfg, is_const_cont)
         t.add('get_list_sets');
         l = gdx.getSymbols(gdx.listSets());
         t.assert(iscell(l));
-        t.assert(numel(l) == 4);
+        t.assert(numel(l) == 2);
         t.assert(isa(l{1}, 'GAMSTransfer.Set'));
         t.assert(isa(l{2}, 'GAMSTransfer.Set'));
         t.assertEquals(l{1}.name, 'i');
         t.assertEquals(l{2}.name, 'j');
-        t.assertEquals(l{3}.name, 'i2');
-        t.assertEquals(l{4}.name, 'j2');
 
         t.add('get_list_variables');
         l = gdx.getSymbols(gdx.listVariables());
@@ -939,7 +937,8 @@ function test_describePartial(t, cfg, is_const_cont)
     end
 
     t.add('describe_partial_sets_1');
-    tbl = gdx.describeSets();
+    tbl = gdx.describeSets(gdx.listSymbols('types', ...
+        [GAMSTransfer.SymbolType.SET, GAMSTransfer.SymbolType.ALIAS]));
     if gdx.features.table
         t.assert(height(tbl) == 4);
         if gdx.features.categorical
