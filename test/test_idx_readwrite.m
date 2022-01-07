@@ -24,18 +24,29 @@
 %
 
 function success = test_idx_readwrite(cfg)
-    t = GAMSTest('GAMSTransfer/idx_readwrite');
-    test_idx_read(t, cfg);
-    test_idx_readSpecialValues(t, cfg);
+    t = GAMSTest('idx_readwrite');
+    test_idx_read(t, cfg, false);
+    test_idx_readSpecialValues(t, cfg, false);
     test_idx_readWrite(t, cfg);
-    [~, n_fails] = t.summary();
-    success = n_fails == 0;
+    [~, n_fails1] = t.summary();
+
+    t = GAMSTest('const_idx_readwrite');
+    test_idx_read(t, cfg, true);
+    test_idx_readSpecialValues(t, cfg, true);
+    [~, n_fails2] = t.summary();
+
+    success = n_fails1 + n_fails2 == 0;
 end
 
-function test_idx_read(t, cfg)
+function test_idx_read(t, cfg, is_const_cont)
 
-    gdx = GAMSTransfer.Container(cfg.filenames{4}, 'gams_dir', ...
-        cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    if is_const_cont
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'gams_dir', ...
+            cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    else
+        gdx = GAMSTransfer.Container(cfg.filenames{4}, 'gams_dir', ...
+            cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    end
 
     t.add('idx_read_basic_info');
     t.assertEquals(gdx.gams_dir, cfg.gams_dir);
@@ -45,7 +56,11 @@ function test_idx_read(t, cfg)
     t.add('idx_read_scalar_basic');
     t.assert(isfield(gdx.data, 'a'));
     s = gdx.data.a;
-    t.assert(isa(s, 'GAMSTransfer.Parameter'));
+    if is_const_cont
+        t.assertEquals(s.symbol_type, 'parameter');
+    else
+        t.assert(isa(s, 'GAMSTransfer.Parameter'));
+    end
     t.assertEquals(s.name, 'a');
     t.assertEquals(s.description, 'par_a');
     t.assert(s.dimension == 0);
@@ -53,15 +68,24 @@ function test_idx_read(t, cfg)
     t.assert(numel(s.domain_labels) == 0);
     t.assertEquals(s.domain_type, 'relaxed');
     t.assert(numel(s.size) == 0);
-    t.assert(s.getCardenality() == 1);
-    t.assert(~isnan(s.getSparsity()));
-    t.assert(s.getNumberRecords() == 1);
-    t.assert(s.isValid());
+    if is_const_cont
+        t.assert(~isnan(s.sparsity));
+        t.assert(s.number_records == 1);
+    else
+        t.assert(s.getCardenality() == 1);
+        t.assert(~isnan(s.getSparsity()));
+        t.assert(s.getNumberRecords() == 1);
+        t.assert(s.isValid());
+    end
 
     t.add('idx_read_parameter_1d_basic');
     t.assert(isfield(gdx.data, 'b'));
     s = gdx.data.b;
-    t.assert(isa(s, 'GAMSTransfer.Parameter'));
+    if is_const_cont
+        t.assertEquals(s.symbol_type, 'parameter');
+    else
+        t.assert(isa(s, 'GAMSTransfer.Parameter'));
+    end
     t.assertEquals(s.name, 'b');
     t.assertEquals(s.description, 'par_b');
     t.assert(s.dimension == 1);
@@ -72,15 +96,24 @@ function test_idx_read(t, cfg)
     t.assertEquals(s.domain_type, 'relaxed');
     t.assert(numel(s.size) == 1);
     t.assert(s.size(1) == 5);
-    t.assert(s.getCardenality() == 5);
-    t.assert(~isnan(s.getSparsity()));
-    t.assert(s.getNumberRecords() == 3);
-    t.assert(s.isValid());
+    if is_const_cont
+        t.assert(~isnan(s.sparsity));
+        t.assert(s.number_records == 3);
+    else
+        t.assert(s.getCardenality() == 5);
+        t.assert(~isnan(s.getSparsity()));
+        t.assert(s.getNumberRecords() == 3);
+        t.assert(s.isValid());
+    end
 
     t.add('indexed_parameter_2d_basic');
     t.assert(isfield(gdx.data, 'c'));
     s = gdx.data.c;
-    t.assert(isa(s, 'GAMSTransfer.Parameter'));
+    if is_const_cont
+        t.assertEquals(s.symbol_type, 'parameter');
+    else
+        t.assert(isa(s, 'GAMSTransfer.Parameter'));
+    end
     t.assertEquals(s.name, 'c');
     t.assertEquals(s.description, 'par_c');
     t.assert(s.dimension == 2);
@@ -94,24 +127,36 @@ function test_idx_read(t, cfg)
     t.assert(numel(s.size) == 2);
     t.assert(s.size(1) == 5);
     t.assert(s.size(2) == 10);
-    t.assert(s.getCardenality() == 50);
-    t.assert(~isnan(s.getSparsity()));
-    t.assert(s.getNumberRecords() == 3);
-    t.assert(s.isValid());
+    if is_const_cont
+        t.assert(~isnan(s.sparsity));
+        t.assert(s.number_records == 3);
+    else
+        t.assert(s.getCardenality() == 50);
+        t.assert(~isnan(s.getSparsity()));
+        t.assert(s.getNumberRecords() == 3);
+        t.assert(s.isValid());
+    end
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-        'features', cfg.features);
-    gdx.read(cfg.filenames{4}, 'format', 'struct');
+    if is_const_cont
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'struct', ...
+            'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    else
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', 'struct');
+    end
 
     t.add('idx_read_scalar_records_struct');
     s = gdx.data.a;
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct') || strcmp(s.format, 'dense_matrix'));
-    t.assert(s.isValid());
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.value) == s.getNumberRecords());
+    t.assert(numel(s.records.value) == 1);
     t.assert(s.records.value == 4);
 
     t.add('idx_read_parameter_1d_records_struct');
@@ -119,12 +164,14 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct'));
-    t.assert(s.isValid());
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'dim_1'));
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.dim_1) == s.getNumberRecords());
-    t.assert(numel(s.records.value) == s.getNumberRecords());
+    t.assert(numel(s.records.dim_1) == 3);
+    t.assert(numel(s.records.value) == 3);
     t.assert(s.records.dim_1(1) == 1);
     t.assert(s.records.dim_1(2) == 3);
     t.assert(s.records.dim_1(3) == 5);
@@ -137,14 +184,16 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct'));
-    t.assert(s.isValid());
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
     t.assert(numel(fieldnames(s.records)) == 3);
     t.assert(isfield(s.records, 'dim_1'));
     t.assert(isfield(s.records, 'dim_2'));
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.dim_1) == s.getNumberRecords());
-    t.assert(numel(s.records.dim_2) == s.getNumberRecords());
-    t.assert(numel(s.records.value) == s.getNumberRecords());
+    t.assert(numel(s.records.dim_1) == 3);
+    t.assert(numel(s.records.dim_2) == 3);
+    t.assert(numel(s.records.value) == 3);
     t.assert(s.records.dim_1(1) == 1);
     t.assert(s.records.dim_1(2) == 3);
     t.assert(s.records.dim_1(3) == 4);
@@ -156,19 +205,26 @@ function test_idx_read(t, cfg)
     t.assert(s.records.value(3) == 49);
 
     if gdx.features.table
-        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-            'features', cfg.features);
-        gdx.read(cfg.filenames{4}, 'format', 'table');
+        if is_const_cont
+            gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'table', ...
+                'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+        else
+            gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+                'features', cfg.features);
+            gdx.read(cfg.filenames{4}, 'format', 'table');
+        end
 
         t.add('indexed_scalar_records_table');
         s = gdx.data.a;
         t.assert(~isempty(s.records));
         t.assert(istable(s.records));
         t.assert(strcmp(s.format, 'table'));
-        t.assert(s.isValid());
+        if ~is_const_cont
+            t.assert(s.isValid());
+        end
         t.assert(numel(s.records.Properties.VariableNames) == 1);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'value');
-        t.assert(numel(s.records.value) == s.getNumberRecords());
+        t.assert(numel(s.records.value) == 1);
         t.assert(s.records.value == 4);
 
         t.add('indexed_parameter_1d_records_table');
@@ -176,12 +232,14 @@ function test_idx_read(t, cfg)
         t.assert(~isempty(s.records));
         t.assert(istable(s.records));
         t.assert(strcmp(s.format, 'table'));
-        t.assert(s.isValid());
+        if ~is_const_cont
+            t.assert(s.isValid());
+        end
         t.assert(numel(s.records.Properties.VariableNames) == 2);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'dim_1');
         t.assertEquals(s.records.Properties.VariableNames{2}, 'value');
-        t.assert(numel(s.records.dim_1) == s.getNumberRecords());
-        t.assert(numel(s.records.value) == s.getNumberRecords());
+        t.assert(numel(s.records.dim_1) == 3);
+        t.assert(numel(s.records.value) == 3);
         t.assert(s.records.dim_1(1) == 1);
         t.assert(s.records.dim_1(2) == 3);
         t.assert(s.records.dim_1(3) == 5);
@@ -194,14 +252,16 @@ function test_idx_read(t, cfg)
         t.assert(~isempty(s.records));
         t.assert(istable(s.records));
         t.assert(strcmp(s.format, 'table'));
-        t.assert(s.isValid());
+        if ~is_const_cont
+            t.assert(s.isValid());
+        end
         t.assert(numel(s.records.Properties.VariableNames) == 3);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'dim_1');
         t.assertEquals(s.records.Properties.VariableNames{2}, 'dim_2');
         t.assertEquals(s.records.Properties.VariableNames{3}, 'value');
-        t.assert(numel(s.records.dim_1) == s.getNumberRecords());
-        t.assert(numel(s.records.dim_2) == s.getNumberRecords());
-        t.assert(numel(s.records.value) == s.getNumberRecords());
+        t.assert(numel(s.records.dim_1) == 3);
+        t.assert(numel(s.records.dim_2) == 3);
+        t.assert(numel(s.records.value) == 3);
         t.assert(s.records.dim_1(1) == 1);
         t.assert(s.records.dim_1(2) == 3);
         t.assert(s.records.dim_1(3) == 4);
@@ -213,16 +273,23 @@ function test_idx_read(t, cfg)
         t.assert(s.records.value(3) == 49);
     end
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-        'features', cfg.features);
-    gdx.read(cfg.filenames{4}, 'format', 'dense_matrix');
+    if is_const_cont
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'dense_matrix', ...
+            'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    else
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', 'dense_matrix');
+    end
 
     t.add('indexed_scalar_records_dense_matrix');
     s = gdx.data.a;
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'struct') || strcmp(s.format, 'dense_matrix'));
-    t.assert(s.isValid());
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.value) == 1);
@@ -233,7 +300,9 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'dense_matrix'));
-    t.assert(s.isValid());
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.value) == 5);
@@ -250,7 +319,9 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'dense_matrix'));
-    t.assert(s.isValid());
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.value) == 50);
@@ -266,21 +337,28 @@ function test_idx_read(t, cfg)
     t.assert(s.records.value(5,3) == 0);
     t.assert(s.records.value(5,9) == 0);
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-        'features', cfg.features);
-    gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix');
+    if is_const_cont
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'sparse_matrix', ...
+            'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    else
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix');
+    end
 
     t.add('indexed_scalar_records_sparse_matrix');
     s = gdx.data.a;
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'sparse_matrix'));
-    t.assert(s.isValid());
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(issparse(s.records.value));
     t.assert(numel(s.records.value) == 1);
-    t.assert(nnz(s.records.value) == s.getNumberValues());
+    t.assert(nnz(s.records.value) == 1);
     t.assert(s.records.value == 4);
 
     t.add('indexed_parameter_1d_records_sparse_matrix');
@@ -288,12 +366,14 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'sparse_matrix'));
-    t.assert(s.isValid());
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(issparse(s.records.value));
     t.assert(numel(s.records.value) == s.size(1));
-    t.assert(nnz(s.records.value) == s.getNumberValues());
+    t.assert(nnz(s.records.value) == 3);
     t.assert(size(s.records.value, 1) == s.size(1));
     t.assert(size(s.records.value, 2) == 1);
     t.assert(s.records.value(1) == 1);
@@ -307,12 +387,14 @@ function test_idx_read(t, cfg)
     t.assert(~isempty(s.records));
     t.assert(isstruct(s.records));
     t.assert(strcmp(s.format, 'sparse_matrix'));
-    t.assert(s.isValid());
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
     t.assert(numel(fieldnames(s.records)) == 1);
     t.assert(isfield(s.records, 'value'));
     t.assert(issparse(s.records.value));
     t.assert(numel(s.records.value) == s.size(1)*s.size(2));
-    t.assert(nnz(s.records.value) == s.getNumberValues());
+    t.assert(nnz(s.records.value) == 3);
     t.assert(size(s.records.value, 1) == s.size(1));
     t.assert(size(s.records.value, 2) == s.size(2));
     t.assert(s.records.value(1,6) == 16);
@@ -326,11 +408,16 @@ function test_idx_read(t, cfg)
     t.assert(s.records.value(5,9) == 0);
 end
 
-function test_idx_readSpecialValues(t, cfg)
+function test_idx_readSpecialValues(t, cfg, is_const_cont)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-        'features', cfg.features);
-    gdx.read(cfg.filenames{2}, 'format', 'struct');
+    if is_const_cont
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{2}, 'format', 'struct', ...
+            'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    else
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{2}, 'format', 'struct');
+    end
 
     t.add('idx_read_special_values');
     t.assert(isfield(gdx.data, 'GUndef'));
@@ -338,11 +425,19 @@ function test_idx_readSpecialValues(t, cfg)
     t.assert(isfield(gdx.data, 'GPInf'));
     t.assert(isfield(gdx.data, 'GMInf'));
     t.assert(isfield(gdx.data, 'GEps'));
-    t.assert(isa(gdx.data.GUndef, 'GAMSTransfer.Parameter'));
-    t.assert(isa(gdx.data.GNA, 'GAMSTransfer.Parameter'));
-    t.assert(isa(gdx.data.GPInf, 'GAMSTransfer.Parameter'));
-    t.assert(isa(gdx.data.GMInf, 'GAMSTransfer.Parameter'));
-    t.assert(isa(gdx.data.GEps, 'GAMSTransfer.Parameter'));
+    if is_const_cont
+        t.assertEquals(gdx.data.GUndef.symbol_type, 'parameter');
+        t.assertEquals(gdx.data.GNA.symbol_type, 'parameter');
+        t.assertEquals(gdx.data.GPInf.symbol_type, 'parameter');
+        t.assertEquals(gdx.data.GMInf.symbol_type, 'parameter');
+        t.assertEquals(gdx.data.GEps.symbol_type, 'parameter');
+    else
+        t.assert(isa(gdx.data.GUndef, 'GAMSTransfer.Parameter'));
+        t.assert(isa(gdx.data.GNA, 'GAMSTransfer.Parameter'));
+        t.assert(isa(gdx.data.GPInf, 'GAMSTransfer.Parameter'));
+        t.assert(isa(gdx.data.GMInf, 'GAMSTransfer.Parameter'));
+        t.assert(isa(gdx.data.GEps, 'GAMSTransfer.Parameter'));
+    end
     t.assert(isstruct(gdx.data.GUndef.records));
     t.assert(isstruct(gdx.data.GNA.records));
     t.assert(isstruct(gdx.data.GPInf.records));

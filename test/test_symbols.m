@@ -24,7 +24,7 @@
 %
 
 function success = test_symbols(cfg)
-    t = GAMSTest('GAMSTransfer/symbols');
+    t = GAMSTest('symbols');
     test_addSymbols(t, cfg);
     test_changeSymbol(t, cfg);
     test_defaultvalues(t, cfg);

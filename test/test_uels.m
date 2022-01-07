@@ -24,7 +24,7 @@
 %
 
 function success = test_uels(cfg)
-    t = GAMSTest('GAMSTransfer/uels');
+    t = GAMSTest('uels');
     test_uniqueelementlist(t, cfg);
     test_symbol_uels(t, cfg);
     [~, n_fails] = t.summary();

@@ -24,7 +24,7 @@
 %
 
 function success = test_trnsport(cfg)
-    t = GAMSTest('GAMSTransfer/trnsport');
+    t = GAMSTest('trnsport');
 
     geps = GAMSTransfer.SpecialValues.EPS;
 

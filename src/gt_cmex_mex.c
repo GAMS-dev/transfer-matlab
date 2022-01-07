@@ -174,14 +174,18 @@ void gt_mex_addsymbol(
     int             subtype,        /** GAMS subtype of symbol */
     int             format,         /** record format */
     size_t          dim,            /** dimension of symbol */
-    size_t*         sizes,          /** sizes of domains (length = dim) */
+    double*         sizes,          /** sizes of domains (length = dim) */
     const char**    domains,        /** domains of symbol (length = dim) */
+    const char**    domain_labels,  /** domain labels of symbol (length = dim) */
     int             domain_type,    /** domain type (e.g. 3: regular or 2: relaxed) */
     size_t          nrecs,          /** number of records */
+    size_t          nvals,          /** number of values */
     mxArray*        mx_arr_records, /** records structure */
     mxArray*        mx_arr_uels     /** list of uels to be stored */
 )
 {
+    size_t card, n_val_fields;
+    double sparsity;
     mxArray* mx_arr_sym_struct = NULL;
 
     /* create symbol structure */
@@ -190,17 +194,53 @@ void gt_mex_addsymbol(
     /* add structrure fields */
     gt_mex_addfield_str(mx_arr_sym_struct, "name", name);
     gt_mex_addfield_str(mx_arr_sym_struct, "description", descr);
-    gt_mex_addfield_int(mx_arr_sym_struct, "type", 1, &type);
-    gt_mex_addfield_int(mx_arr_sym_struct, "subtype", 1, &subtype);
-    gt_mex_addfield_int(mx_arr_sym_struct, "format", 1, &format);
+    gt_mex_addfield_int(mx_arr_sym_struct, "symbol_type", 1, &type);
+    switch (type)
+    {
+        case GMS_DT_ALIAS:
+            gt_mex_addfield_str(mx_arr_sym_struct, "alias_with", descr + 13);
+            mxSetFieldByNumber(mx_struct, 0, mxAddField(mx_struct, name), mx_arr_sym_struct);
+            return;
+        case GMS_DT_PAR:
+            n_val_fields = 1;
+            break;
+        case GMS_DT_SET:
+        {
+            bool is_singleton = subtype == 1;
+            n_val_fields = 0;
+            gt_mex_addfield_bool(mx_arr_sym_struct, "is_singleton", 1, &is_singleton);
+            break;
+        }
+        case GMS_DT_VAR:
+        case GMS_DT_EQU:
+            n_val_fields = 5;
+            gt_mex_addfield_int(mx_arr_sym_struct, "type", 1, &subtype);
+            break;
+    }
     gt_mex_addfield_sizet(mx_arr_sym_struct, "dimension", 1, &dim);
-    gt_mex_addfield_cell_str(mx_arr_sym_struct, "domain", dim, domains);
-    gt_mex_addfield_int(mx_arr_sym_struct, "domain_type", 1, &domain_type);
     if (sizes)
-        gt_mex_addfield_sizet(mx_arr_sym_struct, "size", dim, sizes);
-    gt_mex_addfield_sizet(mx_arr_sym_struct, "number_records", 1, &nrecs);
+        gt_mex_addfield_dbl(mx_arr_sym_struct, "size", dim, sizes);
+    else
+        gt_mex_addfield_dbl(mx_arr_sym_struct, "size", dim, NULL);
+    gt_mex_addfield_cell_str(mx_arr_sym_struct, "domain", dim, domains);
+    gt_mex_addfield_cell_str(mx_arr_sym_struct, "domain_labels", dim, domain_labels);
+    gt_mex_addfield_int(mx_arr_sym_struct, "domain_type", 1, &domain_type);
     if (mx_arr_records)
         mxSetFieldByNumber(mx_arr_sym_struct, 0, mxAddField(mx_arr_sym_struct, "records"), mx_arr_records);
+    else
+        mxAddField(mx_arr_sym_struct, "records");
+    gt_mex_addfield_int(mx_arr_sym_struct, "format", 1, &format);
+    gt_mex_addfield_sizet(mx_arr_sym_struct, "number_records", 1, &nrecs);
+    if (n_val_fields == 0)
+        nvals = 0;
+    gt_mex_addfield_sizet(mx_arr_sym_struct, "number_values", 1, &nvals);
+    card = 1;
+    if (sizes)
+        for (size_t i = 0; i < dim; i++)
+            card *= (size_t) sizes[i];
+    card *= n_val_fields;
+    sparsity = (card > 0) ? 1.0 - (double) nvals / card : mxGetNaN();
+    gt_mex_addfield_dbl(mx_arr_sym_struct, "sparsity", 1, &sparsity);
     if (mx_arr_uels)
         mxSetFieldByNumber(mx_arr_sym_struct, 0, mxAddField(mx_arr_sym_struct, "uels"), mx_arr_uels);
 
@@ -253,8 +293,9 @@ void gt_mex_addfield_int(
 #else
     mx_values = mxGetPr(mx_arr_values);
 #endif
-    for (size_t i = 0; i < dim; i++)
-        mx_values[i] = values[i];
+    if (values)
+        for (size_t i = 0; i < dim; i++)
+            mx_values[i] = values[i];
 
     mxSetFieldByNumber(mx_struct, 0, mxAddField(mx_struct, fieldname), mx_arr_values);
 }
@@ -279,8 +320,32 @@ void gt_mex_addfield_sizet(
 #else
     mx_values = mxGetPr(mx_arr_values);
 #endif
-    for (size_t i = 0; i < dim; i++)
-        mx_values[i] = (double) values[i];
+    if (values)
+        for (size_t i = 0; i < dim; i++)
+            mx_values[i] = (double) values[i];
+
+    mxSetFieldByNumber(mx_struct, 0, mxAddField(mx_struct, fieldname), mx_arr_values);
+}
+
+void gt_mex_addfield_bool(
+    mxArray*        mx_struct,      /** mex structure */
+    const char*     fieldname,      /** field name to be added */
+    size_t          dim,            /** dimension of integer array */
+    bool*           values          /** values of field */
+)
+{
+    mxArray* mx_arr_values;
+    mxLogical* mx_values;
+
+    mx_arr_values = mxCreateLogicalMatrix(1, dim);
+#ifdef WITH_R2018A_OR_NEWER
+    mx_values = mxGetLogicals(mx_arr_values);
+#else
+    mx_values = (mxLogical*) mxGetData(mx_arr_values);
+#endif
+    if (values)
+        for (size_t i = 0; i < dim; i++)
+            mx_values[i] = values[i];
 
     mxSetFieldByNumber(mx_struct, 0, mxAddField(mx_struct, fieldname), mx_arr_values);
 }
@@ -305,8 +370,9 @@ void gt_mex_addfield_dbl(
 #else
     mx_values = mxGetPr(mx_arr_values);
 #endif
-    for (size_t i = 0; i < dim; i++)
-        mx_values[i] = values[i];
+    if (values)
+        for (size_t i = 0; i < dim; i++)
+            mx_values[i] = values[i];
 
     mxSetFieldByNumber(mx_struct, 0, mxAddField(mx_struct, fieldname), mx_arr_values);
 }
@@ -935,6 +1001,7 @@ void gt_mex_readdata_create(
     bool*           values_flag,    /** indicates which values to be read (length: GMS_VAL_MAX) */
     double*         def_values,     /** default values (length: GMS_VAL_MAX) */
     mwSize*         mx_dom_nrecs,   /** number of records of domain symbols */
+    size_t*         nvals,          /** number of values created */
     mwIndex**       col_nnz,        /** sparse format only: number of non-zeros for each value field */
     mxArray**       mx_arr_dom_idx, /** matlab struct containing domain indices */
     mxUint64**      mx_dom_idx,     /** matlab struct containing domain indices */
@@ -951,6 +1018,7 @@ void gt_mex_readdata_create(
     bool*           values_flag,    /** indicates which values to be read (length: GMS_VAL_MAX) */
     double*         def_values,     /** default values (length: GMS_VAL_MAX) */
     mwSize*         mx_dom_nrecs,   /** number of records of domain symbols */
+    size_t*         nvals,          /** number of values created */
     mwIndex**       col_nnz,        /** sparse format only: number of non-zeros for each value field */
     mxArray**       mx_arr_dom_idx, /** matlab struct containing domain indices */
     UINT64_T**      mx_dom_idx,     /** matlab struct containing domain indices */
@@ -979,13 +1047,17 @@ void gt_mex_readdata_create(
     }
 
     /* create record data structures */
+    *nvals = 0;
     switch (format)
     {
         case GT_FORMAT_STRUCT:
         case GT_FORMAT_TABLE:
             for (size_t i = 0; i < GMS_VAL_MAX; i++)
                 if (values_flag[i])
+                {
+                    *nvals += nrecs;
                     mx_arr_values[i] = mxCreateDoubleMatrix(nrecs, 1, mxREAL);
+                }
             break;
 
         case GT_FORMAT_DENSEMAT:
@@ -993,7 +1065,10 @@ void gt_mex_readdata_create(
                 mx_dom_nrecs[0] = 1;
             for (size_t i = 0; i < GMS_VAL_MAX; i++)
                 if (values_flag[i])
+                {
                     mx_arr_values[i] = mxCreateNumericArray(MAX(dim, 1), mx_dom_nrecs, mxDOUBLE_CLASS, mxREAL);
+                    *nvals += mxGetNumberOfElements(mx_arr_values[i]);
+                }
             break;
 
         case GT_FORMAT_SPARSEMAT:
@@ -1004,6 +1079,7 @@ void gt_mex_readdata_create(
                     size_t nnz = 0;
                     for (size_t j = 0; j < mx_dom_nrecs[1]; j++)
                         nnz += col_nnz[i][j];
+                    *nvals += nnz;
                     mx_arr_values[i] = mxCreateSparse(mx_dom_nrecs[0], mx_dom_nrecs[1], nnz, mxREAL);
                 }
             break;

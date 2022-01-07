@@ -956,29 +956,8 @@ classdef Symbol < handle
             % considered.
             %
 
-            value = nan;
-            where = {};
-
-            % get available value fields
-            values = obj.availValueFields(varargin{:});
-            if isempty(values)
-                return
-            end
-
-            % compute values
-            idx = nan;
-            for i = 1:numel(values)
-                [value_, idx_] = max(obj.records.(values{i})(:));
-                if ~isempty(value_) && (isnan(value) || value < value_)
-                    value = value_;
-                    idx = idx_;
-                end
-            end
-
-            % translate linear index to domain entry
-            if ~isnan(idx)
-                where = obj.getInd2Domain(idx);
-            end
+            [value, where] = GAMSTransfer.getMaxValue(obj, ...
+                obj.container.indexed,varargin{:});
         end
 
         function [value, where] = getMinValue(obj, varargin)
@@ -991,29 +970,8 @@ classdef Symbol < handle
             % considered.
             %
 
-            value = nan;
-            where = {};
-
-            % get available value fields
-            values = obj.availValueFields(varargin{:});
-            if isempty(values)
-                return
-            end
-
-            % compute values
-            idx = nan;
-            for i = 1:numel(values)
-                [value_, idx_] = min(obj.records.(values{i})(:));
-                if ~isempty(value_) && (isnan(value) || value > value_)
-                    value = value_;
-                    idx = idx_;
-                end
-            end
-
-            % translate linear index to domain entry
-            if ~isnan(idx)
-                where = obj.getInd2Domain(idx);
-            end
+            [value, where] = GAMSTransfer.getMinValue(obj, ...
+                obj.container.indexed, varargin{:});
         end
 
         function value = getMeanValue(obj, varargin)
@@ -1025,35 +983,7 @@ classdef Symbol < handle
             % is given all available for the symbol are considered.
             %
 
-            value = nan;
-
-            % get available value fields
-            values = obj.availValueFields(varargin{:});
-            if isempty(values)
-                return
-            end
-
-            % compute values
-            n = 0;
-            for i = 1:numel(values)
-                value_ = sum(obj.records.(values{i})(:));
-                if isnan(value)
-                    value = value_;
-                else
-                    value = value + value_;
-                end
-                n = n + obj.getNumberRecords();
-            end
-            if n == 0
-                value = nan;
-                return
-            end
-            switch obj.format_
-            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
-                value = value / prod(obj.size_);
-            otherwise
-                value = value / n;
-            end
+            value = GAMSTransfer.getMeanValue(obj, varargin{:});
         end
 
         function [value, where] = getMaxAbsValue(obj, varargin)
@@ -1066,29 +996,8 @@ classdef Symbol < handle
             % considered.
             %
 
-            value = nan;
-            where = {};
-
-            % get available value fields
-            values = obj.availValueFields(varargin{:});
-            if isempty(values)
-                return
-            end
-
-            % compute values
-            idx = nan;
-            for i = 1:numel(values)
-                [value_, idx_] = max(abs(obj.records.(values{i})(:)));
-                if isnan(value) || value < value_
-                    value = value_;
-                    idx = idx_;
-                end
-            end
-
-            % translate linear index to domain entry
-            if ~isnan(idx)
-                where = obj.getInd2Domain(idx);
-            end
+            [value, where] = GAMSTransfer.getMaxAbsValue(obj, ...
+                obj.container.indexed, varargin{:});
         end
 
         function n = countNA(obj, varargin)
@@ -1102,18 +1011,7 @@ classdef Symbol < handle
             % See also: GAMSTransfer.SpecialValues.NA, GAMSTransfer.SpecialValues.isna
             %
 
-            n = 0;
-
-            % get available value fields
-            values = obj.availValueFields(varargin{:});
-            if isempty(values)
-                return
-            end
-
-            % get count
-            for i = 1:numel(values)
-                n = n + sum(GAMSTransfer.SpecialValues.isNA(obj.records.(values{i})(:)));
-            end
+            n = GAMSTransfer.countNA(obj, varargin{:});
         end
 
         function n = countUndef(obj, varargin)
@@ -1125,18 +1023,7 @@ classdef Symbol < handle
             % is given all available for the symbol are considered.
             %
 
-            n = 0;
-
-            % get available value fields
-            values = obj.availValueFields(varargin{:});
-            if isempty(values)
-                return
-            end
-
-            % get count
-            for i = 1:numel(values)
-                n = n + sum(GAMSTransfer.SpecialValues.isUndef(obj.records.(values{i})(:)));
-            end
+            n = GAMSTransfer.countUndef(obj, varargin{:});
         end
 
         function n = countEps(obj, varargin)
@@ -1150,18 +1037,7 @@ classdef Symbol < handle
             % See also: GAMSTransfer.SpecialValues.EPS, GAMSTransfer.SpecialValues.iseps
             %
 
-            n = 0;
-
-            % get available value fields
-            values = obj.availValueFields(varargin{:});
-            if isempty(values)
-                return
-            end
-
-            % get count
-            for i = 1:numel(values)
-                n = n + sum(GAMSTransfer.SpecialValues.isEps(obj.records.(values{i})(:)));
-            end
+            n = GAMSTransfer.countEps(obj, varargin{:});
         end
 
         function n = countPosInf(obj, varargin)
@@ -1174,18 +1050,7 @@ classdef Symbol < handle
             % is given all available for the symbol are considered.
             %
 
-            n = 0;
-
-            % get available value fields
-            values = obj.availValueFields(varargin{:});
-            if isempty(values)
-                return
-            end
-
-            % get count
-            for i = 1:numel(values)
-                n = n + sum(GAMSTransfer.SpecialValues.isPosInf(obj.records.(values{i})(:)));
-            end
+            n = GAMSTransfer.countPosInf(obj, varargin{:});
         end
 
         function n = countNegInf(obj, varargin)
@@ -1198,18 +1063,7 @@ classdef Symbol < handle
             % is given all available for the symbol are considered.
             %
 
-            n = 0;
-
-            % get available value fields
-            values = obj.availValueFields(varargin{:});
-            if isempty(values)
-                return
-            end
-
-            % get count
-            for i = 1:numel(values)
-                n = n + sum(GAMSTransfer.SpecialValues.isNegInf(obj.records.(values{i})(:)));
-            end
+            n = GAMSTransfer.countNegInf(obj, varargin{:});
         end
 
         function nrecs = getNumberRecords(obj)
@@ -1238,7 +1092,7 @@ classdef Symbol < handle
                 nrecs = height(obj.records);
             case GAMSTransfer.RecordsFormat.STRUCT
                 nrecs = -1;
-                fields = obj.availValueFields();
+                fields = GAMSTransfer.Utils.getAvailableValueFields(obj);
                 if numel(fields) > 0
                     nrecs = numel(obj.records.(fields{1}));
                 else
@@ -1280,7 +1134,7 @@ classdef Symbol < handle
             end
 
             % get available value fields
-            values = obj.availValueFields(varargin{:});
+            values = GAMSTransfer.Utils.getAvailableValueFields(obj, varargin{:});
             if isempty(values)
                 nvals = 0;
                 return
@@ -1652,55 +1506,6 @@ classdef Symbol < handle
     end
 
     methods (Hidden, Access = protected)
-
-        function values = availValueFields(obj, values)
-            switch obj.format_
-            case {GAMSTransfer.RecordsFormat.EMPTY, GAMSTransfer.RecordsFormat.UNKNOWN}
-                values = {};
-                return
-            case GAMSTransfer.RecordsFormat.TABLE
-                fields = obj.records.Properties.VariableNames;
-            otherwise
-                fields = fieldnames(obj.records);
-            end
-            if nargin == 1
-                values = obj.VALUE_FIELDS;
-            else
-                values = intersect(obj.VALUE_FIELDS, values);
-            end
-            values = intersect(fields, values);
-        end
-
-        function domain = getInd2Domain(obj, idx)
-            domain = cell(1, obj.dimension_);
-            if obj.dimension_ == 0
-                return;
-            end
-
-            % get linear index
-            switch obj.format_
-            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
-                for i = 1:obj.dimension_
-                    label = obj.domain_labels_{i};
-                    domain{i} = double(obj.records.(label)(idx));
-                end
-            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
-                k = cell(1, 20);
-                [k{:}] = ind2sub(obj.size_, idx);
-                for i = 1:numel(domain)
-                    domain{i} = k{i};
-                end
-            end
-
-            % convert to uel labels
-            if ~obj.container.indexed
-                for i = 1:obj.dimension_
-                    label = obj.domain_labels_{i};
-                    d = obj.getUELLabels(i, domain{i});
-                    domain{i} = d{1};
-                end
-            end
-        end
 
         function has_domain_label = checkRecordFields(obj, labels)
             has_domain_label = zeros(1, obj.dimension_);

@@ -48,12 +48,13 @@ void mexFunction(
 {
     int sym_id, format, orig_format, type, subtype, lastdim, ival, sym_count;
     int n_acronyms, uel_count, n_symbols, dom_type;
-    size_t dim, nrecs, n_dom_fields;
+    size_t dim, nrecs, nvals, n_dom_fields;
     bool support_categorical, support_setget;
     bool orig_values_flag[GMS_VAL_MAX], values_flag[GMS_VAL_MAX];
     char buf[GMS_SSSIZE], gdx_filename[GMS_SSSIZE], sysdir[GMS_SSSIZE];
     char name[GMS_SSSIZE], text[GMS_SSSIZE];
     double def_values[GMS_VAL_MAX];
+    double sizes[GLOBAL_MAX_INDEX_DIM];
     gdxHandle_t gdx = NULL;
     gdxStrIndexPtrs_t domains_ptr, domain_labels_ptr;
     gdxStrIndex_t domains, domain_labels;
@@ -191,6 +192,17 @@ void mexFunction(
         if (dom_type < 1 || dom_type > 3)
             mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomainX", "GDX error (gdxSymbolGetDomainX)");
 
+        /* load domains and transform to domain_labels */
+        if (!gdxSymbolGetDomainX(gdx, sym_id, domain_labels_ptr))
+            mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomainX", "GDX error (gdxSymbolGetDomainX)");
+        for (size_t j = 0; j < dim; j++)
+        {
+            if (!strcmp(domain_labels_ptr[j], "*"))
+                strcpy(domain_labels_ptr[j], "uni");
+            sprintf(buf, "_%d", (int) j+1);
+            strcat(domain_labels_ptr[j], buf);
+        }
+
         /* prefer struct instead of dense_matrix for scalars */
         if (format == GT_FORMAT_DENSEMAT && dim == 0)
             format = GT_FORMAT_STRUCT;
@@ -232,7 +244,8 @@ void mexFunction(
                 break;
             case GMS_DT_ALIAS:
                 gt_mex_addsymbol(plhs[0], name, text, type, subtype, format, dim,
-                    NULL, (const char**) domains_ptr, dom_type, nrecs, NULL, NULL);
+                    NULL, (const char**) domains_ptr, (const char**) domain_labels_ptr,
+                    dom_type, nrecs, 0, NULL, NULL);
                 continue;
         }
 
@@ -280,17 +293,6 @@ void mexFunction(
 
             if (!gdxDataReadDone(gdx))
                 mexErrMsgIdAndTxt(ERRID"gdxDataReadDone", "GDX error (gdxDataReadDone)");
-        }
-
-        /* load domains and transform to domain_labels */
-        if (!gdxSymbolGetDomainX(gdx, sym_id, domain_labels_ptr))
-            mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomainX", "GDX error (gdxSymbolGetDomainX)");
-        for (size_t j = 0; j < dim; j++)
-        {
-            if (!strcmp(domain_labels_ptr[j], "*"))
-                strcpy(domain_labels_ptr[j], "uni");
-            sprintf(buf, "_%d", (int) j+1);
-            strcat(domain_labels_ptr[j], buf);
         }
 
         /* get default values dependent on type */
@@ -343,7 +345,7 @@ void mexFunction(
         gt_mex_readdata_addfields(type, dim, format, values_flag, domain_labels_ptr,
             mx_arr_records, &n_dom_fields);
         gt_mex_readdata_create(dim, nrecs, format, values_flag, def_values,
-            mx_dom_nrecs, col_nnz, mx_arr_dom_idx, mx_dom_idx, mx_arr_values,
+            mx_dom_nrecs, &nvals, col_nnz, mx_arr_dom_idx, mx_dom_idx, mx_arr_values,
             mx_values, mx_rows, mx_cols);
 
         /* start reading records */
@@ -469,14 +471,21 @@ void mexFunction(
             mx_arr_values[GMS_VAL_LEVEL] = mx_arr_text;
         }
 
-        /* collect uels (only used UELs) */
+        /* collect uels (only used UELs in case of table like formats) */
+        bool collect_only_used_uels = false;
+        switch (format)
+        {
+            case GT_FORMAT_STRUCT:
+            case GT_FORMAT_TABLE:
+                collect_only_used_uels = true;
+        }
         for (size_t j = 0; j < dim; j++)
         {
             size_t num_used = 0;
 
             /* get number of used uels */
             for (size_t k = 0; k < mx_dom_nrecs[j]; k++)
-                if (dom_uels_used[j][k] > 0)
+                if (dom_uels_used[j][k] > 0 || !collect_only_used_uels)
                     dom_uels_used[j][k] = (int) num_used++;
                 else
                     dom_uels_used[j][k] = -1;
@@ -520,7 +529,9 @@ void mexFunction(
             if (values_flag[j])
                 mxSetFieldByNumber(mx_arr_records, 0, (int) (n_dom_fields + k++), mx_arr_values[j]);
 
-        /* set uel fields (only needed if categorical is not used) */
+        /* set uel fields
+         * Note: only needed if categorical is not used in case of table like
+         * formats. For matrix formats always needed. */
         mx_arr_uels = mxCreateCellMatrix(1, dim);
         switch (format)
         {
@@ -528,6 +539,8 @@ void mexFunction(
             case GT_FORMAT_TABLE:
                 if (support_categorical)
                     break;
+            case GT_FORMAT_DENSEMAT:
+            case GT_FORMAT_SPARSEMAT:
                 for (size_t j = 0; j < dim; j++)
                     mxSetCell(mx_arr_uels, j, mx_arr_dom_uels[j]);
                 break;
@@ -538,10 +551,16 @@ void mexFunction(
             gt_mex_struct2table(&mx_arr_records);
 
         /* store records in symbol */
+        for (size_t j = 0; j < dim; j++)
+            if (dom_type == 3)
+                sizes[j] = mx_dom_nrecs[j];
+            else
+                sizes[j] = mxGetNaN();
         if (type == GMS_DT_EQU)
             subtype -= GMS_EQU_USERINFO_BASE;
-        gt_mex_addsymbol(plhs[0], name, text, type, subtype, format, dim, NULL,
-            (const char**) domains_ptr, dom_type, nrecs, mx_arr_records, mx_arr_uels);
+        gt_mex_addsymbol(plhs[0], name, text, type, subtype, format, dim, sizes,
+            (const char**) domains_ptr, (const char**) domain_labels_ptr, dom_type,
+            nrecs, nvals, mx_arr_records, mx_arr_uels);
 
         /* free */
         for (size_t j = 0; j < dim; j++)

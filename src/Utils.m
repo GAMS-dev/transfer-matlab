@@ -171,4 +171,102 @@ classdef Utils
 
     end
 
+    methods (Static, Hidden)
+
+        function values = getAvailableValueFields(symbol, values)
+
+            % get value fields of records
+            switch GAMSTransfer.RecordsFormat.str2int(symbol.format)
+            case {GAMSTransfer.RecordsFormat.EMPTY, GAMSTransfer.RecordsFormat.UNKNOWN}
+                values = {};
+                return
+            case GAMSTransfer.RecordsFormat.TABLE
+                fields = symbol.records.Properties.VariableNames;
+            otherwise
+                fields = fieldnames(symbol.records);
+            end
+
+            % get all supported value fields of symbol
+            if isfield(symbol, 'symbol_type')
+                switch symbol.symbol_type
+                case 'parameter'
+                    possible_values = {'value'};
+                case {'variable', 'equation'}
+                    possible_values = {'level', 'marginal', 'lower', 'upper', 'scale'};
+                otherwise
+                    possible_values = {};
+                end
+            elseif isa(symbol, 'GAMSTransfer.Parameter')
+                possible_values = {'value'};
+            elseif isa(symbol, 'GAMSTransfer.Variable') || isa(symbol, 'GAMSTransfer.Equation')
+                possible_values = {'level', 'marginal', 'lower', 'upper', 'scale'};
+            else
+                possible_values = {};
+            end
+
+            % intersect requested with possible
+            if nargin == 1
+                values = possible_values;
+            else
+                values = intersect(possible_values, values);
+            end
+            values = intersect(fields, values);
+        end
+
+        function domain = getInd2Domain(symbol, is_indexed, idx)
+            domain = cell(1, symbol.dimension);
+            is_numeric_domain = true(1, symbol.dimension);
+            domain_labels = symbol.domain_labels;
+            if symbol.dimension == 0
+                return;
+            end
+
+            % check if we have categorical
+            has_categorical = true;
+            try
+                iscategorical(1);
+            catch
+                has_categorical = false;
+            end
+
+            % get linear index
+            switch GAMSTransfer.RecordsFormat.str2int(symbol.format)
+            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
+                for i = 1:symbol.dimension
+                    k = symbol.records.(domain_labels{i})(idx);
+                    if has_categorical && iscategorical(k)
+                        domain{i} = char(k);
+                        is_numeric_domain(i) = false;
+                    else
+                        domain{i} = double(k);
+                    end
+                end
+            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
+                k = cell(1, 20);
+                [k{:}] = ind2sub(symbol.size, idx);
+                for i = 1:numel(domain)
+                    domain{i} = k{i};
+                end
+            end
+
+            % convert to uel labels
+            if ~is_indexed
+                for i = 1:symbol.dimension
+                    if ~is_numeric_domain(i)
+                        continue
+                    end
+                    if isa(symbol, 'GAMSTransfer.Symbol')
+                        d = symbol.getUELLabels(i, domain{i});
+                        domain{i} = d{1};
+                    elseif isfield(symbol, 'uels')
+                        domain{i} = symbol.uels{i}{domain{i}};
+                    else
+                        domain{i} = nan;
+                    end
+                end
+            end
+        end
+
+    end
+
 end

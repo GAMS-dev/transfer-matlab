@@ -46,18 +46,18 @@ void mexFunction(
 {
     int format, orig_format, lastdim, ival, ival2, ival3, n_symbols;
     int sym_count;
-    size_t dim, nrecs, n_dom_fields;
+    size_t dim, nrecs, nvals, n_dom_fields;
     bool values_flag[GMS_VAL_MAX];
     char buf[GMS_SSSIZE], name[GMS_SSSIZE], gdx_filename[GMS_SSSIZE], sysdir[GMS_SSSIZE];
     char text[GMS_SSSIZE];
     double def_values[GMS_VAL_MAX];
+    double sizes[GLOBAL_MAX_INDEX_DIM];
     idxHandle_t gdx = NULL;
     gdxStrIndexPtrs_t domains_ptr;
     gdxStrIndex_t domains;
     gdxUelIndex_t gdx_uel_index;
     gdxValues_t gdx_values;
     gdxUelIndex_t sizes_int;
-    size_t sizes[GLOBAL_MAX_INDEX_DIM];
     mwIndex idx;
     mwIndex mx_flat_idx[GMS_VAL_MAX];
     mwIndex mx_idx[GLOBAL_MAX_INDEX_DIM];
@@ -214,7 +214,7 @@ void mexFunction(
         gt_mex_readdata_addfields(GMS_DT_PAR, dim, format, values_flag, domains_ptr,
             mx_arr_records, &n_dom_fields);
         gt_mex_readdata_create(dim, nrecs, format, values_flag, def_values,
-            mx_dom_nrecs, col_nnz, mx_arr_dom_idx, mx_dom_idx, mx_arr_values,
+            mx_dom_nrecs, &nvals, col_nnz, mx_arr_dom_idx, mx_dom_idx, mx_arr_values,
             mx_values, mx_rows, mx_cols);
 
         /* start reading records */
@@ -325,7 +325,8 @@ void mexFunction(
 
         /* store records in symbol */
         gt_mex_addsymbol(plhs[0], name, text, GMS_DT_PAR, 0, format, dim, sizes,
-            (const char**) domains_ptr, 2, nrecs, mx_arr_records, NULL);
+            (const char**) domains_ptr, (const char**) domains_ptr, 2, nrecs, nvals,
+            mx_arr_records, NULL);
 
         /* free */
         switch (format)
