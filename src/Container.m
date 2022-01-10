@@ -83,7 +83,8 @@ classdef Container < GAMSTransfer.BaseContainer
             is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
                 ~strcmpi(x, 'gams_dir') && ~strcmpi(x, 'indexed') && ...
                 ~strcmpi(x, 'features');
-            addOptional(p, 'filename', '', is_string_char);
+            is_source = @(x) is_string_char(x) || isa(x, 'GAMSTransfer.ConstContainer');
+            addOptional(p, 'source', '', is_source);
             addParameter(p, 'gams_dir', '', is_string_char);
             addParameter(p, 'indexed', false, @islogical);
             addParameter(p, 'features', struct(), @isstruct);
@@ -93,8 +94,8 @@ classdef Container < GAMSTransfer.BaseContainer
                 p.Results.indexed, p.Results.features);
 
             % read GDX file
-            if ~strcmp(p.Results.filename, '')
-                obj.read(p.Results.filename);
+            if ~strcmp(p.Results.source, '')
+                obj.read(p.Results.source);
             end
         end
 
@@ -132,8 +133,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % input arguments
             p = inputParser();
             is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
+            is_source = @(x) is_string_char(x) || isa(x, 'GAMSTransfer.ConstContainer');
             is_values = @(x) iscellstr(x) && numel(x) <= 5;
-            addRequired(p, 'filename', is_string_char);
+            addRequired(p, 'source', is_source);
             addParameter(p, 'symbols', {}, @iscellstr);
             addParameter(p, 'format', 'table', is_string_char);
             addParameter(p, 'records', true, @islogical);
@@ -142,8 +144,24 @@ classdef Container < GAMSTransfer.BaseContainer
             parse(p, varargin{:});
 
             % read raw data
-            data = obj.readRaw(p.Results.filename, p.Results.symbols, ...
-                p.Results.format, p.Results.records, p.Results.values);
+            if isa(p.Results.source, 'GAMSTransfer.ConstContainer')
+                if p.Results.source.indexed ~= obj.indexed
+                    error('Indexed flags of source and this container must match.');
+                end
+                data = struct();
+                source_data = p.Results.source.data;
+                symbols = p.Results.symbols;
+                if isempty(symbols)
+                    data = source_data;
+                else
+                    for i = 1:numel(symbols)
+                        data.(symbols{i}) = source_data.(symbols{i});
+                    end
+                end
+            else
+                data = obj.readRaw(p.Results.source, p.Results.symbols, ...
+                    p.Results.format, p.Results.records, p.Results.values);
+            end
             symbols = fieldnames(data);
             is_partial_read = numel(p.Results.symbols) > 0;
 
@@ -152,7 +170,8 @@ classdef Container < GAMSTransfer.BaseContainer
                 symbol = data.(symbols{i});
 
                 % handle alias differently
-                if symbol.symbol_type == GAMSTransfer.SymbolType.ALIAS
+                switch symbol.symbol_type
+                case {GAMSTransfer.SymbolType.ALIAS, 'alias'}
                     if ~isfield(obj.data, symbol.alias_with)
                         error('Alias reference for symbol ''%s'' not found: %s.', ...
                             symbol.name, symbol.description);
@@ -179,16 +198,16 @@ classdef Container < GAMSTransfer.BaseContainer
 
                 % convert symbol to GDXSymbol
                 switch symbol.symbol_type
-                case GAMSTransfer.SymbolType.SET
+                case {GAMSTransfer.SymbolType.SET, 'set'}
                     GAMSTransfer.Set(obj, symbol.name, domain, 'description', ...
                         symbol.description, 'is_singleton', symbol.is_singleton);
-                case GAMSTransfer.SymbolType.PARAMETER
+                case {GAMSTransfer.SymbolType.PARAMETER, 'parameter'}
                     GAMSTransfer.Parameter(obj, symbol.name, domain, 'description', ...
                         symbol.description);
-                case GAMSTransfer.SymbolType.VARIABLE
+                case {GAMSTransfer.SymbolType.VARIABLE, 'variable'}
                     GAMSTransfer.Variable(obj, symbol.name, symbol.type, domain, ...
                         'description', symbol.description);
-                case GAMSTransfer.SymbolType.EQUATION
+                case {GAMSTransfer.SymbolType.EQUATION, 'equation'}
                     GAMSTransfer.Equation(obj, symbol.name, symbol.type, domain, ...
                         'description', symbol.description);
                 otherwise
@@ -198,7 +217,11 @@ classdef Container < GAMSTransfer.BaseContainer
                 % set records and store format (no need to call isValid to
                 % detect the format because at this point, we know it)
                 obj.data.(symbol.name).records = symbol.records;
-                obj.data.(symbol.name).format_ = symbol.format;
+                if isnumeric(symbol.format)
+                    obj.data.(symbol.name).format_ = symbol.format;
+                else
+                    obj.data.(symbol.name).format_ = GAMSTransfer.RecordsFormat.str2int(symbol.format);
+                end
 
                 % set uels
                 if isfield(symbol, 'uels') && ~obj.features.categorical && ...

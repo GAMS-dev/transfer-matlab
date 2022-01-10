@@ -25,33 +25,48 @@
 
 function success = test_container(cfg)
     t = GAMSTest('container');
-    test_getlist(t, cfg, false);
-    test_describe(t, cfg, false);
-    test_describePartial(t, cfg, false);
-    test_idx_describe(t, cfg, false);
+    test_getlist(t, cfg, 0);
+    test_describe(t, cfg, 0);
+    test_describePartial(t, cfg, 0);
+    test_idx_describe(t, cfg, 0);
+    test_const2standard(t, cfg);
     test_remove(t, cfg);
     test_universalset(t, cfg);
     [~, n_fails1] = t.summary();
 
     t = GAMSTest('const_container');
-    test_getlist(t, cfg, true);
-    test_describe(t, cfg, true);
-    test_describePartial(t, cfg, true);
-    test_idx_describe(t, cfg, true);
+    test_getlist(t, cfg, 1);
+    test_describe(t, cfg, 1);
+    test_describePartial(t, cfg, 1);
+    test_idx_describe(t, cfg, 1);
     [~, n_fails2] = t.summary();
 
-    success = n_fails1 + n_fails2 == 0;
+    t = GAMSTest('rconst_container');
+    test_getlist(t, cfg, 2);
+    test_describe(t, cfg, 2);
+    test_describePartial(t, cfg, 2);
+    test_idx_describe(t, cfg, 2);
+    [~, n_fails3] = t.summary();
+
+    success = n_fails1 + n_fails2 + n_fails3 == 0;
 end
 
-function test_getlist(t, cfg, is_const_cont)
+function test_getlist(t, cfg, container_type)
 
-    if is_const_cont
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{3}, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
-    else
+    switch container_type
+    case 0
         gdx = GAMSTransfer.Container(cfg.filenames{3}, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
+    case 1
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{3}, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+    case 2
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{3}, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
     end
+    is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
 
     if ~is_const_cont
         t.add('get_list_empty')
@@ -146,11 +161,13 @@ function test_getlist(t, cfg, is_const_cont)
         t.assertEquals(l{2}.name, 'j2');
     end
 
-    if is_const_cont
-        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
-    else
+    switch container_type
+    case {0, 2}
         gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    case 1
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
     end
+    is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
 
     t.add('get_list_sets_is_valid_1');
     l = gdx.listSets('is_valid', true);
@@ -162,12 +179,18 @@ function test_getlist(t, cfg, is_const_cont)
     t.assert(iscell(l));
     t.assert(numel(l) == 0);
 
-    if is_const_cont
+    switch container_type
+    case 0
+        gdx.read(cfg.filenames{1}, 'symbols', {'x'});
+    case 1
         gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'symbols', {'x'}, ...
             'gams_dir', cfg.gams_dir, 'features', cfg.features);
-    else
-        gdx.read(cfg.filenames{1}, 'symbols', {'x'});
+    case 2
+        cgdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'symbols', {'x'}, ...
+            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cgdx, 'symbols', {'x'});
     end
+    is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
 
     t.add('get_list_sets_is_valid_3');
     l = gdx.listSets('is_valid', true);
@@ -184,12 +207,18 @@ function test_getlist(t, cfg, is_const_cont)
     t.assert(numel(l) == 1);
     t.assertEquals(l{1}, 'x');
 
-    if is_const_cont
+    switch container_type
+    case 0
+        gdx.read(cfg.filenames{1}, 'symbols', {'i', 'j'});
+    case 1
         gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'symbols', {'i', 'j', 'x'}, ...
             'gams_dir', cfg.gams_dir, 'features', cfg.features);
-    else
-        gdx.read(cfg.filenames{1}, 'symbols', {'i', 'j'});
+    case 2
+        cgdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'symbols', {'i', 'j', 'x'}, ...
+            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cgdx, 'symbols', {'i', 'j'});
     end
+    is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
 
     t.add('get_list_sets_is_valid_5');
     l = gdx.listSets('is_valid', true);
@@ -204,54 +233,78 @@ function test_getlist(t, cfg, is_const_cont)
 
 end
 
-function test_describe(t, cfg, is_const_cont)
+function test_describe(t, cfg, container_type)
 
     for i = 1:4
         switch i
         case 1
-            if is_const_cont
-                gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'struct', ...
-                    'gams_dir', cfg.gams_dir, 'features', cfg.features);
-            else
+            switch container_type
+            case 0
                 gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
                 gdx.read(cfg.filenames{1}, 'format', 'struct');
+            case 1
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'struct', ...
+                    'gams_dir', cfg.gams_dir, 'features', cfg.features);
+            case 2
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'struct', ...
+                    'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
             end
+            is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
             test_name_describe_sets = 'describe_sets_struct';
             test_name_describe_parameters = 'describe_parameters_struct';
             test_name_describe_variables = 'describe_variables_struct';
         case 2
-            if is_const_cont
-                gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'table', ...
-                    'gams_dir', cfg.gams_dir, 'features', cfg.features);
-            else
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-                gdx.read(cfg.filenames{1}, 'format', 'table');
-            end
-            if ~gdx.features.table
+            if ~cfg.features.table
                 continue
             end
+            switch container_type
+            case 0
+                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx.read(cfg.filenames{1}, 'format', 'table');
+            case 1
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'table', ...
+                    'gams_dir', cfg.gams_dir, 'features', cfg.features);
+            case 2
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'table', ...
+                    'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+            end
+            is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
             test_name_describe_sets = 'describe_sets_table';
             test_name_describe_parameters = 'describe_parameters_table';
             test_name_describe_variables = 'describe_variables_table';
         case 3
-            if is_const_cont
-                gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'dense_matrix', ...
-                    'gams_dir', cfg.gams_dir, 'features', cfg.features);
-            else
+            switch container_type
+            case 0
                 gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
                 gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
+            case 1
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'dense_matrix', ...
+                    'gams_dir', cfg.gams_dir, 'features', cfg.features);
+            case 2
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'dense_matrix', ...
+                    'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
             end
+            is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
             test_name_describe_sets = 'describe_sets_dense_matrix';
             test_name_describe_parameters = 'describe_parameters_dense_matrix';
             test_name_describe_variables = 'describe_variables_dense_matrix';
         case 4
-            if is_const_cont
-                gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'sparse_matrix', ...
-                    'gams_dir', cfg.gams_dir, 'features', cfg.features);
-            else
+            switch container_type
+            case 0
                 gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
                 gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
+            case 1
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'sparse_matrix', ...
+                    'gams_dir', cfg.gams_dir, 'features', cfg.features);
+            case 2
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'sparse_matrix', ...
+                    'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
             end
+            is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
             test_name_describe_sets = 'describe_sets_sparse_matrix';
             test_name_describe_parameters = 'describe_parameters_sparse_matrix';
             test_name_describe_variables = 'describe_variables_sparse_matrix';
@@ -926,15 +979,22 @@ function test_describe(t, cfg, is_const_cont)
     end
 end
 
-function test_describePartial(t, cfg, is_const_cont)
+function test_describePartial(t, cfg, container_type)
 
-    if is_const_cont
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{3}, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
-    else
+    switch container_type
+    case 0
         gdx = GAMSTransfer.Container(cfg.filenames{3}, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
+    case 1
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{3}, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+    case 2
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{3}, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
     end
+    is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
 
     t.add('describe_partial_sets_1');
     tbl = gdx.describeSets(gdx.listSymbols('types', ...
@@ -1185,52 +1245,80 @@ function test_describePartial(t, cfg, is_const_cont)
 
 end
 
-function test_idx_describe(t, cfg, is_const_cont)
+function test_idx_describe(t, cfg, container_type)
 
     for i = 1:4
         switch i
         case 1
-            if is_const_cont
-                gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'struct', ...
-                    'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
-            else
+            switch container_type
+            case 0
                 gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
                 gdx.read(cfg.filenames{4}, 'format', 'struct');
+            case 1
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'struct', ...
+                    'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+            case 2
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'struct', ...
+                    'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+                    'features', cfg.features);
             end
+            is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
             test_name_describe_parameters = 'idx_describe_parameters_struct';
         case 2
             if ~cfg.features.table
                 continue
             end
-            if is_const_cont
-                gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'table', ...
-                    'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
-            else
+            switch container_type
+            case 0
                 gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
                 gdx.read(cfg.filenames{4}, 'format', 'table');
+            case 1
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'table', ...
+                    'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+            case 2
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'table', ...
+                    'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+                    'features', cfg.features);
             end
+            is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
             test_name_describe_parameters = 'idx_describe_parameters_table';
         case 3
-            if is_const_cont
-                gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'dense_matrix', ...
-                    'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
-            else
+            switch container_type
+            case 0
                 gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
                 gdx.read(cfg.filenames{4}, 'format', 'dense_matrix');
+            case 1
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'dense_matrix', ...
+                    'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+            case 2
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'dense_matrix', ...
+                    'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+                    'features', cfg.features);
             end
+            is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
             test_name_describe_parameters = 'idx_describe_parameters_dense_matrix';
         case 4
-            if is_const_cont
-                gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'sparse_matrix', ...
-                    'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
-            else
+            switch container_type
+            case 0
                 gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
                 gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix');
+            case 1
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'sparse_matrix', ...
+                    'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+            case 2
+                gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'format', 'sparse_matrix', ...
+                    'gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+                    'features', cfg.features);
             end
+            is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
             test_name_describe_parameters = 'idx_describe_parameters_sparse_matrix';
         end
 
@@ -1645,6 +1733,54 @@ function test_idx_describe(t, cfg, is_const_cont)
             t.assert(tbl.count_eps(3) == 0);
         end
     end
+end
+
+function test_const2standard(t, cfg)
+
+    t.add('const2standard_no_idx_no_idx');
+    try
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+    catch
+        t.assert(false);
+    end
+
+    t.add('const2standard_idx_idx');
+    try
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'indexed', true, ...
+            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.Container(gdx, 'indexed', true, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+    catch
+        t.assert(false);
+    end
+
+    t.add('const2standard_no_idx_idx');
+    try
+        t.assert(false);
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.Container(gdx, 'indexed', true, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Indexed flags of source and this container must match.');
+    end
+
+    t.add('const2standard_idx_no_idx');
+    try
+        t.assert(false);
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'indexed', true, ...
+            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Indexed flags of source and this container must match.');
+    end
+
 end
 
 function test_remove(t, cfg)
