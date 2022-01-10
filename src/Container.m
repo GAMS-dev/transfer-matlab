@@ -2,17 +2,9 @@ classdef Container < GAMSTransfer.BaseContainer
     % GAMSTransfer Container stores (multiple) symbols
     %
     % A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
-    % parameters), each holding multiple symbol records. In GAMSTransfer the
+    % parameters), each holding multiple symbol records. In GAMS Transfer the
     % Container is the main object that holds different symbols and allows to
-    % read and write those to GDX. There is a fix correspondance to a GDX file,
-    % i.e. the file to be read must be given when creating the container and
-    % can't be changed thereafter. Hence, it is (currently) not possible to read
-    % multiple GDX files into the same container. Simply create multiple
-    % containers for each GDX file to be read.
-    %
-    % When a GDX file is given, the container will read the list of symbols from
-    % the GDX files, but no records. This allows to look what is inside the file
-    % without reading all data records.
+    % read and write those to GDX.
     %
     % Indexed Mode:
     % There are two different modes GAMSTransfer can be used in: indexed or
@@ -28,8 +20,8 @@ classdef Container < GAMSTransfer.BaseContainer
     % thereafter.
     %
     % Optional Arguments:
-    % 1. filename: string
-    %    Path to GDX file to be read
+    % 1. source: string or ConstContainer
+    %    Path to GDX file or a ConstContainer object to be read
     %
     % Parameter Arguments:
     % - gams_dir: string
@@ -44,7 +36,7 @@ classdef Container < GAMSTransfer.BaseContainer
     % c = Container('indexed', true, 'gams_dir', 'C:\GAMS');
     %
     % See also: GAMSTransfer.Set, GAMSTransfer.Alias, GAMSTransfer.Parameter,
-    % GAMSTransfer.Variable, GAMSTransfer.Equation
+    % GAMSTransfer.Variable, GAMSTransfer.Equation, GAMSTransfer.ConstContainer
     %
 
     %
