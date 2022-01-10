@@ -188,6 +188,10 @@ void gt_mex_addsymbol(
     double sparsity;
     mxArray* mx_arr_sym_struct = NULL;
 
+    /* adapt subtype */
+    if (type == GMS_DT_EQU)
+        subtype -= GMS_EQU_USERINFO_BASE;
+
     /* create symbol structure */
     mx_arr_sym_struct = mxCreateStructMatrix(1, 1, 0, NULL);
 

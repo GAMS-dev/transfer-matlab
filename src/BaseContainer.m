@@ -396,7 +396,7 @@ classdef BaseContainer < handle
 
     methods (Hidden, Access = protected)
 
-        function data = readRaw(obj, filename, symbols, format, values)
+        function data = readRaw(obj, filename, symbols, format, records, values)
             % Reads symbol records from GDX file
             %
 
@@ -436,11 +436,11 @@ classdef BaseContainer < handle
             % read records
             if obj.indexed
                 data = GAMSTransfer.gt_cmex_idx_read(obj.gams_dir, filename, ...
-                    symbols, int32(format_int));
+                    symbols, int32(format_int), records);
             else
                 data = GAMSTransfer.gt_cmex_gdx_read(obj.gams_dir, filename, ...
-                    symbols, int32(format_int), values_bool, obj.features.categorical, ...
-                    obj.features.c_prop_setget);
+                    symbols, int32(format_int), records, values_bool, ...
+                    obj.features.categorical, obj.features.c_prop_setget);
             end
             symbols = fieldnames(data);
 

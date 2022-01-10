@@ -87,6 +87,7 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
             addOptional(p, 'filename', '', is_string_char);
             addParameter(p, 'symbols', {}, @iscellstr);
             addParameter(p, 'format', 'table', is_string_char);
+            addParameter(p, 'records', true, @islogical);
             addParameter(p, 'values', {'level', 'marginal', 'lower', 'upper', 'scale'}, ...
                 is_values);
             addParameter(p, 'gams_dir', '', is_string_char);
@@ -103,7 +104,7 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
 
             % read raw data
             data = obj.readRaw(p.Results.filename, p.Results.symbols, ...
-                p.Results.format, p.Results.values);
+                p.Results.format, p.Results.records, p.Results.values);
             symbols = fieldnames(data);
 
             % transform data into Symbol object

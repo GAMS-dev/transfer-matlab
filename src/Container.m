@@ -114,6 +114,8 @@ classdef Container < GAMSTransfer.BaseContainer
             %   List of symbols to be read. All if empty. Default is {}.
             % - format: string
             %   Records format symbols should be stored in. Default is table.
+            % - records: bool
+            %   Enables reading of records. Default is true.
             % - values: cell
             %   Subset of {'level', 'marginal', 'lower', 'upper', 'scale'} that
             %   defines what value fields should be read. Default is all.
@@ -134,13 +136,14 @@ classdef Container < GAMSTransfer.BaseContainer
             addRequired(p, 'filename', is_string_char);
             addParameter(p, 'symbols', {}, @iscellstr);
             addParameter(p, 'format', 'table', is_string_char);
+            addParameter(p, 'records', true, @islogical);
             addParameter(p, 'values', {'level', 'marginal', 'lower', 'upper', 'scale'}, ...
                 is_values);
             parse(p, varargin{:});
 
             % read raw data
             data = obj.readRaw(p.Results.filename, p.Results.symbols, ...
-                p.Results.format, p.Results.values);
+                p.Results.format, p.Results.records, p.Results.values);
             symbols = fieldnames(data);
             is_partial_read = numel(p.Results.symbols) > 0;
 

@@ -26,6 +26,7 @@
 function success = test_readwrite(cfg)
     t = GAMSTest('readwrite');
     test_read(t, cfg, false);
+    test_readNoRecords(t, cfg, false);
     test_readPartial(t, cfg, false);
     test_readSpecialValues(t, cfg, false);
     test_readDomainCycle(t, cfg, false);
@@ -39,6 +40,7 @@ function success = test_readwrite(cfg)
 
     t = GAMSTest('const_readwrite');
     test_read(t, cfg, true);
+    test_readNoRecords(t, cfg, true);
     test_readPartial(t, cfg, true);
     test_readSpecialValues(t, cfg, true);
     test_readDomainCycle(t, cfg, true);
@@ -1081,6 +1083,165 @@ function test_read(t, cfg, is_const_cont)
     t.assertEquals(uels{3}, 'j7');
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
+end
+
+function test_readNoRecords(t, cfg, is_const_cont)
+
+    if is_const_cont
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'struct', ...
+            'records', false, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+    else
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'struct', 'records', false);
+    end
+
+    t.add('read_no_records_set');
+    t.assert(isfield(gdx.data, 'i'));
+    s = gdx.data.i;
+    if is_const_cont
+        t.assertEquals(s.symbol_type, 'set');
+    else
+        t.assert(isa(s, 'GAMSTransfer.Set'));
+    end
+    t.assertEquals(s.name, 'i');
+    t.assertEquals(s.description, 'set_i');
+    t.assert(~s.is_singleton);
+    t.assert(s.dimension == 1);
+    t.assert(numel(s.domain) == 1);
+    t.assertEquals(s.domain{1}, '*');
+    t.assert(numel(s.domain_labels) == 1);
+    t.assertEquals(s.domain_labels{1}, 'uni_1');
+    t.assertEquals(s.domain_type, 'none');
+    t.assert(numel(s.size) == 1);
+    t.assert(isnan(s.size(1)));
+    t.assertEquals(s.format, 'empty');
+    if is_const_cont
+        t.assert(isnan(s.sparsity));
+        t.assert(s.number_records == 5);
+        t.assert(s.number_values == 0);
+    else
+        t.assert(isnan(s.getCardenality()));
+        t.assert(isnan(s.getSparsity()));
+        t.assert(s.getNumberRecords() == 0);
+        t.assert(s.getNumberValues() == 0);
+        t.assert(s.isValid());
+    end
+
+    t.add('read_no_records_scalar');
+    t.assert(isfield(gdx.data, 'a'));
+    s = gdx.data.a;
+    if is_const_cont
+        t.assertEquals(s.symbol_type, 'parameter');
+    else
+        t.assert(isa(s, 'GAMSTransfer.Parameter'));
+    end
+    t.assertEquals(s.name, 'a');
+    t.assertEquals(s.description, 'par_a');
+    t.assert(s.dimension == 0);
+    t.assert(numel(s.domain) == 0);
+    t.assert(numel(s.domain_labels) == 0);
+    t.assertEquals(s.domain_type, 'none');
+    t.assert(numel(s.size) == 0);
+    t.assertEquals(s.format, 'empty');
+    if is_const_cont
+        t.assert(~isnan(s.sparsity));
+        t.assert(s.number_records == 1);
+        t.assert(s.number_values == 0);
+    else
+        t.assert(s.getCardenality() == 1);
+        t.assert(~isnan(s.getSparsity()));
+        t.assert(s.getNumberRecords() == 0);
+        t.assert(s.getNumberValues() == 0);
+        t.assert(s.isValid());
+    end
+
+    t.add('read_no_records_parameter');
+    t.assert(isfield(gdx.data, 'b'));
+    s = gdx.data.b;
+    if is_const_cont
+        t.assertEquals(s.symbol_type, 'parameter');
+    else
+        t.assert(isa(s, 'GAMSTransfer.Parameter'));
+    end
+    t.assertEquals(s.name, 'b');
+    t.assertEquals(s.description, 'par_b');
+    t.assert(s.dimension == 1);
+    t.assert(numel(s.domain) == 1);
+    if is_const_cont
+        t.assertEquals(s.domain{1}, 'i');
+    else
+        t.assertEquals(s.domain{1}.id, gdx.data.i.id);
+        t.assertEquals(s.domain{1}.name, 'i');
+    end
+    t.assert(numel(s.domain_labels) == 1);
+    t.assertEquals(s.domain_labels{1}, 'i_1');
+    t.assertEquals(s.domain_type, 'regular');
+    t.assert(numel(s.size) == 1);
+    if is_const_cont
+        t.assert(s.size(1) == 5);
+    else
+        t.assert(s.size(1) == 0);
+    end
+    t.assertEquals(s.format, 'empty');
+    if is_const_cont
+        t.assert(~isnan(s.sparsity));
+        t.assert(s.number_records == 3);
+        t.assert(s.number_values == 0);
+    else
+        t.assert(s.getCardenality() == 0);
+        t.assert(isnan(s.getSparsity()));
+        t.assert(s.getNumberRecords() == 0);
+        t.assert(s.getNumberValues() == 0);
+        t.assert(s.isValid());
+    end
+
+    t.add('read_no_records_variable');
+    t.assert(isfield(gdx.data, 'x'));
+    s = gdx.data.x;
+    if is_const_cont
+        t.assertEquals(s.symbol_type, 'variable');
+    else
+        t.assert(isa(s, 'GAMSTransfer.Variable'));
+    end
+    t.assertEquals(s.name, 'x');
+    t.assertEquals(s.description, 'var_x');
+    t.assertEquals(s.type, 'positive');
+    t.assert(s.dimension == 2);
+    t.assert(numel(s.domain) == 2);
+    if is_const_cont
+        t.assertEquals(s.domain{1}, 'i');
+        t.assertEquals(s.domain{2}, 'j');
+    else
+        t.assertEquals(s.domain{1}.id, gdx.data.i.id);
+        t.assertEquals(s.domain{2}.id, gdx.data.j.id);
+        t.assertEquals(s.domain{1}.name, 'i');
+        t.assertEquals(s.domain{2}.name, 'j');
+    end
+    t.assert(numel(s.domain_labels) == 2);
+    t.assertEquals(s.domain_labels{1}, 'i_1');
+    t.assertEquals(s.domain_labels{2}, 'j_2');
+    t.assertEquals(s.domain_type, 'regular');
+    t.assert(numel(s.size) == 2);
+    if is_const_cont
+        t.assert(s.size(1) == 5);
+        t.assert(s.size(2) == 5);
+    else
+        t.assert(s.size(1) == 0);
+        t.assert(s.size(2) == 0);
+    end
+    t.assertEquals(s.format, 'empty');
+    if is_const_cont
+        t.assert(~isnan(s.sparsity));
+        t.assert(s.number_records == 6);
+        t.assert(s.number_values == 0);
+    else
+        t.assert(s.getCardenality() == 0);
+        t.assert(isnan(s.getSparsity()));
+        t.assert(s.getNumberRecords() == 0);
+        t.assert(s.getNumberValues() == 0);
+        t.assert(s.isValid());
+    end
+
 end
 
 function test_readPartial(t, cfg, is_const_cont)

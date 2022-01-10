@@ -47,6 +47,7 @@ void mexFunction(
     int format, orig_format, lastdim, ival, ival2, ival3, n_symbols;
     int sym_count;
     size_t dim, nrecs, nvals, n_dom_fields;
+    bool read_records;
     bool values_flag[GMS_VAL_MAX];
     char buf[GMS_SSSIZE], name[GMS_SSSIZE], gdx_filename[GMS_SSSIZE], sysdir[GMS_SSSIZE];
     char text[GMS_SSSIZE];
@@ -81,11 +82,12 @@ void mexFunction(
     GDXSTRINDEXPTRS_INIT(domains, domains_ptr);
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(1, nlhs, 4, nrhs);
+    gt_mex_check_arguments_num(1, nlhs, 5, nrhs);
     gt_mex_check_argument_str(prhs, 0, sysdir);
     gt_mex_check_argument_str(prhs, 1, gdx_filename);
     gt_mex_check_argument_cell(prhs, 2);
     gt_mex_check_argument_int(prhs, 3, GT_FILTER_NONE, 1, &orig_format);
+    gt_mex_check_argument_bool(prhs, 4, 1, &read_records);
     if (orig_format != GT_FORMAT_STRUCT && orig_format != GT_FORMAT_DENSEMAT &&
         orig_format != GT_FORMAT_SPARSEMAT && orig_format != GT_FORMAT_TABLE)
         mexErrMsgIdAndTxt(ERRID"format", "Invalid record format.");
@@ -163,6 +165,15 @@ void mexFunction(
             mx_dom_nrecs[j] = 1;
         for (size_t j = 0; j < dim; j++)
             mx_dom_nrecs[j] = sizes_int[j];
+
+        /* only go on if reading records */
+        if (!read_records)
+        {
+            gt_mex_addsymbol(plhs[0], name, text, GMS_DT_PAR, 0, GT_FORMAT_EMPTY,
+                dim, sizes, (const char**) domains_ptr, (const char**) domains_ptr,
+                2, nrecs, 0, NULL, NULL);
+            continue;
+        }
 
         /* get default values dependent on type */
         gt_utils_type_default_values(GMS_DT_PAR, 0, true, def_values);

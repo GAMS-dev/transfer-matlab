@@ -49,7 +49,7 @@ void mexFunction(
     int sym_id, format, orig_format, type, subtype, lastdim, ival, sym_count;
     int n_acronyms, uel_count, n_symbols, dom_type;
     size_t dim, nrecs, nvals, n_dom_fields;
-    bool support_categorical, support_setget;
+    bool support_categorical, support_setget, read_records;
     bool orig_values_flag[GMS_VAL_MAX], values_flag[GMS_VAL_MAX];
     char buf[GMS_SSSIZE], gdx_filename[GMS_SSSIZE], sysdir[GMS_SSSIZE];
     char name[GMS_SSSIZE], text[GMS_SSSIZE];
@@ -91,14 +91,15 @@ void mexFunction(
     GDXSTRINDEXPTRS_INIT(domain_labels, domain_labels_ptr);
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(1, nlhs, 7, nrhs);
+    gt_mex_check_arguments_num(1, nlhs, 8, nrhs);
     gt_mex_check_argument_str(prhs, 0, sysdir);
     gt_mex_check_argument_str(prhs, 1, gdx_filename);
     gt_mex_check_argument_cell(prhs, 2);
     gt_mex_check_argument_int(prhs, 3, GT_FILTER_NONE, 1, &orig_format);
-    gt_mex_check_argument_bool(prhs, 4, 5, orig_values_flag);
-    gt_mex_check_argument_bool(prhs, 5, 1, &support_categorical);
-    gt_mex_check_argument_bool(prhs, 6, 1, &support_setget);
+    gt_mex_check_argument_bool(prhs, 4, 1, &read_records);
+    gt_mex_check_argument_bool(prhs, 5, 5, orig_values_flag);
+    gt_mex_check_argument_bool(prhs, 6, 1, &support_categorical);
+    gt_mex_check_argument_bool(prhs, 7, 1, &support_setget);
     if (orig_format != GT_FORMAT_STRUCT && orig_format != GT_FORMAT_DENSEMAT &&
         orig_format != GT_FORMAT_SPARSEMAT && orig_format != GT_FORMAT_TABLE)
         mexErrMsgIdAndTxt(ERRID"format", "Invalid record format.");
@@ -293,6 +294,24 @@ void mexFunction(
 
             if (!gdxDataReadDone(gdx))
                 mexErrMsgIdAndTxt(ERRID"gdxDataReadDone", "GDX error (gdxDataReadDone)");
+        }
+
+        /* get shape of symbol */
+        for (size_t j = 0; j < dim; j++)
+            if (dom_type == 3)
+                sizes[j] = mx_dom_nrecs[j];
+            else
+                sizes[j] = mxGetNaN();
+
+        /* only go on if reading records */
+        if (!read_records)
+        {
+            gt_mex_addsymbol(plhs[0], name, text, type, subtype, GT_FORMAT_EMPTY,
+                dim, sizes, (const char**) domains_ptr, (const char**) domain_labels_ptr,
+                dom_type, nrecs, 0, NULL, NULL);
+            for (size_t j = 0; j < dim; j++)
+                mxFree(dom_uels_used[j]);
+            continue;
         }
 
         /* get default values dependent on type */
@@ -532,7 +551,6 @@ void mexFunction(
         /* set uel fields
          * Note: only needed if categorical is not used in case of table like
          * formats. For matrix formats always needed. */
-        mx_arr_uels = mxCreateCellMatrix(1, dim);
         switch (format)
         {
             case GT_FORMAT_STRUCT:
@@ -541,6 +559,7 @@ void mexFunction(
                     break;
             case GT_FORMAT_DENSEMAT:
             case GT_FORMAT_SPARSEMAT:
+                mx_arr_uels = mxCreateCellMatrix(1, dim);
                 for (size_t j = 0; j < dim; j++)
                     mxSetCell(mx_arr_uels, j, mx_arr_dom_uels[j]);
                 break;
@@ -551,13 +570,6 @@ void mexFunction(
             gt_mex_struct2table(&mx_arr_records);
 
         /* store records in symbol */
-        for (size_t j = 0; j < dim; j++)
-            if (dom_type == 3)
-                sizes[j] = mx_dom_nrecs[j];
-            else
-                sizes[j] = mxGetNaN();
-        if (type == GMS_DT_EQU)
-            subtype -= GMS_EQU_USERINFO_BASE;
         gt_mex_addsymbol(plhs[0], name, text, type, subtype, format, dim, sizes,
             (const char**) domains_ptr, (const char**) domain_labels_ptr, dom_type,
             nrecs, nvals, mx_arr_records, mx_arr_uels);
