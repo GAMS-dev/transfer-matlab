@@ -216,15 +216,17 @@ classdef Container < GAMSTransfer.BaseContainer
                 end
 
                 % set uels
-                if isfield(symbol, 'uels') && ~obj.features.categorical && ...
-                    symbol.format ~= GAMSTransfer.RecordsFormat.DENSE_MATRIX && ...
-                    symbol.format ~= GAMSTransfer.RecordsFormat.SPARSE_MATRIX && ...
-                    ~strcmp(symbol.format, 'dense_matrix') && ~strcmp(symbol.format, 'sparse_matrix')
-                    for j = 1:numel(symbol.domain)
-                        if isempty(symbol.uels{j})
-                            continue
+                if isfield(symbol, 'uels') && ~obj.features.categorical
+                    switch symbol.format
+                    case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, 'dense_matrix',
+                        GAMSTransfer.RecordsFormat.SPARSE_MATRIX, 'sparse_matrix'}
+                    otherwise
+                        for j = 1:numel(symbol.domain)
+                            if isempty(symbol.uels{j})
+                                continue
+                            end
+                            obj.data.(symbol.name).initUELs(j, symbol.uels{j});
                         end
-                        obj.data.(symbol.name).initUELs(j, symbol.uels{j});
                     end
                 end
             end

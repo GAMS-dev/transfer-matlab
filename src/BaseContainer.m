@@ -220,10 +220,34 @@ classdef BaseContainer < handle
 
             p = inputParser();
             addParameter(p, 'is_valid', nan);
+            addParameter(p, 'type', nan);
             parse(p, varargin{:});
 
             list = obj.listSymbols('types', GAMSTransfer.SymbolType.VARIABLE, ...
                 'is_valid', p.Results.is_valid);
+
+            % check for further filtering
+            if isstring(p.Results.type) && numel(p.Results.type) == 1 || ischar(p.Results.type)
+                type_request = [GAMSTransfer.VariableType.str2int(p.Results.type)];
+            elseif iscellstr(p.Results.type)
+                type_request = zeros(size(p.Results.type));
+                for i = 1:numel(type_request)
+                    type_request(i) = GAMSTransfer.VariableType.str2int(p.Results.type{i});
+                end
+            elseif isnan(p.Results.type)
+                return;
+            else
+                error('Type must be cellstr or string.');
+            end
+
+            % filter
+            filter = false(size(list));
+            for i = 1:numel(list)
+                symbol = obj.data.(list{i});
+                type_sym = GAMSTransfer.VariableType.str2int(symbol.type);
+                filter(i) = sum(type_request == type_sym) > 0;
+            end
+            list = list(filter);
         end
 
         function list = listEquations(obj, varargin)
@@ -244,10 +268,34 @@ classdef BaseContainer < handle
 
             p = inputParser();
             addParameter(p, 'is_valid', nan);
+            addParameter(p, 'type', nan);
             parse(p, varargin{:});
 
             list = obj.listSymbols('types', GAMSTransfer.SymbolType.EQUATION, ...
                 'is_valid', p.Results.is_valid);
+
+            % check for further filtering
+            if isstring(p.Results.type) && numel(p.Results.type) == 1 || ischar(p.Results.type)
+                type_request = [GAMSTransfer.EquationType.str2int(p.Results.type)];
+            elseif iscellstr(p.Results.type)
+                type_request = zeros(size(p.Results.type));
+                for i = 1:numel(type_request)
+                    type_request(i) = GAMSTransfer.EquationType.str2int(p.Results.type{i});
+                end
+            elseif isnan(p.Results.type)
+                return;
+            else
+                error('Type must be cellstr or string.');
+            end
+
+            % filter
+            filter = false(size(list));
+            for i = 1:numel(list)
+                symbol = obj.data.(list{i});
+                type_sym = GAMSTransfer.EquationType.str2int(symbol.type);
+                filter(i) = sum(type_request == type_sym) > 0;
+            end
+            list = list(filter);
         end
 
         function list = listAliases(obj, varargin)

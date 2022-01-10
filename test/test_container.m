@@ -161,6 +161,31 @@ function test_getlist(t, cfg, container_type)
         t.assertEquals(l{2}.name, 'j2');
     end
 
+    t.add('get_list_variables_types_1');
+    l = gdx.listVariables('type', 'positive');
+    t.assert(numel(l) == 1);
+    t.assertEquals(l{1}, 'x5');
+
+    t.add('get_list_variables_types_2');
+    l = gdx.listVariables('type', {'binary', 'integer'});
+    t.assert(numel(l) == 2);
+    t.assertEquals(l{1}, 'x3');
+    t.assertEquals(l{2}, 'x4');
+
+    t.add('get_list_equations_types_1');
+    l = gdx.listEquations('type', 'e');
+    t.assert(numel(l) == 1);
+    t.assertEquals(l{1}, 'e1');
+    l = gdx.listEquations('type', 'eq');
+    t.assert(numel(l) == 1);
+    t.assertEquals(l{1}, 'e1');
+
+    t.add('get_list_equations_types_2');
+    l = gdx.listEquations('type', {'leq', 'g'});
+    t.assert(numel(l) == 2);
+    t.assertEquals(l{1}, 'e2');
+    t.assertEquals(l{2}, 'e3');
+
     switch container_type
     case {0, 2}
         gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
