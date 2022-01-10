@@ -220,6 +220,8 @@ void gt_mex_addsymbol(
             n_val_fields = 5;
             gt_mex_addfield_int(mx_arr_sym_struct, "type", 1, &subtype);
             break;
+        default:
+            n_val_fields = 0;
     }
     gt_mex_addfield_sizet(mx_arr_sym_struct, "dimension", 1, &dim);
     if (sizes)

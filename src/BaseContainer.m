@@ -43,7 +43,7 @@ classdef BaseContainer < handle
         features
     end
 
-    methods (Hidden, Access = {?GAMSTransfer.Container, ?GAMSTransfer.ConstContainer})
+    methods (Hidden)
 
         function obj = BaseContainer(gams_dir, indexed, features)
             % Constructs a GAMSTransfer BaseContainer.
