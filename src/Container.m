@@ -1,5 +1,5 @@
 classdef Container < GAMSTransfer.BaseContainer
-    % GAMSTransfer Container stores (multiple) symbols
+    % GAMS Transfer Container stores (multiple) symbols
     %
     % A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
     % parameters), each holding multiple symbol records. In GAMS Transfer the
@@ -107,7 +107,7 @@ classdef Container < GAMSTransfer.BaseContainer
             %   List of symbols to be read. All if empty. Default is {}.
             % - format: string
             %   Records format symbols should be stored in. Default is table.
-            % - records: bool
+            % - records: logical
             %   Enables reading of records. Default is true.
             % - values: cell
             %   Subset of {'level', 'marginal', 'lower', 'upper', 'scale'} that
@@ -655,8 +655,6 @@ classdef Container < GAMSTransfer.BaseContainer
 
         function valid = isValid(obj, varargin)
             % Checks correctness of all symbols
-            %
-            % Note: Not yet read symbols will be ignored.
             %
             % Optional Arguments:
             % 1. verbose: logical

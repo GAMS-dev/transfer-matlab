@@ -1,3 +1,4 @@
+
 classdef ConstContainer < GAMSTransfer.BaseContainer
     % GAMS Transfer ConstContainer stores (multiple) symbols (read-only)
     %
@@ -43,7 +44,7 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
     %   List of symbols to be read. All if empty. Default is {}.
     % - format: string
     %   Records format symbols should be stored in. Default is table.
-    % - records: bool
+    % - records: logical
     %   Enables reading of records. Default is true.
     % - values: cell
     %   Subset of {'level', 'marginal', 'lower', 'upper', 'scale'} that

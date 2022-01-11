@@ -155,8 +155,6 @@ classdef BaseContainer < handle
         function list = listSets(obj, varargin)
             % Lists all sets in container
             %
-            % Note: This method includes set aliases.
-            %
             % Parameter Arguments:
             % - is_valid: logical or any
             %   Enable valid filter if argument is of type logical. If true,
@@ -210,6 +208,9 @@ classdef BaseContainer < handle
             %   Enable valid filter if argument is of type logical. If true,
             %   only include symbols that are valid and, if false, only invalid
             %   symbols. Default: not logical.
+            % - types: any
+            %   Enable filter for variable type, e.g. type = {'binary',
+            %   'integer'}. Default: not applied.
             %
             % See also: GAMSTransfer.Container.listSymbols,
             % GAMSTransfer.Container.listSets,
@@ -220,21 +221,21 @@ classdef BaseContainer < handle
 
             p = inputParser();
             addParameter(p, 'is_valid', nan);
-            addParameter(p, 'type', nan);
+            addParameter(p, 'types', nan);
             parse(p, varargin{:});
 
             list = obj.listSymbols('types', GAMSTransfer.SymbolType.VARIABLE, ...
                 'is_valid', p.Results.is_valid);
 
             % check for further filtering
-            if isstring(p.Results.type) && numel(p.Results.type) == 1 || ischar(p.Results.type)
-                type_request = [GAMSTransfer.VariableType.str2int(p.Results.type)];
-            elseif iscellstr(p.Results.type)
-                type_request = zeros(size(p.Results.type));
+            if isstring(p.Results.types) && numel(p.Results.types) == 1 || ischar(p.Results.types)
+                type_request = [GAMSTransfer.VariableType.str2int(p.Results.types)];
+            elseif iscellstr(p.Results.types)
+                type_request = zeros(size(p.Results.types));
                 for i = 1:numel(type_request)
-                    type_request(i) = GAMSTransfer.VariableType.str2int(p.Results.type{i});
+                    type_request(i) = GAMSTransfer.VariableType.str2int(p.Results.types{i});
                 end
-            elseif isnan(p.Results.type)
+            elseif isnan(p.Results.types)
                 return;
             else
                 error('Type must be cellstr or string.');
@@ -257,7 +258,10 @@ classdef BaseContainer < handle
             % - is_valid: logical or any
             %   Enable valid filter if argument is of type logical. If true,
             %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   symbols. Default: not applied.
+            % - types: any
+            %   Enable filter for equation type, e.g. type = {'g', 'l'}.
+            %   Default: not applied.
             %
             % See also: GAMSTransfer.Container.listSymbols,
             % GAMSTransfer.Container.listSets,
@@ -268,21 +272,21 @@ classdef BaseContainer < handle
 
             p = inputParser();
             addParameter(p, 'is_valid', nan);
-            addParameter(p, 'type', nan);
+            addParameter(p, 'types', nan);
             parse(p, varargin{:});
 
             list = obj.listSymbols('types', GAMSTransfer.SymbolType.EQUATION, ...
                 'is_valid', p.Results.is_valid);
 
             % check for further filtering
-            if isstring(p.Results.type) && numel(p.Results.type) == 1 || ischar(p.Results.type)
-                type_request = [GAMSTransfer.EquationType.str2int(p.Results.type)];
-            elseif iscellstr(p.Results.type)
-                type_request = zeros(size(p.Results.type));
+            if isstring(p.Results.types) && numel(p.Results.types) == 1 || ischar(p.Results.types)
+                type_request = [GAMSTransfer.EquationType.str2int(p.Results.types)];
+            elseif iscellstr(p.Results.types)
+                type_request = zeros(size(p.Results.types));
                 for i = 1:numel(type_request)
-                    type_request(i) = GAMSTransfer.EquationType.str2int(p.Results.type{i});
+                    type_request(i) = GAMSTransfer.EquationType.str2int(p.Results.types{i});
                 end
-            elseif isnan(p.Results.type)
+            elseif isnan(p.Results.types)
                 return;
             else
                 error('Type must be cellstr or string.');
