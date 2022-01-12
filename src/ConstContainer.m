@@ -40,15 +40,8 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
     %    Path to GDX file to be read
     %
     % Parameter Arguments:
-    % - symbols: cell
-    %   List of symbols to be read. All if empty. Default is {}.
-    % - format: string
-    %   Records format symbols should be stored in. Default is table.
     % - records: logical
-    %   Enables reading of records. Default is true.
-    % - values: cell
-    %   Subset of {'level', 'marginal', 'lower', 'upper', 'scale'} that
-    %   defines what value fields should be read. Default is all.
+    %   Enables reading of records. Default is false.
     % - gams_dir: string
     %   Path to GAMS system directory. Default is determined from PATH
     %   environment variable
@@ -100,11 +93,7 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
                 ~strcmpi(x, 'features');
             is_values = @(x) iscellstr(x) && numel(x) <= 5;
             addOptional(p, 'filename', '', is_string_char);
-            addParameter(p, 'symbols', {}, @iscellstr);
-            addParameter(p, 'format', 'table', is_string_char);
-            addParameter(p, 'records', true, @islogical);
-            addParameter(p, 'values', {'level', 'marginal', 'lower', 'upper', 'scale'}, ...
-                is_values);
+            addParameter(p, 'records', false, @islogical);
             addParameter(p, 'gams_dir', '', is_string_char);
             addParameter(p, 'indexed', false, @islogical);
             addParameter(p, 'features', struct(), @isstruct);
@@ -113,9 +102,52 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
             obj = obj@GAMSTransfer.BaseContainer(p.Results.gams_dir, p.Results.indexed, ...
                 p.Results.features);
 
-            if strcmp(p.Results.filename, '')
-                return
+            if ~strcmp(p.Results.filename, '')
+                obj.read(p.Results.filename, 'records', p.Results.records);
             end
+        end
+
+        function read(obj, varargin)
+            % Reads symbols from GDX file (current symbols will be lost).
+            %
+            % Required Arguments:
+            % 1. filename: string
+            %    Path to GDX file to be read
+            %
+            % Parameter Arguments:
+            % - symbols: cell
+            %   List of symbols to be read. All if empty. Default is {}.
+            % - format: string
+            %   Records format symbols should be stored in. Default is table.
+            % - records: logical
+            %   Enables reading of records. Default is true.
+            % - values: cell
+            %   Subset of {'level', 'marginal', 'lower', 'upper', 'scale'} that
+            %   defines what value fields should be read. Default is all.
+            %
+            % Example:
+            % c = Container();
+            % c.read('path/to/file.gdx');
+            % c.read('path/to/file.gdx', 'format', 'dense_matrix');
+            % c.read('path/to/file.gdx', 'symbols', {'x', 'z'}, 'format', 'struct', 'values', {'level'});
+            %
+            % See also: GAMSTransfer.RecordsFormat
+            %
+
+            % input arguments
+            p = inputParser();
+            is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
+            is_values = @(x) iscellstr(x) && numel(x) <= 5;
+            addOptional(p, 'filename', '', is_string_char);
+            addParameter(p, 'symbols', {}, @iscellstr);
+            addParameter(p, 'format', 'table', is_string_char);
+            addParameter(p, 'records', true, @islogical);
+            addParameter(p, 'values', {'level', 'marginal', 'lower', 'upper', 'scale'}, ...
+                is_values);
+            parse(p, varargin{:});
+
+            % clear data
+            obj.data = struct();
 
             % read raw data
             data = obj.readRaw(p.Results.filename, p.Results.symbols, ...
@@ -166,7 +198,6 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
                 case {'dense_matrix', 'sparse_matrix'}
                     data.(n).number_records = nan;
                 end
-
             end
 
             obj.data = data;

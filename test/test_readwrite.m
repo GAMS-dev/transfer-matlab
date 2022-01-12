@@ -71,8 +71,8 @@ function test_read(t, cfg, container_type)
         gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     case 2
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'records', true, ...
+            'gams_dir', cfg.gams_dir, 'features', cfg.features);
         gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     end
@@ -214,11 +214,11 @@ function test_read(t, cfg, container_type)
         gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         gdx.read(cfg.filenames{1}, 'format', 'struct');
     case 1
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'struct', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'struct');
     case 2
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'struct', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'struct');
         gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     end
@@ -447,11 +447,11 @@ function test_read(t, cfg, container_type)
             gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
             gdx.read(cfg.filenames{1}, 'format', 'table');
         case 1
-            gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'table', ...
-                'gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx.read(cfg.filenames{1}, 'format', 'table');
         case 2
-            gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'table', ...
-                'gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx.read(cfg.filenames{1}, 'format', 'table');
             gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
                 cfg.gams_dir, 'features', cfg.features);
         end
@@ -681,11 +681,11 @@ function test_read(t, cfg, container_type)
         gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
     case 1
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'dense_matrix', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
     case 2
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'dense_matrix', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
         gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     end
@@ -903,11 +903,11 @@ function test_read(t, cfg, container_type)
         gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
     case 1
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'sparse_matrix', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
     case 2
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'sparse_matrix', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
         gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     end
@@ -1137,11 +1137,11 @@ function test_readNoRecords(t, cfg, container_type)
         gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'records', false);
     case 1
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'struct', ...
-            'records', false, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'struct', 'records', false);
     case 2
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'struct', ...
-            'records', false, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'struct', 'records', false);
         gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     end
@@ -1304,13 +1304,13 @@ function test_readPartial(t, cfg, container_type)
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'i', 'j', 'x'}, ...
             'values', {'level', 'marginal'});
     case 1
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'struct', ...
-            'symbols', {'i', 'j', 'x'}, 'values', {'level', 'marginal'}, ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'i', 'j', 'x'}, ...
+            'values', {'level', 'marginal'});
     case 2
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'struct', ...
-            'symbols', {'i', 'j', 'x'}, 'values', {'level', 'marginal'}, ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'i', 'j', 'x'}, ...
+            'values', {'level', 'marginal'});
         gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     end
@@ -1430,13 +1430,11 @@ function test_readPartial(t, cfg, container_type)
         gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'x'}, 'values', {'marginal'});
     case 1
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'struct', ...
-            'symbols', {'x'}, 'values', {'marginal'}, 'gams_dir', cfg.gams_dir, ...
-            'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'x'}, 'values', {'marginal'});
     case 2
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'format', 'struct', ...
-            'symbols', {'x'}, 'values', {'marginal'}, 'gams_dir', cfg.gams_dir, ...
-            'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'x'}, 'values', {'marginal'});
         gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     end
@@ -1482,11 +1480,11 @@ function test_readSpecialValues(t, cfg, container_type)
         gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         gdx.read(cfg.filenames{2}, 'format', 'struct');
     case 1
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{2}, 'format', 'struct', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{2}, 'format', 'struct');
     case 2
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{2}, 'format', 'struct', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{2}, 'format', 'struct');
         gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     end
@@ -1532,11 +1530,11 @@ function test_readDomainCycle(t, cfg, container_type)
         gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         gdx.read(cfg.filenames{8}, 'format', 'struct');
     case 1
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{8}, 'format', 'struct', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{8}, 'format', 'struct');
     case 2
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{8}, 'format', 'struct', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{8}, 'format', 'struct');
         gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     end
@@ -1563,7 +1561,8 @@ function test_readAcronyms(t, cfg, container_type);
         gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         stdout = evalc("gdx.read(cfg.filenames{6}, 'format', 'struct');");
     case 1
-        stdout = evalc("gdx = GAMSTransfer.ConstContainer(cfg.filenames{6}, 'format', 'struct', 'gams_dir', cfg.gams_dir, 'features', cfg.features);");
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        stdout = evalc("gdx.read(cfg.filenames{6}, 'format', 'struct');");
     end
     t.assert(~isempty(strfind(stdout, ...
         'GDX file contains acronyms. Acronyms are not supported and are set to GAMS NA.')));
@@ -1575,11 +1574,11 @@ function test_readAcronyms(t, cfg, container_type);
         gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         gdx.read(cfg.filenames{6}, 'format', 'struct');
     case 1
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{6}, 'format', 'struct', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{6}, 'format', 'struct');
     case 2
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{6}, 'format', 'struct', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{6}, 'format', 'struct');
         gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     end
@@ -1655,11 +1654,11 @@ function test_readSymbolTypes(t, cfg, container_type);
         gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         gdx.read(cfg.filenames{3}, 'format', 'dense_matrix');
     case 1
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{3}, 'format', 'dense_matrix', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{3}, 'format', 'dense_matrix');
     case 2
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{3}, 'format', 'dense_matrix', ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{3}, 'format', 'dense_matrix');
         gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     end

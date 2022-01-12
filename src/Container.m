@@ -96,11 +96,11 @@ classdef Container < GAMSTransfer.BaseContainer
     methods
 
         function read(obj, varargin)
-            % Reads symbol records from GDX file
+            % Reads symbols from GDX file
             %
             % Required Arguments:
-            % 1. filename: string
-            %    Path to GDX file to be read
+            % 1. source: string or ConstContainer
+            %    Path to GDX file or a ConstContainer object to be read
             %
             % Parameter Arguments:
             % - symbols: cell
