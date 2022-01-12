@@ -71,10 +71,9 @@ function test_read(t, cfg, container_type)
         gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     case 2
-        gdx = GAMSTransfer.ConstContainer(cfg.filenames{1}, 'records', true, ...
-            'gams_dir', cfg.gams_dir, 'features', cfg.features);
-        gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1});
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
     end
     is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
 

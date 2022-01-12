@@ -37,11 +37,9 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
     %
     % Optional Arguments:
     % 1. filename: string
-    %    Path to GDX file to be read
+    %    Path to GDX file to be read (no records will be read)
     %
     % Parameter Arguments:
-    % - records: logical
-    %   Enables reading of records. Default is false.
     % - gams_dir: string
     %   Path to GAMS system directory. Default is determined from PATH
     %   environment variable
@@ -93,7 +91,6 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
                 ~strcmpi(x, 'features');
             is_values = @(x) iscellstr(x) && numel(x) <= 5;
             addOptional(p, 'filename', '', is_string_char);
-            addParameter(p, 'records', false, @islogical);
             addParameter(p, 'gams_dir', '', is_string_char);
             addParameter(p, 'indexed', false, @islogical);
             addParameter(p, 'features', struct(), @isstruct);
@@ -103,7 +100,7 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
                 p.Results.features);
 
             if ~strcmp(p.Results.filename, '')
-                obj.read(p.Results.filename, 'records', p.Results.records);
+                obj.read(p.Results.filename, 'records', false);
             end
         end
 
