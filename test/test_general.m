@@ -24,7 +24,7 @@
 %
 
 function success = test_general(cfg)
-    t = GAMSTest('GAMSTransfer/general');
+    t = GAMSTest('general');
     test_specialValues(t, cfg);
     [~, n_fails] = t.summary();
     success = n_fails == 0;

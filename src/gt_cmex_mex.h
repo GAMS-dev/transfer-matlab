@@ -92,10 +92,12 @@ void gt_mex_addsymbol(
     int             subtype,        /** GAMS subtype of symbol */
     int             format,         /** record format */
     size_t          dim,            /** dimension of symbol */
-    size_t*         sizes,          /** sizes of domains (length = dim) */
+    double*         sizes,          /** sizes of domains (length = dim) */
     const char**    domains,        /** domains of symbol (length = dim) */
+    const char**    domain_labels,  /** domain labels of symbol (length = dim) */
     int             domain_type,    /** domain type (e.g. 3: regular or 2: relaxed) */
     size_t          nrecs,          /** number of records */
+    size_t          nvals,          /** number of values */
     mxArray*        mx_arr_records, /** records structure */
     mxArray*        mx_arr_uels     /** list of uels to be stored */
 );
@@ -129,6 +131,14 @@ void gt_mex_addfield_sizet(
     const char*     fieldname,      /** field name to be added */
     size_t          dim,            /** dimension of integer array */
     size_t*         values          /** values of field */
+);
+
+/** adds a field to a structure with bool type */
+void gt_mex_addfield_bool(
+    mxArray*        mx_struct,      /** mex structure */
+    const char*     fieldname,      /** field name to be added */
+    size_t          dim,            /** dimension of integer array */
+    bool*           values          /** values of field */
 );
 
 /** adds a field to a structure with double type */
@@ -294,6 +304,7 @@ void gt_mex_readdata_create(
     bool*           values_flag,    /** indicates which values to be read (length: GMS_VAL_MAX) */
     double*         def_values,     /** default values (length: GMS_VAL_MAX) */
     mwSize*         mx_dom_nrecs,   /** number of records of domain symbols */
+    size_t*         nvals,          /** number of values created */
     mwIndex**       col_nnz,        /** sparse format only: number of non-zeros for each value field */
     mxArray**       mx_arr_dom_idx, /** matlab struct containing domain indices */
     mxUint64**      mx_dom_idx,     /** matlab struct containing domain indices */
@@ -310,6 +321,7 @@ void gt_mex_readdata_create(
     bool*           values_flag,    /** indicates which values to be read (length: GMS_VAL_MAX) */
     double*         def_values,     /** default values (length: GMS_VAL_MAX) */
     mwSize*         mx_dom_nrecs,   /** number of records of domain symbols */
+    size_t*         nvals,          /** number of values created */
     mwIndex**       col_nnz,        /** sparse format only: number of non-zeros for each value field */
     mxArray**       mx_arr_dom_idx, /** matlab struct containing domain indices */
     UINT64_T**      mx_dom_idx,     /** matlab struct containing domain indices */

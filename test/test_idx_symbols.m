@@ -24,7 +24,7 @@
 %
 
 function success = test_idx_symbols(cfg)
-    t = GAMSTest('GAMSTransfer/idx_symbols');
+    t = GAMSTest('idx_symbols');
     test_idx_addSymbols(t, cfg);
     test_idx_changeSymbol(t, cfg);
     test_idx_setRecords(t, cfg);
