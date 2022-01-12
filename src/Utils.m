@@ -222,19 +222,14 @@ classdef Utils
             end
 
             % check if we have categorical
-            has_categorical = true;
-            try
-                iscategorical(1);
-            catch
-                has_categorical = false;
-            end
+            features = GAMSTransfer.Utils.checkFeatureSupport();
 
             % get linear index
             switch GAMSTransfer.RecordsFormat.str2int(symbol.format)
             case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
                 for i = 1:symbol.dimension
                     k = symbol.records.(domain_labels{i})(idx);
-                    if has_categorical && iscategorical(k)
+                    if features.categorical && iscategorical(k)
                         domain{i} = char(k);
                         is_numeric_domain(i) = false;
                     else
