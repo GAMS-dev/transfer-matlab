@@ -33,26 +33,21 @@ function gams_transfer_setup(varargin)
 
     p = inputParser();
     is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-        ~strcmpi(x, 'target_dir') && ~strcmpi(x, 'gams_dir');
+        ~strcmpi(x, 'target_dir');
     addParameter(p, 'target_dir', '.', is_string_char);
-    addParameter(p, 'gams_dir', find_gams(), is_string_char);
     addParameter(p, 'verbose', 0, @isnumeric)
     addParameter(p, 'skip_compilation', false, @islogical);
     parse(p, varargin{:});
-    if strcmp(p.Results.gams_dir, '')
-        error('GAMS system directory not found.');
-    end
 
     % check paths
     target_dir = Utils.checkFilename(p.Results.target_dir, '', false);
-    gams_dir = Utils.checkFilename(p.Results.gams_dir, '', false);
 
     % get package name
     target_dir = fullfile(target_dir, '+GAMSTransfer');
 
     % install GAMS Transfer
     try
-        gams_transfer_setup_internal(p.Results.gams_dir, current_dir, target_dir, ...
+        gams_transfer_setup_internal(current_dir, target_dir, ...
             p.Results.verbose, p.Results.skip_compilation);
         rmpath(fullfile(current_dir, 'src'));
     catch e
@@ -64,7 +59,7 @@ function gams_transfer_setup(varargin)
 
 end
 
-function gams_transfer_setup_internal(gams_dir, current_dir, target_dir, verbose, skip_compilation)
+function gams_transfer_setup_internal(current_dir, target_dir, verbose, skip_compilation)
 
     m_files = dir(fullfile(current_dir, 'src', '*.m'));
     c_files = {
@@ -81,15 +76,15 @@ function gams_transfer_setup_internal(gams_dir, current_dir, target_dir, verbose
         fullfile(current_dir, 'src', 'gt_cmex_set_sym_domain.c'), ...
     };
     c_common = {
-        fullfile(gams_dir, 'apifiles', 'C', 'api', 'gdxcc.c'), ...
-        fullfile(gams_dir, 'apifiles', 'C', 'api', 'idxcc.c'), ...
-        fullfile(gams_dir, 'apifiles', 'C', 'api', 'gclgms.c'), ...
+        fullfile(current_dir, 'ext', 'gdx', 'gdxcc.c'), ...
+        fullfile(current_dir, 'ext', 'gdx', 'idxcc.c'), ...
+        fullfile(current_dir, 'ext', 'gdx', 'gclgms.c'), ...
         fullfile(current_dir, 'src', 'gt_cmex_utils.c'), ...
         fullfile(current_dir, 'src', 'gt_cmex_mex.c'), ...
         fullfile(current_dir, 'src', 'gt_cmex_gdx_idx.c'), ...
     };
     c_include = {
-        fullfile(gams_dir, 'apifiles', 'C', 'api'), ...
+        fullfile(current_dir, 'ext', 'gdx'), ...
     };
     defines = {
         '-DGC_NO_MUTEX', ...
