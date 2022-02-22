@@ -36,6 +36,11 @@ classdef UniqueElementList < handle
             obj.uels_id2labels = {};
         end
 
+        function eq = equals(obj, other)
+            eq = isequaln(obj.uels_id2labels, other.uels_id2labels) && ...
+                obj.uels_label2ids.equals(obj.uels_label2ids);
+        end
+
         function list = get(obj)
             list = obj.uels_id2labels;
         end

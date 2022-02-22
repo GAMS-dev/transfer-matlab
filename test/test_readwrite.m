@@ -26,6 +26,7 @@
 function success = test_readwrite(cfg)
     t = GAMSTest('readwrite');
     test_read(t, cfg, 0);
+    test_readEquals(t, cfg, 0);
     test_readNoRecords(t, cfg, 0);
     test_readPartial(t, cfg, 0);
     test_readSpecialValues(t, cfg, 0);
@@ -40,6 +41,7 @@ function success = test_readwrite(cfg)
 
     t = GAMSTest('const_readwrite');
     test_read(t, cfg, 1);
+    test_readEquals(t, cfg, 1);
     test_readNoRecords(t, cfg, 1);
     test_readPartial(t, cfg, 1);
     test_readSpecialValues(t, cfg, 1);
@@ -50,6 +52,7 @@ function success = test_readwrite(cfg)
 
     t = GAMSTest('rconst_readwrite');
     test_read(t, cfg, 2);
+    test_readEquals(t, cfg, 2);
     test_readNoRecords(t, cfg, 2);
     test_readPartial(t, cfg, 2);
     test_readSpecialValues(t, cfg, 2);
@@ -1127,6 +1130,35 @@ function test_read(t, cfg, container_type)
     t.assertEquals(uels{3}, 'j7');
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
+end
+
+function test_readEquals(t, cfg, container_type)
+
+    for i = [1,2,5,7]
+        switch container_type
+        case 0
+            gdx1 = GAMSTransfer.Container(cfg.filenames{i}, 'gams_dir', ...
+                cfg.gams_dir, 'features', cfg.features);
+            gdx2 = GAMSTransfer.Container(cfg.filenames{i}, 'gams_dir', ...
+                cfg.gams_dir, 'features', cfg.features);
+        case 1
+            gdx1 = GAMSTransfer.ConstContainer(cfg.filenames{i}, 'gams_dir', ...
+                cfg.gams_dir, 'features', cfg.features);
+            gdx2 = GAMSTransfer.ConstContainer(cfg.filenames{i}, 'gams_dir', ...
+                cfg.gams_dir, 'features', cfg.features);
+        case 2
+            gdx1 = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx1.read(cfg.filenames{i});
+            gdx1 = GAMSTransfer.Container(gdx1, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx2 = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx2.read(cfg.filenames{i});
+            gdx2 = GAMSTransfer.Container(gdx2, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        end
+        is_const_cont = isa(gdx1, 'GAMSTransfer.ConstContainer');
+
+        t.add(sprintf('read_equals_%d', i));
+        t.assert(gdx1.equals(gdx2));
+    end
 end
 
 function test_readNoRecords(t, cfg, container_type)

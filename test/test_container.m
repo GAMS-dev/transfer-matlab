@@ -51,6 +51,27 @@ function success = test_container(cfg)
     success = n_fails1 + n_fails2 + n_fails3 == 0;
 end
 
+function test_equals(t, cfg, container_type)
+
+    switch container_type
+    case 0
+        gdx1 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    case 1
+        gdx1 = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx2 = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    case 2
+        gdx1 = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx1 = GAMSTransfer.Container(gdx1, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx2 = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx2 = GAMSTransfer.Container(gdx2, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+    end
+    is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
+
+    t.add('equals_1');
+    t.assert(gdx1.equals(gdx2));
+end
+
 function test_getlist(t, cfg, container_type)
 
     switch container_type

@@ -196,6 +196,29 @@ classdef Set < GAMSTransfer.Symbol
 
     end
 
+    methods
+
+        function eq = equals(obj, symbol)
+            % Checks equivalence with other symbol
+            %
+            % Note: A symbol is always linked to a container. This method does
+            % not check equivalence of the linked containers.
+            %
+            % Required Arguments:
+            % 1. symbol: any
+            %    Other symbol
+            %
+
+            eq = false;
+            if ~isa(symbol, 'GAMSTransfer.Set')
+                return
+            end
+            eq = obj.is_singleton == symbol.is_singleton && ...
+                equals@GAMSTransfer.Symbol(obj, symbol);
+        end
+
+    end
+
     methods (Hidden)
 
         function bool = isValidAsDomain(obj)

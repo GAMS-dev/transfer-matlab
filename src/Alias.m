@@ -245,6 +245,25 @@ classdef Alias < handle
             obj.alias_with.transformRecords(target_format);
         end
 
+        function eq = equals(obj, symbol)
+            % Checks equivalence with other symbol
+            %
+            % Note: A symbol is always linked to a container. This method does
+            % not check equivalence of the linked containers.
+            %
+            % Required Arguments:
+            % 1. symbol: any
+            %    Other symbol
+            %
+
+            eq = false;
+            if ~isa(symbol, 'GAMSTransfer.Alias')
+                return
+            end
+            eq = isequaln(obj.name_, symbol.name_) && ...
+                obj.alias_with.equals(symbol.alias_with);
+        end
+
         function valid = isValid(obj, varargin)
             % Checks correctness of alias
             %

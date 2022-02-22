@@ -104,6 +104,30 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
             end
         end
 
+        function eq = equals(obj, container)
+            % Checks equivalence with other container
+            %
+            % Required Arguments:
+            % 1. container: any
+            %    Other Container
+            %
+
+            eq = false;
+            if ~isa(container, 'GAMSTransfer.BaseContainer')
+                return
+            end
+            eq = isequaln(obj.gams_dir, container.gams_dir);
+            eq = eq && obj.indexed == container.indexed;
+            eq = eq && numel(fieldnames(obj.data)) == numel(fieldnames(container.data));
+
+            symbols1 = fieldnames(obj.data);
+            symbols2 = fieldnames(container.data);
+            for i = 1:numel(symbols1)
+                eq = eq && isequaln(symbols1{i}, symbols2{i});
+                eq = eq && isequaln(obj.data.(symbols1{i}), container.data.(symbols2{i}));
+            end
+        end
+
         function read(obj, varargin)
             % Reads symbols from GDX file (current symbols will be lost).
             %

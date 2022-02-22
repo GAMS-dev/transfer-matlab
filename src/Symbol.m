@@ -759,6 +759,54 @@ classdef Symbol < handle
                 obj.format, p.Results.target_format);
         end
 
+        function eq = equals(obj, symbol)
+            % Checks equivalence with other symbol
+            %
+            % Note: A symbol is always linked to a container. This method does
+            % not check equivalence of the linked containers.
+            %
+            % Required Arguments:
+            % 1. symbol: any
+            %    Other symbol
+            %
+
+            eq = false;
+            if ~isa(symbol, 'GAMSTransfer.Symbol')
+                return
+            end
+
+            eq = isequaln(obj.records, symbol.records);
+            eq = eq && isequaln(obj.name_, symbol.name_);
+            eq = eq && isequaln(obj.description_, symbol.description_);
+            eq = eq && isequaln(obj.dimension_, symbol.dimension_);
+            eq = eq && isequaln(obj.domain_names_, symbol.domain_names_);
+            eq = eq && isequaln(obj.domain_labels_, symbol.domain_labels_);
+            eq = eq && isequaln(obj.domain_type_, symbol.domain_type_);
+            eq = eq && isequaln(obj.domain_forwarding_, symbol.domain_forwarding_);
+            eq = eq && isequaln(obj.size_, symbol.size_);
+            eq = eq && isequaln(obj.format_, symbol.format_);
+            eq = eq && isequaln(obj.number_records_, symbol.number_records_);
+            if ~eq
+                return
+            end
+
+            for i = 1:obj.dimension_
+                if isa(obj.domain_{i}, 'GAMSTransfer.Set') && isa(symbol.domain_{i}, 'GAMSTransfer.Set')
+                    eq = eq && obj.domain_{i}.equals(symbol.domain_{i});
+                elseif isa(obj.domain_{i}, 'GAMSTransfer.Alias') && isa(symbol.domain_{i}, 'GAMSTransfer.Alias')
+                    eq = eq && obj.domain_{i}.equals(symbol.domain_{i});
+                elseif ischar(obj.domain_{i}) && ischar(symbol.domain_{i})
+                    eq = eq && isequal(obj.domain_{i}, symbol.domain_{i});
+                else
+                    eq = false;
+                end
+
+                if obj.container.indexed
+                    eq = eq && obj.uels.(obj.domain_labels_{i}).equals(symbol.uels.(symbol.domain_labels_{i}));
+                end
+            end
+        end
+
         function valid = isValid(obj, varargin)
             % Checks correctness of symbol
             %
