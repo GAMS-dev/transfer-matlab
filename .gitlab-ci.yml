@@ -75,7 +75,7 @@ test_octave_macos:
     tags :
         - macos
     script:
-        - octave --no-gui --no-window-system --path $PWD/macos --eval "gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'test', 'exit_on_fail', true)"
+        - octave --no-gui --no-window-system --path $PWD/macos --eval "gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'test', 'exit_on_fail', true, 'only_default_config', true)"
     only:
         - merge_requests
         - master
