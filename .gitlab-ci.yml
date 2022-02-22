@@ -64,8 +64,9 @@ test_octave_linux:
         - linux
     image:
         name: registry.gams.com/devel/gams-transfer-matlab/linux/builder
+    needs: [build_octave_linux]
     script:
-        - octave --no-gui --no-window-system --path $PWD/linux --eval "gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'test', 'exit_on_fail', true)"
+        - octave --no-gui --no-window-system --path $PWD/linux --eval "gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'test', 'exit_on_fail', true, 'only_default_config', true)"
     only:
         - merge_requests
         - master
@@ -74,6 +75,7 @@ test_octave_macos:
     stage: test
     tags :
         - macos
+    needs: [build_octave_macos]
     script:
         - octave --no-gui --no-window-system --path $PWD/macos --eval "gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'test', 'exit_on_fail', true, 'only_default_config', true)"
     only:
