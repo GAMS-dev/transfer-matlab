@@ -1596,7 +1596,7 @@ function test_readAcronyms(t, cfg, container_type);
         stdout = evalc("gdx.read(cfg.filenames{6}, 'format', 'struct');");
     end
     t.assert(~isempty(strfind(stdout, ...
-        'GDX file contains acronyms. Acronyms are not supported and are set to GAMS NA.')));
+        'GDX file contains acronyms. Acronyms are not supported')));
 
     t.add('read_acronyms_2');
     warning('off');
