@@ -3,6 +3,7 @@ stages:
   - images
   - build
   - test
+  - package
 
 image_linux:
     stage: images
@@ -30,54 +31,82 @@ image_linux:
 
 build_octave_linux:
     stage: build
-    tags :
+    tags:
         - linux
     image:
         name: registry.gams.com/devel/gams-transfer-matlab/linux/builder
     script:
-        - octave --no-gui --no-window-system --eval "gams_transfer_setup('target_dir', 'linux')"
+        - octave --no-gui --no-window-system --eval "gams_transfer_setup('target_dir', 'octave_linux')"
     only:
         - merge_requests
         - master
     artifacts:
+        name: gams_transfer_octave_linux
         paths:
-            - linux
+            - octave_linux
         expire_in: 1 day
 
 build_octave_macos:
     stage: build
-    tags :
+    tags:
         - macos
     script:
-        - octave --no-gui --no-window-system --eval "gams_transfer_setup('target_dir', 'macos')"
+        - octave --no-gui --no-window-system --eval "gams_transfer_setup('target_dir', 'octave_macos')"
     only:
         - merge_requests
         - master
     artifacts:
+        name: gams_transfer_octave_macos
         paths:
-            - macos
+            - octave_macos
+        expire_in: 1 day
+
+build_matlab_macos:
+    stage: build
+    tags:
+        - macos
+    script:
+        - matlab -nodisplay -nosplash -nodesktop -r "gams_transfer_setup('target_dir', 'matlab_macos')"
+    only:
+        - merge_requests
+        - master
+    artifacts:
+        name: gams_transfer_matlab_macos
+        paths:
+            - matlab_macos
         expire_in: 1 day
 
 test_octave_linux:
     stage: test
-    tags :
+    tags:
         - linux
     image:
         name: registry.gams.com/devel/gams-transfer-matlab/linux/builder
     needs: [build_octave_linux]
     script:
-        - octave --no-gui --no-window-system --path $PWD/linux --eval "gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'test', 'exit_on_fail', true, 'only_default_config', true)"
+        - octave --no-gui --no-window-system --path $PWD/octave_linux --eval "gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'test', 'exit_on_fail', true, 'only_default_config', true)"
     only:
         - merge_requests
         - master
 
 test_octave_macos:
     stage: test
-    tags :
+    tags:
         - macos
     needs: [build_octave_macos]
     script:
-        - octave --no-gui --no-window-system --path $PWD/macos --eval "gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'test', 'exit_on_fail', true, 'only_default_config', true)"
+        - octave --no-gui --no-window-system --path $PWD/octave_macos --eval "gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'test', 'exit_on_fail', true, 'only_default_config', true)"
+    only:
+        - merge_requests
+        - master
+
+test_matlab_macos:
+    stage: test
+    tags:
+        - macos
+    needs: [build_matlab_macos]
+    script:
+        - matlab -nodisplay -nosplash -nodesktop -r "addpath('matlab_macos'); gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'test', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
