@@ -1118,7 +1118,9 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.i.name, 'i');
     t.assert(isfield(gdx2.data, 'a'));
     t.assertEquals(gdx2.data.a.name, 'a');
-    t.assertEquals(gdx2.data.i, gdx2.data.a.alias_with);
+    if gdx.features.handle_compare
+        t.assert(gdx2.data.i == gdx2.data.a.alias_with);
+    end
 
     t.add('copy_symbol_alias_overwrite_1');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
@@ -1131,7 +1133,9 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.i.name, 'i');
     t.assert(isfield(gdx2.data, 'a'));
     t.assertEquals(gdx2.data.a.name, 'a');
-    t.assertEquals(gdx2.data.i, gdx2.data.a.alias_with);
+    if gdx.features.handle_compare
+        t.assert(gdx2.data.i == gdx2.data.a.alias_with);
+    end
 
     t.add('copy_symbol_alias_overwrite_2');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
@@ -1177,7 +1181,9 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.data.x.size(1) == 3);
     t.assert(iscell(gdx2.data.x.domain));
     t.assert(numel(gdx2.data.x.domain) == 1);
-    t.assertEquals(gdx2.data.x.domain{1}, gdx2.data.i);
+    if gdx.features.handle_compare
+        t.assert(gdx2.data.x.domain{1} == gdx2.data.i);
+    end
     t.assertEquals(gdx2.data.x.domain_type, 'regular');
     t.assert(~gdx2.data.x.domain_forwarding);
     t.assertEquals(gdx2.data.x.format, 'empty');
@@ -1255,8 +1261,10 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.data.e.size(2) == 3);
     t.assert(iscell(gdx2.data.e.domain));
     t.assert(numel(gdx2.data.e.domain) == 2);
-    t.assertEquals(gdx2.data.e.domain{1}, gdx2.data.a);
-    t.assertEquals(gdx2.data.e.domain{2}, gdx2.data.i);
+    if gdx.features.handle_compare
+        t.assert(gdx2.data.e.domain{1} == gdx2.data.a);
+        t.assert(gdx2.data.e.domain{2} == gdx2.data.i);
+    end
     t.assertEquals(gdx2.data.e.domain_type, 'regular');
     t.assert(~gdx2.data.e.domain_forwarding);
     t.assertEquals(gdx2.data.e.format, 'empty');
@@ -1343,7 +1351,9 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.data.p.size(1) == 3);
     t.assert(iscell(gdx2.data.p.domain));
     t.assert(numel(gdx2.data.p.domain) == 1);
-    t.assertEquals(gdx2.data.p.domain{1}, gdx2.data.i);
+    if gdx.features.handle_compare
+        t.assert(gdx2.data.p.domain{1} == gdx2.data.i);
+    end
     t.assertEquals(gdx2.data.p.domain_type, 'regular');
     t.assert(~gdx2.data.p.domain_forwarding);
     t.assertEquals(gdx2.data.p.format, 'struct');
