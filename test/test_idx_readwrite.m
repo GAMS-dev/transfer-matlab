@@ -35,12 +35,17 @@ function success = test_idx_readwrite(cfg)
     test_idx_readSpecialValues(t, cfg, 'cc');
     [~, n_fails2] = t.summary();
 
+    t = GAMSTest('idx_readwrite_rc');
+    test_idx_read(t, cfg, 'rc');
+    test_idx_readSpecialValues(t, cfg, 'rc');
+    [~, n_fails3] = t.summary();
+
     t = GAMSTest('idx_readwrite_rcc');
     test_idx_read(t, cfg, 'rcc');
     test_idx_readSpecialValues(t, cfg, 'rcc');
-    [~, n_fails3] = t.summary();
+    [~, n_fails4] = t.summary();
 
-    success = n_fails1 + n_fails2 + n_fails3 == 0;
+    success = n_fails1 + n_fails2 + n_fails3 + n_fails4 == 0;
 end
 
 function test_idx_read(t, cfg, container_type)
@@ -52,6 +57,12 @@ function test_idx_read(t, cfg, container_type)
     case 'cc'
         gdx = GAMSTransfer.ConstContainer(cfg.filenames{4}, 'gams_dir', ...
             cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    case 'rc'
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+            'indexed', true, 'features', cfg.features);
+        gdx.read(cfg.filenames{4});
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, ...
+            'indexed', true, 'features', cfg.features);
     case 'rcc'
         gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, ...
             'indexed', true, 'features', cfg.features);
@@ -159,6 +170,12 @@ function test_idx_read(t, cfg, container_type)
         gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
             'features', cfg.features);
         gdx.read(cfg.filenames{4}, 'format', 'struct');
+    case 'rc'
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', 'struct');
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
     case 'rcc'
         gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
             'features', cfg.features);
@@ -236,6 +253,12 @@ function test_idx_read(t, cfg, container_type)
             gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
                 'features', cfg.features);
             gdx.read(cfg.filenames{4}, 'format', 'table');
+        case 'rc'
+            gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+                'features', cfg.features);
+            gdx.read(cfg.filenames{4}, 'format', 'table');
+            gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+                'features', cfg.features);
         case 'rcc'
             gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
                 'features', cfg.features);
@@ -313,6 +336,12 @@ function test_idx_read(t, cfg, container_type)
         gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
             'features', cfg.features);
         gdx.read(cfg.filenames{4}, 'format', 'dense_matrix');
+    case 'rc'
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', 'dense_matrix');
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
     case 'rcc'
         gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
             'features', cfg.features);
@@ -386,6 +415,12 @@ function test_idx_read(t, cfg, container_type)
         gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
             'features', cfg.features);
         gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix');
+    case 'rc'
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix');
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
     case 'rcc'
         gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
             'features', cfg.features);
@@ -471,6 +506,17 @@ function test_idx_readEquals(t, cfg, container_type)
                 'indexed', true, 'features', cfg.features);
             gdx2 = GAMSTransfer.ConstContainer(cfg.filenames{i}, 'gams_dir', cfg.gams_dir, ...
                 'indexed', true, 'features', cfg.features);
+        case 'rc'
+            gdx1 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+                'indexed', true, 'features', cfg.features);
+            gdx1.read(cfg.filenames{i});
+            gdx1 = GAMSTransfer.Container(gdx1, 'gams_dir', cfg.gams_dir, ...
+                'indexed', true, 'features', cfg.features);
+            gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+                'indexed', true, 'features', cfg.features);
+            gdx2.read(cfg.filenames{i});
+            gdx2 = GAMSTransfer.Container(gdx2, 'gams_dir', cfg.gams_dir, ...
+                'indexed', true, 'features', cfg.features);
         case 'rcc'
             gdx1 = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, ...
                 'indexed', true, 'features', cfg.features);
@@ -501,6 +547,12 @@ function test_idx_readSpecialValues(t, cfg, container_type)
         gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
             'features', cfg.features);
         gdx.read(cfg.filenames{2}, 'format', 'struct');
+    case 'rc'
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{2}, 'format', 'struct');
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
     case 'rcc'
         gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
             'features', cfg.features);

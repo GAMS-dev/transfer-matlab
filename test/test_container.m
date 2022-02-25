@@ -43,13 +43,13 @@ function success = test_container(cfg)
     test_idx_describe(t, cfg, 'cc');
     [~, n_fails2] = t.summary();
 
-    % t = GAMSTest('container_rc');
-    % test_equals(t, cfg, 'rc');
-    % test_getlist(t, cfg, 'rc');
-    % test_describe(t, cfg, 'rc');
-    % test_describePartial(t, cfg, 'rc');
-    % test_idx_describe(t, cfg, 'rc');
-    % [~, n_fails3] = t.summary();
+    t = GAMSTest('container_rc');
+    test_equals(t, cfg, 'rc');
+    test_getlist(t, cfg, 'rc');
+    test_describe(t, cfg, 'rc');
+    test_describePartial(t, cfg, 'rc');
+    test_idx_describe(t, cfg, 'rc');
+    [~, n_fails3] = t.summary();
     n_fails3 = 0;
 
     t = GAMSTest('container_rcc');

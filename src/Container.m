@@ -75,7 +75,7 @@ classdef Container < GAMSTransfer.BaseContainer
             is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
                 ~strcmpi(x, 'gams_dir') && ~strcmpi(x, 'indexed') && ...
                 ~strcmpi(x, 'features');
-            is_source = @(x) is_string_char(x) || isa(x, 'GAMSTransfer.ConstContainer');
+            is_source = @(x) is_string_char(x) || isa(x, 'GAMSTransfer.BaseContainer');
             addOptional(p, 'source', '', is_source);
             addParameter(p, 'gams_dir', '', is_string_char);
             addParameter(p, 'indexed', false, @islogical);
@@ -123,8 +123,8 @@ classdef Container < GAMSTransfer.BaseContainer
             % Reads symbols from GDX file
             %
             % Required Arguments:
-            % 1. source: string or ConstContainer
-            %    Path to GDX file or a ConstContainer object to be read
+            % 1. source: string or (Const)Container
+            %    Path to GDX file or a (Const)Container object to be read
             %
             % Parameter Arguments:
             % - symbols: cell
@@ -149,7 +149,7 @@ classdef Container < GAMSTransfer.BaseContainer
             % input arguments
             p = inputParser();
             is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
-            is_source = @(x) is_string_char(x) || isa(x, 'GAMSTransfer.ConstContainer');
+            is_source = @(x) is_string_char(x) || isa(x, 'GAMSTransfer.BaseContainer');
             is_values = @(x) iscellstr(x) && numel(x) <= 5;
             addRequired(p, 'source', is_source);
             addParameter(p, 'symbols', {}, @iscellstr);
@@ -158,6 +158,22 @@ classdef Container < GAMSTransfer.BaseContainer
             addParameter(p, 'values', {'level', 'marginal', 'lower', 'upper', 'scale'}, ...
                 is_values);
             parse(p, varargin{:});
+
+            % copy symbols from container
+            if isa(p.Results.source, 'GAMSTransfer.Container')
+                if p.Results.source.indexed ~= obj.indexed
+                    error('Indexed flags of source and this container must match.');
+                end
+                source_data = p.Results.source.data;
+                symbols = p.Results.symbols;
+                if isempty(symbols)
+                    symbols = p.Results.source.listSymbols();
+                end
+                for i = 1:numel(symbols)
+                    source_data.(symbols{i}).copy(obj);
+                end
+                return
+            end
 
             % read raw data
             if isa(p.Results.source, 'GAMSTransfer.ConstContainer')
