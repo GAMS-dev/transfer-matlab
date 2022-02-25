@@ -217,6 +217,46 @@ classdef Set < GAMSTransfer.Symbol
                 equals@GAMSTransfer.Symbol(obj, symbol);
         end
 
+        function copy(obj, varargin)
+            % Copies symbol to destination container
+            %
+            % Symbol domains are downgraded to relaxed if the destination
+            % container does not have equivalent domain sets.
+            %
+            % Required Arguments:
+            % 1. destination: Container
+            %    Destination container
+            %
+            % Optional Arguments:
+            % 2. overwrite: bool
+            %    Overwrites symbol with same name in destination if true.
+            %    Default: false.
+            %
+
+            % input arguments
+            p = inputParser();
+            is_dest = @(x) isa(x, 'GAMSTransfer.Container');
+            addRequired(p, 'destination', is_dest);
+            addOptional(p, 'overwrite', '', @islogical);
+            parse(p, varargin{:});
+            destination = p.Results.destination;
+            overwrite = p.Results.overwrite;
+
+            % create new (empty) symbol
+            if isfield(destination.data, obj.name_)
+                if ~overwrite
+                    error('Symbol already exists in destination.');
+                end
+                newsym = destination.data.(obj.name_);
+            else
+                newsym = GAMSTransfer.Set(destination, obj.name_);
+            end
+
+            % copy data
+            copy@GAMSTransfer.Symbol(obj, destination, true);
+            newsym.is_singleton = obj.is_singleton;
+        end
+
     end
 
     methods (Hidden)

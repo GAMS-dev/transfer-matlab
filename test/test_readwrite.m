@@ -24,7 +24,7 @@
 %
 
 function success = test_readwrite(cfg)
-    t = GAMSTest('readwrite');
+    t = GAMSTest('readwrite_c');
     test_read(t, cfg, 0);
     test_readEquals(t, cfg, 0);
     test_readNoRecords(t, cfg, 0);
@@ -39,7 +39,7 @@ function success = test_readwrite(cfg)
     test_readWriteDomainCheck(t, cfg);
     [~, n_fails1] = t.summary();
 
-    t = GAMSTest('const_readwrite');
+    t = GAMSTest('readwrite_cc');
     test_read(t, cfg, 1);
     test_readEquals(t, cfg, 1);
     test_readNoRecords(t, cfg, 1);
@@ -50,7 +50,7 @@ function success = test_readwrite(cfg)
     test_readSymbolTypes(t, cfg, 1);
     [~, n_fails2] = t.summary();
 
-    t = GAMSTest('rconst_readwrite');
+    t = GAMSTest('readwrite_rcc');
     test_read(t, cfg, 2);
     test_readEquals(t, cfg, 2);
     test_readNoRecords(t, cfg, 2);
@@ -1596,7 +1596,7 @@ function test_readAcronyms(t, cfg, container_type);
         stdout = evalc("gdx.read(cfg.filenames{6}, 'format', 'struct');");
     end
     t.assert(~isempty(strfind(stdout, ...
-        'GDX file contains acronyms. Acronyms are not supported')));
+        'GDX file contains acronyms. Acronyms are not supported and are set to GAMS NA.')));
 
     t.add('read_acronyms_2');
     warning('off');

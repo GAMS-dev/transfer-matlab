@@ -264,6 +264,50 @@ classdef Alias < handle
                 obj.alias_with.equals(symbol.alias_with);
         end
 
+        function copy(obj, varargin)
+            % Copies symbol to destination container
+            %
+            % If destination container does not have a symbol equal to the
+            % aliased symbol, an error is raised.
+            %
+            % Required Arguments:
+            % 1. destination: Container
+            %    Destination container
+            %
+            % Optional Arguments:
+            % 2. overwrite: bool
+            %    Overwrites symbol with same name in destination if true.
+            %    Default: false.
+            %
+
+            % input arguments
+            p = inputParser();
+            is_dest = @(x) isa(x, 'GAMSTransfer.Container');
+            addRequired(p, 'destination', is_dest);
+            addOptional(p, 'overwrite', '', @islogical);
+            parse(p, varargin{:});
+            destination = p.Results.destination;
+            overwrite = p.Results.overwrite;
+
+            % get aliased symbol in destination
+            if ~isfield(destination.data, obj.alias_with.name_) || ...
+                ~obj.alias_with.equals(destination.data.(obj.alias_with.name_))
+                error('Aliased symbol not available or differs in destination.');
+            end
+            alias_with = destination.data.(obj.alias_with.name_);
+
+            % create new (empty) symbol
+            if isfield(destination.data, obj.name_)
+                if ~overwrite
+                    error('Symbol already exists in destination.');
+                end
+                newsym = destination.data.(obj.name_);
+                newsym.alias_with = alias_with;
+            else
+                newsym = GAMSTransfer.Alias(destination, obj.name_, alias_with);
+            end
+        end
+
         function valid = isValid(obj, varargin)
             % Checks correctness of alias
             %

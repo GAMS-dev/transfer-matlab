@@ -27,6 +27,7 @@ function success = test_idx_symbols(cfg)
     t = GAMSTest('idx_symbols');
     test_idx_addSymbols(t, cfg);
     test_idx_changeSymbol(t, cfg);
+    test_idx_copySymbol(t, cfg);
     test_idx_setRecords(t, cfg);
     test_idx_writeUnordered(t, cfg);
     test_idx_transformRecords(t, cfg);
@@ -372,6 +373,90 @@ function test_idx_changeSymbol(t, cfg)
             t.assert(~isempty(strfind(e.message, 'read-only')));
         end
     end
+end
+
+function test_idx_copySymbol(t, cfg)
+
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+        'features', cfg.features);
+    p = GAMSTransfer.Parameter(gdx, 'p', [10]);
+    p.records.dim_1 = [2 4]';
+    p.records.value = [1 2]';
+    t.assert(p.isValid());
+
+    t.add('idx_copy_symbol_parameter_empty');
+    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+        'features', cfg.features);
+    p.copy(gdx2);
+    t.assert(numel(fieldnames(gdx2.data)) == 1);
+    t.assert(isfield(gdx2.data, 'p'));
+    t.assertEquals(gdx2.data.p.name, 'p');
+    t.assertEquals(gdx2.data.p.description, '');
+    t.assert(gdx2.data.p.dimension == 1);
+    t.assert(gdx2.data.p.size(1) == 10);
+    t.assert(iscell(gdx2.data.p.domain));
+    t.assert(numel(gdx2.data.p.domain) == 1);
+    t.assertEquals(gdx2.data.p.domain{1}, 'dim_1');
+    t.assertEquals(gdx2.data.p.domain_type, 'relaxed');
+    t.assert(~gdx2.data.p.domain_forwarding);
+    t.assertEquals(gdx2.data.p.format, 'struct');
+    t.assert(isfield(gdx2.data.p.records, 'dim_1'));
+    t.assert(isfield(gdx2.data.p.records, 'value'));
+    t.assert(numel(gdx2.data.p.records.dim_1) == 2);
+    t.assertEquals(gdx2.data.p.records.dim_1(1), 2);
+    t.assertEquals(gdx2.data.p.records.dim_1(2), 4);
+    t.assert(numel(gdx2.data.p.records.value) == 2);
+    t.assert(gdx2.data.p.records.value(1) == 1);
+    t.assert(gdx2.data.p.records.value(2) == 2);
+
+    t.add('idx_copy_symbol_parameter_overwrite_1');
+    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+        'features', cfg.features);
+    GAMSTransfer.Parameter(gdx2, 'p');
+    p.copy(gdx2, true);
+    t.assert(numel(fieldnames(gdx2.data)) == 1);
+    t.assert(isfield(gdx2.data, 'p'));
+    t.assertEquals(gdx2.data.p.name, 'p');
+    t.assertEquals(gdx2.data.p.description, '');
+    t.assert(gdx2.data.p.dimension == 1);
+    t.assert(gdx2.data.p.size(1) == 10);
+    t.assert(iscell(gdx2.data.p.domain));
+    t.assert(numel(gdx2.data.p.domain) == 1);
+    t.assertEquals(gdx2.data.p.domain{1}, 'dim_1');
+    t.assertEquals(gdx2.data.p.domain_type, 'relaxed');
+    t.assert(~gdx2.data.p.domain_forwarding);
+    t.assertEquals(gdx2.data.p.format, 'struct');
+    t.assert(isfield(gdx2.data.p.records, 'dim_1'));
+    t.assert(isfield(gdx2.data.p.records, 'value'));
+    t.assert(numel(gdx2.data.p.records.dim_1) == 2);
+    t.assertEquals(gdx2.data.p.records.dim_1(1), 2);
+    t.assertEquals(gdx2.data.p.records.dim_1(2), 4);
+    t.assert(numel(gdx2.data.p.records.value) == 2);
+    t.assert(gdx2.data.p.records.value(1) == 1);
+    t.assert(gdx2.data.p.records.value(2) == 2);
+
+    t.add('idx_copy_symbol_parameter_overwrite_2');
+    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+        'features', cfg.features);
+    GAMSTransfer.Parameter(gdx2, 'p');
+    try
+        t.assert(false);
+        p.copy(gdx2, false);
+    catch ex
+        t.reset();
+        t.assertEquals(ex.message, 'Symbol already exists in destination.');
+    end
+
+    t.add('idx_copy_symbol_parameter_indexed');
+    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', false, 'features', cfg.features);
+    try
+        t.assert(false);
+        p.copy(gdx2);
+    catch ex
+        t.reset();
+        t.assertEquals(ex.message, 'Destination container must be indexed.');
+    end
+
 end
 
 function test_idx_setRecords(t, cfg)

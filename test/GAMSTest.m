@@ -85,7 +85,7 @@ classdef GAMSTest < handle
                 n_fails = n_fails + numel(fails);
                 n_tests = n_tests + numel(obj.tests{i}.asserts);
             end
-            fprintf('Test Summary (%20s): %3d testsets (%5d tests), %.2f s, %3d failures. ', obj.name, numel(obj.tests), n_tests, time, n_fails);
+            fprintf('Test Summary (%20s): %3d testsets (%5d tests), %5.2f s, %3d failures. ', obj.name, numel(obj.tests), n_tests, time, n_fails);
             if n_fails > 0
                 fprintf('FAIL!\n');
             else
