@@ -1,5 +1,6 @@
 
 [![pipeline status](https://git.gams.com/devel/gams-transfer-matlab/badges/master/pipeline.svg)](https://git.gams.com/devel/gams-transfer-matlab/-/commits/master) 
+[![Latest Release](https://git.gams.com/devel/gams-transfer-matlab/-/badges/release.svg)](https://git.gams.com/devel/gams-transfer-matlab/-/releases) 
 
 # GAMS Transfer Matlab
 
@@ -40,7 +41,7 @@ Description of parameters:
 - `verbose`: Compilation verbosity level from 0 (no compiler output) to 2 (all 
   compiler output). Default: 0.
 
-Add the GAMS Transfer installtion directory to the Matlab Path: 
+Add the GAMS Transfer installation directory to the Matlab Path: 
 ```matlab
 addpath(<install_directory>)
 ```
