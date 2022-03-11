@@ -1,0 +1,10 @@
+GAMS Transfer Matlab v0.2.0
+==================
+- added "equals" method to Container and Symbol classes to compare containers or
+  symbols
+- added "copy" method to Symbol classes to copy symbols to another container
+- added support to read symbols directly from non-const container
+
+GAMS Transfer Matlab v0.1.0
+==================
+- first release
