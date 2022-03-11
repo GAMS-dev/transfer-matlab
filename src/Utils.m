@@ -45,12 +45,14 @@ classdef Utils
             % fields.
             %
 
-            feature_support = struct('categorical', true, 'table', true, 'c_prop_setget', true);
+            feature_support = struct('categorical', true, 'table', true, ...
+                'c_prop_setget', true, 'handle_compare', true);
 
             if exist('OCTAVE_VERSION', 'builtin') > 0
                 feature_support.categorical = false;
                 feature_support.table = false;
                 feature_support.c_prop_setget = false;
+                feature_support.handle_compare = false;
                 v_release = strsplit(version(), '.');
                 for i = 1:3
                     v_release{i} = str2double(v_release{i});

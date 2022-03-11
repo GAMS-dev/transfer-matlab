@@ -156,6 +156,8 @@ classdef Symbol < handle
             % assign records
             if ~isempty(records)
                 obj.setRecords(records);
+            else
+                obj.format_ = GAMSTransfer.RecordsFormat.EMPTY;
             end
         end
 
@@ -803,6 +805,87 @@ classdef Symbol < handle
 
                 if obj.container.indexed
                     eq = eq && obj.uels.(obj.domain_labels_{i}).equals(symbol.uels.(symbol.domain_labels_{i}));
+                end
+            end
+        end
+
+        function copy(obj, varargin)
+            % Copies symbol to destination container
+            %
+            % Symbol domains are downgraded to relaxed if the destination
+            % container does not have equivalent domain sets.
+            %
+            % Required Arguments:
+            % 1. destination: Container
+            %    Destination container
+            %
+            % Optional Arguments:
+            % 2. overwrite: bool
+            %    Overwrites symbol with same name in destination if true.
+            %    Default: false.
+            %
+
+            % input arguments
+            p = inputParser();
+            is_dest = @(x) isa(x, 'GAMSTransfer.Container');
+            addRequired(p, 'destination', is_dest);
+            addOptional(p, 'overwrite', '', @islogical);
+            parse(p, varargin{:});
+            destination = p.Results.destination;
+            overwrite = p.Results.overwrite;
+
+            % domain or size depends on indexed mode
+            if obj.container.indexed
+                if ~destination.indexed
+                    error('Destination container must be indexed.');
+                end
+                domain_size = [];
+            else
+                if destination.indexed
+                    error('Destination container must not be indexed.');
+                end
+                domain_size = {};
+            end
+
+            % create new (empty) symbol
+            if isfield(destination.data, obj.name_)
+                if ~overwrite
+                    error('Symbol already exists in destination.');
+                end
+                newsym = destination.data.(obj.name_);
+            else
+                newsym = GAMSTransfer.Symbol(destination, obj.name_, '', ...
+                    domain_size, [], obj.domain_forwarding_);
+            end
+
+            % copy data
+            newsym.records = obj.records;
+            newsym.uels = obj.uels;
+            newsym.description_ = obj.description_;
+            newsym.dimension_ = obj.dimension_;
+            newsym.domain_ = obj.domain_;
+            newsym.domain_names_ = obj.domain_names_;
+            newsym.domain_labels_ = obj.domain_labels_;
+            newsym.domain_type_ = obj.domain_type_;
+            newsym.domain_forwarding_ = obj.domain_forwarding_;
+            newsym.size_ = obj.size_;
+            newsym.format_ = obj.format_;
+            newsym.number_records_ = obj.number_records_;
+
+            % adapt domain sets
+            for i = 1:obj.dimension_
+                if ~isa(obj.domain_{i}, 'GAMSTransfer.Set') && ...
+                    ~isa(obj.domain_{i}, 'GAMSTransfer.Alias')
+                    continue;
+                end
+
+                if isfield(destination.data, obj.domain_{i}.name_) && ...
+                    obj.domain_{i}.equals(destination.data.(obj.domain_{i}.name_))
+                    newsym.domain_{i} = destination.data.(obj.domain_{i}.name_);
+                else
+                    newsym.domain_{i} = obj.domain_{i}.name_;
+                    newsym.domain_type_ = 'relaxed';
+                    newsym.size_(i) = nan;
                 end
             end
         end
