@@ -80,16 +80,8 @@ classdef Utils
             % error if the given system directory is invalid.
             %
 
-            if ispc
-                gams_exe = 'gams.exe';
-            else
-                gams_exe = 'gams';
-            end
             if strcmp(gams_dir, '')
                 gams_dir = GAMSTransfer.find_gams();
-            end
-            if ~isfile(fullfile(gams_dir, gams_exe))
-                error('Invalid GAMS system directory: %s', gams_dir);
             end
         end
 
