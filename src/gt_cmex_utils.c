@@ -28,6 +28,7 @@
 
 #include <string.h>
 #include <math.h>
+#include <float.h>
 #include <stdlib.h>
 
 #define ERRID "GAMSTransfer:gt_cmex_utils:"
@@ -220,7 +221,7 @@ void gt_utils_type_default_values(
     }
 
     if (sv_matlab)
-        for (size_t i = 0; i < GMS_VAL_MAX; i++)
+        for (i = 0; i < GMS_VAL_MAX; i++)
             def_values[i] = gt_utils_sv_gams2matlab(def_values[i], 0, NULL);
 }
 
