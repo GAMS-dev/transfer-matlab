@@ -1,0 +1,160 @@
+/** \page GAMSTRANSFER_MATLAB_GETSTARTED Getting Started
+
+\section GAMSTRANSFER_MATLAB_GETSTARTED_INSTALL Install
+
+GAMS comes with a ready-to-use GAMS Transfer Matlab (for Matlab 2018a or newer).
+Simply add the GAMS Matlab API to the Matlab path:
+```
+addpath("[PathToGAMS]/apifiles/Matlab/api")
+```
+
+Note that GAMS Transfer Matlab comes as a Matlab package and, thus, all classes
+must be prefixed with `GAMSTransfer.`. In order to avoid this, you can import
+the package with:
+```
+import GAMSTransfer.*
+```
+
+\section GAMSTRANSFER_MATLAB_GETSTARTED_EXAMPLE Example
+
+As an introductory example, we consider creating a GDX file in Matlab with
+content equal to the solution data of model
+[trnsport](https://www.gams.com/latest/gamslib_ml/libhtml/gamslib_trnsport.html).
+
+Create with GAMS:
+```
+gamslib trnsport
+gams trnsport GDX=trnsport.gdx
+```
+
+Create with Matlab:
+```
+import GAMSTransfer.*
+
+% create an empty container
+m = Container();
+
+% add sets
+i = Set(m, 'i', 'records', {'seattle', 'san-diego'}, 'description', 'canning plants');
+j = Set(m, 'j', 'records', {'new-york', 'chicago', 'topeka'}, 'description', 'markets');
+
+% add parameters
+a = Parameter(m, 'a', i, 'description', 'capacity of plant i in cases');
+b = Parameter(m, 'b', j, 'description', 'demand at market j in cases');
+d = Parameter(m, 'd', {i,j}, 'description', 'distance in thousands of miles');
+f = Parameter(m, 'f', 'description', 'freight in dollars per case per thousand miles');
+c = Parameter(m, 'c', {i,j}, 'description', 'transport cost in thousands of dollars per case');
+
+% set parameter records
+a.setRecords([350, 600]);
+b.setRecords([325, 300, 275]);
+d.setRecords([2.5, 1.7, 1.8; 2.5, 1.8, 1.4]);
+f.setRecords(90);
+c.setRecords([0.225, 0.153, 0.162; 0.225, 0.162, 0.126]);
+
+% add variables
+x = Variable(m, 'x', 'positive', {i,j}, 'description', 'shipment quantities in cases');
+z = Variable(m, 'z', 'description', 'total transportation costs in thousands of dollars');
+
+% set variable records
+% Note: Argument order is: level, marginal, lower, upper, scale.
+x.setRecords([50, 300, 0; 275, 0, 275], [0, 0, 0.036; 0, 0.009, 0]);
+z.setRecords(153.675);
+
+% (optional) transform records into different format
+x.transformRecords('table');
+
+% add equations
+cost = Equation(m, 'cost', 'e', 'description', 'define objective function');
+supply = Equation(m, 'supply', 'l', i, 'description', 'observe supply limit at plant i');
+demand = Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
+
+% set equation records
+cost.setRecords(0, 1, 0, 0);
+supply.setRecords(struct('level', [350, 550], 'marginal', [SpecialValues.EPS, 0], 'upper', [350, 600]));
+demand.setRecords([325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]);
+
+% write data to a GDX file
+m.write('trnsport.gdx');
+```
+
+The example illustrates the general GAMS Transfer workflow: A \ref
+Matlab::GAMSTransfer::Container "Container" can be filled with different
+symbols, here are shown \ref Matlab::GAMSTransfer::Set "Set", \ref
+Matlab::GAMSTransfer::Parameter "Parameter", \ref Matlab::GAMSTransfer::Variable
+"Variable" and \ref Matlab::GAMSTransfer::Equation "Equation" (not shown: \ref
+Matlab::GAMSTransfer::Alias "Alias") and is later \ref GAMSTRANSFER_MATLAB_WRITE
+"written to a GDX file".
+
+Instead of starting with an empty container in
+```
+% create an empty container
+m = Container();
+```
+one could initialize it by \ref GAMSTRANSFER_MATLAB_READ
+"reading from a GDX file":
+```
+% create a container based on GDX
+m = Container('path/to/file.gdx');
+```
+
+Each symbol in the container has multiple symbol records -- the actual data --
+that can be provided at symbol creation (see for example set `i`), but \ref TODO
+"adding or modifying data" thereafter is possible, too.
+
+A symbol, e.g. the variable `x` (also accessible through `m.data.x`), stores its
+symbol records in `x.records`, but provides further meta data:
+```
+>> x
+
+x =
+
+  Variable with properties:
+
+                 name: 'x'
+          description: 'shipment quantities in cases'
+                 type: 'positive'
+       default_values: [1×1 struct]
+            dimension: 2
+                 size: [2 3]
+               domain: {[1×1 GAMSTransfer.Set]  [1×1 GAMSTransfer.Set]}
+         domain_names: {'i'  'j'}
+        domain_labels: {'i_1'  'j_2'}
+          domain_type: 'regular'
+    domain_forwarding: 0
+              records: [6×4 table]
+               format: 'table'
+
+>> x.records
+
+ans =
+
+  6×4 table
+
+       i_1         j_2       level    marginal
+    _________    ________    _____    ________
+
+    seattle      new-york      50          0
+    seattle      chicago      300          0
+    seattle      topeka         0      0.036
+    san-diego    new-york     275          0
+    san-diego    chicago        0      0.009
+    san-diego    topeka       275          0
+```
+
+Besides `name` and `description` each symbol has modifyable meta data
+`dimension`, `size` and `domain` to define the symbol domain and shape as well
+as the possible dependency on other sets. Note that `size` is of particular
+importance when using \ref GAMSTRANSFER_MATLAB_RECFORMATS
+"matrix like record formats" to store symbol records (compare property `format`)
+and/or a \ref Matlab::GAMSTransfer::Container "Container" in \ref
+GAMSTRANSFER_MATLAB_INDEXEDGDX "indexed mode".
+
+The example further shows that in table like \ref GAMSTRANSFER_MATLAB_RECFORMATS
+"matrix like record formats" the first `dimension` columns are the record's
+domain information with column names `domain_labels`. Added record value columns
+follow (`level` and `marginal`). Missing value columns, here `lower`, `upper`
+and `scale` are considered to hold default values specified by `default_values`
+-- in this example 0, Inf and 1, respectively.
+
+*/
