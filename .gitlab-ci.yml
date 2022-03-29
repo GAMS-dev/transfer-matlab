@@ -41,6 +41,9 @@ build_documentation:
         name: registry.gams.com/devel/gams-transfer-matlab/linux/builder
     script:
         - ./gams_transfer_doc.sh
+    only:
+        - merge_requests
+        - master
     artifacts:
         name: doc
         paths:
