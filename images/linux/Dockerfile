@@ -2,7 +2,7 @@
 FROM fedora:latest
 
 RUN yum -y update && \
-    yum -y install gcc-c++ redhat-rpm-config octave octave-devel && \
+    yum -y install gcc-c++ git redhat-rpm-config octave octave-devel doxygen && \
     yum clean all
 
 # install gitlab release-cli
