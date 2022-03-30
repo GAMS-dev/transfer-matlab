@@ -1,62 +1,101 @@
-classdef VariableType
-    % GAMS Variable Types
-    %
-    % This class holds the possible GAMS variable types similar to an enumeration
-    % class. Note that it is not an enumeration class due to compatibility (e.g.
-    % for Octave).
-    %
-    % See also: GAMSTransfer.Variable
-    %
+% GAMS Variable Types
+%
+% ------------------------------------------------------------------------------
+%
+% GAMS - General Algebraic Modeling System
+% GAMS Transfer Matlab
+%
+% Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the 'Software'), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
+%
+% ------------------------------------------------------------------------------
+%
+% GAMS Variable Types
+%
+% This class holds the possible GAMS variable types similar to an enumeration
+% class. Note that it is not an enumeration class due to compatibility (e.g.
+% for Octave).
+%
+% See also: GAMSTransfer.Variable
+%
 
-    %
-    % GAMS - General Algebraic Modeling System Matlab API
-    %
-    % Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
-    % Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
-    %
-    % Permission is hereby granted, free of charge, to any person obtaining a copy
-    % of this software and associated documentation files (the 'Software'), to deal
-    % in the Software without restriction, including without limitation the rights
-    % to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    % copies of the Software, and to permit persons to whom the Software is
-    % furnished to do so, subject to the following conditions:
-    %
-    % The above copyright notice and this permission notice shall be included in all
-    % copies or substantial portions of the Software.
-    %
-    % THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    % IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    % FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    % AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    % LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    % SOFTWARE.
-    %
+%> GAMS Variable Types
+%>
+%> This class holds the possible GAMS variable types similar to an enumeration
+%> class. Note that it is not an enumeration class due to compatibility (e.g.
+%> for Octave).
+%>
+%> @see \ref GAMSTransfer::Variable "Variable"
+classdef VariableType
 
     properties (Constant)
+        %> identifier for binary variable
+
         % BINARY identifier for binary variable
         BINARY = 1
+
+
+        %> identifier for integer variable
 
         % INTEGER identifier for integer variable
         INTEGER = 2
 
+
+        %> identifier for positive variable
+
         % POSITIVE identifier for positive variable
         POSITIVE = 3
+
+
+        %> identifier for negative variable
 
         % NEGATIVE identifier for negative variable
         NEGATIVE = 4
 
+
+        %> identifier for free variable
+
         % FREE identifier for free variable
         FREE = 5
+
+
+        %> identifier for SOS1 variable
 
         % SOS1 identifier for SOS1 variable
         SOS1 = 6
 
+
+        %> SOS2 identifier for SOS2 variable
+
         % SOS2 identifier for SOS2 variable
         SOS2 = 7
 
+
+        %> identifier for semi-continuous variable
+
         % SEMICONT identifier for semi-continuous variable
         SEMICONT = 8
+
+
+        %> identifier for semi-integer variable
 
         % SEMIINT identifier for semi-integer variable
         SEMIINT = 9
@@ -64,6 +103,17 @@ classdef VariableType
 
     methods (Static)
 
+        %> Converts a variable type identifier to string
+        %>
+        %> - `s = VariableType.int2str(i)` returns a string with the variable
+        %>   type name for the given variable type identifier `i`. If `i` is an
+        %>   invalid identifier, this function raises an error.
+        %>
+        %> **Example:**
+        %> ```
+        %> s = VariableType.int2str(VariableType.BINARY)
+        %> ```
+        %> `s` equals `"binary"`
         function value_str = int2str(value_int)
             % Converts a variable type identifier to string
             %
@@ -74,7 +124,6 @@ classdef VariableType
             % Example:
             % s = VariableType.int2str(VariableType.BINARY)
             % s equals 'binary'
-            %
 
             switch value_int
             case GAMSTransfer.VariableType.BINARY
@@ -100,6 +149,17 @@ classdef VariableType
             end
         end
 
+        %> Converts a variable type name to an identifier
+        %>
+        %> - `i = VariableType.str2int(s)` returns an integer identifier for the
+        %>   given variable type name `s`. If `s` is an invalid type name, this
+        %>   function raises an error.
+        %>
+        %> **Example:**
+        %> ```
+        %> i = VariableType.str2int('binary')
+        %> ```
+        %> `i` equals `VariableType.BINARY`
         function value_int = str2int(value_str)
             % Converts a variable type name to an identifier
             %
@@ -110,7 +170,6 @@ classdef VariableType
             % Example:
             % i = VariableType.str2int('binary')
             % i equals VariableType.BINARY
-            %
 
             switch lower(char(value_str))
             case 'binary'
@@ -136,6 +195,18 @@ classdef VariableType
             end
         end
 
+        %> Checks if a variable type name or identifier is valid
+        %>
+        %> - `b = VariableType.isValid(s)` returns `true` if `s` is a valid
+        %>   variable type name or variable type identifier and `false`
+        %>   otherwise.
+        %>
+        %> **Example:**
+        %> ```
+        %> VariableType.isValid('binary') % is true
+        %> VariableType.isValid(VariableType.BINARY) % is true
+        %> VariableType.isValid('not_a_valid_name') % is false
+        %> ```
         function bool = isValid(value)
             % Checks if a variable type name or identifier is valid
             %
@@ -146,7 +217,6 @@ classdef VariableType
             % VariableType.isValid('binary') is true
             % VariableType.isValid(VariableType.BINARY) is true
             % VariableType.isValid('not_a_valid_name') is false
-            %
 
             if ischar(value) || isstring(value)
                 switch lower(char(value))

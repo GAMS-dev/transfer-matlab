@@ -1,11 +1,9 @@
 % Find GAMS system directory from PATH
 %
-% sysdir = find_gams() returns the path to the GAMS system directory if it is
-% part of the PATH environment variable and an empty string otherwise.
+% ------------------------------------------------------------------------------
 %
-
-%
-% GAMS - General Algebraic Modeling System Matlab API
+% GAMS - General Algebraic Modeling System
+% GAMS Transfer Matlab
 %
 % Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
 % Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
@@ -28,7 +26,12 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 % SOFTWARE.
 %
-
+% ------------------------------------------------------------------------------
+%
+% Find GAMS system directory from PATH
+%
+% sysdir = find_gams() returns the path to the GAMS system directory if it is
+% part of the PATH environment variable and an empty string otherwise.
 function gamsDirectory = find_gams()
     gamsDirectory = '';
 

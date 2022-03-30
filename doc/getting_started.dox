@@ -79,19 +79,18 @@ m.write('trnsport.gdx');
 ```
 
 The example illustrates the general GAMS Transfer workflow: A \ref
-Matlab::GAMSTransfer::Container "Container" can be filled with different
-symbols, here are shown \ref Matlab::GAMSTransfer::Set "Set", \ref
-Matlab::GAMSTransfer::Parameter "Parameter", \ref Matlab::GAMSTransfer::Variable
-"Variable" and \ref Matlab::GAMSTransfer::Equation "Equation" (not shown: \ref
-Matlab::GAMSTransfer::Alias "Alias") and is later \ref GAMSTRANSFER_MATLAB_WRITE
-"written to a GDX file".
+GAMSTransfer::Container "Container" can be filled with different symbols, here
+are shown \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Parameter
+"Parameter", \ref GAMSTransfer::Variable "Variable" and \ref
+GAMSTransfer::Equation "Equation" (not shown: \ref GAMSTransfer::Alias "Alias")
+and is later \ref GAMSTRANSFER_MATLAB_GDXWRITE "written to a GDX file".
 
 Instead of starting with an empty container in
 ```
 % create an empty container
 m = Container();
 ```
-one could initialize it by \ref GAMSTRANSFER_MATLAB_READ
+one could initialize it by \ref GAMSTRANSFER_MATLAB_GDXREAD
 "reading from a GDX file":
 ```
 % create a container based on GDX
@@ -99,8 +98,8 @@ m = Container('path/to/file.gdx');
 ```
 
 Each symbol in the container has multiple symbol records -- the actual data --
-that can be provided at symbol creation (see for example set `i`), but \ref TODO
-"adding or modifying data" thereafter is possible, too.
+that can be provided at symbol creation (see for example set `i`), but \ref
+GAMSTRANSFER_MATLAB_ADD "adding or modifying data" thereafter is possible, too.
 
 A symbol, e.g. the variable `x` (also accessible through `m.data.x`), stores its
 symbol records in `x.records`, but provides further meta data:
@@ -147,7 +146,7 @@ Besides `name` and `description` each symbol has modifyable meta data
 as the possible dependency on other sets. Note that `size` is of particular
 importance when using \ref GAMSTRANSFER_MATLAB_RECFORMATS
 "matrix like record formats" to store symbol records (compare property `format`)
-and/or a \ref Matlab::GAMSTransfer::Container "Container" in \ref
+and/or a \ref GAMSTransfer::Container "Container" in \ref
 GAMSTRANSFER_MATLAB_INDEXEDGDX "indexed mode".
 
 The example further shows that in table like \ref GAMSTRANSFER_MATLAB_RECFORMATS

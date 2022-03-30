@@ -1,88 +1,147 @@
+% GAMS Transfer ConstContainer stores (multiple) symbols (read-only)
+%
+% ------------------------------------------------------------------------------
+%
+% GAMS - General Algebraic Modeling System
+% GAMS Transfer Matlab
+%
+% Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the 'Software'), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
+%
+% ------------------------------------------------------------------------------
+%
+% GAMS Transfer ConstContainer stores (multiple) symbols (read-only)
+%
+% A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
+% parameters), each holding multiple symbol records. In GAMS Transfer the
+% Container is the main object that holds different symbols and allows to read
+% and write those to GDX.
+%
+% In contrast to the Container, a ConstContainer cannot be modified after
+% creation. This allows using operations that result in better runtime
+% performance. Hence, if performance is key, consider using ConstContainer over
+% Container. However, a ConstContainer supports less features.
+%
+% Further differences are:
+% - Symbols in a ConstContainer are structs, not objects.
+% - number_records in a ConstContainer symbol represents the number of GDX
+%   records in a read GDX file, not the records currently stored. This then also
+%   applies to sizes.
+% - Domains are linked by name, not by reference in a symbol.
+% - UELs in a ConstContainer symbol are stored as a field in the struct or
+%   within the categorical array. Methods like getUELs as in the Symbol class do
+%   not exist.
+%
+% Indexed Mode:
+%
+% There are two different modes GAMSTransfer can be used in: indexed or default.
+% - In default mode the main characteristic of a symbol is its domain that
+%   defines the symbol dimension and its dependencies. A size of symbol is here
+%   given by the number of records of the domain sets of each dimension. In
+%   default mode all GAMS symbol types can be used.
+% - In indexed mode, there are no domain sets, but sizes (the shape of a symbol)
+%   can be set explicitly. Furthermore, there are no UELs and only GAMS
+%   Parameters are allowed to be used in indexed mode.
+% The mode is defined when creating a container and can't be changed thereafter.
+%
+% Optional Arguments:
+% 1. filename (string):
+%    Path to GDX file to be read (no records will be read)
+%
+% Parameter Arguments:
+% - gams_dir (string):
+%   Path to GAMS system directory. Default is determined from PATH environment
+%   variable
+% - indexed (logical):
+%   Specifies if container is used in indexed of default mode, see above.
+%
+% Example:
+% c = ConstContainer('path/to/file.gdx');
+% c = ConstContainer('indexed', true, 'gams_dir', 'C:\GAMS');
+%
+% See also: GAMSTransfer.Container
+%
 
+%> GAMS Transfer ConstContainer stores (multiple) symbols (read-only)
+%>
+%> A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
+%> parameters), each holding multiple symbol records. In GAMS Transfer the
+%> Container is the main object that holds different symbols and allows to read
+%> and write those to GDX.
+%>
+%> In contrast to the \ref GAMSTransfer::Container "Container", a ConstContainer
+%> cannot be modified after creation. This allows using operations that result
+%> in better runtime performance. Hence, if performance is key, consider using
+%> ConstContainer over \ref GAMSTransfer::Container "Container". However, a
+%> ConstContainer supports less features.
+%>
+%> Further differences are:
+%> - Symbols in a ConstContainer are structs, not objects.
+%> - number_records in a ConstContainer symbol represents the number of GDX
+%>   records in a read GDX file, not the records currently stored. This then
+%>   also applies to sizes.
+%> - Domains are linked by name, not by reference in a symbol.
+%> - UELs in a ConstContainer symbol are stored as a field in the struct or
+%>   within the categorical array. Methods like getUELs as in the Symbol class
+%>   do not exist.
+%>
+%> **Indexed Mode:**
+%>
+%> There are two different modes GAMSTransfer can be used in: indexed or
+%> default.
+%> - In default mode the main characteristic of a symbol is its domain that
+%>   defines the symbol dimension and its dependencies. A size of symbol is here
+%>   given by the number of records of the domain sets of each dimension. In
+%>   default mode all GAMS symbol types can be used.
+%> - In indexed mode, there are no domain sets, but sizes (the shape of a
+%>   symbol) can be set explicitly. Furthermore, there are no UELs and only GAMS
+%>   Parameters are allowed to be used in indexed mode.
+%> The mode is defined when creating a container and can't be changed
+%> thereafter.
+%>
+%> **Optional Arguments:**
+%> 1. filename (`string`):
+%>    Path to GDX file to be read (no records will be read)
+%>
+%> **Parameter Arguments:**
+%> - gams_dir (`string`):
+%>   Path to GAMS system directory. Default is determined from PATH environment
+%>   variable
+%> - indexed (`logical`):
+%>   Specifies if container is used in indexed of default mode, see above.
+%>
+%> **Example:**
+%> ```
+%> c = ConstContainer('path/to/file.gdx');
+%> c = ConstContainer('indexed', true, 'gams_dir', 'C:\GAMS');
+%> ```
+%>
+%> @see \ref GAMSTransfer::Container "Container"
 classdef ConstContainer < GAMSTransfer.BaseContainer
-    % GAMS Transfer ConstContainer stores (multiple) symbols (read-only)
-    %
-    % A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
-    % parameters), each holding multiple symbol records. In GAMS Transfer the
-    % Container is the main object that holds different symbols and allows to
-    % read and write those to GDX.
-    %
-    % In contrast to the Container, a ConstContainer cannot be modified after
-    % creation. This allows using operations that result in better runtime
-    % performance. Hence, if performance is key, consider using ConstContainer
-    % over Container. However, a ConstContainer supports less features.
-    %
-    % Further differences are:
-    % - Symbols in a ConstContainer are structs, not objects.
-    % - number_records in a ConstContainer symbol represents the number of GDX
-    %   records in a read GDX file, not the records currently stored. This then
-    %   also applies to sizes.
-    % - Domains are linked by name, not by reference in a symbol.
-    % - UELs in a ConstContainer symbol are stored as a field in the struct or
-    %   within the categorical array. Methods like getUELs as in the Symbol
-    %   class do not exist.
-    %
-    % Indexed Mode:
-    % There are two different modes GAMSTransfer can be used in: indexed or
-    % default.
-    % - In default mode the main characteristic of a symbol is its domain that
-    %   defines the symbol dimension and its dependencies. A size of symbol is
-    %   here given by the number of records of the domain sets of each
-    %   dimension. In default mode all GAMS symbol types can be used.
-    % - In indexed mode, there are no domain sets, but sizes (the shape of a
-    %   symbol) can be set explicitly. Furthermore, there are no UELs and only
-    %   GAMS Parameters are allowed to be used in indexed mode.
-    % The mode is defined when creating a container and can't be changed
-    % thereafter.
-    %
-    % Optional Arguments:
-    % 1. filename: string
-    %    Path to GDX file to be read (no records will be read)
-    %
-    % Parameter Arguments:
-    % - gams_dir: string
-    %   Path to GAMS system directory. Default is determined from PATH
-    %   environment variable
-    % - indexed: logical
-    %   Specifies if container is used in indexed of default mode, see above.
-    %
-    % Example:
-    % c = ConstContainer('path/to/file.gdx');
-    % c = ConstContainer('indexed', true, 'gams_dir', 'C:\GAMS');
-    %
-    % See also: GAMSTransfer.Container
-    %
-
-    %
-    % GAMS - General Algebraic Modeling System Matlab API
-    %
-    % Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
-    % Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
-    %
-    % Permission is hereby granted, free of charge, to any person obtaining a copy
-    % of this software and associated documentation files (the 'Software'), to deal
-    % in the Software without restriction, including without limitation the rights
-    % to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    % copies of the Software, and to permit persons to whom the Software is
-    % furnished to do so, subject to the following conditions:
-    %
-    % The above copyright notice and this permission notice shall be included in all
-    % copies or substantial portions of the Software.
-    %
-    % THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    % IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    % FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    % AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    % LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    % SOFTWARE.
-    %
 
     methods
 
+        %> Constructs a GAMSTransfer Container, see class help
         function obj = ConstContainer(varargin)
-            % Constructs a GAMSTransfer Container, see class help.
-            %
+            % Constructs a GAMSTransfer Container, see class help
 
             % input arguments
             p = inputParser();
@@ -104,13 +163,17 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
             end
         end
 
+        %> Checks equivalence with other container
+        %>
+        %> **Required Arguments:**
+        %> 1. container (`any`):
+        %>    Other Container
         function eq = equals(obj, container)
             % Checks equivalence with other container
             %
             % Required Arguments:
-            % 1. container: any
+            % 1. container (any):
             %    Other Container
-            %
 
             eq = false;
             if ~isa(container, 'GAMSTransfer.BaseContainer')
@@ -128,21 +191,47 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
             end
         end
 
+        %> Reads symbols from GDX file (current symbols will be lost).
+        %>
+        %> **Required Arguments:**
+        %> 1. filename (`string`):
+        %>    Path to GDX file to be read
+        %>
+        %> **Parameter Arguments:**
+        %> - symbols (`cell`):
+        %>   List of symbols to be read. All if empty. Default is `{}`.
+        %> - format (`string`):
+        %>   Records format symbols should be stored in. Default is `table`.
+        %> - records (`logical`):
+        %>   Enables reading of records. Default is `true`.
+        %> - values (`cell`):
+        %>   Subset of `{"level", "marginal", "lower", "upper", "scale"}` that
+        %>   defines what value fields should be read. Default is all.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> c.read('path/to/file.gdx');
+        %> c.read('path/to/file.gdx', 'format', 'dense_matrix');
+        %> c.read('path/to/file.gdx', 'symbols', {'x', 'z'}, 'format', 'struct', 'values', {'level'});
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::RecordsFormat "RecordsFormat"
         function read(obj, varargin)
             % Reads symbols from GDX file (current symbols will be lost).
             %
             % Required Arguments:
-            % 1. filename: string
+            % 1. filename (string):
             %    Path to GDX file to be read
             %
             % Parameter Arguments:
-            % - symbols: cell
+            % - symbols (cell):
             %   List of symbols to be read. All if empty. Default is {}.
-            % - format: string
+            % - format (string):
             %   Records format symbols should be stored in. Default is table.
-            % - records: logical
+            % - records (logical):
             %   Enables reading of records. Default is true.
-            % - values: cell
+            % - values (cell):
             %   Subset of {'level', 'marginal', 'lower', 'upper', 'scale'} that
             %   defines what value fields should be read. Default is all.
             %
@@ -153,7 +242,6 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
             % c.read('path/to/file.gdx', 'symbols', {'x', 'z'}, 'format', 'struct', 'values', {'level'});
             %
             % See also: GAMSTransfer.RecordsFormat
-            %
 
             % input arguments
             p = inputParser();

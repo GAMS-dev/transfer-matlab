@@ -1,74 +1,120 @@
+% GAMS Transfer Container stores (multiple) symbols
+%
+% ------------------------------------------------------------------------------
+%
+% GAMS - General Algebraic Modeling System
+% GAMS Transfer Matlab
+%
+% Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the 'Software'), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
+%
+% ------------------------------------------------------------------------------
+%
+% GAMS Transfer Container stores (multiple) symbols
+%
+% A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
+% parameters), each holding multiple symbol records. In GAMS Transfer the
+% Container is the main object that holds different symbols and allows to read
+% and write those to GDX.
+%
+% Indexed Mode:
+%
+% There are two different modes GAMSTransfer can be used in: indexed or default.
+% - In default mode the main characteristic of a symbol is its domain that
+%   defines the symbol dimension and its dependencies. A size of symbol is here
+%   given by the number of records of the domain sets of each dimension. In
+%   default mode all GAMS symbol types can be used.
+% - In indexed mode, there are no domain sets, but sizes (the shape of a symbol)
+%   can be set explicitly. Furthermore, there are no UELs and only GAMS
+%   Parameters are allowed to be used in indexed mode.
+% The mode is defined when creating a container and can't be changed thereafter.
+%
+% Optional Arguments:
+% 1. source (string or ConstContainer):
+%    Path to GDX file or a ConstContainer object to be read
+%
+% Parameter Arguments:
+% - gams_dir (string):
+%   Path to GAMS system directory. Default is determined from PATH environment
+%   variable
+% - indexed (logical):
+%   Specifies if container is used in indexed of default mode, see above.
+%
+% Example:
+% c = Container();
+% c = Container('path/to/file.gdx');
+% c = Container('indexed', true, 'gams_dir', 'C:\GAMS');
+%
+% See also: GAMSTransfer.Set, GAMSTransfer.Alias, GAMSTransfer.Parameter,
+% GAMSTransfer.Variable, GAMSTransfer.Equation, GAMSTransfer.ConstContainer
+%
+
+%> GAMS Transfer Container stores (multiple) symbols
+%>
+%> A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
+%> parameters), each holding multiple symbol records. In GAMS Transfer the
+%> Container is the main object that holds different symbols and allows to read
+%> and write those to GDX.
+%>
+%> **Indexed Mode:**
+%>
+%> There are two different modes GAMSTransfer can be used in: indexed or default.
+%> - In default mode the main characteristic of a symbol is its domain that
+%>   defines the symbol dimension and its dependencies. A size of symbol is here
+%>   given by the number of records of the domain sets of each dimension. In
+%>   default mode all GAMS symbol types can be used.
+%> - In indexed mode, there are no domain sets, but sizes (the shape of a symbol)
+%>   can be set explicitly. Furthermore, there are no UELs and only GAMS
+%>   Parameters are allowed to be used in indexed mode.
+%> The mode is defined when creating a container and can't be changed thereafter.
+%>
+%> **Optional Arguments:**
+%> 1. source (`string` or `ConstContainer`):
+%>    Path to GDX file or a \ref GAMSTransfer::ConstContainer "ConstContainer"
+%>    object to be read
+%>
+%> **Parameter Arguments:**
+%> - gams_dir (`string`):
+%>   Path to GAMS system directory. Default is determined from PATH environment
+%>   variable
+%> - indexed (`logical`):
+%>   Specifies if container is used in indexed of default mode, see above.
+%>
+%> **Example:**
+%> ```
+%> c = Container();
+%> c = Container('path/to/file.gdx');
+%> c = Container('indexed', true, 'gams_dir', 'C:\GAMS');
+%> ```
+%>
+%> @see \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Alias "Alias", \ref
+%> GAMSTransfer::Parameter "Parameter", \ref GAMSTransfer::Variable "Variable",
+%> \ref GAMSTransfer::Equation "Equation", \ref GAMSTransfer::ConstContainer
+%> "ConstContainer"
 classdef Container < GAMSTransfer.BaseContainer
-    % GAMS Transfer Container stores (multiple) symbols
-    %
-    % A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
-    % parameters), each holding multiple symbol records. In GAMS Transfer the
-    % Container is the main object that holds different symbols and allows to
-    % read and write those to GDX.
-    %
-    % Indexed Mode:
-    % There are two different modes GAMSTransfer can be used in: indexed or
-    % default.
-    % - In default mode the main characteristic of a symbol is its domain that
-    %   defines the symbol dimension and its dependencies. A size of symbol is
-    %   here given by the number of records of the domain sets of each
-    %   dimension. In default mode all GAMS symbol types can be used.
-    % - In indexed mode, there are no domain sets, but sizes (the shape of a
-    %   symbol) can be set explicitly. Furthermore, there are no UELs and only
-    %   GAMS Parameters are allowed to be used in indexed mode.
-    % The mode is defined when creating a container and can't be changed
-    % thereafter.
-    %
-    % Optional Arguments:
-    % 1. source: string or ConstContainer
-    %    Path to GDX file or a ConstContainer object to be read
-    %
-    % Parameter Arguments:
-    % - gams_dir: string
-    %   Path to GAMS system directory. Default is determined from PATH
-    %   environment variable
-    % - indexed: logical
-    %   Specifies if container is used in indexed of default mode, see above.
-    %
-    % Example:
-    % c = Container();
-    % c = Container('path/to/file.gdx');
-    % c = Container('indexed', true, 'gams_dir', 'C:\GAMS');
-    %
-    % See also: GAMSTransfer.Set, GAMSTransfer.Alias, GAMSTransfer.Parameter,
-    % GAMSTransfer.Variable, GAMSTransfer.Equation, GAMSTransfer.ConstContainer
-    %
-
-    %
-    % GAMS - General Algebraic Modeling System Matlab API
-    %
-    % Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
-    % Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
-    %
-    % Permission is hereby granted, free of charge, to any person obtaining a copy
-    % of this software and associated documentation files (the 'Software'), to deal
-    % in the Software without restriction, including without limitation the rights
-    % to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    % copies of the Software, and to permit persons to whom the Software is
-    % furnished to do so, subject to the following conditions:
-    %
-    % The above copyright notice and this permission notice shall be included in all
-    % copies or substantial portions of the Software.
-    %
-    % THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    % IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    % FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    % AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    % LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    % SOFTWARE.
-    %
-
     methods
 
+        %> Constructs a GAMSTransfer Container, see class help
         function obj = Container(varargin)
-            % Constructs a GAMSTransfer Container, see class help.
-            %
+            % Constructs a GAMSTransfer Container, see class help
 
             % input arguments
             p = inputParser();
@@ -95,13 +141,17 @@ classdef Container < GAMSTransfer.BaseContainer
 
     methods
 
+        %> Checks equivalence with other container
+        %>
+        %> **Required Arguments:**
+        %> 1. container (`any`):
+        %>    Other Container
         function eq = equals(obj, container)
             % Checks equivalence with other container
             %
             % Required Arguments:
-            % 1. container: any
+            % 1. container (any):
             %    Other Container
-            %
 
             eq = false;
             if ~isa(container, 'GAMSTransfer.BaseContainer')
@@ -119,21 +169,49 @@ classdef Container < GAMSTransfer.BaseContainer
             end
         end
 
+        %> Reads symbols from GDX file
+        %>
+        %> **Required Arguments:**
+        %> 1. source (`string`, `Container` or `ConstContainer`):
+        %>    Path to GDX file, a \ref GAMSTransfer::Container "Container"
+        %>    object or \ref GAMSTransfer::ConstContainer "ConstContainer"
+        %>    object to be read
+        %>
+        %> **Parameter Arguments:**
+        %> - symbols (`cell`):
+        %>   List of symbols to be read. All if empty. Default is `{}`.
+        %> - format (`string`):
+        %>   Records format symbols should be stored in. Default is `table`.
+        %> - records (`logical`):
+        %>   Enables reading of records. Default is `true`.
+        %> - values (`cell`):
+        %>   Subset of `{"level", "marginal", "lower", "upper", "scale"}` that
+        %>   defines what value fields should be read. Default is all.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> c.read('path/to/file.gdx');
+        %> c.read('path/to/file.gdx', 'format', 'dense_matrix');
+        %> c.read('path/to/file.gdx', 'symbols', {'x', 'z'}, 'format', 'struct', 'values', {'level'});
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::RecordsFormat "RecordsFormat"
         function read(obj, varargin)
             % Reads symbols from GDX file
             %
             % Required Arguments:
-            % 1. source: string or (Const)Container
-            %    Path to GDX file or a (Const)Container object to be read
+            % 1. source (string or (Const)Container):
+            %    Path to GDX file, a (Const)Container object to be read
             %
             % Parameter Arguments:
-            % - symbols: cell
+            % - symbols (cell):
             %   List of symbols to be read. All if empty. Default is {}.
-            % - format: string
+            % - format (string):
             %   Records format symbols should be stored in. Default is table.
-            % - records: logical
+            % - records (logical):
             %   Enables reading of records. Default is true.
-            % - values: cell
+            % - values (cell):
             %   Subset of {'level', 'marginal', 'lower', 'upper', 'scale'} that
             %   defines what value fields should be read. Default is all.
             %
@@ -144,7 +222,6 @@ classdef Container < GAMSTransfer.BaseContainer
             % c.read('path/to/file.gdx', 'symbols', {'x', 'z'}, 'format', 'struct', 'values', {'level'});
             %
             % See also: GAMSTransfer.RecordsFormat
-            %
 
             % input arguments
             p = inputParser();
@@ -284,6 +361,42 @@ classdef Container < GAMSTransfer.BaseContainer
             end
         end
 
+        %> Writes symbols with symbol records to GDX file
+        %>
+        %> There are different issues that can occur when writing to GDX: e.g.
+        %> domain violations and unsorted data. For domain violations, see
+        %> GAMSTransfer.Container.getDomainViolations. Domain labels are stored
+        %> as UELs in GDX that are an (ID,label) pair. The ID is a number with
+        %> an ascending order based on the write occurence. Data records must be
+        %> sorted by these IDs in ascending order (dimension 1 first, then
+        %> dimension 2, ...). If one knows that the data is sorted, one can set
+        %> the flag 'sorted' to true to improve performance. Otherwise
+        %> GAMSTransfer will sort the values internally. Note, that the case of
+        %> 'sorted' being true and the data not being sorted will lead to an
+        %> error.
+        %>
+        %> **Required Arguments:**
+        %> 1. filename (`string`):
+        %>    Path to GDX file to write to.
+        %>
+        %> **Parameter Arguments:**
+        %> - compress (`logical`):
+        %>   Flag to compress GDX file (`true`) or not (`false`). Default is
+        %>   `false`.
+        %> - sorted (`logical`):
+        %>   Flag to define records as sorted (`true`) or not (`false`). Default
+        %>   is `false`.
+        %> - uel_priority (`cellstr`):
+        %>   UELs to be registered first before any symbol UELs. Default: `{}`.
+        %>
+        %> **Example:**
+        %> ```
+        %> c.write('path/to/file.gdx');
+        %> c.write('path/to/file.gdx', 'compress', true, 'sorted', true);
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::Container::getDomainViolations
+        %> "Container.getDomainViolations"
         function write(obj, varargin)
             % Writes symbols with symbol records to GDX file
             %
@@ -300,17 +413,17 @@ classdef Container < GAMSTransfer.BaseContainer
             % data not being sorted will lead to an error.
             %
             % Required Arguments:
-            % 1. filename: string
+            % 1. filename (string):
             %    Path to GDX file to write to.
             %
             % Parameter Arguments:
-            % - compress: logical
+            % - compress (logical):
             %   Flag to compress GDX file (true) or not (false). Default is
             %   false.
-            % - sorted: logical
+            % - sorted (logical):
             %   Flag to define records as sorted (true) or not (false). Default
             %   is false.
-            % - uel_priority: cellstr
+            % - uel_priority (cellstr):
             %   UELs to be registered first before any symbol UELs. Default: {}.
             %
             % Example:
@@ -318,7 +431,6 @@ classdef Container < GAMSTransfer.BaseContainer
             % c.write('path/to/file.gdx', 'compress', true, 'sorted', true);
             %
             % See also: GAMSTransfer.Container.getDomainViolations
-            %
 
             if ~obj.isValid()
                 obj.reorderSymbols();
@@ -358,6 +470,17 @@ classdef Container < GAMSTransfer.BaseContainer
             end
         end
 
+        %> Get symbol objects by names
+        %>
+        %> - `s = c.getSymbols(a)` returns the handle to GAMS symbol named `a`.
+        %> - `s = c.getSymbols(b)` returns a list of handles to the GAMS symbols
+        %>   with names equal to any element in cell `b`.
+        %>
+        %> **Example:**
+        %> ```
+        %> v1 = c.getSymbols('v1');
+        %> vars = c.getSymbols(c.listVariables());
+        %> ```
         function symbols = getSymbols(obj, names)
             % Get symbol objects by names
             %
@@ -368,7 +491,6 @@ classdef Container < GAMSTransfer.BaseContainer
             % Example:
             % v1 = c.getSymbols('v1');
             % vars = c.getSymbols(c.listVariables());
-            %
 
             if ischar(names) || isstring(names)
                 symbols = obj.data.(names);
@@ -383,6 +505,20 @@ classdef Container < GAMSTransfer.BaseContainer
             end
         end
 
+        %> Adds a set to the container
+        %>
+        %> Arguments are identical to the \ref GAMSTransfer::Set "Set"
+        %> constructor. Alternatively, use the constructor directly.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> s1 = c.addSet('s1');
+        %> s2 = c.addSet('s2', {s1, '*', '*'});
+        %> s3 = c.addSet('s3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::Set "Set"
         function symbol = addSet(obj, name, varargin)
             % Adds a set to the container
             %
@@ -396,11 +532,24 @@ classdef Container < GAMSTransfer.BaseContainer
             % s3 = c.addSet('s3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
             %
             % See also: GAMSTransfer.Set
-            %
 
             symbol = GAMSTransfer.Set(obj, name, varargin{:});
         end
 
+        %> Adds a parameter to the container
+        %>
+        %> Arguments are identical to the \ref GAMSTransfer::Parameter
+        %> "Parameter" constructor. Alternatively, use the constructor directly.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> p1 = c.addParameter('p1');
+        %> p2 = c.addParameter('p2', {'*', '*'});
+        %> p3 = c.addParameter('p3', '*', 'description', 'par p3');
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::Parameter "Parameter"
         function symbol = addParameter(obj, name, varargin)
             % Adds a parameter to the container
             %
@@ -414,11 +563,25 @@ classdef Container < GAMSTransfer.BaseContainer
             % p3 = c.addParameter('p3', '*', 'description', 'par p3');
             %
             % See also: GAMSTransfer.Parameter
-            %
 
             symbol = GAMSTransfer.Parameter(obj, name, varargin{:});
         end
 
+        %> Adds a variable to the container
+        %>
+        %> Arguments are identical to the \ref GAMSTransfer::Variable "Variable"
+        %> constructor. Alternatively, use the constructor directly.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> v1 = c.addVariable('v1');
+        %> v2 = c.addVariable('v2', 'binary', {'*', '*'});
+        %> v3 = c.addVariable('v3', VariableType.BINARY, '*', 'description', 'var v3');
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::Variable "Variable", \ref
+        %> GAMSTransfer::VariableType "VariableType"
         function symbol = addVariable(obj, name, varargin)
             % Adds a variable to the container
             %
@@ -432,11 +595,24 @@ classdef Container < GAMSTransfer.BaseContainer
             % v3 = c.addVariable('v3', VariableType.BINARY, '*', 'description', 'var v3');
             %
             % See also: GAMSTransfer.Variable, GAMSTransfer.VariableType
-            %
 
             symbol = GAMSTransfer.Variable(obj, name, varargin{:});
         end
 
+        %> Adds an equation to the container
+        %>
+        %> Arguments are identical to the \ref GAMSTransfer::Equation "Equation"
+        %> constructor. Alternatively, use the constructor directly.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> e2 = c.addEquation('e2', 'l', {'*', '*'});
+        %> e3 = c.addEquation('e3', EquationType.EQ, '*', 'description', 'equ e3');
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::Equation "Equation", \ref
+        %> GAMSTransfer::EquationType "EquationType"
         function symbol = addEquation(obj, name, etype, varargin)
             % Adds an equation to the container
             %
@@ -449,11 +625,23 @@ classdef Container < GAMSTransfer.BaseContainer
             % e3 = c.addEquation('e3', EquationType.EQ, '*', 'description', 'equ e3');
             %
             % See also: GAMSTransfer.Equation, GAMSTransfer.EquationType
-            %
 
             symbol = GAMSTransfer.Equation(obj, name, etype, varargin{:});
         end
 
+        %> Adds an alias to the container
+        %>
+        %> Arguments are identical to the \ref GAMSTransfer::Alias "Alias"
+        %> constructor. Alternatively, use the constructor directly.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> s = c.addSet('s');
+        %> a = c.addAlias('a', s);
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::Alias "Alias", \ref GAMSTransfer::Set "Set"
         function symbol = addAlias(obj, name, alias_with)
             % Adds an alias to the container
             %
@@ -466,11 +654,19 @@ classdef Container < GAMSTransfer.BaseContainer
             % a = c.addAlias('a', s);
             %
             % See also: GAMSTransfer.Alias, GAMSTransfer.Set
-            %
 
             symbol = GAMSTransfer.Alias(obj, name, alias_with);
         end
 
+        %> Rename a symbol
+        %>
+        %> - `renameSymbol(oldname, newname)` renames the symbol with name
+        %>   `oldname` to `newname`. The symbol order in data will not change.
+        %>
+        %> **Example:**
+        %> ```
+        %> c.renameSymbol('x', 'xx');
+        %> ```
         function renameSymbol(obj, oldname, newname)
             % Rename a symbol
             %
@@ -479,7 +675,6 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % Example:
             % c.renameSymbol('x', 'xx');
-            %
 
             if strcmp(oldname, newname)
                 return
@@ -504,9 +699,9 @@ classdef Container < GAMSTransfer.BaseContainer
             obj.data = orderfields(obj.data, perm);
         end
 
+        %> Removes a symbol from container
         function removeSymbols(obj, names)
             % Removes a symbol from container
-            %
 
             if isstring(names) || ischar(names)
                 names = {names};
@@ -531,9 +726,9 @@ classdef Container < GAMSTransfer.BaseContainer
             obj.isValid(false, true);
         end
 
+        %> Reestablishes a valid GDX symbol order
         function reorderSymbols(obj)
             % Reestablishes a valid GDX symbol order
-            %
 
             names = fieldnames(obj.data);
 
@@ -615,6 +810,21 @@ classdef Container < GAMSTransfer.BaseContainer
             obj.isValid(false, true);
         end
 
+        %> Get domain violations for all symbols
+        %>
+        %> Domain violations occur when a symbol uses other \ref
+        %> GAMSTransfer::Set "Set(s)" as domain(s) and a domain entry in its
+        %> records that is not present in the corresponding set. Such a domain
+        %> violation will lead to a GDX error when writing the data.
+        %>
+        %> - `dom_violations = getDomainViolations` returns a list of domain
+        %>   violations.
+        %>
+        %> @see \ref GAMSTransfer::Container::resolveDomainViolations
+        %> "Container.resolveDomainViolations", \ref
+        %> GAMSTransfer::Symbol::getDomainViolations
+        %> "Symbol.getDomainViolations", \ref GAMSTransfer::DomainViolation
+        %> "DomainViolation"
         function dom_violations = getDomainViolations(obj)
             % Get domain violations for all symbols
             %
@@ -626,9 +836,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % dom_violations = getDomainViolations returns a list of domain
             % violations.
             %
-            % See also: GAMSTransfer.Container.resovleDomainViolations,
-            % GAMSTransfer.Symbol.getDomainViolations, GAMSTransfer.DomainViolation
-            %
+            % See also: GAMSTransfer.Container.resolveDomainViolations,
+            % GAMSTransfer.Symbol.getDomainViolations,
+            % GAMSTransfer.DomainViolation
 
             dom_violations = {};
 
@@ -644,6 +854,21 @@ classdef Container < GAMSTransfer.BaseContainer
             end
         end
 
+        %> Extends domain sets in order to remove domain violations
+        %>
+        %> Domain violations occur when a symbol uses other \ref
+        %> GAMSTransfer::Set "Set(s)" as domain(s) and a domain entry in its
+        %> records that is not present in the corresponding set. Such a domain
+        %> violation will lead to a GDX error when writing the data.
+        %>
+        %> - `resolveDomainViolations()` extends the domain sets with the
+        %>   violated domain entries. Hence, the domain violations disappear.
+        %>
+        %> @see \ref GAMSTransfer::Container::getDomainViolations
+        %> "Container.getDomainViolations", \ref
+        %> GAMSTransfer::Symbol::resolveDomainViolations
+        %> "Symbol.resolveDomainViolations", \ref GAMSTransfer::DomainViolation
+        %> "DomainViolation"
         function resolveDomainViolations(obj)
             % Extends domain sets in order to remove domain violations
             %
@@ -656,8 +881,8 @@ classdef Container < GAMSTransfer.BaseContainer
             % violated domain entries. Hence, the domain violations disappear.
             %
             % See also: GAMSTransfer.Container.getDomainViolations,
-            % GAMSTransfer.Symbol.resovleDomainViolations, GAMSTransfer.DomainViolation
-            %
+            % GAMSTransfer.Symbol.resolveDomainViolations,
+            % GAMSTransfer.DomainViolation
 
             dom_violations = obj.getDomainViolations();
             for i = 1:numel(dom_violations)
@@ -665,9 +890,9 @@ classdef Container < GAMSTransfer.BaseContainer
             end
         end
 
+        %> Generate universe set (UEL order in GDX)
         function list = getUniverseSet(obj)
             % Generate universe set (UEL order in GDX)
-            %
 
             map = javaObject('java.util.LinkedHashMap');
 
@@ -693,18 +918,25 @@ classdef Container < GAMSTransfer.BaseContainer
             end
         end
 
+        %> Checks correctness of all symbols
+        %>
+        %> **Optional Arguments:**
+        %> 1. verbose (`logical`):
+        %>    If `true`, the reason for an invalid symbol is printed
+        %> 2. force (`logical`):
+        %>    If `true`, forces reevaluation of validity (resets cache)
+        %>
+        %> @see \ref GAMSTransfer::Symbol::isValid "Symbol.isValid"
         function valid = isValid(obj, varargin)
             % Checks correctness of all symbols
             %
             % Optional Arguments:
-            % 1. verbose: logical
+            % 1. verbose (logical):
             %    If true, the reason for an invalid symbol is printed
-            % 2. force: logical
+            % 2. force (logical):
             %    If true, forces reevaluation of validity (resets cache)
             %
-            %
             % See also: GAMSTransfer.Symbol/isValid
-            %
 
             verbose = false;
             force = false;

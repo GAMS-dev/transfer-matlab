@@ -1,38 +1,54 @@
-classdef BaseContainer < handle
-    % GAMSTransfer BaseContainer stores (multiple) symbols (expert-only)
-    %
+% GAMSTransfer BaseContainer stores (multiple) symbols (expert-only)
+%
+% ------------------------------------------------------------------------------
+%
+% GAMS - General Algebraic Modeling System
+% GAMS Transfer Matlab
+%
+% Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the 'Software'), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
+%
+% ------------------------------------------------------------------------------
+%
+% GAMSTransfer BaseContainer stores (multiple) symbols (expert-only)
+%
 
-    %
-    % GAMS - General Algebraic Modeling System Matlab API
-    %
-    % Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
-    % Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
-    %
-    % Permission is hereby granted, free of charge, to any person obtaining a copy
-    % of this software and associated documentation files (the 'Software'), to deal
-    % in the Software without restriction, including without limitation the rights
-    % to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    % copies of the Software, and to permit persons to whom the Software is
-    % furnished to do so, subject to the following conditions:
-    %
-    % The above copyright notice and this permission notice shall be included in all
-    % copies or substantial portions of the Software.
-    %
-    % THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    % IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    % FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    % AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    % LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    % SOFTWARE.
-    %
+%> GAMSTransfer BaseContainer stores (multiple) symbols (expert-only)
+%>
+classdef BaseContainer < handle
 
     properties (SetAccess = protected)
+        %> GAMS system directory
+
         % gams_dir GAMS system directory
         gams_dir = ''
 
+
+        %> Flag for indexed mode
+
         % indexed Flag for indexed mode
         indexed = false
+
+
+        %> GAMS (GDX) symbols
 
         % data GAMS (GDX) symbols
         data = struct()
@@ -45,9 +61,9 @@ classdef BaseContainer < handle
 
     methods (Hidden)
 
+        %> Constructs a GAMSTransfer BaseContainer
         function obj = BaseContainer(gams_dir, indexed, features)
-            % Constructs a GAMSTransfer BaseContainer.
-            %
+            % Constructs a GAMSTransfer BaseContainer
 
             obj.id = int32(randi(100000));
 
@@ -69,21 +85,37 @@ classdef BaseContainer < handle
 
     methods
 
+        %> Lists all symbols in container
+        %>
+        %> **Parameter Arguments:**
+        %> - is_valid (`logical` or `any`):
+        %>   Enable `valid` filter if argument is of type logical. If `true`,
+        %>   only include symbols that are valid and, if `false`, only invalid
+        %>   symbols. Default: not logical.
+        %>
+        %> @see \ref GAMSTransfer::BaseContainer::listSets
+        %> "BaseContainer.listSets", \ref
+        %> GAMSTransfer::BaseContainer::listParameters
+        %> "BaseContainer.listParameters", \ref
+        %> GAMSTransfer::BaseContainer::listVariables
+        %> "BaseContainer.listVariables", \ref
+        %> GAMSTransfer::BaseContainer::listEquations
+        %> "BaseContainer.listEquations", \ref
+        %> GAMSTransfer::BaseContainer::listAliases "BaseContainer.listAliases"
         function list = listSymbols(obj, varargin)
             % Lists all symbols in container
             %
             % Parameter Arguments:
-            % - is_valid: logical or any
+            % - is_valid (logical or any):
             %   Enable valid filter if argument is of type logical. If true,
             %   only include symbols that are valid and, if false, only invalid
             %   symbols. Default: not logical.
             %
-            % See also: GAMSTransfer.Container.listSets,
-            % GAMSTransfer.Container.listParameters,
-            % GAMSTransfer.Container.listVariables,
-            % GAMSTransfer.Container.listEquations,
-            % GAMSTransfer.Container.listAliases
-            %
+            % See also: GAMSTransfer.BaseContainer.listSets,
+            % GAMSTransfer.BaseContainer.listParameters,
+            % GAMSTransfer.BaseContainer.listVariables,
+            % GAMSTransfer.BaseContainer.listEquations,
+            % GAMSTransfer.BaseContainer.listAliases
 
             p = inputParser();
             addParameter(p, 'types', [], @isnumeric);
@@ -152,21 +184,37 @@ classdef BaseContainer < handle
             end
         end
 
+        %> Lists all sets in container
+        %>
+        %> **Parameter Arguments:**
+        %> - is_valid (`logical` or `any`):
+        %>   Enable `valid` filter if argument is of type logical. If `true`,
+        %>   only include symbols that are valid and, if `false`, only invalid
+        %>   symbols. Default: not logical.
+        %>
+        %> @see \ref GAMSTransfer::BaseContainer::listSymbols
+        %> "BaseContainer.listSymbols", \ref
+        %> GAMSTransfer::BaseContainer::listParameters
+        %> "BaseContainer.listParameters", \ref
+        %> GAMSTransfer::BaseContainer::listVariables
+        %> "BaseContainer.listVariables", \ref
+        %> GAMSTransfer::BaseContainer::listEquations
+        %> "BaseContainer.listEquations", \ref
+        %> GAMSTransfer::BaseContainer::listAliases "BaseContainer.listAliases"
         function list = listSets(obj, varargin)
             % Lists all sets in container
             %
             % Parameter Arguments:
-            % - is_valid: logical or any
+            % - is_valid (logical or any):
             %   Enable valid filter if argument is of type logical. If true,
             %   only include symbols that are valid and, if false, only invalid
             %   symbols. Default: not logical.
             %
-            % See also: GAMSTransfer.Container.listSymbols,
-            % GAMSTransfer.Container.listParameters,
-            % GAMSTransfer.Container.listVariables,
-            % GAMSTransfer.Container.listEquations,
-            % GAMSTransfer.Container.listAliases
-            %
+            % See also: GAMSTransfer.BaseContainer.listSymbols,
+            % GAMSTransfer.BaseContainer.listParameters,
+            % GAMSTransfer.BaseContainer.listVariables,
+            % GAMSTransfer.BaseContainer.listEquations,
+            % GAMSTransfer.BaseContainer.listAliases
 
             p = inputParser();
             addParameter(p, 'is_valid', nan);
@@ -176,21 +224,36 @@ classdef BaseContainer < handle
                 'is_valid', p.Results.is_valid);
         end
 
+        %> Lists all parameters in container
+        %>
+        %> **Parameter Arguments:**
+        %> - is_valid (`logical` or `any`):
+        %>   Enable `valid` filter if argument is of type logical. If `true`,
+        %>   only include symbols that are valid and, if `false`, only invalid
+        %>   symbols. Default: not logical.
+        %>
+        %> @see \ref GAMSTransfer::BaseContainer::listSymbols
+        %> "BaseContainer.listSymbols", \ref
+        %> GAMSTransfer::BaseContainer::listSets "BaseContainer.listSets", \ref
+        %> GAMSTransfer::BaseContainer::listVariables
+        %> "BaseContainer.listVariables", \ref
+        %> GAMSTransfer::BaseContainer::listEquations
+        %> "BaseContainer.listEquations", \ref
+        %> GAMSTransfer::BaseContainer::listAliases "BaseContainer.listAliases"
         function list = listParameters(obj, varargin)
             % Lists all parameters in container
             %
             % Parameter Arguments:
-            % - is_valid: logical or any
+            % - is_valid (logical or any):
             %   Enable valid filter if argument is of type logical. If true,
             %   only include symbols that are valid and, if false, only invalid
             %   symbols. Default: not logical.
             %
-            % See also: GAMSTransfer.Container.listSymbols,
-            % GAMSTransfer.Container.listSets,
-            % GAMSTransfer.Container.listVariables,
-            % GAMSTransfer.Container.listEquations,
-            % GAMSTransfer.Container.listAliases
-            %
+            % See also: GAMSTransfer.BaseContainer.listSymbols,
+            % GAMSTransfer.BaseContainer.listSets,
+            % GAMSTransfer.BaseContainer.listVariables,
+            % GAMSTransfer.BaseContainer.listEquations,
+            % GAMSTransfer.BaseContainer.listAliases
 
             p = inputParser();
             addParameter(p, 'is_valid', nan);
@@ -200,24 +263,42 @@ classdef BaseContainer < handle
                 'is_valid', p.Results.is_valid);
         end
 
+        %> Lists all variables in container
+        %>
+        %> **Parameter Arguments:**
+        %> - is_valid (`logical` or `any`):
+        %>   Enable `valid` filter if argument is of type logical. If `true`,
+        %>   only include symbols that are valid and, if `false`, only invalid
+        %>   symbols. Default: not logical.
+        %> - types (`any`):
+        %>   Enable filter for variable type, e.g. `type = {"binary",
+        %>   "integer"}`. Default: not applied.
+        %>
+        %> @see \ref GAMSTransfer::BaseContainer::listSymbols
+        %> "BaseContainer.listSymbols", \ref
+        %> GAMSTransfer::BaseContainer::listSets "BaseContainer.listSets", \ref
+        %> GAMSTransfer::BaseContainer::listParameters
+        %> "BaseContainer.listParameters", \ref
+        %> GAMSTransfer::BaseContainer::listEquations
+        %> "BaseContainer.listEquations", \ref
+        %> GAMSTransfer::BaseContainer::listAliases "BaseContainer.listAliases"
         function list = listVariables(obj, varargin)
             % Lists all variables in container
             %
             % Parameter Arguments:
-            % - is_valid: logical or any
+            % - is_valid (logical or any):
             %   Enable valid filter if argument is of type logical. If true,
             %   only include symbols that are valid and, if false, only invalid
             %   symbols. Default: not logical.
-            % - types: any
+            % - types (any):
             %   Enable filter for variable type, e.g. type = {'binary',
             %   'integer'}. Default: not applied.
             %
-            % See also: GAMSTransfer.Container.listSymbols,
-            % GAMSTransfer.Container.listSets,
-            % GAMSTransfer.Container.listParameters,
-            % GAMSTransfer.Container.listEquations,
-            % GAMSTransfer.Container.listAliases
-            %
+            % See also: GAMSTransfer.BaseContainer.listSymbols,
+            % GAMSTransfer.BaseContainer.listSets,
+            % GAMSTransfer.BaseContainer.listParameters,
+            % GAMSTransfer.BaseContainer.listEquations,
+            % GAMSTransfer.BaseContainer.listAliases
 
             p = inputParser();
             addParameter(p, 'is_valid', nan);
@@ -251,24 +332,42 @@ classdef BaseContainer < handle
             list = list(filter);
         end
 
+        %> Lists all equations in container
+        %>
+        %> **Parameter Arguments:**
+        %> - is_valid (`logical` or `any`):
+        %>   Enable `valid` filter if argument is of type logical. If `true`,
+        %>   only include symbols that are valid and, if `false`, only invalid
+        %>   symbols. Default: not logical.
+        %> - types (`any`):
+        %>   Enable filter for equation type, e.g. `type = {"g", "l"}`. Default:
+        %>   not applied.
+        %>
+        %> @see \ref GAMSTransfer::BaseContainer::listSymbols
+        %> "BaseContainer.listSymbols", \ref
+        %> GAMSTransfer::BaseContainer::listSets "BaseContainer.listSets", \ref
+        %> GAMSTransfer::BaseContainer::listParameters
+        %> "BaseContainer.listParameters", \ref
+        %> GAMSTransfer::BaseContainer::listVariables
+        %> "BaseContainer.listVariables", \ref
+        %> GAMSTransfer::BaseContainer::listAliases "BaseContainer.listAliases"
         function list = listEquations(obj, varargin)
             % Lists all equations in container
             %
             % Parameter Arguments:
-            % - is_valid: logical or any
+            % - is_valid (logical or any):
             %   Enable valid filter if argument is of type logical. If true,
             %   only include symbols that are valid and, if false, only invalid
             %   symbols. Default: not applied.
-            % - types: any
+            % - types (any):
             %   Enable filter for equation type, e.g. type = {'g', 'l'}.
             %   Default: not applied.
             %
-            % See also: GAMSTransfer.Container.listSymbols,
-            % GAMSTransfer.Container.listSets,
-            % GAMSTransfer.Container.listParameters,
-            % GAMSTransfer.Container.listVariables,
-            % GAMSTransfer.Container.listAliases
-            %
+            % See also: GAMSTransfer.BaseContainer.listSymbols,
+            % GAMSTransfer.BaseContainer.listSets,
+            % GAMSTransfer.BaseContainer.listParameters,
+            % GAMSTransfer.BaseContainer.listVariables,
+            % GAMSTransfer.BaseContainer.listAliases
 
             p = inputParser();
             addParameter(p, 'is_valid', nan);
@@ -302,6 +401,23 @@ classdef BaseContainer < handle
             list = list(filter);
         end
 
+        %> Lists all aliases in container
+        %>
+        %> **Parameter Arguments:**
+        %> - is_valid (`logical` or `any`):
+        %>   Enable `valid` filter if argument is of type logical. If `true`,
+        %>   only include symbols that are valid and, if `false`, only invalid
+        %>   symbols. Default: not logical.
+        %>
+        %> @see \ref GAMSTransfer::BaseContainer::listSymbols
+        %> "BaseContainer.listSymbols", \ref
+        %> GAMSTransfer::BaseContainer::listSets "BaseContainer.listSets", \ref
+        %> GAMSTransfer::BaseContainer::listParameters
+        %> "BaseContainer.listParameters", \ref
+        %> GAMSTransfer::BaseContainer::listVariables
+        %> "BaseContainer.listVariables", \ref
+        %> GAMSTransfer::BaseContainer::listEquations
+        %> "BaseContainer.listEquations"
         function list = listAliases(obj, varargin)
             % Lists all aliases in container
             %
@@ -311,12 +427,11 @@ classdef BaseContainer < handle
             %   only include symbols that are valid and, if false, only invalid
             %   symbols. Default: not logical.
             %
-            % See also: GAMSTransfer.Container.listSymbols,
-            % GAMSTransfer.Container.listSets,
-            % GAMSTransfer.Container.listParameters,
-            % GAMSTransfer.Container.listVariables,
-            % GAMSTransfer.Container.listEquations,
-            %
+            % See also: GAMSTransfer.BaseContainer.listSymbols,
+            % GAMSTransfer.BaseContainer.listSets,
+            % GAMSTransfer.BaseContainer.listParameters,
+            % GAMSTransfer.BaseContainer.listVariables,
+            % GAMSTransfer.BaseContainer.listEquations
 
             p = inputParser();
             addParameter(p, 'is_valid', nan);
@@ -326,18 +441,27 @@ classdef BaseContainer < handle
                 'is_valid', p.Results.is_valid);
         end
 
+        %> Returns an overview over all sets in container
+        %>
+        %> @note This method includes set aliases.
+        %>
+        %> **Optional Arguments:**
+        %> 1. symbols (`cellstr`):
+        %>    List of symbols to include. Default: `listSets()`.
+        %>
+        %> The overview is in form of a table listing for each symbol its
+        %> main characteristics and some statistics.
         function descr = describeSets(obj, varargin)
             % Returns an overview over all sets in container
             %
             % Note: This method includes set aliases.
             %
             % Optional Arguments:
-            % 1. symbols: cellstr
+            % 1. symbols (cellstr):
             %    List of symbols to include. Default: listSets().
             %
             % The overview is in form of a table listing for each symbol its
             % main characteristics and some statistics.
-            %
 
             if nargin == 2
                 symbols = varargin{1};
@@ -348,16 +472,23 @@ classdef BaseContainer < handle
             descr = obj.describeSymbols(GAMSTransfer.SymbolType.SET, symbols);
         end
 
+        %> Returns an overview over all parameters in container
+        %>
+        %> **Optional Arguments:**
+        %> 1. symbols (`cellstr`):
+        %>    List of symbols to include. Default: `listParameters()`.
+        %>
+        %> The overview is in form of a table listing for each symbol its
+        %> main characteristics and some statistics.
         function descr = describeParameters(obj, varargin)
             % Returns an overview over all parameters in container
             %
             % Optional Arguments:
-            % 1. symbols: cellstr
+            % 1. symbols (cellstr):
             %    List of symbols to include. Default: listParameters().
             %
             % The overview is in form of a table listing for each symbol its
             % main characteristics and some statistics.
-            %
 
             if nargin == 2
                 symbols = varargin{1};
@@ -368,6 +499,14 @@ classdef BaseContainer < handle
             descr = obj.describeSymbols(GAMSTransfer.SymbolType.PARAMETER, symbols);
         end
 
+        %> Returns an overview over all variables in container
+        %>
+        %> **Optional Arguments:**
+        %> 1. symbols (`cellstr`):
+        %>    List of symbols to include. Default: `listVariables()`.
+        %>
+        %> The overview is in form of a table listing for each symbol its
+        %> main characteristics and some statistics.
         function descr = describeVariables(obj, varargin)
             % Returns an overview over all variables in container
             %
@@ -377,7 +516,6 @@ classdef BaseContainer < handle
             %
             % The overview is in form of a table listing for each symbol its
             % main characteristics and some statistics.
-            %
 
             if nargin == 2
                 symbols = varargin{1};
@@ -388,16 +526,23 @@ classdef BaseContainer < handle
             descr = obj.describeSymbols(GAMSTransfer.SymbolType.VARIABLE, symbols);
         end
 
+        %> Returns an overview over all equations in container
+        %>
+        %> **Optional Arguments:**
+        %> 1. symbols (`cellstr`):
+        %>    List of symbols to include. Default: `listEquations()`.
+        %>
+        %> The overview is in form of a table listing for each symbol its
+        %> main characteristics and some statistics.
         function descr = describeEquations(obj, varargin)
             % Returns an overview over all equations in container
             %
             % Optional Arguments:
-            % 1. symbols: cellstr
+            % 1. symbols (cellstr):
             %    List of symbols to include. Default: listEquations().
             %
             % The overview is in form of a table listing for each symbol its
             % main characteristics and some statistics.
-            %
 
             if nargin == 2
                 symbols = varargin{1};
@@ -408,16 +553,23 @@ classdef BaseContainer < handle
             descr = obj.describeSymbols(GAMSTransfer.SymbolType.EQUATION, symbols);
         end
 
+        %> Returns an overview over all aliases in container
+        %>
+        %> **Optional Arguments:**
+        %> 1. symbols (`cellstr`):
+        %>    List of symbols to include. Default: `listAliases()`.
+        %>
+        %> The overview is in form of a table listing for each symbol its
+        %> main characteristics and some statistics.
         function descr = describeAliases(obj, varargin)
             % Returns an overview over all aliases in container
             %
             % Optional Arguments:
-            % 1. symbols: cellstr
+            % 1. symbols (cellstr):
             %    List of symbols to include. Default: listAliases().
             %
             % The overview is in form of a table listing for each symbol its
             % main characteristics and some statistics.
-            %
 
             if nargin == 2
                 symbols = varargin{1};
@@ -428,18 +580,25 @@ classdef BaseContainer < handle
             descr = obj.describeSymbols(GAMSTransfer.SymbolType.ALIAS, symbols);
         end
 
+        %> Checks correctness of all symbols
+        %>
+        %> **Optional Arguments:**
+        %> 1. verbose (`logical`):
+        %>    If `true`, the reason for an invalid symbol is printed
+        %> 2. force (`logical`):
+        %>    If `true`, forces reevaluation of validity (resets cache)
+        %>
+        %> @see \ref GAMSTransfer::Symbol::isValid "Symbol.isValid"
         function valid = isValid(obj, varargin)
             % Checks correctness of all symbols
             %
             % Optional Arguments:
-            % 1. verbose: logical
+            % 1. verbose (logical):
             %    If true, the reason for an invalid symbol is printed
-            % 2. force: logical
+            % 2. force (logical):
             %    If true, forces reevaluation of validity (resets cache)
             %
-            %
             % See also: GAMSTransfer.Symbol/isValid
-            %
 
             valid = true;
         end

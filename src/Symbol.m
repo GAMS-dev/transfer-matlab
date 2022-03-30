@@ -1,70 +1,112 @@
-classdef Symbol < handle
-    % This class represents a GAMS Symbol (Set, Alias, Parameter, Variable or
-    % Equation).
-    %
-    % Use subclasses to create a GAMS Symbol, see subclass help.
-    %
-    % See also: GAMSTransfer.Set, GAMSTransfer.Alias, GAMSTransfer.Parameter,
-    % GAMSTransfer.Variable, GAMSTransfer.Equation
-    %
+% GAMS Symbol (Set, Alias, Parameter, Variable or Equation)
+%
+% ------------------------------------------------------------------------------
+%
+% GAMS - General Algebraic Modeling System
+% GAMS Transfer Matlab
+%
+% Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the 'Software'), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
+%
+% ------------------------------------------------------------------------------
+%
+% GAMS Symbol (Set, Alias, Parameter, Variable or Equation)
+%
+% Use subclasses to create a GAMS Symbol, see subclass help.
+%
+% See also: GAMSTransfer.Set, GAMSTransfer.Alias, GAMSTransfer.Parameter,
+% GAMSTransfer.Variable, GAMSTransfer.Equation
+%
 
-    %
-    % GAMS - General Algebraic Modeling System Matlab API
-    %
-    % Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
-    % Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
-    %
-    % Permission is hereby granted, free of charge, to any person obtaining a copy
-    % of this software and associated documentation files (the 'Software'), to deal
-    % in the Software without restriction, including without limitation the rights
-    % to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    % copies of the Software, and to permit persons to whom the Software is
-    % furnished to do so, subject to the following conditions:
-    %
-    % The above copyright notice and this permission notice shall be included in all
-    % copies or substantial portions of the Software.
-    %
-    % THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    % IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    % FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    % AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    % LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    % SOFTWARE.
-    %
+%> This class represents a GAMS Symbol (Set, Alias, Parameter, Variable or
+%> Equation).
+%>
+%> Use subclasses to create a GAMS Symbol, see subclass help.
+%>
+%> @see \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Alias "Alias", \ref
+%> GAMSTransfer::Parameter "Parameter", \ref GAMSTransfer::Variable "Variable",
+%> \ref GAMSTransfer::Equation "Equation"
+classdef Symbol < handle
+
 
     properties (Dependent)
+        %> Dimension of symbol (in [0,20])
+
         % dimension Dimension of symbol (in [0,20])
         dimension
 
+
+        %> Shape of symbol (length == dimension)
+
         % size Shape of symbol (length == dimension)
         size
+
+
+        %> Domain of symbol (length == dimension)
 
         % domain Domain of symbol (length == dimension)
         domain
     end
 
     properties (Dependent, SetAccess = private)
+        %> Domain names of symbol
+
         % domain_names Domain names of symbol
         domain_names
 
+
+        %> Expected domain labels in records
+
         % domain_labels Expected domain labels in records
         domain_labels
+
+
+        %> Specifies if domains are stored 'relaxed' or 'regular'
 
         % domain_type Specifies if domains are stored 'relaxed' or 'regular'
         domain_type
     end
 
     properties (Dependent)
+        %> Enables domain entries in records to be recursively added to the
+        %> domains in case they are not present in the domains already
+
+        % Enables domain entries in records to be recursively added to the
+        % domains in case they are not present in the domains already
         domain_forwarding
     end
 
     properties
+        %> records Storage of symbol records
+
         % records Storage of symbol records
         records
     end
 
     properties (Dependent, SetAccess = private)
+        %> Format in which records are stored in
+        %>
+        %> If records are changed, this gets reset to `"unknown"`. Calling
+        %> `isValid()` will detect the format again.
+
         % format Format in which records are stored in
         %
         % If records are changed, this gets reset to 'unknown'. Calling isValid()
@@ -102,9 +144,9 @@ classdef Symbol < handle
 
     methods (Access = protected)
 
+        %> Constructs a GAMS Symbol, see class help
         function obj = Symbol(container, name, description, domain_size, records, domain_forwarding)
-            % Constructs a GAMS Symbol, see class help.
-            %
+            % Constructs a GAMS Symbol, see class help
 
             obj.id = int32(randi(100000));
 
@@ -314,6 +356,48 @@ classdef Symbol < handle
 
     methods
 
+        %> Sets symbol records in supported format
+        %>
+        %> If records are not given in any of the supported formats, e.g. struct
+        %> or dense_matrix, this function tries to convert the given data into
+        %> one of them.
+        %>
+        %> Conversion is applied based on the following rules:
+        %> - `string`: Interpreted as domain entry for first dimension.
+        %> - `cellstr`: First dimension of `cellstr` must be equal to symbol
+        %>   dimension and second will be the number of records. Row `i` is
+        %>   interpreted to hold the domain entries for dimension `i`.
+        %> - `numeric vector/matrix`: Interpreted to hold the `level` values (or
+        %>   `value` for Parameter). Must satisfy the shape given by symbol
+        %>   size since this can only be a matrix format (e.g. `dense_matrix` or
+        %>   `sparse_matrix`), because domain entries are not given.
+        %> - `cell`: If element is the `i`-th `cellstr`, then this is considered
+        %>   to be the domain entries for the `i`-th domain. If element is the
+        %>   `j`-th numeric vector/matrix, it is interpreted as the `j`-th
+        %>   element of the following: `level` or `value`, `marginal`, `lower`,
+        %>   `upper`, `scale`. If symbol is a \ref GAMSTransfer::Set "Set", the
+        %>   `(dim+1)`-th `cellstr` is considered to be the set element texts.
+        %> - `struct`: Fields which names match domain labels, are interpreted
+        %>   as domain entries of the given domain. Other supported fields are
+        %>   `level`, `value`, `marginal`, `lower`, `upper`, `scale`, `text`.
+        %>   Unsopprted fields are ignored.
+        %> - `table`: used as is.
+        %>
+        %> @note Instead of a `cell`, it is possible to provide the elements as
+        %> separate arguments to the function.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> i = Set(c, 'i', 'description', 'canning plants');
+        %> i.setRecords({'seattle', 'san-diego'});
+        %> a = Parameter(c, 'a', i, 'description', 'capacity of plant i in cases');
+        %> a.setRecords([350, 600]);
+        %> supply = Equation(c, 'supply', 'l', i, 'description', 'observe supply limit at plant i');
+        %> supply.setRecords(struct('level', [350, 550], 'marginal', [geteps(), 0], 'upper', [350, 600]));
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::RecordsFormat "RecordsFormat"
         function setRecords(obj, varargin)
             % Sets symbol records in supported format
             %
@@ -355,7 +439,6 @@ classdef Symbol < handle
             % supply.setRecords(struct('level', [350, 550], 'marginal', [geteps(), 0], 'upper', [350, 600]));
             %
             % See also: GAMSTransfer.RecordsFormat
-            %
 
             obj.records = struct();
             obj.checkDomains();
@@ -501,11 +584,13 @@ classdef Symbol < handle
             end
         end
 
+        %> Transforms symbol records into given format
+        %>
+        %> @see \ref GAMSTransfer::RecordsFormat "RecordsFormat"
         function transformRecords(obj, target_format)
             % Transforms symbol records into given format
             %
             % See also: GAMSTransfer.RecordsFormat
-            %
 
             if ~(isstring(target_format) && numel(target_format) == 1) && ~ischar(target_format);
                 error('Argument ''target_format'' must be ''char''.');
@@ -761,6 +846,14 @@ classdef Symbol < handle
                 obj.format, p.Results.target_format);
         end
 
+        %> Checks equivalence with other symbol
+        %>
+        %> @note A symbol is always linked to a container. This method does not
+        %> check equivalence of the linked containers.
+        %>
+        %> **Required Arguments:**
+        %> 1. symbol (`any`):
+        %>    Other symbol
         function eq = equals(obj, symbol)
             % Checks equivalence with other symbol
             %
@@ -768,9 +861,8 @@ classdef Symbol < handle
             % not check equivalence of the linked containers.
             %
             % Required Arguments:
-            % 1. symbol: any
+            % 1. symbol (any):
             %    Other symbol
-            %
 
             eq = false;
             if ~isa(symbol, 'GAMSTransfer.Symbol')
@@ -809,6 +901,19 @@ classdef Symbol < handle
             end
         end
 
+        %> Copies symbol to destination container
+        %>
+        %> Symbol domains are downgraded to relaxed if the destination container
+        %> does not have equivalent domain sets.
+        %>
+        %> **Required Arguments:**
+        %> 1. destination (`Container`):
+        %>    Destination container
+        %>
+        %> **Optional Arguments:**
+        %> 2. overwrite (`bool`):
+        %>    Overwrites symbol with same name in destination if `true`.
+        %>    Default: `false`.
         function copy(obj, varargin)
             % Copies symbol to destination container
             %
@@ -816,14 +921,13 @@ classdef Symbol < handle
             % container does not have equivalent domain sets.
             %
             % Required Arguments:
-            % 1. destination: Container
+            % 1. destination (Container):
             %    Destination container
             %
             % Optional Arguments:
-            % 2. overwrite: bool
+            % 2. overwrite (bool):
             %    Overwrites symbol with same name in destination if true.
             %    Default: false.
-            %
 
             % input arguments
             p = inputParser();
@@ -890,17 +994,25 @@ classdef Symbol < handle
             end
         end
 
+        %> Checks correctness of symbol
+        %>
+        %> **Optional Arguments:**
+        %> 1. verbose (`logical`):
+        %>    If `true`, the reason for an invalid symbol is printed
+        %> 2. force (`logical`):
+        %>    If `true`, forces reevaluation of validity (resets cache)
+        %>
+        %> @see \ref GAMSTransfer::Container::isValid "Container.isValid"
         function valid = isValid(obj, varargin)
             % Checks correctness of symbol
             %
             % Optional Arguments:
-            % 1. verbose: logical
+            % 1. verbose (logical):
             %    If true, the reason for an invalid symbol is printed
-            % 2. force: logical
+            % 2. force (logical):
             %    If true, forces reevaluation of validity (resets cache)
             %
             % See also: GAMSTransfer.Container/isValid
-            %
 
             verbose = 0;
             force = false;
@@ -994,6 +1106,21 @@ classdef Symbol < handle
             end
         end
 
+        %> Get domain violations
+        %>
+        %> Domain violations occur when this symbol uses other \ref
+        %> GAMSTransfer::Set "Set(s)" as domain(s) and a domain entry in its
+        %> records that is not present in the corresponding set. Such a domain
+        %> violation will lead to a GDX error when writing the data.
+        %>
+        %> - `dom_violations = getDomainViolations` returns a list of domain
+        %>   violations.
+        %>
+        %> @see \ref GAMSTransfer::Symbol::resolveDomainViolations
+        %> "Symbol.resolveDomainViolations", \ref
+        %> GAMSTransfer::Container::getDomainViolations
+        %> "Container.getDomainViolations", \ref GAMSTransfer::DomainViolation
+        %> "DomainViolation"
         function dom_violations = getDomainViolations(obj)
             % Get domain violations
             %
@@ -1005,9 +1132,9 @@ classdef Symbol < handle
             % dom_violations = getDomainViolations returns a list of domain
             % violations.
             %
-            % See also: GAMSTransfer.Symbol.resovleDomainViolations,
-            % GAMSTransfer.Container.getDomainViolations, GAMSTransfer.DomainViolation
-            %
+            % See also: GAMSTransfer.Symbol.resolveDomainViolations,
+            % GAMSTransfer.Container.getDomainViolations,
+            % GAMSTransfer.DomainViolation
 
             if obj.container.indexed
                 error('Getting domain violations not allowed in indexed mode.');
@@ -1032,6 +1159,21 @@ classdef Symbol < handle
             end
         end
 
+        %> Extends domain sets in order to resolve domain violations
+        %>
+        %> Domain violations occur when this symbol uses other \ref
+        %> GAMSTransfer::Set "Set(s)" as domain(s) and a domain entry in its
+        %> records that is not present in the corresponding set. Such a domain
+        %> violation will lead to a GDX error when writing the data.
+        %>
+        %> - `resolveDomainViolations()` extends the domain sets with the
+        %>   violated domain entries. Hence, the domain violations disappear.
+        %>
+        %> @see \ref GAMSTransfer::Symbol::getDomainViolations
+        %> "Symbol.getDomainViolations", \ref
+        %> GAMSTransfer::Container::resolveDomainViolations
+        %> "Container.resolveDomainViolations", \ref
+        %> GAMSTransfer::DomainViolation "DomainViolation"
         function resolveDomainViolations(obj)
             % Extends domain sets in order to resolve domain violations
             %
@@ -1044,8 +1186,8 @@ classdef Symbol < handle
             % violated domain entries. Hence, the domain violations disappear.
             %
             % See also: GAMSTransfer.Symbol.getDomainViolations,
-            % GAMSTransfer.Container.resovleDomainViolations, GAMSTransfer.DomainViolation
-            %
+            % GAMSTransfer.Container.resolveDomainViolations,
+            % GAMSTransfer.DomainViolation
 
             dom_violations = obj.getDomainViolations();
             for i = 1:numel(dom_violations)
@@ -1053,11 +1195,13 @@ classdef Symbol < handle
             end
         end
 
+        %> Returns the sparsity of symbol records
+        %>
+        %> - `s = getSparsity()` returns sparsity `s` in the symbol records.
         function sparsity = getSparsity(obj)
             % Returns the sparsity of symbol records
             %
             % s = getSparsity() returns sparsity s in the symbol records.
-            %
 
             n_dense = prod(obj.size_) * numel(obj.VALUE_FIELDS);
             if n_dense == 0
@@ -1067,16 +1211,26 @@ classdef Symbol < handle
             end
         end
 
+        %> Returns the cardenality of symbol records
+        %>
+        %> - `s = getCardenality()` returns cardenality `s` (maximum number of
+        %>   values) in the symbol records.
         function card = getCardenality(obj)
             % Returns the cardenality of symbol records
             %
             % s = getCardenality() returns cardenality s (maximum number of
             % values) in the symbol records.
-            %
 
             card = prod(obj.size_);
         end
 
+        %> Returns the largest value in records
+        %>
+        %> - `[v, w] = getMaxValue(varargin)` returns the largest value in
+        %>   records `v` and where it is `w`. `varargin` can include a list of
+        %>   value fields that should be considered: `"level"`, `"value"`,
+        %>   `"lower"`, `"upper"`, `"scale"`. If none is given all available for
+        %>   the symbol are considered.
         function [value, where] = getMaxValue(obj, varargin)
             % Returns the largest value in records
             %
@@ -1085,12 +1239,18 @@ classdef Symbol < handle
             % fields that should be considered: level, value, lower, upper,
             % scale. If none is given all available for the symbol are
             % considered.
-            %
 
             [value, where] = GAMSTransfer.getMaxValue(obj, ...
                 obj.container.indexed,varargin{:});
         end
 
+        %> Returns the smallest value in records
+        %>
+        %> - `[v, w] = getMinValue(varargin)` returns the smallest value in
+        %>   records `v` and where it is `w`. `varargin` can include a list of
+        %>   value fields that should be considered: `"level"`, `"value"`,
+        %>   `"lower"`, `"upper"`, `"scale"`. If none is given all available for
+        %>   the symbol are considered.
         function [value, where] = getMinValue(obj, varargin)
             % Returns the smallest value in records
             %
@@ -1099,12 +1259,18 @@ classdef Symbol < handle
             % fields that should be considered: level, value, lower, upper,
             % scale. If none is given all available for the symbol are
             % considered.
-            %
 
             [value, where] = GAMSTransfer.getMinValue(obj, ...
                 obj.container.indexed, varargin{:});
         end
 
+        %> Returns the mean value over all values in records
+        %>
+        %> - `v = getMinValue(varargin)` returns the mean value over all values
+        %>   in records `v`. `varargin` can include a list of value fields that
+        %>   should be considered: `"level"`, `"value"`, `"lower"`, `"upper"`,
+        %>   `"scale"`. If none is given all available for the symbol are
+        %>   considered.
         function value = getMeanValue(obj, varargin)
             % Returns the mean value over all values in records
             %
@@ -1112,11 +1278,17 @@ classdef Symbol < handle
             % in records v. varargin can include a list of value fields that
             % should be considered: level, value, lower, upper, scale. If none
             % is given all available for the symbol are considered.
-            %
 
             value = GAMSTransfer.getMeanValue(obj, varargin{:});
         end
 
+        %> Returns the largest absolute value in records
+        %>
+        %> - `[v, w] = getMaxAbsValue(varargin)` returns the largest absolute
+        %>   value in records `v` and where it is `w`. `varargin` can include a
+        %>   list of value fields that should be considered: `"level"`,
+        %>   `"value"`, `"lower"`, `"upper"`, `"scale"`. If none is given all
+        %>   available for the symbol are considered.
         function [value, where] = getMaxAbsValue(obj, varargin)
             % Returns the largest absolute value in records
             %
@@ -1125,12 +1297,21 @@ classdef Symbol < handle
             % of value fields that should be considered: level, value, lower,
             % upper, scale. If none is given all available for the symbol are
             % considered.
-            %
 
             [value, where] = GAMSTransfer.getMaxAbsValue(obj, ...
                 obj.container.indexed, varargin{:});
         end
 
+        %> Returns the number of GAMS NA values in records
+        %>
+        %> - `n = countNA(varargin)` returns the number of GAMS NA values `n` in
+        %>   records. `varargin` can include a list of value fields that should
+        %>   be considered: `"level"`, `"value"`, `"lower"`, `"upper"`,
+        %>   `"scale"`. If none is given all available for the symbol are
+        %>   considered.
+        %>
+        %> @see \ref GAMSTransfer::SpecialValues::NA "SpecialValues.NA", \ref
+        %> GAMSTransfer::SpecialValues::isNA "SpecialValues.isNA"
         function n = countNA(obj, varargin)
             % Returns the number of GAMS NA values in records
             %
@@ -1140,11 +1321,17 @@ classdef Symbol < handle
             % all available for the symbol are considered.
             %
             % See also: GAMSTransfer.SpecialValues.NA, GAMSTransfer.SpecialValues.isna
-            %
 
             n = GAMSTransfer.countNA(obj, varargin{:});
         end
 
+        %> Returns the number of GAMS UNDEF values in records
+        %>
+        %> - `n = countUndef(varargin)` returns the number of GAMS UNDEF values
+        %>   `n` in records. `varargin` can include a list of value fields that
+        %>   should be considered: `"level"`, `"value"`, `"lower"`, `"upper"`,
+        %>   `"scale"`. If none is given all available for the symbol are
+        %>   considered.
         function n = countUndef(obj, varargin)
             % Returns the number of GAMS UNDEF values in records
             %
@@ -1152,11 +1339,20 @@ classdef Symbol < handle
             % n in records. varargin can include a list of value fields that
             % should be considered: level, value, lower, upper, scale. If none
             % is given all available for the symbol are considered.
-            %
 
             n = GAMSTransfer.countUndef(obj, varargin{:});
         end
 
+        %> Returns the number of GAMS EPS values in records
+        %>
+        %> - `n = countEps(varargin)` returns the number of GAMS EPS values `n` in
+        %>   records. `varargin` can include a list of value fields that
+        %>   should be considered: `"level"`, `"value"`, `"lower"`, `"upper"`,
+        %>   `"scale"`. If none is given all available for the symbol are
+        %>   considered.
+        %>
+        %> @see \ref GAMSTransfer::SpecialValues::EPS "SpecialValues.EPS", \ref
+        %> GAMSTransfer::SpecialValues::isEps "SpecialValues.isEps"
         function n = countEps(obj, varargin)
             % Returns the number of GAMS EPS values in records
             %
@@ -1165,12 +1361,19 @@ classdef Symbol < handle
             % be considered: level, value, lower, upper, scale. If none is given
             % all available for the symbol are considered.
             %
-            % See also: GAMSTransfer.SpecialValues.EPS, GAMSTransfer.SpecialValues.iseps
-            %
+            % See also: GAMSTransfer.SpecialValues.EPS, GAMSTransfer.SpecialValues.isEps
 
             n = GAMSTransfer.countEps(obj, varargin{:});
         end
 
+        %> Returns the number of GAMS PINF (positive infinity) values in
+        %> records
+        %>
+        %> - `n = countPosInf(varargin)` returns the number of GAMS PINF values
+        %>   `n` in records. `varargin` can include a list of value fields that
+        %>   should be considered: `"level"`, `"value"`, `"lower"`, `"upper"`,
+        %>   `"scale"`. If none is given all available for the symbol are
+        %>   considered.
         function n = countPosInf(obj, varargin)
             % Returns the number of GAMS PINF (positive infinity) values in
             % records
@@ -1179,11 +1382,18 @@ classdef Symbol < handle
             % n in records. varargin can include a list of value fields that
             % should be considered: level, value, lower, upper, scale. If none
             % is given all available for the symbol are considered.
-            %
 
             n = GAMSTransfer.countPosInf(obj, varargin{:});
         end
 
+        %> Returns the number of GAMS MINF (negative infinity) values in
+        %> records
+        %>
+        %> - `n = countNegInf(varargin)` returns the number of GAMS MINF values
+        %>   `n` in records. `varargin` can include a list of value fields that
+        %>   should be considered: `"level"`, `"value"`, `"lower"`, `"upper"`,
+        %>   `"scale"`. If none is given all available for the symbol are
+        %>   considered.
         function n = countNegInf(obj, varargin)
             % Returns the number of GAMS MINF (negative infinity) values in
             % records
@@ -1192,11 +1402,15 @@ classdef Symbol < handle
             % n in records. varargin can include a list of value fields that
             % should be considered: level, value, lower, upper, scale. If none
             % is given all available for the symbol are considered.
-            %
 
             n = GAMSTransfer.countNegInf(obj, varargin{:});
         end
 
+        %> Returns the number of GDX records (not available for matrix formats)
+        %>
+        %> - `n = getNumberRecords()` returns the number of records that would
+        %> be stored in a GDX file if this symbol would be written to GDX. For
+        %> matrix formats `n` is `NaN`.
         function nrecs = getNumberRecords(obj)
             % Returns the number of GDX records (not available for matrix
             % formats)
@@ -1204,7 +1418,6 @@ classdef Symbol < handle
             % n = getNumberRecords() returns the number of records that would be
             % stored in a GDX file if this symbol would be written to GDX. For
             % matrix formats n is NaN.
-            %
 
             if ~isnan(obj.number_records_)
                 nrecs = obj.number_records_;
@@ -1246,6 +1459,17 @@ classdef Symbol < handle
             obj.number_records_ = nrecs;
         end
 
+        %> Returns the number of values stored for this symbol.
+        %>
+        %> - `n = getNumberValues(varargin)` is the sum of values stored of the
+        %>   following fields: `"level"`, `"value"`, `"marginal"`, `"lower"`,
+        %>   `"upper"`, `"scale"`. The number of values is the basis for the
+        %>   sparsity computation. `varargin` can include a list of value fields
+        %>   that should be considered: `"level"`, `"value"`, `"lower"`,
+        %>   `"upper"`, `"scale"`. If none is given all available for the symbol
+        %>   are considered.
+        %>
+        %> @see \ref GAMSTransfer::Symbol::getSparsity "Symbol.getSparsity"
         function nvals = getNumberValues(obj, varargin)
             % Returns the number of values stored for this symbol.
             %
@@ -1257,7 +1481,6 @@ classdef Symbol < handle
             % all available for the symbol are considered.
             %
             % See also: GAMSTransfer.Symbol.getSparsity
-            %
 
             if ~obj.isValid()
                 nvals = nan;
@@ -1289,6 +1512,18 @@ classdef Symbol < handle
             end
         end
 
+        %> Returns the UELs used in this symbol
+        %>
+        %> - `u = getUELs(d)` returns the UELs used in dimension `d` of this
+        %>   symbol
+        %> - `u = getUELs(d, "ignore_unused", true)` returns only those UELs
+        %>   that are actually used in the records
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
         function uels = getUELs(obj, dim, varargin)
             % Returns the UELs used in this symbol
             %
@@ -1300,7 +1535,6 @@ classdef Symbol < handle
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
-            %
 
             if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
                 error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
@@ -1348,6 +1582,16 @@ classdef Symbol < handle
             end
         end
 
+        %> Returns the UELs labels for the given UEL IDs
+        %>
+        %> - `u = getUELLabels(d, i)` returns the UELs labels `u` for the given
+        %>   UEL IDs `i` for the UELs stored for dimension `d`.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
         function uels = getUELLabels(obj, dim, ids)
             % Returns the UELs labels for the given UEL IDs
             %
@@ -1358,7 +1602,6 @@ classdef Symbol < handle
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
-            %
 
             if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
                 error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
@@ -1374,6 +1617,18 @@ classdef Symbol < handle
             uels(~idx) = {'<undefined>'};
         end
 
+        %> Sets the UELs without modifying UEL IDs in records
+        %>
+        %> - `initUELs(d, u)` sets the UELs `u` for dimension `d`. In contrast
+        %>   to the method `setUELs(d, u)`, this method does not modify UEL IDs
+        %>   used in the property records.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid", \ref
+        %> GAMSTransfer::Symbol::setUELs "Symbol.setUELs"
         function initUELs(obj, dim, uels)
             % Sets the UELs without modifying UEL IDs in records
             %
@@ -1386,7 +1641,6 @@ classdef Symbol < handle
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid,
             % GAMSTransfer.Symbol.setUELs
-            %
 
             if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
                 error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
@@ -1423,6 +1677,19 @@ classdef Symbol < handle
             end
         end
 
+        %> Sets the UELs with updating UEL IDs in records
+        %>
+        %> - `setUELs(d, u)` sets the UELs `u` for dimension `d`. In contrast to
+        %>   the method `initUELs(d, u)`, this method may modify UEL IDs used in
+        %>   the property records such that records still point to the correct
+        %>   UEL label when UEL IDs have changed.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid", \ref
+        %> GAMSTransfer::Symbol::initUELs "Symbol.initUELs"
         function setUELs(obj, dim, uels)
             % Sets the UELs with updating UEL IDs in records
             %
@@ -1436,7 +1703,6 @@ classdef Symbol < handle
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid,
             % GAMSTransfer.Symbol.initUELs
-            %
 
             if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
                 error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
@@ -1477,6 +1743,15 @@ classdef Symbol < handle
             end
         end
 
+        %> Adds UELs to the symbol
+        %>
+        %> - `addUELs(d, u)` adds the UELs `u` for dimension `d`.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
         function addUELs(obj, dim, uels)
             % Adds UELs to the symbol
             %
@@ -1486,7 +1761,6 @@ classdef Symbol < handle
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
-            %
 
             if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
                 error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
@@ -1523,6 +1797,16 @@ classdef Symbol < handle
             end
         end
 
+        %> Removes UELs from the symbol
+        %>
+        %> - `removeUELs(d)` removes all unused UELs for dimension `d`.
+        %> - `removeUELs(d, u)` removes the UELs `u` for dimension `d`.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
         function removeUELs(obj, dim, uels)
             % Removes UELs from the symbol
             %
@@ -1533,7 +1817,6 @@ classdef Symbol < handle
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
-            %
 
             if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
                 error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
@@ -1585,6 +1868,16 @@ classdef Symbol < handle
 
         end
 
+        %> Renames UELs in the symbol
+        %>
+        %> - `renameUELs(d, u1, u2)` renames the UELs `u1` to the labels given
+        %>   in `u2` for dimension `d`. The IDs for these UELs do not change.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
         function renameUELs(obj, dim, olduels, newuels)
             % Renames UELs in the symbol
             %
@@ -1595,7 +1888,6 @@ classdef Symbol < handle
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
-            %
 
             if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
                 error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);

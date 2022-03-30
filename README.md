@@ -1,6 +1,6 @@
 
-[![pipeline status](https://git.gams.com/devel/gams-transfer-matlab/badges/master/pipeline.svg)](https://git.gams.com/devel/gams-transfer-matlab/-/commits/master) 
-[![Latest Release](https://git.gams.com/devel/gams-transfer-matlab/-/badges/release.svg)](https://git.gams.com/devel/gams-transfer-matlab/-/releases) 
+[![pipeline status](https://git.gams.com/devel/gams-transfer-matlab/badges/master/pipeline.svg)](https://git.gams.com/devel/gams-transfer-matlab/-/commits/master)
+[![Latest Release](https://git.gams.com/devel/gams-transfer-matlab/-/badges/release.svg)](https://git.gams.com/devel/gams-transfer-matlab/-/releases)
 
 # GAMS Transfer Matlab
 
@@ -8,16 +8,16 @@ GAMS Transfer is a package to maintain GAMS data outside a GAMS script in a
 programming language like Python or Matlab. It allows the user to add GAMS
 symbols (Sets, Parameters, Variables and Equations), to manipulate GAMS symbols,
 read symbols from a GDX file or write them to one. While keeping those
-operations as simple as possible for the user, GAMS Transfer’s main focus is the
+operations as simple as possible for the user, GAMS Transfer's main focus is the
 highly efficient transfer of data between GAMS and the target programming
 language. In order to achieve this, symbol records – the actual and potentially
 large-scale data sets – are stored in native data structures of the
 corresponding programming languages, e.g., dataframes, tables or (sparse)
-matrices. The benefits of this approach are threefold: (1) The user is usually
-very familiar with these data structures, (2) these data structures come with a
-large tool box for various data operations, and (3) optimized methods for
-reading from and writing to GDX can transfer the data as a bulk – resulting in
-the high performance of this package.
+matrices. The benefits of this approach are threefold:
+- The user is usually very familiar with these data structures.
+- These data structures come with a large tool box for various data operations.
+- Optimized methods for reading from and writing to GDX can transfer the data as
+  a bulk –- resulting in the high performance of this package.
 
 ## Documentation
 
@@ -25,8 +25,22 @@ See [GAMS Transfer Matlab Tutorial](https://www.gams.com/37/docs/API_MATLAB_GAMS
 
 ## Install
 
-Note, GAMS comes with a precompiled GAMS Transfer Matlab version. For custom or 
-Octave builds, follow the steps below.
+GAMS comes with a ready-to-use GAMS Transfer Matlab (for Matlab 2018a or newer).
+Simply add the GAMS Matlab API to the Matlab path:
+```
+addpath("[PathToGAMS]/apifiles/Matlab/api")
+```
+
+Note that GAMS Transfer Matlab comes as a Matlab package and, thus, all classes
+must be prefixed with `GAMSTransfer.`. In order to avoid this, you can import
+the package with:
+```
+import GAMSTransfer.*
+```
+
+## Install From Source
+
+### Build
 
 To build GAMSTransfer, open Matlab and run `gams_transfer_setup`:
 ```matlab
@@ -38,15 +52,15 @@ gams_transfer_setup(_, 'verbose', <level>)
 Description of parameters:
 - `target_dir`: Installation directory. Default: `'.'`.
 - `gams_dir`: GAMS system directory. Default: found from PATH environment variable.
-- `verbose`: Compilation verbosity level from 0 (no compiler output) to 2 (all 
+- `verbose`: Compilation verbosity level from 0 (no compiler output) to 2 (all
   compiler output). Default: 0.
 
-Add the GAMS Transfer installation directory to the Matlab Path: 
+Add the GAMS Transfer installation directory to the Matlab Path:
 ```matlab
 addpath(<install_directory>)
 ```
 
-## Run Unit Tests
+### Run Unit Tests
 
 Make sure that the GAMSTransfer build is part of the Matlab PATH. Then, run
 `gams_transfer_test`:
@@ -61,8 +75,17 @@ Description of parameters:
 
 ## Example
 
-The following example creates a GDX file that could also be generated with `gams
-trnsport GDX=trnsport.gdx`.
+We consider creating a GDX file in Matlab with content equal to the solution
+data of model
+[trnsport](https://www.gams.com/latest/gamslib_ml/libhtml/gamslib_trnsport.html).
+
+### Create with GAMS:
+```matlab
+gamslib trnsport
+gams trnsport GDX=trnsport.gdx
+```
+
+### Create with Matlab:
 ```matlab
 import GAMSTransfer.*
 
@@ -113,26 +136,26 @@ demand.setRecords([325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]);
 m.write('trnsport.gdx');
 ```
 
-A GAMSTransfer symbol looks like:
-```matlab
+```
 >> x
 
 x =
 
   Variable with properties:
 
-              name: 'x'
-       description: 'shipment quantities in cases'
-              type: 'positive'
-    default_values: [1×1 struct]
-         dimension: 2
-              size: [2 3]
-            domain: {[1×1 GAMSTransfer.Set]  [1×1 GAMSTransfer.Set]}
-      domain_names: {'i'  'j'}
-     domain_labels: {'i_1'  'j_2'}
-       domain_type: 'regular'
-           records: [6×4 table]
-            format: 'table'
+                 name: 'x'
+          description: 'shipment quantities in cases'
+                 type: 'positive'
+       default_values: [1×1 struct]
+            dimension: 2
+                 size: [2 3]
+               domain: {[1×1 GAMSTransfer.Set]  [1×1 GAMSTransfer.Set]}
+         domain_names: {'i'  'j'}
+        domain_labels: {'i_1'  'j_2'}
+          domain_type: 'regular'
+    domain_forwarding: 0
+              records: [6×4 table]
+               format: 'table'
 
 >> x.records
 
