@@ -1,0 +1,44 @@
+/** \mainpage GAMS Transfer Matlab
+
+\section GAMSTRANSFER_MATLAB_INTRO Introduction
+
+GAMS Transfer is a package to maintain GAMS data outside a GAMS script in a
+programming language like Python or Matlab. It allows the user to add GAMS
+symbols (Sets, Parameters, Variables and Equations), to manipulate GAMS symbols,
+read symbols from a GDX file or write them to one. While keeping those
+operations as simple as possible for the user, GAMS Transfer's main focus is the
+highly efficient transfer of data between GAMS and the target programming
+language. In order to achieve this, symbol records – the actual and potentially
+large-scale data sets – are stored in native data structures of the
+corresponding programming languages, e.g., dataframes, tables or (sparse)
+matrices. The benefits of this approach are threefold:
+- The user is usually very familiar with these data structures.
+- These data structures come with a large tool box for various data operations.
+- Optimized methods for reading from and writing to GDX can transfer the data as
+  a bulk –- resulting in the high performance of this package.
+
+\subsection GAMSTRANSFER_MATLAB_VS Should I use GAMS Transfer Matlab or ...?
+
+\subsubsection GAMSTRANSFER_MATLAB_VS_API ...GAMS Matlab API?
+
+[GAMS Matlab API]: https://www.gams.com/latest/docs/API_MATLAB_GAMS_OVERVIEW.html
+
+Both, the [GAMS Matlab API] and GAMS Transfer Matlab allow to exchange data from
+Matlab with GAMS. However, GAMS Transfer Matlab focuses on data exchange and for
+this is much more efficient. Moreover, it offers a richer set of features to
+read and write GDX files. On the contrary, the [GAMS Matlab API] can manage GAMS
+jobs which GAMS Transfer Matlab cannot do. In summary, if you are only using the
+[GAMS Matlab API] for data exchange, consider using GAMS Transfer Matlab
+instead.
+
+\subsubsection GAMSTRANSFER_MATLAB_VS_GDXMRW ...GDXMRW?
+
+[GDXMRW]: https://www.gams.com/latest/docs/T_GDXMRW.html
+
+[GDXMRW] has been [deprecated since GAMS
+38](https://www.gams.com/latest/docs/RN_38.html#g3810_GDXMRW) and may be removed
+in a future GAMS release. Please migrate to GAMS Transfer Matlab instead. While
+the purpose of these two is similar, GAMS Transfer Matlab offers more features,
+a more user-friendly interface and is actively maintained.
+
+*/

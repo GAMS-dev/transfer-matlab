@@ -1,29 +1,6 @@
+/** \page GAMSTRANSFER_MATLAB_GETSTARTED Getting Started
 
-[![pipeline status](https://git.gams.com/devel/gams-transfer-matlab/badges/master/pipeline.svg)](https://git.gams.com/devel/gams-transfer-matlab/-/commits/master)
-[![Latest Release](https://git.gams.com/devel/gams-transfer-matlab/-/badges/release.svg)](https://git.gams.com/devel/gams-transfer-matlab/-/releases)
-
-# GAMS Transfer Matlab
-
-GAMS Transfer is a package to maintain GAMS data outside a GAMS script in a
-programming language like Python or Matlab. It allows the user to add GAMS
-symbols (Sets, Parameters, Variables and Equations), to manipulate GAMS symbols,
-read symbols from a GDX file or write them to one. While keeping those
-operations as simple as possible for the user, GAMS Transfer's main focus is the
-highly efficient transfer of data between GAMS and the target programming
-language. In order to achieve this, symbol records – the actual and potentially
-large-scale data sets – are stored in native data structures of the
-corresponding programming languages, e.g., dataframes, tables or (sparse)
-matrices. The benefits of this approach are threefold:
-- The user is usually very familiar with these data structures.
-- These data structures come with a large tool box for various data operations.
-- Optimized methods for reading from and writing to GDX can transfer the data as
-  a bulk –- resulting in the high performance of this package.
-
-## Documentation
-
-See [GAMS Transfer Matlab Tutorial](https://www.gams.com/37/docs/API_MATLAB_GAMSTRANSFER_TUTORIAL.html).
-
-## Install
+\section GAMSTRANSFER_MATLAB_GETSTARTED_INSTALL Install
 
 GAMS comes with a ready-to-use GAMS Transfer Matlab (for Matlab 2018a or newer).
 Simply add the GAMS Matlab API to the Matlab path:
@@ -38,55 +15,20 @@ the package with:
 import GAMSTransfer.*
 ```
 
-## Install From Source
+\section GAMSTRANSFER_MATLAB_GETSTARTED_EXAMPLE Example
 
-### Build
-
-To build GAMSTransfer, open Matlab and run `gams_transfer_setup`:
-```matlab
-gams_transfer_setup()
-gams_transfer_setup(_, 'target_dir', <install_directory>)
-gams_transfer_setup(_, 'gams_dir', <gams_gams_dir>)
-gams_transfer_setup(_, 'verbose', <level>)
-```
-Description of parameters:
-- `target_dir`: Installation directory. Default: `'.'`.
-- `gams_dir`: GAMS system directory. Default: found from PATH environment variable.
-- `verbose`: Compilation verbosity level from 0 (no compiler output) to 2 (all
-  compiler output). Default: 0.
-
-Add the GAMS Transfer installation directory to the Matlab Path:
-```matlab
-addpath(<install_directory>)
-```
-
-### Run Unit Tests
-
-Make sure that the GAMSTransfer build is part of the Matlab PATH. Then, run
-`gams_transfer_test`:
-```matlab
-gams_transfer_test()
-gams_transfer_test(_, 'working_dir', <test_directory>)
-gams_transfer_test(_, 'gams_dir', <gams_gams_dir>)
-```
-Description of parameters:
-- `working_dir`: Directory for test example GAMS / GDX files. Default: `tempname()`.
-- `gams_dir`: GAMS system directory. Default: found from PATH environment variable.
-
-## Example
-
-We consider creating a GDX file in Matlab with content equal to the solution
-data of model
+As an introductory example, we consider creating a GDX file in Matlab with
+content equal to the solution data of model
 [trnsport](https://www.gams.com/latest/gamslib_ml/libhtml/gamslib_trnsport.html).
 
-### Create with GAMS:
-```matlab
+Create with GAMS:
+```
 gamslib trnsport
 gams trnsport GDX=trnsport.gdx
 ```
 
-### Create with Matlab:
-```matlab
+Create with Matlab:
+```
 import GAMSTransfer.*
 
 % create an empty container
@@ -136,6 +78,31 @@ demand.setRecords([325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]);
 m.write('trnsport.gdx');
 ```
 
+The example illustrates the general GAMS Transfer workflow: A \ref
+GAMSTransfer::Container "Container" can be filled with different symbols, here
+are shown \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Parameter
+"Parameter", \ref GAMSTransfer::Variable "Variable" and \ref
+GAMSTransfer::Equation "Equation" (not shown: \ref GAMSTransfer::Alias "Alias")
+and is later \ref GAMSTRANSFER_MATLAB_GDXWRITE "written to a GDX file".
+
+Instead of starting with an empty container in
+```
+% create an empty container
+m = Container();
+```
+one could initialize it by \ref GAMSTRANSFER_MATLAB_GDXREAD
+"reading from a GDX file":
+```
+% create a container based on GDX
+m = Container('path/to/file.gdx');
+```
+
+Each symbol in the container has multiple symbol records -- the actual data --
+that can be provided at symbol creation (see for example set `i`), but \ref
+GAMSTRANSFER_MATLAB_ADD "adding or modifying data" thereafter is possible, too.
+
+A symbol, e.g. the variable `x` (also accessible through `m.data.x`), stores its
+symbol records in `x.records`, but provides further meta data:
 ```
 >> x
 
@@ -173,3 +140,20 @@ ans =
     san-diego    chicago        0      0.009
     san-diego    topeka       275          0
 ```
+
+Besides `name` and `description` each symbol has modifyable meta data
+`dimension`, `size` and `domain` to define the symbol domain and shape as well
+as the possible dependency on other sets. Note that `size` is of particular
+importance when using \ref GAMSTRANSFER_MATLAB_RECFORMATS
+"matrix like record formats" to store symbol records (compare property `format`)
+and/or a \ref GAMSTransfer::Container "Container" in \ref
+GAMSTRANSFER_MATLAB_INDEXEDGDX "indexed mode".
+
+The example further shows that in table like \ref GAMSTRANSFER_MATLAB_RECFORMATS
+"matrix like record formats" the first `dimension` columns are the record's
+domain information with column names `domain_labels`. Added record value columns
+follow (`level` and `marginal`). Missing value columns, here `lower`, `upper`
+and `scale` are considered to hold default values specified by `default_values`
+-- in this example 0, Inf and 1, respectively.
+
+*/

@@ -1,91 +1,153 @@
-classdef Alias < handle
-    % GAMS Alias
-    %
-    % This class represents a GAMS Alias, which is a link to another GAMS Set.
-    %
-    % Required Arguments:
-    % 1. container: Container
-    %    GAMSTransfer container object this symbol should be stored in
-    % 2. name: string
-    %    name of alias
-    % 3. alias_with: Set or Alias
-    %    GAMS Set to be linked to
-    %
-    % Example:
-    % c = Container();
-    % s = Set(c, 's');
-    % a = Alias(c, 'a', s);
-    %
-    % See also: GAMSTransfer.Set, GAMSTransfer.Container
-    %
+% GAMS Alias
+%
+% ------------------------------------------------------------------------------
+%
+% GAMS - General Algebraic Modeling System
+% GAMS Transfer Matlab
+%
+% Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the 'Software'), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
+%
+% ------------------------------------------------------------------------------
+%
+% GAMS Alias
+%
+% This class represents a GAMS Alias, which is a link to another GAMS Set.
+%
+% Required Arguments:
+% 1. container (Container):
+%    GAMSTransfer container object this symbol should be stored in
+% 2. name (string):
+%    name of alias
+% 3. alias_with (Set or Alias):
+%    GAMS Set to be linked to
+%
+% Example:
+% c = Container();
+% s = Set(c, 's');
+% a = Alias(c, 'a', s);
+%
+% See also: GAMSTransfer.Set, GAMSTransfer.Container
 
-    %
-    % GAMS - General Algebraic Modeling System Matlab API
-    %
-    % Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
-    % Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
-    %
-    % Permission is hereby granted, free of charge, to any person obtaining a copy
-    % of this software and associated documentation files (the 'Software'), to deal
-    % in the Software without restriction, including without limitation the rights
-    % to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    % copies of the Software, and to permit persons to whom the Software is
-    % furnished to do so, subject to the following conditions:
-    %
-    % The above copyright notice and this permission notice shall be included in all
-    % copies or substantial portions of the Software.
-    %
-    % THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    % IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    % FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    % AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    % LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    % SOFTWARE.
-    %
+%> GAMS Alias
+%>
+%> This class represents a GAMS Alias, which is a link to another GAMS Set.
+%>
+%> **Required Arguments:**
+%> 1. container [Container]:
+%>    GAMSTransfer container object this symbol should be stored in
+%> 2. name [string]:
+%>    name of alias
+%> 3. alias_with [Set or Alias]:
+%>    GAMS Set to be linked to
+%>
+%> **Example:**
+%> ```
+%> c = Container();
+%> s = Set(c, 's');
+%> a = Alias(c, 'a', s);
+%> ```
+%>
+%> @see \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Container "Container"
+%>
+classdef Alias < handle
 
     properties (Dependent)
-        % name name of alias
+        %> Alias name
+
+        % name Alias name
         name
     end
 
     properties
-        % alias_with linked GAMS Set
+        %> Aliased GAMS Set
+
+        % Aliased GAMS Set
         alias_with
     end
 
     properties (Dependent)
-        % description Aliased Set description
+        %> Aliased GAMS Set description
+
+        % Aliased GAMS Set description
         description
 
-        % is_singleton indicator if aliased Set is is_singleton
+
+        %> Indicator if aliased GAMS Set is singleton
+
+        % Indicator if aliased GAMS Set is singleton
         is_singleton
 
-        % dimension Dimension of aliased Set (in [0,20])
+
+        %> Aliased GAMS Set dimension (in [0,20])
+
+        % Aliased GAMS Set dimension (in [0,20])
         dimension
 
-        % size Shape of aliased Set (length == dimension)
+
+        %> Aliased GAMS Set Shape (length == dimension)
+
+        % Aliased GAMS Set Shape (length == dimension)
         size
 
-        % domain Domain of aliased Set (length == dimension)
+
+        %> Aliased GAMS Set domain (length == dimension)
+
+        % Aliased GAMS Set domain (length == dimension)
         domain
 
-        % domain_names Domain names of aliased Set
+
+        %> Aliased GAMS Set domain names
+
+        % Aliased GAMS Set domain names
         domain_names
 
-        % domain_labels Expected domain labels in records
+
+        %> Expected domain labels in records
+
+        % Expected domain labels in records
         domain_labels
 
-        % domain_type Specifies if domains are stored 'relaxed' or 'regular'
+
+        %> Specifies if domains are stored 'relaxed' or 'regular'
+
+        % Specifies if domains are stored 'relaxed' or 'regular'
         domain_type
 
-        % records Storage of aliased Set records
+
+        %> Storage of aliased Set records
+
+        % Storage of aliased Set records
         records
 
-        % format Format in which records are stored in
+
+        %> Records format
+        %>
+        %> If records are changed, this gets reset to `unknown`. Calling
+        %> `isValid()` will detect the format again.
+
+        % Records format
         %
-        % If records are changed, this gets reset to 'unknown'. Calling isValid()
-        % will detect the format again.
+        % If records are changed, this gets reset to 'unknown'. Calling
+        % isValid() will detect the format again.
         format
     end
 
@@ -100,9 +162,8 @@ classdef Alias < handle
 
     methods
 
+        %> Constructs a GAMS Alias, see class help.
         function obj = Alias(container, name, alias_with)
-            % Constructs a GAMS Alias, see class help.
-            %
 
             obj.id = int32(randi(100000));
 
@@ -227,24 +288,37 @@ classdef Alias < handle
 
     methods
 
+        %> Sets symbol records in supported format
+        %>
+        %> @see GAMSTransfer::Symbol::setRecords
         function setRecords(obj, varargin)
             % Sets symbol records in supported format
             %
             % See also: GAMSTransfer.Symbol.setRecords
-            %
 
             obj.alias_with.setRecords(varargin{:});
         end
 
+        %> Transforms symbol records into given format
+        %>
+        %> @see \ref GAMSTransfer::Symbol::transformRecords
+        %> "Symbol.transformRecords"
         function transformRecords(obj, target_format)
             % Transforms symbol records into given format
             %
             % See also: GAMSTransfer.Symbol.transformRecords
-            %
 
             obj.alias_with.transformRecords(target_format);
         end
 
+        %> Checks equivalence with other symbol
+        %>
+        %> @note A symbol is always linked to a container. This method does not
+        %> check equivalence of the linked containers.
+        %>
+        %> **Required Arguments:**
+        %> 1. symbol (any):
+        %>    Other symbol
         function eq = equals(obj, symbol)
             % Checks equivalence with other symbol
             %
@@ -252,9 +326,8 @@ classdef Alias < handle
             % not check equivalence of the linked containers.
             %
             % Required Arguments:
-            % 1. symbol: any
+            % 1. symbol (any):
             %    Other symbol
-            %
 
             eq = false;
             if ~isa(symbol, 'GAMSTransfer.Alias')
@@ -264,6 +337,19 @@ classdef Alias < handle
                 obj.alias_with.equals(symbol.alias_with);
         end
 
+        %> Copies symbol to destination container
+        %>
+        %> If destination container does not have a symbol equal to the
+        %> aliased symbol, an error is raised.
+        %>
+        %> **Required Arguments:**
+        %> 1. destination (`Container`):
+        %>    Destination container
+        %>
+        %> **Optional Arguments:**
+        %> 2. overwrite (`bool`):
+        %>    Overwrites symbol with same name in destination if `true`.
+        %>    Default: `false`.
         function copy(obj, varargin)
             % Copies symbol to destination container
             %
@@ -271,14 +357,13 @@ classdef Alias < handle
             % aliased symbol, an error is raised.
             %
             % Required Arguments:
-            % 1. destination: Container
+            % 1. destination (Container):
             %    Destination container
             %
             % Optional Arguments:
-            % 2. overwrite: bool
+            % 2. overwrite (bool):
             %    Overwrites symbol with same name in destination if true.
             %    Default: false.
-            %
 
             % input arguments
             p = inputParser();
@@ -308,15 +393,21 @@ classdef Alias < handle
             end
         end
 
+        %> Checks correctness of alias
+        %>
+        %> **Optional Arguments:**
+        %> 1. verbose (`logical`):
+        %>    If `true`, the reason for an invalid symbol is printed
+        %> 2. force (`logical`):
+        %>    If `true`, forces reevaluation of validity (resets cache)
         function valid = isValid(obj, varargin)
             % Checks correctness of alias
             %
             % Optional Arguments:
-            % 1. verbose: logical
+            % 1. verbose (logical):
             %    If true, the reason for an invalid symbol is printed
-            % 2. force: logical
+            % 2. force (logical):
             %    If true, forces reevaluation of validity (resets cache)
-            %
 
             verbose = false;
             force = false;
@@ -347,203 +438,253 @@ classdef Alias < handle
             valid = true;
         end
 
+        %> Get domain violations
+        %>
+        %> @see \ref GAMSTransfer::Symbol::getDomainViolations
+        %> "Symbol.getDomainViolations"
         function dom_violations = getDomainViolations(obj)
             % Get domain violations
             %
             % See also: GAMSTransfer.Symbol.getDomainViolations
-            %
 
             dom_violations = obj.alias_with.getDomainViolations();
         end
 
+        %> Extends domain sets in order to resolve domain violations
+        %>
+        %> @see \ref GAMSTransfer::Symbol::resolveDomainViolations
+        %> "Symbol.resolveDomainViolations"
         function resolveDomainViolations(obj)
             % Extends domain sets in order to resolve domain violations
             %
             % See also: GAMSTransfer.Symbol.resolveDomainViolations
-            %
 
             obj.alias_with.resolveDomainViolations();
         end
 
+        %> Returns the sparsity of symbol records
+        %>
+        %> @see \ref GAMSTransfer::Symbol::getSparsity "Symbol.getSparsity"
         function sparsity = getSparsity(obj)
             % Returns the sparsity of symbol records
             %
             % See also: GAMSTransfer.Symbol.getSparsity
-            %
 
             sparsity = obj.alias_with.getSparsity();
         end
 
+        %> Returns the cardenality of symbol records
+        %>
+        %> @see \ref GAMSTransfer::Symbol::getCardenality
+        %> "Symbol.getCardenality"
         function card = getCardenality(obj)
             % Returns the cardenality of symbol records
             %
             % See also: GAMSTransfer.Symbol.getCardenality
-            %
 
             card = obj.alias_with.getCardenality();
         end
 
+        %> Returns the largest value in records
+        %>
+        %> @see \ref GAMSTransfer::Symbol::getMaxValue "Symbol.getMaxValue"
         function [value, where] = getMaxValue(obj, varargin)
             % Returns the largest value in records
             %
             % See also: GAMSTransfer.Symbol.getMaxValue
-            %
 
             [value, where] = obj.alias_with.getMaxValue(varargin{:});
         end
 
+        %> Returns the smallest value in records
+        %>
+        %> @see \ref GAMSTransfer::Symbol::getMinValue "Symbol.getMinValue"
         function [value, where] = getMinValue(obj, varargin)
             % Returns the smallest value in records
             %
             % See also: GAMSTransfer.Symbol.getMinValue
-            %
 
             [value, where] = obj.alias_with.getMinValue(varargin{:});
         end
 
+        %> Returns the mean value over all values in records
+        %>
+        %> @see \ref GAMSTransfer::Symbol::getMeanValue "Symbol.getMeanValue"
         function value = getMeanValue(obj, varargin)
             % Returns the mean value over all values in records
             %
             % See also: GAMSTransfer.Symbol.getMeanValue
-            %
 
             value = obj.alias_with.getMeanValue(varargin{:});
         end
 
+        %> Returns the largest absolute value in records
+        %>
+        %> @see \ref GAMSTransfer::Symbol::getMaxAbsValue
+        %> "Symbol.getMaxAbsValue"
         function [value, where] = getMaxAbsValue(obj, varargin)
             % Returns the largest absolute value in records
             %
             % See also: GAMSTransfer.Symbol.getMaxAbsValue
-            %
 
             [value, where] = obj.alias_with.getMaxAbsValue(varargin{:});
         end
 
+        %> Returns the number of GAMS NA values in records
+        %>
+        %> @see \ref GAMSTransfer::Symbol::countNA "Symbol.countNA"
         function n = countNA(obj, varargin)
             % Returns the number of GAMS NA values in records
             %
             % See also: GAMSTransfer.Symbol.countNA
-            %
 
             n = obj.alias_with.countNA(varargin{:});
         end
 
+        %> Returns the number of GAMS UNDEF values in records
+        %>
+        %> @see \ref GAMSTransfer::Symbol::countUndef "Symbol.countUndef"
         function n = countUndef(obj, varargin)
             % Returns the number of GAMS UNDEF values in records
             %
             % See also: GAMSTransfer.Symbol.countUndef
-            %
 
             n = obj.alias_with.countUndef(varargin{:});
         end
 
+        %> Returns the number of GAMS EPS values in records
+        %>
+        %> @see \ref GAMSTransfer::Symbol::countEps "Symbol.countEps"
         function n = countEps(obj, varargin)
             % Returns the number of GAMS EPS values in records
             %
             % See also: GAMSTransfer.Symbol.countEps
-            %
 
             n = obj.alias_with.countEps(varargin{:});
         end
 
+        %> Returns the number of GAMS PINF (positive infinity) values in records
+        %>
+        %> @see \ref GAMSTransfer::Symbol::countPosInf "Symbol.countPosInf"
         function n = countPosInf(obj, varargin)
             % Returns the number of GAMS PINF (positive infinity) values in
             % records
             %
             % See also: GAMSTransfer.Symbol.countPosInf
-            %
 
             n = obj.alias_with.countPosInf(varargin{:});
         end
 
+        %> Returns the number of GAMS MINF (negative infinity) values in records
+        %>
+        %> @see \ref GAMSTransfer::Symbol::countNegInf "Symbol.countNegInf"
         function n = countNegInf(obj, varargin)
             % Returns the number of GAMS MINF (negative infinity) values in
             % records
             %
             % See also: GAMSTransfer.Symbol.countNegInf
-            %
 
             n = obj.alias_with.countNegInf(varargin{:});
         end
 
+        %> Returns the number of GDX records (not available for matrix formats)
+        %>
+        %> @see \ref GAMSTransfer::Symbol::getNumberRecords
+        %> "Symbol.getNumberRecords"
         function nrecs = getNumberRecords(obj)
             % Returns the number of GDX records (not available for matrix
             % formats)
             %
             % See also: GAMSTransfer.Symbol.getNumberRecords
-            %
 
             nrecs = obj.alias_with.getNumberRecords();
         end
 
+        %> Returns the number of values stored for this symbol.
+        %>
+        %> @see \ref GAMSTransfer::Symbol::getNumberValues
+        %> "Symbol.getNumberValues"
         function nvals = getNumberValues(obj, varargin)
             % Returns the number of values stored for this symbol.
             %
             % See also: GAMSTransfer.Symbol.getNumberValues
-            %
 
             nvals = obj.alias_with.getNumberValues(varargin{:});
         end
 
+        %> Returns the UELs used in this symbol
+        %>
+        %> @see \ref GAMSTransfer::Symbol::getUELs "Symbol.getUELs"
         function uels = getUELs(obj, dim, varargin)
             % Returns the UELs used in this symbol
             %
             % See also: GAMSTransfer.Symbol.getUELs
-            %
 
             uels = obj.alias_with.getUELs(dim, varargin{:});
         end
 
+        %> Returns the UELs labels for the given UEL IDs
+        %>
+        %> @see \ref GAMSTransfer::Symbol::getUELLabels "Symbol.getUELLabels"
         function uels = getUELLabels(obj, dim, ids)
             % Returns the UELs labels for the given UEL IDs
             %
             % See also: GAMSTransfer.Symbol.getUELLabels
-            %
 
             uels = obj.alias_with.getUELLabels(dim, ids);
         end
 
+        %> Sets the UELs without modifying UEL IDs in records
+        %>
+        %> @see \ref GAMSTransfer::Symbol::initUELs "Symbol.initUELs"
         function initUELs(obj, dim, uels)
             % Sets the UELs without modifying UEL IDs in records
             %
             % See also: GAMSTransfer.Symbol.initUELs
-            %
 
             obj.alias_with.initUELs(dim, uels);
         end
 
+        %> Sets the UELs with updating UEL IDs in records
+        %>
+        %> @see \ref GAMSTransfer::Symbol::setUELs "Symbol.setUELs"
         function setUELs(obj, dim, uels)
             % Sets the UELs with updating UEL IDs in records
             %
             % See also: GAMSTransfer.Symbol.setUELs
-            %
 
             obj.alias_with.setUELs(dim, uels);
         end
 
+        %> Adds UELs to the symbol
+        %>
+        %> @see \ref GAMSTransfer::Symbol::addUELs "Symbol.addUELs"
         function addUELs(obj, dim, uels)
             % Adds UELs to the symbol
             %
             % See also: GAMSTransfer.Symbol.addUELs
-            %
 
             obj.alias_with.addUELs(dim, uels);
         end
 
+        %> Removes UELs from the symbol
+        %>
+        %> @see \ref GAMSTransfer::Symbol::removeUELs "Symbol.removeUELs"
         function removeUELs(obj, dim, uels)
             % Removes UELs from the symbol
             %
             % See also: GAMSTransfer.Symbol.removeUELs
-            %
 
             obj.alias_with.removeUELs(dim, uels);
         end
 
+        %> Renames UELs in the symbol
+        %>
+        %> @see \ref GAMSTransfer::Symbol::renameUELs "Symbol.renameUELs"
         function renameUELs(obj, dim, olduels, newuels)
             % Renames UELs in the symbol
             %
             % See also: GAMSTransfer.Symbol.renameUELs
-            %
 
             obj.alias_with.renameUELs(dim, olduels, newuels);
         end
