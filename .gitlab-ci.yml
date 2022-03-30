@@ -5,6 +5,7 @@ stages:
   - test
   - package
   - release
+  - deploy
 
 variables:
     GIT_SUBMODULE_STRATEGY: recursive
@@ -60,7 +61,7 @@ build_octave_linux:
     script:
         - octave --no-gui --no-window-system --eval "gams_transfer_setup('target_dir', 'octave_linux')"
     only:
-#        - merge_requests
+        - merge_requests
         - master
     artifacts:
         name: gams_transfer_octave_linux
@@ -75,7 +76,7 @@ build_octave_macos:
     script:
         - octave --no-gui --no-window-system --eval "gams_transfer_setup('target_dir', 'octave_macos')"
     only:
-#        - merge_requests
+        - merge_requests
         - master
     artifacts:
         name: gams_transfer_octave_macos
@@ -90,7 +91,7 @@ build_matlab_macos:
     script:
         - matlab -nodisplay -nosplash -nodesktop -r "gams_transfer_setup('target_dir', 'matlab_macos')"
     only:
-#        - merge_requests
+        - merge_requests
         - master
         - tags
     artifacts:
@@ -106,7 +107,7 @@ build_matlab_windows:
     script:
         - C:\"Program Files"\MATLAB\bin\matlab.exe -batch "gams_transfer_setup('target_dir', 'matlab_windows')"
     only:
-#        - merge_requests
+        - merge_requests
         - master
         - tags
     artifacts:
@@ -126,7 +127,7 @@ test_octave_linux:
         - ls /opt/gams29.1.0
         - octave --no-gui --no-window-system --path $PWD/octave_linux --eval "gams_transfer_test('gams_dir', '/opt/gams29.1.0', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
     only:
-#        - merge_requests
+        - merge_requests
         - master
 
 test_octave_macos:
@@ -137,7 +138,7 @@ test_octave_macos:
     script:
         - octave --no-gui --no-window-system --path $PWD/octave_macos --eval "gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
     only:
-#        - merge_requests
+        - merge_requests
         - master
 
 test_matlab_macos:
@@ -148,7 +149,7 @@ test_matlab_macos:
     script:
         - matlab -nodisplay -nosplash -nodesktop -r "addpath('matlab_macos'); gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
-#        - merge_requests
+        - merge_requests
         - master
 
 test_matlab_windows:
@@ -164,7 +165,7 @@ test_matlab_windows:
         - cd ..
         - C:\"Program Files"\MATLAB\bin\matlab.exe -batch "addpath('matlab_windows'); gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
-#        - merge_requests
+        - merge_requests
         - master
 
 package:
@@ -203,3 +204,17 @@ release:
                 --assets-link "{\"name\":\"gams_transfer_matlab_windows.zip\",\"url\":\"${PACKAGE_REGISTRY_URL}gams_transfer_matlab_windows.zip\"}"
     only:
         - tags
+
+pages:
+    stage: deploy
+    tags:
+        - linux
+    image:
+        name: alpine
+    script:
+        - mv doc/html public/
+    artifacts:
+        paths:
+            - public
+    only:
+        - master
