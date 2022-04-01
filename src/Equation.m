@@ -48,7 +48,7 @@
 %
 % Parameter Arguments:
 % - records:
-%   Set records, e.g. a list of strings. Default is [].
+%   Equation records, e.g. a list of strings. Default is [].
 % - description (string):
 %   Description of symbol. Default is ''.
 % - domain_forwarding (logical):
@@ -64,33 +64,8 @@
 % See also: GAMSTransfer.Container, GAMSTransfer.EquationType, GAMSTransfer.Set
 %
 
-%> GAMS Equation
-%>
-%> This class represents a GAMS Equation.
-%>
-%> **Required Arguments:**
-%> 1. container (`Container`):
-%>    GAMSTransfer container object this symbol should be stored in
-%> 2. name (`string`):
-%>    Name of equation
-%> 3. type (`string` or `int`):
-%>    Specifies the equation type, either as string or as integer given by any
-%>    of the constants in EquationType.
-%>
-%> **Optional Arguments:**
-%> 4. domain (`cellstr` or `Set`):
-%>    List of domains given either as string or as reference to a Set object.
-%>    Default is `{}` (for scalar).
-%>
-%> **Parameter Arguments:**
-%> - records:
-%>   Set records, e.g. a list of strings. Default is `[]`.
-%> - description (`string`):
-%>   Description of symbol. Default is `""`.
-%> - domain_forwarding (`logical`):
-%>   If true, domain entries in records will recursively be added to the
-%>   domains in case they are not present in the domains already. Default:
-%>   `false`.
+%> @ingroup symbol
+%> @brief GAMS Equation
 %>
 %> **Example:**
 %> ```
@@ -144,7 +119,45 @@ classdef Equation < GAMSTransfer.Symbol
 
     methods
 
-        %> Constructs a GAMS Equation, see class help
+        %> Constructs a GAMS Equation
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_SYMBOL_CREATE for more information.
+        %>
+        %> **Required Arguments:**
+        %> 1. container (`Container`):
+        %>    \ref GAMSTransfer::Container "Container" object this symbol should
+        %>    be stored in
+        %> 2. name (`string`):
+        %>    Name of equation
+        %> 3. type (`string` or `int`):
+        %>    Specifies the equation type, either as `string` or as `integer`
+        %>    given by any of the constants in \ref GAMSTransfer::EquationType
+        %>    "EquationType".
+        %>
+        %> **Optional Arguments:**
+        %> 4. domain (`cellstr` or `Set`):
+        %>    List of domains given either as `string` or as reference to a \ref
+        %>    GAMSTransfer::Set "Set" object. Default is `{}` (for scalar).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Equation records. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the
+        %>   domains in case they are not present in the domains already. Default:
+        %>   `false`.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> e2 = Equation(c, 'e2', 'l', {'*', '*'});
+        %> e3 = Equation(c, 'e3', EquationType.EQ, '*', 'description', 'equ e3');
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::Container "Container", \ref
+        %> GAMSTransfer::EquationType "EquationType", \ref GAMSTransfer::Set "Set"
         function obj = Equation(container, name, etype, varargin)
             % Constructs a GAMS Equation, see class help
 
@@ -313,12 +326,13 @@ classdef Equation < GAMSTransfer.Symbol
 
         %> Copies symbol to destination container
         %>
-        %> Symbol domains are downgraded to relaxed if the destination container
-        %> does not have equivalent domain sets.
+        %> Symbol domains are downgraded to `relaxed` if the destination
+        %> container does not have equivalent domain sets, see also \ref
+        %> GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN.
         %>
         %> **Required Arguments:**
         %> 1. destination (`Container`):
-        %>    Destination container
+        %>    Destination \ref GAMSTransfer::Container "Container"
         %>
         %> **Optional Arguments:**
         %> 2. overwrite (`bool`):

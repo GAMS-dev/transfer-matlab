@@ -67,12 +67,13 @@
 % GAMSTransfer.Variable, GAMSTransfer.Equation, GAMSTransfer.ConstContainer
 %
 
-%> GAMS Transfer Container stores (multiple) symbols
+%> @ingroup container
+%> @brief GAMS Transfer Container stores (multiple) symbols
 %>
 %> A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
 %> parameters), each holding multiple symbol records. In GAMS Transfer the
 %> Container is the main object that holds different symbols and allows to read
-%> and write those to GDX.
+%> and write those to GDX. See \ref container for more information.
 %>
 %> **Indexed Mode:**
 %>
@@ -84,19 +85,9 @@
 %> - In indexed mode, there are no domain sets, but sizes (the shape of a symbol)
 %>   can be set explicitly. Furthermore, there are no UELs and only GAMS
 %>   Parameters are allowed to be used in indexed mode.
+%>
 %> The mode is defined when creating a container and can't be changed thereafter.
-%>
-%> **Optional Arguments:**
-%> 1. source (`string` or `ConstContainer`):
-%>    Path to GDX file or a \ref GAMSTransfer::ConstContainer "ConstContainer"
-%>    object to be read
-%>
-%> **Parameter Arguments:**
-%> - gams_dir (`string`):
-%>   Path to GAMS system directory. Default is determined from PATH environment
-%>   variable
-%> - indexed (`logical`):
-%>   Specifies if container is used in indexed of default mode, see above.
+%> See \ref GAMSTRANSFER_MATLAB_CONTAINER_INDEXED for more information.
 %>
 %> **Example:**
 %> ```
@@ -112,7 +103,31 @@
 classdef Container < GAMSTransfer.BaseContainer
     methods
 
-        %> Constructs a GAMSTransfer Container, see class help
+        %> Constructs a GAMSTransfer Container
+        %>
+        %> **Optional Arguments:**
+        %> 1. source (`string` or `ConstContainer`):
+        %>    Path to GDX file or a \ref GAMSTransfer::ConstContainer "ConstContainer"
+        %>    object to be read
+        %>
+        %> **Parameter Arguments:**
+        %> - gams_dir (`string`):
+        %>   Path to GAMS system directory. Default is determined from PATH environment
+        %>   variable
+        %> - indexed (`logical`):
+        %>   Specifies if container is used in indexed of default mode, see above.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> c = Container('path/to/file.gdx');
+        %> c = Container('indexed', true, 'gams_dir', 'C:\GAMS');
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Alias "Alias", \ref
+        %> GAMSTransfer::Parameter "Parameter", \ref GAMSTransfer::Variable "Variable",
+        %> \ref GAMSTransfer::Equation "Equation", \ref GAMSTransfer::ConstContainer
+        %> "ConstContainer"
         function obj = Container(varargin)
             % Constructs a GAMSTransfer Container, see class help
 
@@ -170,6 +185,8 @@ classdef Container < GAMSTransfer.BaseContainer
         end
 
         %> Reads symbols from GDX file
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_CONTAINER_READ for more information.
         %>
         %> **Required Arguments:**
         %> 1. source (`string`, `Container` or `ConstContainer`):
@@ -363,17 +380,7 @@ classdef Container < GAMSTransfer.BaseContainer
 
         %> Writes symbols with symbol records to GDX file
         %>
-        %> There are different issues that can occur when writing to GDX: e.g.
-        %> domain violations and unsorted data. For domain violations, see
-        %> GAMSTransfer.Container.getDomainViolations. Domain labels are stored
-        %> as UELs in GDX that are an (ID,label) pair. The ID is a number with
-        %> an ascending order based on the write occurence. Data records must be
-        %> sorted by these IDs in ascending order (dimension 1 first, then
-        %> dimension 2, ...). If one knows that the data is sorted, one can set
-        %> the flag 'sorted' to true to improve performance. Otherwise
-        %> GAMSTransfer will sort the values internally. Note, that the case of
-        %> 'sorted' being true and the data not being sorted will lead to an
-        %> error.
+        %> See \ref GAMSTRANSFER_MATLAB_CONTAINER_WRITE for more information.
         %>
         %> **Required Arguments:**
         %> 1. filename (`string`):
@@ -813,9 +820,14 @@ classdef Container < GAMSTransfer.BaseContainer
         %> Get domain violations for all symbols
         %>
         %> Domain violations occur when a symbol uses other \ref
-        %> GAMSTransfer::Set "Set(s)" as domain(s) and a domain entry in its
-        %> records that is not present in the corresponding set. Such a domain
-        %> violation will lead to a GDX error when writing the data.
+        %> GAMSTransfer::Set "Sets" as \ref GAMSTransfer::Symbol::domain
+        %> "domain"(s) -- and is thus of domain type `regular`, see \ref
+        %> GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in its
+        %> \ref GAMSTransfer::Symbol::records "records" that is not present in
+        %> the corresponding referenced domain set. Such a domain violation will
+        %> lead to a GDX error when writing the data!
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
         %>
         %> - `dom_violations = getDomainViolations` returns a list of domain
         %>   violations.
@@ -857,9 +869,14 @@ classdef Container < GAMSTransfer.BaseContainer
         %> Extends domain sets in order to remove domain violations
         %>
         %> Domain violations occur when a symbol uses other \ref
-        %> GAMSTransfer::Set "Set(s)" as domain(s) and a domain entry in its
-        %> records that is not present in the corresponding set. Such a domain
-        %> violation will lead to a GDX error when writing the data.
+        %> GAMSTransfer::Set "Sets" as \ref GAMSTransfer::Symbol::domain
+        %> "domain"(s) -- and is thus of domain type `regular`, see \ref
+        %> GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in its
+        %> \ref GAMSTransfer::Symbol::records "records" that is not present in
+        %> the corresponding referenced domain set. Such a domain violation will
+        %> lead to a GDX error when writing the data!
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
         %>
         %> - `resolveDomainViolations()` extends the domain sets with the
         %>   violated domain entries. Hence, the domain violations disappear.
@@ -919,6 +936,8 @@ classdef Container < GAMSTransfer.BaseContainer
         end
 
         %> Checks correctness of all symbols
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_VALIDATE for more information.
         %>
         %> **Optional Arguments:**
         %> 1. verbose (`logical`):

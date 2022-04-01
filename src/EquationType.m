@@ -37,7 +37,8 @@
 % See also: GAMSTransfer.Equation
 %
 
-%> GAMS Equation Types
+%> @ingroup symbol
+%> @brief GAMS Equation Types
 %>
 %> This class holds the possible GAMS equation types similar to an enumeration
 %> class. Note that it is not an enumeration class due to compatibility (e.g.

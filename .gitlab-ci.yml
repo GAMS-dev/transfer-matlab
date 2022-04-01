@@ -49,7 +49,7 @@ build_documentation:
     artifacts:
         name: doc
         paths:
-            - doc/html
+            - build/doc/html
         expire_in: 1 day
 
 build_octave_linux:
@@ -212,7 +212,7 @@ pages:
     image:
         name: alpine
     script:
-        - mv doc/html public/
+        - mv build/doc/html public/
     artifacts:
         paths:
             - public

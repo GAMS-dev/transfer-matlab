@@ -64,33 +64,8 @@
 % See also: GAMSTransfer.Container
 %
 
-%> GAMS Set
-%>
-%> This class represents a GAMS Set.
-%>
-%> **Required Arguments:**
-%> 1. container (`Container`):
-%>    GAMSTransfer container object this symbol should be stored in
-%> 2. name (`string`):
-%>    Name of set
-%>
-%> **Optional Arguments:**
-%> 3. domain (`cellstr` or `Set`):
-%>    List of domains given either as string or as reference to a Set
-%>    object. Default is `{"*"}` (for 1-dim with universe domain).
-%>
-%> **Parameter Arguments:**
-%> - records:
-%>   Set records, e.g. a list of strings. Default is `[]`.
-%> - description (`string`):
-%>   Description of symbol. Default is `""`.
-%> - is_singleton (`logical`):
-%>   Indicates if set is a is_singleton set (`true`) or not (`false`). Default
-%>   is `false`.
-%> - domain_forwarding (`logical`):
-%>   If `true`, domain entries in records will recursively be added to the
-%>   domains in case they are not present in the domains already. Default:
-%>   `false`.
+%> @ingroup symbol
+%> @brief GAMS Set
 %>
 %> **Example:**
 %> ```
@@ -134,7 +109,45 @@ classdef Set < GAMSTransfer.Symbol
 
     methods
 
-        %> Constructs a GAMS Set, see class help
+        %> Constructs a GAMS Set
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_SYMBOL_CREATE for more information.
+        %>
+        %> **Required Arguments:**
+        %> 1. container (`Container`):
+        %>    \ref GAMSTransfer::Container "Container" object this symbol should
+        %>    be stored in
+        %> 2. name (`string`):
+        %>    Name of set
+        %>
+        %> **Optional Arguments:**
+        %> 3. domain (`cellstr` or `Set`):
+        %>    List of domains given either as `string` or as reference to a \ref
+        %>    GAMSTransfer::Set "Set" object. Default is `{"*"}` (for 1-dim with
+        %>    universe domain).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Set records, e.g. a list of strings. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - is_singleton (`logical`):
+        %>   Indicates if set is a is_singleton set (`true`) or not (`false`). Default
+        %>   is `false`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the
+        %>   domains in case they are not present in the domains already. Default:
+        %>   `false`.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> s1 = Set(c, 's1');
+        %> s2 = Set(c, 's2', {s1, '*', '*'});
+        %> s3 = Set(c, 's3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::Container "Container"
         function obj = Set(container, name, varargin)
             % Constructs a GAMS Set, see class help
 
@@ -276,12 +289,13 @@ classdef Set < GAMSTransfer.Symbol
 
         %> Copies symbol to destination container
         %>
-        %> Symbol domains are downgraded to relaxed if the destination container
-        %> does not have equivalent domain sets.
+        %> Symbol domains are downgraded to `relaxed` if the destination
+        %> container does not have equivalent domain sets, see also \ref
+        %> GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN.
         %>
         %> **Required Arguments:**
         %> 1. destination (`Container`):
-        %>    Destination container
+        %>    Destination \ref GAMSTransfer::Container "Container"
         %>
         %> **Optional Arguments:**
         %> 2. overwrite (`bool`):

@@ -35,7 +35,8 @@
 % compatibility (e.g. for Octave).
 %
 
-%> GAMSTransfer Symbol Types
+%> @ingroup symbol
+%> @brief GAMSTransfer Symbol Types
 %>
 %> This class holds the possible GAMSTransfer symbol types similar to an
 %> enumeration class. Note that it is not an enumeration class due to

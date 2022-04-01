@@ -36,8 +36,8 @@
 % GAMSTransfer.Variable, GAMSTransfer.Equation
 %
 
-%> This class represents a GAMS Symbol (Set, Alias, Parameter, Variable or
-%> Equation).
+%> @ingroup symbol
+%> @brief GAMS Symbol (Set, Alias, Parameter, Variable or Equation)
 %>
 %> Use subclasses to create a GAMS Symbol, see subclass help.
 %>
@@ -55,12 +55,17 @@ classdef Symbol < handle
 
 
         %> Shape of symbol (length == dimension)
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN and \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED for more information.
 
         % size Shape of symbol (length == dimension)
         size
 
 
         %> Domain of symbol (length == dimension)
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN for more information.
 
         % domain Domain of symbol (length == dimension)
         domain
@@ -80,6 +85,8 @@ classdef Symbol < handle
 
 
         %> Specifies if domains are stored 'relaxed' or 'regular'
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN for more information.
 
         % domain_type Specifies if domains are stored 'relaxed' or 'regular'
         domain_type
@@ -88,6 +95,8 @@ classdef Symbol < handle
     properties (Dependent)
         %> Enables domain entries in records to be recursively added to the
         %> domains in case they are not present in the domains already
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
 
         % Enables domain entries in records to be recursively added to the
         % domains in case they are not present in the domains already
@@ -96,6 +105,8 @@ classdef Symbol < handle
 
     properties
         %> records Storage of symbol records
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT for more information.
 
         % records Storage of symbol records
         records
@@ -104,8 +115,12 @@ classdef Symbol < handle
     properties (Dependent, SetAccess = private)
         %> Format in which records are stored in
         %>
-        %> If records are changed, this gets reset to `"unknown"`. Calling
-        %> `isValid()` will detect the format again.
+        %> If records are changed, this gets reset to \ref
+        %> GAMSTransfer::RecordsFormat::UNKNOWN "RecordsFormat.UNKNOWN". Calling
+        %> \ref GAMSTransfer::Alias::isValid "Alias.isValid" will detect the
+        %> format again.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT for more information.
 
         % format Format in which records are stored in
         %
@@ -144,7 +159,7 @@ classdef Symbol < handle
 
     methods (Access = protected)
 
-        %> Constructs a GAMS Symbol, see class help
+        %> Constructs a GAMS Symbol, see subclasses help
         function obj = Symbol(container, name, description, domain_size, records, domain_forwarding)
             % Constructs a GAMS Symbol, see class help
 
@@ -903,12 +918,13 @@ classdef Symbol < handle
 
         %> Copies symbol to destination container
         %>
-        %> Symbol domains are downgraded to relaxed if the destination container
-        %> does not have equivalent domain sets.
+        %> Symbol domains are downgraded to `relaxed` if the destination
+        %> container does not have equivalent domain sets, see also \ref
+        %> GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN.
         %>
         %> **Required Arguments:**
         %> 1. destination (`Container`):
-        %>    Destination container
+        %>    Destination \ref GAMSTransfer::Container "Container"
         %>
         %> **Optional Arguments:**
         %> 2. overwrite (`bool`):
@@ -995,6 +1011,8 @@ classdef Symbol < handle
         end
 
         %> Checks correctness of symbol
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_VALIDATE for more information.
         %>
         %> **Optional Arguments:**
         %> 1. verbose (`logical`):
@@ -1108,10 +1126,15 @@ classdef Symbol < handle
 
         %> Get domain violations
         %>
-        %> Domain violations occur when this symbol uses other \ref
-        %> GAMSTransfer::Set "Set(s)" as domain(s) and a domain entry in its
-        %> records that is not present in the corresponding set. Such a domain
-        %> violation will lead to a GDX error when writing the data.
+        %> Domain violations occur when a symbol uses other \ref
+        %> GAMSTransfer::Set "Sets" as \ref GAMSTransfer::Symbol::domain
+        %> "domain"(s) -- and is thus of domain type `regular`, see \ref
+        %> GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in its
+        %> \ref GAMSTransfer::Symbol::records "records" that is not present in
+        %> the corresponding referenced domain set. Such a domain violation will
+        %> lead to a GDX error when writing the data!
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
         %>
         %> - `dom_violations = getDomainViolations` returns a list of domain
         %>   violations.
@@ -1161,10 +1184,15 @@ classdef Symbol < handle
 
         %> Extends domain sets in order to resolve domain violations
         %>
-        %> Domain violations occur when this symbol uses other \ref
-        %> GAMSTransfer::Set "Set(s)" as domain(s) and a domain entry in its
-        %> records that is not present in the corresponding set. Such a domain
-        %> violation will lead to a GDX error when writing the data.
+        %> Domain violations occur when a symbol uses other \ref
+        %> GAMSTransfer::Set "Sets" as \ref GAMSTransfer::Symbol::domain
+        %> "domain"(s) -- and is thus of domain type `regular`, see \ref
+        %> GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in its
+        %> \ref GAMSTransfer::Symbol::records "records" that is not present in
+        %> the corresponding referenced domain set. Such a domain violation will
+        %> lead to a GDX error when writing the data!
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
         %>
         %> - `resolveDomainViolations()` extends the domain sets with the
         %>   violated domain entries. Hence, the domain violations disappear.
@@ -1519,8 +1547,11 @@ classdef Symbol < handle
         %> - `u = getUELs(d, "ignore_unused", true)` returns only those UELs
         %>   that are actually used in the records
         %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
         %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode.
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
@@ -1587,8 +1618,11 @@ classdef Symbol < handle
         %> - `u = getUELLabels(d, i)` returns the UELs labels `u` for the given
         %>   UEL IDs `i` for the UELs stored for dimension `d`.
         %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
         %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode.
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
@@ -1684,8 +1718,11 @@ classdef Symbol < handle
         %>   the property records such that records still point to the correct
         %>   UEL label when UEL IDs have changed.
         %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
         %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode.
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid", \ref
@@ -1747,8 +1784,11 @@ classdef Symbol < handle
         %>
         %> - `addUELs(d, u)` adds the UELs `u` for dimension `d`.
         %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
         %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode.
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
@@ -1802,8 +1842,11 @@ classdef Symbol < handle
         %> - `removeUELs(d)` removes all unused UELs for dimension `d`.
         %> - `removeUELs(d, u)` removes the UELs `u` for dimension `d`.
         %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
         %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode.
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
@@ -1873,8 +1916,11 @@ classdef Symbol < handle
         %> - `renameUELs(d, u1, u2)` renames the UELs `u1` to the labels given
         %>   in `u2` for dimension `d`. The IDs for these UELs do not change.
         %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
         %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode.
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
