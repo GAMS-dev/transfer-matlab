@@ -28,11 +28,11 @@
 %
 % ------------------------------------------------------------------------------
 %
-% GAMSTransfer BaseContainer stores (multiple) symbols (expert-only)
+% Container base (only use subclasses)
 %
 
 %> @ingroup container
-%> @brief GAMSTransfer BaseContainer stores (multiple) symbols (expert-only)
+%> @brief Container base (only use subclasses)
 %>
 classdef BaseContainer < handle
 
@@ -444,6 +444,8 @@ classdef BaseContainer < handle
 
         %> Returns an overview over all sets in container
         %>
+        %> See \ref GAMSTRANSFER_MATLAB_CONTAINER_OVERVIEW for more information.
+        %>
         %> @note This method includes set aliases.
         %>
         %> **Optional Arguments:**
@@ -475,6 +477,8 @@ classdef BaseContainer < handle
 
         %> Returns an overview over all parameters in container
         %>
+        %> See \ref GAMSTRANSFER_MATLAB_CONTAINER_OVERVIEW for more information.
+        %>
         %> **Optional Arguments:**
         %> 1. symbols (`cellstr`):
         %>    List of symbols to include. Default: `listParameters()`.
@@ -501,6 +505,8 @@ classdef BaseContainer < handle
         end
 
         %> Returns an overview over all variables in container
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_CONTAINER_OVERVIEW for more information.
         %>
         %> **Optional Arguments:**
         %> 1. symbols (`cellstr`):
@@ -529,6 +535,8 @@ classdef BaseContainer < handle
 
         %> Returns an overview over all equations in container
         %>
+        %> See \ref GAMSTRANSFER_MATLAB_CONTAINER_OVERVIEW for more information.
+        %>
         %> **Optional Arguments:**
         %> 1. symbols (`cellstr`):
         %>    List of symbols to include. Default: `listEquations()`.
@@ -556,6 +564,8 @@ classdef BaseContainer < handle
 
         %> Returns an overview over all aliases in container
         %>
+        %> See \ref GAMSTRANSFER_MATLAB_CONTAINER_OVERVIEW for more information.
+        %>
         %> **Optional Arguments:**
         %> 1. symbols (`cellstr`):
         %>    List of symbols to include. Default: `listAliases()`.
@@ -582,6 +592,8 @@ classdef BaseContainer < handle
         end
 
         %> Checks correctness of all symbols
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_VALIDATE for more information.
         %>
         %> **Optional Arguments:**
         %> 1. verbose (`logical`):

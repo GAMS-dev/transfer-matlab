@@ -51,19 +51,12 @@
 %> @brief Domain Violation
 %>
 %> Domain violations occur when a symbol uses other \ref GAMSTransfer::Set
-%> "Set(s)" as domain(s) and a domain entry in its records that is not present
-%> in the corresponding set. Such a domain violation will lead to a GDX error
-%> when writing the data.
-%>
-%> **Required Arguments:**
-%> 1. symbol (`Symbol`):
-%>    The GAMS symbol in which the domain violation occurs.
-%> 2. dimension (`int`):
-%>    The dimension of the domain in which the domain violation occurs.
-%> 3. domain (`Set`):
-%>    The GAMS Set that is the domain of symbol.
-%> 4. violations (`cellstr`):
-%>    List of domain entries that are used in symbol but are missing in domain.
+%> "Sets" as \ref GAMSTransfer::Symbol::domain "domain"(s) -- and is thus of
+%> domain type `regular`, see \ref GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses
+%> a domain entry in its \ref GAMSTransfer::Symbol::records "records" that is
+%> not present in the corresponding referenced domain set. Such a domain
+%> violation will lead to a GDX error when writing the data! See \ref
+%> GAMSTRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
 %>
 %> @see \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Symbol "Symbol"
 classdef DomainViolation
@@ -99,6 +92,18 @@ classdef DomainViolation
     methods
 
         %> Constructs a domain violation, see class help
+        %>
+        %> **Required Arguments:**
+        %> 1. symbol (`Symbol`):
+        %>    The GAMS symbol in which the domain violation occurs.
+        %> 2. dimension (`int`):
+        %>    The dimension of the domain in which the domain violation occurs.
+        %> 3. domain (`Set`):
+        %>    The GAMS \ref GAMSTransfer::Set "Set" that is the domain of symbol.
+        %> 4. violations (`cellstr`):
+        %>    List of domain entries that are used in symbol but are missing in domain.
+        %>
+        %> @see \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Symbol "Symbol"
         function obj = DomainViolation(symbol, dimension, domain, violations)
             % Constructs a domain violation, see class help
 

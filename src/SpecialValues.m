@@ -30,26 +30,31 @@
 %
 % GAMS Special Values
 %
+% GAMS GDX offers five special values: NA (not available), UNDEF (undefined),
+% EPS (explicit zero, a standard zero is usually not stored in the sparse GDX
+% format), PINF or POSINF (positive infinity) and MINF or NEGINF (negative
+% infinity). All special values can be queried and checked for by using this
+% class. While UNDEF, POSINF and NEGINF have natural counterparts in Matlab
+% (NaN, Inf and -Inf, respectively), NA and EPS do not. The latter two are
+% therefore mapped to a special NaN and -0, respectively.
 
 %> @ingroup records
 %> @brief GAMS Special Values
 %>
-%>GAMS GDX offers five special values: \ref
-%>GAMSTransfer::SpecialValues::NA "NA" (not available), \ref
-%>GAMSTransfer::SpecialValues::UNDEF "UNDEF" (undefined), \ref
-%>GAMSTransfer::SpecialValues::EPS "EPS" (explicit zero, a standard zero
-%>is usually not stored in the sparse GDX format), PINF or \ref
-%>GAMSTransfer::SpecialValues::POSINF "POSINF" (positive infinity) and
-%>MINF or \ref GAMSTransfer::SpecialValues::NEGINF "NEGINF" (negative
-%>infinity). All special values can be queried and checked for using the class
-%>\ref GAMSTransfer::SpecialValues "SpecialValues". While \ref
-%>GAMSTransfer::SpecialValues::UNDEF "UNDEF", \ref
-%>GAMSTransfer::SpecialValues::POSINF "POSINF" and \ref
-%>GAMSTransfer::SpecialValues::NEGINF "NEGINF" have natural counterparts
-%>in Matlab (`NaN`, `Inf` and `-Inf`, respectively), \ref
-%>GAMSTransfer::SpecialValues::NA "NA" and \ref
-%>GAMSTransfer::SpecialValues::EPS "EPS" do not. The latter two are
-%>therefore mapped to a special `NaN` and `-0`, respectively.
+%> GAMS GDX offers five special values: \ref GAMSTransfer::SpecialValues::NA
+%> "NA" (not available), \ref GAMSTransfer::SpecialValues::UNDEF "UNDEF"
+%> (undefined), \ref GAMSTransfer::SpecialValues::EPS "EPS" (explicit zero, a
+%> standard zero is usually not stored in the sparse GDX format), PINF or \ref
+%> GAMSTransfer::SpecialValues::POSINF "POSINF" (positive infinity) and MINF or
+%> \ref GAMSTransfer::SpecialValues::NEGINF "NEGINF" (negative infinity). All
+%> special values can be queried and checked for by using this class. While \ref
+%> GAMSTransfer::SpecialValues::UNDEF "UNDEF", \ref
+%> GAMSTransfer::SpecialValues::POSINF "POSINF" and \ref
+%> GAMSTransfer::SpecialValues::NEGINF "NEGINF" have natural counterparts in
+%> Matlab (`NaN`, `Inf` and `-Inf`, respectively), \ref
+%> GAMSTransfer::SpecialValues::NA "NA" and \ref
+%> GAMSTransfer::SpecialValues::EPS "EPS" do not. The latter two are therefore
+%> mapped to a special `NaN` and `-0`, respectively.
 %>
 %>\par Example:
 %>\code{.matlab}

@@ -65,29 +65,6 @@
 %> @ingroup symbol
 %> @brief GAMS Parameter
 %>
-%> This class represents a GAMS Parameter.
-%>
-%> **Required Arguments:**
-%> 1. container (`Container`):
-%>    GAMSTransfer container object this symbol should be stored in
-%> 2. name (`string`):
-%>    Name of parameter
-%>
-%> **Optional Arguments:**
-%> 3. domain (`cellstr` or `Set`):
-%>    List of domains given either as string or as reference to a Set
-%>    object. Default is `{}` (for scalar).
-%>
-%> **Parameter Arguments:**
-%> - records:
-%>   Set records, e.g. a list of strings. Default is `[]`.
-%> - description (`string`):
-%>   Description of symbol. Default is `""`.
-%> - domain_forwarding (`logical`):
-%>   If `true`, domain entries in records will recursively be added to the
-%>   domains in case they are not present in the domains already. Default:
-%>   `false`.
-%>
 %> **Example:**
 %> ```
 %> c = Container();
@@ -124,7 +101,41 @@ classdef Parameter < GAMSTransfer.Symbol
 
     methods
 
-        %> Constructs a GAMS Parameter, see class help
+        %> Constructs a GAMS Parameter
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_SYMBOL_CREATE for more information.
+        %>
+        %> **Required Arguments:**
+        %> 1. container (`Container`):
+        %>    \ref GAMSTransfer::Container "Container" object this symbol should
+        %>    be stored in
+        %> 2. name (`string`):
+        %>    Name of parameter
+        %>
+        %> **Optional Arguments:**
+        %> 3. domain (`cellstr` or `Set`):
+        %>    List of domains given either as `string` or as reference to a \ref
+        %>    GAMSTransfer::Set "Set" object. Default is `{}` (for scalar).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Parameter records. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the
+        %>   domains in case they are not present in the domains already. Default:
+        %>   `false`.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> p1 = Parameter(c, 'p1');
+        %> p2 = Parameter(c, 'p2', {'*', '*'});
+        %> p3 = Parameter(c, 'p3', '*', 'description', 'par p3');
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::Container "Container", \ref GAMSTransfer::Set "Set"
         function obj = Parameter(container, name, varargin)
             % Constructs a GAMS Parameter, see class help
 
@@ -255,12 +266,13 @@ classdef Parameter < GAMSTransfer.Symbol
 
         %> Copies symbol to destination container
         %>
-        %> Symbol domains are downgraded to relaxed if the destination container
-        %> does not have equivalent domain sets.
+        %> Symbol domains are downgraded to `relaxed` if the destination
+        %> container does not have equivalent domain sets, see also \ref
+        %> GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN.
         %>
         %> **Required Arguments:**
         %> 1. destination (`Container`):
-        %>    Destination container
+        %>    Destination \ref GAMSTransfer::Container "Container"
         %>
         %> **Optional Arguments:**
         %> 2. overwrite (`bool`):

@@ -68,32 +68,6 @@
 %> @ingroup symbol
 %> @brief GAMS Variable
 %>
-%> This class represents a GAMS Variable.
-%>
-%> **Required Arguments:**
-%> 1. container (`Container`):
-%>    GAMSTransfer container object this symbol should be stored in
-%> 2. name (`string`):
-%>    Name of variable
-%>
-%> **Optional Arguments:**
-%> 3. type (`string` or `int`):
-%>    Specifies the variable type, either as string or as integer given by
-%>    any of the constants in VariableType. Default is `"free"`.
-%> 4. domain (`cellstr` or `Set`):
-%>    List of domains given either as string or as reference to a Set
-%>    object. Default is `{}` (for scalar).
-%>
-%> **Parameter Arguments:**
-%> - records:
-%>   Set records, e.g. a list of strings. Default is `[]`.
-%> - description (`string`):
-%>   Description of symbol. Default is `""`.
-%> - domain_forwarding (`logical`):
-%>   If `true`, domain entries in records will recursively be added to the
-%>   domains in case they are not present in the domains already. Default:
-%>   `false`.
-%>
 %> **Example:**
 %> ```
 %> c = Container();
@@ -148,7 +122,46 @@ classdef Variable < GAMSTransfer.Symbol
 
     methods
 
-        %> Constructs a GAMS Variable, see class help
+        %> Constructs a GAMS Variable
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_SYMBOL_CREATE for more information.
+        %>
+        %> **Required Arguments:**
+        %> 1. container (`Container`):
+        %>    \ref GAMSTransfer::Container "Container" object this symbol should
+        %>    be stored in
+        %> 2. name (`string`):
+        %>    Name of variable
+        %>
+        %> **Optional Arguments:**
+        %> 3. type (`string` or `int`):
+        %>    Specifies the variable type, either as `string` or as `integer`
+        %>    given by any of the constants in \ref GAMSTransfer::VariableType
+        %>    "VariableType". Default is `"free"`.
+        %> 4. domain (`cellstr` or `Set`):
+        %>    List of domains given either as string or as reference to a \ref
+        %>    GAMSTransfer::Set "Set" object. Default is `{}` (for scalar).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Set records, e.g. a list of strings. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the
+        %>   domains in case they are not present in the domains already. Default:
+        %>   `false`.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> v1 = Variable(c, 'v1');
+        %> v2 = Variable(c, 'v2', 'binary', {'*', '*'});
+        %> v3 = Variable(c, 'v3', VariableType.BINARY, '*', 'description', 'var v3');
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::Container "Container", \ref
+        %> GAMSTransfer::VariableType "VariableType", \ref GAMSTransfer::Set "Set"
         function obj = Variable(container, name, varargin)
             % Constructs a GAMS Variable, see class help
 
@@ -316,12 +329,13 @@ classdef Variable < GAMSTransfer.Symbol
 
         %> Copies symbol to destination container
         %>
-        %> Symbol domains are downgraded to relaxed if the destination container
-        %> does not have equivalent domain sets.
+        %> Symbol domains are downgraded to `relaxed` if the destination
+        %> container does not have equivalent domain sets, see also \ref
+        %> GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN.
         %>
         %> **Required Arguments:**
-        %> 1. destination (`Container`)
-        %>    Destination container
+        %> 1. destination (`Container`):
+        %>    Destination \ref GAMSTransfer::Container "Container"
         %>
         %> **Optional Arguments:**
         %> 2. overwrite (`bool`):

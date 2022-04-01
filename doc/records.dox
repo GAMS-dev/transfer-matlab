@@ -14,7 +14,8 @@ memory. The values a \ref symbol "symbol" stores per record depends on the \ref
 GAMSTransfer::SymbolType "symbol type". \ref GAMSTransfer.Set "Sets" have
 `text`, \ref GAMSTransfer.Parameter "Parameters" have `value` and \ref
 GAMSTransfer.Equation "Equations" and \ref GAMSTransfer.Variable "Variables"
-have `level`, `marginal`, `lower`, `upper` and `scale`. A \ref
+have `level`, `marginal`, `lower`, `upper` and `scale`. If some of these value
+fields are not provided, then default values are used. A \ref
 GAMSTRANSFER_MATLAB_RECORDS_FORMAT "record format" is chosen for each symbol and
 not for each of these values independently. Hence note, a \ref container
 "container" can store different symbols with different \ref
@@ -432,7 +433,7 @@ GAMSTransfer::Symbol::initUELs "Symbol.initUELs" instead.
 For example, continuing the \ref GAMSTRANSFER_MATLAB_GETSTARTED_EXAMPLE from
 above, the UELs are:
 ```
->> x.getUELs(1)'
+>> transpose(x.getUELs(1))
 
 ans =
 
@@ -440,7 +441,7 @@ ans =
 
     {'seattle'}    {'san-diego'}
 
->> x.getUELs(2)'
+>> transpose(x.getUELs(2))
 
 ans =
 
@@ -461,7 +462,7 @@ ans =
     {'new-york'}
     {'seattle' }
 
->> x.records.i_1'
+>> transpose(x.records.i_1)
 
 ans =
 

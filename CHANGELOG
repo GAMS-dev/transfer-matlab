@@ -1,5 +1,6 @@
 GAMS Transfer Matlab v0.2.0
 ==================
+- added documentation
 - added "equals" method to Container and Symbol classes to compare containers or
   symbols
 - added "copy" method to Symbol classes to copy symbols to another container

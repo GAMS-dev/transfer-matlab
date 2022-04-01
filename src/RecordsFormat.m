@@ -40,7 +40,8 @@
 %>
 %> This class holds the possible GAMSTransfer formats of records similar to
 %> an enumeration class. Note that it is not an enumeration class due to
-%> compatibility (e.g. for Octave).
+%> compatibility (e.g. for Octave). See \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT
+%> for more information.
 classdef RecordsFormat
     properties (Constant)
         %> identifier for unknown records format

@@ -50,15 +50,8 @@
 %> @ingroup symbol
 %> @brief GAMS Alias
 %>
-%> This class represents a GAMS Alias, which is a link to another GAMS Set.
-%>
-%> **Required Arguments:**
-%> 1. container [Container]:
-%>    GAMSTransfer container object this symbol should be stored in
-%> 2. name [string]:
-%>    name of alias
-%> 3. alias_with [Set or Alias]:
-%>    GAMS Set to be linked to
+%> This class represents a GAMS Alias, which is a link to another GAMS \ref
+%> GAMSTransfer::Set "Set".
 %>
 %> **Example:**
 %> ```
@@ -142,8 +135,10 @@ classdef Alias < handle
 
         %> Records format
         %>
-        %> If records are changed, this gets reset to `unknown`. Calling
-        %> `isValid()` will detect the format again.
+        %> If records are changed, this gets reset to \ref
+        %> GAMSTransfer::RecordsFormat::UNKNOWN "RecordsFormat.UNKNOWN". Calling
+        %> \ref GAMSTransfer::Alias::isValid "Alias.isValid" will detect the
+        %> format again.
 
         % Records format
         %
@@ -163,8 +158,30 @@ classdef Alias < handle
 
     methods
 
-        %> Constructs a GAMS Alias, see class help.
+        %> Constructs a GAMS Alias
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_SYMBOL_CREATE for more information.
+        %>
+        %> **Required Arguments:**
+        %> 1. container (`Container`):
+        %>    \ref GAMSTransfer::Container "Container" object this symbol should
+        %>    be stored in
+        %> 2. name (`string`):
+        %>    name of alias
+        %> 3. alias_with (`Set` or `Alias`):
+        %>    GAMS \ref GAMSTransfer::Set "Set" to be linked to
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> s = Set(c, 's');
+        %> a = Alias(c, 'a', s);
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Container
+        %> "Container"
         function obj = Alias(container, name, alias_with)
+            % Constructs a GAMS Alias, see class help
 
             obj.id = int32(randi(100000));
 
@@ -291,7 +308,7 @@ classdef Alias < handle
 
         %> Sets symbol records in supported format
         %>
-        %> @see GAMSTransfer::Symbol::setRecords
+        %> @see \ref GAMSTransfer::Symbol::setRecords "Symbol.setRecords"
         function setRecords(obj, varargin)
             % Sets symbol records in supported format
             %
@@ -318,7 +335,7 @@ classdef Alias < handle
         %> check equivalence of the linked containers.
         %>
         %> **Required Arguments:**
-        %> 1. symbol (any):
+        %> 1. symbol (`any`):
         %>    Other symbol
         function eq = equals(obj, symbol)
             % Checks equivalence with other symbol
