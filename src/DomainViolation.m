@@ -47,7 +47,8 @@
 % See also: GAMSTransfer.Set, GAMSTransfer.Symbol
 %
 
-%> Domain Violation
+%> @ingroup records
+%> @brief Domain Violation
 %>
 %> Domain violations occur when a symbol uses other \ref GAMSTransfer::Set
 %> "Set(s)" as domain(s) and a domain entry in its records that is not present

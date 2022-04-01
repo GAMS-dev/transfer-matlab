@@ -21,7 +21,7 @@ matrices. The benefits of this approach are threefold:
 
 ## Documentation
 
-See [GAMS Transfer Matlab Tutorial](https://www.gams.com/37/docs/API_MATLAB_GAMSTRANSFER_TUTORIAL.html).
+See [GAMS Transfer Matlab Documentation](http://devel.pages.gams.com/gams-transfer-matlab).
 
 ## Install
 

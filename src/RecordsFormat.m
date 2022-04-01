@@ -35,7 +35,8 @@
 % compatibility (e.g. for Octave).
 %
 
-%> GAMSTransfer Records Formats
+%> @ingroup records
+%> @brief GAMSTransfer Records Formats
 %>
 %> This class holds the possible GAMSTransfer formats of records similar to
 %> an enumeration class. Note that it is not an enumeration class due to

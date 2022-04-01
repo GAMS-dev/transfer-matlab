@@ -36,7 +36,8 @@
 % GAMSTransfer.Variable, GAMSTransfer.Equation
 %
 
-%> This class represents a GAMS Symbol (Set, Alias, Parameter, Variable or
+%> @ingroup symbol
+%> @brief This class represents a GAMS Symbol (Set, Alias, Parameter, Variable or
 %> Equation).
 %>
 %> Use subclasses to create a GAMS Symbol, see subclass help.

@@ -80,7 +80,8 @@
 % See also: GAMSTransfer.Container
 %
 
-%> GAMS Transfer ConstContainer stores (multiple) symbols (read-only)
+%> @ingroup container
+%> @brief GAMS Transfer ConstContainer stores (multiple) symbols (read-only)
 %>
 %> A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
 %> parameters), each holding multiple symbol records. In GAMS Transfer the
@@ -102,6 +103,58 @@
 %> - UELs in a ConstContainer symbol are stored as a field in the struct or
 %>   within the categorical array. Methods like getUELs as in the Symbol class
 %>   do not exist.
+%> \section GAMSTRANSFER_MATLAB_CONTAINERS Container Types
+%> GAMS Transfer offers two different container types: \ref
+%> GAMSTransfer::Container "Container" and \ref
+%> GAMSTransfer::ConstContainer "ConstContainer". The latter differs from
+%> the former in that it is read only. After creation, data cannot be altered
+%> anymore. This allows to use internal operations with better runtime performance.
+%> Being read only, however, implies that many features of a \ref
+%> GAMSTransfer::Container "Container" are not available in a \ref
+%> GAMSTransfer::ConstContainer "ConstContainer". Hence, choose \ref
+%> GAMSTransfer::ConstContainer "ConstContainer", when performance is key.
+%> Further differences are:
+%> - \ref GAMSTransfer::ConstContainer "ConstContainer" currently does not
+%>   support writing to GDX.
+%> - \ref GAMSTransfer::ConstContainer "ConstContainer" symbols are
+%>   structs, not objects.
+%> - \ref GAMSTransfer::ConstContainer "ConstContainer" symbols are linked
+%>   by domain names, not \ref GAMSTransfer::Set "Set" object references.
+%> - Number of records and size information in a \ref
+%>   GAMSTransfer::ConstContainer "ConstContainer" refers to that
+%>   information in the read GDX file and not on the records currently stored in
+%>   the container. This allows to read a GDX file without records and inspect
+%>   symbol sizes and sparsity etc.
+%> - \ref GAMSTransfer::ConstContainer "ConstContainer" symbols do not
+%>   offer methods to manage UELs, e.g. \ref GAMSTransfer::Symbol::getUELs
+%>   "getUELs", see also \ref GAMSTRANSFER_MATLAB_RECORDS_UELS.
+%> - Properties supported by \ref GAMSTransfer::ConstContainer
+%>   "ConstContainer" symbols only:
+%>   - `symbol_type`: Symbol type, e.g. `set` or `variable`.
+%>   - `number_records`: Number of records in read GDX file, not actually read
+%>     records, see also \ref GAMSTransfer::Symbol::getNumberRecords
+%>     "getNumberRecords".
+%>   - `number_values`: Number of values read, which differs to number of records
+%>     due to chosen format, see also \ref
+%>     GAMSTransfer::Symbol::getNumberValues "getNumberValues".
+%>   - `sparsity`: Sparsity of symbol based on number of records read and symbol
+%>     shape as in GDX file, see also \ref
+%>     GAMSTransfer::Symbol::getSparsity "getSparsity".
+%>   - `uels` (optional): UELs used in symbol if categorical arrays are not
+%>     supported.
+%> - Properties supported by \ref GAMSTransfer::Container
+%>   "Container" symbols only:
+%>   - \ref GAMSTransfer::Variable::default_values "default_values".
+%>   - \ref GAMSTransfer::Symbol::domain_forwarding "domain_forwarding".
+%> \par Advanced users:
+%> Creation of categorical arrays can be a bottleneck. Reading performance can be
+%> increased for a \ref GAMSTransfer::ConstContainer "ConstContainer" (not
+%> \ref GAMSTransfer::Container "Container") when disabling them:
+%> \code{.matlab}
+%> c = ConstContainer('path/to/file.gdx', 'features', struct('categorical', false));
+%> \endcode
+%> Domain entries are numerical IDs of UELs (see also \ref GAMSTRANSFER_MATLAB_RECORDS_UELS)
+%> and can be looked up in the `uels` field of a symbol.
 %>
 %> **Indexed Mode:**
 %>

@@ -31,7 +31,8 @@
 % GAMSTransfer BaseContainer stores (multiple) symbols (expert-only)
 %
 
-%> GAMSTransfer BaseContainer stores (multiple) symbols (expert-only)
+%> @ingroup container
+%> @brief GAMSTransfer BaseContainer stores (multiple) symbols (expert-only)
 %>
 classdef BaseContainer < handle
 

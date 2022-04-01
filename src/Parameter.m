@@ -62,7 +62,8 @@
 % See also: GAMSTransfer.Container, GAMSTransfer.Set
 %
 
-%> GAMS Parameter
+%> @ingroup symbol
+%> @brief GAMS Parameter
 %>
 %> This class represents a GAMS Parameter.
 %>

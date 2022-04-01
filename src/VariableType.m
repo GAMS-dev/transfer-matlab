@@ -37,7 +37,8 @@
 % See also: GAMSTransfer.Variable
 %
 
-%> GAMS Variable Types
+%> @ingroup symbol
+%> @brief GAMS Variable Types
 %>
 %> This class holds the possible GAMS variable types similar to an enumeration
 %> class. Note that it is not an enumeration class due to compatibility (e.g.

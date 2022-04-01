@@ -47,7 +47,8 @@
 %
 % See also: GAMSTransfer.Set, GAMSTransfer.Container
 
-%> GAMS Alias
+%> @ingroup symbol
+%> @brief GAMS Alias
 %>
 %> This class represents a GAMS Alias, which is a link to another GAMS Set.
 %>

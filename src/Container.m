@@ -67,7 +67,8 @@
 % GAMSTransfer.Variable, GAMSTransfer.Equation, GAMSTransfer.ConstContainer
 %
 
-%> GAMS Transfer Container stores (multiple) symbols
+%> @ingroup container
+%> @brief GAMS Transfer Container stores (multiple) symbols
 %>
 %> A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
 %> parameters), each holding multiple symbol records. In GAMS Transfer the

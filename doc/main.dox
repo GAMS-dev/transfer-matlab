@@ -17,6 +17,9 @@ matrices. The benefits of this approach are threefold:
 - Optimized methods for reading from and writing to GDX can transfer the data as
   a bulk –- resulting in the high performance of this package.
 
+\image html overview.jpg
+\image latex overview.jpg
+
 \subsection GAMSTRANSFER_MATLAB_VS Should I use GAMS Transfer Matlab or ...?
 
 \subsubsection GAMSTRANSFER_MATLAB_VS_API ...GAMS Matlab API?

@@ -64,7 +64,8 @@
 % See also: GAMSTransfer.Container, GAMSTransfer.EquationType, GAMSTransfer.Set
 %
 
-%> GAMS Equation
+%> @ingroup symbol
+%> @brief GAMS Equation
 %>
 %> This class represents a GAMS Equation.
 %>

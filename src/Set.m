@@ -64,7 +64,8 @@
 % See also: GAMSTransfer.Container
 %
 
-%> GAMS Set
+%> @ingroup symbol
+%> @brief GAMS Set
 %>
 %> This class represents a GAMS Set.
 %>

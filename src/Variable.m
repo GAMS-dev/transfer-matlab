@@ -65,7 +65,8 @@
 % See also: GAMSTransfer.Container, GAMSTransfer.VariableType, GAMSTransfer.Set
 %
 
-%> GAMS Variable
+%> @ingroup symbol
+%> @brief GAMS Variable
 %>
 %> This class represents a GAMS Variable.
 %>
