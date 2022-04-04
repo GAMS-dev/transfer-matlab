@@ -89,6 +89,7 @@ build_matlab_macos:
     tags:
         - macos
     script:
+        - export MACOSX_DEPLOYMENT_TARGET=10.14
         - matlab -nodisplay -nosplash -nodesktop -r "gams_transfer_setup('target_dir', 'matlab_macos')"
     only:
         - merge_requests
