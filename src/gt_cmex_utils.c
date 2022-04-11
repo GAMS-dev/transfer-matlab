@@ -141,16 +141,7 @@ bool gt_utils_iseps(
     double          x               /** value to be checked for EPS */
 )
 {
-    UINT64 u;
-    mxAssert(sizeof(x) == sizeof(u), "Invalid double size");
-    mxAssert(sizeof(u) == 8, "Invalid double size");
-    if (x != 0.0)
-        return false;
-    memcpy(&u, &x, sizeof(u));
-    u >>= 63;
-    if (u)
-        return true;
-    return false;
+    return x == 0.0 && signbit(x);
 }
 
 double gt_utils_sv_gams2matlab(
