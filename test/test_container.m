@@ -154,7 +154,7 @@ function test_getlist(t, cfg, container_type)
         t.add('get_list_variables');
         l = gdx.getSymbols(gdx.listVariables());
         t.assert(iscell(l));
-        t.assert(numel(l) == 10);
+        t.assert(numel(l) == 11);
         t.assert(isa(l{1}, 'GAMSTransfer.Variable'));
         t.assert(isa(l{2}, 'GAMSTransfer.Variable'));
         t.assert(isa(l{3}, 'GAMSTransfer.Variable'));
@@ -165,6 +165,7 @@ function test_getlist(t, cfg, container_type)
         t.assert(isa(l{8}, 'GAMSTransfer.Variable'));
         t.assert(isa(l{9}, 'GAMSTransfer.Variable'));
         t.assert(isa(l{10}, 'GAMSTransfer.Variable'));
+        t.assert(isa(l{11}, 'GAMSTransfer.Variable'));
         t.assertEquals(l{1}.name, 'x1');
         t.assertEquals(l{2}.name, 'x2');
         t.assertEquals(l{3}.name, 'x3');
@@ -175,6 +176,7 @@ function test_getlist(t, cfg, container_type)
         t.assertEquals(l{8}.name, 'x8');
         t.assertEquals(l{9}.name, 'x9');
         t.assertEquals(l{10}.name, 'x10');
+        t.assertEquals(l{11}.name, 'x11');
 
         t.add('get_list_equations');
         l = gdx.getSymbols(gdx.listEquations());
@@ -1213,7 +1215,7 @@ function test_describePartial(t, cfg, container_type)
     t.add('describe_partial_variables_1');
     tbl = gdx.describeVariables();
     if gdx.features.table
-        t.assert(height(tbl) == 10);
+        t.assert(height(tbl) == 11);
         if gdx.features.categorical
             t.assertEquals(tbl{1,'name'}, 'x1');
             t.assertEquals(tbl{2,'name'}, 'x2');
@@ -1225,6 +1227,7 @@ function test_describePartial(t, cfg, container_type)
             t.assertEquals(tbl{8,'name'}, 'x8');
             t.assertEquals(tbl{9,'name'}, 'x9');
             t.assertEquals(tbl{10,'name'}, 'x10');
+            t.assertEquals(tbl{11,'name'}, 'x11');
         else
             t.assertEquals(tbl{1,'name'}{1}, 'x1');
             t.assertEquals(tbl{2,'name'}{1}, 'x2');
@@ -1236,9 +1239,10 @@ function test_describePartial(t, cfg, container_type)
             t.assertEquals(tbl{8,'name'}{1}, 'x8');
             t.assertEquals(tbl{9,'name'}{1}, 'x9');
             t.assertEquals(tbl{10,'name'}{1}, 'x10');
+            t.assertEquals(tbl{11,'name'}{1}, 'x11');
         end
     else
-        t.assert(numel(tbl.name) == 10);
+        t.assert(numel(tbl.name) == 11);
         if gdx.features.categorical
             t.assertEquals(tbl.name(1), 'x1');
             t.assertEquals(tbl.name(2), 'x2');
@@ -1250,6 +1254,7 @@ function test_describePartial(t, cfg, container_type)
             t.assertEquals(tbl.name(8), 'x8');
             t.assertEquals(tbl.name(9), 'x9');
             t.assertEquals(tbl.name(10), 'x10');
+            t.assertEquals(tbl.name(11), 'x11');
         else
             t.assertEquals(tbl.name{1}, 'x1');
             t.assertEquals(tbl.name{2}, 'x2');
@@ -1261,6 +1266,7 @@ function test_describePartial(t, cfg, container_type)
             t.assertEquals(tbl.name{8}, 'x8');
             t.assertEquals(tbl.name{9}, 'x9');
             t.assertEquals(tbl.name{10}, 'x10');
+            t.assertEquals(tbl.name{11}, 'x11');
         end
     end
 

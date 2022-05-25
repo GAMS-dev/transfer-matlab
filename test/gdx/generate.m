@@ -92,6 +92,7 @@ function gams_transfer_testcreate(varargin)
     'SOS2 Variable x8(j,i);'
     'SemiInt Variable x9(j);'
     'SemiCont Variable x10(j);'
+    'Variable x11(*);'
     'x1.l(''1'') = 1;'
     'x2.l(''1'') = 1;'
     'x3.l(''1'') = 1;'
@@ -108,7 +109,7 @@ function gams_transfer_testcreate(varargin)
     'e1(''1'').. x1(''1'') =e= 1;'
     'e2(''1'').. x2(''1'') =g= 1;'
     'e3(''1'').. x3(''1'') =l= 1;'
-    'execute_unloaddi ''data3.gdx'', i, j, i2, j2, a, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, e1, e2, e3;'
+    'execute_unloaddi ''data3.gdx'', i, j, i2, j2, a, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, e1, e2, e3;'
     };
 
     gams_data{4} = {
