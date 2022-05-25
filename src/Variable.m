@@ -227,6 +227,16 @@ classdef Variable < GAMSTransfer.Symbol
                 error('Variable not allowed in indexed mode.');
             end
 
+            if ~GAMSTransfer.VariableType.isValid(vtype)
+                if ischar(vtype) || isstring(vtype)
+                    error('Invalid variable type: %s', vtype);
+                elseif isnumeric(vtype)
+                    error('Invalid variable type: %d', vtype);
+                else
+                    error('Invalid variable type');
+                end
+            end
+
             % create object
             obj = obj@GAMSTransfer.Symbol(container, name, description, domain, ...
                 records, domain_forwarding);
@@ -276,6 +286,9 @@ classdef Variable < GAMSTransfer.Symbol
 
         function set.type(obj, typ)
             if ischar(typ) || isstring(typ)
+                if ~GAMSTransfer.VariableType.isValid(typ)
+                    error("Invalid variable type: %s", typ);
+                end
                 obj.type_ = GAMSTransfer.VariableType.str2int(typ);
             elseif isnumeric(typ)
                 if ~GAMSTransfer.VariableType.isValid(typ)

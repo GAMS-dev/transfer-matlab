@@ -166,10 +166,13 @@ classdef Equation < GAMSTransfer.Symbol
 
             % check required arguments
             if ischar(etype) || isstring(etype)
+                if ~GAMSTransfer.EquationType.isValid(etype)
+                    error("Invalid equation type: %s", etype);
+                end
                 etype = GAMSTransfer.EquationType.str2int(etype);
             elseif isnumeric(etype)
                 if ~GAMSTransfer.EquationType.isValid(etype)
-                    error("Invalid variable type: %d", etype);
+                    error("Invalid equation type: %d", etype);
                 end
             else
                 error('Equation type must be of type ''char'' or ''numeric''.');
@@ -273,10 +276,13 @@ classdef Equation < GAMSTransfer.Symbol
 
         function set.type(obj, typ)
             if ischar(typ) || isstring(typ)
+                if ~GAMSTransfer.EquationType.isValid(typ)
+                    error("Invalid equation type: %s", typ);
+                end
                 obj.type_ = GAMSTransfer.EquationType.str2int(typ);
             elseif isnumeric(typ)
                 if ~GAMSTransfer.EquationType.isValid(typ)
-                    error("Invalid variable type: %d", typ);
+                    error("Invalid equation type: %d", typ);
                 end
                 obj.type_ = typ;
             else
