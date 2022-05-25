@@ -1439,7 +1439,7 @@ function test_defaultvalues(t, cfg)
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 0);
-    t.assert(s.default_values.upper == Inf);
+    t.assert(s.default_values.upper == 100);
     t.assert(s.default_values.scale == 1);
     s = GAMSTransfer.Variable(gdx, 'x3', 'positive');
     t.assert(s.default_values.level == 0);
@@ -1475,7 +1475,7 @@ function test_defaultvalues(t, cfg)
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 1);
-    t.assert(s.default_values.upper == Inf);
+    t.assert(s.default_values.upper == 100);
     t.assert(s.default_values.scale == 1);
     s = GAMSTransfer.Variable(gdx, 'x9', 'semicont');
     t.assert(s.default_values.level == 0);
@@ -1512,19 +1512,19 @@ function test_defaultvalues(t, cfg)
     s = GAMSTransfer.Equation(gdx, 'e5', 'x');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
-    t.assert(s.default_values.lower == -Inf);
-    t.assert(s.default_values.upper == Inf);
+    t.assert(s.default_values.lower == 0);
+    t.assert(s.default_values.upper == 0);
     t.assert(s.default_values.scale == 1);
     s = GAMSTransfer.Equation(gdx, 'e6', 'b');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
-    t.assert(s.default_values.lower == -Inf);
-    t.assert(s.default_values.upper == Inf);
+    t.assert(s.default_values.lower == 0);
+    t.assert(s.default_values.upper == 0);
     t.assert(s.default_values.scale == 1);
     s = GAMSTransfer.Equation(gdx, 'e7', 'c');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
-    t.assert(s.default_values.lower == -Inf);
+    t.assert(s.default_values.lower == 0);
     t.assert(s.default_values.upper == Inf);
     t.assert(s.default_values.scale == 1);
 
