@@ -1736,6 +1736,7 @@ function test_readSymbolTypes(t, cfg, container_type);
     t.assert(isfield(gdx.data, 'x8'));
     t.assert(isfield(gdx.data, 'x9'));
     t.assert(isfield(gdx.data, 'x10'));
+    t.assert(isfield(gdx.data, 'x11'));
     t.assertEquals(gdx.data.x1.type, 'free');
     t.assertEquals(gdx.data.x2.type, 'free');
     t.assertEquals(gdx.data.x3.type, 'binary');
@@ -1746,6 +1747,7 @@ function test_readSymbolTypes(t, cfg, container_type);
     t.assertEquals(gdx.data.x8.type, 'sos2');
     t.assertEquals(gdx.data.x9.type, 'semiint');
     t.assertEquals(gdx.data.x10.type, 'semicont');
+    t.assertEquals(gdx.data.x11.type, 'free');
 
     t.add('read_symbol_types_equtypes');
     t.assert(isfield(gdx.data, 'e1'));

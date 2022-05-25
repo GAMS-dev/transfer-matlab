@@ -228,6 +228,12 @@ void mexFunction(
                 mexErrMsgIdAndTxt(ERRID"format", "Invalid records format");
         }
 
+        /* modify subtype if unknown
+         * Note: GAMS CMEX may export variables with unknown subtype which is
+         * not allowed in GAMS Transfer. Therefore, recast as free. */
+        if (type == GMS_DT_VAR && subtype == GMS_VARTYPE_UNKNOWN)
+            subtype = GMS_VARTYPE_FREE;
+
         /* modify value fields based on type */
         switch (type)
         {
