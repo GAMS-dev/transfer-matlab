@@ -142,7 +142,14 @@ classdef SpecialValues
             % b = SpecialValues.isUndef([0, 1, SpecialValues.NA, SpecialValues.UNDEF])
             % b equals [0, 0, 0, 1]
 
-            bool = isnan(value) & ~GAMSTransfer.gt_cmex_isna(value);
+            if issparse(value)
+                [row, col, val] = find(value);
+                val = isnan(val) & ~GAMSTransfer.gt_cmex_isna(val);
+                [m, n] = size(value);
+                bool = sparse(row, col, val, m, n);
+            else
+                bool = isnan(value) & ~GAMSTransfer.gt_cmex_isna(value);
+            end
         end
 
         %> Checks if values are GAMS NA
@@ -163,7 +170,18 @@ classdef SpecialValues
             % b = SpecialValues.isNA([0, 1, SpecialValues.NA, SpecialValues.UNDEF])
             % b equals [0, 0, 1, 0]
 
-            bool = GAMSTransfer.gt_cmex_isna(value);
+            % na_uint64 = (intmax('uint64') - 1) * ones(size(value), 'uint64');
+            % value_uint64 = typecast(value, 'uint64');
+            % bool = na_uint64 == value_uint64;
+
+            if issparse(value)
+                [row, col, val] = find(value);
+                val = GAMSTransfer.gt_cmex_isna(val);
+                [m, n] = size(value);
+                bool = sparse(row, col, val, m, n);
+            else
+                bool = GAMSTransfer.gt_cmex_isna(value);
+            end
         end
 
         %> Checks if values are GAMS EPS
@@ -184,7 +202,18 @@ classdef SpecialValues
             % b = SpecialValues.isEps([0, 1, SpecialValues.EPS, SpecialValues.UNDEF])
             % b equals [0, 0, 1, 0]
 
-            bool = GAMSTransfer.gt_cmex_iseps(value);
+            % eps_uint64 = typecast(GAMSTransfer.SpecialValues.EPS, 'uint64') * ones(size(value), 'uint64');
+            % value_uint64 = typecast(value, 'uint64');
+            % bool = eps_uint64 == value_uint64;
+
+            if issparse(value)
+                [row, col, val] = find(value);
+                val = GAMSTransfer.gt_cmex_iseps(val);
+                [m, n] = size(value);
+                bool = sparse(row, col, val, m, n);
+            else
+                bool = GAMSTransfer.gt_cmex_iseps(value);
+            end
         end
 
         %> Checks if values are GAMS PINF

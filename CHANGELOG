@@ -2,6 +2,7 @@ GAMS Transfer Matlab *
 ==================
 - Fixed read of variable with unknown subtype (recast as free)
 - Fixed check of variable type on variable creation
+- Fixed `isEps`, `isNA` and `isUndef` of `SpecialValues` for sparse matrix input
 
 GAMS Transfer Matlab v0.2.0
 ==================
