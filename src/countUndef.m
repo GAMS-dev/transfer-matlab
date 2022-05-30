@@ -45,6 +45,6 @@ function n = countUndef(symbol, varargin)
 
     % get count
     for i = 1:numel(values)
-        n = n + sum(GAMSTransfer.SpecialValues.isUndef(full(symbol.records.(values{i})(:))));
+        n = n + sum(GAMSTransfer.SpecialValues.isUndef(symbol.records.(values{i})(:)));
     end
 end

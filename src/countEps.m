@@ -48,6 +48,6 @@ function n = countEps(symbol, varargin)
 
     % get count
     for i = 1:numel(values)
-        n = n + sum(GAMSTransfer.SpecialValues.isEps(full(symbol.records.(values{i})(:))));
+        n = n + sum(GAMSTransfer.SpecialValues.isEps(symbol.records.(values{i})(:)));
     end
 end

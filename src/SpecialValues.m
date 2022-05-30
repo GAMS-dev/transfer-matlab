@@ -142,7 +142,14 @@ classdef SpecialValues
             % b = SpecialValues.isUndef([0, 1, SpecialValues.NA, SpecialValues.UNDEF])
             % b equals [0, 0, 0, 1]
 
-            bool = isnan(value) & ~GAMSTransfer.gt_cmex_isna(value);
+            if issparse(value)
+                [row, col, val] = find(value);
+                val = isnan(val) & ~GAMSTransfer.gt_cmex_isna(val);
+                [m, n] = size(value);
+                bool = sparse(row, col, val, m, n);
+            else
+                bool = isnan(value) & ~GAMSTransfer.gt_cmex_isna(value);
+            end
         end
 
         %> Checks if values are GAMS NA
@@ -170,7 +177,8 @@ classdef SpecialValues
             if issparse(value)
                 [row, col, val] = find(value);
                 val = GAMSTransfer.gt_cmex_isna(val);
-                bool = sparse(row, col, val);
+                [m, n] = size(value);
+                bool = sparse(row, col, val, m, n);
             else
                 bool = GAMSTransfer.gt_cmex_isna(value);
             end
@@ -201,7 +209,8 @@ classdef SpecialValues
             if issparse(value)
                 [row, col, val] = find(value);
                 val = GAMSTransfer.gt_cmex_iseps(val);
-                bool = sparse(row, col, val);
+                [m, n] = size(value);
+                bool = sparse(row, col, val, m, n);
             else
                 bool = GAMSTransfer.gt_cmex_iseps(value);
             end
