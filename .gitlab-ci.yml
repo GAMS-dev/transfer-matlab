@@ -209,17 +209,17 @@ package:
         name: registry.gams.com/devel/gams-transfer-matlab/linux/builder
     script:
         - cd matlab_macos
-        - zip -r gams_transfer_matlab_macos.zip +GAMSTransfer
+        - sudo zip -r gams_transfer_matlab_macos.zip +GAMSTransfer
         - |
             curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_macos.zip ${PACKAGE_REGISTRY_URL}
         - cd ..
         - cd matlab_windows
-        - zip -r gams_transfer_matlab_windows.zip +GAMSTransfer
+        - sudo zip -r gams_transfer_matlab_windows.zip +GAMSTransfer
         - |
             curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_windows.zip ${PACKAGE_REGISTRY_URL}
         - cd ..
         - cd matlab_linux
-        - zip -r gams_transfer_matlab_linux.zip +GAMSTransfer
+        - sudo zip -r gams_transfer_matlab_linux.zip +GAMSTransfer
         - |
             curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_linux.zip ${PACKAGE_REGISTRY_URL}
     only:
