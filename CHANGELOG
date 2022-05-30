@@ -1,4 +1,4 @@
-GAMS Transfer Matlab *
+GAMS Transfer Matlab v0.2.1
 ==================
 - Fixed read of variable with unknown subtype (recast as free)
 - Fixed check of variable type on variable creation
