@@ -63,45 +63,12 @@ typedef union rec64 {
   double x;
 } rec64_t;
 
-typedef struct gt_type_default
-{
-    int type;
-    int subtype;
-    double level;
-    double marginal;
-    double lower;
-    double upper;
-    double scale;
-} gt_type_default_t;
-
 typedef struct gt_domain_sort
 {
     size_t dim;
     size_t idx;
     int* domain_uels;
 } gt_domain_sort_t;
-
-const gt_type_default_t GT_TYPE_DEFAULT[] =
-{
-    {GMS_DT_SET,   -1,                                    0, GMS_SV_NA, GMS_SV_NA,   GMS_SV_NA,   GMS_SV_NA},
-    {GMS_DT_PAR,   -1,                                    0, GMS_SV_NA, GMS_SV_NA,   GMS_SV_NA,   GMS_SV_NA},
-    {GMS_DT_VAR,   GMS_VARTYPE_BINARY,                    0, 0,         0,           1,           1},
-    {GMS_DT_VAR,   GMS_VARTYPE_INTEGER,                   0, 0,         0,           GMS_SV_PINF, 1},
-    {GMS_DT_VAR,   GMS_VARTYPE_POSITIVE,                  0, 0,         0,           GMS_SV_PINF, 1},
-    {GMS_DT_VAR,   GMS_VARTYPE_NEGATIVE,                  0, 0,         GMS_SV_MINF, 0,           1},
-    {GMS_DT_VAR,   GMS_VARTYPE_FREE,                      0, 0,         GMS_SV_MINF, GMS_SV_PINF, 1},
-    {GMS_DT_VAR,   GMS_VARTYPE_SOS1,                      0, 0,         0,           GMS_SV_PINF, 1},
-    {GMS_DT_VAR,   GMS_VARTYPE_SOS2,                      0, 0,         0,           GMS_SV_PINF, 1},
-    {GMS_DT_VAR,   GMS_VARTYPE_SEMICONT,                  0, 0,         1,           GMS_SV_PINF, 1},
-    {GMS_DT_VAR,   GMS_VARTYPE_SEMIINT,                   0, 0,         1,           GMS_SV_PINF, 1},
-    {GMS_DT_EQU,   GMS_EQUTYPE_E + GMS_EQU_USERINFO_BASE, 0, 0,         0,           0,           1},
-    {GMS_DT_EQU,   GMS_EQUTYPE_L + GMS_EQU_USERINFO_BASE, 0, 0,         GMS_SV_MINF, 0,           1},
-    {GMS_DT_EQU,   GMS_EQUTYPE_G + GMS_EQU_USERINFO_BASE, 0, 0,         0,           GMS_SV_PINF, 1},
-    {GMS_DT_EQU,   GMS_EQUTYPE_N + GMS_EQU_USERINFO_BASE, 0, 0,         GMS_SV_MINF, GMS_SV_PINF, 1},
-    {GMS_DT_EQU,   GMS_EQUTYPE_X + GMS_EQU_USERINFO_BASE, 0, 0,         GMS_SV_MINF, GMS_SV_PINF, 1},
-    {GMS_DT_EQU,   GMS_EQUTYPE_B + GMS_EQU_USERINFO_BASE, 0, 0,         GMS_SV_MINF, GMS_SV_PINF, 1},
-    {GMS_DT_EQU,   GMS_EQUTYPE_C + GMS_EQU_USERINFO_BASE, 0, 0,         GMS_SV_MINF, GMS_SV_PINF, 1},
-};
 
 /** comparison function for sorting gt_domain_sort_t */
 static int gt_utils_domain_sort_comp(
@@ -190,29 +157,34 @@ void gt_utils_type_default_values(
     double*         def_values      /** array of default values (size: GMS_VAL_MAX) */
 )
 {
-    int i = 0;
+    for (int i = 0; i < GMS_VAL_MAX; ++i)
+        def_values[i] = GMS_SV_NA;
 
-    def_values[GMS_VAL_LEVEL] = 0;
-    def_values[GMS_VAL_MARGINAL] = 0;
-    def_values[GMS_VAL_LOWER] = GMS_SV_MINF;
-    def_values[GMS_VAL_UPPER] = GMS_SV_PINF;
-    def_values[GMS_VAL_SCALE] = 1;
-    while (GT_TYPE_DEFAULT[i].type >= 0)
+    switch (type)
     {
-        if (GT_TYPE_DEFAULT[i].type == type && (GT_TYPE_DEFAULT[i].subtype <= 0 || GT_TYPE_DEFAULT[i].subtype == subtype))
+        case GMS_DT_SET:
+        case GMS_DT_PAR:
+            def_values[GMS_VAL_LEVEL] = 0;
+            break;
+        case GMS_DT_VAR:
+            if (subtype < 0 || subtype >= GMS_VARTYPE_MAX)
+                mexErrMsgIdAndTxt(ERRID"type_default_values", "Unknown variable subtype: %d", subtype);
+            for (int i = 0; i < GMS_VAL_MAX; ++i)
+                def_values[i] = gmsDefRecVar[subtype][i];
+            break;
+        case GMS_DT_EQU:
         {
-            def_values[GMS_VAL_LEVEL] = GT_TYPE_DEFAULT[i].level;
-            def_values[GMS_VAL_MARGINAL] = GT_TYPE_DEFAULT[i].marginal;
-            def_values[GMS_VAL_LOWER] = GT_TYPE_DEFAULT[i].lower;
-            def_values[GMS_VAL_UPPER] = GT_TYPE_DEFAULT[i].upper;
-            def_values[GMS_VAL_SCALE] = GT_TYPE_DEFAULT[i].scale;
+            int equ_subtype = subtype - GMS_EQUEOFFSET;
+            if (equ_subtype < 0 || equ_subtype >= GMS_EQUTYPE_MAX)
+                mexErrMsgIdAndTxt(ERRID"type_default_values", "Unknown equation subtype: %d", equ_subtype);
+            for (int i = 0; i < GMS_VAL_MAX; ++i)
+                def_values[i] = gmsDefRecEqu[equ_subtype][i];
             break;
         }
-        i++;
     }
 
     if (sv_matlab)
-        for (i = 0; i < GMS_VAL_MAX; i++)
+        for (int i = 0; i < GMS_VAL_MAX; ++i)
             def_values[i] = gt_utils_sv_gams2matlab(def_values[i], 0, NULL);
 }
 

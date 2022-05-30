@@ -75,14 +75,14 @@ const double gmsDefRecVar[GMS_VARTYPE_MAX][GMS_VAL_MAX] = {
  /* .l   .m           .lo         .ub  .scale */
   { 0.0, 0.0,         0.0,         0.0, 1.0},    /* unknown */
   { 0.0, 0.0,         0.0,         1.0, 1.0},    /* binary */
-  { 0.0, 0.0,         0.0,       100.0, 1.0},    /* integer */
+  { 0.0, 0.0,         0.0, GMS_SV_PINF, 1.0},    /* integer */
   { 0.0, 0.0,         0.0, GMS_SV_PINF, 1.0},    /* positive */
   { 0.0, 0.0, GMS_SV_MINF,         0.0, 1.0},    /* negative */
   { 0.0, 0.0, GMS_SV_MINF, GMS_SV_PINF, 1.0},    /* free */
   { 0.0, 0.0,         0.0, GMS_SV_PINF, 1.0},    /* sos1 */
   { 0.0, 0.0,         0.0, GMS_SV_PINF, 1.0},    /* sos2 */
   { 0.0, 0.0,         1.0, GMS_SV_PINF, 1.0},    /* semicont */
-  { 0.0, 0.0,         1.0,       100.0, 1.0}     /* semiint */
+  { 0.0, 0.0,         1.0, GMS_SV_PINF, 1.0}     /* semiint */
 };
 
 const double gmsDefRecEqu[GMS_EQUTYPE_MAX][GMS_VAL_MAX] = {
