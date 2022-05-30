@@ -1,13 +1,17 @@
+# Build from the MATLAB base image
+FROM mathworks/matlab:r2022a
 
-FROM fedora:latest
+RUN sudo apt-get update && \
+    sudo apt-get -y install git build-essential expect && \
+    sudo apt-get -y install octave liboctave-dev doxygen && \
+    sudo apt-get -y clean
 
-RUN yum -y update && \
-    yum -y install gcc-c++ git redhat-rpm-config octave octave-devel doxygen && \
-    yum clean all
+COPY runmatlab.sh ./
 
 # install gitlab release-cli
-RUN curl -L --output /usr/local/bin/release-cli \
+RUN sudo curl -L --output /usr/local/bin/release-cli \
     "https://release-cli-downloads.s3.amazonaws.com/latest/release-cli-linux-amd64" && \
     sudo chmod +x /usr/local/bin/release-cli
 
-VOLUME /home
+# entrypoint from matlab base image
+ENTRYPOINT ["/bin/run.sh", "-shell"]
