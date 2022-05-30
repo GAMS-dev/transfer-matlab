@@ -48,6 +48,8 @@ void mexFunction(
         mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of inputs (%d). 1 required.", nrhs);
     if (!mxIsDouble(prhs[0]))
         mexErrMsgIdAndTxt(ERRID"check_argument", "Argument has invalid type: need double");
+    if (mxIsSparse(prhs[0]))
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Argument must not be sparse");
 
     /* create output data */
     plhs[0] = mxCreateLogicalArray(mxGetNumberOfDimensions(prhs[0]), mxGetDimensions(prhs[0]));

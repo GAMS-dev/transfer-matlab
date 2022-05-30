@@ -45,6 +45,6 @@ function n = countNegInf(symbol, varargin)
 
     % get count
     for i = 1:numel(values)
-        n = n + sum(GAMSTransfer.SpecialValues.isNegInf(symbol.records.(values{i})(:)));
+        n = n + sum(GAMSTransfer.SpecialValues.isNegInf(full(symbol.records.(values{i})(:))));
     end
 end

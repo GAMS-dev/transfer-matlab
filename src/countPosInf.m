@@ -45,6 +45,6 @@ function n = countPosInf(symbol, varargin)
 
     % get count
     for i = 1:numel(values)
-        n = n + sum(GAMSTransfer.SpecialValues.isPosInf(symbol.records.(values{i})(:)));
+        n = n + sum(GAMSTransfer.SpecialValues.isPosInf(full(symbol.records.(values{i})(:))));
     end
 end
