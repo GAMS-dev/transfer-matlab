@@ -2,7 +2,7 @@
 FROM mathworks/matlab:r2022a
 
 RUN sudo apt-get update && \
-    sudo apt-get -y install git build-essential expect && \
+    sudo apt-get -y install git build-essential expect zip graphviz && \
     sudo apt-get -y install octave liboctave-dev doxygen && \
     sudo apt-get -y clean
 
