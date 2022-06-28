@@ -231,8 +231,12 @@ void mexFunction(
         /* modify subtype if unknown
          * Note: GAMS CMEX may export variables with unknown subtype which is
          * not allowed in GAMS Transfer. Therefore, recast as free. */
-        if (type == GMS_DT_VAR && subtype == GMS_VARTYPE_UNKNOWN)
+        if (type == GMS_DT_VAR && (subtype <= GMS_VARTYPE_UNKNOWN ||
+            subtype >= GMS_VARTYPE_MAX))
             subtype = GMS_VARTYPE_FREE;
+        if (type == GMS_DT_EQU && (subtype < GMS_EQUTYPE_E + GMS_EQU_USERINFO_BASE ||
+            subtype >= GMS_EQUTYPE_MAX + GMS_EQU_USERINFO_BASE))
+            subtype = GMS_EQUTYPE_E + GMS_EQU_USERINFO_BASE;
 
         /* modify value fields based on type */
         switch (type)
