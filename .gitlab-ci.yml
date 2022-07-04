@@ -28,8 +28,8 @@ image_linux:
         - sed -i "s/_matlab_username_/$MATLAB_USERNAME/g" images/linux/runmatlab.sh
         - sed -i "s/_matlab_password_/$MATLAB_PASSWORD/g" images/linux/runmatlab.sh
         - docker build -t linux/builder images/linux
-        - docker tag linux/builder registry.gams.com/devel/gams-transfer-matlab/linux/builder:latest
-        - docker push registry.gams.com/devel/gams-transfer-matlab/linux/builder:latest
+        - docker tag linux/builder $CI_REGISTRY_IMAGE/linux/builder:latest
+        - docker push $CI_REGISTRY_IMAGE/linux/builder:latest
     rules:
         - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
           changes:
@@ -42,7 +42,7 @@ build_documentation:
     tags:
         - linux
     image:
-        name: registry.gams.com/devel/gams-transfer-matlab/linux/builder
+        name: $CI_REGISTRY_IMAGE/linux/builder
     script:
         - ./gams_transfer_doc.sh
     only:
@@ -59,7 +59,7 @@ build_octave_linux:
     tags:
         - linux
     image:
-        name: registry.gams.com/devel/gams-transfer-matlab/linux/builder
+        name: $CI_REGISTRY_IMAGE/linux/builder
     script:
         - octave --no-gui --no-window-system --eval "gams_transfer_setup('target_dir', 'octave_linux')"
     only:
@@ -91,7 +91,7 @@ build_matlab_linux:
     tags:
         - linux
     image:
-        name: registry.gams.com/devel/gams-transfer-matlab/linux/builder
+        name: $CI_REGISTRY_IMAGE/linux/builder
     script:
         - ~/Documents/MATLAB/runmatlab.sh "gams_transfer_setup('target_dir', 'matlab_linux')"
     only:
@@ -109,7 +109,6 @@ build_matlab_macos:
     tags:
         - macos
     script:
-        - export MACOSX_DEPLOYMENT_TARGET=10.14
         - matlab -nodisplay -nosplash -nodesktop -r "gams_transfer_setup('target_dir', 'matlab_macos')"
     only:
         - merge_requests
@@ -126,7 +125,7 @@ build_matlab_windows:
     tags:
         - windows-shell
     script:
-        - C:\"Program Files"\MATLAB\bin\matlab.exe -batch "gams_transfer_setup('target_dir', 'matlab_windows')"
+        - C:\"Program Files"\MATLAB\R2022a\bin\matlab.exe -batch "gams_transfer_setup('target_dir', 'matlab_windows')"
     only:
         - merge_requests
         - master
@@ -142,10 +141,10 @@ test_octave_linux:
     tags:
         - linux
     image:
-        name: registry.gams.com/devel/gams-transfer-matlab/linux/builder
+        name: $CI_REGISTRY_IMAGE/linux/builder
     needs: [build_octave_linux]
     script:
-        - octave --no-gui --no-window-system --path $PWD/octave_linux --eval "gams_transfer_test('gams_dir', '/opt/gams29.1.0', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
+        - octave --no-gui --no-window-system --path $PWD/octave_linux --eval "gams_transfer_test('gams_dir', '$GAMS_PATH_LINUX', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
     only:
         - merge_requests
         - master
@@ -156,7 +155,7 @@ test_octave_macos:
         - macos
     needs: [build_octave_macos]
     script:
-        - octave --no-gui --no-window-system --path $PWD/octave_macos --eval "gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
+        - octave --no-gui --no-window-system --path $PWD/octave_macos --eval "gams_transfer_test('gams_dir', '$GAMS_PATH_MACOS', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
     only:
         - merge_requests
         - master
@@ -166,10 +165,10 @@ test_matlab_linux:
     tags:
         - linux
     image:
-        name: registry.gams.com/devel/gams-transfer-matlab/linux/builder
+        name: $CI_REGISTRY_IMAGE/linux/builder
     needs: [build_matlab_linux]
     script:
-        - ~/Documents/MATLAB/runmatlab.sh "addpath('matlab_linux'); gams_transfer_test('gams_dir', '/opt/gams29.1.0', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - ~/Documents/MATLAB/runmatlab.sh "addpath('matlab_linux'); gams_transfer_test('gams_dir', '$GAMS_PATH_LINUX', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -180,7 +179,7 @@ test_matlab_macos:
         - macos
     needs: [build_matlab_macos]
     script:
-        - matlab -nodisplay -nosplash -nodesktop -r "addpath('matlab_macos'); gams_transfer_test('gams_dir', '/opt/gams', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab -nodisplay -nosplash -nodesktop -r "addpath('matlab_macos'); gams_transfer_test('gams_dir', '$GAMS_PATH_MACOS', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -193,10 +192,10 @@ test_matlab_windows:
     script:
         - mkdir gdx
         - cd gdx
-        - curl -o gdx.zip https://cloud.gams.com/s/wQKgjWkExkbPqNs/download/gamstransfer_gdx_windows.zip
+        - curl -o gdx.zip $URL_MINIGAMS_WINDOWS
         - tar -xf gdx.zip
         - cd ..
-        - C:\"Program Files"\MATLAB\bin\matlab.exe -batch "addpath('matlab_windows'); gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - C:\"Program Files"\MATLAB\R2022a\bin\matlab.exe -batch "addpath('matlab_windows'); gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -206,7 +205,7 @@ package:
     tags:
         - linux
     image:
-        name: registry.gams.com/devel/gams-transfer-matlab/linux/builder
+        name: $CI_REGISTRY_IMAGE/linux/builder
     script:
         - cd matlab_macos
         - sudo zip -r gams_transfer_matlab_macos.zip +GAMSTransfer
@@ -230,7 +229,7 @@ release:
     tags:
         - linux
     image:
-        name: registry.gams.com/devel/gams-transfer-matlab/linux/builder
+        name: $CI_REGISTRY_IMAGE/linux/builder
     script:
         - DESCR=$(grep -Pzo "(?s)GAMS Transfer Matlab $CI_COMMIT_TAG.*?((?=\nGAMS Transfer Matlab v)|$)" CHANGELOG | tr -d '\0')
         - |
