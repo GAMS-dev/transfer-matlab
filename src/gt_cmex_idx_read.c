@@ -129,7 +129,7 @@ void mexFunction(
             if (!mxIsChar(mx_arr_symbol_name))
                 mexErrMsgIdAndTxt(ERRID"symbol", "Symbol name must be of type 'char'.");
             mxGetString(mx_arr_symbol_name, name, GMS_SSSIZE);
-            if (!idxGetSymbolInfoByName(gdx, name, &ival, &ival3, sizes_int, &ival2, text, GMS_SSSIZE))
+            if (!idxGetSymbolInfoByName(gdx, name, &ival3, &ival, sizes_int, &ival2, text, GMS_SSSIZE))
             {
                 mexWarnMsgIdAndTxt(ERRID"symbol", "Symbol %s not found in GDX file. ", name);
                 continue;

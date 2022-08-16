@@ -358,7 +358,7 @@ function test_idx_changeSymbol(t, cfg)
         p1.size = -1;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Size must not be non-negative.');
+        t.assertEquals(e.message, 'Size must be non-negative.');
     end
 
     t.add('idx_change_symbol_format');
