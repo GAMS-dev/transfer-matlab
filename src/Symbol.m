@@ -1544,8 +1544,8 @@ classdef Symbol < handle
         %>
         %> - `u = getUELs(d)` returns the UELs used in dimension `d` of this
         %>   symbol
-        %> - `u = getUELLabels(d, i)` returns the UELs `u` for the given UEL
-        %>   IDs `i` for the UELs stored for dimension `d`.
+        %> - `u = getUELs(d, i)` returns the UELs `u` for the given UEL IDs `i`
+        %>   for the UELs stored for dimension `d`.
         %> - `u = getUELs(d, _, "ignore_unused", true)` returns only those UELs
         %>   that are actually used in the records
         %>
@@ -1561,8 +1561,8 @@ classdef Symbol < handle
             % Returns the UELs used in this symbol
             %
             % u = getUELs(d) returns the UELs used in dimension d of this symbol
-            % u = getUELLabels(d, i) returns the UELs u for the given UEL
-            % IDs i for the UELs stored for dimension d.
+            % u = getUELs(d, i) returns the UELs u for the given UEL IDs i for
+            % the UELs stored for dimension d.
             % u = getUELs(d, _, 'ignore_unused', true) returns only those UELs that
             % are actually used in the records
             %
@@ -1660,7 +1660,9 @@ classdef Symbol < handle
         end
 
         %> Returns the UELs labels for the given UEL IDs
-        %> @deprecated Will be removed in version 1.x.x
+        %>
+        %> @deprecated Will be removed in version 1.x.x. Use \ref
+        %> GAMSTransfer::Symbol::getUELs "Symbol.getUELs".
         %>
         %> - `u = getUELLabels(d, i)` returns the UELs labels `u` for the given
         %>   UEL IDs `i` for the UELs stored for dimension `d`.
