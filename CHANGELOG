@@ -1,7 +1,16 @@
 GAMS Transfer Matlab v0.3.0
 ==================
-- Added possibility to filter UEL IDs in `getUELs`.
-- Deprecated `getUELLabels`. Use `getUELs` instead.
+- Breaking: Symbol name uniqueness is now checked case insensitively. For
+  example, it is not possible anymore to have two different symbols named
+  `symbol` and `Symbol` or `SYMBOL` anymore.
+- Added method `Container.getSymbolNames` to return the original symbol names
+  for a list of symbol names of any case.
+- Added method `Container.hasSymbols` to check if symbol name (case insensitive)
+  exists.
+- Added possibility to filter UEL IDs in `Symbol.getUELs`.
+- Deprecated `Symbol.getUELLabels`. Use `Symbol.getUELs` instead.
+- Changed `Container.removeSymbol` and `Container.renameSymbol` to accept symbol
+  names case insensitively.
 - Fixed read of equation with unknown subtype (recast as `=e=`).
 
 GAMS Transfer Matlab v0.2.1
