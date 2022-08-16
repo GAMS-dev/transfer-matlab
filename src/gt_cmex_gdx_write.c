@@ -392,7 +392,7 @@ void mexFunction(
                             gdx_values[k] = gt_utils_sv_matlab2gams(mx_values[k][idx]);
                         else
                             gdx_values[k] = def_values[k];
-                        empty_rec = (gdx_values[k] != 0) ? false : empty_rec;
+                        empty_rec = (gdx_values[k] != def_values[k]) ? false : empty_rec;
                     }
                     if (empty_rec)
                         continue;
