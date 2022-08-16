@@ -250,7 +250,7 @@ classdef Utils
                         continue
                     end
                     if isa(symbol, 'GAMSTransfer.Symbol')
-                        d = symbol.getUELLabels(i, domain{i});
+                        d = symbol.getUELs(i, domain{i});
                         domain{i} = d{1};
                     elseif isfield(symbol, 'uels')
                         domain{i} = symbol.uels{i}{domain{i}};
