@@ -895,7 +895,6 @@ classdef Symbol < handle
             eq = eq && isequaln(obj.size_, symbol.size_);
             eq = eq && isequaln(obj.format_, symbol.format_);
             eq = eq && isequaln(obj.number_records_, symbol.number_records_);
-            eq = eq && isequaln(obj.uels, symbol.uels);
             if ~eq
                 return
             end
@@ -909,6 +908,10 @@ classdef Symbol < handle
                     eq = eq && isequal(obj.domain_{i}, symbol.domain_{i});
                 else
                     eq = false;
+                end
+
+                if ~obj.container.indexed && ~obj.container.features.categorical
+                    eq = eq && obj.uels.(obj.domain_labels_{i}).equals(symbol.uels.(symbol.domain_labels_{i}));
                 end
             end
         end
