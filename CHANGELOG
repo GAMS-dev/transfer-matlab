@@ -1,24 +1,26 @@
-GAMS Transfer Matlab
+GAMS Transfer Matlab v0.3.0
 ==================
-- Fixed read of equation with unknown subtype (recast as `=e=`)
-- Fixed partial read of symbols in indexed container
-- Fixed `equals` method in indexed container
+- Added possibility to filter UEL IDs in `getUELs`.
+- Deprecated `getUELLabels`. Use `getUELs` instead.
+- Fixed read of equation with unknown subtype (recast as `=e=`).
+- Fixed partial read of symbols in indexed container.
+- Fixed `equals` method in indexed container.
 
 GAMS Transfer Matlab v0.2.1
 ==================
-- Fixed read of variable with unknown subtype (recast as free)
-- Fixed check of variable type on variable creation
-- Fixed `isEps`, `isNA` and `isUndef` of `SpecialValues` for sparse matrix input
+- Fixed read of variable with unknown subtype (recast as free).
+- Fixed check of variable type on variable creation.
+- Fixed `isEps`, `isNA` and `isUndef` of `SpecialValues` for sparse matrix input.
 - Fixed default values of external, conic and boolean equations.
 
 GAMS Transfer Matlab v0.2.0
 ==================
-- added documentation
-- added "equals" method to Container and Symbol classes to compare containers or
-  symbols
-- added "copy" method to Symbol classes to copy symbols to another container
-- added support to read symbols directly from non-const container
+- Added documentation.
+- Added "equals" method to Container and Symbol classes to compare containers or.
+  symbols.
+- Added "copy" method to Symbol classes to copy symbols to another container.
+- Added support to read symbols directly from non-const container.
 
 GAMS Transfer Matlab v0.1.0
 ==================
-- first release
+- First release

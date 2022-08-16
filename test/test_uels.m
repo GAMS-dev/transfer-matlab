@@ -327,7 +327,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{5}, 'j9');
 
     t.add('symbol_uels_getlabels');
-    uels = x.getUELLabels(1, [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5]);
+    uels = x.getUELs(1, [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5]);
     t.assert(numel(uels) == 12);
     t.assertEquals(uels{1}, '<undefined>');
     t.assertEquals(uels{2}, 'i1');
