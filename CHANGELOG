@@ -1,5 +1,7 @@
 GAMS Transfer Matlab v0.3.0
 ==================
+- Breaking: Default records don't get written to GDX anymore if either the
+  container is in indexed mode or if the symbol has a regular domain.
 - Added possibility to filter UEL IDs in `getUELs`.
 - Deprecated `getUELLabels`. Use `getUELs` instead.
 - Fixed read of equation with unknown subtype (recast as `=e=`).
