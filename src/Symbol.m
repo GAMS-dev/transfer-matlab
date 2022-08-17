@@ -1544,7 +1544,9 @@ classdef Symbol < handle
         %>
         %> - `u = getUELs(d)` returns the UELs used in dimension `d` of this
         %>   symbol
-        %> - `u = getUELs(d, "ignore_unused", true)` returns only those UELs
+        %> - `u = getUELs(d, i)` returns the UELs `u` for the given UEL IDs `i`
+        %>   for the UELs stored for dimension `d`.
+        %> - `u = getUELs(d, _, "ignore_unused", true)` returns only those UELs
         %>   that are actually used in the records
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
@@ -1559,7 +1561,9 @@ classdef Symbol < handle
             % Returns the UELs used in this symbol
             %
             % u = getUELs(d) returns the UELs used in dimension d of this symbol
-            % u = getUELs(d, 'ignore_unused', true) returns only those UELs that
+            % u = getUELs(d, i) returns the UELs u for the given UEL IDs i for
+            % the UELs stored for dimension d.
+            % u = getUELs(d, _, 'ignore_unused', true) returns only those UELs that
             % are actually used in the records
             %
             % Note: This can only be used if the symbol is valid. UELs are not
@@ -1567,16 +1571,49 @@ classdef Symbol < handle
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
+            is_parname = @(x) strcmpi(x, 'ignore_unused');
+
+            % check required arguments
             if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
                 error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
             end
-            if nargin == 4 && strcmpi(varargin{1}, 'ignore_unused')
-                ignore_unused = varargin{2};
-                if ~islogical(ignore_unused)
-                    error('Argument ''ignore_unused'' must be logical.');
+
+            % check optional arguments
+            i = 1;
+            ids = [];
+            while true
+                term = true;
+                if i == 1 && nargin > 2
+                    if isnumeric(varargin{i})
+                        ids = varargin{i};
+                        i = i + 1;
+                        term = false;
+                    elseif ~is_parname(varargin{i})
+                        error('Argument ''ids'' must be ''numeric''.');
+                    end
                 end
-            else
-                ignore_unused = false;
+                if term || i > 1
+                    break;
+                end
+            end
+
+            % check parameter arguments
+            ignore_unused = false;
+            while i < nargin - 2
+                if strcmpi(varargin{i}, 'ignore_unused')
+                    ignore_unused = varargin{i+1};
+                    if ~islogical(ignore_unused)
+                        error('Argument ''ignore_unused'' must be logical.');
+                    end
+                else
+                    error('Unknown argument name.');
+                end
+                i = i + 2;
+            end
+
+            % check number of arguments
+            if i <= nargin - 2
+                error('Invalid number of arguments');
             end
 
             if ~obj.isValid()
@@ -1592,7 +1629,7 @@ classdef Symbol < handle
                 return
             case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
-                uels = obj.domain_{dim}.getUELs(1, 'ignore_unused', true);
+                uels = obj.domain_{dim}.getUELs(1, ids, 'ignore_unused', true);
                 return
             otherwise
                 error('Symbol must be valid in order to manage UELs.');
@@ -1611,9 +1648,21 @@ classdef Symbol < handle
                     uels = uels(unique(obj.records.(label)));
                 end
             end
+
+            % filter for given ids
+            if ~isempty(ids)
+                uels_orig = uels;
+                idx = ids >= 1 & ids <= numel(uels_orig);
+                uels = cell(1, numel(ids));
+                uels(idx) = uels_orig(ids(idx));
+                uels(~idx) = {'<undefined>'};
+            end
         end
 
         %> Returns the UELs labels for the given UEL IDs
+        %>
+        %> @deprecated Will be removed in version 1.x.x. Use \ref
+        %> GAMSTransfer::Symbol::getUELs "Symbol.getUELs".
         %>
         %> - `u = getUELLabels(d, i)` returns the UELs labels `u` for the given
         %>   UEL IDs `i` for the UELs stored for dimension `d`.
@@ -1627,7 +1676,7 @@ classdef Symbol < handle
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
         function uels = getUELLabels(obj, dim, ids)
-            % Returns the UELs labels for the given UEL IDs
+            % Returns the UELs labels for the given UEL IDs (deprecated)
             %
             % u = getUELLabels(d, i) returns the UELs labels u for the given UEL
             % IDs i for the UELs stored for dimension d.
@@ -1637,18 +1686,8 @@ classdef Symbol < handle
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
-            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
-                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
-            end
-            if ~isnumeric(ids)
-                error('Argument ''ids'' must be numeric');
-            end
-
-            uel_label = obj.getUELs(dim);
-            idx = ids >= 1 & ids <= numel(uel_label);
-            uels = cell(1, numel(ids));
-            uels(idx) = uel_label(ids(idx));
-            uels(~idx) = {'<undefined>'};
+            warning('Method ''getUELLabels'' is deprecated. Please use getUELs instead');
+            uels = obj.getUELs(dim, ids);
         end
 
         %> Sets the UELs without modifying UEL IDs in records

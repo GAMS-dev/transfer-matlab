@@ -108,11 +108,11 @@ ans =
   GAMSTransfer::Symbol::size "size". If \ref GAMSTransfer::Symbol::size "size"
   is undefined (see \ref GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN), a matrix-like
   format is not possible. Domain entries cannot be stored in the matrix, but can
-  be queried using the symbol method \ref GAMSTransfer::Symbol::getUELLabels
-  "getUELLabels" (see also \ref GAMSTRANSFER_MATLAB_RECORDS_UELS). Assume a
-  symbol `s` has two dimensions. Then, a `(row,col)` matrix entry corresponds to
-  the domain entry `{s.getUELLabels(1, row), s.getUELLabels(2, col)}`. The logic
-  is analogue for different dimensions.
+  be queried using the symbol method \ref GAMSTransfer::Symbol::getUELs
+  "getUELs" (see also \ref GAMSTRANSFER_MATLAB_RECORDS_UELS). Assume a symbol
+  `s` has two dimensions. Then, a `(row,col)` matrix entry corresponds to the
+  domain entry `s.getUELs(1, [row, col])`. The logic is analogue for different
+  dimensions.
 
   For example, `x` in \ref GAMSTRANSFER_MATLAB_GETSTARTED_EXAMPLE as `dense_matrix`:
 ```
@@ -149,8 +149,8 @@ ans =
   In order to get the domain entries for matrix elements, note that in the above
   examples the following holds:
 ```
-x.getUELLabels(1, 1:2) equals {'seattle', 'san-diego'}
-x.getUELLabels(2, 1:3) equals {'new-york', 'chicago', 'topeka'}
+x.getUELs(1, 1:2) equals {'seattle', 'san-diego'}
+x.getUELs(2, 1:3) equals {'new-york', 'chicago', 'topeka'}
 ```
   \attention Matrix based formats do not store the domain UELs in its own symbol
   object. Instead, they are given by the elements of the domain set. This
@@ -401,13 +401,13 @@ ans =
    1   2   3   1   2   3
 ```
 
-@attention In the very unlikely case that your Matlab (or Octave) version does NOT
-support `categorical` (Matlab earlier than R2013b or any Octave version), please
-go on and read carefully about UELs. You must store the UEL IDs in the domain
-columns of the \ref GAMSTransfer::Symbol::records "Symbol.records". Storing
-strings is not supported. For looking up the corresponding string, use the
-method \ref GAMSTransfer::Symbol::getUELLabels "Symbol.getUELLabels". Otherwise,
-if you can use `categorical` -- very likely --, you won't need the \ref
+@attention In the very unlikely case that your Matlab (or Octave) version does
+NOT support `categorical` (Matlab earlier than R2013b or any Octave version),
+please go on and read carefully about UELs. You must store the UEL IDs in the
+domain columns of the \ref GAMSTransfer::Symbol::records "Symbol.records".
+Storing strings is not supported. For looking up the corresponding string, use
+the method \ref GAMSTransfer::Symbol::getUELs "Symbol.getUELs". Otherwise, if
+you can use `categorical` -- very likely --, you won't need the \ref
 GAMSTransfer::Symbol "Symbol" methods regarding adding or modifying UELs,
 explained below.
 
