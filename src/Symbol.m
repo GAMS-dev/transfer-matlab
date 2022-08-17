@@ -329,7 +329,7 @@ classdef Symbol < handle
                     error('Size must not be inf or nan.');
                 end
                 if sizes(i) < 0
-                    error('Size must not be non-negative.');
+                    error('Size must be non-negative.');
                 end
                 if sizes(i) ~= round(sizes(i))
                     error('Size must be integer.');
@@ -910,7 +910,7 @@ classdef Symbol < handle
                     eq = false;
                 end
 
-                if obj.container.indexed
+                if ~obj.container.indexed && ~obj.container.features.categorical
                     eq = eq && obj.uels.(obj.domain_labels_{i}).equals(symbol.uels.(symbol.domain_labels_{i}));
                 end
             end
