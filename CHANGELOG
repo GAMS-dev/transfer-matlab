@@ -5,6 +5,8 @@ GAMS Transfer Matlab v0.3.0
 - Fixed read of equation with unknown subtype (recast as `=e=`).
 - Fixed partial read of symbols in indexed container.
 - Fixed `equals` method in indexed container.
+- Fixed possible segfault when reading a subset of symbols as dense matrix with
+  at least one scalar symbol.
 
 GAMS Transfer Matlab v0.2.1
 ==================

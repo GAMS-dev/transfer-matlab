@@ -159,6 +159,7 @@ void mexFunction(
     for (int i = 0; i < n_symbols; i++)
     {
         /* reset data */
+        mx_arr_uels = NULL;
         for (size_t j = 0; j < GMS_VAL_MAX; j++)
         {
             col_nnz[j] = NULL;
