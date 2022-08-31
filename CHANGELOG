@@ -1,4 +1,4 @@
-GAMS Transfer Matlab
+GAMS Transfer Matlab v0.2.2
 ==================
 - Fixed read of equation with unknown subtype (recast as `=e=`).
 - Fixed partial read of symbols in indexed container.
