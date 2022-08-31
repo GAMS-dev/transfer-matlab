@@ -47,7 +47,7 @@ void mexFunction(
 )
 {
     int sym_id, format, orig_format, type, subtype, lastdim, ival, sym_count;
-    int n_acronyms, uel_count, n_symbols, dom_type;
+    int n_acronyms, uel_count, dom_type;
     size_t dim, nrecs, nvals, n_dom_fields;
     bool support_categorical, support_setget, read_records;
     bool orig_values_flag[GMS_VAL_MAX], values_flag[GMS_VAL_MAX];
@@ -64,7 +64,7 @@ void mexFunction(
     int** dom_uel_dim_maps = NULL;
     int* dom_uels_used[GLOBAL_MAX_INDEX_DIM] = {NULL};
     int* acronyms = NULL;
-    int* sym_ids = NULL;
+    bool* sym_enabled = NULL;
     mwIndex idx;
     mwIndex mx_flat_idx[GMS_VAL_MAX];
     mwIndex mx_idx[GLOBAL_MAX_INDEX_DIM];
@@ -113,30 +113,31 @@ void mexFunction(
         mexErrMsgIdAndTxt(ERRID"gdxSystemInfo", "GDX error (gdxSystemInfo)");
 
     dom_uel_dim_maps = (int**) mxCalloc(sym_count+1, sizeof(int*));
-    sym_ids = (int*) mxCalloc(sym_count+1, sizeof(int));
+    sym_enabled = (bool*) mxCalloc(sym_count+1, sizeof(bool));
 
     /* get symbol ids */
     if (mxGetNumberOfElements(prhs[2]) == 0)
     {
-        n_symbols = sym_count;
-        for (int i = 0; i < sym_count; i++)
-            sym_ids[i] = i+1;
+        sym_enabled[0] = false;
+        for (int i = 1; i < sym_count+1; i++)
+            sym_enabled[i] = true;
     }
     else
     {
-        n_symbols = 0;
+        for (int i = 0; i < sym_count+1; i++)
+            sym_enabled[i] = false;
         for (size_t i = 0; i < mxGetNumberOfElements(prhs[2]); i++)
         {
             mx_arr_symbol_name = mxGetCell(prhs[2], i);
             if (!mxIsChar(mx_arr_symbol_name))
                 mexErrMsgIdAndTxt(ERRID"symbol", "Symbol name must be of type 'char'.");
             mxGetString(mx_arr_symbol_name, buf, GMS_SSSIZE);
-            if (!gdxFindSymbol(gdx, buf, &sym_ids[n_symbols]))
+            if (!gdxFindSymbol(gdx, buf, &sym_id))
             {
                 mexWarnMsgIdAndTxt(ERRID"symbol", "Symbol %s not found in GDX file. ", buf);
                 continue;
             }
-            n_symbols++;
+            sym_enabled[sym_id] = true;
         }
     }
 
@@ -156,8 +157,12 @@ void mexFunction(
         }
     }
 
-    for (int i = 0; i < n_symbols; i++)
+    for (int i = 0; i < sym_count+1; i++)
     {
+        if (!sym_enabled[i])
+            continue;
+        sym_id = i;
+
         /* reset data */
         mx_arr_uels = NULL;
         for (size_t j = 0; j < GMS_VAL_MAX; j++)
@@ -177,7 +182,6 @@ void mexFunction(
         format = orig_format;
 
         /* read symbol gdx data */
-        sym_id = sym_ids[i];
         if (!gdxSymbolInfo(gdx, sym_id, name, &ival, &type))
             mexErrMsgIdAndTxt(ERRID"gdxSymbolInfo", "GDX error (gdxSymbolInfo)");
         mxAssert(ival >= 0 && ival <= GLOBAL_MAX_INDEX_DIM, "Invalid dimension of symbol.");
@@ -610,7 +614,7 @@ void mexFunction(
         if (dom_uel_dim_maps[i])
             mxFree(dom_uel_dim_maps[i]);
     mxFree(dom_uel_dim_maps);
-    mxFree(sym_ids);
+    mxFree(sym_enabled);
     if (n_acronyms > 0)
         mxFree(acronyms);
 }

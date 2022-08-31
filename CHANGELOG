@@ -3,6 +3,10 @@ GAMS Transfer Matlab v0.3.0
 - Changed behaviour of default records: Default records don't get written to GDX
   anymore if either the container is in indexed mode or if the symbol has a
   regular domain.
+- Changed symbol read order when reading a subset of symbols: Symbol order is
+  defined by source order (e.g. symbol order in GDX file) rather than user
+  supplied order. To establish a custom order after the read, use
+  `reorderSymbols`.
 - Added possibility to filter UEL IDs in `getUELs`.
 - Deprecated `getUELLabels`. Use `getUELs` instead.
 - Fixed read of equation with unknown subtype (recast as `=e=`).
