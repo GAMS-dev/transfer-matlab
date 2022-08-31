@@ -5,6 +5,9 @@ GAMS Transfer Matlab v0.3.0
   regular domain.
 - Added possibility to filter UEL IDs in `getUELs`.
 - Deprecated `getUELLabels`. Use `getUELs` instead.
+
+GAMS Transfer Matlab v0.2.2
+==================
 - Fixed read of equation with unknown subtype (recast as `=e=`).
 - Fixed partial read of symbols in indexed container.
 - Fixed `equals` method in indexed container.
