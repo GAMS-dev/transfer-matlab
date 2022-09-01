@@ -695,7 +695,7 @@ classdef Container < GAMSTransfer.BaseContainer
             names = fieldnames(obj.data);
 
             % check if symbol exists
-            if ~isempty(find(strcmpi(names, newname), 1))
+            if obj.hasSymbols(newname)
                 error('Symbol ''%s'' already exists.', newname);
             end
 
@@ -999,7 +999,7 @@ classdef Container < GAMSTransfer.BaseContainer
             if obj.indexed && ~isa(symbol, 'GAMSTransfer.Parameter')
                 error('Symbol must be of type ''GAMSTransfer.Parameter'' in indexed mode.');
             end
-            if ~isempty(find(strcmpi(fieldnames(obj.data), symbol.name_), 1))
+            if obj.hasSymbols(symbol.name_)
                 error('Symbol ''%s'' already exists.', symbol.name_);
             end
             obj.data.(symbol.name_) = symbol;
