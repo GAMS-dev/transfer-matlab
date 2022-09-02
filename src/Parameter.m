@@ -139,63 +139,10 @@ classdef Parameter < GAMSTransfer.Symbol
         function obj = Parameter(container, name, varargin)
             % Constructs a GAMS Parameter, see class help
 
-            is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
-            is_parname = @(x) strcmpi(x, 'records') || strcmpi(x, 'description');
-            idxed = container.indexed;
-
-            % check optional arguments
-            i = 1;
-            if idxed
-                domain = [];
-            else
-                domain = {};
-            end
-            while true
-                term = true;
-                if i == 1 && nargin > 2
-                    if (idxed && isnumeric(varargin{i})) || (~idxed && ...
-                        (is_string_char(varargin{i}) && ~is_parname(varargin{i}) || ...
-                        iscell(varargin{i}) || isa(varargin{i}, 'GAMSTransfer.Set')))
-                        domain = varargin{i};
-                        if ~idxed && ~iscell(domain)
-                            domain = {domain};
-                        end
-                        i = i + 1;
-                        term = false;
-                    elseif ~is_parname(varargin{i})
-                        error('Argument ''domain'' must be ''cell'', ''Set'', or ''char''.');
-                    end
-                end
-                if term || i > 1
-                    break;
-                end
-            end
-
-            % check parameter arguments
-            records = [];
-            description = '';
-            domain_forwarding = false;
-            while i < nargin - 2
-                if strcmpi(varargin{i}, 'records')
-                    records = varargin{i+1};
-                elseif strcmpi(varargin{i}, 'description')
-                    description = varargin{i+1};
-                elseif strcmpi(varargin{i}, 'domain_forwarding')
-                    domain_forwarding = varargin{i+1};
-                else
-                    error('Unknown argument name: %s.', varargin{i});
-                end
-                i = i + 2;
-            end
-
-            % check number of arguments
-            if i <= nargin - 2
-                error('Invalid number of arguments');
-            end
-
-            % create object
-            obj = obj@GAMSTransfer.Symbol(container, name, description, domain, ...
-                records, domain_forwarding);
+            args = GAMSTransfer.Parameter.parseConstructArguments(container.indexed, ...
+                name, varargin{:});
+            obj = obj@GAMSTransfer.Symbol(container, args.name, args.description, ...
+                args.domain, args.records, args.domain_forwarding);
         end
 
     end
@@ -314,6 +261,69 @@ classdef Parameter < GAMSTransfer.Symbol
 
             % copy data
             copy@GAMSTransfer.Symbol(obj, destination, true);
+        end
+
+    end
+
+    methods (Hidden, Static, Access = private)
+
+        function args = parseConstructArguments(indexed, name, varargin)
+            args = struct;
+            args.name = name;
+
+            is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
+            is_parname = @(x) strcmpi(x, 'records') || strcmpi(x, 'description');
+
+            % check optional arguments
+            i = 1;
+            if indexed
+                args.domain = [];
+            else
+                args.domain = {};
+            end
+            while true
+                term = true;
+                if i == 1 && nargin > 2
+                    if (indexed && isnumeric(varargin{i})) || (~indexed && ...
+                        (is_string_char(varargin{i}) && ~is_parname(varargin{i}) || ...
+                        iscell(varargin{i}) || isa(varargin{i}, 'GAMSTransfer.Set')))
+                        args.domain = varargin{i};
+                        if ~indexed && ~iscell(args.domain)
+                            args.domain = {args.domain};
+                        end
+                        i = i + 1;
+                        term = false;
+                    elseif ~is_parname(varargin{i})
+                        error('Argument ''domain'' must be ''cell'', ''Set'', or ''char''.');
+                    end
+                end
+                if term || i > 1
+                    break;
+                end
+            end
+
+            % check parameter arguments
+            args.records = [];
+            args.description = '';
+            args.domain_forwarding = false;
+            while i < nargin - 2
+                if strcmpi(varargin{i}, 'records')
+                    args.records = varargin{i+1};
+                elseif strcmpi(varargin{i}, 'description')
+                    args.description = varargin{i+1};
+                elseif strcmpi(varargin{i}, 'domain_forwarding')
+                    args.domain_forwarding = varargin{i+1};
+                else
+                    error('Unknown argument name: %s.', varargin{i});
+                end
+                i = i + 2;
+            end
+
+            % check number of arguments
+            if i <= nargin - 2
+                error('Invalid number of arguments');
+            end
+
         end
 
     end

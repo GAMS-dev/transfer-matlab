@@ -189,22 +189,15 @@ classdef Alias < handle
             if ~isa(container, 'GAMSTransfer.Container')
                 error('Argument ''container'' must be of type ''GAMSTransfer.Container''.');
             end
-            if ~(isstring(name) && numel(name) == 1) && ~ischar(name)
-                error('Argument ''name'' must be of type ''char''.');
-            end
-            if ~isa(alias_with, 'GAMSTransfer.Set') && ~isa(alias_with, 'GAMSTransfer.Alias')
-                error('Argument ''alias_with'' must be of type ''GAMSTransfer.Set'' or ''GAMSTransfer.Alias''.');
-            end
             obj.container = container;
-            obj.name_ = char(name);
-            while isa(alias_with, 'GAMSTransfer.Alias')
-                alias_with = alias_with.alias_with;
-            end
-            obj.alias_with = alias_with;
 
             if container.indexed
                 error('Alias not allowed in indexed mode.');
             end
+
+            args = GAMSTransfer.Alias.parseConstructArguments(name, alias_with);
+            obj.name_ = args.name;
+            obj.alias_with = args.alias_with;
 
             % add symbol to container
             obj.container.add(obj);
@@ -719,6 +712,27 @@ classdef Alias < handle
             %
 
             bool = obj.alias_with.isValidAsDomain();
+        end
+
+    end
+
+    methods (Hidden, Static, Access = private)
+
+        function args = parseConstructArguments(name, alias_with)
+            args = struct;
+
+            if ~(isstring(name) && numel(name) == 1) && ~ischar(name)
+                error('Argument ''name'' must be of type ''char''.');
+            end
+            if ~isa(alias_with, 'GAMSTransfer.Set') && ~isa(alias_with, 'GAMSTransfer.Alias')
+                error('Argument ''alias_with'' must be of type ''GAMSTransfer.Set'' or ''GAMSTransfer.Alias''.');
+            end
+            args.name = char(name);
+            while isa(alias_with, 'GAMSTransfer.Alias')
+                alias_with = alias_with.alias_with;
+            end
+            args.alias_with = alias_with;
+
         end
 
     end
