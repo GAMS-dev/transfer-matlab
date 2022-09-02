@@ -6,6 +6,10 @@ GAMS Transfer Matlab v0.3.0
 - Categoricals for record domain labels are now created with `Ordinal` set to
   `true`, but ordinal categoricals are not enforced, i.e. users may pass
   categoricals with `Ordinal` set to `false`.
+- Changed symbol read order when reading a subset of symbols: Symbol order is
+  defined by source order (e.g. symbol order in GDX file) rather than user
+  supplied order. To establish a custom order after the read, use
+  `reorderSymbols`.
 - Added possibility to filter UEL IDs in `getUELs`.
 - Deprecated `getUELLabels`. Use `getUELs` instead.
 
