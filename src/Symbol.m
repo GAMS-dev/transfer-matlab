@@ -2023,6 +2023,15 @@ classdef Symbol < handle
 
     end
 
+    methods (Hidden)
+
+        function unsetContainer(obj)
+            obj.container = GAMSTransfer.Container('indexed', obj.container.indexed, ...
+                'gams_dir', obj.container.gams_dir, 'features', obj.container.features);
+        end
+
+    end
+
     methods (Hidden, Access = protected)
 
         function has_domain_label = checkRecordFields(obj, labels)

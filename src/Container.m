@@ -747,6 +747,9 @@ classdef Container < GAMSTransfer.BaseContainer
                 % force recheck of deleted symbol (it may still live within an
                 % alias, domain or in the user's program)
                 symbol.isValid(false, true);
+
+                % unlink container
+                symbol.unsetContainer();
             end
 
             % force recheck of all remaining symbols in container
