@@ -7,12 +7,29 @@ GAMS Transfer Matlab v0.3.0
   for a list of symbol names of any case.
 - Added method `Container.hasSymbols` to check if symbol name (case insensitive)
   exists.
-- Added possibility to filter UEL IDs in `Symbol.getUELs`.
-- Deprecated `Symbol.getUELLabels`. Use `Symbol.getUELs` instead.
 - Changed `Container.getSymbols`, `Container.removeSymbol`,
   `Container.renameSymbol`, `Container.describe*` and others that use
   `Container.getSymbols` to accept symbol names case insensitively.
+- Changed behaviour of default records: Default records don't get written to GDX
+  anymore if either the container is in indexed mode or if the symbol has a
+  regular domain.
+- Categoricals for record domain labels are now created with `Ordinal` set to
+  `true`, but ordinal categoricals are not enforced, i.e. users may pass
+  categoricals with `Ordinal` set to `false`.
+- Changed symbol read order when reading a subset of symbols: Symbol order is
+  defined by source order (e.g. symbol order in GDX file) rather than user
+  supplied order. To establish a custom order after the read, use
+  `reorderSymbols`.
+- Added possibility to filter UEL IDs in `Symbol.getUELs`.
+- Deprecated `Symbol.getUELLabels`. Use `Symbol.getUELs` instead.
+
+GAMS Transfer Matlab v0.2.2
+==================
 - Fixed read of equation with unknown subtype (recast as `=e=`).
+- Fixed partial read of symbols in indexed container.
+- Fixed `equals` method in indexed container.
+- Fixed possible segfault when reading a subset of symbols as dense matrix with
+  at least one scalar symbol.
 
 GAMS Transfer Matlab v0.2.1
 ==================

@@ -26,22 +26,30 @@
 function success = test_idx_readwrite(cfg)
     t = GAMSTest('idx_readwrite_c');
     test_idx_read(t, cfg, 'c');
+    test_idx_readEquals(t, cfg, 'c');
+    test_idx_readPartial(t, cfg, 'c');
     test_idx_readSpecialValues(t, cfg, 'c');
     test_idx_readWrite(t, cfg);
     [~, n_fails1] = t.summary();
 
     t = GAMSTest('idx_readwrite_cc');
     test_idx_read(t, cfg, 'cc');
+    test_idx_readEquals(t, cfg, 'cc');
+    test_idx_readPartial(t, cfg, 'cc');
     test_idx_readSpecialValues(t, cfg, 'cc');
     [~, n_fails2] = t.summary();
 
     t = GAMSTest('idx_readwrite_rc');
     test_idx_read(t, cfg, 'rc');
+    test_idx_readEquals(t, cfg, 'rc');
+    test_idx_readPartial(t, cfg, 'rc');
     test_idx_readSpecialValues(t, cfg, 'rc');
     [~, n_fails3] = t.summary();
 
     t = GAMSTest('idx_readwrite_rcc');
     test_idx_read(t, cfg, 'rcc');
+    test_idx_readEquals(t, cfg, 'rcc');
+    test_idx_readPartial(t, cfg, 'rcc');
     test_idx_readSpecialValues(t, cfg, 'rcc');
     [~, n_fails4] = t.summary();
 
@@ -534,6 +542,113 @@ function test_idx_readEquals(t, cfg, container_type)
         t.add(sprintf('idx_read_equals_%d', i));
         t.assert(gdx1.equals(gdx2));
     end
+end
+
+function test_idx_readPartial(t, cfg, container_type)
+
+    switch container_type
+    case 'c'
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', 'struct', 'symbols', {'b', 'c'});
+    case 'cc'
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', 'struct', 'symbols', {'b', 'c'});
+    case 'rc'
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', 'struct', 'symbols', {'b', 'c'});
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+    case 'rcc'
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', 'struct', 'symbols', {'b', 'c'});
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+    end
+    is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
+
+    t.add('idx_read_partial_basic_info_1');
+    t.assertEquals(gdx.gams_dir, cfg.gams_dir);
+    t.assert(gdx.indexed);
+    t.assert(numel(fieldnames(gdx.data)) == 2);
+    t.assert(isfield(gdx.data, 'b'));
+    t.assert(isfield(gdx.data, 'c'));
+
+    t.add('idx_read_partial_order_1');
+    names = fieldnames(gdx.data);
+    t.assert(numel(names) == 2);
+    t.assertEquals(names{1}, 'b');
+    t.assertEquals(names{2}, 'c');
+
+    t.add('idx_read_partial_parameters_records_struct_1');
+    s = gdx.data.c;
+    t.assert(~isempty(s.records));
+    t.assert(isstruct(s.records));
+    t.assert(strcmp(s.format, 'struct'));
+    t.assert(s.dimension == 2);
+    t.assert(s.size(1) == 5);
+    t.assert(s.size(2) == 10);
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
+    t.assert(numel(fieldnames(s.records)) == 3);
+    t.assert(isfield(s.records, 'dim_1'));
+    t.assert(isfield(s.records, 'dim_2'));
+    t.assert(isfield(s.records, 'value'));
+    t.assert(numel(s.records.dim_1) == 3);
+    t.assert(numel(s.records.dim_2) == 3);
+    t.assert(numel(s.records.value) == 3);
+    t.assert(s.records.dim_1(1) == 1);
+    t.assert(s.records.dim_1(2) == 3);
+    t.assert(s.records.dim_1(3) == 4);
+    t.assert(s.records.dim_2(1) == 6);
+    t.assert(s.records.dim_2(2) == 7);
+    t.assert(s.records.dim_2(3) == 9);
+    t.assert(s.records.value(1) == 16);
+    t.assert(s.records.value(2) == 37);
+    t.assert(s.records.value(3) == 49);
+
+    switch container_type
+    case 'c'
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', 'struct', 'symbols', {'c', 'b'});
+    case 'cc'
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(cfg.filenames{4}, 'format', 'struct', 'symbols', {'c', 'b'});
+    case 'rc'
+        gdx1 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx1.read(cfg.filenames{4}, 'format', 'struct');
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(gdx1, 'symbols', {'c', 'b'});
+    case 'rcc'
+        gdx1 = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx1.read(cfg.filenames{4}, 'format', 'struct');
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            'features', cfg.features);
+        gdx.read(gdx1, 'symbols', {'c', 'b'});
+    end
+    is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
+
+    t.add('idx_read_partial_basic_info_2');
+    t.assertEquals(gdx.gams_dir, cfg.gams_dir);
+    t.assert(gdx.indexed);
+    t.assert(numel(fieldnames(gdx.data)) == 2);
+    t.assert(isfield(gdx.data, 'b'));
+    t.assert(isfield(gdx.data, 'c'));
+
+    t.add('idx_read_partial_order_2');
+    names = fieldnames(gdx.data);
+    t.assert(numel(names) == 2);
+    t.assertEquals(names{1}, 'b');
+    t.assertEquals(names{2}, 'c');
 end
 
 function test_idx_readSpecialValues(t, cfg, container_type)

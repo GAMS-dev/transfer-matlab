@@ -261,9 +261,13 @@ classdef Container < GAMSTransfer.BaseContainer
                     error('Indexed flags of source and this container must match.');
                 end
                 source_data = p.Results.source.data;
-                symbols = p.Results.symbols;
-                if isempty(symbols)
-                    symbols = p.Results.source.listSymbols();
+                symbols = p.Results.source.listSymbols();
+                if ~isempty(p.Results.symbols)
+                    sym_enabled = false(size(symbols));
+                    for i = 1:numel(p.Results.symbols)
+                        sym_enabled(strcmp(symbols, p.Results.symbols{i})) = true;
+                    end
+                    symbols = symbols(sym_enabled);
                 end
                 for i = 1:numel(symbols)
                     source_data.(symbols{i}).copy(obj);
@@ -278,13 +282,16 @@ classdef Container < GAMSTransfer.BaseContainer
                 end
                 data = struct();
                 source_data = p.Results.source.data;
-                symbols = p.Results.symbols;
-                if isempty(symbols)
-                    data = source_data;
-                else
-                    for i = 1:numel(symbols)
-                        data.(symbols{i}) = source_data.(symbols{i});
+                symbols = p.Results.source.listSymbols();
+                if ~isempty(p.Results.symbols)
+                    sym_enabled = false(size(symbols));
+                    for i = 1:numel(p.Results.symbols)
+                        sym_enabled(strcmp(symbols, p.Results.symbols{i})) = true;
                     end
+                    symbols = symbols(sym_enabled);
+                end
+                for i = 1:numel(symbols)
+                    data.(symbols{i}) = source_data.(symbols{i});
                 end
             else
                 data = obj.readRaw(p.Results.source, p.Results.symbols, ...
