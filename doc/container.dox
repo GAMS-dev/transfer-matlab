@@ -140,6 +140,31 @@ GAMSTransfer::Container::getUniverseSet "Container.getUniverseSet" creates this
 set only on request and is not very efficient.
 \endparblock
 
+\section GAMSTRANSFER_MATLAB_CONTAINER_SYMBOL_NAMES Naming Symbols
+
+GAMS Transfer follows the GDX convention for naming symbols. That means, symbol
+names can consist of alpha-numeric characters and `_` (but not at the
+beginning). Name length must be shorter than 64. Symbol names are considered
+case insensitive, i.e. adding a symbol named `X` after adding `x` is not allowed
+because the names are considered equal. Methods that accept symbol names as
+input, accept symbol names in any case.
+
+To get the original names of symbols registered in a container, use \ref
+GAMSTransfer::Container::getSymbolNames "Container.getSymbolNames". To check if
+a symbol exists, use \ref GAMSTransfer::Container::hasSymbols
+"Container.hasSymbols". For example consider a container `m` with symbol `sym1`:
+```
+>> m.hasSymbols({'Sym1', 'sym1', 'sYM1'})
+ans =
+  1×3 logical array
+   1   1   1
+
+>> m.getSymbolNames({'Sym1', 'sym1', 'sYM1'})
+ans =
+  1×3 cell array
+    {'sym1'}    {'sym1'}    {'sym1'}
+```
+
 \section GAMSTRANSFER_MATLAB_CONTAINER_ACCESS Accessing Symbols
 
 Symbols are stored in the struct \ref GAMSTransfer::Container::data
@@ -195,6 +220,10 @@ ans =
   1×2 cell array
     {'x'}    {'z'}
 ```
+
+\note When accessing the symbols via \ref GAMSTransfer::Container::data
+"Container.data", then the case of characters matters. This is not the case for
+\ref GAMSTransfer::Container::getSymbols "Container.getSymbols".
 
 \section GAMSTRANSFER_MATLAB_CONTAINER_REMOVE Removing Symbols
 

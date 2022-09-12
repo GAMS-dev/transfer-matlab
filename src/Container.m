@@ -196,7 +196,8 @@ classdef Container < GAMSTransfer.BaseContainer
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be read. All if empty. Default is `{}`.
+        %>   List of symbols to be read. All if empty. Case doesn't matter.
+        %>   Default is `{}`.
         %> - format (`string`):
         %>   Records format symbols should be stored in. Default is `table`.
         %> - records (`logical`):
@@ -223,7 +224,8 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be read. All if empty. Default is {}.
+            %   List of symbols to be read. All if empty. Case doesn't matter.
+            %   Default is {}.
             % - format (string):
             %   Records format symbols should be stored in. Default is table.
             % - records (logical):
