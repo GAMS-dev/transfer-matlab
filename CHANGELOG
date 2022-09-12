@@ -2,7 +2,7 @@ GAMS Transfer Matlab v0.3.0
 ==================
 - Breaking: Symbol name uniqueness is now checked case insensitively. For
   example, it is not possible anymore to have two different symbols named
-  `symbol` and `Symbol` or `SYMBOL` anymore.
+  `symbol` and `Symbol` or `SYMBOL`.
 - Added method `Container.getSymbolNames` to return the original symbol names
   for a list of symbol names of any case.
 - Added method `Container.hasSymbols` to check if symbol name (case insensitive)
