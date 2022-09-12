@@ -545,7 +545,7 @@ classdef BaseContainer < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = varargin{1};
+                symbols = obj.getSymbolNames(varargin{1});
             else
                 symbols = obj.listSets();
             end
@@ -574,7 +574,7 @@ classdef BaseContainer < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = varargin{1};
+                symbols = obj.getSymbolNames(varargin{1});
             else
                 symbols = obj.listParameters();
             end
@@ -603,7 +603,7 @@ classdef BaseContainer < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = varargin{1};
+                symbols = obj.getSymbolNames(varargin{1});
             else
                 symbols = obj.listVariables();
             end
@@ -632,7 +632,7 @@ classdef BaseContainer < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = varargin{1};
+                symbols = obj.getSymbolNames(varargin{1});
             else
                 symbols = obj.listEquations();
             end
@@ -661,7 +661,7 @@ classdef BaseContainer < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = varargin{1};
+                symbols = obj.getSymbolNames(varargin{1});
             else
                 symbols = obj.listAliases();
             end
