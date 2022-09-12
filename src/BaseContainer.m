@@ -90,17 +90,17 @@ classdef BaseContainer < handle
         %>
         %> - `s = c.hasSymbols(a)` returns `true` if GAMS symbol named `a` (case
         %>   does not matter) exists. `false` otherwise.
-        %> - `s = c.getSymbolNames(b)` returns a list of bools where an entry
-        %>   `s{i}` is `true` if GAMS symbol named `b{i}` (case does not matter)
+        %> - `s = c.hasSymbols(b)` returns a list of bools where an entry `s{i}`
+        %>   is `true` if GAMS symbol named `b{i}` (case does not matter)
         %>   exists. `false` otherwise.
         function bool = hasSymbols(obj, names)
             % Checks if symbol exists in container (case insensitive)
             %
             % s = c.hasSymbols(a) returns true if GAMS symbol named a (case does
             % not matter) exists. false otherwise.
-            % s = c.getSymbolNames(b) returns a list of bools where an entry
-            % s{i} is true if GAMS symbol named b{i} (case does not matter)
-            % exists. false otherwise.
+            % s = c.hasSymbols(b) returns a list of bools where an entry s{i} is
+            % true if GAMS symbol named b{i} (case does not matter) exists.
+            % false otherwise.
 
             sym_names = fieldnames(obj.data);
 
