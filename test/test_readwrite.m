@@ -1571,6 +1571,41 @@ function test_readPartial(t, cfg, container_type)
     switch container_type
     case 'c'
         gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'I', 'J', 'X'}, ...
+            'values', {'level', 'marginal'});
+    case 'cc'
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'I', 'J', 'X'}, ...
+            'values', {'level', 'marginal'});
+    case 'rc'
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'I', 'J', 'X'}, ...
+            'values', {'level', 'marginal'});
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+    case 'rcc'
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'I', 'J', 'X'}, ...
+            'values', {'level', 'marginal'});
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+    end
+    is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
+
+    t.add('read_partial_diffcase_basic_info');
+    t.assertEquals(gdx.gams_dir, cfg.gams_dir);
+    t.assert(~gdx.indexed);
+    t.assert(numel(fieldnames(gdx.data)) == 3);
+    t.assert(isfield(gdx.data, 'i'));
+    t.assert(isfield(gdx.data, 'j'));
+    t.assert(isfield(gdx.data, 'x'));
+    t.assertEquals(gdx.data.i.name, 'i');
+    t.assertEquals(gdx.data.j.name, 'j');
+    t.assertEquals(gdx.data.x.name, 'x');
+
+    switch container_type
+    case 'c'
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'j', 'x', 'i'}, ...
             'values', {'level', 'marginal'});
     case 'cc'

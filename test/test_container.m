@@ -111,34 +111,85 @@ function test_getlist(t, cfg, container_type)
     end
     is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
 
+    t.add('get_list_has');
+    t.assert(gdx.hasSymbols('i'));
+    t.assert(gdx.hasSymbols('I'));
+    t.assert(gdx.hasSymbols('x1'));
+    t.assert(gdx.hasSymbols('X1'));
+    t.assert(gdx.hasSymbols('e1'));
+    t.assert(gdx.hasSymbols('E1'));
+    t.assert(gdx.hasSymbols('a'));
+    t.assert(gdx.hasSymbols('A'));
+    t.assert(gdx.hasSymbols('i2'));
+    t.assert(gdx.hasSymbols('I2'));
+    t.assert(~gdx.hasSymbols('I3'));
+    t.assert(~gdx.hasSymbols('Z'));
+
+    t.add('get_list_names');
+    t.assertEquals(gdx.getSymbolNames('i'), 'i');
+    t.assertEquals(gdx.getSymbolNames('I'), 'i');
+    t.assertEquals(gdx.getSymbolNames('x1'), 'x1');
+    t.assertEquals(gdx.getSymbolNames('X1'), 'x1');
+    t.assertEquals(gdx.getSymbolNames('e1'), 'e1');
+    t.assertEquals(gdx.getSymbolNames('E1'), 'e1');
+    t.assertEquals(gdx.getSymbolNames('a'), 'a');
+    t.assertEquals(gdx.getSymbolNames('A'), 'a');
+    t.assertEquals(gdx.getSymbolNames('i2'), 'i2');
+    t.assertEquals(gdx.getSymbolNames('I2'), 'i2');
+
     if ~is_const_cont
         t.add('get_list_empty')
         l = gdx.getSymbols({});
         t.assert(iscell(l));
         t.assert(isempty(l));
 
-        t.add('get_list_set');
+        t.add('get_list_set_1');
         l = gdx.getSymbols('i');
         t.assert(isa(l, 'GAMSTransfer.Set'));
         t.assertEquals(l.name, 'i');
 
-        t.add('get_list_variable');
+        t.add('get_list_set_2');
+        l = gdx.getSymbols('I');
+        t.assert(isa(l, 'GAMSTransfer.Set'));
+        t.assertEquals(l.name, 'i');
+
+        t.add('get_list_variable_1');
         l = gdx.getSymbols('x1');
         t.assert(isa(l, 'GAMSTransfer.Variable'));
         t.assertEquals(l.name, 'x1');
 
-        t.add('get_list_equation');
+        t.add('get_list_variable_2');
+        l = gdx.getSymbols('X1');
+        t.assert(isa(l, 'GAMSTransfer.Variable'));
+        t.assertEquals(l.name, 'x1');
+
+        t.add('get_list_equation_1');
         l = gdx.getSymbols('e1');
         t.assert(isa(l, 'GAMSTransfer.Equation'));
         t.assertEquals(l.name, 'e1');
 
-        t.add('get_list_parameter');
+        t.add('get_list_equation_2');
+        l = gdx.getSymbols('E1');
+        t.assert(isa(l, 'GAMSTransfer.Equation'));
+        t.assertEquals(l.name, 'e1');
+
+        t.add('get_list_parameter_1');
         l = gdx.getSymbols('a');
         t.assert(isa(l, 'GAMSTransfer.Parameter'));
         t.assertEquals(l.name, 'a');
 
-        t.add('get_list_alias');
+        t.add('get_list_parameter_2');
+        l = gdx.getSymbols('A');
+        t.assert(isa(l, 'GAMSTransfer.Parameter'));
+        t.assertEquals(l.name, 'a');
+
+        t.add('get_list_alias_1');
         l = gdx.getSymbols('i2');
+        t.assert(isa(l, 'GAMSTransfer.Alias'));
+        t.assertEquals(l.name, 'i2');
+
+        t.add('get_list_alias_2');
+        l = gdx.getSymbols('I2');
         t.assert(isa(l, 'GAMSTransfer.Alias'));
         t.assertEquals(l.name, 'i2');
 
@@ -1942,6 +1993,35 @@ function test_remove(t, cfg)
 
     t.add('remove_2');
     gdx.removeSymbols({'i1', 'a1', 'x1'});
+    t.assert(numel(fieldnames(gdx.data)) == 0)
+    t.assert(~i1.isValid());
+    t.assert(~a1.isValid());
+    t.assert(~x1.isValid());
+
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+        'features', cfg.features);
+    i1 = GAMSTransfer.Set(gdx, 'i1');
+    a1 = GAMSTransfer.Alias(gdx, 'a1', i1);
+    x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
+
+    t.add('remove_diffcase_1');
+    t.assert(numel(fieldnames(gdx.data)) == 3);
+    t.assert(isfield(gdx.data, 'i1'));
+    t.assert(isfield(gdx.data, 'a1'));
+    t.assert(isfield(gdx.data, 'x1'));
+    t.assert(i1.isValid());
+    t.assert(a1.isValid());
+    t.assert(x1.isValid());
+    gdx.removeSymbols('I1');
+    t.assert(numel(fieldnames(gdx.data)) == 2);
+    t.assert(isfield(gdx.data, 'a1'));
+    t.assert(isfield(gdx.data, 'x1'));
+    t.assert(~i1.isValid());
+    t.assert(~a1.isValid());
+    t.assert(~x1.isValid());
+
+    t.add('remove_diffcase_2');
+    gdx.removeSymbols({'I1', 'A1', 'X1'});
     t.assert(numel(fieldnames(gdx.data)) == 0)
     t.assert(~i1.isValid());
     t.assert(~a1.isValid());

@@ -265,6 +265,20 @@ function test_addSymbols(t, cfg)
         t.reset();
         t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
     end
+    try
+        t.assert(false);
+        GAMSTransfer.Set(gdx, 's1');
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''s1'' already exists.');
+    end
+    try
+        t.assert(false);
+        GAMSTransfer.Set(gdx, 'S1');
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''S1'' already exists.');
+    end
 
     t.add('add_symbols_alias_1');
     a1 = GAMSTransfer.Alias(gdx, 'a1', s1);
@@ -851,6 +865,20 @@ function test_changeSymbol(t, cfg)
     catch e
         t.reset();
         t.assertEquals(e.message, 'Name must be of type ''char''.');
+    end
+    try
+        t.assert(false);
+        x1.name = 'x2';
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''x2'' already exists.');
+    end
+    try
+        t.assert(false);
+        x1.name = 'X2';
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''X2'' already exists.');
     end
 
     t.add('change_symbol_description');

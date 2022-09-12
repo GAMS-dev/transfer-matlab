@@ -86,6 +86,84 @@ classdef BaseContainer < handle
 
     methods
 
+        %> Checks if symbol exists in container (case insensitive)
+        %>
+        %> - `s = c.hasSymbols(a)` returns `true` if GAMS symbol named `a` (case
+        %>   does not matter) exists. `false` otherwise.
+        %> - `s = c.hasSymbols(b)` returns a list of bools where an entry `s{i}`
+        %>   is `true` if GAMS symbol named `b{i}` (case does not matter)
+        %>   exists. `false` otherwise.
+        function bool = hasSymbols(obj, names)
+            % Checks if symbol exists in container (case insensitive)
+            %
+            % s = c.hasSymbols(a) returns true if GAMS symbol named a (case does
+            % not matter) exists. false otherwise.
+            % s = c.hasSymbols(b) returns a list of bools where an entry s{i} is
+            % true if GAMS symbol named b{i} (case does not matter) exists.
+            % false otherwise.
+
+            sym_names = fieldnames(obj.data);
+
+            if ischar(names) || isstring(names)
+                bool = ~isempty(find(strcmpi(sym_names, names), 1));
+            elseif iscellstr(names)
+                n = numel(names);
+                bool = true(1, n);
+                for i = 1:n
+                    bool(i) = ~isempty(find(strcmpi(sym_names, names{i}), 1));
+                end
+            else
+                error('Name must be of type ''char'' or ''cellstr''.');
+            end
+        end
+
+        %> Get symbol names by names (case insensitive)
+        %>
+        %> - `s = c.getSymbolNames(a)` returns GAMS symbol names named `a` where
+        %>   `a` may have different casing.
+        %> - `s = c.getSymbolNames(b)` returns a list GAMS symbol names
+        %>   where names equal `b` case insensitively.
+        %>
+        %> **Example:**
+        %> ```
+        %> v1 = c.getSymbolNames('v1'); % equals c.getSymbolNames('V1');
+        %> ```
+        function symbols = getSymbolNames(obj, names)
+            % Get symbol names by names (case insensitive)
+            %
+            % s = c.getSymbolNames(a) returns GAMS symbol names named a where a
+            % may have different casing.
+            % s = c.getSymbolNames(b) returns a list GAMS symbol names where
+            % names equal b case insensitively.
+            %
+            % Example:
+            % v1 = c.getSymbolNames('v1'); % equals c.getSymbolNames('V1');
+
+            sym_names = fieldnames(obj.data);
+
+            if ischar(names) || isstring(names)
+                idx = find(strcmpi(sym_names, names), 1);
+                if isempty(idx)
+                    error('Symbol ''%s'' does not exist.', names);
+                else
+                    symbols = sym_names{idx};
+                end
+            elseif iscellstr(names)
+                n = numel(names);
+                symbols = cell(size(names));
+                for i = 1:n
+                    idx = find(strcmpi(sym_names, names{i}), 1);
+                    if isempty(idx)
+                        error('Symbol ''%s'' does not exist.', names{i});
+                    else
+                        symbols{i} = sym_names{idx};
+                    end
+                end
+            else
+                error('Name must be of type ''char'' or ''cellstr''.');
+            end
+        end
+
         %> Lists all symbols in container
         %>
         %> **Parameter Arguments:**
@@ -467,7 +545,7 @@ classdef BaseContainer < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = varargin{1};
+                symbols = obj.getSymbolNames(varargin{1});
             else
                 symbols = obj.listSets();
             end
@@ -496,7 +574,7 @@ classdef BaseContainer < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = varargin{1};
+                symbols = obj.getSymbolNames(varargin{1});
             else
                 symbols = obj.listParameters();
             end
@@ -525,7 +603,7 @@ classdef BaseContainer < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = varargin{1};
+                symbols = obj.getSymbolNames(varargin{1});
             else
                 symbols = obj.listVariables();
             end
@@ -554,7 +632,7 @@ classdef BaseContainer < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = varargin{1};
+                symbols = obj.getSymbolNames(varargin{1});
             else
                 symbols = obj.listEquations();
             end
@@ -583,7 +661,7 @@ classdef BaseContainer < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = varargin{1};
+                symbols = obj.getSymbolNames(varargin{1});
             else
                 symbols = obj.listAliases();
             end
@@ -667,13 +745,6 @@ classdef BaseContainer < handle
                     obj.features.categorical, obj.features.c_prop_setget);
             end
             symbols = fieldnames(data);
-
-            % check for duplicate symbols
-            for i = 1:numel(symbols)
-                if isfield(obj.data, symbols{i})
-                    error('Symbol ''%s'' already exists. Read aborted.', symbols{i});
-                end
-            end
         end
 
         function descr = describeSymbols(obj, symtype, wanted_symbols)
