@@ -2050,7 +2050,7 @@ function test_universalset(t, cfg)
     t.assertEquals(uels{10}, 'j9');
 
     t.add('universalset_2');
-    gdx.data.i.addUELs(1, 'j9');
+    gdx.data.i.addUELs('j9', 1);
     uels = gdx.getUniverseSet();
     t.assert(iscellstr(uels));
     t.assert(numel(uels) == 10);

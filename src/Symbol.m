@@ -1823,7 +1823,7 @@ classdef Symbol < handle
 
         %> Adds UELs to the symbol
         %>
-        %> - `addUELs(d, u)` adds the UELs `u` for dimension `d`.
+        %> - `addUELs(u, d)` adds the UELs `u` for dimension `d`.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1833,10 +1833,10 @@ classdef Symbol < handle
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
-        function addUELs(obj, dim, uels)
+        function addUELs(obj, uels, dim)
             % Adds UELs to the symbol
             %
-            % addUELs(d, u) adds the UELs u for dimension d.
+            % addUELs(u, d) adds the UELs u for dimension d.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.

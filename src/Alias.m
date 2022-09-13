@@ -677,12 +677,12 @@ classdef Alias < handle
         %> Adds UELs to the symbol
         %>
         %> @see \ref GAMSTransfer::Symbol::addUELs "Symbol.addUELs"
-        function addUELs(obj, dim, uels)
+        function addUELs(obj, uels, dim)
             % Adds UELs to the symbol
             %
             % See also: GAMSTransfer.Symbol.addUELs
 
-            obj.alias_with.addUELs(dim, uels);
+            obj.alias_with.addUELs(uels, dim);
         end
 
         %> Removes UELs from the symbol
