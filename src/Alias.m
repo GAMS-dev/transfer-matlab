@@ -373,8 +373,7 @@ classdef Alias < handle
                 return
             end
             eq = isequaln(obj.name_, symbol.name_) && ...
-                obj.alias_with.equals(symbol.alias_with) && ...
-                isequaln(obj.modified, symbol.modified);
+                obj.alias_with.equals(symbol.alias_with);
         end
 
         %> Copies symbol to destination container

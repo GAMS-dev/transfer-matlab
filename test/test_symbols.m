@@ -65,6 +65,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 's1'));
     t.assert(gdx.data.s1.id == s1.id);
+    t.assert(s1.modified);
 
     t.add('add_symbols_set_2');
     s2 = GAMSTransfer.Set(gdx, 's2', {s1}, 'description', 'descr s2');
@@ -90,6 +91,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 's2'));
     t.assert(gdx.data.s2.id == s2.id);
+    t.assert(s2.modified);
 
     t.add('add_symbols_set_3');
     s3 = GAMSTransfer.Set(gdx, 's3', {s1, '*'}, 'is_singleton', true);
@@ -120,6 +122,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 's3'));
     t.assert(gdx.data.s3.id == s3.id);
+    t.assert(s3.modified);
 
     t.add('add_symbols_set_4');
     s4 = GAMSTransfer.Set(gdx, 's4', s2, 'description', 'descr s4', 'is_singleton', true);
@@ -145,6 +148,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 4);
     t.assert(isfield(gdx.data, 's4'));
     t.assert(gdx.data.s4.id == s4.id);
+    t.assert(s4.modified);
 
     t.add('add_symbols_set_5');
     s5 = GAMSTransfer.Set(gdx, 's5', {'s1', s2});
@@ -175,6 +179,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 5);
     t.assert(isfield(gdx.data, 's5'));
     t.assert(gdx.data.s5.id == s5.id);
+    t.assert(s5.modified);
 
     t.add('add_symbols_set_6');
     s6 = GAMSTransfer.Set(gdx, 's6', 's1');
@@ -199,6 +204,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 6);
     t.assert(isfield(gdx.data, 's6'));
     t.assert(gdx.data.s6.id == s6.id);
+    t.assert(s6.modified);
 
     t.add('add_symbols_set_fails');
     try
@@ -305,6 +311,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 7);
     t.assert(isfield(gdx.data, 'a1'));
     t.assert(gdx.data.a1.id == a1.id);
+    t.assert(a1.modified);
 
     t.add('add_symbols_alias_2');
     a2 = GAMSTransfer.Alias(gdx, 'a2', a1);
@@ -316,6 +323,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 8);
     t.assert(isfield(gdx.data, 'a2'));
     t.assert(gdx.data.a2.id == a2.id);
+    t.assert(a2.modified);
 
     t.add('add_symbols_alias_3');
     a3 = GAMSTransfer.Alias(gdx, 'a3', a2);
@@ -327,6 +335,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 9);
     t.assert(isfield(gdx.data, 'a3'));
     t.assert(gdx.data.a3.id == a3.id);
+    t.assert(a3.modified);
 
     t.add('add_symbols_parameter_1');
     p1 = GAMSTransfer.Parameter(gdx, 'p1');
@@ -345,6 +354,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 10);
     t.assert(isfield(gdx.data, 'p1'));
     t.assert(gdx.data.p1.id == p1.id);
+    t.assert(p1.modified);
 
     t.add('add_symbols_parameter_2');
     p2 = GAMSTransfer.Parameter(gdx, 'p2', s1, 'description', 'descr par 2');
@@ -369,6 +379,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 11);
     t.assert(isfield(gdx.data, 'p2'));
     t.assert(gdx.data.p2.id == p2.id);
+    t.assert(p2.modified);
 
     t.add('add_symbols_parameter_3');
     p3 = GAMSTransfer.Parameter(gdx, 'p3', {s1, '*', 's2'}, 'description', 'descr par 3');
@@ -403,6 +414,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 12);
     t.assert(isfield(gdx.data, 'p3'));
     t.assert(gdx.data.p3.id == p3.id);
+    t.assert(p3.modified);
 
     t.add('add_symbols_parameter_fails');
     try
@@ -482,6 +494,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 13);
     t.assert(isfield(gdx.data, 'v1'));
     t.assert(gdx.data.v1.id == v1.id);
+    t.assert(v1.modified);
 
     t.add('add_symbols_variable_2');
     v2 = GAMSTransfer.Variable(gdx, 'v2', GAMSTransfer.VariableType.BINARY, {}, 'description', 'descr var 2');
@@ -501,6 +514,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 14);
     t.assert(isfield(gdx.data, 'v2'));
     t.assert(gdx.data.v2.id == v2.id);
+    t.assert(v2.modified);
 
     t.add('add_symbols_variable_3');
     v3 = GAMSTransfer.Variable(gdx, 'v3', 'sos1', {s1, '*'});
@@ -531,6 +545,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 15);
     t.assert(isfield(gdx.data, 'v3'));
     t.assert(gdx.data.v3.id == v3.id);
+    t.assert(v3.modified);
 
     t.add('add_symbols_variable_4');
     v = GAMSTransfer.Variable(gdx, 'v41', 'binary');
@@ -656,6 +671,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 34);
     t.assert(isfield(gdx.data, 'e1'));
     t.assert(gdx.data.e1.id == e1.id);
+    t.assert(e1.modified);
 
     t.add('add_symbols_equation_2');
     e2 = GAMSTransfer.Equation(gdx, 'e2', GAMSTransfer.EquationType.EQ, {}, 'description', 'descr equ 2');
@@ -675,6 +691,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 35);
     t.assert(isfield(gdx.data, 'e2'));
     t.assert(gdx.data.e2.id == e2.id);
+    t.assert(e2.modified);
 
     t.add('add_symbols_equation_3');
     e3 = GAMSTransfer.Equation(gdx, 'e3', 'leq', {s1, '*'});
@@ -705,6 +722,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(fieldnames(gdx.data)) == 36);
     t.assert(isfield(gdx.data, 'e3'));
     t.assert(gdx.data.e3.id == e3.id);
+    t.assert(e3.modified);
 
     t.add('add_symbols_equation_4');
     e = GAMSTransfer.Equation(gdx, 'e41', 'eq');
@@ -839,12 +857,19 @@ function test_changeSymbol(t, cfg)
     x3 = GAMSTransfer.Variable(gdx, 'x3', 'free', {i2}, 'records', {{'i21', 'i22', 'i23'}, [1 2 3]});
 
     t.add('change_symbol_name');
+    gdx.modified = false;
     t.assertEquals(x1.name, 'x1');
     t.assert(isfield(gdx.data, 'x1'));
     t.assert(~isfield(gdx.data, 'xx1'));
     vars = gdx.listVariables();
     t.assert(numel(vars) == 3);
     t.assertEquals(vars{1}, 'x1');
+    t.assert(~gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(~x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
     x1.name = 'xx1';
     t.assertEquals(x1.name, 'xx1');
     t.assert(~isfield(gdx.data, 'x1'));
@@ -852,6 +877,12 @@ function test_changeSymbol(t, cfg)
     vars = gdx.listVariables();
     t.assert(numel(vars) == 3);
     t.assertEquals(vars{1}, 'xx1');
+    t.assert(gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
     try
         t.assert(false);
         x1.name = 2;
@@ -903,21 +934,40 @@ function test_changeSymbol(t, cfg)
     end
 
     t.add('change_symbol_dimension');
+    gdx.modified = false;
     t.assert(x1.dimension == 1);
     t.assert(numel(x1.domain) == 1);
     t.assertEquals(x1.domain{1}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
+    t.assert(~gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(~x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
     x1.dimension = 2;
     t.assert(x1.dimension == 2);
     t.assert(numel(x1.domain) == 2);
     t.assertEquals(x1.domain{1}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assertEquals(x1.domain{2}, '*');
+    t.assert(gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
     x1.dimension = 1;
     t.assert(x1.dimension == 1);
     t.assert(numel(x1.domain) == 1);
     t.assertEquals(x1.domain{1}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
+    t.assert(gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
     try
         t.assert(false);
         x1.dimension = '2';
@@ -948,11 +998,18 @@ function test_changeSymbol(t, cfg)
     end
 
     t.add('change_symbol_dimension_2');
+    gdx.modified = false;
     t.assert(x3.dimension == 1);
     t.assert(numel(x3.domain) == 1);
     t.assertEquals(x3.domain{1}.id, i2.id);
     t.assertEquals(x3.domain{1}.name, 'i2');
     t.assert(x3.isValid());
+    t.assert(~gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(~x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
     x3.dimension = 2;
     t.assert(x3.dimension == 2);
     t.assert(numel(x3.domain) == 2);
@@ -960,17 +1017,36 @@ function test_changeSymbol(t, cfg)
     t.assertEquals(x3.domain{1}.name, 'i2');
     t.assertEquals(x3.domain{2}, '*');
     t.assert(~x3.isValid());
+    t.assert(gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(~x1.modified);
+    t.assert(~x2.modified);
+    t.assert(x3.modified);
     x3.dimension = 1;
     t.assert(x3.dimension == 1);
     t.assert(numel(x3.domain) == 1);
     t.assertEquals(x3.domain{1}.id, i2.id);
     t.assertEquals(x3.domain{1}.name, 'i2');
     t.assert(x3.isValid());
+    t.assert(gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(~x1.modified);
+    t.assert(~x2.modified);
+    t.assert(x3.modified);
 
     t.add('change_symbol_domain');
+    gdx.modified = false;
     t.assert(numel(x1.domain) == 1);
     t.assertEquals(x1.domain{1}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
+    t.assert(~gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(~x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
     x1.domain = {i1,i1};
     t.assert(x1.dimension == 2);
     t.assert(numel(x1.domain) == 2);
@@ -978,12 +1054,30 @@ function test_changeSymbol(t, cfg)
     t.assertEquals(x1.domain{2}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assertEquals(x1.domain{2}.name, 'i1');
+    t.assert(gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
     x1.domain = {'*'};
     t.assert(x1.dimension == 1);
     t.assertEquals(x1.domain, {'*'});
+    t.assert(gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
     x1.domain = {'a', 'b'};
     t.assert(x1.dimension == 2);
     t.assertEquals(x1.domain, {'a', 'b'});
+    t.assert(gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
     try
         t.assert(false);
         x1.domain = '*';
@@ -1052,9 +1146,11 @@ function test_copySymbol(t, cfg)
     x = GAMSTransfer.Variable(gdx, 'x', 'binary', {i});
     e = GAMSTransfer.Equation(gdx, 'e', 'leq', {a, i}, 'description', 'equ e');
     p = GAMSTransfer.Parameter(gdx, 'p', {i}, 'records', {{'i1', 'i2'}, [1 2]});
+    gdx.modified = false;
 
     t.add('copy_symbol_set_empty');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2.modified = false;
     i.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
     t.assert(isfield(gdx2.data, 'i'));
@@ -1078,10 +1174,15 @@ function test_copySymbol(t, cfg)
     end
     t.assert(~gdx2.data.i.domain_forwarding);
     t.assertEquals(gdx2.data.i.format, 'struct');
+    t.assert(~i.modified);
+    t.assert(gdx2.data.i.modified);
+    t.assert(~gdx.modified);
+    t.assert(gdx2.modified);
 
     t.add('copy_symbol_set_overwrite_1');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     GAMSTransfer.Set(gdx2, 'i');
+    gdx2.modified = false;
     i.copy(gdx2, true);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
     t.assert(isfield(gdx2.data, 'i'));
@@ -1105,6 +1206,10 @@ function test_copySymbol(t, cfg)
     end
     t.assert(~gdx2.data.i.domain_forwarding);
     t.assertEquals(gdx2.data.i.format, 'struct');
+    t.assert(~i.modified);
+    t.assert(gdx2.data.i.modified);
+    t.assert(~gdx.modified);
+    t.assert(gdx2.modified);
 
     t.add('copy_symbol_set_overwrite_2');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
@@ -1139,6 +1244,7 @@ function test_copySymbol(t, cfg)
 
     t.add('copy_symbol_alias_empty_2');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2.modified = false;
     i.copy(gdx2);
     a.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 2);
@@ -1149,12 +1255,17 @@ function test_copySymbol(t, cfg)
     if gdx.features.handle_compare
         t.assert(gdx2.data.i == gdx2.data.a.alias_with);
     end
+    t.assert(~a.modified);
+    t.assert(gdx2.data.a.modified);
+    t.assert(~gdx.modified);
+    t.assert(gdx2.modified);
 
     t.add('copy_symbol_alias_overwrite_1');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     i.copy(gdx2);
     j = GAMSTransfer.Set(gdx2, 'j');
     GAMSTransfer.Alias(gdx2, 'a', j);
+    gdx2.modified = false;
     a.copy(gdx2, true);
     t.assert(numel(fieldnames(gdx2.data)) == 3);
     t.assert(isfield(gdx2.data, 'i'));
@@ -1164,6 +1275,10 @@ function test_copySymbol(t, cfg)
     if gdx.features.handle_compare
         t.assert(gdx2.data.i == gdx2.data.a.alias_with);
     end
+    t.assert(~a.modified);
+    t.assert(gdx2.data.a.modified);
+    t.assert(~gdx.modified);
+    t.assert(gdx2.modified);
 
     t.add('copy_symbol_alias_overwrite_2');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
@@ -1181,6 +1296,7 @@ function test_copySymbol(t, cfg)
 
     t.add('copy_symbol_variable_empty_1');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2.modified = false;
     x.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
     t.assert(isfield(gdx2.data, 'x'));
@@ -1195,9 +1311,14 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
     t.assert(~gdx2.data.x.domain_forwarding);
     t.assertEquals(gdx2.data.x.format, 'empty');
+    t.assert(~x.modified);
+    t.assert(gdx2.data.x.modified);
+    t.assert(~gdx.modified);
+    t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_empty_2');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2.modified = false;
     i.copy(gdx2);
     x.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 2);
@@ -1215,10 +1336,15 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.x.domain_type, 'regular');
     t.assert(~gdx2.data.x.domain_forwarding);
     t.assertEquals(gdx2.data.x.format, 'empty');
+    t.assert(~x.modified);
+    t.assert(gdx2.data.x.modified);
+    t.assert(~gdx.modified);
+    t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_overwrite_1');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     GAMSTransfer.Variable(gdx2, 'x');
+    gdx2.modified = false;
     x.copy(gdx2, true);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
     t.assert(isfield(gdx2.data, 'x'));
@@ -1233,6 +1359,10 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
     t.assert(~gdx2.data.x.domain_forwarding);
     t.assertEquals(gdx2.data.x.format, 'empty');
+    t.assert(~x.modified);
+    t.assert(gdx2.data.x.modified);
+    t.assert(~gdx.modified);
+    t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_overwrite_2');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
@@ -1257,6 +1387,7 @@ function test_copySymbol(t, cfg)
 
     t.add('copy_symbol_equation_empty_1');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2.modified = false;
     e.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
     t.assert(isfield(gdx2.data, 'e'));
@@ -1273,9 +1404,14 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.domain_type, 'relaxed');
     t.assert(~gdx2.data.e.domain_forwarding);
     t.assertEquals(gdx2.data.e.format, 'empty');
+    t.assert(~e.modified);
+    t.assert(gdx2.data.e.modified);
+    t.assert(~gdx.modified);
+    t.assert(gdx2.modified);
 
     t.add('copy_symbol_equation_empty_2');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2.modified = false;
     i.copy(gdx2);
     a.copy(gdx2);
     e.copy(gdx2);
@@ -1296,10 +1432,15 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.domain_type, 'regular');
     t.assert(~gdx2.data.e.domain_forwarding);
     t.assertEquals(gdx2.data.e.format, 'empty');
+    t.assert(~e.modified);
+    t.assert(gdx2.data.e.modified);
+    t.assert(~gdx.modified);
+    t.assert(gdx2.modified);
 
     t.add('copy_symbol_equation_overwrite_1');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     GAMSTransfer.Equation(gdx2, 'e', 'geq');
+    gdx2.modified = false;
     e.copy(gdx2, true);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
     t.assert(isfield(gdx2.data, 'e'));
@@ -1316,6 +1457,10 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.domain_type, 'relaxed');
     t.assert(~gdx2.data.e.domain_forwarding);
     t.assertEquals(gdx2.data.e.format, 'empty');
+    t.assert(~e.modified);
+    t.assert(gdx2.data.e.modified);
+    t.assert(~gdx.modified);
+    t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_overwrite_2');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
@@ -1340,6 +1485,7 @@ function test_copySymbol(t, cfg)
 
     t.add('copy_symbol_parameter_empty_1');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2.modified = false;
     p.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
     t.assert(isfield(gdx2.data, 'p'));
@@ -1366,9 +1512,14 @@ function test_copySymbol(t, cfg)
     t.assert(numel(gdx2.data.p.records.value) == 2);
     t.assert(gdx2.data.p.records.value(1) == 1);
     t.assert(gdx2.data.p.records.value(2) == 2);
+    t.assert(~p.modified);
+    t.assert(gdx2.data.p.modified);
+    t.assert(~gdx.modified);
+    t.assert(gdx2.modified);
 
     t.add('copy_symbol_parameter_empty_2');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2.modified = false;
     i.copy(gdx2);
     p.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 2);
@@ -1398,10 +1549,15 @@ function test_copySymbol(t, cfg)
     t.assert(numel(gdx2.data.p.records.value) == 2);
     t.assert(gdx2.data.p.records.value(1) == 1);
     t.assert(gdx2.data.p.records.value(2) == 2);
+    t.assert(~p.modified);
+    t.assert(gdx2.data.p.modified);
+    t.assert(~gdx.modified);
+    t.assert(gdx2.modified);
 
     t.add('copy_symbol_parameter_overwrite_1');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     GAMSTransfer.Parameter(gdx2, 'p');
+    gdx2.modified = false;
     p.copy(gdx2, true);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
     t.assert(isfield(gdx2.data, 'p'));
@@ -1428,6 +1584,10 @@ function test_copySymbol(t, cfg)
     t.assert(numel(gdx2.data.p.records.value) == 2);
     t.assert(gdx2.data.p.records.value(1) == 1);
     t.assert(gdx2.data.p.records.value(2) == 2);
+    t.assert(~p.modified);
+    t.assert(gdx2.data.p.modified);
+    t.assert(~gdx.modified);
+    t.assert(gdx2.modified);
 
     t.add('copy_symbol_parameter_overwrite_2');
     gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
@@ -1750,6 +1910,7 @@ function test_setRecords(t, cfg)
     s3 = GAMSTransfer.Variable(gdx, 'x3', 'free', {gdx.data.i1});
 
     t.add('set_records_string_1');
+    gdx.modified = false;
     s1.setRecords('test');
     t.assertEquals(s1.format, 'struct');
     t.assert(isstruct(s1.records));
@@ -1765,6 +1926,7 @@ function test_setRecords(t, cfg)
     t.assert(numel(uels) == 1);
     t.assertEquals(uels{1}, 'test');
     t.assert(s1.isValid());
+    t.assert(s1.modified);
 
     t.add('set_records_string_2');
     try
@@ -1776,6 +1938,7 @@ function test_setRecords(t, cfg)
     end
 
     t.add('set_records_cellstr_1');
+    gdx.modified = false;
     s1.setRecords({'test1', 'test2', 'test3'});
     t.assertEquals(s1.format, 'struct');
     t.assert(isstruct(s1.records));
@@ -1797,6 +1960,7 @@ function test_setRecords(t, cfg)
     t.assertEquals(uels{2}, 'test2');
     t.assertEquals(uels{3}, 'test3');
     t.assert(s1.isValid());
+    t.assert(s1.modified);
 
     t.add('set_records_cellstr_2');
     try
@@ -1808,6 +1972,7 @@ function test_setRecords(t, cfg)
     end
 
     t.add('set_records_cellstr_3');
+    gdx.modified = false;
     s2.setRecords({'test11', 'test12', 'test13'; 'test21', 'test22', 'test23'});
     t.assertEquals(s2.format, 'struct');
     t.assert(isstruct(s2.records));
@@ -1842,6 +2007,7 @@ function test_setRecords(t, cfg)
     t.assertEquals(uels{2}, 'test22');
     t.assertEquals(uels{3}, 'test23');
     t.assert(s2.isValid());
+    t.assert(s2.modified);
 
     i1.setRecords({'i1', 'i2', 'i3', 'i4'});
 
@@ -1855,6 +2021,7 @@ function test_setRecords(t, cfg)
     end
 
     t.add('set_records_numeric_2');
+    gdx.modified = false;
     s3.setRecords([1; 2; 3; 4]);
     t.assertEquals(s3.format, 'dense_matrix');
     t.assert(isstruct(s3.records));
@@ -1866,8 +2033,10 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(3) == 3);
     t.assert(s3.records.level(4) == 4);
     t.assert(s3.isValid());
+    t.assert(s3.modified);
 
     t.add('set_records_numeric_3');
+    gdx.modified = false;
     s3.setRecords(sparse([1; 0; 0; 4]));
     t.assertEquals(s3.format, 'sparse_matrix');
     t.assert(isstruct(s3.records));
@@ -1880,6 +2049,7 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(4) == 4);
     t.assert(nnz(s3.records.level) == 2);
     t.assert(s3.isValid());
+    t.assert(s3.modified);
 
     t.add('set_records_numeric_4');
     try
@@ -1891,6 +2061,7 @@ function test_setRecords(t, cfg)
     end
 
     t.add('set_records_cell_1');
+    gdx.modified = false;
     s3.setRecords({[1; 2; 3; 4]});
     t.assertEquals(s3.format, 'dense_matrix');
     t.assert(isstruct(s3.records));
@@ -1902,8 +2073,10 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(3) == 3);
     t.assert(s3.records.level(4) == 4);
     t.assert(s3.isValid());
+    t.assert(s3.modified);
 
     t.add('set_records_cell_2');
+    gdx.modified = false;
     s3.setRecords({{'i1', 'i4'}, [1; 4]});
     t.assertEquals(s3.format, 'struct');
     t.assert(isstruct(s3.records));
@@ -1925,8 +2098,10 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
     t.assert(s3.isValid());
+    t.assert(s3.modified);
 
     t.add('set_records_cell_3');
+    gdx.modified = false;
     s3.setRecords({[1; 4], {'i1', 'i4'}, [11; 44]});
     t.assertEquals(s3.format, 'struct');
     t.assert(isstruct(s3.records));
@@ -1952,8 +2127,10 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.marginal(1) == 11);
     t.assert(s3.records.marginal(2) == 44);
     t.assert(s3.isValid());
+    t.assert(s3.modified);
 
     t.add('set_records_cell_4');
+    gdx.modified = false;
     s3.setRecords({[1; 4], {'i1', 'i4'}, [11; 44], [111; 444], [1111; 4444], [11111; 44444]});
     t.assertEquals(s3.format, 'struct');
     t.assert(isstruct(s3.records));
@@ -1991,6 +2168,7 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.scale(1) == 11111);
     t.assert(s3.records.scale(2) == 44444);
     t.assert(s3.isValid());
+    t.assert(s3.modified);
 
     t.add('set_records_cell_5');
     try
@@ -2020,6 +2198,7 @@ function test_setRecords(t, cfg)
     end
 
     t.add('set_records_struct_1');
+    gdx.modified = false;
     s3.setRecords(struct('level', [1; 2; 3; 4]));
     t.assertEquals(s3.format, 'dense_matrix');
     t.assert(isstruct(s3.records));
@@ -2031,8 +2210,10 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(3) == 3);
     t.assert(s3.records.level(4) == 4);
     t.assert(s3.isValid());
+    t.assert(s3.modified);
 
     t.add('set_records_struct_2');
+    gdx.modified = false;
     s3.setRecords(struct('marginal', [1; 2; 3; 4]));
     t.assertEquals(s3.format, 'dense_matrix');
     t.assert(isstruct(s3.records));
@@ -2044,6 +2225,7 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.marginal(3) == 3);
     t.assert(s3.records.marginal(4) == 4);
     t.assert(s3.isValid());
+    t.assert(s3.modified);
 
     t.add('set_records_struct_3');
     try
@@ -2055,6 +2237,7 @@ function test_setRecords(t, cfg)
     end
 
     t.add('set_records_struct_4');
+    gdx.modified = false;
     recs = struct();
     recs.i1_1 = {'i1', 'i4'};
     recs.level = [1; 4];
@@ -2079,8 +2262,10 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
     t.assert(s3.isValid());
+    t.assert(s3.modified);
 
     t.add('set_records_struct_5');
+    gdx.modified = false;
     recs = struct();
     recs.i1_1 = {'i1', 'i4'};
     recs.level = [1; 4];
@@ -2106,8 +2291,10 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
     t.assert(s3.isValid());
+    t.assert(s3.modified);
 
     t.add('set_records_struct_6');
+    gdx.modified = false;
     recs = struct();
     recs.i1 = {'i1', 'i4'};
     recs.level = [1; 4];
@@ -2132,6 +2319,7 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(1) == 1);
     t.assert(s3.records.level(2) == 4);
     t.assert(s3.isValid());
+    t.assert(s3.modified);
 
     t.add('set_records_struct_7');
     recs = struct();
@@ -2146,6 +2334,7 @@ function test_setRecords(t, cfg)
     end
 
     t.add('set_records_struct_8');
+    gdx.modified = false;
     s3.setRecords(struct('level', [1, 2, 3, 4]));
     t.assertEquals(s3.format, 'dense_matrix');
     t.assert(isstruct(s3.records));
@@ -2157,6 +2346,7 @@ function test_setRecords(t, cfg)
     t.assert(s3.records.level(3) == 3);
     t.assert(s3.records.level(4) == 4);
     t.assert(s3.isValid());
+    t.assert(s3.modified);
 
     t.add('set_records_struct_9');
     try
@@ -2183,6 +2373,7 @@ function test_setRecords(t, cfg)
         end
 
         t.add('set_records_table_2');
+        gdx.modified = false;
         if gdx.features.categorical
             tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
         else
@@ -2196,9 +2387,11 @@ function test_setRecords(t, cfg)
         end
         t.assertEquals(s3.format, 'table');
         t.assert(s3.isValid());
+        t.assert(s3.modified);
     end
 
     t.add('set_records_set_element_text_1');
+    gdx.modified = false;
     i1.setRecords({'i1', 'i2', 'i3', 'i4'}, {'text_i1', 'text_i2', 'text_i3', 'text_i4'});
     t.assert(i1.isValid());
     t.assertEquals(i1.format, 'struct');
@@ -2232,8 +2425,10 @@ function test_setRecords(t, cfg)
     t.assertEquals(uels{2}, 'i2');
     t.assertEquals(uels{3}, 'i3');
     t.assertEquals(uels{4}, 'i4');
+    t.assert(i1.modified);
 
     t.add('set_records_set_element_text_2');
+    gdx.modified = false;
     recs = struct();
     recs.uni_1 = {'i1', 'i2', 'i3', 'i4'};
     recs.text = {'text_i1', 'text_i2', 'text_i3', 'text_i4'};
@@ -2270,6 +2465,7 @@ function test_setRecords(t, cfg)
     t.assertEquals(uels{2}, 'i2');
     t.assertEquals(uels{3}, 'i3');
     t.assertEquals(uels{4}, 'i4');
+    t.assert(i1.modified);
 
 end
 
@@ -2366,9 +2562,15 @@ function test_reorder(t, cfg)
         t.assertEquals(e.message, 'Domain set ''s4'' is out of order: Try calling the Container method reorderSymbols().');
     end
 
+    gdx.modified = false;
     gdx.reorderSymbols();
 
     t.add('reorder_3');
+    t.assert(gdx.modified);
+    t.assert(~s1.modified);
+    t.assert(~s2.modified);
+    t.assert(~s3.modified);
+    t.assert(~s4.modified);
     t.assert(numel(fieldnames(gdx.data)) == 4);
     fields = fieldnames(gdx.data);
     t.assertEquals(fields{1}, 's1');
@@ -2383,9 +2585,15 @@ function test_reorder(t, cfg)
 
     s2.domain = {s3};
     s3.domain = {s4};
+    gdx.modified = false;
     gdx.reorderSymbols();
 
     t.add('reorder_4');
+    t.assert(gdx.modified);
+    t.assert(~s1.modified);
+    t.assert(~s2.modified);
+    t.assert(~s3.modified);
+    t.assert(~s4.modified);
     t.assert(numel(fieldnames(gdx.data)) == 4);
     fields = fieldnames(gdx.data);
     t.assertEquals(fields{1}, 's1');

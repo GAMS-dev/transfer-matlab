@@ -89,7 +89,7 @@ classdef BaseContainer < handle
 
         function set.data(obj, data)
             obj.data = data;
-            obj.modified = true;
+            obj.modified_ = true;
         end
 
     end

@@ -1974,6 +1974,7 @@ function test_remove(t, cfg)
     i1 = GAMSTransfer.Set(gdx, 'i1');
     a1 = GAMSTransfer.Alias(gdx, 'a1', i1);
     x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
+    gdx.modified = false;
 
     t.add('remove_1');
     t.assert(numel(fieldnames(gdx.data)) == 3);
@@ -1983,6 +1984,10 @@ function test_remove(t, cfg)
     t.assert(i1.isValid());
     t.assert(a1.isValid());
     t.assert(x1.isValid());
+    t.assert(~gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~a1.modified);
+    t.assert(~x1.modified);
     gdx.removeSymbols('i1');
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 'a1'));
@@ -1990,6 +1995,10 @@ function test_remove(t, cfg)
     t.assert(~i1.isValid());
     t.assert(~a1.isValid());
     t.assert(~x1.isValid());
+    t.assert(gdx.modified);
+    t.assert(i1.modified);
+    t.assert(~a1.modified);
+    t.assert(~x1.modified);
 
     t.add('remove_2');
     gdx.removeSymbols({'i1', 'a1', 'x1'});
@@ -1997,12 +2006,17 @@ function test_remove(t, cfg)
     t.assert(~i1.isValid());
     t.assert(~a1.isValid());
     t.assert(~x1.isValid());
+    t.assert(gdx.modified);
+    t.assert(i1.modified);
+    t.assert(a1.modified);
+    t.assert(x1.modified);
 
     gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
         'features', cfg.features);
     i1 = GAMSTransfer.Set(gdx, 'i1');
     a1 = GAMSTransfer.Alias(gdx, 'a1', i1);
     x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
+    gdx.modified = false;
 
     t.add('remove_diffcase_1');
     t.assert(numel(fieldnames(gdx.data)) == 3);
@@ -2012,6 +2026,10 @@ function test_remove(t, cfg)
     t.assert(i1.isValid());
     t.assert(a1.isValid());
     t.assert(x1.isValid());
+    t.assert(~gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~a1.modified);
+    t.assert(~x1.modified);
     gdx.removeSymbols('I1');
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 'a1'));
@@ -2019,6 +2037,10 @@ function test_remove(t, cfg)
     t.assert(~i1.isValid());
     t.assert(~a1.isValid());
     t.assert(~x1.isValid());
+    t.assert(gdx.modified);
+    t.assert(i1.modified);
+    t.assert(~a1.modified);
+    t.assert(~x1.modified);
 
     t.add('remove_diffcase_2');
     gdx.removeSymbols({'I1', 'A1', 'X1'});
@@ -2026,6 +2048,10 @@ function test_remove(t, cfg)
     t.assert(~i1.isValid());
     t.assert(~a1.isValid());
     t.assert(~x1.isValid());
+    t.assert(gdx.modified);
+    t.assert(i1.modified);
+    t.assert(a1.modified);
+    t.assert(x1.modified);
 
 end
 

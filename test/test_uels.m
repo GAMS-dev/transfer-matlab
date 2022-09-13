@@ -312,12 +312,15 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels');
+    c.modified = false;
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i1');
     t.assertEquals(uels{2}, 'i3');
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
+    t.assert(~c.modified);
+    t.assert(~x.modified);
     uels = x.getUELs(2);
     t.assert(numel(uels) == 5);
     t.assertEquals(uels{1}, 'j2');
@@ -325,8 +328,11 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{3}, 'j7');
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
+    t.assert(~c.modified);
+    t.assert(~x.modified);
 
     t.add('symbol_uels_getlabels');
+    c.modified = false;
     uels = x.getUELs(1, [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5]);
     t.assert(numel(uels) == 12);
     t.assertEquals(uels{1}, '<undefined>');
@@ -341,9 +347,14 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{10}, 'i6');
     t.assertEquals(uels{11}, 'i10');
     t.assertEquals(uels{12}, '<undefined>');
+    t.assert(~c.modified);
+    t.assert(~x.modified);
 
     t.add('symbol_uels_add');
+    c.modified = false;
     x.addUELs(1, 'i11');
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 5);
     t.assertEquals(uels{1}, 'i1');
@@ -379,7 +390,10 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{4}, 'i10');
 
     t.add('symbol_uels_set_1');
+    c.modified = false;
     x.setUELs(1, {'i1', 'i3', 'i6', 'i10'});
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i1');
@@ -410,7 +424,10 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_set_2');
+    c.modified = false;
     x.setUELs(1, 'i1');
+    t.assert(c.modified);
+    t.assert(x.modified);
     t.assert(~x.isValid());
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);
@@ -426,6 +443,7 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_init');
+    c.modified = false;
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
@@ -435,6 +453,8 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
     x.initUELs(1, {'i1', 'i3', 'i4', 'i6', 'i10'});
+    t.assert(c.modified);
+    t.assert(x.modified);
     t.assert(x.isValid());
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);
@@ -474,7 +494,10 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_remove_1');
+    c.modified = false;
     x.removeUELs(1, 'i4');
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i1');
@@ -534,7 +557,10 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_rename');
+    c.modified = false;
     x.renameUELs(1, 'i1', 'i11');
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i11');

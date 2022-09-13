@@ -921,7 +921,6 @@ classdef Symbol < handle
             eq = eq && isequaln(obj.size_, symbol.size_);
             eq = eq && isequaln(obj.format_, symbol.format_);
             eq = eq && isequaln(obj.number_records_, symbol.number_records_);
-            eq = eq && isequaln(obj.modified, symbol.modified);
             if ~eq
                 return
             end
