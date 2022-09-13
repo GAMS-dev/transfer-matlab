@@ -332,6 +332,7 @@ classdef Variable < GAMSTransfer.Symbol
         function args = parseConstructArguments(name, varargin)
             args = struct;
             args.name = name;
+            args.isset_name = true;
 
             is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
             is_parname = @(x) strcmpi(x, 'records') || strcmpi(x, 'description') || ...
@@ -340,13 +341,16 @@ classdef Variable < GAMSTransfer.Symbol
             % check optional arguments
             i = 1;
             args.type = GAMSTransfer.VariableType.FREE;
+            args.isset_type = false;
             args.domain = {};
+            args.isset_domain = false;
             while true
                 term = true;
                 if i == 1 && nargin > 1
                     if is_string_char(varargin{i}) && ~is_parname(varargin{i}) || ...
                         isnumeric(varargin{i})
                         args.type = varargin{i};
+                        args.isset_type = true;
                         i = i + 1;
                         term = false;
                     elseif ~is_parname(varargin{i})
@@ -356,6 +360,7 @@ classdef Variable < GAMSTransfer.Symbol
                     if is_string_char(varargin{i}) && ~is_parname(varargin{i}) || ...
                         iscell(varargin{i}) || isa(varargin{i}, 'GAMSTransfer.Set')
                         args.domain = varargin{i};
+                        args.isset_domain = true;
                         if ~iscell(args.domain)
                             args.domain = {args.domain};
                         end
@@ -372,15 +377,21 @@ classdef Variable < GAMSTransfer.Symbol
 
             % check parameter arguments
             args.records = [];
+            args.isset_records = false;
             args.description = '';
+            args.isset_description = false;
             args.domain_forwarding = false;
+            args.isset_domain_forwarding = false;
             while i < nargin - 1
                 if strcmpi(varargin{i}, 'records')
                     args.records = varargin{i+1};
+                    args.isset_records = true;
                 elseif strcmpi(varargin{i}, 'description')
                     args.description = varargin{i+1};
+                    args.isset_description = true;
                 elseif strcmpi(varargin{i}, 'domain_forwarding')
                     args.domain_forwarding = varargin{i+1};
+                    args.isset_domain_forwarding = true;
                 else
                     error('Unknown argument name.');
                 end

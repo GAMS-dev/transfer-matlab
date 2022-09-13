@@ -733,10 +733,12 @@ classdef Alias < handle
                 error('Argument ''alias_with'' must be of type ''GAMSTransfer.Set'' or ''GAMSTransfer.Alias''.');
             end
             args.name = char(name);
+            args.isset_name = true;
             while isa(alias_with, 'GAMSTransfer.Alias')
                 alias_with = alias_with.alias_with;
             end
             args.alias_with = alias_with;
+            args.isset_alias_with = true;
 
         end
 

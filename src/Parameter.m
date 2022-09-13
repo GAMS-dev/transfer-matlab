@@ -270,6 +270,7 @@ classdef Parameter < GAMSTransfer.Symbol
         function args = parseConstructArguments(indexed, name, varargin)
             args = struct;
             args.name = name;
+            args.isset_name = true;
 
             is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
             is_parname = @(x) strcmpi(x, 'records') || strcmpi(x, 'description') || ...
@@ -282,6 +283,7 @@ classdef Parameter < GAMSTransfer.Symbol
             else
                 args.domain = {};
             end
+            args.isset_domain = false;
             while true
                 term = true;
                 if i == 1 && nargin > 2
@@ -289,6 +291,7 @@ classdef Parameter < GAMSTransfer.Symbol
                         (is_string_char(varargin{i}) && ~is_parname(varargin{i}) || ...
                         iscell(varargin{i}) || isa(varargin{i}, 'GAMSTransfer.Set')))
                         args.domain = varargin{i};
+                        args.isset_domain = true;
                         if ~indexed && ~iscell(args.domain)
                             args.domain = {args.domain};
                         end
@@ -305,15 +308,21 @@ classdef Parameter < GAMSTransfer.Symbol
 
             % check parameter arguments
             args.records = [];
+            args.isset_records = false;
             args.description = '';
+            args.isset_description = false;
             args.domain_forwarding = false;
+            args.isset_domain_forwarding = false;
             while i < nargin - 2
                 if strcmpi(varargin{i}, 'records')
                     args.records = varargin{i+1};
+                    args.isset_records = true;
                 elseif strcmpi(varargin{i}, 'description')
                     args.description = varargin{i+1};
+                    args.isset_description = true;
                 elseif strcmpi(varargin{i}, 'domain_forwarding')
                     args.domain_forwarding = varargin{i+1};
+                    args.isset_domain_forwarding = true;
                 else
                     error('Unknown argument name: %s.', varargin{i});
                 end

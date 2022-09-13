@@ -568,8 +568,10 @@ classdef Container < GAMSTransfer.BaseContainer
                     isequal(symbol.is_singleton, args.is_singleton) && ...
                     isequal(symbol.domain, args.domain) && ...
                     isequal(symbol.domain_forwarding, args.domain_forwarding)
-                    symbol.description = args.description;
-                    if ~isempty(args.records)
+                    if args.isset_description
+                        symbol.description = args.description;
+                    end
+                    if args.isset_records
                         symbol.setRecords(args.records);
                     end
                 else
@@ -621,8 +623,10 @@ classdef Container < GAMSTransfer.BaseContainer
                 if isa(symbol, 'GAMSTransfer.Parameter') && ...
                     isequal(symbol.domain, args.domain) && ...
                     isequal(symbol.domain_forwarding, args.domain_forwarding)
-                    symbol.description = args.description;
-                    if ~isempty(args.records)
+                    if args.isset_description
+                        symbol.description = args.description;
+                    end
+                    if args.isset_records
                         symbol.setRecords(args.records);
                     end
                 else
@@ -677,8 +681,10 @@ classdef Container < GAMSTransfer.BaseContainer
                     (~isnumeric(args.type) && isequal(symbol.type, args.type) || ...
                     isnumeric(args.type) && isequal(symbol.type, GAMSTransfer.VariableType.int2str(args.type))) && ...
                     isequal(symbol.domain_forwarding, args.domain_forwarding)
-                    symbol.description = args.description;
-                    if ~isempty(args.records)
+                    if args.isset_description
+                        symbol.description = args.description;
+                    end
+                    if args.isset_records
                         symbol.setRecords(args.records);
                     end
                 else
@@ -731,8 +737,10 @@ classdef Container < GAMSTransfer.BaseContainer
                     (~isnumeric(args.type) && isequal(symbol.type, args.type) || ...
                     isnumeric(args.type) && isequal(symbol.type, GAMSTransfer.EquationType.int2str(args.type))) && ...
                     isequal(symbol.domain_forwarding, args.domain_forwarding)
-                    symbol.description = args.description;
-                    if ~isempty(args.records)
+                    if args.isset_description
+                        symbol.description = args.description;
+                    end
+                    if args.isset_records
                         symbol.setRecords(args.records);
                     end
                 else

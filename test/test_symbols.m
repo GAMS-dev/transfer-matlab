@@ -841,7 +841,7 @@ function test_overwriteSymbols(t, cfg)
     t.assertEquals(s.description, 'set1');
     t.assertEquals(s.getNumberRecords(), 0)
     gdx.addSet('s', 'records', {'i1', 'i2'});
-    t.assertEquals(s.description, '');
+    t.assertEquals(s.description, 'set1');
     t.assertEquals(s.getNumberRecords(), 2)
 
     t.add('overwrite_symbols_set_2');
@@ -882,7 +882,7 @@ function test_overwriteSymbols(t, cfg)
     t.assertEquals(p.description, 'par1');
     t.assertEquals(p.getNumberRecords(), 0)
     gdx.addParameter('p', 'records', 1);
-    t.assertEquals(p.description, '');
+    t.assertEquals(p.description, 'par1');
     t.assertEquals(p.getNumberRecords(), 1)
 
     t.add('overwrite_symbols_parameter_2');
@@ -916,7 +916,7 @@ function test_overwriteSymbols(t, cfg)
     t.assertEquals(v.description, 'var1');
     t.assertEquals(v.getNumberRecords(), 0)
     gdx.addVariable('v', 'records', 1);
-    t.assertEquals(v.description, '');
+    t.assertEquals(v.description, 'var1');
     t.assertEquals(v.getNumberRecords(), 1)
 
     t.add('overwrite_symbols_variable_2');
@@ -957,7 +957,7 @@ function test_overwriteSymbols(t, cfg)
     t.assertEquals(e.description, 'equ1');
     t.assertEquals(e.getNumberRecords(), 0)
     gdx.addEquation('e', 'l', 'records', 1);
-    t.assertEquals(e.description, '');
+    t.assertEquals(e.description, 'equ1');
     t.assertEquals(e.getNumberRecords(), 1)
 
     t.add('overwrite_symbols_equation_2');
