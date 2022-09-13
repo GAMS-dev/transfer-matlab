@@ -707,7 +707,8 @@ classdef Symbol < handle
                                 idx_sub{i} = obj.records.(obj.domain_labels_{i});
                             else
                                 % get UEL mapping w.r.t. domain set
-                                [~, uel_map] = ismember(obj.getUELs(i), obj.domain_{i}.getUELs(1));
+                                [~, uel_map] = ismember(obj.getUELs(i), ...
+                                    obj.domain_{i}.getUELs(1, 'ignore_unused', true));
                                 if any(uel_map == 0)
                                     error('Found domain violation.');
                                 end
