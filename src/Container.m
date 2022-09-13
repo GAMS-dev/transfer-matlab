@@ -196,7 +196,8 @@ classdef Container < GAMSTransfer.BaseContainer
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be read. All if empty. Default is `{}`.
+        %>   List of symbols to be read. All if empty. Case doesn't matter.
+        %>   Default is `{}`.
         %> - format (`string`):
         %>   Records format symbols should be stored in. Default is `table`.
         %> - records (`logical`):
@@ -223,7 +224,8 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be read. All if empty. Default is {}.
+            %   List of symbols to be read. All if empty. Case doesn't matter.
+            %   Default is {}.
             % - format (string):
             %   Records format symbols should be stored in. Default is table.
             % - records (logical):
@@ -259,9 +261,13 @@ classdef Container < GAMSTransfer.BaseContainer
                     error('Indexed flags of source and this container must match.');
                 end
                 source_data = p.Results.source.data;
-                symbols = p.Results.symbols;
-                if isempty(symbols)
-                    symbols = p.Results.source.listSymbols();
+                symbols = p.Results.source.listSymbols();
+                if ~isempty(p.Results.symbols)
+                    sym_enabled = false(size(symbols));
+                    for i = 1:numel(p.Results.symbols)
+                        sym_enabled(strcmp(symbols, p.Results.symbols{i})) = true;
+                    end
+                    symbols = symbols(sym_enabled);
                 end
                 for i = 1:numel(symbols)
                     source_data.(symbols{i}).copy(obj);
@@ -276,13 +282,16 @@ classdef Container < GAMSTransfer.BaseContainer
                 end
                 data = struct();
                 source_data = p.Results.source.data;
-                symbols = p.Results.symbols;
-                if isempty(symbols)
-                    data = source_data;
-                else
-                    for i = 1:numel(symbols)
-                        data.(symbols{i}) = source_data.(symbols{i});
+                symbols = p.Results.source.listSymbols();
+                if ~isempty(p.Results.symbols)
+                    sym_enabled = false(size(symbols));
+                    for i = 1:numel(p.Results.symbols)
+                        sym_enabled(strcmp(symbols, p.Results.symbols{i})) = true;
                     end
+                    symbols = symbols(sym_enabled);
+                end
+                for i = 1:numel(symbols)
+                    data.(symbols{i}) = source_data.(symbols{i});
                 end
             else
                 data = obj.readRaw(p.Results.source, p.Results.symbols, ...
@@ -298,11 +307,11 @@ classdef Container < GAMSTransfer.BaseContainer
                 % handle alias differently
                 switch symbol.symbol_type
                 case {GAMSTransfer.SymbolType.ALIAS, 'alias'}
-                    if ~isfield(obj.data, symbol.alias_with)
+                    if ~obj.hasSymbols(symbol.alias_with)
                         error('Alias reference for symbol ''%s'' not found: %s.', ...
-                            symbol.name, symbol.description);
+                            symbol.name, symbol.alias_with);
                     end
-                    GAMSTransfer.Alias(obj, symbol.name, obj.data.(symbol.alias_with));
+                    GAMSTransfer.Alias(obj, symbol.name, obj.getSymbols(symbol.alias_with));
                     continue;
                 end
 
@@ -316,8 +325,8 @@ classdef Container < GAMSTransfer.BaseContainer
                             continue
                         elseif symbol.domain_type == 2
                             continue
-                        elseif isfield(obj.data, domain{j}) && isfield(data, domain{j})
-                            domain{j} = obj.data.(domain{j});
+                        elseif obj.hasSymbols(domain{j}) && isfield(data, domain{j})
+                            domain{j} = obj.getSymbols(domain{j});
                         end
                     end
                 end
@@ -370,10 +379,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % invalid symbols.
             if is_partial_read
                 for j = 1:numel(symbols)
-                    if ~isfield(obj.data, symbols{j})
-                        continue
+                    if obj.hasSymbols(symbols{i})
+                        obj.getSymbols(symbols{i}).isValid(false, true);
                     end
-                    obj.data.(symbols{j}).isValid(false, true);
                 end
             end
         end
@@ -479,6 +487,8 @@ classdef Container < GAMSTransfer.BaseContainer
 
         %> Get symbol objects by names
         %>
+        %> Note: The letter case of the name does not matter.
+        %>
         %> - `s = c.getSymbols(a)` returns the handle to GAMS symbol named `a`.
         %> - `s = c.getSymbols(b)` returns a list of handles to the GAMS symbols
         %>   with names equal to any element in cell `b`.
@@ -491,6 +501,8 @@ classdef Container < GAMSTransfer.BaseContainer
         function symbols = getSymbols(obj, names)
             % Get symbol objects by names
             %
+            % Note: The letter case of the name does not matter.
+            %
             % s = c.getSymbols(a) returns the handle to GAMS symbol named a.
             % s = c.getSymbols(b) returns a list of handles to the GAMS symbols
             % with names equal to any element in cell b.
@@ -499,16 +511,18 @@ classdef Container < GAMSTransfer.BaseContainer
             % v1 = c.getSymbols('v1');
             % vars = c.getSymbols(c.listVariables());
 
+            sym_names = obj.getSymbolNames(names);
+
             if ischar(names) || isstring(names)
-                symbols = obj.data.(names);
-                return
-            elseif ~iscellstr(names)
+                symbols = obj.data.(sym_names);
+            elseif iscellstr(names)
+                n = numel(names);
+                symbols = cell(size(names));
+                for i = 1:n
+                    symbols{i} = obj.data.(sym_names{i});
+                end
+            else
                 error('Name must be of type ''char'' or ''cellstr''.');
-            end
-            n = numel(names);
-            symbols = cell(size(names));
-            for i = 1:n
-                symbols{i} = obj.data.(names{i});
             end
         end
 
@@ -687,9 +701,16 @@ classdef Container < GAMSTransfer.BaseContainer
                 return
             end
 
-            % get index of symbol
             names = fieldnames(obj.data);
-            idx = find(strcmp(names, oldname));
+
+            % check if symbol exists
+            if obj.hasSymbols(newname)
+                error('Symbol ''%s'' already exists.', newname);
+            end
+
+            % get index of symbol
+            oldname = obj.getSymbolNames(oldname);
+            idx = find(strcmp(names, oldname), 1);
             if isempty(idx)
                 return
             end
@@ -715,18 +736,20 @@ classdef Container < GAMSTransfer.BaseContainer
             end
 
             for i = 1:numel(names)
-                if ~isfield(obj.data, names{i})
+                if ~obj.hasSymbols(names{i})
                     continue;
                 end
-
-                symbol = obj.data.(names{i});
+                symbol = obj.getSymbols(names{i});
 
                 % remove symbol
-                obj.data = rmfield(obj.data, names{i});
+                obj.data = rmfield(obj.data, symbol.name);
 
                 % force recheck of deleted symbol (it may still live within an
                 % alias, domain or in the user's program)
                 symbol.isValid(false, true);
+
+                % unlink container
+                symbol.unsetContainer();
             end
 
             % force recheck of all remaining symbols in container
@@ -988,8 +1011,8 @@ classdef Container < GAMSTransfer.BaseContainer
             if obj.indexed && ~isa(symbol, 'GAMSTransfer.Parameter')
                 error('Symbol must be of type ''GAMSTransfer.Parameter'' in indexed mode.');
             end
-            if isfield(obj.data, symbol.name_)
-                error('Symbol ''%s'' already exists.', symbol.name);
+            if obj.hasSymbols(symbol.name_)
+                error('Symbol ''%s'' already exists.', symbol.name_);
             end
             obj.data.(symbol.name_) = symbol;
         end

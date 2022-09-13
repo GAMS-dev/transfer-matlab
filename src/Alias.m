@@ -704,6 +704,11 @@ classdef Alias < handle
 
     methods (Hidden)
 
+        function unsetContainer(obj)
+            obj.container = GAMSTransfer.Container('indexed', obj.container.indexed, ...
+                'gams_dir', obj.container.gams_dir, 'features', obj.container.features);
+        end
+
         function bool = isValidAsDomain(obj)
             % Checks if alias could be used as a domain of a different symbol
             %

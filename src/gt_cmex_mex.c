@@ -1147,7 +1147,7 @@ void gt_mex_domain2categorical(
 {
     size_t n;
     mxArray* call_plhs[1] = {NULL};
-    mxArray* call_prhs[3] = {NULL};
+    mxArray* call_prhs[5] = {NULL};
 #ifdef WITH_R2018A_OR_NEWER
     mxUint64* mx_uel_ids = NULL;
 #else
@@ -1159,6 +1159,8 @@ void gt_mex_domain2categorical(
     call_prhs[0] = *mx_arr_domains;
     call_prhs[1] = mxCreateNumericMatrix(1, n, mxUINT64_CLASS, mxREAL);
     call_prhs[2] = (mxArray*) mx_arr_uels;
+    call_prhs[3] = mxCreateString("Ordinal");
+    call_prhs[4] = mxCreateLogicalScalar(true);
 
 #ifdef WITH_R2018A_OR_NEWER
     mx_uel_ids = mxGetUint64s(call_prhs[1]);
@@ -1168,7 +1170,7 @@ void gt_mex_domain2categorical(
     for (size_t i = 0; i < n; i++)
         mx_uel_ids[i] = i+1;
 
-    if (mexCallMATLAB(1, call_plhs, 3, call_prhs, "categorical"))
+    if (mexCallMATLAB(1, call_plhs, 5, call_prhs, "categorical"))
         mexErrMsgIdAndTxt(ERRID"domain2categorical", "Calling 'categorical' failed.");
 
     *mx_arr_domains = call_plhs[0];

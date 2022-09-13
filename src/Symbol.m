@@ -825,7 +825,7 @@ classdef Symbol < handle
                         if ~obj.container.indexed && obj.container.features.categorical
                             uels = obj.domain_{i}.getUELs(1, 'ignore_unused', true);
                             records.(label) = categorical(records.(label), ...
-                                1:numel(uels), uels);
+                                1:numel(uels), uels, 'Ordinal', true);
                         end
                     end
 
@@ -1744,7 +1744,8 @@ classdef Symbol < handle
 
             label = obj.domain_labels_{dim};
             if obj.container.features.categorical
-                obj.records.(label) = categorical(double(obj.records.(label)), 1:numel(uels), uels);
+                obj.records.(label) = categorical(double(obj.records.(label)), ...
+                    1:numel(uels), uels, 'Ordinal', true);
             else
                 obj.uels.(label).set(uels, []);
             end
@@ -1870,7 +1871,16 @@ classdef Symbol < handle
 
             label = obj.domain_labels_{dim};
             if obj.container.features.categorical
-                obj.records.(label) = addcats(obj.records.(label), uels);
+                if isordinal(obj.records.(label))
+                    cats = categories(obj.records.(label));
+                    if numel(cats) == 0
+                        obj.records.(label) = categorical(uels, 'Ordinal', true);
+                    else
+                        obj.records.(label) = addcats(obj.records.(label), uels, 'After', cats{end});
+                    end
+                else
+                    obj.records.(label) = addcats(obj.records.(label), uels);
+                end
             else
                 obj.uels.(label).add(uels);
             end
@@ -2009,6 +2019,15 @@ classdef Symbol < handle
             else
                 obj.uels.(label).rename(olduels, newuels);
             end
+        end
+
+    end
+
+    methods (Hidden)
+
+        function unsetContainer(obj)
+            obj.container = GAMSTransfer.Container('indexed', obj.container.indexed, ...
+                'gams_dir', obj.container.gams_dir, 'features', obj.container.features);
         end
 
     end
@@ -2197,7 +2216,7 @@ classdef Symbol < handle
 
             % set record values in numerical or categorical format
             if obj.container.features.categorical
-                obj.records.(label) = categorical(domains, uels);
+                obj.records.(label) = categorical(domains, uels, 'Ordinal', true);
             else
                 map = containers.Map(uels, 1:numel(uels));
                 recs = zeros(numel(domains), 1);

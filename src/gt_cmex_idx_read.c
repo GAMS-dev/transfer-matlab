@@ -44,8 +44,7 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
-    int format, orig_format, lastdim, ival, ival2, ival3, n_symbols;
-    int sym_count;
+    int format, orig_format, lastdim, ival, ival2, ival3, sym_count, sym_id;
     size_t dim, nrecs, nvals, n_dom_fields;
     bool read_records;
     bool values_flag[GMS_VAL_MAX];
@@ -59,6 +58,7 @@ void mexFunction(
     gdxUelIndex_t gdx_uel_index;
     gdxValues_t gdx_values;
     gdxUelIndex_t sizes_int;
+    bool* sym_enabled = NULL;
     mwIndex idx;
     mwIndex mx_flat_idx[GMS_VAL_MAX];
     mwIndex mx_idx[GLOBAL_MAX_INDEX_DIM];
@@ -99,13 +99,41 @@ void mexFunction(
     gt_idx_init_read(&gdx, sysdir, gdx_filename);
     if (!idxGetSymCount(gdx, &sym_count))
         mexErrMsgIdAndTxt(ERRID"gdxSystemInfo", "GDX error (idxGetSymCount)");
-    if (mxGetNumberOfElements(prhs[2]) == 0)
-        n_symbols = sym_count;
-    else
-        n_symbols = mxGetNumberOfElements(prhs[2]);
 
-    for (int i = 0; i < n_symbols; i++)
+    sym_enabled = (bool*) mxCalloc(sym_count+1, sizeof(bool));
+
+    /* get symbol ids */
+    if (mxGetNumberOfElements(prhs[2]) == 0)
     {
+        sym_enabled[0] = false;
+        for (int i = 1; i < sym_count+1; i++)
+            sym_enabled[i] = true;
+    }
+    else
+    {
+        for (int i = 0; i < sym_count+1; i++)
+            sym_enabled[i] = false;
+        for (size_t i = 0; i < mxGetNumberOfElements(prhs[2]); i++)
+        {
+            mx_arr_symbol_name = mxGetCell(prhs[2], i);
+            if (!mxIsChar(mx_arr_symbol_name))
+                mexErrMsgIdAndTxt(ERRID"symbol", "Symbol name must be of type 'char'.");
+            mxGetString(mx_arr_symbol_name, buf, GMS_SSSIZE);
+            if (!idxGetSymbolInfoByName(gdx, buf, &ival3, &ival, sizes_int, &ival2, text, GMS_SSSIZE))
+            {
+                mexWarnMsgIdAndTxt(ERRID"symbol", "Symbol %s not found in GDX file. ", buf);
+                continue;
+            }
+            sym_enabled[ival3] = true;
+        }
+    }
+
+    for (int i = 0; i < sym_count+1; i++)
+    {
+        if (!sym_enabled[i])
+            continue;
+        sym_id = i;
+
         /* reset data */
         for (size_t j = 0; j < GMS_VAL_MAX; j++)
         {
@@ -118,23 +146,8 @@ void mexFunction(
         format = orig_format;
 
         /* read symbol gdx data */
-        if (mxGetNumberOfElements(prhs[2]) == 0)
-        {
-            if (!idxGetSymbolInfo(gdx, i, name, GMS_SSSIZE, &ival, sizes_int, &ival2, text, GMS_SSSIZE))
-                mexErrMsgIdAndTxt(ERRID"idxGetSymbolInfo", "GDX error (idxGetSymbolInfo)");
-        }
-        else
-        {
-            mx_arr_symbol_name = mxGetCell(prhs[2], i);
-            if (!mxIsChar(mx_arr_symbol_name))
-                mexErrMsgIdAndTxt(ERRID"symbol", "Symbol name must be of type 'char'.");
-            mxGetString(mx_arr_symbol_name, name, GMS_SSSIZE);
-            if (!idxGetSymbolInfoByName(gdx, name, &ival3, &ival, sizes_int, &ival2, text, GMS_SSSIZE))
-            {
-                mexWarnMsgIdAndTxt(ERRID"symbol", "Symbol %s not found in GDX file. ", name);
-                continue;
-            }
-        }
+        if (!idxGetSymbolInfo(gdx, sym_id-1, name, GMS_SSSIZE, &ival, sizes_int, &ival2, text, GMS_SSSIZE))
+            mexErrMsgIdAndTxt(ERRID"idxGetSymbolInfo", "GDX error (idxGetSymbolInfo)");
         mxAssert(ival >= 0 && ival <= GLOBAL_MAX_INDEX_DIM, "Invalid dimension of symbol.");
         mxAssert(ival2 >= 0, "Invalid number of records");
         dim = (size_t) ival;
@@ -357,4 +370,6 @@ void mexFunction(
 
     idxClose(gdx);
     idxFree(&gdx);
+
+    mxFree(sym_enabled);
 }
