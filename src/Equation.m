@@ -323,7 +323,7 @@ classdef Equation < GAMSTransfer.Symbol
 
     end
 
-    methods (Hidden, Static, Access = private)
+    methods (Hidden, Static)
 
         function args = parseConstructArguments(name, etype, varargin)
             args = struct;

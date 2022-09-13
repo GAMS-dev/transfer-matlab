@@ -529,7 +529,12 @@ classdef Container < GAMSTransfer.BaseContainer
         %> Adds a set to the container
         %>
         %> Arguments are identical to the \ref GAMSTransfer::Set "Set"
-        %> constructor. Alternatively, use the constructor directly.
+        %> constructor. Alternatively, use the constructor directly. In contrast
+        %> to the constructor, this method may overwrite a set if its definition
+        %> (\ref GAMSTransfer::Set::is_singleton "is_singleton", \ref
+        %> GAMSTransfer::Set::domain "domain", \ref
+        %> GAMSTransfer::Set::domain_forwarding "domain_forwarding") doesn't
+        %> differ.
         %>
         %> **Example:**
         %> ```
@@ -544,7 +549,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % Adds a set to the container
             %
             % Arguments are identical to the GAMSTransfer.Set constructor.
-            % Alternatively, use the constructor directly.
+            % Alternatively, use the constructor directly. In contrast to the
+            % constructor, this method may overwrite a set if its definition
+            % (is_singleton, domain, domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -554,13 +561,33 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % See also: GAMSTransfer.Set
 
-            symbol = GAMSTransfer.Set(obj, name, varargin{:});
+            if obj.hasSymbols(name)
+                symbol = obj.getSymbols(name);
+                args = GAMSTransfer.Set.parseConstructArguments(name, varargin{:});
+                if isa(symbol, 'GAMSTransfer.Set') && ...
+                    isequal(symbol.is_singleton, args.is_singleton) && ...
+                    isequal(symbol.domain, args.domain) && ...
+                    isequal(symbol.domain_forwarding, args.domain_forwarding)
+                    symbol.description = args.description;
+                    if ~isempty(args.records)
+                        symbol.setRecords(args.records);
+                    end
+                else
+                    error('Symbol ''%s'' (with different definition) already exists.', name);
+                end
+            else
+                symbol = GAMSTransfer.Set(obj, name, varargin{:});
+            end
         end
 
         %> Adds a parameter to the container
         %>
         %> Arguments are identical to the \ref GAMSTransfer::Parameter
         %> "Parameter" constructor. Alternatively, use the constructor directly.
+        %> In contrast to the constructor, this method may overwrite a parameter
+        %> if its definition (\ref GAMSTransfer::Parameter::domain "domain",
+        %> \ref GAMSTransfer::Parameter::domain_forwarding "domain_forwarding")
+        %> doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -575,7 +602,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % Adds a parameter to the container
             %
             % Arguments are identical to the GAMSTransfer.Parameter constructor.
-            % Alternatively, use the constructor directly.
+            % Alternatively, use the constructor directly. In contrast to the
+            % constructor, this method may overwrite a parameter if its
+            % definition (domain, domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -585,13 +614,33 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % See also: GAMSTransfer.Parameter
 
-            symbol = GAMSTransfer.Parameter(obj, name, varargin{:});
+            if obj.hasSymbols(name)
+                symbol = obj.getSymbols(name);
+                args = GAMSTransfer.Parameter.parseConstructArguments(name, varargin{:});
+                if isa(symbol, 'GAMSTransfer.Parameter') && ...
+                    isequal(symbol.domain, args.domain) && ...
+                    isequal(symbol.domain_forwarding, args.domain_forwarding)
+                    symbol.description = args.description;
+                    if ~isempty(args.records)
+                        symbol.setRecords(args.records);
+                    end
+                else
+                    error('Symbol ''%s'' (with different definition) already exists.', name);
+                end
+            else
+                symbol = GAMSTransfer.Parameter(obj, name, varargin{:});
+            end
         end
 
         %> Adds a variable to the container
         %>
         %> Arguments are identical to the \ref GAMSTransfer::Variable "Variable"
-        %> constructor. Alternatively, use the constructor directly.
+        %> constructor. Alternatively, use the constructor directly. In contrast
+        %> to the constructor, this method may overwrite a variable if its
+        %> definition (\ref GAMSTransfer::Variable::type "type", \ref
+        %> GAMSTransfer::Variable::domain "domain", \ref
+        %> GAMSTransfer::Variable::domain_forwarding "domain_forwarding")
+        %> doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -607,7 +656,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % Adds a variable to the container
             %
             % Arguments are identical to the GAMSTransfer.Variable constructor.
-            % Alternatively, use the constructor directly.
+            % Alternatively, use the constructor directly. In contrast to the
+            % constructor, this method may overwrite a variable if its
+            % definition (type, domain, domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -617,13 +668,34 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % See also: GAMSTransfer.Variable, GAMSTransfer.VariableType
 
-            symbol = GAMSTransfer.Variable(obj, name, varargin{:});
+            if obj.hasSymbols(name)
+                symbol = obj.getSymbols(name);
+                args = GAMSTransfer.Variable.parseConstructArguments(name, varargin{:});
+                if isa(symbol, 'GAMSTransfer.Variable') && ...
+                    isequal(symbol.domain, args.domain) && ...
+                    isequal(symbol.type, args.type) && ...
+                    isequal(symbol.domain_forwarding, args.domain_forwarding)
+                    symbol.description = args.description;
+                    if ~isempty(args.records)
+                        symbol.setRecords(args.records);
+                    end
+                else
+                    error('Symbol ''%s'' (with different definition) already exists.', name);
+                end
+            else
+                symbol = GAMSTransfer.Variable(obj, name, varargin{:});
+            end
         end
 
         %> Adds an equation to the container
         %>
         %> Arguments are identical to the \ref GAMSTransfer::Equation "Equation"
-        %> constructor. Alternatively, use the constructor directly.
+        %> constructor. Alternatively, use the constructor directly. In contrast
+        %> to the constructor, this method may overwrite an equation if its
+        %> definition (\ref GAMSTransfer::Equation::type "type", \ref
+        %> GAMSTransfer::Equation::domain "domain", \ref
+        %> GAMSTransfer::Equation::domain_forwarding "domain_forwarding")
+        %> doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -638,7 +710,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % Adds an equation to the container
             %
             % Arguments are identical to the GAMSTransfer.Equation constructor.
-            % Alternatively, use the constructor directly.
+            % Alternatively, use the constructor directly. In contrast to the
+            % constructor, this method may overwrite an equation if its
+            % definition (type, domain, domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -647,13 +721,30 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % See also: GAMSTransfer.Equation, GAMSTransfer.EquationType
 
-            symbol = GAMSTransfer.Equation(obj, name, etype, varargin{:});
+            if obj.hasSymbols(name)
+                symbol = obj.getSymbols(name);
+                args = GAMSTransfer.Equation.parseConstructArguments(name, varargin{:});
+                if isa(symbol, 'GAMSTransfer.Equation') && ...
+                    isequal(symbol.domain, args.domain) && ...
+                    isequal(symbol.type, args.type) && ...
+                    isequal(symbol.domain_forwarding, args.domain_forwarding)
+                    symbol.description = args.description;
+                    if ~isempty(args.records)
+                        symbol.setRecords(args.records);
+                    end
+                else
+                    error('Symbol ''%s'' (with different definition) already exists.', name);
+                end
+            else
+                symbol = GAMSTransfer.Equation(obj, name, etype, varargin{:});
+            end
         end
 
         %> Adds an alias to the container
         %>
         %> Arguments are identical to the \ref GAMSTransfer::Alias "Alias"
-        %> constructor. Alternatively, use the constructor directly.
+        %> constructor. Alternatively, use the constructor directly. In contrast
+        %> to the constructor, this method may overwrite an alias.
         %>
         %> **Example:**
         %> ```
@@ -667,7 +758,8 @@ classdef Container < GAMSTransfer.BaseContainer
             % Adds an alias to the container
             %
             % Arguments are identical to the GAMSTransfer.Alias constructor.
-            % Alternatively, use the constructor directly.
+            % Alternatively, use the constructor directly. In contrast to the
+            % constructor, this method may overwrite an alias.
             %
             % Example:
             % c = Container();
@@ -676,7 +768,17 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % See also: GAMSTransfer.Alias, GAMSTransfer.Set
 
-            symbol = GAMSTransfer.Alias(obj, name, alias_with);
+            if obj.hasSymbols(name)
+                symbol = obj.getSymbols(name);
+                args = GAMSTransfer.Alias.parseConstructArguments(name, alias_with);
+                if isa(symbol, 'GAMSTransfer.Alias')
+                    symbol.alias_with = args.alias_with;
+                else
+                    error('Symbol ''%s'' (with different definition) already exists.', name);
+                end
+            else
+                symbol = GAMSTransfer.Alias(obj, name, alias_with);
+            end
         end
 
         %> Rename a symbol

@@ -721,7 +721,7 @@ classdef Alias < handle
 
     end
 
-    methods (Hidden, Static, Access = private)
+    methods (Hidden, Static)
 
         function args = parseConstructArguments(name, alias_with)
             args = struct;

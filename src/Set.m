@@ -312,7 +312,7 @@ classdef Set < GAMSTransfer.Symbol
 
     end
 
-    methods (Hidden, Static, Access = private)
+    methods (Hidden, Static)
 
         function args = parseConstructArguments(name, varargin)
             args = struct;

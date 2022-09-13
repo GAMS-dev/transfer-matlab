@@ -265,7 +265,7 @@ classdef Parameter < GAMSTransfer.Symbol
 
     end
 
-    methods (Hidden, Static, Access = private)
+    methods (Hidden, Static)
 
         function args = parseConstructArguments(indexed, name, varargin)
             args = struct;
