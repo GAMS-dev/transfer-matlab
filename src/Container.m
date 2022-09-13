@@ -178,11 +178,11 @@ classdef Container < GAMSTransfer.BaseContainer
             if ~islogical(modified)
                 error('Modified must be logical.');
             end
-            obj.modified_ = modified;
             symbols = fieldnames(obj.data);
             for i = 1:numel(symbols)
                 obj.data.(symbols{i}).modified = modified;
             end
+            obj.modified_ = modified;
         end
 
         function modified = get.modified(obj)
