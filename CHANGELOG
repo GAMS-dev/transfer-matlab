@@ -22,6 +22,8 @@ GAMS Transfer Matlab v0.3.0
   `reorderSymbols`.
 - Added possibility to filter UEL IDs in `Symbol.getUELs`.
 - Deprecated `Symbol.getUELLabels`. Use `Symbol.getUELs` instead.
+- Fixed `Symbol.transformRecords` (table-like to matrix-like formats) in case
+  the domain set records and UELs differ.
 
 GAMS Transfer Matlab v0.2.2
 ==================
