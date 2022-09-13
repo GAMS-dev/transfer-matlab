@@ -263,6 +263,7 @@ classdef Variable < GAMSTransfer.Symbol
                 return
             end
             obj.container.renameSymbol(obj.name_, name);
+            obj.modified = true;
         end
 
         function descr = get.description(obj)
@@ -278,6 +279,7 @@ classdef Variable < GAMSTransfer.Symbol
                 error('Symbol description too long. Name length must be smaller than 256.');
             end
             obj.description_ = descr;
+            obj.modified = true;
         end
 
         function typ = get.type(obj)
@@ -298,6 +300,7 @@ classdef Variable < GAMSTransfer.Symbol
             else
                 error('Variable type must be of type ''char'' or ''numeric''.');
             end
+            obj.modified = true;
         end
 
         function def = get.default_values(obj)

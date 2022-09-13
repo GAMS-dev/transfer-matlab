@@ -253,6 +253,7 @@ classdef Equation < GAMSTransfer.Symbol
                 return
             end
             obj.container.renameSymbol(obj.name_, name);
+            obj.modified = true;
         end
 
         function descr = get.description(obj)
@@ -268,6 +269,7 @@ classdef Equation < GAMSTransfer.Symbol
                 error('Symbol description too long. Name length must be smaller than 256.');
             end
             obj.description_ = descr;
+            obj.modified = true;
         end
 
         function typ = get.type(obj)
@@ -288,6 +290,7 @@ classdef Equation < GAMSTransfer.Symbol
             else
                 error('Equation type must be of type ''char'' or ''numeric''.');
             end
+            obj.modified = true;
         end
 
         function def = get.default_values(obj)

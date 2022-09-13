@@ -104,7 +104,7 @@ classdef Symbol < handle
     end
 
     properties
-        %> records Storage of symbol records
+        %> Storage of symbol records
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT for more information.
 
@@ -127,6 +127,19 @@ classdef Symbol < handle
         % If records are changed, this gets reset to 'unknown'. Calling isValid()
         % will detect the format again.
         format
+    end
+
+    properties
+        %> Flag to indicate modification
+        %>
+        %> If the symbol has been modified since last reset of flag (`false`),
+        %> this flag will be `true`.
+
+        % Flag to indicate modification
+        %
+        % If the symbol has been modified since last reset of flag (`false`),
+        % this flag will be `true`.
+        modified = true
     end
 
     properties (Hidden, SetAccess = private)
@@ -285,6 +298,8 @@ classdef Symbol < handle
                 end
                 obj.uels = uels;
             end
+
+            obj.modified = true;
         end
 
         function domain_names = get.domain_names(obj)
@@ -311,6 +326,7 @@ classdef Symbol < handle
                 obj.resolveDomainViolations();
             end
             obj.domain_forwarding_ = domain_forwarding;
+            obj.modified = true;
         end
 
         function sizes = get.size(obj)
@@ -355,6 +371,8 @@ classdef Symbol < handle
             % indicate that we need to recheck symbol records
             obj.format_ = obj.FORMAT_REEVALUATE;
             obj.number_records_ = nan;
+
+            obj.modified = true;
         end
 
         function form = get.format(obj)
@@ -365,6 +383,14 @@ classdef Symbol < handle
             obj.records = records;
             obj.format_ = obj.FORMAT_REEVALUATE;
             obj.number_records_ = nan;
+            obj.modified = true;
+        end
+
+        function set.modified(obj, modified)
+            if ~islogical(modified)
+                error('Modified must be logical.');
+            end
+            obj.modified = modified;
         end
 
     end
@@ -895,6 +921,7 @@ classdef Symbol < handle
             eq = eq && isequaln(obj.size_, symbol.size_);
             eq = eq && isequaln(obj.format_, symbol.format_);
             eq = eq && isequaln(obj.number_records_, symbol.number_records_);
+            eq = eq && isequaln(obj.modified, symbol.modified);
             if ~eq
                 return
             end
@@ -991,6 +1018,7 @@ classdef Symbol < handle
             newsym.size_ = obj.size_;
             newsym.format_ = obj.format_;
             newsym.number_records_ = obj.number_records_;
+            newsym.modified = true;
 
             % adapt domain sets
             for i = 1:obj.dimension_
@@ -1749,6 +1777,8 @@ classdef Symbol < handle
             else
                 obj.uels.(label).set(uels, []);
             end
+
+            obj.modified = true;
         end
 
         %> Sets the UELs with updating UEL IDs in records
@@ -1818,6 +1848,8 @@ classdef Symbol < handle
                     obj.records.(label) = obj.uels.(label).set(uels, obj.records.(label));
                 end
             end
+
+            obj.modified = true;
         end
 
         %> Adds UELs to the symbol
@@ -1884,6 +1916,8 @@ classdef Symbol < handle
             else
                 obj.uels.(label).add(uels);
             end
+
+            obj.modified = true;
         end
 
         %> Removes UELs from the symbol
@@ -1958,6 +1992,7 @@ classdef Symbol < handle
                 end
             end
 
+            obj.modified = true;
         end
 
         %> Renames UELs in the symbol
@@ -2019,6 +2054,8 @@ classdef Symbol < handle
             else
                 obj.uels.(label).rename(olduels, newuels);
             end
+
+            obj.modified = true;
         end
 
     end
@@ -2028,6 +2065,7 @@ classdef Symbol < handle
         function unsetContainer(obj)
             obj.container = GAMSTransfer.Container('indexed', obj.container.indexed, ...
                 'gams_dir', obj.container.gams_dir, 'features', obj.container.features);
+            obj.modified = true;
         end
 
     end
@@ -2283,7 +2321,11 @@ classdef Symbol < handle
                 end
                 obj.domain_names_{i} = obj.domain_{i}.name;
                 obj.domain_labels_{i} = sprintf('%s_%d', obj.domain_{i}.name, i);
-                obj.size_(i) = obj.domain_{i}.getNumberRecords();
+                size = obj.domain_{i}.getNumberRecords();
+                if size ~= obj.size_(i)
+                    obj.size_(i) = size;
+                    obj.modified = true;
+                end
             end
         end
 

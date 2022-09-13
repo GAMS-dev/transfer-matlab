@@ -20,6 +20,8 @@ GAMS Transfer Matlab v0.3.0
   defined by source order (e.g. symbol order in GDX file) rather than user
   supplied order. To establish a custom order after the read, use
   `reorderSymbols`.
+- Added flags `Container.modified` and `Symbol.modified` to indicate if a
+  container and/or symbol has been modified since last reset.
 - Added possibility to filter UEL IDs in `Symbol.getUELs`.
 - Deprecated `Symbol.getUELLabels`. Use `Symbol.getUELs` instead.
 
