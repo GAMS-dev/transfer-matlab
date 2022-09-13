@@ -334,7 +334,8 @@ classdef Variable < GAMSTransfer.Symbol
             args.name = name;
 
             is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
-            is_parname = @(x) strcmpi(x, 'records') || strcmpi(x, 'description');
+            is_parname = @(x) strcmpi(x, 'records') || strcmpi(x, 'description') || ...
+                strcmpi(x, 'domain_forwarding');
 
             % check optional arguments
             i = 1;

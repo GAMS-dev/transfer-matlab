@@ -26,6 +26,7 @@
 function success = test_symbols(cfg)
     t = GAMSTest('symbols');
     test_addSymbols(t, cfg);
+    test_overwriteSymbols(t, cfg);
     test_changeSymbol(t, cfg);
     test_copySymbol(t, cfg);
     test_defaultvalues(t, cfg);
@@ -824,6 +825,185 @@ function test_addSymbols(t, cfg)
     catch e
         t.reset();
         t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
+    end
+
+end
+
+function test_overwriteSymbols(t, cfg)
+
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+
+    t.add('overwrite_symbols_set_1');
+    s = gdx.addSet('s');
+    t.assertEquals(s.description, '');
+    t.assertEquals(s.getNumberRecords(), 0)
+    gdx.addSet('s', 'description', 'set1');
+    t.assertEquals(s.description, 'set1');
+    t.assertEquals(s.getNumberRecords(), 0)
+    gdx.addSet('s', 'records', {'i1', 'i2'});
+    t.assertEquals(s.description, '');
+    t.assertEquals(s.getNumberRecords(), 2)
+
+    t.add('overwrite_symbols_set_2');
+    try
+        t.assert(false);
+        gdx.addSet('s', 'is_singleton', true);
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''s'' (with different definition) already exists.');
+    end
+    try
+        t.assert(false);
+        gdx.addSet('s', {'i'});
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''s'' (with different definition) already exists.');
+    end
+    try
+        t.assert(false);
+        gdx.addSet('s', 'domain_forwarding', true);
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''s'' (with different definition) already exists.');
+    end
+    try
+        t.assert(false);
+        gdx.addParameter('s');
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''s'' (with different definition) already exists.');
+    end
+
+    t.add('overwrite_symbols_parameter_1');
+    p = gdx.addParameter('p');
+    t.assertEquals(p.description, '');
+    t.assertEquals(p.getNumberRecords(), 0)
+    gdx.addParameter('p', 'description', 'par1');
+    t.assertEquals(p.description, 'par1');
+    t.assertEquals(p.getNumberRecords(), 0)
+    gdx.addParameter('p', 'records', 1);
+    t.assertEquals(p.description, '');
+    t.assertEquals(p.getNumberRecords(), 1)
+
+    t.add('overwrite_symbols_parameter_2');
+    try
+        t.assert(false);
+        gdx.addParameter('p', {'i'});
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''p'' (with different definition) already exists.');
+    end
+    try
+        t.assert(false);
+        gdx.addParameter('p', 'domain_forwarding', true);
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''p'' (with different definition) already exists.');
+    end
+    try
+        t.assert(false);
+        gdx.addSet('p');
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''p'' (with different definition) already exists.');
+    end
+
+    t.add('overwrite_symbols_variable_1');
+    v = gdx.addVariable('v');
+    t.assertEquals(v.description, '');
+    t.assertEquals(v.getNumberRecords(), 0)
+    gdx.addVariable('v', 'description', 'var1');
+    t.assertEquals(v.description, 'var1');
+    t.assertEquals(v.getNumberRecords(), 0)
+    gdx.addVariable('v', 'records', 1);
+    t.assertEquals(v.description, '');
+    t.assertEquals(v.getNumberRecords(), 1)
+
+    t.add('overwrite_symbols_variable_2');
+    try
+        t.assert(false);
+        gdx.addVariable('v', 'binary');
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''v'' (with different definition) already exists.');
+    end
+    try
+        t.assert(false);
+        gdx.addVariable('v', 'free', {'i'});
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''v'' (with different definition) already exists.');
+    end
+    try
+        t.assert(false);
+        gdx.addVariable('v', 'domain_forwarding', true);
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''v'' (with different definition) already exists.');
+    end
+    try
+        t.assert(false);
+        gdx.addSet('v');
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''v'' (with different definition) already exists.');
+    end
+
+    t.add('overwrite_symbols_equation_1');
+    e = gdx.addEquation('e', 'l');
+    t.assertEquals(e.description, '');
+    t.assertEquals(e.getNumberRecords(), 0)
+    gdx.addEquation('e', 'l', 'description', 'equ1');
+    t.assertEquals(e.description, 'equ1');
+    t.assertEquals(e.getNumberRecords(), 0)
+    gdx.addEquation('e', 'l', 'records', 1);
+    t.assertEquals(e.description, '');
+    t.assertEquals(e.getNumberRecords(), 1)
+
+    t.add('overwrite_symbols_equation_2');
+    try
+        t.assert(false);
+        gdx.addEquation('e', 'g');
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''e'' (with different definition) already exists.');
+    end
+    try
+        t.assert(false);
+        gdx.addEquation('e', 'l', {'i'});
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''e'' (with different definition) already exists.');
+    end
+    try
+        t.assert(false);
+        gdx.addEquation('e', 'l', 'domain_forwarding', true);
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''e'' (with different definition) already exists.');
+    end
+    try
+        t.assert(false);
+        gdx.addSet('e');
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''e'' (with different definition) already exists.');
+    end
+
+    t.add('overwrite_symbols_alias_1');
+    s2 = gdx.addSet('s2');
+    a = gdx.addAlias('a', s);
+    t.assertEquals(a.alias_with.name, 's');
+    gdx.addAlias('a', s2);
+    t.assertEquals(a.alias_with.name, 's2');
+
+    t.add('overwrite_symbols_alias_2');
+    try
+        t.assert(false);
+        gdx.addSet('a');
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Symbol ''a'' (with different definition) already exists.');
     end
 
 end
