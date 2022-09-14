@@ -16,6 +16,7 @@ GAMS Transfer Matlab v0.3.0
   for a list of symbol names of any case.
 - Added method `Container.hasSymbols` to check if symbol name (case insensitive)
   exists.
+- Added method `Container.removeUELs` to remove UELs from all symbols.
 - Changed `Container.getSymbols`, `Container.removeSymbol`,
   `Container.renameSymbol`, `Container.describe*` and others that use
   `Container.getSymbols` to accept symbol names case insensitively.

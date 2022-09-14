@@ -1003,6 +1003,49 @@ classdef Container < GAMSTransfer.BaseContainer
             end
         end
 
+        %> Removes UELs from all symbols
+        %>
+        %> - `removeUELs()` removes all unused UELs for all symbols.
+        %> - `removeUELs(u)` removes the UELs `u` for all symbols.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the container is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Container::isValid "Container.isValid"
+        function removeUELs(obj, uels)
+            % Removes UELs from all symbol
+            %
+            % removeUELs() removes all unused UELs for all symbols.
+            % removeUELs(u) removes the UELs u for all symbols.
+            %
+            % Note: This can only be used if the container is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Container.isValid
+
+            if nargin < 2
+                uels = {};
+            end
+            if ~obj.isValid()
+                error('Container must be valid in order to manage UELs.');
+            end
+            if obj.indexed
+                error('UELs not supported in indexed mode.');
+            end
+            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
+                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            end
+
+            symbols = fieldnames(obj.data);
+            for i = 1:numel(symbols)
+                obj.data.(symbols{i}).removeUELs(uels);
+            end
+        end
+
     end
 
     methods (Hidden, Access = {?GAMSTransfer.Symbol, ?GAMSTransfer.Alias})
