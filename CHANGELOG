@@ -4,7 +4,7 @@ GAMS Transfer Matlab v0.3.0
   example, it is not possible anymore to have two different symbols named
   `symbol` and `Symbol` or `SYMBOL`.
 - Breaking: Changed `Symbol.addUELs` signature from `addUELs(dim, uels)` to
-  `addUELs(uels, dim)`.
+  `addUELs(uels, dim)`. `dim` is now allowed to accept a vector of dimensions.
 - Breaking: Changed `Symbol.setUELs` signature from `setUELs(dim, uels)` to
   `setUELs(uels, dim)` and `setUELS(_, 'rename', true/false)`. Setting `rename`
   to `true` triggers the old `Symbol.initUELs`. `dim` is now allowed to accept a

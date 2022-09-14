@@ -1757,8 +1757,8 @@ classdef Symbol < handle
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
             % check required arguments
-            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
-                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
+                error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
             end
             if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
                 error('Argument ''uels'' must be ''char'' or ''cellstr''.');
@@ -1830,7 +1830,7 @@ classdef Symbol < handle
 
         %> Adds UELs to the symbol
         %>
-        %> - `addUELs(u, d)` adds the UELs `u` for dimension `d`.
+        %> - `addUELs(u, d)` adds the UELs `u` for dimension(s) `d`.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1843,15 +1843,15 @@ classdef Symbol < handle
         function addUELs(obj, uels, dim)
             % Adds UELs to the symbol
             %
-            % addUELs(u, d) adds the UELs u for dimension d.
+            % addUELs(u, d) adds the UELs u for dimension(s) d.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
-            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
-                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
+                error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
             end
             if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
                 error('Argument ''uels'' must be ''char'' or ''cellstr''.');
@@ -1877,20 +1877,22 @@ classdef Symbol < handle
                 error('Symbol must be valid in order to manage UELs.');
             end
 
-            label = obj.domain_labels_{dim};
-            if obj.container.features.categorical
-                if isordinal(obj.records.(label))
-                    cats = categories(obj.records.(label));
-                    if numel(cats) == 0
-                        obj.records.(label) = categorical(uels, 'Ordinal', true);
+            for i = dim
+                label = obj.domain_labels_{i};
+                if obj.container.features.categorical
+                    if isordinal(obj.records.(label))
+                        cats = categories(obj.records.(label));
+                        if numel(cats) == 0
+                            obj.records.(label) = categorical(uels, 'Ordinal', true);
+                        else
+                            obj.records.(label) = addcats(obj.records.(label), uels, 'After', cats{end});
+                        end
                     else
-                        obj.records.(label) = addcats(obj.records.(label), uels, 'After', cats{end});
+                        obj.records.(label) = addcats(obj.records.(label), uels);
                     end
                 else
-                    obj.records.(label) = addcats(obj.records.(label), uels);
+                    obj.uels.(label).add(uels);
                 end
-            else
-                obj.uels.(label).add(uels);
             end
         end
 
