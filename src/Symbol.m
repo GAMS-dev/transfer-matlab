@@ -1669,7 +1669,8 @@ classdef Symbol < handle
             end
 
             if numel(dim) > 1
-                uels = unique(uels, 'stable');
+                [~,uidx,~] = unique(uels, 'first');
+                uels = uels(sort(uidx));
             end
         end
 

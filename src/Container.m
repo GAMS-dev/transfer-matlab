@@ -1028,7 +1028,8 @@ classdef Container < GAMSTransfer.BaseContainer
             uels = {};
             for i = 1:numel(symbols)
                 uels = [uels; obj.data.(symbols{i}).getUELs('ignore_unused', p.Results.ignore_unused)];
-                uels = unique(uels, 'stable');
+                [~,uidx,~] = unique(uels, 'first');
+                uels = uels(sort(uidx));
             end
         end
 
