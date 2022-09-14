@@ -688,12 +688,12 @@ classdef Alias < handle
         %> Removes UELs from the symbol
         %>
         %> @see \ref GAMSTransfer::Symbol::removeUELs "Symbol.removeUELs"
-        function removeUELs(obj, dim, uels)
+        function removeUELs(obj, varargin)
             % Removes UELs from the symbol
             %
             % See also: GAMSTransfer.Symbol.removeUELs
 
-            obj.alias_with.removeUELs(dim, uels);
+            obj.alias_with.removeUELs(varargin{:});
         end
 
         %> Renames UELs in the symbol

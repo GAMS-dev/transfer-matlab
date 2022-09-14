@@ -626,7 +626,7 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_remove_1');
-    x.removeUELs(1, 'i4');
+    x.removeUELs('i4', 1);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i1');
@@ -641,7 +641,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 3);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
-    x.removeUELs(1, {'i3', 'i6'});
+    x.removeUELs({'i3', 'i6'}, 1);
     t.assert(~x.isValid());
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);
@@ -665,7 +665,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
     t.assertEquals(uels{5}, 'i4');
-    x.removeUELs(1);
+    x.removeUELs({}, 1);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i1');
@@ -680,6 +680,58 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 3);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
+
+    c = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    c.read(cfg.filenames{1}, 'format', 'struct');
+    x = c.data.x;
+
+    t.add('symbol_uels_remove_3');
+    x.addUELs('bla', 1:2);
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 5);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i6');
+    t.assertEquals(uels{4}, 'i10');
+    t.assertEquals(uels{5}, 'bla');
+    uels = x.getUELs(2);
+    t.assert(numel(uels) == 6);
+    t.assertEquals(uels{1}, 'j2');
+    t.assertEquals(uels{2}, 'j5');
+    t.assertEquals(uels{3}, 'j7');
+    t.assertEquals(uels{4}, 'j8');
+    t.assertEquals(uels{5}, 'j9');
+    t.assertEquals(uels{6}, 'bla');
+    x.removeUELs({}, 2);
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 5);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i6');
+    t.assertEquals(uels{4}, 'i10');
+    t.assertEquals(uels{5}, 'bla');
+    uels = x.getUELs(2);
+    t.assert(numel(uels) == 5);
+    t.assertEquals(uels{1}, 'j2');
+    t.assertEquals(uels{2}, 'j5');
+    t.assertEquals(uels{3}, 'j7');
+    t.assertEquals(uels{4}, 'j8');
+    t.assertEquals(uels{5}, 'j9');
+    x.addUELs('bla2', 1:2);
+    x.removeUELs();
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 4);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i6');
+    t.assertEquals(uels{4}, 'i10');
+    uels = x.getUELs(2);
+    t.assert(numel(uels) == 5);
+    t.assertEquals(uels{1}, 'j2');
+    t.assertEquals(uels{2}, 'j5');
+    t.assertEquals(uels{3}, 'j7');
+    t.assertEquals(uels{4}, 'j8');
+    t.assertEquals(uels{5}, 'j9');
 
     c = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     c.read(cfg.filenames{1}, 'format', 'struct');

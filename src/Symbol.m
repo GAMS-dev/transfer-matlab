@@ -851,9 +851,7 @@ classdef Symbol < handle
 
                     % remove unused UELs
                     if ~obj.container.indexed
-                        for i = 1:obj.dimension_
-                            obj.removeUELs(i);
-                        end
+                        obj.removeUELs();
                     end
                     return
                 end
@@ -1898,8 +1896,10 @@ classdef Symbol < handle
 
         %> Removes UELs from the symbol
         %>
-        %> - `removeUELs(d)` removes all unused UELs for dimension `d`.
-        %> - `removeUELs(d, u)` removes the UELs `u` for dimension `d`.
+        %> - `removeUELs()` removes all unused UELs for all dimensions.
+        %> - `removeUELs({}, d)` removes all unused UELs for dimension(s) `d`.
+        %> - `removeUELs(u)` removes the UELs `u` for all dimensions.
+        %> - `removeUELs(u, d)` removes the UELs `u` for dimension(s) `d`.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1909,26 +1909,34 @@ classdef Symbol < handle
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
-        function removeUELs(obj, dim, uels)
+        function removeUELs(obj, uels, dim)
             % Removes UELs from the symbol
             %
-            % removeUELs(d) removes all unused UELs for dimension d.
-            % removeUELs(d, u) removes the UELs u for dimension d.
+            % removeUELs() removes all unused UELs for all dimensions.
+            % removeUELs({}, d) removes all unused UELs for dimension(s) d.
+            % removeUELs(u) removes the UELs u for all dimensions.
+            % removeUELs(u, d) removes the UELs u for dimension(s) d.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
-            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
-                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            if obj.dimension_ == 0
+                return
             end
-            if nargin == 3
-                if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
-                    error('Argument ''uels'' must be ''char'' or ''cellstr''.');
-                end
-            else
+
+            if nargin < 2
                 uels = {};
+            end
+            if nargin < 3
+                dim = 1:obj.dimension_;
+            end
+            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
+                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            end
+            if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
+                error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
             end
 
             if ~obj.isValid()
@@ -1950,21 +1958,23 @@ classdef Symbol < handle
                 error('Symbol must be valid in order to manage UELs.');
             end
 
-            label = obj.domain_labels_{dim};
-            if obj.container.features.categorical
-                if isempty(uels)
-                    obj.records.(label) = removecats(obj.records.(label));
+            for i = dim
+                label = obj.domain_labels_{i};
+                if obj.container.features.categorical
+                    if isempty(uels)
+                        obj.records.(label) = removecats(obj.records.(label));
+                    else
+                        obj.records.(label) = removecats(obj.records.(label), uels);
+                    end
                 else
-                    obj.records.(label) = removecats(obj.records.(label), uels);
-                end
-            else
-                if isempty(uels)
-                    uels = setdiff(obj.getUELs(dim), obj.getUELs(dim, 'ignore_unused', true));
-                end
-                if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
-                    obj.records.(label) = obj.uels.(label).remove(uels, []);
-                else
-                    obj.records.(label) = obj.uels.(label).remove(uels, obj.records.(label));
+                    if isempty(uels)
+                        uels = setdiff(obj.getUELs(i), obj.getUELs(i, 'ignore_unused', true));
+                    end
+                    if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
+                        obj.records.(label) = obj.uels.(label).remove(uels, []);
+                    else
+                        obj.records.(label) = obj.uels.(label).remove(uels, obj.records.(label));
+                    end
                 end
             end
 
