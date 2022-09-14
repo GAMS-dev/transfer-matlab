@@ -418,9 +418,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % There are different issues that can occur when writing to GDX:
             % e.g. domain violations and unsorted data. For domain violations,
             % see GAMSTransfer.Container.getDomainViolations. Domain labels are
-            % stored as UELs in GDX that are an (ID,label) pair. The ID is a
+            % stored as UELs in GDX that are an (code,label) pair. The code is a
             % number with an ascending order based on the write occurence. Data
-            % records must be sorted by these IDs in ascending order (dimension
+            % records must be sorted by these codes in ascending order (dimension
             % 1 first, then dimension 2, ...). If one knows that the data is
             % sorted, one can set the flag 'sorted' to true to improve
             % performance. Otherwise GAMSTransfer will sort the values
@@ -1075,7 +1075,7 @@ classdef Container < GAMSTransfer.BaseContainer
         %>   `struct` (field names = old UELs, field values = new UELs),
         %>   `containers.Map` (keys = old UELs, values = new UELs) or `cellstr`
         %>   (full list of UELs, must have as many entries as current UELs). The
-        %>   IDs for renamed UELs do not change.
+        %>   codes for renamed UELs do not change.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1092,7 +1092,7 @@ classdef Container < GAMSTransfer.BaseContainer
             % struct (field names = old UELs, field values = new UELs),
             % containers.Map (keys = old UELs, values = new UELs) or cellstr
             % (full list of UELs, must have as many entries as current UELs).
-            % The IDs for renamed UELs do not change.
+            % The codes for renamed UELs do not change.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.

@@ -641,33 +641,33 @@ classdef Alias < handle
             uels = obj.alias_with.getUELs(dim, varargin{:});
         end
 
-        %> Returns the UELs labels for the given UEL IDs
+        %> Returns the UELs labels for the given UEL codes
         %>
         %> @see \ref GAMSTransfer::Symbol::getUELLabels "Symbol.getUELLabels"
-        function uels = getUELLabels(obj, dim, ids)
-            % Returns the UELs labels for the given UEL IDs
+        function uels = getUELLabels(obj, dim, codes)
+            % Returns the UELs labels for the given UEL codes
             %
             % See also: GAMSTransfer.Symbol.getUELLabels
 
-            uels = obj.alias_with.getUELLabels(dim, ids);
+            uels = obj.alias_with.getUELLabels(dim, codes);
         end
 
-        %> Sets the UELs without modifying UEL IDs in records
+        %> Sets the UELs without modifying UEL codes in records
         %>
         %> @see \ref GAMSTransfer::Symbol::initUELs "Symbol.initUELs"
         function initUELs(obj, dim, uels)
-            % Sets the UELs without modifying UEL IDs in records
+            % Sets the UELs without modifying UEL codes in records
             %
             % See also: GAMSTransfer.Symbol.initUELs
 
             obj.alias_with.initUELs(dim, uels);
         end
 
-        %> Sets the UELs with updating UEL IDs in records
+        %> Sets the UELs with updating UEL codes in records
         %>
         %> @see \ref GAMSTransfer::Symbol::setUELs "Symbol.setUELs"
         function setUELs(obj, uels, dim, varargin)
-            % Sets the UELs with updating UEL IDs in records
+            % Sets the UELs with updating UEL codes in records
             %
             % See also: GAMSTransfer.Symbol.setUELs
 

@@ -38,7 +38,7 @@ GAMS Transfer Matlab v0.3.0
   defined by source order (e.g. symbol order in GDX file) rather than user
   supplied order. To establish a custom order after the read, use
   `reorderSymbols`.
-- Added possibility to filter UEL IDs in `Symbol.getUELs`.
+- Added possibility to filter UEL codes in `Symbol.getUELs`.
 - Added possibility to pass a vector of dimensions to `Symbol.getUELs`.
 - Deprecated `Symbol.getUELLabels`. Use `Symbol.getUELs` instead.
 - Deprecated `Symbol.initUELs`. Use `Symbol.setUELs` instead.

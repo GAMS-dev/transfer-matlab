@@ -1544,7 +1544,7 @@ classdef Symbol < handle
         %>
         %> - `u = getUELs()` returns the UELs across all dimensions.
         %> - `u = getUELs(d)` returns the UELs used in dimension(s) `d`.
-        %> - `u = getUELs(d, i)` returns the UELs `u` for the given UEL IDs `i`.
+        %> - `u = getUELs(d, i)` returns the UELs `u` for the given UEL codes `i`.
         %> - `u = getUELs(d, _, "ignore_unused", true)` returns only those UELs
         %>   that are actually used in the records.
         %>
@@ -1561,7 +1561,7 @@ classdef Symbol < handle
             %
             % u = getUELs() returns the UELs across all dimensions.
             % u = getUELs(d) returns the UELs used in dimension(s) d.
-            % u = getUELs(d, i) returns the UELs u for the given UEL IDs i.
+            % u = getUELs(d, i) returns the UELs u for the given UEL codes i.
             % u = getUELs(_, 'ignore_unused', true) returns only those UELs that
             % are actually used in the records.
             %
@@ -1580,7 +1580,7 @@ classdef Symbol < handle
             % check optional arguments
             i = 1;
             dim = 1:obj.dimension_;
-            ids = [];
+            codes = [];
             while true
                 term = true;
                 if i == 1 && nargin > 1
@@ -1594,11 +1594,11 @@ classdef Symbol < handle
                     end
                 elseif i == 2 && nargin > 2
                     if isnumeric(varargin{i}) && ~is_parname(varargin{i})
-                        ids = varargin{i};
+                        codes = varargin{i};
                         i = i + 1;
                         term = false;
                     elseif ~is_parname(varargin{i})
-                        error('Argument ''ids'' must be ''numeric''.');
+                        error('Argument ''codes'' must be ''numeric''.');
                     end
                 end
                 if term || i > 2
@@ -1638,7 +1638,7 @@ classdef Symbol < handle
                 case GAMSTransfer.RecordsFormat.EMPTY
                     uels_i = {};
                 case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
-                    uels_i = obj.domain_{i}.getUELs(1, ids, 'ignore_unused', true);
+                    uels_i = obj.domain_{i}.getUELs(1, codes, 'ignore_unused', true);
                 case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
                     label = obj.domain_labels_{i};
                     if obj.container.features.categorical
@@ -1654,12 +1654,12 @@ classdef Symbol < handle
                         end
                     end
 
-                    % filter for given ids
-                    if ~isempty(ids)
+                    % filter for given codes
+                    if ~isempty(codes)
                         uels_i_orig = uels_i;
-                        idx = ids >= 1 & ids <= numel(uels_i_orig);
-                        uels_i = cell(numel(ids), 1);
-                        uels_i(idx) = uels_i_orig(ids(idx));
+                        idx = codes >= 1 & codes <= numel(uels_i_orig);
+                        uels_i = cell(numel(codes), 1);
+                        uels_i(idx) = uels_i_orig(codes(idx));
                         uels_i(~idx) = {'<undefined>'};
                     end
                 otherwise
@@ -1673,13 +1673,13 @@ classdef Symbol < handle
             end
         end
 
-        %> Returns the UELs labels for the given UEL IDs
+        %> Returns the UELs labels for the given UEL codes
         %>
         %> @deprecated Will be removed in version 1.x.x. Use \ref
         %> GAMSTransfer::Symbol::getUELs "Symbol.getUELs".
         %>
         %> - `u = getUELLabels(d, i)` returns the UELs labels `u` for the given
-        %>   UEL IDs `i` for the UELs stored for dimension `d`.
+        %>   UEL codes `i` for the UELs stored for dimension `d`.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1689,11 +1689,11 @@ classdef Symbol < handle
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
-        function uels = getUELLabels(obj, dim, ids)
-            % Returns the UELs labels for the given UEL IDs (deprecated)
+        function uels = getUELLabels(obj, dim, codes)
+            % Returns the UELs labels for the given UEL codes (deprecated)
             %
             % u = getUELLabels(d, i) returns the UELs labels u for the given UEL
-            % IDs i for the UELs stored for dimension d.
+            % codes i for the UELs stored for dimension d.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.
@@ -1701,16 +1701,16 @@ classdef Symbol < handle
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
             warning('Method ''getUELLabels'' is deprecated. Please use getUELs instead');
-            uels = obj.getUELs(dim, ids);
+            uels = obj.getUELs(dim, codes);
         end
 
-        %> Sets the UELs without modifying UEL IDs in records
+        %> Sets the UELs without modifying UEL codes in records
         %>
         %> @deprecated Will be removed in version 1.x.x. Use \ref
         %> GAMSTransfer::Symbol::setUELs "Symbol.setUELs".
         %>
         %> - `initUELs(d, u)` sets the UELs `u` for dimension `d`. In contrast
-        %>   to the method `setUELs(u, d)`, this method does not modify UEL IDs
+        %>   to the method `setUELs(u, d)`, this method does not modify UEL codes
         %>   used in the property records.
         %>
         %> @note This can only be used if the symbol is valid. UELs are not
@@ -1720,10 +1720,10 @@ classdef Symbol < handle
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid", \ref
         %> GAMSTransfer::Symbol::setUELs "Symbol.setUELs"
         function initUELs(obj, dim, uels)
-            % Sets the UELs without modifying UEL IDs in records (deprecated)
+            % Sets the UELs without modifying UEL codes in records (deprecated)
             %
             % initUELs(d, u) sets the UELs u for dimension d. In contrast to
-            % the method setUELs(u, d), this method does not modify UEL IDs
+            % the method setUELs(u, d), this method does not modify UEL codes
             % used in the property records.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
@@ -1736,13 +1736,13 @@ classdef Symbol < handle
             obj.setUELs(uels, dim, 'rename', true);
         end
 
-        %> Sets the UELs with updating UEL IDs in records
+        %> Sets UELs
         %>
         %> - `setUELs(u, d)` sets the UELs `u` for dimension(s) `d`. This may
-        %>   modify UEL IDs used in the property records such that records still
-        %>   point to the correct UEL label when UEL IDs have changed.
+        %>   modify UEL codes used in the property records such that records still
+        %>   point to the correct UEL label when UEL codes have changed.
         %> - `setUELs(u, d, 'rename', true)` sets the UELs `u` for dimension(s)
-        %>   `d`. This does not modify UEL IDs used in the property records.
+        %>   `d`. This does not modify UEL codes used in the property records.
         %>   This can change the meaning of the records.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
@@ -1754,13 +1754,13 @@ classdef Symbol < handle
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
         function setUELs(obj, uels, dim, varargin)
-            % Sets the UELs with updating UEL IDs in records
+            % Sets UELs
             %
             % setUELs(u, d) sets the UELs u for dimension(s) d. This may modify
-            % UEL IDs used in the property records such that records still point
-            % to the correct UEL label when UEL IDs have changed.
+            % UEL codes used in the property records such that records still point
+            % to the correct UEL label when UEL codes have changed.
             % setUELs(u, d, 'rename', true) sets the UELs u for dimension(s) d.
-            % This does not modify UEL IDs used in the property records. This
+            % This does not modify UEL codes used in the property records. This
             % can change the meaning of the records.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
@@ -2043,7 +2043,7 @@ classdef Symbol < handle
         %>   be a `struct` (field names = old UELs, field values = new UELs),
         %>   `containers.Map` (keys = old UELs, values = new UELs) or `cellstr`
         %>   (full list of UELs, must have as many entries as current UELs). The
-        %>   IDs for renamed UELs do not change.
+        %>   codes for renamed UELs do not change.
         %> - `renameUELs(u, d)` renames the UELs `u` for dimension(s) `d`. `u`
         %>   as above.
         %>
@@ -2065,7 +2065,7 @@ classdef Symbol < handle
             % struct (field names = old UELs, field values = new UELs),
             % containers.Map (keys = old UELs, values = new UELs) or cellstr
             % (full list of UELs, must have as many entries as current UELs).
-            % The IDs for renamed UELs do not change.
+            % The codes for renamed UELs do not change.
             % renameUELs(u, d) renames the UELs u for dimension(s) d. u as
             % above.
             %
@@ -2348,7 +2348,7 @@ classdef Symbol < handle
             end
             domains = reshape(domains, [numel(domains), 1]);
 
-            % in indexed mode we don't need to translate strings to uel ids
+            % in indexed mode we don't need to translate strings to uel codes
             if obj.container.indexed
                 obj.records.(label) = domains;
                 return;
