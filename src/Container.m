@@ -931,31 +931,14 @@ classdef Container < GAMSTransfer.BaseContainer
         end
 
         %> Generate universe set (UEL order in GDX)
+        %>
+        %> @deprecated Will be removed in version 1.x.x. Use \ref
+        %> GAMSTransfer::Container::getUELs "Container.getUELs".
         function list = getUniverseSet(obj)
-            % Generate universe set (UEL order in GDX)
+            % Generate universe set (UEL order in GDX) (deprecated)
 
-            map = javaObject('java.util.LinkedHashMap');
-
-            % collect uels
-            symbols = fieldnames(obj.data);
-            for i = 1:numel(symbols)
-                symbol = obj.data.(symbols{i});
-                for j = 1:symbol.dimension
-                    uels = symbol.getUELs(j);
-                    for k = 1:numel(uels)
-                        map.put(uels{k}, true);
-                    end
-                end
-            end
-
-            % get list of keys
-            list = cell(1, map.keySet().size());
-            it = map.keySet().iterator();
-            i = 1;
-            while it.hasNext()
-                list{i} = char(it.next());
-                i = i + 1;
-            end
+            warning('Method ''getUniverseSet'' is deprecated. Please use ''getUELs'' instead');
+            list = obj.getUELs();
         end
 
         %> Checks correctness of all symbols
@@ -1003,6 +986,52 @@ classdef Container < GAMSTransfer.BaseContainer
             end
         end
 
+        %> Get UELs from all symbols
+        %>
+        %> - `u = getUELs()` returns the UELs across all symbols.
+        %> - `u = getUELs(_, 'symbols', s)` returns the UELs across symbols `s`.
+        %> - `u = getUELs(_, "ignore_unused", true)` returns only those UELs
+        %>   that are actually used in the records.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the container is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Container::isValid "Container.isValid"
+        function uels = getUELs(obj, varargin)
+            % Get UELs from all symbols
+            %
+            % u = getUELs() returns the UELs across all symbols.
+            % u = getUELs(_, 'symbols', s) returns the UELs across symbols s.
+            % u = getUELs(_, "ignore_unused", true) returns only those UELs
+            % that are actually used in the records.
+            %
+            % Note: This can only be used if the container is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Container.isValid
+
+            % input arguments
+            p = inputParser();
+            addParameter(p, 'symbols', {}, @iscellstr);
+            addParameter(p, 'ignore_unused', false, @islogical);
+            parse(p, varargin{:});
+            if isempty(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = obj.getSymbolNames(p.Results.symbols);
+            end
+
+            uels = {};
+            for i = 1:numel(symbols)
+                uels = [uels; obj.data.(symbols{i}).getUELs('ignore_unused', p.Results.ignore_unused)];
+                uels = unique(uels, 'stable');
+            end
+        end
+
         %> Removes UELs from all symbols
         %>
         %> - `removeUELs()` removes all unused UELs for all symbols.
@@ -1029,12 +1058,6 @@ classdef Container < GAMSTransfer.BaseContainer
 
             if nargin < 2
                 uels = {};
-            end
-            if ~obj.isValid()
-                error('Container must be valid in order to manage UELs.');
-            end
-            if obj.indexed
-                error('UELs not supported in indexed mode.');
             end
             if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
                 error('Argument ''uels'' must be ''char'' or ''cellstr''.');
@@ -1075,13 +1098,6 @@ classdef Container < GAMSTransfer.BaseContainer
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
-
-            if ~obj.isValid()
-                error('Container must be valid in order to manage UELs.');
-            end
-            if obj.indexed
-                error('UELs not supported in indexed mode.');
-            end
 
             symbols = fieldnames(obj.data);
             for i = 1:numel(symbols)

@@ -32,7 +32,6 @@ function success = test_container(cfg)
     test_idx_describe(t, cfg, 'c');
     test_const2standard(t, cfg);
     test_remove(t, cfg);
-    test_universalset(t, cfg);
     [~, n_fails1] = t.summary();
 
     t = GAMSTest('container_cc');
@@ -2026,43 +2025,5 @@ function test_remove(t, cfg)
     t.assert(~i1.isValid());
     t.assert(~a1.isValid());
     t.assert(~x1.isValid());
-
-end
-
-function test_universalset(t, cfg)
-
-    gdx = GAMSTransfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
-
-    t.add('universalset_1');
-    uels = gdx.getUniverseSet();
-    t.assert(iscellstr(uels));
-    t.assert(numel(uels) == 10);
-    t.assertEquals(uels{1}, 'i1');
-    t.assertEquals(uels{2}, 'i3');
-    t.assertEquals(uels{3}, 'i4');
-    t.assertEquals(uels{4}, 'i6');
-    t.assertEquals(uels{5}, 'i10');
-    t.assertEquals(uels{6}, 'j2');
-    t.assertEquals(uels{7}, 'j5');
-    t.assertEquals(uels{8}, 'j7');
-    t.assertEquals(uels{9}, 'j8');
-    t.assertEquals(uels{10}, 'j9');
-
-    t.add('universalset_2');
-    gdx.data.i.addUELs('j9', 1);
-    uels = gdx.getUniverseSet();
-    t.assert(iscellstr(uels));
-    t.assert(numel(uels) == 10);
-    t.assertEquals(uels{1}, 'i1');
-    t.assertEquals(uels{2}, 'i3');
-    t.assertEquals(uels{3}, 'i4');
-    t.assertEquals(uels{4}, 'i6');
-    t.assertEquals(uels{5}, 'i10');
-    t.assertEquals(uels{6}, 'j9');
-    t.assertEquals(uels{7}, 'j2');
-    t.assertEquals(uels{8}, 'j5');
-    t.assertEquals(uels{9}, 'j7');
-    t.assertEquals(uels{10}, 'j8');
 
 end

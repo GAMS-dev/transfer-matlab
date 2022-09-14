@@ -311,7 +311,7 @@ function test_symbol_uels(t, cfg)
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
-    t.add('symbol_uels');
+    t.add('symbol_uels_get_1');
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i1');
@@ -326,7 +326,20 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
 
-    t.add('symbol_uels_getlabels');
+    t.add('symbol_uels_get_2');
+    uels = x.getUELs();
+    t.assert(numel(uels) == 9);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i6');
+    t.assertEquals(uels{4}, 'i10');
+    t.assertEquals(uels{5}, 'j2');
+    t.assertEquals(uels{6}, 'j5');
+    t.assertEquals(uels{7}, 'j7');
+    t.assertEquals(uels{8}, 'j8');
+    t.assertEquals(uels{9}, 'j9');
+
+    t.add('symbol_uels_get_3');
     uels = x.getUELs(1, [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5]);
     t.assert(numel(uels) == 12);
     t.assertEquals(uels{1}, '<undefined>');
@@ -341,6 +354,47 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{10}, 'i6');
     t.assertEquals(uels{11}, 'i10');
     t.assertEquals(uels{12}, '<undefined>');
+
+    t.add('symbol_uels_get_4');
+    uels = c.getUELs();
+    t.assert(numel(uels) == 10);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i4');
+    t.assertEquals(uels{4}, 'i6');
+    t.assertEquals(uels{5}, 'i10');
+    t.assertEquals(uels{6}, 'j2');
+    t.assertEquals(uels{7}, 'j5');
+    t.assertEquals(uels{8}, 'j7');
+    t.assertEquals(uels{9}, 'j8');
+    t.assertEquals(uels{10}, 'j9');
+
+    t.add('symbol_uels_get_5');
+    uels = c.getUELs('symbols', {'x'});
+    t.assert(numel(uels) == 9);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i6');
+    t.assertEquals(uels{4}, 'i10');
+    t.assertEquals(uels{5}, 'j2');
+    t.assertEquals(uels{6}, 'j5');
+    t.assertEquals(uels{7}, 'j7');
+    t.assertEquals(uels{8}, 'j8');
+    t.assertEquals(uels{9}, 'j9');
+
+    t.add('symbol_uels_get_6');
+    uels = c.getUELs('symbols', {'i', 'j'});
+    t.assert(numel(uels) == 10);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i4');
+    t.assertEquals(uels{4}, 'i6');
+    t.assertEquals(uels{5}, 'i10');
+    t.assertEquals(uels{6}, 'j2');
+    t.assertEquals(uels{7}, 'j5');
+    t.assertEquals(uels{8}, 'j7');
+    t.assertEquals(uels{9}, 'j8');
+    t.assertEquals(uels{10}, 'j9');
 
     t.add('symbol_uels_add_1');
     x.addUELs('i11', 1);

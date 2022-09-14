@@ -20,6 +20,7 @@ GAMS Transfer Matlab v0.3.0
   for a list of symbol names of any case.
 - Added method `Container.hasSymbols` to check if symbol name (case insensitive)
   exists.
+- Added method `Container.getUELs` to get UELs from all symbols.
 - Added method `Container.removeUELs` to remove UELs from all symbols.
 - Added method `Container.renameUELs` to rename UELs in all symbols.
 - Added method `Symbol.reorderUELs` to reorder UELs without changing the meaning
@@ -38,8 +39,10 @@ GAMS Transfer Matlab v0.3.0
   supplied order. To establish a custom order after the read, use
   `reorderSymbols`.
 - Added possibility to filter UEL IDs in `Symbol.getUELs`.
+- Added possibility to pass a vector of dimensions to `Symbol.getUELs`.
 - Deprecated `Symbol.getUELLabels`. Use `Symbol.getUELs` instead.
 - Deprecated `Symbol.initUELs`. Use `Symbol.setUELs` instead.
+- Deprecated `Container.getUniverseSet`. Use `Container.getUELs` instead.
 - Fixed `Symbol.transformRecords` (table-like to matrix-like formats) in case
   the domain set records and UELs differ.
 

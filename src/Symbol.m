@@ -1542,12 +1542,11 @@ classdef Symbol < handle
 
         %> Returns the UELs used in this symbol
         %>
-        %> - `u = getUELs(d)` returns the UELs used in dimension `d` of this
-        %>   symbol
-        %> - `u = getUELs(d, i)` returns the UELs `u` for the given UEL IDs `i`
-        %>   for the UELs stored for dimension `d`.
+        %> - `u = getUELs()` returns the UELs across all dimensions.
+        %> - `u = getUELs(d)` returns the UELs used in dimension(s) `d`.
+        %> - `u = getUELs(d, i)` returns the UELs `u` for the given UEL IDs `i`.
         %> - `u = getUELs(d, _, "ignore_unused", true)` returns only those UELs
-        %>   that are actually used in the records
+        %>   that are actually used in the records.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1557,34 +1556,44 @@ classdef Symbol < handle
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
-        function uels = getUELs(obj, dim, varargin)
+        function uels = getUELs(obj, varargin)
             % Returns the UELs used in this symbol
             %
-            % u = getUELs(d) returns the UELs used in dimension d of this symbol
-            % u = getUELs(d, i) returns the UELs u for the given UEL IDs i for
-            % the UELs stored for dimension d.
-            % u = getUELs(d, _, 'ignore_unused', true) returns only those UELs that
-            % are actually used in the records
+            % u = getUELs() returns the UELs across all dimensions.
+            % u = getUELs(d) returns the UELs used in dimension(s) d.
+            % u = getUELs(d, i) returns the UELs u for the given UEL IDs i.
+            % u = getUELs(_, 'ignore_unused', true) returns only those UELs that
+            % are actually used in the records.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
-            is_parname = @(x) strcmpi(x, 'ignore_unused');
-
-            % check required arguments
-            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
-                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            if obj.dimension_ == 0
+                uels = {};
+                return;
             end
+
+            is_parname = @(x) strcmpi(x, 'ignore_unused');
 
             % check optional arguments
             i = 1;
+            dim = 1:obj.dimension_;
             ids = [];
             while true
                 term = true;
-                if i == 1 && nargin > 2
-                    if isnumeric(varargin{i})
+                if i == 1 && nargin > 1
+                    if isnumeric(dim) && isvector(dim) && all(dim == round(dim)) && ...
+                        min(dim) >= 1 && max(dim) <= obj.dimension_ && ~is_parname(varargin{i})
+                        dim = varargin{i};
+                        i = i + 1;
+                        term = false;
+                    elseif ~is_parname(varargin{i})
+                        error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
+                    end
+                elseif i == 2 && nargin > 2
+                    if isnumeric(varargin{i}) && ~is_parname(varargin{i})
                         ids = varargin{i};
                         i = i + 1;
                         term = false;
@@ -1592,14 +1601,14 @@ classdef Symbol < handle
                         error('Argument ''ids'' must be ''numeric''.');
                     end
                 end
-                if term || i > 1
+                if term || i > 2
                     break;
                 end
             end
 
             % check parameter arguments
             ignore_unused = false;
-            while i < nargin - 2
+            while i < nargin - 1
                 if strcmpi(varargin{i}, 'ignore_unused')
                     ignore_unused = varargin{i+1};
                     if ~islogical(ignore_unused)
@@ -1612,7 +1621,7 @@ classdef Symbol < handle
             end
 
             % check number of arguments
-            if i <= nargin - 2
+            if i <= nargin - 1
                 error('Invalid number of arguments');
             end
 
@@ -1623,39 +1632,44 @@ classdef Symbol < handle
                 error('UELs not supported in indexed mode.');
             end
 
-            switch obj.format_
-            case GAMSTransfer.RecordsFormat.EMPTY
-                uels = {};
-                return
-            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
-            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
-                uels = obj.domain_{dim}.getUELs(1, ids, 'ignore_unused', true);
-                return
-            otherwise
-                error('Symbol must be valid in order to manage UELs.');
+            uels = {};
+            for i = dim
+                switch obj.format_
+                case GAMSTransfer.RecordsFormat.EMPTY
+                    uels_i = {};
+                case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
+                    uels_i = obj.domain_{i}.getUELs(1, ids, 'ignore_unused', true);
+                case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
+                    label = obj.domain_labels_{i};
+                    if obj.container.features.categorical
+                        if ignore_unused
+                            uels_i = categories(removecats(obj.records.(label)));
+                        else
+                            uels_i = categories(obj.records.(label));
+                        end
+                    else
+                        uels_i = obj.uels.(label).get();
+                        if ignore_unused
+                            uels_i = uels_i(unique(obj.records.(label)));
+                        end
+                    end
+
+                    % filter for given ids
+                    if ~isempty(ids)
+                        uels_i_orig = uels_i;
+                        idx = ids >= 1 & ids <= numel(uels_i_orig);
+                        uels_i = cell(numel(ids), 1);
+                        uels_i(idx) = uels_i_orig(ids(idx));
+                        uels_i(~idx) = {'<undefined>'};
+                    end
+                otherwise
+                    error('Symbol must be valid in order to manage UELs.');
+                end
+                uels = [uels; reshape(uels_i, [numel(uels_i), 1])];
             end
 
-            label = obj.domain_labels_{dim};
-            if obj.container.features.categorical
-                if ignore_unused
-                    uels = categories(removecats(obj.records.(label)));
-                else
-                    uels = categories(obj.records.(label));
-                end
-            else
-                uels = obj.uels.(label).get();
-                if ignore_unused
-                    uels = uels(unique(obj.records.(label)));
-                end
-            end
-
-            % filter for given ids
-            if ~isempty(ids)
-                uels_orig = uels;
-                idx = ids >= 1 & ids <= numel(uels_orig);
-                uels = cell(1, numel(ids));
-                uels(idx) = uels_orig(ids(idx));
-                uels(~idx) = {'<undefined>'};
+            if numel(dim) > 1
+                uels = unique(uels, 'stable');
             end
         end
 
