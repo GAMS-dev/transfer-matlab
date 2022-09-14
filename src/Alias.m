@@ -666,12 +666,12 @@ classdef Alias < handle
         %> Sets the UELs with updating UEL IDs in records
         %>
         %> @see \ref GAMSTransfer::Symbol::setUELs "Symbol.setUELs"
-        function setUELs(obj, dim, uels)
+        function setUELs(obj, uels, dim, varargin)
             % Sets the UELs with updating UEL IDs in records
             %
             % See also: GAMSTransfer.Symbol.setUELs
 
-            obj.alias_with.setUELs(dim, uels);
+            obj.alias_with.setUELs(uels, dim, varargin{:});
         end
 
         %> Adds UELs to the symbol

@@ -379,7 +379,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{4}, 'i10');
 
     t.add('symbol_uels_set_1');
-    x.setUELs(1, {'i1', 'i3', 'i6', 'i10'});
+    x.setUELs({'i1', 'i3', 'i6', 'i10'}, 1);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i1');
@@ -394,7 +394,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 3);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
-    x.setUELs(1, {'i1', 'i3', 'i10'});
+    x.setUELs({'i1', 'i3', 'i10'}, 1);
     t.assert(~x.isValid());
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);
@@ -410,7 +410,7 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_set_2');
-    x.setUELs(1, 'i1');
+    x.setUELs('i1', 1);
     t.assert(~x.isValid());
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);
@@ -434,7 +434,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 3);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
-    x.initUELs(1, {'i1', 'i3', 'i4', 'i6', 'i10'});
+    x.setUELs({'i1', 'i3', 'i4', 'i6', 'i10'}, 1, 'rename', true);
     t.assert(x.isValid());
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);
@@ -451,7 +451,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{3}, 'i4');
     t.assertEquals(uels{4}, 'i6');
     t.assertEquals(uels{5}, 'i10');
-    x.initUELs(1, {'i3', 'i1', 'i4', 'i10', 'i5'});
+    x.setUELs({'i3', 'i1', 'i4', 'i10', 'i5'}, 1, 'rename', true);
     t.assert(x.isValid());
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);

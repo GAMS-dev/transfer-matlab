@@ -588,7 +588,7 @@ classdef Symbol < handle
             if ~obj.container.indexed && ~obj.container.features.categorical
                 for i = 1:obj.dimension_
                     if ~isempty(uels{i})
-                        obj.initUELs(i, uels{i});
+                        obj.setUELs(uels{i}, i, 'rename', true);
                     end
                 end
 
@@ -844,7 +844,8 @@ classdef Symbol < handle
                     % In case of categorical this has already happen
                     if ~obj.container.indexed && ~obj.container.features.categorical
                         for i = 1:obj.dimension_
-                            obj.initUELs(i, obj.domain_{i}.getUELs(1, 'ignore_unused', true));
+                            obj.setUELs(obj.domain_{i}.getUELs(1, 'ignore_unused', true), ...
+                                i, 'rename', true);
                         end
                     end
 
@@ -1693,8 +1694,11 @@ classdef Symbol < handle
 
         %> Sets the UELs without modifying UEL IDs in records
         %>
+        %> @deprecated Will be removed in version 1.x.x. Use \ref
+        %> GAMSTransfer::Symbol::setUELs "Symbol.setUELs".
+        %>
         %> - `initUELs(d, u)` sets the UELs `u` for dimension `d`. In contrast
-        %>   to the method `setUELs(d, u)`, this method does not modify UEL IDs
+        %>   to the method `setUELs(u, d)`, this method does not modify UEL IDs
         %>   used in the property records.
         %>
         %> @note This can only be used if the symbol is valid. UELs are not
@@ -1704,10 +1708,10 @@ classdef Symbol < handle
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid", \ref
         %> GAMSTransfer::Symbol::setUELs "Symbol.setUELs"
         function initUELs(obj, dim, uels)
-            % Sets the UELs without modifying UEL IDs in records
+            % Sets the UELs without modifying UEL IDs in records (deprecated)
             %
             % initUELs(d, u) sets the UELs u for dimension d. In contrast to
-            % the method setUELs(d, u), this method does not modify UEL IDs
+            % the method setUELs(u, d), this method does not modify UEL IDs
             % used in the property records.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
@@ -1716,48 +1720,18 @@ classdef Symbol < handle
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid,
             % GAMSTransfer.Symbol.setUELs
 
-            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
-                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
-            end
-            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
-                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
-            end
-
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
-            end
-            if obj.container.indexed
-                error('UELs not supported in indexed mode.');
-            end
-
-            switch obj.format_
-            case GAMSTransfer.RecordsFormat.EMPTY
-                if obj.container.features.categorical
-                    warning('Cannot init UELs to empty symbol.');
-                    return
-                end
-            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
-            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
-                error('Matrix formats do not maintain UELs. Modify domain set instead.');
-            otherwise
-                error('Symbol must be valid in order to manage UELs.');
-            end
-
-            label = obj.domain_labels_{dim};
-            if obj.container.features.categorical
-                obj.records.(label) = categorical(double(obj.records.(label)), ...
-                    1:numel(uels), uels, 'Ordinal', true);
-            else
-                obj.uels.(label).set(uels, []);
-            end
+            warning('Method ''initUELs'' is deprecated. Please use setUELs instead');
+            obj.setUELs(uels, dim, 'rename', true);
         end
 
         %> Sets the UELs with updating UEL IDs in records
         %>
-        %> - `setUELs(d, u)` sets the UELs `u` for dimension `d`. In contrast to
-        %>   the method `initUELs(d, u)`, this method may modify UEL IDs used in
-        %>   the property records such that records still point to the correct
-        %>   UEL label when UEL IDs have changed.
+        %> - `setUELs(u, d)` sets the UELs `u` for dimension(s) `d`. This may
+        %>   modify UEL IDs used in the property records such that records still
+        %>   point to the correct UEL label when UEL IDs have changed.
+        %> - `setUELs(u, d, 'rename', true)` sets the UELs `u` for dimension(s)
+        %>   `d`. This does not modify UEL IDs used in the property records.
+        %>   This can change the meaning of the records.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1766,27 +1740,50 @@ classdef Symbol < handle
         %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
-        %> GAMSTransfer::Symbol::isValid "Symbol.isValid", \ref
-        %> GAMSTransfer::Symbol::initUELs "Symbol.initUELs"
-        function setUELs(obj, dim, uels)
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
+        function setUELs(obj, uels, dim, varargin)
             % Sets the UELs with updating UEL IDs in records
             %
-            % setUELs(d, u) sets the UELs u for dimension d. In contrast to the
-            % method initUELs(d, u), this method may modify UEL IDs used in the
-            % property records such that records still point to the correct UEL
-            % label when UEL IDs have changed.
+            % setUELs(u, d) sets the UELs u for dimension(s) d. This may modify
+            % UEL IDs used in the property records such that records still point
+            % to the correct UEL label when UEL IDs have changed.
+            % setUELs(u, d, 'rename', true) sets the UELs u for dimension(s) d.
+            % This does not modify UEL IDs used in the property records. This
+            % can change the meaning of the records.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.
             %
-            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid,
-            % GAMSTransfer.Symbol.initUELs
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
+            % check required arguments
             if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
                 error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
             end
             if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
                 error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            end
+
+            % check optional arguments
+            i = 1;
+
+            % check parameter arguments
+            rename = false;
+            while i < nargin - 3
+                if strcmpi(varargin{i}, 'rename')
+                    rename = varargin{i+1};
+                    if ~islogical(rename)
+                        error('Argument ''rename'' must be logical.');
+                    end
+                else
+                    error('Unknown argument name.');
+                end
+                i = i + 2;
+            end
+
+            % check number of arguments
+            if i <= nargin - 3
+                error('Invalid number of arguments');
             end
 
             if ~obj.isValid()
@@ -1797,11 +1794,6 @@ classdef Symbol < handle
             end
 
             switch obj.format_
-            case GAMSTransfer.RecordsFormat.EMPTY
-                if obj.container.features.categorical
-                    warning('Cannot set UELs to empty symbol.');
-                    return
-                end
             case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
                 error('Matrix formats do not maintain UELs. Modify domain set instead.');
@@ -1809,14 +1801,29 @@ classdef Symbol < handle
                 error('Symbol must be valid in order to manage UELs.');
             end
 
-            label = obj.domain_labels_{dim};
-            if obj.container.features.categorical
-                obj.records.(label) = setcats(obj.records.(label), uels);
-            else
-                if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
-                    obj.uels.(label).set(uels, []);
+            for i = dim
+                label = obj.domain_labels_{i};
+                if rename
+                    if obj.container.features.categorical
+                        obj.records.(label) = categorical(double(obj.records.(label)), ...
+                            1:numel(uels), uels, 'Ordinal', true);
+                    else
+                        obj.uels.(label).set(uels, []);
+                    end
                 else
-                    obj.records.(label) = obj.uels.(label).set(uels, obj.records.(label));
+                    if obj.container.features.categorical
+                        if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
+                            warning('Cannot set UELs to empty symbol.');
+                        else
+                            obj.records.(label) = setcats(obj.records.(label), uels);
+                        end
+                    else
+                        if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
+                            obj.uels.(label).set(uels, []);
+                        else
+                            obj.records.(label) = obj.uels.(label).set(uels, obj.records.(label));
+                        end
+                    end
                 end
             end
         end

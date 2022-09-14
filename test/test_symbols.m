@@ -2173,7 +2173,7 @@ function test_setRecords(t, cfg)
             tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
         else
             tbl = table([1; 2; 3], [1; 2; 3]);
-            % s3.initUELs(1, {'i1'; 'i2'; 'i3'}); % need to set records first
+            % s3.setUELs({'i1'; 'i2'; 'i3'}, 1, 'rename', true); % need to set records first
         end
         try
             t.assert(false);
@@ -2187,12 +2187,12 @@ function test_setRecords(t, cfg)
             tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
         else
             tbl = table([1; 2; 3], [1; 2; 3]);
-            % s3.initUELs(1, {'i1'; 'i2'; 'i3'}); % need to set records first
+            % s3.setUELs({'i1'; 'i2'; 'i3'}, 1, 'rename', true); % need to set records first
         end
         tbl.Properties.VariableNames = {'i1_1', 'level'};
         s3.setRecords(tbl);
         if ~gdx.features.categorical
-            s3.initUELs(1, {'i1'; 'i2'; 'i3'});
+            s3.setUELs({'i1'; 'i2'; 'i3'}, 1, 'rename', true);
         end
         t.assertEquals(s3.format, 'table');
         t.assert(s3.isValid());

@@ -414,7 +414,6 @@ explained below.
 Each symbol maintains its own list of UELs per dimension, which can be accessed
 and modified via the methods \ref GAMSTransfer::Symbol::getUELs
 "Symbol.getUELs", \ref GAMSTransfer::Symbol::setUELs "Symbol.setUELs", \ref
-GAMSTransfer::Symbol::initUELs "Symbol.initUELs", \ref
 GAMSTransfer::Symbol::addUELs "Symbol.addUELs", \ref
 GAMSTransfer::Symbol::removeUELs "Symbol.removeUELs" and \ref
 GAMSTransfer::Symbol::renameUELs "Symbol.renameUELs" (or the Matlab functions
@@ -426,9 +425,9 @@ number of UELs stored independently for each dimension.
 UEL IDs to the UEL labels. These changes are applied to the IDs used in \ref
 GAMSTransfer::Symbol::records "Symbol.records". This implies that removing a UEL
 that is used in the \ref GAMSTransfer::Symbol::records "Symbol.records" will
-then lead to an invalid domain entry (displayed as `<undefined>` in Matlab). If
-these updates are not desired, use the method \ref
-GAMSTransfer::Symbol::initUELs "Symbol.initUELs" instead.
+then lead to an invalid domain entry (displayed as `<undefined>` in Matlab). For
+\ref GAMSTransfer::Symbol::setUELs "Symbol.setUELs", these updates can be
+disabled by passing the arguments `'rename', true`.
 
 For example, continuing the \ref GAMSTRANSFER_MATLAB_GETSTARTED_EXAMPLE from
 above, the UELs are:
@@ -451,7 +450,7 @@ ans =
 ```
 Changing these can invalidate some records:
 ```
->> x.setUELs(1, {'madison', 'new-york', 'seattle'});
+>> x.setUELs({'madison', 'new-york', 'seattle'}, 1);
 >> categories(x.records.i_1)
 
 ans =

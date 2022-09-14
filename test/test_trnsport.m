@@ -104,7 +104,7 @@ function success = test_trnsport(cfg)
                     {'seattle'; 'san-diego'}));
             else
                 i.records = struct('uni_1', (1:2)');
-                i.initUELs(1, {'seattle'; 'san-diego'});
+                i.setUELs({'seattle'; 'san-diego'}, 1, 'rename', true);
             end
             j = GAMSTransfer.Set(m, 'j', 'description', 'markets');
             if m.features.categorical
@@ -112,7 +112,7 @@ function success = test_trnsport(cfg)
                     {'new-york'; 'chicago'; 'topeka'}));
             else
                 j.records = struct('uni_1', (1:3)');
-                j.initUELs(1, {'new-york'; 'chicago'; 'topeka'});
+                j.setUELs({'new-york'; 'chicago'; 'topeka'}, 1, 'rename', true);
             end
             a = GAMSTransfer.Parameter(m, 'a', i, 'description', 'capacity of plant i in cases');
             a.records = struct('value', [350; 600]);

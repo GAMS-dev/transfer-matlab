@@ -5,6 +5,10 @@ GAMS Transfer Matlab v0.3.0
   `symbol` and `Symbol` or `SYMBOL`.
 - Breaking: Changed `Symbol.addUELs` signature from `addUELs(dim, uels)` to
   `addUELs(uels, dim)`.
+- Breaking: Changed `Symbol.setUELs` signature from `setUELs(dim, uels)` to
+  `setUELs(uels, dim)` and `setUELS(_, 'rename', true/false)`. Setting `rename`
+  to `true` triggers the old `Symbol.initUELs`. `dim` is now allowed to accept a
+  vector of dimensions.
 - Added method `Container.getSymbolNames` to return the original symbol names
   for a list of symbol names of any case.
 - Added method `Container.hasSymbols` to check if symbol name (case insensitive)
@@ -24,6 +28,7 @@ GAMS Transfer Matlab v0.3.0
   `reorderSymbols`.
 - Added possibility to filter UEL IDs in `Symbol.getUELs`.
 - Deprecated `Symbol.getUELLabels`. Use `Symbol.getUELs` instead.
+- Deprecated `Symbol.initUELs`. Use `Symbol.setUELs` instead.
 - Fixed `Symbol.transformRecords` (table-like to matrix-like formats) in case
   the domain set records and UELs differ.
 

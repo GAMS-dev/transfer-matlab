@@ -368,7 +368,7 @@ classdef Container < GAMSTransfer.BaseContainer
                             if isempty(symbol.uels{j})
                                 continue
                             end
-                            obj.data.(symbol.name).initUELs(j, symbol.uels{j});
+                            obj.data.(symbol.name).setUELs(symbol.uels{j}, j, 'rename', true);
                         end
                     end
                 end
