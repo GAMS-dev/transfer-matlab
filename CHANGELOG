@@ -17,6 +17,8 @@ GAMS Transfer Matlab v0.3.0
 - Added method `Container.hasSymbols` to check if symbol name (case insensitive)
   exists.
 - Added method `Container.removeUELs` to remove UELs from all symbols.
+- Added method `Symbol.reorderUELs` to reorder UELs without changing the meaning
+  of records.
 - Changed `Container.getSymbols`, `Container.removeSymbol`,
   `Container.renameSymbol`, `Container.describe*` and others that use
   `Container.getSymbols` to accept symbol names case insensitively.

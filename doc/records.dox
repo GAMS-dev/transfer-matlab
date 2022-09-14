@@ -415,8 +415,9 @@ Each symbol maintains its own list of UELs per dimension, which can be accessed
 and modified via the methods \ref GAMSTransfer::Symbol::getUELs
 "Symbol.getUELs", \ref GAMSTransfer::Symbol::setUELs "Symbol.setUELs", \ref
 GAMSTransfer::Symbol::addUELs "Symbol.addUELs", \ref
-GAMSTransfer::Symbol::removeUELs "Symbol.removeUELs" and \ref
-GAMSTransfer::Symbol::renameUELs "Symbol.renameUELs" (or the Matlab functions
+GAMSTransfer::Symbol::removeUELs "Symbol.removeUELs", \ref
+GAMSTransfer::Symbol::renameUELs "Symbol.renameUELs" and \ref
+GAMSTransfer::Symbol::reorderUELs "Symbol.reorderUELs" (or the Matlab functions
 for modifying `categorical` directly). The UEL IDs are numbered from 1 to the
 number of UELs stored independently for each dimension.
 

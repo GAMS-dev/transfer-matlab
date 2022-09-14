@@ -1826,6 +1826,49 @@ classdef Symbol < handle
             end
         end
 
+        %> Reorders UELs
+        %>
+        %> Same functionality as `setUELs(uels, dim)`, but checks that no new
+        %> categories are added. The meaning of records does not change.
+        %>
+        %> @see \ref GAMSTransfer::Symbol::setUELs "Symbol.setUELs"
+        function reorderUELs(obj, uels, dim)
+            % Reorders UELs
+            %
+            % Same functionality as setUELs(uels, dim), but checks that no new
+            % categories are added. The meaning of records does not change.
+            %
+            % See also: GAMSTransfer.Symbol.setUELs
+
+            if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
+                error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
+            end
+            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
+                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            end
+
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+            if obj.container.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
+            for i = dim
+                current_uels = obj.getUELs(i);
+
+                if numel(uels) ~= numel(current_uels)
+                    error('Number of UELs %d not equal to number of current UELs %d', ...
+                        numel(uels), numel(current_uels));
+                end
+                if ~all(ismember(current_uels, uels))
+                    error('Adding new UELs not supported for reordering');
+                end
+            end
+
+            obj.setUELs(uels, dim);
+        end
+
         %> Adds UELs to the symbol
         %>
         %> - `addUELs(u, d)` adds the UELs `u` for dimension(s) `d`.

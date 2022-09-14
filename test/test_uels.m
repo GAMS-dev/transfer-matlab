@@ -832,4 +832,62 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
 
+    c = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    c.read(cfg.filenames{1}, 'format', 'struct');
+    x = c.data.x;
+
+    t.add('symbol_uels_reorder_1');
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 4);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i6');
+    t.assertEquals(uels{4}, 'i10');
+    ids = int64(x.records.i_1);
+    t.assert(numel(ids) == 6);
+    t.assert(ids(1) == 1);
+    t.assert(ids(2) == 2);
+    t.assert(ids(3) == 2);
+    t.assert(ids(4) == 3);
+    t.assert(ids(5) == 3);
+    t.assert(ids(6) == 4);
+    x.reorderUELs({'i3', 'i10', 'i1', 'i6'}, 1);
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 4);
+    t.assertEquals(uels{1}, 'i3');
+    t.assertEquals(uels{2}, 'i10');
+    t.assertEquals(uels{3}, 'i1');
+    t.assertEquals(uels{4}, 'i6');
+    ids = int64(x.records.i_1);
+    t.assert(numel(ids) == 6);
+    t.assert(ids(1) == 3);
+    t.assert(ids(2) == 1);
+    t.assert(ids(3) == 1);
+    t.assert(ids(4) == 4);
+    t.assert(ids(5) == 4);
+    t.assert(ids(6) == 2);
+
+    t.add('symbol_uels_reorder_2');
+    try
+        t.assert(false);
+        x.reorderUELs({'i6', 'i3'}, 1);
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Number of UELs 2 not equal to number of current UELs 4');
+    end
+    try
+        t.assert(false);
+        x.reorderUELs({'i3', 'i5', 'i1', 'i6'}, 1);
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Adding new UELs not supported for reordering');
+    end
+    try
+        t.assert(false);
+        x.reorderUELs({'i3', 'i1', 'i1', 'i6'}, 1);
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Adding new UELs not supported for reordering');
+    end
+
 end
