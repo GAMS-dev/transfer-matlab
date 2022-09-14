@@ -12,11 +12,16 @@ GAMS Transfer Matlab v0.3.0
 - Breaking: Changed `Symbol.removeUELs` signature from `removeUELs(dim, uels)`
   to `removeUELs()`, `removeUELs(uels)` and `removeUELs(uels, dim)`. `dim` is
   now allowed to accept a vector of dimensions.
+- Breaking: Changed `Symbol.renameUELs` signature from `renameUELs(dim, olduels,
+  newuels)` to `renameUELs(uels)` and `renameUELs(uels, dim)`. `uels` can now be
+  `cellstr`, `struct` or `containers.Map`. `dim` is now allowed to accept a
+  vector of dimensions.
 - Added method `Container.getSymbolNames` to return the original symbol names
   for a list of symbol names of any case.
 - Added method `Container.hasSymbols` to check if symbol name (case insensitive)
   exists.
 - Added method `Container.removeUELs` to remove UELs from all symbols.
+- Added method `Container.renameUELs` to rename UELs in all symbols.
 - Added method `Symbol.reorderUELs` to reorder UELs without changing the meaning
   of records.
 - Changed `Container.getSymbols`, `Container.removeSymbol`,

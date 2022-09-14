@@ -2025,8 +2025,16 @@ classdef Symbol < handle
 
         %> Renames UELs in the symbol
         %>
-        %> - `renameUELs(d, u1, u2)` renames the UELs `u1` to the labels given
-        %>   in `u2` for dimension `d`. The IDs for these UELs do not change.
+        %> - `renameUELs(u)` renames the UELs `u` for all dimensions. `u` can
+        %>   be a `struct` (field names = old UELs, field values = new UELs),
+        %>   `containers.Map` (keys = old UELs, values = new UELs) or `cellstr`
+        %>   (full list of UELs, must have as many entries as current UELs). The
+        %>   IDs for renamed UELs do not change.
+        %> - `renameUELs(u, d)` renames the UELs `u` for dimension(s) `d`. `u`
+        %>   as above.
+        %>
+        %> If an old UEL is provided in `struct` or `containers.Map` that is not
+        %> present in the symbol UELs, it will be silently ignored.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -2036,25 +2044,38 @@ classdef Symbol < handle
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
-        function renameUELs(obj, dim, olduels, newuels)
+        function renameUELs(obj, uels, dim)
             % Renames UELs in the symbol
             %
-            % renameUELs(d, u1, u2) renames the UELs u1 to the labels given in
-            % u2 for dimension d. The IDs for these UELs do not change.
+            % renameUELs(u) renames the UELs u for all dimensions. u can be a
+            % struct (field names = old UELs, field values = new UELs),
+            % containers.Map (keys = old UELs, values = new UELs) or cellstr
+            % (full list of UELs, must have as many entries as current UELs).
+            % The IDs for renamed UELs do not change.
+            % renameUELs(u, d) renames the UELs u for dimension(s) d. u as
+            % above.
+            %
+            % If an old UEL is provided in `struct` or `containers.Map` that is
+            % not present in the symbol UELs, it will be silently ignored.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
-            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
-                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            if obj.dimension_ == 0
+                return
             end
-            if ~(isstring(olduels) && numel(olduels) == 1) && ~ischar(olduels) && ~iscellstr(olduels);
-                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+
+            if nargin < 3
+                dim = 1:obj.dimension_;
             end
-            if ~(isstring(newuels) && numel(newuels) == 1) && ~ischar(newuels) && ~iscellstr(newuels);
-                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels) && ...
+                ~isa(uels, 'containers.Map') && ~isstruct(uels);
+                error('Argument ''uels'' must be ''char'', ''cellstr'', ''struct'' or ''containers.Map''.');
+            end
+            if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
+                error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
             end
 
             if ~obj.isValid()
@@ -2076,11 +2097,53 @@ classdef Symbol < handle
                 error('Symbol must be valid in order to manage UELs.');
             end
 
-            label = obj.domain_labels_{dim};
-            if obj.container.features.categorical
-                obj.records.(label) = renamecats(obj.records.(label), olduels, newuels);
-            else
-                obj.uels.(label).rename(olduels, newuels);
+            for i = dim
+                label = obj.domain_labels_{i};
+
+                if isa(uels, 'containers.Map')
+                    olduels = keys(uels);
+                    newuels = values(uels);
+                elseif isstruct(uels)
+                    olduels = fieldnames(uels);
+                    newuels = cell(size(olduels));
+                    for j = 1:numel(olduels)
+                        newuel = uels.(olduels{j});
+                        if ~(isstring(newuel) && numel(newuel) == 1) && ~ischar(newuel)
+                            error('Struct elements of ''uels'' must be ''char''.');
+                        end
+                        newuels{j} = newuel;
+                    end
+                else
+                    if obj.container.features.categorical
+                        olduels = categories(obj.records.(label));
+                        newuels = uels;
+                    else
+                        olduels = obj.uels.(label).get();
+                        newuels = uels;
+                    end
+                end
+
+                if numel(newuels) ~= numel(olduels)
+                    error('Number of new UELs %d not equal to number of old UELs %d', ...
+                        numel(newuels), numel(olduels));
+                end
+
+                if isa(uels, 'containers.Map') || isstruct(uels)
+                    if obj.container.features.categorical
+                        unavail = ~ismember(olduels, categories(obj.records.(label)));
+                    else
+                        unavail = ~ismember(olduels, obj.uels.(label).get());
+                    end
+                    olduels(unavail) = [];
+                    newuels(unavail) = [];
+                end
+
+                if obj.container.features.categorical
+                    obj.records.(label) = renamecats(obj.records.(label), ...
+                        olduels, newuels);
+                else
+                    obj.uels.(label).rename(olduels, newuels);
+                end
             end
         end
 

@@ -1046,6 +1046,49 @@ classdef Container < GAMSTransfer.BaseContainer
             end
         end
 
+        %> Renames UELs in all symbol
+        %>
+        %> - `renameUELs(u)` renames the UELs `u` for all symbols. `u` can be a
+        %>   `struct` (field names = old UELs, field values = new UELs),
+        %>   `containers.Map` (keys = old UELs, values = new UELs) or `cellstr`
+        %>   (full list of UELs, must have as many entries as current UELs). The
+        %>   IDs for renamed UELs do not change.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
+        function renameUELs(obj, uels)
+            % Renames UELs in all symbol
+            %
+            % renameUELs(u) renames the UELs u for all symbols. u can be a
+            % struct (field names = old UELs, field values = new UELs),
+            % containers.Map (keys = old UELs, values = new UELs) or cellstr
+            % (full list of UELs, must have as many entries as current UELs).
+            % The IDs for renamed UELs do not change.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+
+            if ~obj.isValid()
+                error('Container must be valid in order to manage UELs.');
+            end
+            if obj.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
+            symbols = fieldnames(obj.data);
+            for i = 1:numel(symbols)
+                obj.data.(symbols{i}).renameUELs(uels);
+            end
+        end
+
     end
 
     methods (Hidden, Access = {?GAMSTransfer.Symbol, ?GAMSTransfer.Alias})

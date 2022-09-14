@@ -699,12 +699,12 @@ classdef Alias < handle
         %> Renames UELs in the symbol
         %>
         %> @see \ref GAMSTransfer::Symbol::renameUELs "Symbol.renameUELs"
-        function renameUELs(obj, dim, olduels, newuels)
+        function renameUELs(obj, uels, dim)
             % Renames UELs in the symbol
             %
             % See also: GAMSTransfer.Symbol.renameUELs
 
-            obj.alias_with.renameUELs(dim, olduels, newuels);
+            obj.alias_with.renameUELs(uels, dim);
         end
 
     end
