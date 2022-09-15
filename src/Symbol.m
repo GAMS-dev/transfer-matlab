@@ -1886,6 +1886,7 @@ classdef Symbol < handle
 
         %> Adds UELs to the symbol
         %>
+        %> - `addUELs(u)` adds the UELs `u` for all dimensions.
         %> - `addUELs(u, d)` adds the UELs `u` for dimension(s) `d`.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
@@ -1899,6 +1900,7 @@ classdef Symbol < handle
         function addUELs(obj, uels, dim)
             % Adds UELs to the symbol
             %
+            % addUELs(u) adds the UELs u for all dimensions.
             % addUELs(u, d) adds the UELs u for dimension(s) d.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
@@ -1906,6 +1908,9 @@ classdef Symbol < handle
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
+            if nargin < 3
+                dim = 1:obj.dimension_;
+            end
             if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
                 error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
             end

@@ -1059,22 +1059,51 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Container.isValid
 
-            is_string_or_cellstr = @(x) (isstring(x) && numel(x) == 1) || ...
-                ischar(x) || iscellstr(x);
+            is_parname = @(x) strcmpi(x, 'symbols');
 
-            % input arguments
-            p = inputParser();
-            addOptional(p, 'uels', {}, is_string_or_cellstr);
-            addParameter(p, 'symbols', {}, @iscellstr);
-            parse(p, varargin{:});
-            if isempty(p.Results.symbols)
+            % check optional arguments
+            i = 1;
+            uels = {};
+            while true
+                term = true;
+                if i == 1 && nargin > 1
+                    if ((isstring(uels) && numel(uels) == 1) || ischar(uels) || iscellstr(uels)) && ~is_parname(varargin{i})
+                        uels = varargin{i};
+                        i = i + 1;
+                        term = false;
+                    elseif ~is_parname(varargin{i})
+                        error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+                    end
+                end
+                if term || i > 1
+                    break;
+                end
+            end
+
+            % check parameter arguments
+            symbols = {};
+            while i < nargin - 1
+                if strcmpi(varargin{i}, 'symbols')
+                    symbols = varargin{i+1};
+                else
+                    error('Unknown argument name.');
+                end
+                i = i + 2;
+            end
+
+            % check number of arguments
+            if i <= nargin - 1
+                error('Invalid number of arguments');
+            end
+
+            if isempty(symbols)
                 symbols = fieldnames(obj.data);
             else
-                symbols = obj.getSymbolNames(p.Results.symbols);
+                symbols = obj.getSymbolNames(symbols);
             end
 
             for i = 1:numel(symbols)
-                obj.data.(symbols{i}).removeUELs(p.Results.uels);
+                obj.data.(symbols{i}).removeUELs(uels);
             end
         end
 
