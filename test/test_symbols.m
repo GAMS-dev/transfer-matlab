@@ -1566,11 +1566,11 @@ function test_domainViolation(t, cfg);
     i1 = GAMSTransfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
     i2 = GAMSTransfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
     a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
-        {{'i0', 'i0', 'i1', 'i1'}, {'i1', 'i2', 'i1', 'i2'}, [1;2;3;4]});
+        {{'i0', 'i0', 'I1', 'i1'}, {'i1', 'I2', 'I1', 'i2'}, [1;2;3;4]});
     a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
-        {{'i1', 'i1', 'i5', 'i5'}, {'i1', 'i5', 'i1', 'i5'}, [1;2;3;4]});
+        {{'i1', 'I1', 'i5', 'I5'}, {'i1', 'I5', 'I1', 'i5'}, [1;2;3;4]});
     a3 = GAMSTransfer.Parameter(gdx, 'a3', i2, 'records', ...
-        {{'i1', 'i7'}, [1;2]});
+        {{'I1', 'i7'}, [1;2]});
 
     t.add('domain_violation_1');
     t.assert(i1.isValid());
@@ -1636,17 +1636,20 @@ function test_domainViolation(t, cfg);
     t.assert(a2.isValid());
     t.assert(a3.isValid());
 
+    t.add('domain_violation_4');
+    gdx.write(write_filename);
+
     gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i1 = GAMSTransfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
     i2 = GAMSTransfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
     a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
-        {{'i0', 'i0', 'i1', 'i1'}, {'i1', 'i2', 'i1', 'i2'}, [1;2;3;4]});
+        {{'i0', 'i0', 'I1', 'i1'}, {'i1', 'I2', 'I1', 'i2'}, [1;2;3;4]});
     a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
-        {{'i1', 'i1', 'i5', 'i5'}, {'i1', 'i5', 'i1', 'i5'}, [1;2;3;4]});
+        {{'i1', 'I1', 'i5', 'I5'}, {'i1', 'I5', 'I1', 'i5'}, [1;2;3;4]});
     a3 = GAMSTransfer.Parameter(gdx, 'a3', i2, 'records', ...
-        {{'i1', 'i7'}, [1;2]});
+        {{'I1', 'i7'}, [1;2]});
 
     t.add('domain_violation_with_grow_1');
     t.assert(i1.isValid());
@@ -1710,13 +1713,13 @@ function test_domainViolation(t, cfg);
     i1 = GAMSTransfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
     i2 = GAMSTransfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
     a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
-        {{'i0', 'i0', 'i1', 'i1'}, {'i1', 'i2', 'i1', 'i2'}, [1;2;3;4]}, ...
+        {{'i0', 'i0', 'I1', 'i1'}, {'i1', 'I2', 'I1', 'i2'}, [1;2;3;4]}, ...
         'domain_forwarding', true);
     a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
-        {{'i1', 'i1', 'i5', 'i5'}, {'i1', 'i5', 'i1', 'i5'}, [1;2;3;4]}, ...
+        {{'i1', 'I1', 'i5', 'I5'}, {'i1', 'I5', 'I1', 'i5'}, [1;2;3;4]}, ...
         'domain_forwarding', true);
     a3 = GAMSTransfer.Parameter(gdx, 'a3', i2, 'records', ...
-        {{'i1', 'i7'}, [1;2]}, 'domain_forwarding', true);
+        {{'I1', 'i7'}, [1;2]}, 'domain_forwarding', true);
 
     t.add('domain_violation_with_grow_3');
     t.assert(a1.domain_forwarding);

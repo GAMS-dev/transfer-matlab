@@ -1174,8 +1174,11 @@ classdef Symbol < handle
                     continue;
                 end
 
-                added_uels = setdiff(obj.getUELs(i, 'ignore_unused', true), ...
-                    obj.domain_{i}.getUELs(1, 'ignore_unused', true));
+                self_uels = obj.getUELs(i, 'ignore_unused', true);
+                domain_uels = obj.domain_{i}.getUELs(1, 'ignore_unused', true);
+                [~, ia] = setdiff(lower(self_uels), lower(domain_uels));
+                added_uels = self_uels(ia);
+
                 if numel(added_uels) > 0
                     dom_violations{end+1} = GAMSTransfer.DomainViolation(obj, ...
                         i, obj.domain_{i}, added_uels);

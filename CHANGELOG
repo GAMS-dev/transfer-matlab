@@ -13,6 +13,8 @@ GAMS Transfer Matlab v0.3.0
 - Changed behaviour of default records: Default records don't get written to GDX
   anymore if either the container is in indexed mode or if the symbol has a
   regular domain.
+- Changed behaviour of `getDomainViolations`: As in GDX different character case
+  does not lead to a domain violation.
 - Categoricals for record domain labels are now created with `Ordinal` set to
   `true`, but ordinal categoricals are not enforced, i.e. users may pass
   categoricals with `Ordinal` set to `false`.
