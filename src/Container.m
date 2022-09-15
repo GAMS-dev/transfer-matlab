@@ -1037,6 +1037,7 @@ classdef Container < GAMSTransfer.BaseContainer
         %>
         %> - `removeUELs()` removes all unused UELs for all symbols.
         %> - `removeUELs(u)` removes the UELs `u` for all symbols.
+        %> - `removeUELs(_, 'symbols', s)` removes UELs for symbols `s`.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1046,27 +1047,34 @@ classdef Container < GAMSTransfer.BaseContainer
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Container::isValid "Container.isValid"
-        function removeUELs(obj, uels)
+        function removeUELs(obj, varargin)
             % Removes UELs from all symbol
             %
             % removeUELs() removes all unused UELs for all symbols.
             % removeUELs(u) removes the UELs u for all symbols.
+            % removeUELs(_, 'symbols', s) removes UELs for symbols s.
             %
             % Note: This can only be used if the container is valid. UELs are not
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Container.isValid
 
-            if nargin < 2
-                uels = {};
-            end
-            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
-                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            is_string_or_cellstr = @(x) (isstring(x) && numel(x) == 1) || ...
+                ischar(x) || iscellstr(x);
+
+            % input arguments
+            p = inputParser();
+            addOptional(p, 'uels', {}, is_string_or_cellstr);
+            addParameter(p, 'symbols', {}, @iscellstr);
+            parse(p, varargin{:});
+            if isempty(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = obj.getSymbolNames(p.Results.symbols);
             end
 
-            symbols = fieldnames(obj.data);
             for i = 1:numel(symbols)
-                obj.data.(symbols{i}).removeUELs(uels);
+                obj.data.(symbols{i}).removeUELs(p.Results.uels);
             end
         end
 
@@ -1077,6 +1085,7 @@ classdef Container < GAMSTransfer.BaseContainer
         %>   `containers.Map` (keys = old UELs, values = new UELs) or `cellstr`
         %>   (full list of UELs, must have as many entries as current UELs). The
         %>   codes for renamed UELs do not change.
+        %> - `renameUELs(_, 'symbols', s)` renames UELs for symbols `s`.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1086,7 +1095,7 @@ classdef Container < GAMSTransfer.BaseContainer
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
-        function renameUELs(obj, uels)
+        function renameUELs(obj, uels, varargin)
             % Renames UELs in all symbol
             %
             % renameUELs(u) renames the UELs u for all symbols. u can be a
@@ -1094,13 +1103,23 @@ classdef Container < GAMSTransfer.BaseContainer
             % containers.Map (keys = old UELs, values = new UELs) or cellstr
             % (full list of UELs, must have as many entries as current UELs).
             % The codes for renamed UELs do not change.
+            % renameUELs(_, 'symbols', s) renames UELs for symbols s.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
-            symbols = fieldnames(obj.data);
+            % input arguments
+            p = inputParser();
+            addParameter(p, 'symbols', {}, @iscellstr);
+            parse(p, varargin{:});
+            if isempty(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = obj.getSymbolNames(p.Results.symbols);
+            end
+
             for i = 1:numel(symbols)
                 obj.data.(symbols{i}).renameUELs(uels);
             end
