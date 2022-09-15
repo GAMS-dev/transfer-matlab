@@ -24,6 +24,7 @@ GAMS Transfer Matlab v0.3.0
 - Deprecated `Symbol.getUELLabels`. Use `Symbol.getUELs` instead.
 - Fixed `Symbol.transformRecords` (table-like to matrix-like formats) in case
   the domain set records and UELs differ.
+- Fixed write of sets defined over sets.
 
 GAMS Transfer Matlab v0.2.2
 ==================
