@@ -65,6 +65,13 @@ Parameter(c, 'p_matrix3', {'i', *});
 \section GAMSTRANSFER_MATLAB_SYMBOL_CREATE Creating a Symbol
 
 To create a symbol, two equivalent ways exist:
+- The constructors of \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Alias
+  "Alias", \ref GAMSTransfer::Parameter "Parameter", \ref GAMSTransfer::Variable
+  "Variable" and \ref GAMSTransfer::Equation "Equation", e.g.:
+```
+c = Container();
+p = Parameter(c, 'p');
+```
 - The methods \ref GAMSTransfer::Container::addSet "Container.addSet", \ref
   GAMSTransfer::Container::addAlias "Container.addAlias", \ref
   GAMSTransfer::Container::addParameter "Container.addParameter", \ref
@@ -74,13 +81,8 @@ To create a symbol, two equivalent ways exist:
 c = Container();
 p = c.addParameter('p');
 ```
-- The constructors of \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Alias
-  "Alias", \ref GAMSTransfer::Parameter "Parameter", \ref GAMSTransfer::Variable
-  "Variable" and \ref GAMSTransfer::Equation "Equation", e.g.:
-```
-c = Container();
-p = Parameter(c, 'p');
-```
+  In contrast to the constructor, these methods allow overwriting if the main
+  symbol definition (e.g. type, domain) doesn't differ.
 
 The following table lists the required and possible arguments creating a the
 symbol. Here, the argument can be either of type `required`, `optional`
@@ -143,9 +145,10 @@ GAMSTRANSFER_MATLAB_SYMBOL_EFFICIENT_RECORDS requires to provide the data in one
 of the supported \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT "records format". For
 more convenience, the method \ref GAMSTransfer::Symbol::setRecords
 "Symbol.setRecords" accepts a wide range of formats that will be transformed
-internally to one of the \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT "records
-format". Note that \ref GAMSTransfer::Symbol::setRecords "Symbol.setRecords" is
-also called by the symbol constructor of the argument `records` is provided.
+internally to one of the \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT
+"records format". Note that \ref GAMSTransfer::Symbol::setRecords
+"Symbol.setRecords" is also called by the symbol constructor of the argument
+`records` is provided.
 
 The following transformations are supported (sample code uses symbols of \ref
 GAMSTRANSFER_MATLAB_GETSTARTED_EXAMPLE):
