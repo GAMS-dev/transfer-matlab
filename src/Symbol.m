@@ -588,7 +588,7 @@ classdef Symbol < handle
             if ~obj.container.indexed && ~obj.container.features.categorical
                 for i = 1:obj.dimension_
                     if ~isempty(uels{i})
-                        obj.initUELs(i, uels{i});
+                        obj.setUELs(uels{i}, i, 'rename', true);
                     end
                 end
 
@@ -844,15 +844,14 @@ classdef Symbol < handle
                     % In case of categorical this has already happen
                     if ~obj.container.indexed && ~obj.container.features.categorical
                         for i = 1:obj.dimension_
-                            obj.initUELs(i, obj.domain_{i}.getUELs(1, 'ignore_unused', true));
+                            obj.setUELs(obj.domain_{i}.getUELs(1, 'ignore_unused', true), ...
+                                i, 'rename', true);
                         end
                     end
 
                     % remove unused UELs
                     if ~obj.container.indexed
-                        for i = 1:obj.dimension_
-                            obj.removeUELs(i);
-                        end
+                        obj.removeUELs();
                     end
                     return
                 end
@@ -1543,12 +1542,11 @@ classdef Symbol < handle
 
         %> Returns the UELs used in this symbol
         %>
-        %> - `u = getUELs(d)` returns the UELs used in dimension `d` of this
-        %>   symbol
-        %> - `u = getUELs(d, i)` returns the UELs `u` for the given UEL IDs `i`
-        %>   for the UELs stored for dimension `d`.
+        %> - `u = getUELs()` returns the UELs across all dimensions.
+        %> - `u = getUELs(d)` returns the UELs used in dimension(s) `d`.
+        %> - `u = getUELs(d, i)` returns the UELs `u` for the given UEL codes `i`.
         %> - `u = getUELs(d, _, "ignore_unused", true)` returns only those UELs
-        %>   that are actually used in the records
+        %>   that are actually used in the records.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1558,49 +1556,59 @@ classdef Symbol < handle
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
-        function uels = getUELs(obj, dim, varargin)
+        function uels = getUELs(obj, varargin)
             % Returns the UELs used in this symbol
             %
-            % u = getUELs(d) returns the UELs used in dimension d of this symbol
-            % u = getUELs(d, i) returns the UELs u for the given UEL IDs i for
-            % the UELs stored for dimension d.
-            % u = getUELs(d, _, 'ignore_unused', true) returns only those UELs that
-            % are actually used in the records
+            % u = getUELs() returns the UELs across all dimensions.
+            % u = getUELs(d) returns the UELs used in dimension(s) d.
+            % u = getUELs(d, i) returns the UELs u for the given UEL codes i.
+            % u = getUELs(_, 'ignore_unused', true) returns only those UELs that
+            % are actually used in the records.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
-            is_parname = @(x) strcmpi(x, 'ignore_unused');
-
-            % check required arguments
-            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
-                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            if obj.dimension_ == 0
+                uels = {};
+                return;
             end
+
+            is_parname = @(x) strcmpi(x, 'ignore_unused');
 
             % check optional arguments
             i = 1;
-            ids = [];
+            dim = 1:obj.dimension_;
+            codes = [];
             while true
                 term = true;
-                if i == 1 && nargin > 2
-                    if isnumeric(varargin{i})
-                        ids = varargin{i};
+                if i == 1 && nargin > 1
+                    if isnumeric(dim) && isvector(dim) && all(dim == round(dim)) && ...
+                        min(dim) >= 1 && max(dim) <= obj.dimension_ && ~is_parname(varargin{i})
+                        dim = varargin{i};
                         i = i + 1;
                         term = false;
                     elseif ~is_parname(varargin{i})
-                        error('Argument ''ids'' must be ''numeric''.');
+                        error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
+                    end
+                elseif i == 2 && nargin > 2
+                    if isnumeric(varargin{i}) && ~is_parname(varargin{i})
+                        codes = varargin{i};
+                        i = i + 1;
+                        term = false;
+                    elseif ~is_parname(varargin{i})
+                        error('Argument ''codes'' must be ''numeric''.');
                     end
                 end
-                if term || i > 1
+                if term || i > 2
                     break;
                 end
             end
 
             % check parameter arguments
             ignore_unused = false;
-            while i < nargin - 2
+            while i < nargin - 1
                 if strcmpi(varargin{i}, 'ignore_unused')
                     ignore_unused = varargin{i+1};
                     if ~islogical(ignore_unused)
@@ -1613,7 +1621,181 @@ classdef Symbol < handle
             end
 
             % check number of arguments
-            if i <= nargin - 2
+            if i <= nargin - 1
+                error('Invalid number of arguments');
+            end
+
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+            if obj.container.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
+            uels = {};
+            for i = dim
+                switch obj.format_
+                case GAMSTransfer.RecordsFormat.EMPTY
+                    uels_i = {};
+                case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
+                    uels_i = obj.domain_{i}.getUELs(1, codes, 'ignore_unused', true);
+                case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
+                    label = obj.domain_labels_{i};
+                    if obj.container.features.categorical
+                        if ignore_unused
+                            uels_i = categories(removecats(obj.records.(label)));
+                        else
+                            uels_i = categories(obj.records.(label));
+                        end
+                    else
+                        uels_i = obj.uels.(label).get();
+                        if ignore_unused
+                            uels_i = uels_i(unique(obj.records.(label)));
+                        end
+                    end
+
+                    % filter for given codes
+                    if ~isempty(codes)
+                        uels_i_orig = uels_i;
+                        idx = codes >= 1 & codes <= numel(uels_i_orig);
+                        uels_i = cell(numel(codes), 1);
+                        uels_i(idx) = uels_i_orig(codes(idx));
+                        uels_i(~idx) = {'<undefined>'};
+                    end
+                otherwise
+                    error('Symbol must be valid in order to manage UELs.');
+                end
+                uels = [uels; reshape(uels_i, [numel(uels_i), 1])];
+            end
+
+            if numel(dim) > 1
+                [~,uidx,~] = unique(uels, 'first');
+                uels = uels(sort(uidx));
+            end
+        end
+
+        %> Returns the UELs labels for the given UEL codes
+        %>
+        %> @deprecated Will be removed in version 1.x.x. Use \ref
+        %> GAMSTransfer::Symbol::getUELs "Symbol.getUELs".
+        %>
+        %> - `u = getUELLabels(d, i)` returns the UELs labels `u` for the given
+        %>   UEL codes `i` for the UELs stored for dimension `d`.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
+        function uels = getUELLabels(obj, dim, codes)
+            % Returns the UELs labels for the given UEL codes (deprecated)
+            %
+            % u = getUELLabels(d, i) returns the UELs labels u for the given UEL
+            % codes i for the UELs stored for dimension d.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+
+            warning('Method ''getUELLabels'' is deprecated. Please use getUELs instead');
+            uels = obj.getUELs(dim, codes);
+        end
+
+        %> Sets the UELs without modifying UEL codes in records
+        %>
+        %> @deprecated Will be removed in version 1.x.x. Use \ref
+        %> GAMSTransfer::Symbol::setUELs "Symbol.setUELs".
+        %>
+        %> - `initUELs(d, u)` sets the UELs `u` for dimension `d`. In contrast
+        %>   to the method `setUELs(u, d)`, this method does not modify UEL codes
+        %>   used in the property records.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid", \ref
+        %> GAMSTransfer::Symbol::setUELs "Symbol.setUELs"
+        function initUELs(obj, dim, uels)
+            % Sets the UELs without modifying UEL codes in records (deprecated)
+            %
+            % initUELs(d, u) sets the UELs u for dimension d. In contrast to
+            % the method setUELs(u, d), this method does not modify UEL codes
+            % used in the property records.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid,
+            % GAMSTransfer.Symbol.setUELs
+
+            warning('Method ''initUELs'' is deprecated. Please use setUELs instead');
+            obj.setUELs(uels, dim, 'rename', true);
+        end
+
+        %> Sets UELs
+        %>
+        %> - `setUELs(u, d)` sets the UELs `u` for dimension(s) `d`. This may
+        %>   modify UEL codes used in the property records such that records still
+        %>   point to the correct UEL label when UEL codes have changed.
+        %> - `setUELs(u, d, 'rename', true)` sets the UELs `u` for dimension(s)
+        %>   `d`. This does not modify UEL codes used in the property records.
+        %>   This can change the meaning of the records.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
+        function setUELs(obj, uels, dim, varargin)
+            % Sets UELs
+            %
+            % setUELs(u, d) sets the UELs u for dimension(s) d. This may modify
+            % UEL codes used in the property records such that records still point
+            % to the correct UEL label when UEL codes have changed.
+            % setUELs(u, d, 'rename', true) sets the UELs u for dimension(s) d.
+            % This does not modify UEL codes used in the property records. This
+            % can change the meaning of the records.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+
+            % check required arguments
+            if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
+                error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
+            end
+            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
+                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            end
+
+            % check optional arguments
+            i = 1;
+
+            % check parameter arguments
+            rename = false;
+            while i < nargin - 3
+                if strcmpi(varargin{i}, 'rename')
+                    rename = varargin{i+1};
+                    if ~islogical(rename)
+                        error('Argument ''rename'' must be logical.');
+                    end
+                else
+                    error('Unknown argument name.');
+                end
+                i = i + 2;
+            end
+
+            % check number of arguments
+            if i <= nargin - 3
                 error('Invalid number of arguments');
             end
 
@@ -1625,99 +1807,56 @@ classdef Symbol < handle
             end
 
             switch obj.format_
-            case GAMSTransfer.RecordsFormat.EMPTY
-                uels = {};
-                return
             case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
-                uels = obj.domain_{dim}.getUELs(1, ids, 'ignore_unused', true);
-                return
+                error('Matrix formats do not maintain UELs. Modify domain set instead.');
             otherwise
                 error('Symbol must be valid in order to manage UELs.');
             end
 
-            label = obj.domain_labels_{dim};
-            if obj.container.features.categorical
-                if ignore_unused
-                    uels = categories(removecats(obj.records.(label)));
+            for i = dim
+                label = obj.domain_labels_{i};
+                if rename
+                    if obj.container.features.categorical
+                        obj.records.(label) = categorical(double(obj.records.(label)), ...
+                            1:numel(uels), uels, 'Ordinal', true);
+                    else
+                        obj.uels.(label).set(uels, []);
+                    end
                 else
-                    uels = categories(obj.records.(label));
+                    if obj.container.features.categorical
+                        if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
+                            warning('Cannot set UELs to empty symbol.');
+                        else
+                            obj.records.(label) = setcats(obj.records.(label), uels);
+                        end
+                    else
+                        if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
+                            obj.uels.(label).set(uels, []);
+                        else
+                            obj.records.(label) = obj.uels.(label).set(uels, obj.records.(label));
+                        end
+                    end
                 end
-            else
-                uels = obj.uels.(label).get();
-                if ignore_unused
-                    uels = uels(unique(obj.records.(label)));
-                end
-            end
-
-            % filter for given ids
-            if ~isempty(ids)
-                uels_orig = uels;
-                idx = ids >= 1 & ids <= numel(uels_orig);
-                uels = cell(1, numel(ids));
-                uels(idx) = uels_orig(ids(idx));
-                uels(~idx) = {'<undefined>'};
             end
         end
 
-        %> Returns the UELs labels for the given UEL IDs
+        %> Reorders UELs
         %>
-        %> @deprecated Will be removed in version 1.x.x. Use \ref
-        %> GAMSTransfer::Symbol::getUELs "Symbol.getUELs".
+        %> Same functionality as `setUELs(uels, dim)`, but checks that no new
+        %> categories are added. The meaning of records does not change.
         %>
-        %> - `u = getUELLabels(d, i)` returns the UELs labels `u` for the given
-        %>   UEL IDs `i` for the UELs stored for dimension `d`.
-        %>
-        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
-        %>
-        %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode, see \ref
-        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
-        %>
-        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
-        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
-        function uels = getUELLabels(obj, dim, ids)
-            % Returns the UELs labels for the given UEL IDs (deprecated)
+        %> @see \ref GAMSTransfer::Symbol::setUELs "Symbol.setUELs"
+        function reorderUELs(obj, uels, dim)
+            % Reorders UELs
             %
-            % u = getUELLabels(d, i) returns the UELs labels u for the given UEL
-            % IDs i for the UELs stored for dimension d.
+            % Same functionality as setUELs(uels, dim), but checks that no new
+            % categories are added. The meaning of records does not change.
             %
-            % Note: This can only be used if the symbol is valid. UELs are not
-            % available when using the indexed mode.
-            %
-            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+            % See also: GAMSTransfer.Symbol.setUELs
 
-            warning('Method ''getUELLabels'' is deprecated. Please use getUELs instead');
-            uels = obj.getUELs(dim, ids);
-        end
-
-        %> Sets the UELs without modifying UEL IDs in records
-        %>
-        %> - `initUELs(d, u)` sets the UELs `u` for dimension `d`. In contrast
-        %>   to the method `setUELs(d, u)`, this method does not modify UEL IDs
-        %>   used in the property records.
-        %>
-        %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode.
-        %>
-        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
-        %> GAMSTransfer::Symbol::isValid "Symbol.isValid", \ref
-        %> GAMSTransfer::Symbol::setUELs "Symbol.setUELs"
-        function initUELs(obj, dim, uels)
-            % Sets the UELs without modifying UEL IDs in records
-            %
-            % initUELs(d, u) sets the UELs u for dimension d. In contrast to
-            % the method setUELs(d, u), this method does not modify UEL IDs
-            % used in the property records.
-            %
-            % Note: This can only be used if the symbol is valid. UELs are not
-            % available when using the indexed mode.
-            %
-            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid,
-            % GAMSTransfer.Symbol.setUELs
-
-            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
-                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
+                error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
             end
             if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
                 error('Argument ''uels'' must be ''char'' or ''cellstr''.');
@@ -1730,100 +1869,25 @@ classdef Symbol < handle
                 error('UELs not supported in indexed mode.');
             end
 
-            switch obj.format_
-            case GAMSTransfer.RecordsFormat.EMPTY
-                if obj.container.features.categorical
-                    warning('Cannot init UELs to empty symbol.');
-                    return
+            for i = dim
+                current_uels = obj.getUELs(i);
+
+                if numel(uels) ~= numel(current_uels)
+                    error('Number of UELs %d not equal to number of current UELs %d', ...
+                        numel(uels), numel(current_uels));
                 end
-            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
-            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
-                error('Matrix formats do not maintain UELs. Modify domain set instead.');
-            otherwise
-                error('Symbol must be valid in order to manage UELs.');
-            end
-
-            label = obj.domain_labels_{dim};
-            if obj.container.features.categorical
-                obj.records.(label) = categorical(double(obj.records.(label)), ...
-                    1:numel(uels), uels, 'Ordinal', true);
-            else
-                obj.uels.(label).set(uels, []);
-            end
-        end
-
-        %> Sets the UELs with updating UEL IDs in records
-        %>
-        %> - `setUELs(d, u)` sets the UELs `u` for dimension `d`. In contrast to
-        %>   the method `initUELs(d, u)`, this method may modify UEL IDs used in
-        %>   the property records such that records still point to the correct
-        %>   UEL label when UEL IDs have changed.
-        %>
-        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
-        %>
-        %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode, see \ref
-        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
-        %>
-        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
-        %> GAMSTransfer::Symbol::isValid "Symbol.isValid", \ref
-        %> GAMSTransfer::Symbol::initUELs "Symbol.initUELs"
-        function setUELs(obj, dim, uels)
-            % Sets the UELs with updating UEL IDs in records
-            %
-            % setUELs(d, u) sets the UELs u for dimension d. In contrast to the
-            % method initUELs(d, u), this method may modify UEL IDs used in the
-            % property records such that records still point to the correct UEL
-            % label when UEL IDs have changed.
-            %
-            % Note: This can only be used if the symbol is valid. UELs are not
-            % available when using the indexed mode.
-            %
-            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid,
-            % GAMSTransfer.Symbol.initUELs
-
-            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
-                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
-            end
-            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
-                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
-            end
-
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
-            end
-            if obj.container.indexed
-                error('UELs not supported in indexed mode.');
-            end
-
-            switch obj.format_
-            case GAMSTransfer.RecordsFormat.EMPTY
-                if obj.container.features.categorical
-                    warning('Cannot set UELs to empty symbol.');
-                    return
-                end
-            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
-            case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
-                error('Matrix formats do not maintain UELs. Modify domain set instead.');
-            otherwise
-                error('Symbol must be valid in order to manage UELs.');
-            end
-
-            label = obj.domain_labels_{dim};
-            if obj.container.features.categorical
-                obj.records.(label) = setcats(obj.records.(label), uels);
-            else
-                if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
-                    obj.uels.(label).set(uels, []);
-                else
-                    obj.records.(label) = obj.uels.(label).set(uels, obj.records.(label));
+                if ~all(ismember(current_uels, uels))
+                    error('Adding new UELs not supported for reordering');
                 end
             end
+
+            obj.setUELs(uels, dim);
         end
 
         %> Adds UELs to the symbol
         %>
-        %> - `addUELs(d, u)` adds the UELs `u` for dimension `d`.
+        %> - `addUELs(u)` adds the UELs `u` for all dimensions.
+        %> - `addUELs(u, d)` adds the UELs `u` for dimension(s) `d`.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1833,18 +1897,22 @@ classdef Symbol < handle
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
-        function addUELs(obj, dim, uels)
+        function addUELs(obj, uels, dim)
             % Adds UELs to the symbol
             %
-            % addUELs(d, u) adds the UELs u for dimension d.
+            % addUELs(u) adds the UELs u for all dimensions.
+            % addUELs(u, d) adds the UELs u for dimension(s) d.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
-            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
-                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            if nargin < 3
+                dim = 1:obj.dimension_;
+            end
+            if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
+                error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
             end
             if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
                 error('Argument ''uels'' must be ''char'' or ''cellstr''.');
@@ -1870,27 +1938,31 @@ classdef Symbol < handle
                 error('Symbol must be valid in order to manage UELs.');
             end
 
-            label = obj.domain_labels_{dim};
-            if obj.container.features.categorical
-                if isordinal(obj.records.(label))
-                    cats = categories(obj.records.(label));
-                    if numel(cats) == 0
-                        obj.records.(label) = categorical(uels, 'Ordinal', true);
+            for i = dim
+                label = obj.domain_labels_{i};
+                if obj.container.features.categorical
+                    if isordinal(obj.records.(label))
+                        cats = categories(obj.records.(label));
+                        if numel(cats) == 0
+                            obj.records.(label) = categorical(uels, 'Ordinal', true);
+                        else
+                            obj.records.(label) = addcats(obj.records.(label), uels, 'After', cats{end});
+                        end
                     else
-                        obj.records.(label) = addcats(obj.records.(label), uels, 'After', cats{end});
+                        obj.records.(label) = addcats(obj.records.(label), uels);
                     end
                 else
-                    obj.records.(label) = addcats(obj.records.(label), uels);
+                    obj.uels.(label).add(uels);
                 end
-            else
-                obj.uels.(label).add(uels);
             end
         end
 
         %> Removes UELs from the symbol
         %>
-        %> - `removeUELs(d)` removes all unused UELs for dimension `d`.
-        %> - `removeUELs(d, u)` removes the UELs `u` for dimension `d`.
+        %> - `removeUELs()` removes all unused UELs for all dimensions.
+        %> - `removeUELs({}, d)` removes all unused UELs for dimension(s) `d`.
+        %> - `removeUELs(u)` removes the UELs `u` for all dimensions.
+        %> - `removeUELs(u, d)` removes the UELs `u` for dimension(s) `d`.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1900,26 +1972,34 @@ classdef Symbol < handle
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
-        function removeUELs(obj, dim, uels)
+        function removeUELs(obj, uels, dim)
             % Removes UELs from the symbol
             %
-            % removeUELs(d) removes all unused UELs for dimension d.
-            % removeUELs(d, u) removes the UELs u for dimension d.
+            % removeUELs() removes all unused UELs for all dimensions.
+            % removeUELs({}, d) removes all unused UELs for dimension(s) d.
+            % removeUELs(u) removes the UELs u for all dimensions.
+            % removeUELs(u, d) removes the UELs u for dimension(s) d.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
-            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
-                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            if obj.dimension_ == 0
+                return
             end
-            if nargin == 3
-                if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
-                    error('Argument ''uels'' must be ''char'' or ''cellstr''.');
-                end
-            else
+
+            if nargin < 2
                 uels = {};
+            end
+            if nargin < 3
+                dim = 1:obj.dimension_;
+            end
+            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
+                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            end
+            if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
+                error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
             end
 
             if ~obj.isValid()
@@ -1941,21 +2021,23 @@ classdef Symbol < handle
                 error('Symbol must be valid in order to manage UELs.');
             end
 
-            label = obj.domain_labels_{dim};
-            if obj.container.features.categorical
-                if isempty(uels)
-                    obj.records.(label) = removecats(obj.records.(label));
+            for i = dim
+                label = obj.domain_labels_{i};
+                if obj.container.features.categorical
+                    if isempty(uels)
+                        obj.records.(label) = removecats(obj.records.(label));
+                    else
+                        obj.records.(label) = removecats(obj.records.(label), uels);
+                    end
                 else
-                    obj.records.(label) = removecats(obj.records.(label), uels);
-                end
-            else
-                if isempty(uels)
-                    uels = setdiff(obj.getUELs(dim), obj.getUELs(dim, 'ignore_unused', true));
-                end
-                if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
-                    obj.records.(label) = obj.uels.(label).remove(uels, []);
-                else
-                    obj.records.(label) = obj.uels.(label).remove(uels, obj.records.(label));
+                    if isempty(uels)
+                        uels = setdiff(obj.getUELs(i), obj.getUELs(i, 'ignore_unused', true));
+                    end
+                    if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
+                        obj.records.(label) = obj.uels.(label).remove(uels, []);
+                    else
+                        obj.records.(label) = obj.uels.(label).remove(uels, obj.records.(label));
+                    end
                 end
             end
 
@@ -1963,8 +2045,16 @@ classdef Symbol < handle
 
         %> Renames UELs in the symbol
         %>
-        %> - `renameUELs(d, u1, u2)` renames the UELs `u1` to the labels given
-        %>   in `u2` for dimension `d`. The IDs for these UELs do not change.
+        %> - `renameUELs(u)` renames the UELs `u` for all dimensions. `u` can
+        %>   be a `struct` (field names = old UELs, field values = new UELs),
+        %>   `containers.Map` (keys = old UELs, values = new UELs) or `cellstr`
+        %>   (full list of UELs, must have as many entries as current UELs). The
+        %>   codes for renamed UELs do not change.
+        %> - `renameUELs(u, d)` renames the UELs `u` for dimension(s) `d`. `u`
+        %>   as above.
+        %>
+        %> If an old UEL is provided in `struct` or `containers.Map` that is not
+        %> present in the symbol UELs, it will be silently ignored.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1974,25 +2064,38 @@ classdef Symbol < handle
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
-        function renameUELs(obj, dim, olduels, newuels)
+        function renameUELs(obj, uels, dim)
             % Renames UELs in the symbol
             %
-            % renameUELs(d, u1, u2) renames the UELs u1 to the labels given in
-            % u2 for dimension d. The IDs for these UELs do not change.
+            % renameUELs(u) renames the UELs u for all dimensions. u can be a
+            % struct (field names = old UELs, field values = new UELs),
+            % containers.Map (keys = old UELs, values = new UELs) or cellstr
+            % (full list of UELs, must have as many entries as current UELs).
+            % The codes for renamed UELs do not change.
+            % renameUELs(u, d) renames the UELs u for dimension(s) d. u as
+            % above.
+            %
+            % If an old UEL is provided in `struct` or `containers.Map` that is
+            % not present in the symbol UELs, it will be silently ignored.
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
-            if ~isnumeric(dim) || dim ~= round(dim) || dim < 1 || dim > obj.dimension_
-                error('Argument ''dimension'' must be integer in [1,%d]', obj.dimension_);
+            if obj.dimension_ == 0
+                return
             end
-            if ~(isstring(olduels) && numel(olduels) == 1) && ~ischar(olduels) && ~iscellstr(olduels);
-                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+
+            if nargin < 3
+                dim = 1:obj.dimension_;
             end
-            if ~(isstring(newuels) && numel(newuels) == 1) && ~ischar(newuels) && ~iscellstr(newuels);
-                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels) && ...
+                ~isa(uels, 'containers.Map') && ~isstruct(uels);
+                error('Argument ''uels'' must be ''char'', ''cellstr'', ''struct'' or ''containers.Map''.');
+            end
+            if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
+                error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
             end
 
             if ~obj.isValid()
@@ -2014,11 +2117,53 @@ classdef Symbol < handle
                 error('Symbol must be valid in order to manage UELs.');
             end
 
-            label = obj.domain_labels_{dim};
-            if obj.container.features.categorical
-                obj.records.(label) = renamecats(obj.records.(label), olduels, newuels);
-            else
-                obj.uels.(label).rename(olduels, newuels);
+            for i = dim
+                label = obj.domain_labels_{i};
+
+                if isa(uels, 'containers.Map')
+                    olduels = keys(uels);
+                    newuels = values(uels);
+                elseif isstruct(uels)
+                    olduels = fieldnames(uels);
+                    newuels = cell(size(olduels));
+                    for j = 1:numel(olduels)
+                        newuel = uels.(olduels{j});
+                        if ~(isstring(newuel) && numel(newuel) == 1) && ~ischar(newuel)
+                            error('Struct elements of ''uels'' must be ''char''.');
+                        end
+                        newuels{j} = newuel;
+                    end
+                else
+                    if obj.container.features.categorical
+                        olduels = categories(obj.records.(label));
+                        newuels = uels;
+                    else
+                        olduels = obj.uels.(label).get();
+                        newuels = uels;
+                    end
+                end
+
+                if numel(newuels) ~= numel(olduels)
+                    error('Number of new UELs %d not equal to number of old UELs %d', ...
+                        numel(newuels), numel(olduels));
+                end
+
+                if isa(uels, 'containers.Map') || isstruct(uels)
+                    if obj.container.features.categorical
+                        unavail = ~ismember(olduels, categories(obj.records.(label)));
+                    else
+                        unavail = ~ismember(olduels, obj.uels.(label).get());
+                    end
+                    olduels(unavail) = [];
+                    newuels(unavail) = [];
+                end
+
+                if obj.container.features.categorical
+                    obj.records.(label) = renamecats(obj.records.(label), ...
+                        olduels, newuels);
+                else
+                    obj.uels.(label).rename(olduels, newuels);
+                end
             end
         end
 
@@ -2209,7 +2354,7 @@ classdef Symbol < handle
             end
             domains = reshape(domains, [numel(domains), 1]);
 
-            % in indexed mode we don't need to translate strings to uel ids
+            % in indexed mode we don't need to translate strings to uel codes
             if obj.container.indexed
                 obj.records.(label) = domains;
                 return;

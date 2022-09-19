@@ -368,7 +368,7 @@ classdef Container < GAMSTransfer.BaseContainer
                             if isempty(symbol.uels{j})
                                 continue
                             end
-                            obj.data.(symbol.name).initUELs(j, symbol.uels{j});
+                            obj.data.(symbol.name).setUELs(symbol.uels{j}, j, 'rename', true);
                         end
                     end
                 end
@@ -418,9 +418,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % There are different issues that can occur when writing to GDX:
             % e.g. domain violations and unsorted data. For domain violations,
             % see GAMSTransfer.Container.getDomainViolations. Domain labels are
-            % stored as UELs in GDX that are an (ID,label) pair. The ID is a
+            % stored as UELs in GDX that are an (code,label) pair. The code is a
             % number with an ascending order based on the write occurence. Data
-            % records must be sorted by these IDs in ascending order (dimension
+            % records must be sorted by these codes in ascending order (dimension
             % 1 first, then dimension 2, ...). If one knows that the data is
             % sorted, one can set the flag 'sorted' to true to improve
             % performance. Otherwise GAMSTransfer will sort the values
@@ -1044,31 +1044,14 @@ classdef Container < GAMSTransfer.BaseContainer
         end
 
         %> Generate universe set (UEL order in GDX)
+        %>
+        %> @deprecated Will be removed in version 1.x.x. Use \ref
+        %> GAMSTransfer::Container::getUELs "Container.getUELs".
         function list = getUniverseSet(obj)
-            % Generate universe set (UEL order in GDX)
+            % Generate universe set (UEL order in GDX) (deprecated)
 
-            map = javaObject('java.util.LinkedHashMap');
-
-            % collect uels
-            symbols = fieldnames(obj.data);
-            for i = 1:numel(symbols)
-                symbol = obj.data.(symbols{i});
-                for j = 1:symbol.dimension
-                    uels = symbol.getUELs(j);
-                    for k = 1:numel(uels)
-                        map.put(uels{k}, true);
-                    end
-                end
-            end
-
-            % get list of keys
-            list = cell(1, map.keySet().size());
-            it = map.keySet().iterator();
-            i = 1;
-            while it.hasNext()
-                list{i} = char(it.next());
-                i = i + 1;
-            end
+            warning('Method ''getUniverseSet'' is deprecated. Please use ''getUELs'' instead');
+            list = obj.getUELs();
         end
 
         %> Checks correctness of all symbols
@@ -1113,6 +1096,174 @@ classdef Container < GAMSTransfer.BaseContainer
                 if ~force
                     return
                 end
+            end
+        end
+
+        %> Get UELs from all symbols
+        %>
+        %> - `u = getUELs()` returns the UELs across all symbols.
+        %> - `u = getUELs(_, 'symbols', s)` returns the UELs across symbols `s`.
+        %> - `u = getUELs(_, "ignore_unused", true)` returns only those UELs
+        %>   that are actually used in the records.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the container is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Container::isValid "Container.isValid"
+        function uels = getUELs(obj, varargin)
+            % Get UELs from all symbols
+            %
+            % u = getUELs() returns the UELs across all symbols.
+            % u = getUELs(_, 'symbols', s) returns the UELs across symbols s.
+            % u = getUELs(_, "ignore_unused", true) returns only those UELs
+            % that are actually used in the records.
+            %
+            % Note: This can only be used if the container is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Container.isValid
+
+            % input arguments
+            p = inputParser();
+            addParameter(p, 'symbols', {}, @iscellstr);
+            addParameter(p, 'ignore_unused', false, @islogical);
+            parse(p, varargin{:});
+            if isempty(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = obj.getSymbolNames(p.Results.symbols);
+            end
+
+            uels = {};
+            for i = 1:numel(symbols)
+                uels = [uels; obj.data.(symbols{i}).getUELs('ignore_unused', p.Results.ignore_unused)];
+                [~,uidx,~] = unique(uels, 'first');
+                uels = uels(sort(uidx));
+            end
+        end
+
+        %> Removes UELs from all symbols
+        %>
+        %> - `removeUELs()` removes all unused UELs for all symbols.
+        %> - `removeUELs(u)` removes the UELs `u` for all symbols.
+        %> - `removeUELs(_, 'symbols', s)` removes UELs for symbols `s`.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the container is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Container::isValid "Container.isValid"
+        function removeUELs(obj, varargin)
+            % Removes UELs from all symbol
+            %
+            % removeUELs() removes all unused UELs for all symbols.
+            % removeUELs(u) removes the UELs u for all symbols.
+            % removeUELs(_, 'symbols', s) removes UELs for symbols s.
+            %
+            % Note: This can only be used if the container is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Container.isValid
+
+            is_parname = @(x) strcmpi(x, 'symbols');
+
+            % check optional arguments
+            i = 1;
+            uels = {};
+            while true
+                term = true;
+                if i == 1 && nargin > 1
+                    if ((isstring(uels) && numel(uels) == 1) || ischar(uels) || iscellstr(uels)) && ~is_parname(varargin{i})
+                        uels = varargin{i};
+                        i = i + 1;
+                        term = false;
+                    elseif ~is_parname(varargin{i})
+                        error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+                    end
+                end
+                if term || i > 1
+                    break;
+                end
+            end
+
+            % check parameter arguments
+            symbols = {};
+            while i < nargin - 1
+                if strcmpi(varargin{i}, 'symbols')
+                    symbols = varargin{i+1};
+                else
+                    error('Unknown argument name.');
+                end
+                i = i + 2;
+            end
+
+            % check number of arguments
+            if i <= nargin - 1
+                error('Invalid number of arguments');
+            end
+
+            if isempty(symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = obj.getSymbolNames(symbols);
+            end
+
+            for i = 1:numel(symbols)
+                obj.data.(symbols{i}).removeUELs(uels);
+            end
+        end
+
+        %> Renames UELs in all symbol
+        %>
+        %> - `renameUELs(u)` renames the UELs `u` for all symbols. `u` can be a
+        %>   `struct` (field names = old UELs, field values = new UELs),
+        %>   `containers.Map` (keys = old UELs, values = new UELs) or `cellstr`
+        %>   (full list of UELs, must have as many entries as current UELs). The
+        %>   codes for renamed UELs do not change.
+        %> - `renameUELs(_, 'symbols', s)` renames UELs for symbols `s`.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
+        function renameUELs(obj, uels, varargin)
+            % Renames UELs in all symbol
+            %
+            % renameUELs(u) renames the UELs u for all symbols. u can be a
+            % struct (field names = old UELs, field values = new UELs),
+            % containers.Map (keys = old UELs, values = new UELs) or cellstr
+            % (full list of UELs, must have as many entries as current UELs).
+            % The codes for renamed UELs do not change.
+            % renameUELs(_, 'symbols', s) renames UELs for symbols s.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+
+            % input arguments
+            p = inputParser();
+            addParameter(p, 'symbols', {}, @iscellstr);
+            parse(p, varargin{:});
+            if isempty(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = obj.getSymbolNames(p.Results.symbols);
+            end
+
+            for i = 1:numel(symbols)
+                obj.data.(symbols{i}).renameUELs(uels);
             end
         end
 
