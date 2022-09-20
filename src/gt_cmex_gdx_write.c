@@ -48,7 +48,7 @@ void mexFunction(
     char text[GMS_SSSIZE], dominfo[10], sysdir[GMS_SSSIZE];
     double def_values[GMS_VAL_MAX];
     bool was_table, support_table, support_categorical, compress, issorted, singleton;
-    bool have_nrecs, support_setget, is_regular_domain;
+    bool have_nrecs, support_setget, can_skip_default_recs;
     char* data_name = NULL;
     gdxHandle_t gdx = NULL;
     gdxStrIndexPtrs_t domains_ptr, domain_labels_ptr;
@@ -245,7 +245,7 @@ void mexFunction(
         /* write domain information */
         if (dim > 0)
             gt_gdx_setdomain(gdx, dominfo, i+1, (const char**) domains_ptr);
-        is_regular_domain = !strcmp(dominfo, "regular");
+        can_skip_default_recs = !strcmp(dominfo, "regular") && type != GMS_DT_SET;
 
         /* only go on to writing records if records are available */
         if (!mx_arr_records || format == GT_FORMAT_UNKNOWN || format == GT_FORMAT_EMPTY ||
@@ -347,7 +347,7 @@ void mexFunction(
                             gdx_values[k] = def_values[k];
                         is_default_rec = (gdx_values[k] != def_values[k]) ? false : is_default_rec;
                     }
-                    if (is_regular_domain && is_default_rec)
+                    if (can_skip_default_recs && is_default_rec)
                         continue;
 
                     if (issorted)
@@ -402,7 +402,7 @@ void mexFunction(
                             gdx_values[k] = def_values[k];
                         is_default_rec = (gdx_values[k] != def_values[k]) ? false : is_default_rec;
                     }
-                    if (is_regular_domain && is_default_rec)
+                    if (can_skip_default_recs && is_default_rec)
                         continue;
 
                     if (issorted)
@@ -460,7 +460,7 @@ void mexFunction(
                         }
                         for (size_t kk = 0; kk < GMS_VAL_MAX; kk++)
                             is_default_rec = (gdx_values[kk] != def_values[kk]) ? false : is_default_rec;
-                        if (is_regular_domain && is_default_rec)
+                        if (can_skip_default_recs && is_default_rec)
                             continue;
 
                         /* write values */
