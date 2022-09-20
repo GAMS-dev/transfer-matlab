@@ -2085,8 +2085,8 @@ function test_readWriteDomainCheck(t, cfg)
     x.records.lower = records.lower;
     x.records.upper = records.upper;
     x.records.scale = records.scale;
-    x.initUELs(1, uels1);
-    x.initUELs(2, uels2);
+    x.setUELs(uels1, 1, 'rename', true);
+    x.setUELs(uels2, 2, 'rename', true);
     t.assertEquals(gdx.data.x.domain_type, 'relaxed');
     gdx.write(write_filename);
     gdx2 = GAMSTransfer.Container(write_filename, 'gams_dir', ...

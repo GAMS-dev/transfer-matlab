@@ -132,7 +132,7 @@
 %> ```
 %> c = ConstContainer('path/to/file.gdx', 'features', struct('categorical', false));
 %> ```
-%> Domain entries are numerical IDs of UELs (see also \ref
+%> Domain entries are numerical codes of UELs (see also \ref
 %> GAMSTRANSFER_MATLAB_RECORDS_UELS) and can be looked up in the `uels` field of
 %> a symbol.
 %> \endparblock

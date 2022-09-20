@@ -201,22 +201,15 @@ classdef Alias < handle
             if ~isa(container, 'GAMSTransfer.Container')
                 error('Argument ''container'' must be of type ''GAMSTransfer.Container''.');
             end
-            if ~(isstring(name) && numel(name) == 1) && ~ischar(name)
-                error('Argument ''name'' must be of type ''char''.');
-            end
-            if ~isa(alias_with, 'GAMSTransfer.Set') && ~isa(alias_with, 'GAMSTransfer.Alias')
-                error('Argument ''alias_with'' must be of type ''GAMSTransfer.Set'' or ''GAMSTransfer.Alias''.');
-            end
             obj.container = container;
-            obj.name_ = char(name);
-            while isa(alias_with, 'GAMSTransfer.Alias')
-                alias_with = alias_with.alias_with;
-            end
-            obj.alias_with = alias_with;
 
             if container.indexed
                 error('Alias not allowed in indexed mode.');
             end
+
+            args = GAMSTransfer.Alias.parseConstructArguments(name, alias_with);
+            obj.name_ = args.name;
+            obj.alias_with = args.alias_with;
 
             % add symbol to container
             obj.container.add(obj);
@@ -663,70 +656,70 @@ classdef Alias < handle
             uels = obj.alias_with.getUELs(dim, varargin{:});
         end
 
-        %> Returns the UELs labels for the given UEL IDs
+        %> Returns the UELs labels for the given UEL codes
         %>
         %> @see \ref GAMSTransfer::Symbol::getUELLabels "Symbol.getUELLabels"
-        function uels = getUELLabels(obj, dim, ids)
-            % Returns the UELs labels for the given UEL IDs
+        function uels = getUELLabels(obj, dim, codes)
+            % Returns the UELs labels for the given UEL codes
             %
             % See also: GAMSTransfer.Symbol.getUELLabels
 
-            uels = obj.alias_with.getUELLabels(dim, ids);
+            uels = obj.alias_with.getUELLabels(dim, codes);
         end
 
-        %> Sets the UELs without modifying UEL IDs in records
+        %> Sets the UELs without modifying UEL codes in records
         %>
         %> @see \ref GAMSTransfer::Symbol::initUELs "Symbol.initUELs"
         function initUELs(obj, dim, uels)
-            % Sets the UELs without modifying UEL IDs in records
+            % Sets the UELs without modifying UEL codes in records
             %
             % See also: GAMSTransfer.Symbol.initUELs
 
             obj.alias_with.initUELs(dim, uels);
         end
 
-        %> Sets the UELs with updating UEL IDs in records
+        %> Sets the UELs with updating UEL codes in records
         %>
         %> @see \ref GAMSTransfer::Symbol::setUELs "Symbol.setUELs"
-        function setUELs(obj, dim, uels)
-            % Sets the UELs with updating UEL IDs in records
+        function setUELs(obj, uels, dim, varargin)
+            % Sets the UELs with updating UEL codes in records
             %
             % See also: GAMSTransfer.Symbol.setUELs
 
-            obj.alias_with.setUELs(dim, uels);
+            obj.alias_with.setUELs(uels, dim, varargin{:});
         end
 
         %> Adds UELs to the symbol
         %>
         %> @see \ref GAMSTransfer::Symbol::addUELs "Symbol.addUELs"
-        function addUELs(obj, dim, uels)
+        function addUELs(obj, uels, dim)
             % Adds UELs to the symbol
             %
             % See also: GAMSTransfer.Symbol.addUELs
 
-            obj.alias_with.addUELs(dim, uels);
+            obj.alias_with.addUELs(uels, dim);
         end
 
         %> Removes UELs from the symbol
         %>
         %> @see \ref GAMSTransfer::Symbol::removeUELs "Symbol.removeUELs"
-        function removeUELs(obj, dim, uels)
+        function removeUELs(obj, varargin)
             % Removes UELs from the symbol
             %
             % See also: GAMSTransfer.Symbol.removeUELs
 
-            obj.alias_with.removeUELs(dim, uels);
+            obj.alias_with.removeUELs(varargin{:});
         end
 
         %> Renames UELs in the symbol
         %>
         %> @see \ref GAMSTransfer::Symbol::renameUELs "Symbol.renameUELs"
-        function renameUELs(obj, dim, olduels, newuels)
+        function renameUELs(obj, uels, dim)
             % Renames UELs in the symbol
             %
             % See also: GAMSTransfer.Symbol.renameUELs
 
-            obj.alias_with.renameUELs(dim, olduels, newuels);
+            obj.alias_with.renameUELs(uels, dim);
         end
 
     end
@@ -747,6 +740,29 @@ classdef Alias < handle
             %
 
             bool = obj.alias_with.isValidAsDomain();
+        end
+
+    end
+
+    methods (Hidden, Static)
+
+        function args = parseConstructArguments(name, alias_with)
+            args = struct;
+
+            if ~(isstring(name) && numel(name) == 1) && ~ischar(name)
+                error('Argument ''name'' must be of type ''char''.');
+            end
+            if ~isa(alias_with, 'GAMSTransfer.Set') && ~isa(alias_with, 'GAMSTransfer.Alias')
+                error('Argument ''alias_with'' must be of type ''GAMSTransfer.Set'' or ''GAMSTransfer.Alias''.');
+            end
+            args.name = char(name);
+            args.isset_name = true;
+            while isa(alias_with, 'GAMSTransfer.Alias')
+                alias_with = alias_with.alias_with;
+            end
+            args.alias_with = alias_with;
+            args.isset_alias_with = true;
+
         end
 
     end

@@ -412,7 +412,7 @@ classdef Container < GAMSTransfer.BaseContainer
                             if isempty(symbol.uels{j})
                                 continue
                             end
-                            obj.data.(symbol.name).initUELs(j, symbol.uels{j});
+                            obj.data.(symbol.name).setUELs(symbol.uels{j}, j, 'rename', true);
                         end
                     end
                 end
@@ -462,9 +462,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % There are different issues that can occur when writing to GDX:
             % e.g. domain violations and unsorted data. For domain violations,
             % see GAMSTransfer.Container.getDomainViolations. Domain labels are
-            % stored as UELs in GDX that are an (ID,label) pair. The ID is a
+            % stored as UELs in GDX that are an (code,label) pair. The code is a
             % number with an ascending order based on the write occurence. Data
-            % records must be sorted by these IDs in ascending order (dimension
+            % records must be sorted by these codes in ascending order (dimension
             % 1 first, then dimension 2, ...). If one knows that the data is
             % sorted, one can set the flag 'sorted' to true to improve
             % performance. Otherwise GAMSTransfer will sort the values
@@ -573,7 +573,12 @@ classdef Container < GAMSTransfer.BaseContainer
         %> Adds a set to the container
         %>
         %> Arguments are identical to the \ref GAMSTransfer::Set "Set"
-        %> constructor. Alternatively, use the constructor directly.
+        %> constructor. Alternatively, use the constructor directly. In contrast
+        %> to the constructor, this method may overwrite a set if its definition
+        %> (\ref GAMSTransfer::Set::is_singleton "is_singleton", \ref
+        %> GAMSTransfer::Set::domain "domain", \ref
+        %> GAMSTransfer::Set::domain_forwarding "domain_forwarding") doesn't
+        %> differ.
         %>
         %> **Example:**
         %> ```
@@ -588,7 +593,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % Adds a set to the container
             %
             % Arguments are identical to the GAMSTransfer.Set constructor.
-            % Alternatively, use the constructor directly.
+            % Alternatively, use the constructor directly. In contrast to the
+            % constructor, this method may overwrite a set if its definition
+            % (is_singleton, domain, domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -598,13 +605,35 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % See also: GAMSTransfer.Set
 
-            symbol = GAMSTransfer.Set(obj, name, varargin{:});
+            if obj.hasSymbols(name)
+                symbol = obj.getSymbols(name);
+                args = GAMSTransfer.Set.parseConstructArguments(name, varargin{:});
+                if isa(symbol, 'GAMSTransfer.Set') && ...
+                    isequal(symbol.is_singleton, args.is_singleton) && ...
+                    isequal(symbol.domain, args.domain) && ...
+                    isequal(symbol.domain_forwarding, args.domain_forwarding)
+                    if args.isset_description
+                        symbol.description = args.description;
+                    end
+                    if args.isset_records
+                        symbol.setRecords(args.records);
+                    end
+                else
+                    error('Symbol ''%s'' (with different definition) already exists.', name);
+                end
+            else
+                symbol = GAMSTransfer.Set(obj, name, varargin{:});
+            end
         end
 
         %> Adds a parameter to the container
         %>
         %> Arguments are identical to the \ref GAMSTransfer::Parameter
         %> "Parameter" constructor. Alternatively, use the constructor directly.
+        %> In contrast to the constructor, this method may overwrite a parameter
+        %> if its definition (\ref GAMSTransfer::Parameter::domain "domain",
+        %> \ref GAMSTransfer::Parameter::domain_forwarding "domain_forwarding")
+        %> doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -619,7 +648,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % Adds a parameter to the container
             %
             % Arguments are identical to the GAMSTransfer.Parameter constructor.
-            % Alternatively, use the constructor directly.
+            % Alternatively, use the constructor directly. In contrast to the
+            % constructor, this method may overwrite a parameter if its
+            % definition (domain, domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -629,13 +660,36 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % See also: GAMSTransfer.Parameter
 
-            symbol = GAMSTransfer.Parameter(obj, name, varargin{:});
+            if obj.hasSymbols(name)
+                symbol = obj.getSymbols(name);
+                args = GAMSTransfer.Parameter.parseConstructArguments(obj.indexed, ...
+                    name, varargin{:});
+                if isa(symbol, 'GAMSTransfer.Parameter') && ...
+                    isequal(symbol.domain, args.domain) && ...
+                    isequal(symbol.domain_forwarding, args.domain_forwarding)
+                    if args.isset_description
+                        symbol.description = args.description;
+                    end
+                    if args.isset_records
+                        symbol.setRecords(args.records);
+                    end
+                else
+                    error('Symbol ''%s'' (with different definition) already exists.', name);
+                end
+            else
+                symbol = GAMSTransfer.Parameter(obj, name, varargin{:});
+            end
         end
 
         %> Adds a variable to the container
         %>
         %> Arguments are identical to the \ref GAMSTransfer::Variable "Variable"
-        %> constructor. Alternatively, use the constructor directly.
+        %> constructor. Alternatively, use the constructor directly. In contrast
+        %> to the constructor, this method may overwrite a variable if its
+        %> definition (\ref GAMSTransfer::Variable::type "type", \ref
+        %> GAMSTransfer::Variable::domain "domain", \ref
+        %> GAMSTransfer::Variable::domain_forwarding "domain_forwarding")
+        %> doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -651,7 +705,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % Adds a variable to the container
             %
             % Arguments are identical to the GAMSTransfer.Variable constructor.
-            % Alternatively, use the constructor directly.
+            % Alternatively, use the constructor directly. In contrast to the
+            % constructor, this method may overwrite a variable if its
+            % definition (type, domain, domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -661,13 +717,37 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % See also: GAMSTransfer.Variable, GAMSTransfer.VariableType
 
-            symbol = GAMSTransfer.Variable(obj, name, varargin{:});
+            if obj.hasSymbols(name)
+                symbol = obj.getSymbols(name);
+                args = GAMSTransfer.Variable.parseConstructArguments(name, varargin{:});
+                if isa(symbol, 'GAMSTransfer.Variable') && ...
+                    isequal(symbol.domain, args.domain) && ...
+                    (~isnumeric(args.type) && isequal(symbol.type, args.type) || ...
+                    isnumeric(args.type) && isequal(symbol.type, GAMSTransfer.VariableType.int2str(args.type))) && ...
+                    isequal(symbol.domain_forwarding, args.domain_forwarding)
+                    if args.isset_description
+                        symbol.description = args.description;
+                    end
+                    if args.isset_records
+                        symbol.setRecords(args.records);
+                    end
+                else
+                    error('Symbol ''%s'' (with different definition) already exists.', name);
+                end
+            else
+                symbol = GAMSTransfer.Variable(obj, name, varargin{:});
+            end
         end
 
         %> Adds an equation to the container
         %>
         %> Arguments are identical to the \ref GAMSTransfer::Equation "Equation"
-        %> constructor. Alternatively, use the constructor directly.
+        %> constructor. Alternatively, use the constructor directly. In contrast
+        %> to the constructor, this method may overwrite an equation if its
+        %> definition (\ref GAMSTransfer::Equation::type "type", \ref
+        %> GAMSTransfer::Equation::domain "domain", \ref
+        %> GAMSTransfer::Equation::domain_forwarding "domain_forwarding")
+        %> doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -682,7 +762,9 @@ classdef Container < GAMSTransfer.BaseContainer
             % Adds an equation to the container
             %
             % Arguments are identical to the GAMSTransfer.Equation constructor.
-            % Alternatively, use the constructor directly.
+            % Alternatively, use the constructor directly. In contrast to the
+            % constructor, this method may overwrite an equation if its
+            % definition (type, domain, domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -691,13 +773,33 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % See also: GAMSTransfer.Equation, GAMSTransfer.EquationType
 
-            symbol = GAMSTransfer.Equation(obj, name, etype, varargin{:});
+            if obj.hasSymbols(name)
+                symbol = obj.getSymbols(name);
+                args = GAMSTransfer.Equation.parseConstructArguments(name, etype, varargin{:});
+                if isa(symbol, 'GAMSTransfer.Equation') && ...
+                    isequal(symbol.domain, args.domain) && ...
+                    (~isnumeric(args.type) && isequal(symbol.type, args.type) || ...
+                    isnumeric(args.type) && isequal(symbol.type, GAMSTransfer.EquationType.int2str(args.type))) && ...
+                    isequal(symbol.domain_forwarding, args.domain_forwarding)
+                    if args.isset_description
+                        symbol.description = args.description;
+                    end
+                    if args.isset_records
+                        symbol.setRecords(args.records);
+                    end
+                else
+                    error('Symbol ''%s'' (with different definition) already exists.', name);
+                end
+            else
+                symbol = GAMSTransfer.Equation(obj, name, etype, varargin{:});
+            end
         end
 
         %> Adds an alias to the container
         %>
         %> Arguments are identical to the \ref GAMSTransfer::Alias "Alias"
-        %> constructor. Alternatively, use the constructor directly.
+        %> constructor. Alternatively, use the constructor directly. In contrast
+        %> to the constructor, this method may overwrite an alias.
         %>
         %> **Example:**
         %> ```
@@ -711,7 +813,8 @@ classdef Container < GAMSTransfer.BaseContainer
             % Adds an alias to the container
             %
             % Arguments are identical to the GAMSTransfer.Alias constructor.
-            % Alternatively, use the constructor directly.
+            % Alternatively, use the constructor directly. In contrast to the
+            % constructor, this method may overwrite an alias.
             %
             % Example:
             % c = Container();
@@ -720,7 +823,17 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % See also: GAMSTransfer.Alias, GAMSTransfer.Set
 
-            symbol = GAMSTransfer.Alias(obj, name, alias_with);
+            if obj.hasSymbols(name)
+                symbol = obj.getSymbols(name);
+                args = GAMSTransfer.Alias.parseConstructArguments(name, alias_with);
+                if isa(symbol, 'GAMSTransfer.Alias')
+                    symbol.alias_with = args.alias_with;
+                else
+                    error('Symbol ''%s'' (with different definition) already exists.', name);
+                end
+            else
+                symbol = GAMSTransfer.Alias(obj, name, alias_with);
+            end
         end
 
         %> Rename a symbol
@@ -975,31 +1088,14 @@ classdef Container < GAMSTransfer.BaseContainer
         end
 
         %> Generate universe set (UEL order in GDX)
+        %>
+        %> @deprecated Will be removed in version 1.x.x. Use \ref
+        %> GAMSTransfer::Container::getUELs "Container.getUELs".
         function list = getUniverseSet(obj)
-            % Generate universe set (UEL order in GDX)
+            % Generate universe set (UEL order in GDX) (deprecated)
 
-            map = javaObject('java.util.LinkedHashMap');
-
-            % collect uels
-            symbols = fieldnames(obj.data);
-            for i = 1:numel(symbols)
-                symbol = obj.data.(symbols{i});
-                for j = 1:symbol.dimension
-                    uels = symbol.getUELs(j);
-                    for k = 1:numel(uels)
-                        map.put(uels{k}, true);
-                    end
-                end
-            end
-
-            % get list of keys
-            list = cell(1, map.keySet().size());
-            it = map.keySet().iterator();
-            i = 1;
-            while it.hasNext()
-                list{i} = char(it.next());
-                i = i + 1;
-            end
+            warning('Method ''getUniverseSet'' is deprecated. Please use ''getUELs'' instead');
+            list = obj.getUELs();
         end
 
         %> Checks correctness of all symbols
@@ -1044,6 +1140,174 @@ classdef Container < GAMSTransfer.BaseContainer
                 if ~force
                     return
                 end
+            end
+        end
+
+        %> Get UELs from all symbols
+        %>
+        %> - `u = getUELs()` returns the UELs across all symbols.
+        %> - `u = getUELs(_, 'symbols', s)` returns the UELs across symbols `s`.
+        %> - `u = getUELs(_, "ignore_unused", true)` returns only those UELs
+        %>   that are actually used in the records.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the container is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Container::isValid "Container.isValid"
+        function uels = getUELs(obj, varargin)
+            % Get UELs from all symbols
+            %
+            % u = getUELs() returns the UELs across all symbols.
+            % u = getUELs(_, 'symbols', s) returns the UELs across symbols s.
+            % u = getUELs(_, "ignore_unused", true) returns only those UELs
+            % that are actually used in the records.
+            %
+            % Note: This can only be used if the container is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Container.isValid
+
+            % input arguments
+            p = inputParser();
+            addParameter(p, 'symbols', {}, @iscellstr);
+            addParameter(p, 'ignore_unused', false, @islogical);
+            parse(p, varargin{:});
+            if isempty(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = obj.getSymbolNames(p.Results.symbols);
+            end
+
+            uels = {};
+            for i = 1:numel(symbols)
+                uels = [uels; obj.data.(symbols{i}).getUELs('ignore_unused', p.Results.ignore_unused)];
+                [~,uidx,~] = unique(uels, 'first');
+                uels = uels(sort(uidx));
+            end
+        end
+
+        %> Removes UELs from all symbols
+        %>
+        %> - `removeUELs()` removes all unused UELs for all symbols.
+        %> - `removeUELs(u)` removes the UELs `u` for all symbols.
+        %> - `removeUELs(_, 'symbols', s)` removes UELs for symbols `s`.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the container is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Container::isValid "Container.isValid"
+        function removeUELs(obj, varargin)
+            % Removes UELs from all symbol
+            %
+            % removeUELs() removes all unused UELs for all symbols.
+            % removeUELs(u) removes the UELs u for all symbols.
+            % removeUELs(_, 'symbols', s) removes UELs for symbols s.
+            %
+            % Note: This can only be used if the container is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Container.isValid
+
+            is_parname = @(x) strcmpi(x, 'symbols');
+
+            % check optional arguments
+            i = 1;
+            uels = {};
+            while true
+                term = true;
+                if i == 1 && nargin > 1
+                    if ((isstring(uels) && numel(uels) == 1) || ischar(uels) || iscellstr(uels)) && ~is_parname(varargin{i})
+                        uels = varargin{i};
+                        i = i + 1;
+                        term = false;
+                    elseif ~is_parname(varargin{i})
+                        error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+                    end
+                end
+                if term || i > 1
+                    break;
+                end
+            end
+
+            % check parameter arguments
+            symbols = {};
+            while i < nargin - 1
+                if strcmpi(varargin{i}, 'symbols')
+                    symbols = varargin{i+1};
+                else
+                    error('Unknown argument name.');
+                end
+                i = i + 2;
+            end
+
+            % check number of arguments
+            if i <= nargin - 1
+                error('Invalid number of arguments');
+            end
+
+            if isempty(symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = obj.getSymbolNames(symbols);
+            end
+
+            for i = 1:numel(symbols)
+                obj.data.(symbols{i}).removeUELs(uels);
+            end
+        end
+
+        %> Renames UELs in all symbol
+        %>
+        %> - `renameUELs(u)` renames the UELs `u` for all symbols. `u` can be a
+        %>   `struct` (field names = old UELs, field values = new UELs),
+        %>   `containers.Map` (keys = old UELs, values = new UELs) or `cellstr`
+        %>   (full list of UELs, must have as many entries as current UELs). The
+        %>   codes for renamed UELs do not change.
+        %> - `renameUELs(_, 'symbols', s)` renames UELs for symbols `s`.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
+        function renameUELs(obj, uels, varargin)
+            % Renames UELs in all symbol
+            %
+            % renameUELs(u) renames the UELs u for all symbols. u can be a
+            % struct (field names = old UELs, field values = new UELs),
+            % containers.Map (keys = old UELs, values = new UELs) or cellstr
+            % (full list of UELs, must have as many entries as current UELs).
+            % The codes for renamed UELs do not change.
+            % renameUELs(_, 'symbols', s) renames UELs for symbols s.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+
+            % input arguments
+            p = inputParser();
+            addParameter(p, 'symbols', {}, @iscellstr);
+            parse(p, varargin{:});
+            if isempty(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = obj.getSymbolNames(p.Results.symbols);
+            end
+
+            for i = 1:numel(symbols)
+                obj.data.(symbols{i}).renameUELs(uels);
             end
         end
 

@@ -127,15 +127,15 @@ records are sorted correctly, can set the \ref GAMSTransfer::Container::write
 efficiency. Symbol records `dense_matrix` and `sparse_matrix` are sorted per
 definition (`sorted` has no effect). GDX expects the following order for
 `struct` and `table` formats. Symbol records are sorted by domain \ref
-GAMSTRANSFER_MATLAB_RECORDS_UELS "UEL" IDs in ascending order w.r.t. dimension 1
-first, then 2, then 3, etc. However, \ref GAMSTRANSFER_MATLAB_RECORDS_UELS "UEL"
-IDs are here not relative to the symbol, but global to the whole container where
-only the first occurence is relevant. This also means that symbol order within a
-container also influences the \ref GAMSTRANSFER_MATLAB_RECORDS_UELS "UEL" order
-and hence symbol record order. The method \ref
-GAMSTransfer::Container::getUniverseSet "Container.getUniverseSet" returns this
-global \ref GAMSTRANSFER_MATLAB_RECORDS_UELS "UEL" ordering and can be a help to
-establish the correct ordering. Note that \ref
+GAMSTRANSFER_MATLAB_RECORDS_UELS "UEL" codes in ascending order w.r.t. dimension
+1 first, then 2, then 3, etc. However, \ref GAMSTRANSFER_MATLAB_RECORDS_UELS
+"UEL" codes are here not relative to the symbol, but global to the whole
+container where only the first occurence is relevant. This also means that
+symbol order within a container also influences the \ref
+GAMSTRANSFER_MATLAB_RECORDS_UELS "UEL" order and hence symbol record order. The
+method \ref GAMSTransfer::Container::getUniverseSet "Container.getUniverseSet"
+returns this global \ref GAMSTRANSFER_MATLAB_RECORDS_UELS "UEL" ordering and can
+be a help to establish the correct ordering. Note that \ref
 GAMSTransfer::Container::getUniverseSet "Container.getUniverseSet" creates this
 set only on request and is not very efficient.
 \endparblock
