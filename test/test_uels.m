@@ -312,12 +312,15 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_get_1');
+    c.modified = false;
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i1');
     t.assertEquals(uels{2}, 'i3');
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
+    t.assert(~c.modified);
+    t.assert(~x.modified);
     uels = x.getUELs(2);
     t.assert(numel(uels) == 5);
     t.assertEquals(uels{1}, 'j2');
@@ -325,8 +328,11 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{3}, 'j7');
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
+    t.assert(~c.modified);
+    t.assert(~x.modified);
 
     t.add('symbol_uels_get_2');
+    c.modified = false;
     uels = x.getUELs();
     t.assert(numel(uels) == 9);
     t.assertEquals(uels{1}, 'i1');
@@ -338,8 +344,11 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{7}, 'j7');
     t.assertEquals(uels{8}, 'j8');
     t.assertEquals(uels{9}, 'j9');
+    t.assert(~c.modified);
+    t.assert(~x.modified);
 
     t.add('symbol_uels_get_3');
+    c.modified = false;
     uels = x.getUELs(1, [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5]);
     t.assert(numel(uels) == 12);
     t.assertEquals(uels{1}, '<undefined>');
@@ -354,8 +363,11 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{10}, 'i6');
     t.assertEquals(uels{11}, 'i10');
     t.assertEquals(uels{12}, '<undefined>');
+    t.assert(~c.modified);
+    t.assert(~x.modified);
 
     t.add('symbol_uels_get_4');
+    c.modified = false;
     uels = c.getUELs();
     t.assert(numel(uels) == 10);
     t.assertEquals(uels{1}, 'i1');
@@ -368,8 +380,11 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{8}, 'j7');
     t.assertEquals(uels{9}, 'j8');
     t.assertEquals(uels{10}, 'j9');
+    t.assert(~c.modified);
+    t.assert(~x.modified);
 
     t.add('symbol_uels_get_5');
+    c.modified = false;
     uels = c.getUELs('symbols', {'x'});
     t.assert(numel(uels) == 9);
     t.assertEquals(uels{1}, 'i1');
@@ -381,8 +396,11 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{7}, 'j7');
     t.assertEquals(uels{8}, 'j8');
     t.assertEquals(uels{9}, 'j9');
+    t.assert(~c.modified);
+    t.assert(~x.modified);
 
     t.add('symbol_uels_get_6');
+    c.modified = false;
     uels = c.getUELs('symbols', {'i', 'j'});
     t.assert(numel(uels) == 10);
     t.assertEquals(uels{1}, 'i1');
@@ -395,9 +413,14 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{8}, 'j7');
     t.assertEquals(uels{9}, 'j8');
     t.assertEquals(uels{10}, 'j9');
+    t.assert(~c.modified);
+    t.assert(~x.modified);
 
     t.add('symbol_uels_add_1');
+    c.modified = false;
     x.addUELs('i11', 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 5);
     t.assertEquals(uels{1}, 'i1');
@@ -405,7 +428,10 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
     t.assertEquals(uels{5}, 'i11');
+    c.modified = false;
     x.addUELs({'i12', 'i13'}, 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 7);
     t.assertEquals(uels{1}, 'i1');
@@ -415,7 +441,10 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{5}, 'i11');
     t.assertEquals(uels{6}, 'i12');
     t.assertEquals(uels{7}, 'i13');
+    c.modified = false;
     x.addUELs({'i12', 'i13'}, 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 7);
     t.assertEquals(uels{1}, 'i1');
@@ -437,7 +466,10 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_add_2');
+    c.modified = false;
     x.addUELs('i11', 1:2);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 5);
     t.assertEquals(uels{1}, 'i1');
@@ -453,7 +485,10 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
     t.assertEquals(uels{6}, 'i11');
+    c.modified = false;
     x.addUELs({'i12', 'i13'}, 1:2);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 7);
     t.assertEquals(uels{1}, 'i1');
@@ -473,7 +508,10 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{6}, 'i11');
     t.assertEquals(uels{7}, 'i12');
     t.assertEquals(uels{8}, 'i13');
+    c.modified = false;
     x.addUELs({'i12', 'i13'}, 1:2);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 7);
     t.assertEquals(uels{1}, 'i1');
@@ -508,7 +546,10 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{5}, 'j9');
 
     t.add('symbol_uels_set_1');
+    c.modified = false;
     x.setUELs({'i1', 'i3', 'i6', 'i10'}, 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i1');
@@ -539,7 +580,10 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_set_2');
+    c.modified = false;
     x.setUELs('i1', 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     t.assert(~x.isValid());
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);
@@ -555,7 +599,10 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_set_3');
+    c.modified = false;
     x.setUELs({'i1', 'i3', 'i6', 'i10'}, 1:2);
+    t.assert(c.modified);
+    t.assert(x.modified);
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
@@ -586,7 +633,10 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 3);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
+    c.modified = false;
     x.setUELs({'i1', 'i3', 'i4', 'i6', 'i10'}, 1, 'rename', true);
+    t.assert(c.modified);
+    t.assert(x.modified);
     t.assert(x.isValid());
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);
@@ -603,7 +653,10 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{3}, 'i4');
     t.assertEquals(uels{4}, 'i6');
     t.assertEquals(uels{5}, 'i10');
+    c.modified = false;
     x.setUELs({'i3', 'i1', 'i4', 'i10', 'i5'}, 1, 'rename', true);
+    t.assert(c.modified);
+    t.assert(x.modified);
     t.assert(x.isValid());
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);
@@ -642,7 +695,10 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 2);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 3);
+    c.modified = false;
     x.setUELs({'i1', 'i3', 'i4', 'i6', 'i10'}, 1:2, 'rename', true);
+    t.assert(c.modified);
+    t.assert(x.modified);
     t.assert(x.isValid());
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);
@@ -680,7 +736,10 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_remove_1');
+    c.modified = false;
     x.removeUELs('i4', 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i1');
@@ -695,7 +754,10 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 3);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
+    c.modified = false;
     x.removeUELs({'i3', 'i6'}, 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     t.assert(~x.isValid());
     ids = int64(x.records.i_1);
     t.assert(numel(ids) == 6);
@@ -711,7 +773,10 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_remove_2');
+    c.modified = false;
     x.addUELs('i4', 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 5);
     t.assertEquals(uels{1}, 'i1');
@@ -719,7 +784,10 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
     t.assertEquals(uels{5}, 'i4');
+    c.modified = false;
     x.removeUELs({}, 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i1');
@@ -740,7 +808,10 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_remove_3');
+    c.modified = false;
     x.addUELs('bla', 1:2);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 5);
     t.assertEquals(uels{1}, 'i1');
@@ -756,7 +827,10 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
     t.assertEquals(uels{6}, 'bla');
+    c.modified = false;
     x.removeUELs({}, 2);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 5);
     t.assertEquals(uels{1}, 'i1');
@@ -772,7 +846,10 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
     x.addUELs('bla2', 1:2);
+    c.modified = false;
     x.removeUELs();
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i1');
@@ -793,8 +870,12 @@ function test_symbol_uels(t, cfg)
     j = c.data.j;
 
     t.add('symbol_uels_remove_4');
+    c.modified = false;
     i.addUELs({'bla1', 'bla2', 'bla3'}, 1);
     j.addUELs({'bla1', 'bla2', 'bla3'}, 1);
+    t.assert(c.modified);
+    t.assert(i.modified);
+    t.assert(j.modified);
     uels = i.getUELs(1);
     t.assert(numel(uels) == 8);
     t.assertEquals(uels{1}, 'i1');
@@ -815,7 +896,11 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{6}, 'bla1');
     t.assertEquals(uels{7}, 'bla2');
     t.assertEquals(uels{8}, 'bla3');
+    c.modified = false;
     c.removeUELs('bla1');
+    t.assert(c.modified);
+    t.assert(i.modified);
+    t.assert(j.modified);
     uels = i.getUELs(1);
     t.assert(numel(uels) == 7);
     t.assertEquals(uels{1}, 'i1');
@@ -834,7 +919,11 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{5}, 'j9');
     t.assertEquals(uels{6}, 'bla2');
     t.assertEquals(uels{7}, 'bla3');
+    c.modified = false;
     c.removeUELs();
+    t.assert(c.modified);
+    t.assert(i.modified);
+    t.assert(j.modified);
     uels = i.getUELs(1);
     t.assert(numel(uels) == 5);
     t.assertEquals(uels{1}, 'i1');
@@ -855,7 +944,10 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_rename_1');
+    c.modified = false;
     x.renameUELs(struct('i1', 'i11'), 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i11');
@@ -870,7 +962,10 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 3);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
+    c.modified = false;
     x.renameUELs(struct('i3', 'i33', 'i10', 'i1010'), 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i11');
@@ -891,7 +986,10 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_rename_2');
+    c.modified = false;
     x.renameUELs({'i11', 'i3', 'i6', 'i10'}, 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i11');
@@ -906,7 +1004,10 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 3);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
+    c.modified = false;
     x.renameUELs({'i11', 'i33', 'i6', 'i1010'}, 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i11');
@@ -927,7 +1028,10 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_rename_3');
+    c.modified = false;
     x.renameUELs(containers.Map({'i1'}, {'i11'}), 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i11');
@@ -942,7 +1046,10 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 3);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
+    c.modified = false;
     x.renameUELs(containers.Map({'i3', 'i10'}, {'i33', 'i1010'}), 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i11');
@@ -964,7 +1071,10 @@ function test_symbol_uels(t, cfg)
     i = c.data.i;
 
     t.add('symbol_uels_rename_4');
+    c.modified = false;
     c.renameUELs(struct('i1', 'i11', 'i3', 'i33'));
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i11');
@@ -1013,7 +1123,10 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 3);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
+    c.modified = false;
     x.reorderUELs({'i3', 'i10', 'i1', 'i6'}, 1);
+    t.assert(c.modified);
+    t.assert(x.modified);
     uels = x.getUELs(1);
     t.assert(numel(uels) == 4);
     t.assertEquals(uels{1}, 'i3');

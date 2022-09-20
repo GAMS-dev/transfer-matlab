@@ -58,6 +58,7 @@ classdef BaseContainer < handle
     properties (Hidden, SetAccess = protected)
         id
         features
+        modified_ = true
     end
 
     methods (Hidden)
@@ -80,6 +81,15 @@ classdef BaseContainer < handle
                     obj.features.(feature_names{i}) = features.(feature_names{i});
                 end
             end
+        end
+
+    end
+
+    methods
+
+        function set.data(obj, data)
+            obj.data = data;
+            obj.modified_ = true;
         end
 
     end

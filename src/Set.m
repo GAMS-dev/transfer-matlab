@@ -182,6 +182,7 @@ classdef Set < GAMSTransfer.Symbol
                 return
             end
             obj.container.renameSymbol(obj.name_, name);
+            obj.modified = true;
         end
 
         function descr = get.description(obj)
@@ -197,6 +198,7 @@ classdef Set < GAMSTransfer.Symbol
                 error('Symbol description too long. Name length must be smaller than 256.');
             end
             obj.description_ = descr;
+            obj.modified = true;
         end
 
         function set.is_singleton(obj, is_singleton)
@@ -204,6 +206,7 @@ classdef Set < GAMSTransfer.Symbol
                 error('is_singleton must be of type ''logical''.');
             end
             obj.is_singleton = is_singleton;
+            obj.modified = true;
         end
 
     end

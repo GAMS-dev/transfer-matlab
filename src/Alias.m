@@ -76,6 +76,18 @@ classdef Alias < handle
 
         % Aliased GAMS Set
         alias_with
+
+
+        %> Flag to indicate modification
+        %>
+        %> If the symbol has been modified since last reset of flag (`false`),
+        %> this flag will be `true`.
+
+        % Flag to indicate modification
+        %
+        % If the symbol has been modified since last reset of flag (`false`),
+        % this flag will be `true`.
+        modified = true
     end
 
     properties (Dependent)
@@ -219,6 +231,7 @@ classdef Alias < handle
                 return
             end
             obj.container.renameSymbol(obj.name_, name);
+            obj.modified = true;
         end
 
         function set.alias_with(obj, alias)
@@ -229,6 +242,14 @@ classdef Alias < handle
                 error('Alias and aliased set must be located in same container');
             end
             obj.alias_with = alias;
+            obj.modified = true;
+        end
+
+        function set.modified(obj, modified)
+            if ~islogical(modified)
+                error('Modified must be logical.');
+            end
+            obj.modified = modified;
         end
 
         function description = get.description(obj)
@@ -402,6 +423,7 @@ classdef Alias < handle
             else
                 newsym = GAMSTransfer.Alias(destination, obj.name_, alias_with);
             end
+            newsym.modified = true;
         end
 
         %> Checks correctness of alias
@@ -707,6 +729,7 @@ classdef Alias < handle
         function unsetContainer(obj)
             obj.container = GAMSTransfer.Container('indexed', obj.container.indexed, ...
                 'gams_dir', obj.container.gams_dir, 'features', obj.container.features);
+            obj.modified = true;
         end
 
         function bool = isValidAsDomain(obj)

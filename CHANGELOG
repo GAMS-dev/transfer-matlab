@@ -25,6 +25,8 @@ GAMS Transfer Matlab v0.3.0
 - Added method `Container.renameUELs` to rename UELs in all symbols.
 - Added method `Symbol.reorderUELs` to reorder UELs without changing the meaning
   of records.
+- Added flags `Container.modified` and `Symbol.modified` to indicate if a
+  container and/or symbol has been modified since last reset.
 - Added possibility to filter UEL codes in `Symbol.getUELs`.
 - Added possibility to pass a vector of dimensions to `Symbol.getUELs`.
 - Added possibility to overwrite symbols with `Container.add*` if main symbol

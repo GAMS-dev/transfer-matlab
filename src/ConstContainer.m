@@ -140,6 +140,23 @@
 %> @see \ref GAMSTransfer::Container "Container"
 classdef ConstContainer < GAMSTransfer.BaseContainer
 
+    properties (Dependent)
+
+        %> Flag to indicate modification
+        %>
+        %> If the container or any symbol within has been modified since last
+        %> reset of flag (`false`), this flag will be `true`. Resetting will
+        %> also reset symbol flag.
+
+        % Flag to indicate modification
+        %
+        % If the container or any symbol within has been modified since last
+        % reset of flag (`false`), this flag will be `true`. Resetting will
+        % also reset symbol flag.
+        modified
+
+    end
+
     methods
 
         %> Constructs a GAMSTransfer Container
@@ -184,6 +201,25 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
                 obj.read(p.Results.filename, 'records', false);
             end
         end
+
+    end
+
+    methods
+
+        function set.modified(obj, modified)
+            if ~islogical(modified)
+                error('Modified must be logical.');
+            end
+            obj.modified_ = modified;
+        end
+
+        function modified = get.modified(obj)
+            modified = obj.modified_;
+        end
+
+    end
+
+    methods
 
         %> Checks equivalence with other container
         %>
@@ -320,6 +356,7 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
                 end
                 data.(n).symbol_type = GAMSTransfer.SymbolType.int2str(data.(n).symbol_type);
                 data.(n).format = GAMSTransfer.RecordsFormat.int2str(data.(n).format);
+                data.(n).modified = true;
                 if data.(n).domain_type == 1
                     data.(n).domain_type = 'none';
                 elseif data.(n).domain_type == 2

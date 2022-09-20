@@ -101,6 +101,24 @@
 %> \ref GAMSTransfer::Equation "Equation", \ref GAMSTransfer::ConstContainer
 %> "ConstContainer"
 classdef Container < GAMSTransfer.BaseContainer
+
+    properties (Dependent)
+
+        %> Flag to indicate modification
+        %>
+        %> If the container or any symbol within has been modified since last
+        %> reset of flag (`false`), this flag will be `true`. Resetting will
+        %> also reset symbol flag.
+
+        % Flag to indicate modification
+        %
+        % If the container or any symbol within has been modified since last
+        % reset of flag (`false`), this flag will be `true`. Resetting will
+        % also reset symbol flag.
+        modified
+
+    end
+
     methods
 
         %> Constructs a GAMSTransfer Container
@@ -149,6 +167,32 @@ classdef Container < GAMSTransfer.BaseContainer
             % read GDX file
             if ~strcmp(p.Results.source, '')
                 obj.read(p.Results.source);
+            end
+        end
+
+    end
+
+    methods
+
+        function set.modified(obj, modified)
+            if ~islogical(modified)
+                error('Modified must be logical.');
+            end
+            symbols = fieldnames(obj.data);
+            for i = 1:numel(symbols)
+                obj.data.(symbols{i}).modified = modified;
+            end
+            obj.modified_ = modified;
+        end
+
+        function modified = get.modified(obj)
+            modified = obj.modified_;
+            symbols = fieldnames(obj.data);
+            for i = 1:numel(symbols)
+                if modified
+                    return
+                end
+                modified = modified || obj.data.(symbols{i}).modified;
             end
         end
 
