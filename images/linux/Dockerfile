@@ -1,5 +1,5 @@
 # Build from the MATLAB base image
-FROM mathworks/matlab:r2022a
+FROM mathworks/matlab:r2022b
 
 RUN sudo apt-get update && \
     sudo apt-get -y install git build-essential expect zip graphviz && \
