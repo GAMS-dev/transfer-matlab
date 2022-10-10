@@ -1988,16 +1988,16 @@ function test_remove(t, cfg)
     t.assert(~a1.modified);
     t.assert(~x1.modified);
     gdx.removeSymbols('i1');
-    t.assert(numel(fieldnames(gdx.data)) == 2);
-    t.assert(isfield(gdx.data, 'a1'));
+    t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'x1'));
     t.assert(~i1.isValid());
     t.assert(~a1.isValid());
-    t.assert(~x1.isValid());
+    t.assert(x1.isValid());
+    t.assertEquals(x1.domain{1}, '*');
     t.assert(gdx.modified);
     t.assert(i1.modified);
-    t.assert(~a1.modified);
-    t.assert(~x1.modified);
+    t.assert(a1.modified);
+    t.assert(x1.modified);
 
     t.add('remove_2');
     gdx.removeSymbols({'i1', 'a1', 'x1'});
@@ -2030,16 +2030,16 @@ function test_remove(t, cfg)
     t.assert(~a1.modified);
     t.assert(~x1.modified);
     gdx.removeSymbols('I1');
-    t.assert(numel(fieldnames(gdx.data)) == 2);
-    t.assert(isfield(gdx.data, 'a1'));
+    t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'x1'));
     t.assert(~i1.isValid());
     t.assert(~a1.isValid());
-    t.assert(~x1.isValid());
+    t.assert(x1.isValid());
+    t.assertEquals(x1.domain{1}, '*');
     t.assert(gdx.modified);
     t.assert(i1.modified);
-    t.assert(~a1.modified);
-    t.assert(~x1.modified);
+    t.assert(a1.modified);
+    t.assert(x1.modified);
 
     t.add('remove_diffcase_2');
     gdx.removeSymbols({'I1', 'A1', 'X1'});

@@ -892,25 +892,46 @@ classdef Container < GAMSTransfer.BaseContainer
                 names = {names};
             end
 
+            removed_symbols = cell(1, numel(names));
+            j = 0;
+            % remove symbols from data
             for i = 1:numel(names)
                 if ~obj.hasSymbols(names{i})
                     continue;
                 end
-                symbol = obj.getSymbols(names{i});
+                j = j + 1;
+                removed_symbols{j} = obj.getSymbols(names{i});
 
                 % remove symbol
-                obj.data = rmfield(obj.data, symbol.name);
+                obj.data = rmfield(obj.data, removed_symbols{j}.name);
 
                 % force recheck of deleted symbol (it may still live within an
                 % alias, domain or in the user's program)
-                symbol.isValid(false, true);
+                removed_symbols{j}.isValid(false, true);
 
                 % unlink container
-                symbol.unsetContainer();
+                removed_symbols{j}.unsetContainer();
             end
+            removed_symbols = removed_symbols(1:j);
 
-            % force recheck of all remaining symbols in container
-            obj.isValid(false, true);
+            % remove symbols from domain references
+            symbols = fieldnames(obj.data);
+            remove_aliases = {};
+            for i = 1:numel(symbols)
+                symbol = obj.data.(symbols{i});
+                if isa(symbol, 'GAMSTransfer.Alias')
+                    for j = 1:numel(removed_symbols)
+                        if symbol.alias_with.name == removed_symbols{j}.name
+                            remove_aliases{end+1} = symbol.name;
+                        end
+                    end
+                else
+                    symbol.unsetDomain(removed_symbols);
+                end
+            end
+            if numel(remove_aliases) > 0
+                obj.removeSymbols(remove_aliases);
+            end
         end
 
         %> Reestablishes a valid GDX symbol order

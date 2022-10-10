@@ -46,6 +46,8 @@ GAMS Transfer Matlab v0.3.0
   defined by source order (e.g. symbol order in GDX file) rather than user
   supplied order. To establish a custom order after the read, use
   `reorderSymbols`.
+- Aliases are now removed if the aliased set is removed.
+- Domains are now set to `*` (universe) if the domain set is removed.
 - Deprecated `Symbol.getUELLabels`. Use `Symbol.getUELs` instead.
 - Deprecated `Symbol.initUELs`. Use `Symbol.setUELs` instead.
 - Deprecated `Container.getUniverseSet`. Use `Container.getUELs` instead.

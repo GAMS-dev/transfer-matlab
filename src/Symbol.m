@@ -2214,6 +2214,19 @@ classdef Symbol < handle
             obj.modified = true;
         end
 
+        function unsetDomain(obj, unset_domains)
+            for i = 1:obj.dimension_
+                if ~isa(obj.domain{i}, 'GAMSTransfer.Set') && ~isa(obj.domain{i}, 'GAMSTransfer.Alias')
+                    continue
+                end
+                for j = 1:numel(unset_domains)
+                    if obj.domain{i}.name == unset_domains{j}.name
+                        obj.domain{i} = '*';
+                    end
+                end
+            end
+        end
+
     end
 
     methods (Hidden, Access = protected)
