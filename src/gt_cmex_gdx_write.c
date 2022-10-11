@@ -245,7 +245,6 @@ void mexFunction(
         /* write domain information */
         if (dim > 0)
             gt_gdx_setdomain(gdx, dominfo, i+1, (const char**) domains_ptr);
-        can_skip_default_recs = !strcmp(dominfo, "regular") && type != GMS_DT_SET;
 
         /* only go on to writing records if records are available */
         if (!mx_arr_records || format == GT_FORMAT_UNKNOWN || format == GT_FORMAT_EMPTY ||
@@ -316,6 +315,9 @@ void mexFunction(
             continue;
         }
 
+        /* check if default records can be skipped */
+        can_skip_default_recs = !strcmp(dominfo, "regular") && type != GMS_DT_SET;
+
         /* write values */
         switch (format)
         {
@@ -325,8 +327,6 @@ void mexFunction(
 
                 for (size_t j = 0; j < nrecs; j++)
                 {
-                    bool is_default_rec = true;
-
                     for (size_t k = 0; k < dim; k++)
                     {
                         size_t rel_idx = mx_domains[k][j];
@@ -345,10 +345,7 @@ void mexFunction(
                             gdx_values[k] = gt_utils_sv_matlab2gams(mx_values[k][j]);
                         else
                             gdx_values[k] = def_values[k];
-                        is_default_rec = (gdx_values[k] != def_values[k]) ? false : is_default_rec;
                     }
-                    if (can_skip_default_recs && is_default_rec)
-                        continue;
 
                     if (issorted)
                     {
@@ -458,10 +455,6 @@ void mexFunction(
                             col_nnz[kk][k]++;
                             gdx_values[kk] = gt_utils_sv_matlab2gams(mx_values[kk][idx]);
                         }
-                        for (size_t kk = 0; kk < GMS_VAL_MAX; kk++)
-                            is_default_rec = (gdx_values[kk] != def_values[kk]) ? false : is_default_rec;
-                        if (can_skip_default_recs && is_default_rec)
-                            continue;
 
                         /* write values */
                         if (issorted)

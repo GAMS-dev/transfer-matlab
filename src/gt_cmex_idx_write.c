@@ -227,7 +227,6 @@ void mexFunction(
 
                 for (size_t j_unsorted = 0, j; j_unsorted < nrecs; j_unsorted++)
                 {
-                    bool is_default_rec = true;
                     j = (issorted) ? j_unsorted : idx_sorted[j_unsorted];
 
                     for (size_t k = 0; k < dim; k++)
@@ -238,10 +237,7 @@ void mexFunction(
                             gdx_values[k] = mx_values[k][j];
                         else
                             gdx_values[k] = def_values[k];
-                        is_default_rec = (gdx_values[k] != def_values[k]) ? false : is_default_rec;
                     }
-                    if (is_default_rec)
-                        continue;
 
                     if (!idxDataWrite(gdx, gdx_uel_index, gdx_values[GMS_VAL_LEVEL]))
                         gt_idx_write_record_error(gdx, name, dim, gdx_uel_index);
@@ -308,8 +304,6 @@ void mexFunction(
                 {
                     for (int k = 0; k < sizes[1]; k++)
                     {
-                        bool is_default_rec = true;
-
                         /* set domains */
                         if (dim >= 1)
                             gdx_uel_index[0] = j+1;
@@ -331,10 +325,6 @@ void mexFunction(
                             col_nnz[kk][k]++;
                             gdx_values[kk] = mx_values[kk][idx];
                         }
-                        for (size_t kk = 0; kk < GMS_VAL_MAX; kk++)
-                            is_default_rec = (gdx_values[kk] != def_values[kk]) ? false : is_default_rec;
-                        if (is_default_rec)
-                            continue;
 
                         /* write values */
                         if (!idxDataWrite(gdx, gdx_uel_index, gdx_values[GMS_VAL_LEVEL]))

@@ -34,9 +34,9 @@ GAMS Transfer Matlab v0.3.0
 - Changed `Container.getSymbols`, `Container.removeSymbol`,
   `Container.renameSymbol`, `Container.describe*` and others that use
   `Container.getSymbols` to accept symbol names case insensitively.
-- Changed behaviour of default records: Default records do not get written to GDX
-  anymore if either the container is in indexed mode or if the symbol has a
-  regular domain.
+- Changed behaviour of default records: Default records do not get written to
+  GDX anymore if the records format is `dense_matrix` and either the container
+  is in indexed mode or if the symbol has a regular domain.
 - Changed behaviour of `getDomainViolations`: As in GDX different character case
   does not lead to a domain violation.
 - Categoricals for record domain labels are now created with `Ordinal` set to
