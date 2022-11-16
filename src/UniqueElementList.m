@@ -171,7 +171,7 @@ classdef UniqueElementList < handle
             end
         end
 
-        function rename(obj, oldlist, newlist)
+        function vals = rename(obj, oldlist, newlist, vals)
             if ischar(oldlist) || isstring(oldlist)
                 oldlist = {oldlist};
             elseif ~iscellstr(oldlist)
@@ -189,8 +189,23 @@ classdef UniqueElementList < handle
                 return
             end
 
+            remove = false(1, numel(obj.uels_id2labels));
+            for i = 1:numel(newlist)
+                if strcmp(oldlist{i}, newlist{i})
+                    continue
+                end
+                if obj.uels_label2ids.containsKey(oldlist{i}) && obj.uels_label2ids.containsKey(newlist{i})
+                    vals(vals == obj.uels_label2ids.get(oldlist{i})) = obj.uels_label2ids.get(newlist{i});
+                    remove(i) = true;
+                end
+            end
+            vals = obj.remove(obj.uels_id2labels(remove), vals);
+
             list = obj.uels_id2labels;
             for i = 1:numel(newlist)
+                if strcmp(oldlist{i}, newlist{i})
+                    continue
+                end
                 if obj.uels_label2ids.containsKey(oldlist{i})
                     list{obj.uels_label2ids.get(oldlist{i})} = newlist{i};
                 end

@@ -1293,6 +1293,8 @@ classdef Container < GAMSTransfer.BaseContainer
         %>   (full list of UELs, must have as many entries as current UELs). The
         %>   codes for renamed UELs do not change.
         %> - `renameUELs(_, 'symbols', s)` renames UELs for symbols `s`.
+        %> - `renameUELs(_, 'allow_merge', true)` enables support of merging one
+        %>   UEL into another one (renaming a UEL to an already existing one).
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -1311,6 +1313,8 @@ classdef Container < GAMSTransfer.BaseContainer
             % (full list of UELs, must have as many entries as current UELs).
             % The codes for renamed UELs do not change.
             % renameUELs(_, 'symbols', s) renames UELs for symbols s.
+            % renameUELs(_, 'allow_merge', true) enables support of merging one
+            % UEL into another one (renaming a UEL to an already existing one).
             %
             % Note: This can only be used if the symbol is valid. UELs are not
             % available when using the indexed mode.
@@ -1320,6 +1324,7 @@ classdef Container < GAMSTransfer.BaseContainer
             % input arguments
             p = inputParser();
             addParameter(p, 'symbols', {}, @iscellstr);
+            addParameter(p, 'allow_merge', false, @islogical);
             parse(p, varargin{:});
             if isempty(p.Results.symbols)
                 symbols = fieldnames(obj.data);
@@ -1328,7 +1333,7 @@ classdef Container < GAMSTransfer.BaseContainer
             end
 
             for i = 1:numel(symbols)
-                obj.data.(symbols{i}).renameUELs(uels);
+                obj.data.(symbols{i}).renameUELs(uels, 'allow_merge', p.Results.allow_merge);
             end
         end
 

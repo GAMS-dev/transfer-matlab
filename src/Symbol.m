@@ -2087,6 +2087,8 @@ classdef Symbol < handle
         %>   codes for renamed UELs do not change.
         %> - `renameUELs(u, d)` renames the UELs `u` for dimension(s) `d`. `u`
         %>   as above.
+        %> - `renameUELs(_, 'allow_merge', true)` enables support of merging one
+        %>   UEL into another one (renaming a UEL to an already existing one).
         %>
         %> If an old UEL is provided in `struct` or `containers.Map` that is not
         %> present in the symbol UELs, it will be silently ignored.
@@ -2099,7 +2101,7 @@ classdef Symbol < handle
         %>
         %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
         %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
-        function renameUELs(obj, uels, dim)
+        function renameUELs(obj, uels, varargin)
             % Renames UELs in the symbol
             %
             % renameUELs(u) renames the UELs u for all dimensions. u can be a
@@ -2109,6 +2111,8 @@ classdef Symbol < handle
             % The codes for renamed UELs do not change.
             % renameUELs(u, d) renames the UELs u for dimension(s) d. u as
             % above.
+            % renameUELs(_, 'allow_merge', true) enables support of merging one
+            % UEL into another one (renaming a UEL to an already existing one).
             %
             % If an old UEL is provided in `struct` or `containers.Map` that is
             % not present in the symbol UELs, it will be silently ignored.
@@ -2122,15 +2126,17 @@ classdef Symbol < handle
                 return
             end
 
-            if nargin < 3
-                dim = 1:obj.dimension_;
-            end
+            p = inputParser();
+            is_dim = @(x) isnumeric(x) && isvector(x) && all(x == round(x)) && min(x) >= 1 && max(x) <= obj.dimension_;
+            addOptional(p, 'dim', 1:obj.dimension_, is_dim);
+            addParameter(p, 'allow_merge', false, @islogical);
+            parse(p, varargin{:});
+            dim = p.Results.dim;
+            allow_merge = p.Results.allow_merge;
+
             if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels) && ...
                 ~isa(uels, 'containers.Map') && ~isstruct(uels);
                 error('Argument ''uels'' must be ''char'', ''cellstr'', ''struct'' or ''containers.Map''.');
-            end
-            if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
-                error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
             end
 
             if ~obj.isValid()
@@ -2194,10 +2200,24 @@ classdef Symbol < handle
                 end
 
                 if obj.container.features.categorical
-                    obj.records.(label) = renamecats(obj.records.(label), ...
-                        olduels, newuels);
+                    if allow_merge
+                        obj.records.(label) = categorical(obj.records.(label), 'Ordinal', false);
+                        for j = 1:numel(newuels)
+                            obj.records.(label) = mergecats(obj.records.(label), ...
+                                olduels{j}, newuels{j});
+                        end
+                        obj.records.(label) = categorical(obj.records.(label), 'Ordinal', true);
+                    else
+                        obj.records.(label) = renamecats(obj.records.(label), ...
+                            olduels, newuels);
+                    end
                 else
-                    obj.uels.(label).rename(olduels, newuels);
+                    if allow_merge
+                        obj.records.(label) = obj.uels.(label).rename(olduels, ...
+                            newuels, obj.records.(label));
+                    else
+                        obj.uels.(label).rename(olduels, newuels, []);
+                    end
                 end
             end
 
