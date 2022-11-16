@@ -858,30 +858,14 @@ classdef Container < GAMSTransfer.BaseContainer
                 return
             end
 
-            names = fieldnames(obj.data);
-
             % check if symbol exists
             if obj.hasSymbols(newname)
                 error('Symbol ''%s'' already exists.', newname);
             end
 
-            % get index of symbol
             oldname = obj.getSymbolNames(oldname);
-            idx = find(strcmp(names, oldname), 1);
-            if isempty(idx)
-                return
-            end
-
-            % change name in symbol
             obj.data.(oldname).name_ = char(newname);
-
-            % add new symbol / remove old symbol
-            obj.data.(newname) = obj.data.(oldname);
-            obj.data = rmfield(obj.data, oldname);
-
-            % get old ordering
-            perm = [1:idx-1, numel(names), idx:numel(names)-1];
-            obj.data = orderfields(obj.data, perm);
+            obj.renameData(oldname, newname);
         end
 
         %> Removes a symbol from container
@@ -903,7 +887,7 @@ classdef Container < GAMSTransfer.BaseContainer
                 removed_symbols{j} = obj.getSymbols(names{i});
 
                 % remove symbol
-                obj.data = rmfield(obj.data, removed_symbols{j}.name);
+                obj.removeFromData(removed_symbols{j}.name);
 
                 % force recheck of deleted symbol (it may still live within an
                 % alias, domain or in the user's program)
@@ -1345,10 +1329,7 @@ classdef Container < GAMSTransfer.BaseContainer
             if obj.indexed && ~isa(symbol, 'GAMSTransfer.Parameter')
                 error('Symbol must be of type ''GAMSTransfer.Parameter'' in indexed mode.');
             end
-            if obj.hasSymbols(symbol.name_)
-                error('Symbol ''%s'' already exists.', symbol.name_);
-            end
-            obj.data.(symbol.name_) = symbol;
+            obj.addToData(symbol.name_, symbol);
         end
 
     end

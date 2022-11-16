@@ -318,7 +318,7 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
             parse(p, varargin{:});
 
             % clear data
-            obj.data = struct();
+            obj.clearData();
 
             % read raw data
             data = obj.readRaw(p.Results.filename, p.Results.symbols, ...
@@ -336,6 +336,7 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
                         error('Alias reference for symbol ''%s'' not found: %s.', ...
                             data.(n).name, data.(n).description);
                     end
+                    obj.addToData(data.(n).name, data.(n));
                     continue
                 end
 
@@ -370,9 +371,9 @@ classdef ConstContainer < GAMSTransfer.BaseContainer
                 case {'dense_matrix', 'sparse_matrix'}
                     data.(n).number_records = nan;
                 end
-            end
 
-            obj.data = data;
+                obj.addToData(data.(n).name, data.(n));
+            end
         end
 
     end
