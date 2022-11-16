@@ -439,6 +439,9 @@ classdef Container < GAMSTransfer.BaseContainer
         %>    Path to GDX file to write to.
         %>
         %> **Parameter Arguments:**
+        %> - symbols (`cell`):
+        %>   List of symbols to be written. All if empty. Case doesn't matter.
+        %>   Default is `{}`.
         %> - compress (`logical`):
         %>   Flag to compress GDX file (`true`) or not (`false`). Default is
         %>   `false`.
@@ -476,6 +479,9 @@ classdef Container < GAMSTransfer.BaseContainer
             %    Path to GDX file to write to.
             %
             % Parameter Arguments:
+            % - symbols (cell):
+            %   List of symbols to be written. All if empty. Case doesn't
+            %   matter. Default is {}.
             % - compress (logical):
             %   Flag to compress GDX file (true) or not (false). Default is
             %   false.
@@ -505,10 +511,24 @@ classdef Container < GAMSTransfer.BaseContainer
             is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
                 ~strcmpi(x, 'compress') && ~strcmpi(x, 'sorted');
             addRequired(p, 'filename', is_string_char);
+            addParameter(p, 'symbols', {}, @iscellstr);
             addParameter(p, 'compress', false, @islogical);
             addParameter(p, 'sorted', false, @islogical);
             addParameter(p, 'uel_priority', {}, @iscellstr);
             parse(p, varargin{:});
+
+            % create enable flags
+            if isempty(p.Results.symbols)
+                enable = true(1, numel(fieldnames(obj.data)));
+            else
+                enable = false(1, numel(fieldnames(obj.data)));
+                symbols = obj.getSymbolNames(p.Results.symbols);
+                allsymbols = fieldnames(obj.data);
+                allsymbols = containers.Map(allsymbols, 1:numel(allsymbols));
+                for i = 1:numel(symbols)
+                    enable(allsymbols(symbols{i})) = true;
+                end
+            end
 
             if p.Results.compress && obj.indexed
                 error('Compression not supported for indexed GDX.');
@@ -521,10 +541,10 @@ classdef Container < GAMSTransfer.BaseContainer
             % write data
             if obj.indexed
                 GAMSTransfer.gt_cmex_idx_write(obj.gams_dir, filename, obj.data, ...
-                    p.Results.sorted, obj.features.table);
+                    enable, p.Results.sorted, obj.features.table);
             else
                 GAMSTransfer.gt_cmex_gdx_write(obj.gams_dir, filename, obj.data, ...
-                    p.Results.uel_priority, p.Results.compress, p.Results.sorted, ...
+                    enable, p.Results.uel_priority, p.Results.compress, p.Results.sorted, ...
                     obj.features.table, obj.features.categorical, obj.features.c_prop_setget);
             end
         end
