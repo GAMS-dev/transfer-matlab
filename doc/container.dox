@@ -42,8 +42,8 @@ c2 = Container(c1);
 using the PATH environment variable (this is not the Matlab path). Whether GAMS
 was found, can be checked by looking at `c.gams_dir` (empty string = not found).
 Alternatively, one can pass a GAMS system path to the \ref
-GAMSTransfer.Container "Container" constructor: `c = Container('gams_dir',
-'path/to/gams');`.
+GAMSTransfer.Container "Container" constructor: `c = Container("gams_dir",
+"path/to/gams");`.
 
 \section GAMSTRANSFER_MATLAB_CONTAINER_READ Reading From GDX
 
