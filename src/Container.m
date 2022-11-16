@@ -497,15 +497,6 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % See also: GAMSTransfer.Container.getDomainViolations
 
-            if ~obj.isValid()
-                obj.reorderSymbols();
-                if ~obj.isValid()
-                    invalid_symbols = GAMSTransfer.Utils.list2str(...
-                        obj.listSymbols('is_valid', false));
-                    error('Can''t write invalid container. Invalid symbols: %s.', invalid_symbols);
-                end
-            end
-
             % input arguments
             p = inputParser();
             is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
@@ -517,12 +508,26 @@ classdef Container < GAMSTransfer.BaseContainer
             addParameter(p, 'uel_priority', {}, @iscellstr);
             parse(p, varargin{:});
 
+            if isempty(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = obj.getSymbolNames(p.Results.symbols);
+            end
+
+            if ~obj.isValid('symbols', symbols)
+                obj.reorderSymbols();
+                if ~obj.isValid('symbols', symbols)
+                    invalid_symbols = GAMSTransfer.Utils.list2str(...
+                        obj.listSymbols('is_valid', false));
+                    error('Can''t write invalid container. Invalid symbols: %s.', invalid_symbols);
+                end
+            end
+
             % create enable flags
             if isempty(p.Results.symbols)
-                enable = true(1, numel(fieldnames(obj.data)));
+                enable = true(1, numel(symbols));
             else
-                enable = false(1, numel(fieldnames(obj.data)));
-                symbols = obj.getSymbolNames(p.Results.symbols);
+                enable = false(1, numel(symbols));
                 allsymbols = fieldnames(obj.data);
                 allsymbols = containers.Map(allsymbols, 1:numel(allsymbols));
                 for i = 1:numel(symbols)
