@@ -213,8 +213,12 @@ void gt_gdx_setdomain(
     {
         if (!gdxSymbolSetDomain(gdx, (const char**) domains))
         {
-            gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
-            mexErrMsgIdAndTxt(ERRID"setdomain", "GDX error: %s", buf);
+            gdxGetLastError(gdx); // clears last error
+            if (!gdxSymbolSetDomainX(gdx, symbol_nr, (const char**) domains))
+            {
+                gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                mexErrMsgIdAndTxt(ERRID"setdomain", "GDX error: %s", buf);
+            }
         }
     }
     else if (!strcmp(mode, "relaxed"))

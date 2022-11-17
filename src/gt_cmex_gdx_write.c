@@ -42,7 +42,7 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
-    int type, subtype, format;
+    int type, subtype, format, sym_nr;
     size_t dim, nrecs;
     char gdx_filename[GMS_SSSIZE], buf[GMS_SSSIZE], name[GMS_SSSIZE];
     char text[GMS_SSSIZE], dominfo[10], sysdir[GMS_SSSIZE];
@@ -70,6 +70,7 @@ void mexFunction(
     INT32_T** mx_domains = NULL;
     double* mx_values[GMS_VAL_MAX] = {NULL};
 #endif
+    mxLogical* mx_enable = NULL;
     mxArray* mx_arr_data = NULL;
     mxArray* mx_arr_records = NULL;
     mxArray* mx_arr_text = NULL;
@@ -83,16 +84,16 @@ void mexFunction(
     GDXSTRINDEXPTRS_INIT(domain_labels, domain_labels_ptr);
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(0, nlhs, 9, nrhs);
+    gt_mex_check_arguments_num(0, nlhs, 10, nrhs);
     gt_mex_check_argument_str(prhs, 0, sysdir);
     gt_mex_check_argument_str(prhs, 1, gdx_filename);
     gt_mex_check_argument_struct(prhs, 2);
-    gt_mex_check_argument_cell(prhs, 3);
-    gt_mex_check_argument_bool(prhs, 4, 1, &compress);
-    gt_mex_check_argument_bool(prhs, 5, 1, &issorted);
-    gt_mex_check_argument_bool(prhs, 6, 1, &support_table);
-    gt_mex_check_argument_bool(prhs, 7, 1, &support_categorical);
-    gt_mex_check_argument_bool(prhs, 8, 1, &support_setget);
+    gt_mex_check_argument_cell(prhs, 4);
+    gt_mex_check_argument_bool(prhs, 5, 1, &compress);
+    gt_mex_check_argument_bool(prhs, 6, 1, &issorted);
+    gt_mex_check_argument_bool(prhs, 7, 1, &support_table);
+    gt_mex_check_argument_bool(prhs, 8, 1, &support_categorical);
+    gt_mex_check_argument_bool(prhs, 9, 1, &support_setget);
 
     /* create output data */
     plhs = NULL;
@@ -101,10 +102,20 @@ void mexFunction(
     gt_gdx_init_write(&gdx, sysdir, gdx_filename, compress);
 
     /* register priority UELs */
-    gt_gdx_register_uels(gdx, (mxArray*) prhs[3], NULL);
+    gt_gdx_register_uels(gdx, (mxArray*) prhs[4], NULL);
 
+
+#ifdef WITH_R2018A_OR_NEWER
+    mx_enable = mxGetLogicals(prhs[3]);
+#else
+    mx_enable = (mxLogical*) mxGetData(prhs[3]);
+#endif
+    sym_nr = 0;
     for (int i = 0; i < mxGetNumberOfFields(prhs[2]); i++)
     {
+        if (!mx_enable[i])
+            continue;
+
         /* reset pointers */
         for (size_t j = 0; j < GMS_VAL_MAX; j++)
         {
@@ -114,6 +125,8 @@ void mexFunction(
             mx_values[j] = NULL;
             mx_arr_values[j] = NULL;
         }
+
+        sym_nr++;
 
         /* get data field */
         mx_arr_data = mxGetFieldByNumber(prhs[2], 0, i);
@@ -244,7 +257,7 @@ void mexFunction(
 
         /* write domain information */
         if (dim > 0)
-            gt_gdx_setdomain(gdx, dominfo, i+1, (const char**) domains_ptr);
+            gt_gdx_setdomain(gdx, dominfo, sym_nr, (const char**) domains_ptr);
 
         /* only go on to writing records if records are available */
         if (!mx_arr_records || format == GT_FORMAT_UNKNOWN || format == GT_FORMAT_EMPTY ||

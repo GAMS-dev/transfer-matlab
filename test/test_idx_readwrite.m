@@ -30,6 +30,7 @@ function success = test_idx_readwrite(cfg)
     test_idx_readPartial(t, cfg, 'c');
     test_idx_readSpecialValues(t, cfg, 'c');
     test_idx_readWrite(t, cfg);
+    test_idx_readWritePartial(t, cfg);
     [~, n_fails1] = t.summary();
 
     t = GAMSTest('idx_readwrite_cc');
@@ -752,4 +753,36 @@ function test_idx_readWrite(t, cfg)
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
     end
+end
+
+function test_idx_readWritePartial(t, cfg)
+
+    write_filename = fullfile(cfg.working_dir, 'write.gdx');
+
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+        'features', cfg.features);
+    gdx.read(cfg.filenames{4});
+
+    t.add('idx_read_write_partial_1');
+    gdx.write(write_filename, 'symbols', {'c'});
+    gdx = GAMSTransfer.Container(write_filename, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+        'features', cfg.features);
+    t.assert(numel(fieldnames(gdx.data)) == 1);
+    t.assert(isfield(gdx.data, 'c'));
+    t.assert(gdx.isValid());
+    t.assertEquals(gdx.data.c.domain_type, 'relaxed');
+
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+        'features', cfg.features);
+    gdx.read(cfg.filenames{4});
+
+    t.add('idx_read_write_partial_2');
+    gdx.write(write_filename, 'symbols', {});
+    gdx = GAMSTransfer.Container(write_filename, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+        'features', cfg.features);
+    t.assert(numel(fieldnames(gdx.data)) == 3);
+    t.assert(isfield(gdx.data, 'a'));
+    t.assert(isfield(gdx.data, 'b'));
+    t.assert(isfield(gdx.data, 'c'));
+    t.assert(gdx.isValid());
 end

@@ -439,6 +439,9 @@ classdef Container < GAMSTransfer.BaseContainer
         %>    Path to GDX file to write to.
         %>
         %> **Parameter Arguments:**
+        %> - symbols (`cell`):
+        %>   List of symbols to be written. All if empty. Case doesn't matter.
+        %>   Default is `{}`.
         %> - compress (`logical`):
         %>   Flag to compress GDX file (`true`) or not (`false`). Default is
         %>   `false`.
@@ -476,6 +479,9 @@ classdef Container < GAMSTransfer.BaseContainer
             %    Path to GDX file to write to.
             %
             % Parameter Arguments:
+            % - symbols (cell):
+            %   List of symbols to be written. All if empty. Case doesn't
+            %   matter. Default is {}.
             % - compress (logical):
             %   Flag to compress GDX file (true) or not (false). Default is
             %   false.
@@ -491,24 +497,43 @@ classdef Container < GAMSTransfer.BaseContainer
             %
             % See also: GAMSTransfer.Container.getDomainViolations
 
-            if ~obj.isValid()
+            % input arguments
+            p = inputParser();
+            is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
+                ~strcmpi(x, 'compress') && ~strcmpi(x, 'sorted');
+            addRequired(p, 'filename', is_string_char);
+            addParameter(p, 'symbols', {}, @iscellstr);
+            addParameter(p, 'compress', false, @islogical);
+            addParameter(p, 'sorted', false, @islogical);
+            addParameter(p, 'uel_priority', {}, @iscellstr);
+            parse(p, varargin{:});
+
+            if isempty(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = obj.getSymbolNames(p.Results.symbols);
+            end
+
+            if ~obj.isValid('symbols', symbols)
                 obj.reorderSymbols();
-                if ~obj.isValid()
+                if ~obj.isValid('symbols', symbols)
                     invalid_symbols = GAMSTransfer.Utils.list2str(...
                         obj.listSymbols('is_valid', false));
                     error('Can''t write invalid container. Invalid symbols: %s.', invalid_symbols);
                 end
             end
 
-            % input arguments
-            p = inputParser();
-            is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-                ~strcmpi(x, 'compress') && ~strcmpi(x, 'sorted');
-            addRequired(p, 'filename', is_string_char);
-            addParameter(p, 'compress', false, @islogical);
-            addParameter(p, 'sorted', false, @islogical);
-            addParameter(p, 'uel_priority', {}, @iscellstr);
-            parse(p, varargin{:});
+            % create enable flags
+            if isempty(p.Results.symbols)
+                enable = true(1, numel(symbols));
+            else
+                enable = false(1, numel(symbols));
+                allsymbols = fieldnames(obj.data);
+                allsymbols = containers.Map(allsymbols, 1:numel(allsymbols));
+                for i = 1:numel(symbols)
+                    enable(allsymbols(symbols{i})) = true;
+                end
+            end
 
             if p.Results.compress && obj.indexed
                 error('Compression not supported for indexed GDX.');
@@ -521,10 +546,10 @@ classdef Container < GAMSTransfer.BaseContainer
             % write data
             if obj.indexed
                 GAMSTransfer.gt_cmex_idx_write(obj.gams_dir, filename, obj.data, ...
-                    p.Results.sorted, obj.features.table);
+                    enable, p.Results.sorted, obj.features.table);
             else
                 GAMSTransfer.gt_cmex_gdx_write(obj.gams_dir, filename, obj.data, ...
-                    p.Results.uel_priority, p.Results.compress, p.Results.sorted, ...
+                    enable, p.Results.uel_priority, p.Results.compress, p.Results.sorted, ...
                     obj.features.table, obj.features.categorical, obj.features.c_prop_setget);
             end
         end
@@ -1033,12 +1058,17 @@ classdef Container < GAMSTransfer.BaseContainer
         %> - `dom_violations = getDomainViolations` returns a list of domain
         %>   violations.
         %>
+        %> **Parameter Arguments:**
+        %> - symbols (`cell`):
+        %>   List of symbols to be considered. All if empty. Case doesn't
+        %>   matter. Default is `{}`.
+        %>
         %> @see \ref GAMSTransfer::Container::resolveDomainViolations
         %> "Container.resolveDomainViolations", \ref
         %> GAMSTransfer::Symbol::getDomainViolations
         %> "Symbol.getDomainViolations", \ref GAMSTransfer::DomainViolation
         %> "DomainViolation"
-        function dom_violations = getDomainViolations(obj)
+        function dom_violations = getDomainViolations(obj, varargin)
             % Get domain violations for all symbols
             %
             % Domain violations occur when a symbol uses other Set(s) as
@@ -1049,13 +1079,27 @@ classdef Container < GAMSTransfer.BaseContainer
             % dom_violations = getDomainViolations returns a list of domain
             % violations.
             %
+            % Parameter Arguments:
+            % - symbols (cell):
+            %   List of symbols to be considered. All if empty. Case doesn't
+            %   matter. Default is {}.
+            %
             % See also: GAMSTransfer.Container.resolveDomainViolations,
             % GAMSTransfer.Symbol.getDomainViolations,
             % GAMSTransfer.DomainViolation
 
             dom_violations = {};
 
-            symbols = fieldnames(obj.data);
+            % input arguments
+            p = inputParser();
+            addParameter(p, 'symbols', {}, @iscellstr);
+            parse(p, varargin{:});
+            if isempty(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = obj.getSymbolNames(p.Results.symbols);
+            end
+
             for i = 1:numel(symbols)
                 symbol = obj.data.(symbols{i});
                 if isa(symbol, 'GAMSTransfer.Alias')
@@ -1082,12 +1126,17 @@ classdef Container < GAMSTransfer.BaseContainer
         %> - `resolveDomainViolations()` extends the domain sets with the
         %>   violated domain entries. Hence, the domain violations disappear.
         %>
+        %> **Parameter Arguments:**
+        %> - symbols (`cell`):
+        %>   List of symbols to be considered. All if empty. Case doesn't
+        %>   matter. Default is `{}`.
+        %>
         %> @see \ref GAMSTransfer::Container::getDomainViolations
         %> "Container.getDomainViolations", \ref
         %> GAMSTransfer::Symbol::resolveDomainViolations
         %> "Symbol.resolveDomainViolations", \ref GAMSTransfer::DomainViolation
         %> "DomainViolation"
-        function resolveDomainViolations(obj)
+        function resolveDomainViolations(obj, varargin)
             % Extends domain sets in order to remove domain violations
             %
             % Domain violations occur when this symbol uses other Set(s) as
@@ -1098,11 +1147,21 @@ classdef Container < GAMSTransfer.BaseContainer
             % resolveDomainViolations() extends the domain sets with the
             % violated domain entries. Hence, the domain violations disappear.
             %
+            % Parameter Arguments:
+            % - symbols (cell):
+            %   List of symbols to be considered. All if empty. Case doesn't
+            %   matter. Default is {}.
+            %
             % See also: GAMSTransfer.Container.getDomainViolations,
             % GAMSTransfer.Symbol.resolveDomainViolations,
             % GAMSTransfer.DomainViolation
 
-            dom_violations = obj.getDomainViolations();
+            % input arguments
+            p = inputParser();
+            addParameter(p, 'symbols', {}, @iscellstr);
+            parse(p, varargin{:});
+
+            dom_violations = obj.getDomainViolations('symbols', p.Results.symbols);
             for i = 1:numel(dom_violations)
                 dom_violations{i}.resolve();
             end
@@ -1129,6 +1188,11 @@ classdef Container < GAMSTransfer.BaseContainer
         %> 2. force (`logical`):
         %>    If `true`, forces reevaluation of validity (resets cache)
         %>
+        %> **Parameter Arguments:**
+        %> - symbols (`cell`):
+        %>   List of symbols to be considered. All if empty. Case doesn't
+        %>   matter. Default is `{}`.
+        %>
         %> @see \ref GAMSTransfer::Symbol::isValid "Symbol.isValid"
         function valid = isValid(obj, varargin)
             % Checks correctness of all symbols
@@ -1139,19 +1203,28 @@ classdef Container < GAMSTransfer.BaseContainer
             % 2. force (logical):
             %    If true, forces reevaluation of validity (resets cache)
             %
+            % Parameter Arguments:
+            % - symbols (cell):
+            %   List of symbols to be considered. All if empty. Case doesn't
+            %   matter. Default is {}.
+            %
             % See also: GAMSTransfer.Symbol/isValid
 
-            verbose = false;
-            force = false;
-            if nargin > 1 && varargin{1}
-                verbose = true;
+            % input arguments
+            p = inputParser();
+            addOptional(p, 'verbose', false, @islogical);
+            addOptional(p, 'force', false, @islogical);
+            addParameter(p, 'symbols', {}, @iscellstr);
+            parse(p, varargin{:});
+            if isempty(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            else
+                symbols = obj.getSymbolNames(p.Results.symbols);
             end
-            if nargin > 2 && varargin{2}
-                force = true;
-            end
+            verbose = p.Results.verbose;
+            force = p.Results.force;
 
             valid = true;
-            symbols = fieldnames(obj.data);
             for i = 1:numel(symbols)
                 symbol = obj.data.(symbols{i});
                 if symbol.isValid(verbose, force)
