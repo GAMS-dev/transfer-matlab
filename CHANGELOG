@@ -1,5 +1,7 @@
 GAMS Transfer Matlab v0.4.0
 ==================
+- Improved performance of `Container.hasSymbols`. Among others, this has a
+  significant effect when adding many symbols.
 - Added support of partial write.
 - Added parameter `symbols` to `Container.write`,
   `Container.getDomainViolations`, `Container.resolveDomainViolations` and

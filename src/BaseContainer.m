@@ -59,6 +59,7 @@ classdef BaseContainer < handle
         id
         features
         modified_ = true
+        name_lookup = struct();
     end
 
     methods (Hidden)
@@ -112,15 +113,13 @@ classdef BaseContainer < handle
             % true if GAMS symbol named b{i} (case does not matter) exists.
             % false otherwise.
 
-            sym_names = fieldnames(obj.data);
-
             if ischar(names) || isstring(names)
-                bool = ~isempty(find(strcmpi(sym_names, names), 1));
+                bool = isfield(obj.name_lookup, lower(names));
             elseif iscellstr(names)
                 n = numel(names);
                 bool = true(1, n);
                 for i = 1:n
-                    bool(i) = ~isempty(find(strcmpi(sym_names, names{i}), 1));
+                    bool(i) = isfield(obj.name_lookup, lower(names{i}));
                 end
             else
                 error('Name must be of type ''char'' or ''cellstr''.');
@@ -149,25 +148,21 @@ classdef BaseContainer < handle
             % Example:
             % v1 = c.getSymbolNames('v1'); % equals c.getSymbolNames('V1');
 
-            sym_names = fieldnames(obj.data);
-
             if ischar(names) || isstring(names)
-                idx = find(strcmpi(sym_names, names), 1);
-                if isempty(idx)
+                name_lower = lower(names);
+                if ~isfield(obj.name_lookup, name_lower)
                     error('Symbol ''%s'' does not exist.', names);
-                else
-                    symbols = sym_names{idx};
                 end
+                symbols = obj.name_lookup.(name_lower);
             elseif iscellstr(names)
                 n = numel(names);
                 symbols = cell(size(names));
                 for i = 1:n
-                    idx = find(strcmpi(sym_names, names{i}), 1);
-                    if isempty(idx)
+                    name_lower = lower(names{i});
+                    if ~isfield(obj.name_lookup, name_lower)
                         error('Symbol ''%s'' does not exist.', names{i});
-                    else
-                        symbols{i} = sym_names{idx};
                     end
+                    symbols{i} = obj.name_lookup.(name_lower);
                 end
             else
                 error('Name must be of type ''char'' or ''cellstr''.');
@@ -754,7 +749,6 @@ classdef BaseContainer < handle
                     symbols, int32(format_int), records, values_bool, ...
                     obj.features.categorical, obj.features.c_prop_setget);
             end
-            symbols = fieldnames(data);
         end
 
         function descr = describeSymbols(obj, symtype, wanted_symbols)
@@ -966,6 +960,55 @@ classdef BaseContainer < handle
             if obj.features.table
                 descr = struct2table(descr);
             end
+        end
+
+    end
+
+    methods (Hidden, Access = protected)
+
+        function clearData(obj)
+            obj.data = struct();
+            obj.name_lookup = struct();
+        end
+
+        function addToData(obj, name, symbol)
+            if obj.hasSymbols(name)
+                error('Symbol ''%s'' already exists.', name);
+            end
+            obj.data.(name) = symbol;
+            obj.name_lookup.(lower(name)) = name;
+        end
+
+        function renameData(obj, oldname, newname)
+            if ~obj.hasSymbols(oldname)
+                return
+            end
+
+            % get index of symbol
+            names = fieldnames(obj.data);
+            idx = find(strcmp(names, oldname), 1);
+            if isempty(idx)
+                return
+            end
+
+            % add new symbol / remove old symbol
+            obj.data.(newname) = obj.data.(oldname);
+            obj.name_lookup.(lower(newname)) = newname;
+            obj.data = rmfield(obj.data, oldname);
+            obj.name_lookup = rmfield(obj.name_lookup, lower(oldname));
+
+            % get old ordering
+            perm = [1:idx-1, numel(names), idx:numel(names)-1];
+            obj.data = orderfields(obj.data, perm);
+            obj.name_lookup = orderfields(obj.name_lookup, perm);
+        end
+
+        function removeFromData(obj, name)
+            if ~obj.hasSymbols(name)
+                return
+            end
+            obj.data = rmfield(obj.data, name);
+            obj.name_lookup = rmfield(obj.name_lookup, lower(name));
         end
 
     end
