@@ -69,6 +69,7 @@ void mexFunction(
     INT32_T** mx_domains = NULL;
     double* mx_values[GMS_VAL_MAX] = {NULL};
 #endif
+    mxLogical* mx_enable = NULL;
     mxArray* mx_arr_data = NULL;
     mxArray* mx_arr_records = NULL;
     mxArray* mx_arr_values[GMS_VAL_MAX] = {NULL};
@@ -77,12 +78,12 @@ void mexFunction(
     GDXSTRINDEXPTRS_INIT(domain_labels, domain_labels_ptr);
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(0, nlhs, 5, nrhs);
+    gt_mex_check_arguments_num(0, nlhs, 6, nrhs);
     gt_mex_check_argument_str(prhs, 0, sysdir);
     gt_mex_check_argument_str(prhs, 1, gdx_filename);
     gt_mex_check_argument_struct(prhs, 2);
-    gt_mex_check_argument_bool(prhs, 3, 1, &issorted);
-    gt_mex_check_argument_bool(prhs, 4, 1, &support_table);
+    gt_mex_check_argument_bool(prhs, 4, 1, &issorted);
+    gt_mex_check_argument_bool(prhs, 5, 1, &support_table);
 
     /* create output data */
     plhs = NULL;
@@ -90,8 +91,16 @@ void mexFunction(
     /* start GDX */
     gt_idx_init_write(&gdx, sysdir, gdx_filename);
 
+#ifdef WITH_R2018A_OR_NEWER
+    mx_enable = mxGetLogicals(prhs[3]);
+#else
+    mx_enable = (mxLogical*) mxGetData(prhs[3]);
+#endif
     for (int i = 0; i < mxGetNumberOfFields(prhs[2]); i++)
     {
+        if (!mx_enable[i])
+            continue;
+
         /* reset pointers */
         for (size_t j = 0; j < GMS_VAL_MAX; j++)
         {

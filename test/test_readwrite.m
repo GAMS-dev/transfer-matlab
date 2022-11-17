@@ -1993,6 +1993,32 @@ function test_readWritePartial(t, cfg)
     t.assert(isfield(gdx.data, 'j'));
     t.assert(isfield(gdx.data, 'x'));
     t.assert(gdx.isValid());
+
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx.read(cfg.filenames{1});
+
+    t.add('read_write_partial_4');
+    gdx.write(write_filename, 'symbols', {'x'});
+    gdx = GAMSTransfer.Container(write_filename, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+    t.assert(numel(fieldnames(gdx.data)) == 1);
+    t.assert(isfield(gdx.data, 'x'));
+    t.assert(gdx.isValid());
+    t.assertEquals(gdx.data.x.domain_type, 'relaxed');
+
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx.read(cfg.filenames{1});
+
+    t.add('read_write_partial_5');
+    gdx.write(write_filename, 'symbols', {});
+    gdx = GAMSTransfer.Container(write_filename, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+    t.assert(numel(fieldnames(gdx.data)) == 5);
+    t.assert(isfield(gdx.data, 'i'));
+    t.assert(isfield(gdx.data, 'j'));
+    t.assert(isfield(gdx.data, 'a'));
+    t.assert(isfield(gdx.data, 'b'));
+    t.assert(isfield(gdx.data, 'x'));
+    t.assert(gdx.isValid());
+
 end
 
 function test_readWriteCompress(t, cfg)

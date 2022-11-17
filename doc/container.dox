@@ -114,15 +114,35 @@ raise an error.
 A container with all symbols and symbol records can be written to a GDX file
 with it's \ref GAMSTransfer::Container::write "Container.write" method. It is possible to
 write a compressed GDX file. Simply write with:
+- \par Writing all Symbols:
+\parblock
+Write all symbols to a GDX file with
 ```
 c.write('path/to/file.gdx');
+```
+\endparblock
+
+- \par Writing a Subset of Symbols:
+\parblock
+In order to only write the symbols `x` and `z` to a GDX file, do
+```
+c.write('path/to/file.gdx', 'symbols', {'x', 'z'});
+```
+\endparblock
+
+- \par Writing a Compressed GDX File:
+\parblock
+In order to write compressed, set the parameter `compress` to `true`:
+```
 c.write('path/to/file.gdx', 'compress', true);
 ```
+\endparblock
 
-\note It is not possible to write the container if any of its symbols is not
-valid (see also \ref GAMSTRANSFER_MATLAB_RECORDS_VALIDATE). Further note that a
-symbol can be considered valid but still has domain violations, which would lead
-to an error when writing, see also \ref GAMSTRANSFER_MATLAB_RECORDS_DOMVIOL.
+\note It is not possible to write the container if any of the symbols to write
+is not valid (see also \ref GAMSTRANSFER_MATLAB_RECORDS_VALIDATE). Further note
+that a symbol can be considered valid but still has domain violations, which
+would lead to an error when writing, see also \ref
+GAMSTRANSFER_MATLAB_RECORDS_DOMVIOL.
 
 \par Advanced Users Only:
 \parblock
