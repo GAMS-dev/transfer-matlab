@@ -1,5 +1,7 @@
 GAMS Transfer Matlab v0.4.0
 ==================
+- Improved performance of `Container.hasSymbols`. Among others, this has a
+  significant effect when adding many symbols.
 - Added parameter `allow_merge` to `Container.renameUELs` and
   `Symbol.renameUELs` in order support merging UELs while renaming (renaming a
   UEL to an already existing UEL).

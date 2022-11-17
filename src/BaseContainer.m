@@ -749,7 +749,6 @@ classdef BaseContainer < handle
                     symbols, int32(format_int), records, values_bool, ...
                     obj.features.categorical, obj.features.c_prop_setget);
             end
-            symbols = fieldnames(data);
         end
 
         function descr = describeSymbols(obj, symtype, wanted_symbols)
