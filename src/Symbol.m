@@ -2467,17 +2467,21 @@ classdef Symbol < handle
             if obj.dimension_ == 0 && numel(values) ~= 1
                 error('Length of numerical records must equal 1 for scalars');
             end
-            s = size(values);
-            s = s(1:obj.dimension_);
-            if any(s ~= obj.size_)
-                values = values';
-                s = size(values);
-                s = s(1:obj.dimension_);
-                if any(s ~= obj.size_)
-                    if ismatrix
-                        error('Records size doesn''t match symbol size.');
+            if ~ismatrix && isvector(values)
+                values = values(:);
+            else
+                size1 = size(values);
+                size2 = ones(1, max(2, obj.dimension_));
+                size2(1:obj.dimension_) = obj.size_;
+                if any(size1 ~= size2)
+                    values = values';
+                    size1 = size(values);
+                    if any(size1 ~= size2)
+                        if ismatrix
+                            error('Records size doesn''t match symbol size.');
+                        end
+                        values = values(:);
                     end
-                    values = values(:);
                 end
             end
 
