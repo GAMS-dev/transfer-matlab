@@ -51,9 +51,10 @@
 % - is_singleton (logical):
 %   Indicates if set is a is_singleton set (true) or not (false). Default is false.
 % - domain_forwarding (logical):
-%   If true, domain entries in records will recursively be added to the
-%   domains in case they are not present in the domains already. Default:
-%   false.
+%   If true, domain entries in records will recursively be added to the domains
+%   in case they are not present in the domains already. With a logical vector
+%   domain forwarding can be enabled/disabled independently for each domain.
+%   Default: false.
 %
 % Example:
 % c = Container();
@@ -135,9 +136,10 @@ classdef Set < GAMSTransfer.Symbol
         %>   Indicates if set is a is_singleton set (`true`) or not (`false`). Default
         %>   is `false`.
         %> - domain_forwarding (`logical`):
-        %>   If `true`, domain entries in records will recursively be added to the
-        %>   domains in case they are not present in the domains already. Default:
-        %>   `false`.
+        %>   If `true`, domain entries in records will recursively be added to
+        %>   the domains in case they are not present in the domains already.
+        %>   With a logical vector domain forwarding can be enabled/disabled
+        %>   independently for each domain. Default: `false`.
         %>
         %> **Example:**
         %> ```
@@ -358,7 +360,7 @@ classdef Set < GAMSTransfer.Symbol
             args.isset_description = false;
             args.is_singleton = false;
             args.isset_is_singleton = false;
-            args.domain_forwarding = false;
+            args.domain_forwarding = false(1, numel(args.domain));
             args.isset_domain_forwarding = false;
             while i < nargin - 1
                 if strcmpi(varargin{i}, 'records')

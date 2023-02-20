@@ -52,9 +52,10 @@
 % - description (string):
 %   Description of symbol. Default is ''.
 % - domain_forwarding (logical):
-%   If true, domain entries in records will recursively be added to the
-%   domains in case they are not present in the domains already. Default:
-%   false.
+%   If true, domain entries in records will recursively be added to the domains
+%   in case they are not present in the domains already. With a logical vector
+%   domain forwarding can be enabled/disabled independently for each domain.
+%   Default: false.
 %
 % Example:
 % c = Container();
@@ -148,9 +149,10 @@ classdef Variable < GAMSTransfer.Symbol
         %> - description (`string`):
         %>   Description of symbol. Default is `""`.
         %> - domain_forwarding (`logical`):
-        %>   If `true`, domain entries in records will recursively be added to the
-        %>   domains in case they are not present in the domains already. Default:
-        %>   `false`.
+        %>   If `true`, domain entries in records will recursively be added to
+        %>   the domains in case they are not present in the domains already.
+        %>   With a logical vector domain forwarding can be enabled/disabled
+        %>   independently for each domain. Default: `false`.
         %>
         %> **Example:**
         %> ```
@@ -383,7 +385,7 @@ classdef Variable < GAMSTransfer.Symbol
             args.isset_records = false;
             args.description = '';
             args.isset_description = false;
-            args.domain_forwarding = false;
+            args.domain_forwarding = false(1, numel(args.domain));
             args.isset_domain_forwarding = false;
             while i < nargin - 1
                 if strcmpi(varargin{i}, 'records')

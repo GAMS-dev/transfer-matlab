@@ -1352,7 +1352,7 @@ function test_copySymbol(t, cfg)
         t.assertEquals(gdx2.data.i.records.uni_1(2), 2);
         t.assertEquals(gdx2.data.i.records.uni_1(3), 3);
     end
-    t.assert(~gdx2.data.i.domain_forwarding);
+    t.assert(~gdx2.data.i.domain_forwarding(1));
     t.assertEquals(gdx2.data.i.format, 'struct');
     t.assert(~i.modified);
     t.assert(gdx2.data.i.modified);
@@ -1384,7 +1384,7 @@ function test_copySymbol(t, cfg)
         t.assertEquals(gdx2.data.i.records.uni_1(2), 2);
         t.assertEquals(gdx2.data.i.records.uni_1(3), 3);
     end
-    t.assert(~gdx2.data.i.domain_forwarding);
+    t.assert(~gdx2.data.i.domain_forwarding(1));
     t.assertEquals(gdx2.data.i.format, 'struct');
     t.assert(~i.modified);
     t.assert(gdx2.data.i.modified);
@@ -1489,7 +1489,7 @@ function test_copySymbol(t, cfg)
     t.assert(numel(gdx2.data.x.domain) == 1);
     t.assertEquals(gdx2.data.x.domain{1}, 'i');
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
-    t.assert(~gdx2.data.x.domain_forwarding);
+    t.assert(~gdx2.data.x.domain_forwarding(1));
     t.assertEquals(gdx2.data.x.format, 'empty');
     t.assert(~x.modified);
     t.assert(gdx2.data.x.modified);
@@ -1514,7 +1514,7 @@ function test_copySymbol(t, cfg)
         t.assert(gdx2.data.x.domain{1} == gdx2.data.i);
     end
     t.assertEquals(gdx2.data.x.domain_type, 'regular');
-    t.assert(~gdx2.data.x.domain_forwarding);
+    t.assert(~gdx2.data.x.domain_forwarding(1));
     t.assertEquals(gdx2.data.x.format, 'empty');
     t.assert(~x.modified);
     t.assert(gdx2.data.x.modified);
@@ -1537,7 +1537,7 @@ function test_copySymbol(t, cfg)
     t.assert(numel(gdx2.data.x.domain) == 1);
     t.assertEquals(gdx2.data.x.domain{1}, 'i');
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
-    t.assert(~gdx2.data.x.domain_forwarding);
+    t.assert(~gdx2.data.x.domain_forwarding(1));
     t.assertEquals(gdx2.data.x.format, 'empty');
     t.assert(~x.modified);
     t.assert(gdx2.data.x.modified);
@@ -1582,7 +1582,8 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.domain{1}, 'a');
     t.assertEquals(gdx2.data.e.domain{2}, 'i');
     t.assertEquals(gdx2.data.e.domain_type, 'relaxed');
-    t.assert(~gdx2.data.e.domain_forwarding);
+    t.assert(~gdx2.data.e.domain_forwarding(1));
+    t.assert(~gdx2.data.e.domain_forwarding(2));
     t.assertEquals(gdx2.data.e.format, 'empty');
     t.assert(~e.modified);
     t.assert(gdx2.data.e.modified);
@@ -1610,7 +1611,8 @@ function test_copySymbol(t, cfg)
         t.assert(gdx2.data.e.domain{2} == gdx2.data.i);
     end
     t.assertEquals(gdx2.data.e.domain_type, 'regular');
-    t.assert(~gdx2.data.e.domain_forwarding);
+    t.assert(~gdx2.data.e.domain_forwarding(1));
+    t.assert(~gdx2.data.e.domain_forwarding(2));
     t.assertEquals(gdx2.data.e.format, 'empty');
     t.assert(~e.modified);
     t.assert(gdx2.data.e.modified);
@@ -1635,7 +1637,8 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.domain{1}, 'a');
     t.assertEquals(gdx2.data.e.domain{2}, 'i');
     t.assertEquals(gdx2.data.e.domain_type, 'relaxed');
-    t.assert(~gdx2.data.e.domain_forwarding);
+    t.assert(~gdx2.data.e.domain_forwarding(1));
+    t.assert(~gdx2.data.e.domain_forwarding(2));
     t.assertEquals(gdx2.data.e.format, 'empty');
     t.assert(~e.modified);
     t.assert(gdx2.data.e.modified);
@@ -1677,7 +1680,7 @@ function test_copySymbol(t, cfg)
     t.assert(numel(gdx2.data.p.domain) == 1);
     t.assertEquals(gdx2.data.p.domain{1}, 'i');
     t.assertEquals(gdx2.data.p.domain_type, 'relaxed');
-    t.assert(~gdx2.data.p.domain_forwarding);
+    t.assert(~gdx2.data.p.domain_forwarding(1));
     t.assertEquals(gdx2.data.p.format, 'struct');
     t.assert(isfield(gdx2.data.p.records, 'i_1'));
     t.assert(isfield(gdx2.data.p.records, 'value'));
@@ -1714,7 +1717,7 @@ function test_copySymbol(t, cfg)
         t.assert(gdx2.data.p.domain{1} == gdx2.data.i);
     end
     t.assertEquals(gdx2.data.p.domain_type, 'regular');
-    t.assert(~gdx2.data.p.domain_forwarding);
+    t.assert(~gdx2.data.p.domain_forwarding(1));
     t.assertEquals(gdx2.data.p.format, 'struct');
     t.assert(isfield(gdx2.data.p.records, 'i_1'));
     t.assert(isfield(gdx2.data.p.records, 'value'));
@@ -1749,7 +1752,7 @@ function test_copySymbol(t, cfg)
     t.assert(numel(gdx2.data.p.domain) == 1);
     t.assertEquals(gdx2.data.p.domain{1}, 'i');
     t.assertEquals(gdx2.data.p.domain_type, 'relaxed');
-    t.assert(~gdx2.data.p.domain_forwarding);
+    t.assert(~gdx2.data.p.domain_forwarding(1));
     t.assertEquals(gdx2.data.p.format, 'struct');
     t.assert(isfield(gdx2.data.p.records, 'i_1'));
     t.assert(isfield(gdx2.data.p.records, 'value'));
@@ -1917,9 +1920,11 @@ function test_domainViolation(t, cfg);
     t.assert(a1.isValid());
     t.assert(a2.isValid());
     t.assert(a3.isValid());
-    t.assert(~a1.domain_forwarding);
-    t.assert(~a2.domain_forwarding);
-    t.assert(~a3.domain_forwarding);
+    t.assert(~a1.domain_forwarding(1));
+    t.assert(~a1.domain_forwarding(2));
+    t.assert(~a2.domain_forwarding(1));
+    t.assert(~a2.domain_forwarding(2));
+    t.assert(~a3.domain_forwarding(1));
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 3);
     t.assert(isa(domviol{1}, 'GAMSTransfer.DomainViolation'));
@@ -1996,9 +2001,11 @@ function test_domainViolation(t, cfg);
     t.assert(a1.isValid());
     t.assert(a2.isValid());
     t.assert(a3.isValid());
-    t.assert(~a1.domain_forwarding);
-    t.assert(~a2.domain_forwarding);
-    t.assert(~a3.domain_forwarding);
+    t.assert(~a1.domain_forwarding(1));
+    t.assert(~a1.domain_forwarding(2));
+    t.assert(~a2.domain_forwarding(1));
+    t.assert(~a2.domain_forwarding(2));
+    t.assert(~a3.domain_forwarding(1));
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 3);
     t.assert(isa(domviol{1}, 'GAMSTransfer.DomainViolation'));
@@ -2027,9 +2034,11 @@ function test_domainViolation(t, cfg);
     a1.domain_forwarding = true;
     a2.domain_forwarding = true;
     a3.domain_forwarding = true;
-    t.assert(a1.domain_forwarding);
-    t.assert(a2.domain_forwarding);
-    t.assert(a3.domain_forwarding);
+    t.assert(a1.domain_forwarding(1));
+    t.assert(a1.domain_forwarding(2));
+    t.assert(a2.domain_forwarding(1));
+    t.assert(a2.domain_forwarding(2));
+    t.assert(a3.domain_forwarding(1));
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 0);
     elems = i1.getUELs(1);
@@ -2062,9 +2071,11 @@ function test_domainViolation(t, cfg);
         {{'I1', 'i7'}, [1;2]}, 'domain_forwarding', true);
 
     t.add('domain_violation_with_grow_3');
-    t.assert(a1.domain_forwarding);
-    t.assert(a2.domain_forwarding);
-    t.assert(a3.domain_forwarding);
+    t.assert(a1.domain_forwarding(1));
+    t.assert(a1.domain_forwarding(2));
+    t.assert(a2.domain_forwarding(1));
+    t.assert(a2.domain_forwarding(2));
+    t.assert(a3.domain_forwarding(1));
     t.assert(numel(domviol) == 0);
     elems = i1.getUELs(1);
     t.assert(iscell(elems));
@@ -2081,6 +2092,43 @@ function test_domainViolation(t, cfg);
     t.assert(a2.isValid());
     t.assert(a3.isValid());
 
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    write_filename = fullfile(cfg.working_dir, 'write.gdx');
+
+    i1 = GAMSTransfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
+    i2 = GAMSTransfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
+    a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
+        {{'i0', 'i0', 'I1', 'i1'}, {'i1', 'I2', 'I1', 'i2'}, [1;2;3;4]});
+    a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
+        {{'i1', 'I1', 'i5', 'I5'}, {'i1', 'I5', 'I1', 'i5'}, [1;2;3;4]});
+    a3 = GAMSTransfer.Parameter(gdx, 'a3', i2, 'records', ...
+        {{'I1', 'i7'}, [1;2]});
+
+    t.add('domain_violation_with_grow_4');
+    a1.domain_forwarding(2) = true;
+    a2.domain_forwarding(2) = true;
+    a3.domain_forwarding(1) = true;
+    t.assert(~a1.domain_forwarding(1));
+    t.assert(a1.domain_forwarding(2));
+    t.assert(~a2.domain_forwarding(1));
+    t.assert(a2.domain_forwarding(2));
+    t.assert(a3.domain_forwarding(1));
+    domviol = gdx.getDomainViolations();
+    t.assert(numel(domviol) == 2);
+    t.assert(isa(domviol{1}, 'GAMSTransfer.DomainViolation'));
+    t.assert(isa(domviol{2}, 'GAMSTransfer.DomainViolation'));
+    t.assertEquals(domviol{1}.symbol.name, 'a1');
+    t.assertEquals(domviol{2}.symbol.name, 'a2');
+    t.assert(domviol{1}.dimension == 1);
+    t.assert(domviol{2}.dimension == 1);
+    t.assertEquals(domviol{1}.domain.name, 'i1');
+    t.assertEquals(domviol{2}.domain.name, 'i1');
+    t.assert(iscellstr(domviol{1}.violations));
+    t.assert(iscellstr(domviol{2}.violations));
+    t.assert(numel(domviol{1}.violations) == 1);
+    t.assert(numel(domviol{2}.violations) == 1);
+    t.assertEquals(domviol{1}.violations{1}, 'i0');
+    t.assertEquals(lower(domviol{2}.violations{1}), 'i5');
 end
 
 function test_setRecords(t, cfg)
