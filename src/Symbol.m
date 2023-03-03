@@ -204,12 +204,17 @@ classdef Symbol < handle
             if ~islogical(domain_forwarding)
                 error('Argument ''domain_forwarding'' must be of type ''logical''.');
             end
+            if numel(domain_forwarding) == 1
+                domain_forwarding = false(1, numel(domain_size)) | domain_forwarding;
+            elseif ~isvector(domain_forwarding) || numel(domain_forwarding) ~= numel(domain_size)
+                error('domain_forwarding must be vector of size equal to dimension');
+            end
 
             obj.container = container;
             obj.name_ = name;
             obj.description_ = description;
-            obj.domain_forwarding_ = domain_forwarding;
             obj.number_records_ = nan;
+            obj.domain_forwarding_ = domain_forwarding;
 
             % the following inits dimension_, domain_, domain_names_, domain_labels_,
             % domain_type_, uels
@@ -299,6 +304,12 @@ classdef Symbol < handle
                 obj.uels = uels;
             end
 
+            % update domain forwarding
+            domain_forwarding_ = false(1, obj.dimension_);
+            idx = 1:min(obj.dimension_, numel(obj.domain_forwarding_));
+            domain_forwarding_(idx) = obj.domain_forwarding_(idx);
+            obj.domain_forwarding_ = domain_forwarding_;
+
             obj.modified = true;
         end
 
@@ -322,8 +333,15 @@ classdef Symbol < handle
             if ~islogical(domain_forwarding)
                 error('domain_forwarding must be logical.');
             end
-            if ~obj.domain_forwarding_ && domain_forwarding
-                obj.resolveDomainViolations();
+            if numel(domain_forwarding) == 1
+                domain_forwarding = false(1, obj.dimension_) | domain_forwarding;
+            elseif ~isvector(domain_forwarding) || numel(domain_forwarding) ~= obj.dimension_
+                error('domain_forwarding must be vector of size equal to dimension');
+            end
+            for i = 1:obj.dimension_
+                if ~obj.domain_forwarding_(i) && domain_forwarding(i)
+                    obj.resolveDomainViolations(i);
+                end
             end
             obj.domain_forwarding_ = domain_forwarding;
             obj.modified = true;
@@ -616,11 +634,11 @@ classdef Symbol < handle
                     if ~isempty(uels{i})
                         obj.setUELs(uels{i}, i, 'rename', true);
                     end
-                end
 
-                % resolve domain violations
-                if obj.domain_forwarding_
-                    obj.resolveDomainViolations();
+                    % resolve domain violations
+                    if obj.domain_forwarding_(i)
+                        obj.resolveDomainViolations(i);
+                    end
                 end
             end
         end
@@ -1146,8 +1164,10 @@ classdef Symbol < handle
             end
 
             % resolve domain violations
-            if obj.domain_forwarding_
-                obj.resolveDomainViolations();
+            for i = 1:obj.dimension_
+                if obj.domain_forwarding_(i)
+                    obj.resolveDomainViolations(i);
+                end
             end
         end
 
@@ -1164,14 +1184,16 @@ classdef Symbol < handle
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
         %>
         %> - `dom_violations = getDomainViolations` returns a list of domain
-        %>   violations.
+        %>   violations for all dimensions.
+        %> - `dom_violations = getDomainViolations(d)` returns a list of domain
+        %>   violations for dimension(s) `d`.
         %>
         %> @see \ref GAMSTransfer::Symbol::resolveDomainViolations
         %> "Symbol.resolveDomainViolations", \ref
         %> GAMSTransfer::Container::getDomainViolations
         %> "Container.getDomainViolations", \ref GAMSTransfer::DomainViolation
         %> "DomainViolation"
-        function dom_violations = getDomainViolations(obj)
+        function dom_violations = getDomainViolations(obj, varargin)
             % Get domain violations
             %
             % Domain violations occur when this symbol uses other Set(s) as
@@ -1180,7 +1202,9 @@ classdef Symbol < handle
             % error when writing the data.
             %
             % dom_violations = getDomainViolations returns a list of domain
-            % violations.
+            % violations for all dimension.
+            % dom_violations = getDomainViolations(d) returns a list of domain
+            % violations for dimension(s) d.
             %
             % See also: GAMSTransfer.Symbol.resolveDomainViolations,
             % GAMSTransfer.Container.getDomainViolations,
@@ -1193,8 +1217,18 @@ classdef Symbol < handle
                 error('Symbol must be valid in order to get domain violations.');
             end
 
+            if nargin >= 2
+                dim = varargin{1};
+                if ~isnumeric(dim) || ~isvector(dim) || ~all(dim == round(dim)) || ...
+                    min(dim) < 1 && max(dim) > obj.dimension_
+                    error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
+                end
+            else
+                dim = 1:obj.dimension_;
+            end
+
             dom_violations = {};
-            for i = 1:obj.dimension_
+            for i = dim
                 if ~isa(obj.domain_{i}, 'GAMSTransfer.Set') && ...
                     ~isa(obj.domain_{i}, 'GAMSTransfer.Alias')
                     continue;
@@ -1225,14 +1259,18 @@ classdef Symbol < handle
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
         %>
         %> - `resolveDomainViolations()` extends the domain sets with the
-        %>   violated domain entries. Hence, the domain violations disappear.
+        %>   violated domain entries for all domains. Hence, the domain
+        %>   violations disappear.
+        %> - `resolveDomainViolations(d)` extends the domain sets with the
+        %>   violated domain entries for dimension(s) `d`. Hence, the domain
+        %>   violations disappear for those dimension(s).
         %>
         %> @see \ref GAMSTransfer::Symbol::getDomainViolations
         %> "Symbol.getDomainViolations", \ref
         %> GAMSTransfer::Container::resolveDomainViolations
         %> "Container.resolveDomainViolations", \ref
         %> GAMSTransfer::DomainViolation "DomainViolation"
-        function resolveDomainViolations(obj)
+        function resolveDomainViolations(obj, varargin)
             % Extends domain sets in order to resolve domain violations
             %
             % Domain violations occur when this symbol uses other Set(s) as
@@ -1241,13 +1279,17 @@ classdef Symbol < handle
             % error when writing the data.
             %
             % resolveDomainViolations() extends the domain sets with the
-            % violated domain entries. Hence, the domain violations disappear.
+            % violated domain entries for all dimensions. Hence, the domain
+            % violations disappear.
+            % resolveDomainViolations(d) extends the domain sets with the
+            % violated domain entries for dimension(s) d. Hence, the domain
+            % violations disappear for those dimension(s).
             %
             % See also: GAMSTransfer.Symbol.getDomainViolations,
             % GAMSTransfer.Container.resolveDomainViolations,
             % GAMSTransfer.DomainViolation
 
-            dom_violations = obj.getDomainViolations();
+            dom_violations = obj.getDomainViolations(varargin{:});
             for i = 1:numel(dom_violations)
                 dom_violations{i}.resolve();
             end

@@ -398,7 +398,7 @@ function test_idx_copySymbol(t, cfg)
     t.assert(numel(gdx2.data.p.domain) == 1);
     t.assertEquals(gdx2.data.p.domain{1}, 'dim_1');
     t.assertEquals(gdx2.data.p.domain_type, 'relaxed');
-    t.assert(~gdx2.data.p.domain_forwarding);
+    t.assert(~gdx2.data.p.domain_forwarding(1));
     t.assertEquals(gdx2.data.p.format, 'struct');
     t.assert(isfield(gdx2.data.p.records, 'dim_1'));
     t.assert(isfield(gdx2.data.p.records, 'value'));
@@ -424,7 +424,7 @@ function test_idx_copySymbol(t, cfg)
     t.assert(numel(gdx2.data.p.domain) == 1);
     t.assertEquals(gdx2.data.p.domain{1}, 'dim_1');
     t.assertEquals(gdx2.data.p.domain_type, 'relaxed');
-    t.assert(~gdx2.data.p.domain_forwarding);
+    t.assert(~gdx2.data.p.domain_forwarding(1));
     t.assertEquals(gdx2.data.p.format, 'struct');
     t.assert(isfield(gdx2.data.p.records, 'dim_1'));
     t.assert(isfield(gdx2.data.p.records, 'value'));

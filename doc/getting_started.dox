@@ -120,7 +120,7 @@ x =
          domain_names: {'i'  'j'}
         domain_labels: {'i_1'  'j_2'}
           domain_type: 'regular'
-    domain_forwarding: 0
+    domain_forwarding: [0 0]
               records: [6×4 table]
                format: 'table'
 
