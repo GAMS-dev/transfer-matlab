@@ -49,7 +49,7 @@ void mexFunction(
     int sym_id, format, orig_format, type, subtype, lastdim, ival, sym_count;
     int n_acronyms, uel_count, dom_type;
     size_t dim, nrecs, nvals, n_dom_fields;
-    bool support_categorical, support_setget, read_records;
+    bool support_categorical, support_setget, read_records, unique_labels;
     bool orig_values_flag[GMS_VAL_MAX], values_flag[GMS_VAL_MAX];
     char buf[GMS_SSSIZE], gdx_filename[GMS_SSSIZE], sysdir[GMS_SSSIZE];
     char name[GMS_SSSIZE], text[GMS_SSSIZE];
@@ -201,13 +201,21 @@ void mexFunction(
         /* load domains and transform to domain_labels */
         if (!gdxSymbolGetDomainX(gdx, sym_id, domain_labels_ptr))
             mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomainX", "GDX error (gdxSymbolGetDomainX)");
+        unique_labels = true;
         for (size_t j = 0; j < dim; j++)
         {
             if (!strcmp(domain_labels_ptr[j], "*"))
                 strcpy(domain_labels_ptr[j], "uni");
-            sprintf(buf, "_%d", (int) j+1);
-            strcat(domain_labels_ptr[j], buf);
+            for (size_t k = 0; unique_labels && k < j; k++)
+                if (!strcmp(domain_labels_ptr[j], domain_labels_ptr[k]))
+                    unique_labels = false;
         }
+        if (!unique_labels)
+            for (size_t j = 0; j < dim; j++)
+            {
+                sprintf(buf, "_%d", (int) j+1);
+                strcat(domain_labels_ptr[j], buf);
+            }
 
         /* prefer struct instead of dense_matrix for scalars */
         if (format == GT_FORMAT_DENSEMAT && dim == 0)

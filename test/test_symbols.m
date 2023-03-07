@@ -53,9 +53,9 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s1.domain) == 1);
     t.assertEquals(s1.domain{1}, '*');
     t.assert(numel(s1.domain_names) == 1);
-    t.assert(s1.domain_names{1} == '*');
+    t.assertEquals(s1.domain_names{1}, '*');
     t.assert(numel(s1.domain_labels) == 1);
-    t.assert(s1.domain_labels{1} == 'uni_1');
+    t.assertEquals(s1.domain_labels{1}, 'uni');
     t.assertEquals(s1.domain_type, 'none');
     t.assert(numel(s1.size) == 1);
     t.assert(isnan(s1.size(1)));
@@ -79,9 +79,9 @@ function test_addSymbols(t, cfg)
     t.assert(s2.domain{1}.id == s1.id);
     t.assertEquals(s2.domain{1}.name, 's1');
     t.assert(numel(s2.domain_names) == 1);
-    t.assert(s2.domain_names{1} == 's1');
+    t.assertEquals(s2.domain_names{1}, 's1');
     t.assert(numel(s2.domain_labels) == 1);
-    t.assert(s2.domain_labels{1} == 's1_1');
+    t.assertEquals(s2.domain_labels{1}, 's1');
     t.assertEquals(s2.domain_type, 'regular');
     t.assert(numel(s2.size) == 1);
     t.assert(s2.size(1) == 0);
@@ -106,11 +106,11 @@ function test_addSymbols(t, cfg)
     t.assertEquals(s3.domain{1}.name, 's1');
     t.assertEquals(s3.domain{2}, '*');
     t.assert(numel(s3.domain_names) == 2);
-    t.assert(s3.domain_names{1} == 's1');
-    t.assert(s3.domain_names{2} == '*');
+    t.assertEquals(s3.domain_names{1}, 's1');
+    t.assertEquals(s3.domain_names{2}, '*');
     t.assert(numel(s3.domain_labels) == 2);
-    t.assert(s3.domain_labels{1} == 's1_1');
-    t.assert(s3.domain_labels{2} == 'uni_2');
+    t.assertEquals(s3.domain_labels{1}, 's1');
+    t.assertEquals(s3.domain_labels{2}, 'uni');
     t.assertEquals(s3.domain_type, 'regular');
     t.assert(numel(s3.size) == 2);
     t.assert(s3.size(1) == 0);
@@ -136,9 +136,9 @@ function test_addSymbols(t, cfg)
     t.assert(s4.domain{1}.id == s2.id);
     t.assertEquals(s4.domain{1}.name, 's2');
     t.assert(numel(s4.domain_names) == 1);
-    t.assert(s4.domain_names{1} == 's2');
+    t.assertEquals(s4.domain_names{1}, 's2');
     t.assert(numel(s4.domain_labels) == 1);
-    t.assert(s4.domain_labels{1} == 's2_1');
+    t.assertEquals(s4.domain_labels{1}, 's2');
     t.assertEquals(s4.domain_type, 'regular');
     t.assert(numel(s4.size) == 1);
     t.assert(s4.size(1) == 0);
@@ -163,11 +163,11 @@ function test_addSymbols(t, cfg)
     t.assert(s5.domain{2}.id == s2.id);
     t.assertEquals(s5.domain{2}.name, 's2');
     t.assert(numel(s5.domain_names) == 2);
-    t.assert(s5.domain_names{1} == 's1');
-    t.assert(s5.domain_names{2} == 's2');
+    t.assertEquals(s5.domain_names{1}, 's1');
+    t.assertEquals(s5.domain_names{2}, 's2');
     t.assert(numel(s5.domain_labels) == 2);
-    t.assert(s5.domain_labels{1} == 's1_1');
-    t.assert(s5.domain_labels{2} == 's2_2');
+    t.assertEquals(s5.domain_labels{1}, 's1');
+    t.assertEquals(s5.domain_labels{2}, 's2');
     t.assertEquals(s5.domain_type, 'relaxed');
     t.assert(numel(s5.size) == 2);
     t.assert(isnan(s5.size(1)));
@@ -192,9 +192,9 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s6.domain) == 1);
     t.assert(s6.domain{1} == 's1');
     t.assert(numel(s6.domain_names) == 1);
-    t.assert(s6.domain_names{1} == 's1');
+    t.assertEquals(s6.domain_names{1}, 's1');
     t.assert(numel(s6.domain_labels) == 1);
-    t.assert(s6.domain_labels{1} == 's1_1');
+    t.assertEquals(s6.domain_labels{1}, 's1');
     t.assertEquals(s6.domain_type, 'relaxed');
     t.assert(numel(s6.size) == 1);
     t.assert(isnan(s6.size(1)));
@@ -299,9 +299,9 @@ function test_addSymbols(t, cfg)
     t.assert(numel(a1.domain) == 1);
     t.assertEquals(a1.domain{1}, '*');
     t.assert(numel(a1.domain_names) == 1);
-    t.assert(a1.domain_names{1} == '*');
+    t.assertEquals(a1.domain_names{1}, '*');
     t.assert(numel(a1.domain_labels) == 1);
-    t.assert(a1.domain_labels{1} == 'uni_1');
+    t.assertEquals(a1.domain_labels{1}, 'uni');
     t.assertEquals(a1.domain_type, 'none');
     t.assert(numel(a1.size) == 1);
     t.assert(isnan(a1.size(1)));
@@ -369,7 +369,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(p2.domain_names) == 1);
     t.assertEquals(p2.domain_names{1}, 's1');
     t.assert(numel(p2.domain_labels) == 1);
-    t.assertEquals(p2.domain_labels{1}, 's1_1');
+    t.assertEquals(p2.domain_labels{1}, 's1');
     t.assertEquals(p2.domain_type, 'regular');
     t.assert(numel(p2.size) == 1);
     t.assert(p2.size(1) == 0);
@@ -398,9 +398,9 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p3.domain_names{2}, '*');
     t.assertEquals(p3.domain_names{3}, 's2');
     t.assert(numel(p3.domain_labels) == 3);
-    t.assertEquals(p3.domain_labels{1}, 's1_1');
-    t.assertEquals(p3.domain_labels{2}, 'uni_2');
-    t.assertEquals(p3.domain_labels{3}, 's2_3');
+    t.assertEquals(p3.domain_labels{1}, 's1');
+    t.assertEquals(p3.domain_labels{2}, 'uni');
+    t.assertEquals(p3.domain_labels{3}, 's2');
     t.assertEquals(p3.domain_type, 'relaxed');
     t.assert(numel(p3.size) == 3);
     t.assert(p3.size(1) == 0);
@@ -532,8 +532,8 @@ function test_addSymbols(t, cfg)
     t.assertEquals(v3.domain_names{1}, 's1');
     t.assertEquals(v3.domain_names{2}, '*');
     t.assert(numel(v3.domain_labels) == 2);
-    t.assertEquals(v3.domain_labels{1}, 's1_1');
-    t.assertEquals(v3.domain_labels{2}, 'uni_2');
+    t.assertEquals(v3.domain_labels{1}, 's1');
+    t.assertEquals(v3.domain_labels{2}, 'uni');
     t.assertEquals(v3.domain_type, 'regular');
     t.assert(numel(v3.size) == 2);
     t.assert(v3.size(1) == 0);
@@ -709,8 +709,8 @@ function test_addSymbols(t, cfg)
     t.assertEquals(e3.domain_names{1}, 's1');
     t.assertEquals(e3.domain_names{2}, '*');
     t.assert(numel(e3.domain_labels) == 2);
-    t.assertEquals(e3.domain_labels{1}, 's1_1');
-    t.assertEquals(e3.domain_labels{2}, 'uni_2');
+    t.assertEquals(e3.domain_labels{1}, 's1');
+    t.assertEquals(e3.domain_labels{2}, 'uni');
     t.assertEquals(e3.domain_type, 'regular');
     t.assert(numel(e3.size) == 2);
     t.assert(e3.size(1) == 0);
@@ -1283,7 +1283,7 @@ function test_changeSymbol(t, cfg)
 
     t.add('change_symbol_domain_label');
     try
-        x1.domain_labels = {'uni_1'};
+        x1.domain_labels = {'uni'};
         t.assert(false);
     catch e
         if exist('OCTAVE_VERSION', 'builtin') > 0
@@ -1341,16 +1341,16 @@ function test_copySymbol(t, cfg)
     t.assert(iscell(gdx2.data.i.domain));
     t.assert(numel(gdx2.data.i.domain) == 1);
     t.assertEquals(gdx2.data.i.domain{1}, '*');
-    t.assert(isfield(gdx2.data.i.records, 'uni_1'));
-    t.assert(numel(gdx2.data.i.records.uni_1) == 3);
+    t.assert(isfield(gdx2.data.i.records, 'uni'));
+    t.assert(numel(gdx2.data.i.records.uni) == 3);
     if gdx.features.categorical
-        t.assertEquals(gdx2.data.i.records.uni_1(1), 'i1');
-        t.assertEquals(gdx2.data.i.records.uni_1(2), 'i2');
-        t.assertEquals(gdx2.data.i.records.uni_1(3), 'i3');
+        t.assertEquals(gdx2.data.i.records.uni(1), 'i1');
+        t.assertEquals(gdx2.data.i.records.uni(2), 'i2');
+        t.assertEquals(gdx2.data.i.records.uni(3), 'i3');
     else
-        t.assertEquals(gdx2.data.i.records.uni_1(1), 1);
-        t.assertEquals(gdx2.data.i.records.uni_1(2), 2);
-        t.assertEquals(gdx2.data.i.records.uni_1(3), 3);
+        t.assertEquals(gdx2.data.i.records.uni(1), 1);
+        t.assertEquals(gdx2.data.i.records.uni(2), 2);
+        t.assertEquals(gdx2.data.i.records.uni(3), 3);
     end
     t.assert(~gdx2.data.i.domain_forwarding(1));
     t.assertEquals(gdx2.data.i.format, 'struct');
@@ -1373,16 +1373,16 @@ function test_copySymbol(t, cfg)
     t.assert(iscell(gdx2.data.i.domain));
     t.assert(numel(gdx2.data.i.domain) == 1);
     t.assertEquals(gdx2.data.i.domain{1}, '*');
-    t.assert(isfield(gdx2.data.i.records, 'uni_1'));
-    t.assert(numel(gdx2.data.i.records.uni_1) == 3);
+    t.assert(isfield(gdx2.data.i.records, 'uni'));
+    t.assert(numel(gdx2.data.i.records.uni) == 3);
     if gdx.features.categorical
-        t.assertEquals(gdx2.data.i.records.uni_1(1), 'i1');
-        t.assertEquals(gdx2.data.i.records.uni_1(2), 'i2');
-        t.assertEquals(gdx2.data.i.records.uni_1(3), 'i3');
+        t.assertEquals(gdx2.data.i.records.uni(1), 'i1');
+        t.assertEquals(gdx2.data.i.records.uni(2), 'i2');
+        t.assertEquals(gdx2.data.i.records.uni(3), 'i3');
     else
-        t.assertEquals(gdx2.data.i.records.uni_1(1), 1);
-        t.assertEquals(gdx2.data.i.records.uni_1(2), 2);
-        t.assertEquals(gdx2.data.i.records.uni_1(3), 3);
+        t.assertEquals(gdx2.data.i.records.uni(1), 1);
+        t.assertEquals(gdx2.data.i.records.uni(2), 2);
+        t.assertEquals(gdx2.data.i.records.uni(3), 3);
     end
     t.assert(~gdx2.data.i.domain_forwarding(1));
     t.assertEquals(gdx2.data.i.format, 'struct');
@@ -1682,15 +1682,15 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.p.domain_type, 'relaxed');
     t.assert(~gdx2.data.p.domain_forwarding(1));
     t.assertEquals(gdx2.data.p.format, 'struct');
-    t.assert(isfield(gdx2.data.p.records, 'i_1'));
+    t.assert(isfield(gdx2.data.p.records, 'i'));
     t.assert(isfield(gdx2.data.p.records, 'value'));
-    t.assert(numel(gdx2.data.p.records.i_1) == 2);
+    t.assert(numel(gdx2.data.p.records.i) == 2);
     if gdx.features.categorical
-        t.assertEquals(gdx2.data.p.records.i_1(1), 'i1');
-        t.assertEquals(gdx2.data.p.records.i_1(2), 'i2');
+        t.assertEquals(gdx2.data.p.records.i(1), 'i1');
+        t.assertEquals(gdx2.data.p.records.i(2), 'i2');
     else
-        t.assertEquals(gdx2.data.p.records.i_1(1), 1);
-        t.assertEquals(gdx2.data.p.records.i_1(2), 2);
+        t.assertEquals(gdx2.data.p.records.i(1), 1);
+        t.assertEquals(gdx2.data.p.records.i(2), 2);
     end
     t.assert(numel(gdx2.data.p.records.value) == 2);
     t.assert(gdx2.data.p.records.value(1) == 1);
@@ -1719,15 +1719,15 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.p.domain_type, 'regular');
     t.assert(~gdx2.data.p.domain_forwarding(1));
     t.assertEquals(gdx2.data.p.format, 'struct');
-    t.assert(isfield(gdx2.data.p.records, 'i_1'));
+    t.assert(isfield(gdx2.data.p.records, 'i'));
     t.assert(isfield(gdx2.data.p.records, 'value'));
-    t.assert(numel(gdx2.data.p.records.i_1) == 2);
+    t.assert(numel(gdx2.data.p.records.i) == 2);
     if gdx.features.categorical
-        t.assertEquals(gdx2.data.p.records.i_1(1), 'i1');
-        t.assertEquals(gdx2.data.p.records.i_1(2), 'i2');
+        t.assertEquals(gdx2.data.p.records.i(1), 'i1');
+        t.assertEquals(gdx2.data.p.records.i(2), 'i2');
     else
-        t.assertEquals(gdx2.data.p.records.i_1(1), 1);
-        t.assertEquals(gdx2.data.p.records.i_1(2), 2);
+        t.assertEquals(gdx2.data.p.records.i(1), 1);
+        t.assertEquals(gdx2.data.p.records.i(2), 2);
     end
     t.assert(numel(gdx2.data.p.records.value) == 2);
     t.assert(gdx2.data.p.records.value(1) == 1);
@@ -1754,15 +1754,15 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.p.domain_type, 'relaxed');
     t.assert(~gdx2.data.p.domain_forwarding(1));
     t.assertEquals(gdx2.data.p.format, 'struct');
-    t.assert(isfield(gdx2.data.p.records, 'i_1'));
+    t.assert(isfield(gdx2.data.p.records, 'i'));
     t.assert(isfield(gdx2.data.p.records, 'value'));
-    t.assert(numel(gdx2.data.p.records.i_1) == 2);
+    t.assert(numel(gdx2.data.p.records.i) == 2);
     if gdx.features.categorical
-        t.assertEquals(gdx2.data.p.records.i_1(1), 'i1');
-        t.assertEquals(gdx2.data.p.records.i_1(2), 'i2');
+        t.assertEquals(gdx2.data.p.records.i(1), 'i1');
+        t.assertEquals(gdx2.data.p.records.i(2), 'i2');
     else
-        t.assertEquals(gdx2.data.p.records.i_1(1), 1);
-        t.assertEquals(gdx2.data.p.records.i_1(2), 2);
+        t.assertEquals(gdx2.data.p.records.i(1), 1);
+        t.assertEquals(gdx2.data.p.records.i(2), 2);
     end
     t.assert(numel(gdx2.data.p.records.value) == 2);
     t.assert(gdx2.data.p.records.value(1) == 1);
@@ -2146,12 +2146,12 @@ function test_setRecords(t, cfg)
     t.assertEquals(s1.format, 'struct');
     t.assert(isstruct(s1.records));
     t.assert(numel(fieldnames(s1.records)) == 1);
-    t.assert(isfield(s1.records, 'i_1'));
-    t.assert(numel(s1.records.i_1) == 1);
+    t.assert(isfield(s1.records, 'i'));
+    t.assert(numel(s1.records.i) == 1);
     if gdx.features.categorical
-        t.assertEquals(s1.records.i_1(1), 'test');
+        t.assertEquals(s1.records.i(1), 'test');
     else
-        t.assert(s1.records.i_1(1) == 1);
+        t.assert(s1.records.i(1) == 1);
     end
     uels = s1.getUELs(1);
     t.assert(numel(uels) == 1);
@@ -2174,16 +2174,16 @@ function test_setRecords(t, cfg)
     t.assertEquals(s1.format, 'struct');
     t.assert(isstruct(s1.records));
     t.assert(numel(fieldnames(s1.records)) == 1);
-    t.assert(isfield(s1.records, 'i_1'));
-    t.assert(numel(s1.records.i_1) == 3);
+    t.assert(isfield(s1.records, 'i'));
+    t.assert(numel(s1.records.i) == 3);
     if gdx.features.categorical
-        t.assertEquals(s1.records.i_1(1), 'test1');
-        t.assertEquals(s1.records.i_1(2), 'test2');
-        t.assertEquals(s1.records.i_1(3), 'test3');
+        t.assertEquals(s1.records.i(1), 'test1');
+        t.assertEquals(s1.records.i(2), 'test2');
+        t.assertEquals(s1.records.i(3), 'test3');
     else
-        t.assert(s1.records.i_1(1) == 1);
-        t.assert(s1.records.i_1(2) == 2);
-        t.assert(s1.records.i_1(3) == 3);
+        t.assert(s1.records.i(1) == 1);
+        t.assert(s1.records.i(2) == 2);
+        t.assert(s1.records.i(3) == 3);
     end
     uels = s1.getUELs(1);
     t.assert(numel(uels) == 3);
@@ -2208,24 +2208,24 @@ function test_setRecords(t, cfg)
     t.assertEquals(s2.format, 'struct');
     t.assert(isstruct(s2.records));
     t.assert(numel(fieldnames(s2.records)) == 2);
-    t.assert(isfield(s2.records, 'i_1'));
-    t.assert(isfield(s2.records, 'uni_2'));
-    t.assert(numel(s2.records.i_1) == 3);
-    t.assert(numel(s2.records.uni_2) == 3);
+    t.assert(isfield(s2.records, 'i'));
+    t.assert(isfield(s2.records, 'uni'));
+    t.assert(numel(s2.records.i) == 3);
+    t.assert(numel(s2.records.uni) == 3);
     if gdx.features.categorical
-        t.assertEquals(s2.records.i_1(1), 'test11');
-        t.assertEquals(s2.records.i_1(2), 'test12');
-        t.assertEquals(s2.records.i_1(3), 'test13');
-        t.assertEquals(s2.records.uni_2(1), 'test21');
-        t.assertEquals(s2.records.uni_2(2), 'test22');
-        t.assertEquals(s2.records.uni_2(3), 'test23');
+        t.assertEquals(s2.records.i(1), 'test11');
+        t.assertEquals(s2.records.i(2), 'test12');
+        t.assertEquals(s2.records.i(3), 'test13');
+        t.assertEquals(s2.records.uni(1), 'test21');
+        t.assertEquals(s2.records.uni(2), 'test22');
+        t.assertEquals(s2.records.uni(3), 'test23');
     else
-        t.assert(s2.records.i_1(1) == 1);
-        t.assert(s2.records.i_1(2) == 2);
-        t.assert(s2.records.i_1(3) == 3);
-        t.assert(s2.records.uni_2(1) == 1);
-        t.assert(s2.records.uni_2(2) == 2);
-        t.assert(s2.records.uni_2(3) == 3);
+        t.assert(s2.records.i(1) == 1);
+        t.assert(s2.records.i(2) == 2);
+        t.assert(s2.records.i(3) == 3);
+        t.assert(s2.records.uni(1) == 1);
+        t.assert(s2.records.uni(2) == 2);
+        t.assert(s2.records.uni(3) == 3);
     end
     uels = s2.getUELs(1);
     t.assert(numel(uels) == 3);
@@ -2312,16 +2312,16 @@ function test_setRecords(t, cfg)
     t.assertEquals(s3.format, 'struct');
     t.assert(isstruct(s3.records));
     t.assert(numel(fieldnames(s3.records)) == 2);
-    t.assert(isfield(s3.records, 'i1_1'));
+    t.assert(isfield(s3.records, 'i1'));
     t.assert(isfield(s3.records, 'level'));
-    t.assert(numel(s3.records.i1_1) == 2);
+    t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
     if gdx.features.categorical
-        t.assertEquals(s3.records.i1_1(1), 'i1');
-        t.assertEquals(s3.records.i1_1(2), 'i4');
+        t.assertEquals(s3.records.i1(1), 'i1');
+        t.assertEquals(s3.records.i1(2), 'i4');
     else
-        t.assert(s3.records.i1_1(1) == 1);
-        t.assert(s3.records.i1_1(2) == 2);
+        t.assert(s3.records.i1(1) == 1);
+        t.assert(s3.records.i1(2) == 2);
     end
     uels = s3.getUELs(1);
     t.assertEquals(uels{1}, 'i1');
@@ -2337,18 +2337,18 @@ function test_setRecords(t, cfg)
     t.assertEquals(s3.format, 'struct');
     t.assert(isstruct(s3.records));
     t.assert(numel(fieldnames(s3.records)) == 3);
-    t.assert(isfield(s3.records, 'i1_1'));
+    t.assert(isfield(s3.records, 'i1'));
     t.assert(isfield(s3.records, 'level'));
     t.assert(isfield(s3.records, 'marginal'));
-    t.assert(numel(s3.records.i1_1) == 2);
+    t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
     t.assert(numel(s3.records.marginal) == 2);
     if gdx.features.categorical
-        t.assertEquals(s3.records.i1_1(1), 'i1');
-        t.assertEquals(s3.records.i1_1(2), 'i4');
+        t.assertEquals(s3.records.i1(1), 'i1');
+        t.assertEquals(s3.records.i1(2), 'i4');
     else
-        t.assert(s3.records.i1_1(1) == 1);
-        t.assert(s3.records.i1_1(2) == 2);
+        t.assert(s3.records.i1(1) == 1);
+        t.assert(s3.records.i1(2) == 2);
     end
     uels = s3.getUELs(1);
     t.assertEquals(uels{1}, 'i1');
@@ -2366,24 +2366,24 @@ function test_setRecords(t, cfg)
     t.assertEquals(s3.format, 'struct');
     t.assert(isstruct(s3.records));
     t.assert(numel(fieldnames(s3.records)) == 6);
-    t.assert(isfield(s3.records, 'i1_1'));
+    t.assert(isfield(s3.records, 'i1'));
     t.assert(isfield(s3.records, 'level'));
     t.assert(isfield(s3.records, 'marginal'));
     t.assert(isfield(s3.records, 'lower'));
     t.assert(isfield(s3.records, 'upper'));
     t.assert(isfield(s3.records, 'scale'));
-    t.assert(numel(s3.records.i1_1) == 2);
+    t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
     t.assert(numel(s3.records.marginal) == 2);
     t.assert(numel(s3.records.lower) == 2);
     t.assert(numel(s3.records.upper) == 2);
     t.assert(numel(s3.records.scale) == 2);
     if gdx.features.categorical
-        t.assertEquals(s3.records.i1_1(1), 'i1');
-        t.assertEquals(s3.records.i1_1(2), 'i4');
+        t.assertEquals(s3.records.i1(1), 'i1');
+        t.assertEquals(s3.records.i1(2), 'i4');
     else
-        t.assert(s3.records.i1_1(1) == 1);
-        t.assert(s3.records.i1_1(2) == 2);
+        t.assert(s3.records.i1(1) == 1);
+        t.assert(s3.records.i1(2) == 2);
     end
     uels = s3.getUELs(1);
     t.assertEquals(uels{1}, 'i1');
@@ -2407,7 +2407,7 @@ function test_setRecords(t, cfg)
         s2.setRecords({{'i1', 'i4'}, [1; 4]});
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain ''uni_2'' is missing.');
+        t.assertEquals(e.message, 'Domain ''uni'' is missing.');
     end
 
     t.add('set_records_cell_6');
@@ -2461,7 +2461,7 @@ function test_setRecords(t, cfg)
     t.add('set_records_struct_3');
     try
         t.assert(false);
-        s3.setRecords(struct('i1_1', {'i1', 'i4'}, 'level', [1; 4]));
+        s3.setRecords(struct('i1', {'i1', 'i4'}, 'level', [1; 4]));
     catch e
         t.reset();
         t.assertEquals(e.message, 'Non-scalar structure arrays currently not supported.');
@@ -2470,22 +2470,22 @@ function test_setRecords(t, cfg)
     t.add('set_records_struct_4');
     gdx.modified = false;
     recs = struct();
-    recs.i1_1 = {'i1', 'i4'};
+    recs.i1 = {'i1', 'i4'};
     recs.level = [1; 4];
     s3.setRecords(recs);
     t.assertEquals(s3.format, 'struct');
     t.assert(isstruct(s3.records));
     t.assert(numel(fieldnames(s3.records)) == 2);
-    t.assert(isfield(s3.records, 'i1_1'));
+    t.assert(isfield(s3.records, 'i1'));
     t.assert(isfield(s3.records, 'level'));
-    t.assert(numel(s3.records.i1_1) == 2);
+    t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
     if gdx.features.categorical
-        t.assertEquals(s3.records.i1_1(1), 'i1');
-        t.assertEquals(s3.records.i1_1(2), 'i4');
+        t.assertEquals(s3.records.i1(1), 'i1');
+        t.assertEquals(s3.records.i1(2), 'i4');
     else
-        t.assert(s3.records.i1_1(1) == 1);
-        t.assert(s3.records.i1_1(2) == 2);
+        t.assert(s3.records.i1(1) == 1);
+        t.assert(s3.records.i1(2) == 2);
     end
     uels = s3.getUELs(1);
     t.assertEquals(uels{1}, 'i1');
@@ -2498,23 +2498,23 @@ function test_setRecords(t, cfg)
     t.add('set_records_struct_5');
     gdx.modified = false;
     recs = struct();
-    recs.i1_1 = {'i1', 'i4'};
+    recs.i1 = {'i1', 'i4'};
     recs.level = [1; 4];
     recs.shit_field = [nan, inf];
     s3.setRecords(recs);
     t.assertEquals(s3.format, 'struct');
     t.assert(isstruct(s3.records));
     t.assert(numel(fieldnames(s3.records)) == 2);
-    t.assert(isfield(s3.records, 'i1_1'));
+    t.assert(isfield(s3.records, 'i1'));
     t.assert(isfield(s3.records, 'level'));
-    t.assert(numel(s3.records.i1_1) == 2);
+    t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
     if gdx.features.categorical
-        t.assertEquals(s3.records.i1_1(1), 'i1');
-        t.assertEquals(s3.records.i1_1(2), 'i4');
+        t.assertEquals(s3.records.i1(1), 'i1');
+        t.assertEquals(s3.records.i1(2), 'i4');
     else
-        t.assert(s3.records.i1_1(1) == 1);
-        t.assert(s3.records.i1_1(2) == 2);
+        t.assert(s3.records.i1(1) == 1);
+        t.assert(s3.records.i1(2) == 2);
     end
     s3.getUELs(1);
     t.assertEquals(uels{1}, 'i1');
@@ -2533,16 +2533,16 @@ function test_setRecords(t, cfg)
     t.assertEquals(s3.format, 'struct');
     t.assert(isstruct(s3.records));
     t.assert(numel(fieldnames(s3.records)) == 2);
-    t.assert(isfield(s3.records, 'i1_1'));
+    t.assert(isfield(s3.records, 'i1'));
     t.assert(isfield(s3.records, 'level'));
-    t.assert(numel(s3.records.i1_1) == 2);
+    t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
     if gdx.features.categorical
-        t.assertEquals(s3.records.i1_1(1), 'i1');
-        t.assertEquals(s3.records.i1_1(2), 'i4');
+        t.assertEquals(s3.records.i1(1), 'i1');
+        t.assertEquals(s3.records.i1(2), 'i4');
     else
-        t.assert(s3.records.i1_1(1) == 1);
-        t.assert(s3.records.i1_1(2) == 2);
+        t.assert(s3.records.i1(1) == 1);
+        t.assert(s3.records.i1(2) == 2);
     end
     uels = s3.getUELs(1);
     t.assertEquals(uels{1}, 'i1');
@@ -2554,7 +2554,7 @@ function test_setRecords(t, cfg)
 
     t.add('set_records_struct_7');
     recs = struct();
-    recs.i1_1 = {'i1', 'i4'};
+    recs.i1 = {'i1', 'i4'};
     recs.level = [1];
     try
         t.assert(false);
@@ -2585,7 +2585,7 @@ function test_setRecords(t, cfg)
         s3.setRecords(struct('level', [1, 2, 3]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain ''i1_1'' is missing.');
+        t.assertEquals(e.message, 'Domain ''i1'' is missing.');
     end
 
     if gdx.features.table
@@ -2611,7 +2611,7 @@ function test_setRecords(t, cfg)
             tbl = table([1; 2; 3], [1; 2; 3]);
             % s3.setUELs({'i1'; 'i2'; 'i3'}, 1, 'rename', true); % need to set records first
         end
-        tbl.Properties.VariableNames = {'i1_1', 'level'};
+        tbl.Properties.VariableNames = {'i1', 'level'};
         s3.setRecords(tbl);
         if ~gdx.features.categorical
             s3.setUELs({'i1'; 'i2'; 'i3'}, 1, 'rename', true);
@@ -2627,24 +2627,24 @@ function test_setRecords(t, cfg)
     t.assert(i1.isValid());
     t.assertEquals(i1.format, 'struct');
     t.assert(numel(fieldnames(i1.records)) == 2);
-    t.assert(isfield(i1.records, 'uni_1'));
+    t.assert(isfield(i1.records, 'uni'));
     t.assert(isfield(i1.records, 'text'));
-    t.assert(numel(i1.records.uni_1) == 4);
+    t.assert(numel(i1.records.uni) == 4);
     t.assert(numel(i1.records.text) == 4);
     if gdx.features.categorical
-        t.assertEquals(i1.records.uni_1(1), 'i1');
-        t.assertEquals(i1.records.uni_1(2), 'i2');
-        t.assertEquals(i1.records.uni_1(3), 'i3');
-        t.assertEquals(i1.records.uni_1(4), 'i4');
+        t.assertEquals(i1.records.uni(1), 'i1');
+        t.assertEquals(i1.records.uni(2), 'i2');
+        t.assertEquals(i1.records.uni(3), 'i3');
+        t.assertEquals(i1.records.uni(4), 'i4');
         t.assertEquals(i1.records.text(1), 'text_i1');
         t.assertEquals(i1.records.text(2), 'text_i2');
         t.assertEquals(i1.records.text(3), 'text_i3');
         t.assertEquals(i1.records.text(4), 'text_i4');
     else
-        t.assert(i1.records.uni_1(1) == 1);
-        t.assert(i1.records.uni_1(2) == 2);
-        t.assert(i1.records.uni_1(3) == 3);
-        t.assert(i1.records.uni_1(4) == 4);
+        t.assert(i1.records.uni(1) == 1);
+        t.assert(i1.records.uni(2) == 2);
+        t.assert(i1.records.uni(3) == 3);
+        t.assert(i1.records.uni(4) == 4);
         t.assertEquals(i1.records.text{1}, 'text_i1');
         t.assertEquals(i1.records.text{2}, 'text_i2');
         t.assertEquals(i1.records.text{3}, 'text_i3');
@@ -2661,30 +2661,30 @@ function test_setRecords(t, cfg)
     t.add('set_records_set_element_text_2');
     gdx.modified = false;
     recs = struct();
-    recs.uni_1 = {'i1', 'i2', 'i3', 'i4'};
+    recs.uni = {'i1', 'i2', 'i3', 'i4'};
     recs.text = {'text_i1', 'text_i2', 'text_i3', 'text_i4'};
     i1.setRecords(recs);
     t.assert(i1.isValid());
     t.assertEquals(i1.format, 'struct');
     t.assert(numel(fieldnames(i1.records)) == 2);
-    t.assert(isfield(i1.records, 'uni_1'));
+    t.assert(isfield(i1.records, 'uni'));
     t.assert(isfield(i1.records, 'text'));
-    t.assert(numel(i1.records.uni_1) == 4);
+    t.assert(numel(i1.records.uni) == 4);
     t.assert(numel(i1.records.text) == 4);
     if gdx.features.categorical
-        t.assertEquals(i1.records.uni_1(1), 'i1');
-        t.assertEquals(i1.records.uni_1(2), 'i2');
-        t.assertEquals(i1.records.uni_1(3), 'i3');
-        t.assertEquals(i1.records.uni_1(4), 'i4');
+        t.assertEquals(i1.records.uni(1), 'i1');
+        t.assertEquals(i1.records.uni(2), 'i2');
+        t.assertEquals(i1.records.uni(3), 'i3');
+        t.assertEquals(i1.records.uni(4), 'i4');
         t.assertEquals(i1.records.text(1), 'text_i1');
         t.assertEquals(i1.records.text(2), 'text_i2');
         t.assertEquals(i1.records.text(3), 'text_i3');
         t.assertEquals(i1.records.text(4), 'text_i4');
     else
-        t.assert(i1.records.uni_1(1) == 1);
-        t.assert(i1.records.uni_1(2) == 2);
-        t.assert(i1.records.uni_1(3) == 3);
-        t.assert(i1.records.uni_1(4) == 4);
+        t.assert(i1.records.uni(1) == 1);
+        t.assert(i1.records.uni(2) == 2);
+        t.assert(i1.records.uni(3) == 3);
+        t.assert(i1.records.uni(4) == 4);
         t.assertEquals(i1.records.text{1}, 'text_i1');
         t.assertEquals(i1.records.text{2}, 'text_i2');
         t.assertEquals(i1.records.text{3}, 'text_i3');

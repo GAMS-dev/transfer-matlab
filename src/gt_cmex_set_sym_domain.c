@@ -153,6 +153,7 @@ void mexFunction(
             mexErrMsgIdAndTxt(ERRID"domain", "Domain entry must be of type 'GAMSTransfer.Set' or 'char'.");
     }
 
+    mxSetProperty((mxArray*) prhs[0], 0, "domain_", prhs[1]);
     mxSetProperty((mxArray*) prhs[0], 0, "dimension_", mxCreateDoubleScalar(dim));
     mxSetProperty((mxArray*) prhs[0], 0, "domain_names_", mx_arr_domnames);
     mxSetProperty((mxArray*) prhs[0], 0, "domain_labels_", mx_arr_domlabels);
