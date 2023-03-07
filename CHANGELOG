@@ -2,6 +2,8 @@ GAMS Transfer Matlab v0.5.0
 ==================
 - Changed `Symbol.domain_forwarding` to be a vector of length `Symbol.dimension`
   to enable/disable domain forwarding for each dimension independently.
+- Fixed possibly incorrect order of UELs of symbols in `dense_matrix` or 
+  `sparse_matrix` format. 
 - Fixed `Symbol.setRecords` for cell input and symbols of dimension >= 3.
 
 GAMS Transfer Matlab v0.4.0
