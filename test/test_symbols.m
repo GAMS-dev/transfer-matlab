@@ -1036,7 +1036,7 @@ function test_changeSymbol(t, cfg)
     x2 = GAMSTransfer.Variable(gdx, 'x2', 'free', {i1,i1});
     x3 = GAMSTransfer.Variable(gdx, 'x3', 'free', {i2}, 'records', {{'i21', 'i22', 'i23'}, [1 2 3]});
 
-    t.add('change_symbol_name');
+    t.add('change_symbol_name_1');
     gdx.modified = false;
     t.assertEquals(x1.name, 'x1');
     t.assert(isfield(gdx.data, 'x1'));
@@ -1063,6 +1063,8 @@ function test_changeSymbol(t, cfg)
     t.assert(x1.modified);
     t.assert(~x2.modified);
     t.assert(~x3.modified);
+
+    t.add('change_symbol_name_2');
     try
         t.assert(false);
         x1.name = 2;
@@ -1092,12 +1094,14 @@ function test_changeSymbol(t, cfg)
         t.assertEquals(e.message, 'Symbol ''X2'' already exists.');
     end
 
-    t.add('change_symbol_description');
+    t.add('change_symbol_description_1');
     t.assertEquals(x1.description, '');
     t.assertEquals(x2.description, '');
     x1.description = 'descr x1';
     t.assertEquals(x1.description, 'descr x1');
     t.assertEquals(x2.description, '');
+
+    t.add('change_symbol_description_2');
     try
         t.assert(false);
         x1.description = 2;
@@ -1113,7 +1117,7 @@ function test_changeSymbol(t, cfg)
         t.assertEquals(e.message, 'Description must be of type ''char''.');
     end
 
-    t.add('change_symbol_dimension');
+    t.add('change_symbol_dimension_1');
     gdx.modified = false;
     t.assert(x1.dimension == 1);
     t.assert(numel(x1.domain) == 1);
@@ -1148,6 +1152,8 @@ function test_changeSymbol(t, cfg)
     t.assert(x1.modified);
     t.assert(~x2.modified);
     t.assert(~x3.modified);
+
+    t.add('change_symbol_dimension_2');
     try
         t.assert(false);
         x1.dimension = '2';
@@ -1177,7 +1183,7 @@ function test_changeSymbol(t, cfg)
         t.assertEquals(e.message, 'Dimension must be within [0,20].');
     end
 
-    t.add('change_symbol_dimension_2');
+    t.add('change_symbol_dimension_3');
     gdx.modified = false;
     t.assert(x3.dimension == 1);
     t.assert(numel(x3.domain) == 1);
@@ -1216,11 +1222,12 @@ function test_changeSymbol(t, cfg)
     t.assert(~x2.modified);
     t.assert(x3.modified);
 
-    t.add('change_symbol_domain');
+    t.add('change_symbol_domain_1');
     gdx.modified = false;
     t.assert(numel(x1.domain) == 1);
     t.assertEquals(x1.domain{1}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
+    t.assertEquals(x1.domain_labels{1}, 'i1');
     t.assert(~gdx.modified);
     t.assert(~i1.modified);
     t.assert(~i2.modified);
@@ -1234,6 +1241,8 @@ function test_changeSymbol(t, cfg)
     t.assertEquals(x1.domain{2}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assertEquals(x1.domain{2}.name, 'i1');
+    t.assertEquals(x1.domain_labels{1}, 'i1_1');
+    t.assertEquals(x1.domain_labels{2}, 'i1_2');
     t.assert(gdx.modified);
     t.assert(~i1.modified);
     t.assert(~i2.modified);
@@ -1243,6 +1252,7 @@ function test_changeSymbol(t, cfg)
     x1.domain = {'*'};
     t.assert(x1.dimension == 1);
     t.assertEquals(x1.domain, {'*'});
+    t.assertEquals(x1.domain_labels{1}, 'uni');
     t.assert(gdx.modified);
     t.assert(~i1.modified);
     t.assert(~i2.modified);
@@ -1252,12 +1262,16 @@ function test_changeSymbol(t, cfg)
     x1.domain = {'a', 'b'};
     t.assert(x1.dimension == 2);
     t.assertEquals(x1.domain, {'a', 'b'});
+    t.assertEquals(x1.domain_labels{1}, 'a');
+    t.assertEquals(x1.domain_labels{2}, 'b');
     t.assert(gdx.modified);
     t.assert(~i1.modified);
     t.assert(~i2.modified);
     t.assert(x1.modified);
     t.assert(~x2.modified);
     t.assert(~x3.modified);
+
+    t.add('change_symbol_domain_2');
     try
         t.assert(false);
         x1.domain = '*';
@@ -1281,19 +1295,80 @@ function test_changeSymbol(t, cfg)
         end
     end
 
-    t.add('change_symbol_domain_label');
-    try
-        x1.domain_labels = {'uni'};
-        t.assert(false);
-    catch e
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            msg_end = 'has private access and cannot be set in this context';
-            t.assertEquals(e.message(end-numel(msg_end)+1:end), msg_end);
-        else
-            t.assert(~isempty(strfind(e.message, 'read-only')));
-        end
-    end
+    t.add('change_symbol_domain_labels_1');
+    x1.domain = {i1};
+    gdx.modified = false;
+    t.assert(numel(x1.domain) == 1);
+    t.assertEquals(x1.domain{1}.id, i1.id);
+    t.assertEquals(x1.domain{1}.name, 'i1');
+    t.assertEquals(x1.domain_labels{1}, 'i1');
+    t.assert(~gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(~x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
+    x1.domain_labels = {'first'};
+    t.assert(x1.dimension == 1);
+    t.assert(numel(x1.domain) == 1);
+    t.assertEquals(x1.domain{1}.id, i1.id);
+    t.assertEquals(x1.domain{1}.name, 'i1');
+    t.assertEquals(x1.domain_labels{1}, 'first');
+    t.assert(gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
 
+    t.add('change_symbol_domain_labels_2');
+    x1.domain = {'*', '*'};
+    gdx.modified = false;
+    t.assert(x1.dimension == 2);
+    t.assertEquals(x1.domain, {'*', '*'});
+    t.assertEquals(x1.domain_labels{1}, 'uni_1');
+    t.assertEquals(x1.domain_labels{2}, 'uni_2');
+    t.assert(~gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(~x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
+    x1.domain_labels = {'one', 'two'};
+    t.assert(x1.dimension == 2);
+    t.assertEquals(x1.domain, {'*', '*'});
+    t.assertEquals(x1.domain_labels{1}, 'one');
+    t.assertEquals(x1.domain_labels{2}, 'two');
+    t.assert(gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
+
+    t.add('change_symbol_domain_labels_3');
+    try
+        t.assert(false);
+        x1.domain_labels = '*';
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain labels must be of type ''cellstr''.');
+    end
+    try
+        t.assert(false);
+        x1.domain_labels = {'*'};
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain labels must have length equal to symbol dimension.');
+    end
+    try
+        t.assert(false);
+        x1.domain_labels = {'*', '*'};
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain labels must be unique.');
+    end
+    
     t.add('change_symbol_size');
     try
         t.assert(false);

@@ -1203,6 +1203,78 @@ function test_readEquals(t, cfg, container_type)
     end
 end
 
+function test_readSameDomainLabels(t, cfg, container_type)
+    
+    switch container_type
+    case 'c'
+        gdx = GAMSTransfer.Container(cfg.filenames{9}, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+    case 'cc'
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{9}, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+    case 'rc'
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{9});
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+    case 'rcc'
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{9});
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+    end
+    is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
+
+    t.add('read_same_domain_labels_1');
+    t.assert(isfield(gdx.data, 'a'));
+    s = gdx.data.a;
+    t.assertEquals(s.name, 'a');
+    t.assert(s.dimension == 2);
+    t.assert(numel(s.domain_labels) == 2);
+    t.assertEquals(s.domain_labels{1}, 'i_1');
+    t.assertEquals(s.domain_labels{2}, 'i_2');
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
+
+    t.add('read_same_domain_labels_2');
+    t.assert(isfield(gdx.data, 'b'));
+    s = gdx.data.b;
+    t.assertEquals(s.name, 'b');
+    t.assert(s.dimension == 2);
+    t.assert(numel(s.domain_labels) == 2);
+    t.assertEquals(s.domain_labels{1}, 'i');
+    t.assertEquals(s.domain_labels{2}, 'j');
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
+
+    t.add('read_same_domain_labels_3');
+    t.assert(isfield(gdx.data, 'c'));
+    s = gdx.data.c;
+    t.assertEquals(s.name, 'c');
+    t.assert(s.dimension == 3);
+    t.assert(numel(s.domain_labels) == 3);
+    t.assertEquals(s.domain_labels{1}, 'i_1');
+    t.assertEquals(s.domain_labels{2}, 'j_2');
+    t.assertEquals(s.domain_labels{3}, 'i_3');
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
+
+    t.add('read_same_domain_labels_4');
+    t.assert(isfield(gdx.data, 'd'));
+    s = gdx.data.d;
+    t.assertEquals(s.name, 'd');
+    t.assert(s.dimension == 3);
+    t.assert(numel(s.domain_labels) == 3);
+    t.assertEquals(s.domain_labels{1}, 'i');
+    t.assertEquals(s.domain_labels{2}, 'j');
+    t.assertEquals(s.domain_labels{2}, 'k');
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
+
+end
+
 function test_readNoRecords(t, cfg, container_type)
 
     switch container_type
@@ -1923,7 +1995,7 @@ end
 
 function test_readWrite(t, cfg)
 
-    for i = [1,2,5,7]
+    for i = [1,2,5,7,9]
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
         gdxdump = fullfile(cfg.gams_dir, 'gdxdump');
 
@@ -1950,12 +2022,14 @@ function test_readWrite(t, cfg)
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
-        t.add(sprintf('read_write_sparse_matrix_%d', i));
-        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-        gdx.read(cfg.filenames{i}, 'format', 'sparse_matrix');
-        gdx.write(write_filename);
-        t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
-        t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
+        if i ~= 9
+            t.add(sprintf('read_write_sparse_matrix_%d', i));
+            gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx.read(cfg.filenames{i}, 'format', 'sparse_matrix');
+            gdx.write(write_filename);
+            t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
+            t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
+        end
     end
 end
 

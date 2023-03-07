@@ -334,17 +334,18 @@ classdef Symbol < handle
 
         function set.domain_labels(obj, labels)
             if ~iscellstr(labels)
-                error('labels must be cellstr');
+                error('Domain labels must be of type ''cellstr''.');
             end
             if numel(labels) ~= obj.dimension_
-                error('labels must have length equal to symbol dimension');
+                error('Domain labels must have length equal to symbol dimension.');
             end
             if numel(unique(labels)) ~= numel(labels)
-                error('labels must be unique');
+                error('Domain labels must be unique.');
             end
             for i = 1:obj.dimension_
                 obj.domain_labels_{i} = labels{i};
             end
+            obj.modified = true;
         end
 
         function domain_type = get.domain_type(obj)
