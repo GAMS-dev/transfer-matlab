@@ -445,8 +445,6 @@ void mexFunction(
                 {
                     for (size_t k = 0; k < sizes[1]; k++)
                     {
-                        bool is_default_rec = true;
-
                         /* set domains */
                         if (dim >= 1)
                             gdx_uel_index[0] = domain_uel_ids[0][j];

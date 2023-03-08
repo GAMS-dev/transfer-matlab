@@ -1,7 +1,4 @@
 
-[![pipeline status](https://git.gams.com/devel/gams-transfer-matlab/badges/master/pipeline.svg)](https://git.gams.com/devel/gams-transfer-matlab/-/commits/master)
-[![Latest Release](https://git.gams.com/devel/gams-transfer-matlab/-/badges/release.svg)](https://git.gams.com/devel/gams-transfer-matlab/-/releases)
-
 # GAMS Transfer Matlab
 
 GAMS Transfer is a package to maintain GAMS data outside a GAMS script in a
