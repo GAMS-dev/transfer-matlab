@@ -1,7 +1,7 @@
 /**
 
-@defgroup records Records
-@ingroup symbol
+@defgroup gams_transfer_matlab_records Records
+@ingroup gams_transfer_matlab_symbol
 @brief Symbol Records
 
 Symbol records are the actual data. In GAMS Transfer Matlab they are stored in
@@ -10,16 +10,16 @@ Matlab native data structures, structs, tables, dense or sparse matrices (see
 is the combination of domain entry data and value data. Domain entries are given
 as \ref GAMSTRANSFER_MATLAB_RECORDS_UELS "UELs" using Matlab `categorical`. Work
 with `categorical` as you would work with strings -- it's just a way to save
-memory. The values a \ref symbol "symbol" stores per record depends on the \ref
-GAMSTransfer::SymbolType "symbol type". \ref GAMSTransfer.Set "Sets" have
-`text`, \ref GAMSTransfer.Parameter "Parameters" have `value` and \ref
-GAMSTransfer.Equation "Equations" and \ref GAMSTransfer.Variable "Variables"
-have `level`, `marginal`, `lower`, `upper` and `scale`. If some of these value
-fields are not provided, then default values are used. A \ref
-GAMSTRANSFER_MATLAB_RECORDS_FORMAT "record format" is chosen for each symbol and
-not for each of these values independently. Hence note, a \ref container
-"container" can store different symbols with different \ref
-GAMSTRANSFER_MATLAB_RECORDS_FORMAT "record formats".
+memory. The values a \ref gams_transfer_matlab_symbol "symbol" stores per record
+depends on the \ref GAMSTransfer::SymbolType "symbol type". \ref
+GAMSTransfer.Set "Sets" have `text`, \ref GAMSTransfer.Parameter "Parameters"
+have `value` and \ref GAMSTransfer.Equation "Equations" and \ref
+GAMSTransfer.Variable "Variables" have `level`, `marginal`, `lower`, `upper` and
+`scale`. If some of these value fields are not provided, then default values are
+used. A \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT "record format" is chosen for
+each symbol and not for each of these values independently. Hence note, a \ref
+gams_transfer_matlab_container "container" can store different symbols with
+different \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT "record formats".
 
 When working with symbol records, there are two things that can go wrong:
 - \par Record data does not satisfy any of the supported formats.

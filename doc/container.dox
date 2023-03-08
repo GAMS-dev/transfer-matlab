@@ -1,14 +1,15 @@
 /**
 
-@defgroup container Container
+@defgroup gams_transfer_matlab_container Container
 @brief Wrapper of symbols (like GDX file)
 
-A GAMS Transfer Matlab container stores a collection of \ref symbol "symbols"
-and is therefore comparable to a GDX file. It is indeed a fundamental feature of
-containers to read from or write to GDX files. GDX files can be operated in two
-different modes, `default` and `indexed`, which are also supported by GAMS
-Transfer Matlab containers, see \ref GAMSTRANSFER_MATLAB_CONTAINER_INDEXED for
-more info. GAMS Transfer Matlab offers two types of containers:
+A GAMS Transfer Matlab container stores a collection of \ref
+gams_transfer_matlab_symbol "symbols" and is therefore comparable to a GDX file.
+It is indeed a fundamental feature of containers to read from or write to GDX
+files. GDX files can be operated in two different modes, `default` and
+`indexed`, which are also supported by GAMS Transfer Matlab containers, see \ref
+GAMSTRANSFER_MATLAB_CONTAINER_INDEXED for more info. GAMS Transfer Matlab offers
+two types of containers:
 - \ref GAMSTransfer.Container "Container": This should be your default choice.
 - \ref GAMSTransfer.ConstContainer "ConstContainer": Need even higher
   efficiency? Try this one! But keep in mind, it's constant which means that
@@ -88,8 +89,8 @@ Finally note that GDX files store multiple values per symbol. \ref
 GAMSTransfer.Set "Sets" have `text`, \ref GAMSTransfer.Parameter "Parameters"
 have `value` and \ref GAMSTransfer.Equation "Equations" and \ref
 GAMSTransfer.Variable "Variables" have `level`, `marginal`, `lower`, `upper`,
-`scale`, see \ref records for more information. On default, all values are read,
-but you can select a subset by
+`scale`, see \ref gams_transfer_matlab_records for more information. On
+default, all values are read, but you can select a subset by
 ```
 c.read(source, 'values', {'level', 'marginal'});
 ```

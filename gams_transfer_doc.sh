@@ -5,7 +5,7 @@ mkdir -p tempdoc/+GAMSTransfer
 cp src/*.m tempdoc/+GAMSTransfer
 
 (cat doc/Doxyfile && \
-    echo "PROJECT_NUMBER=0.4.0"; \
+    echo "PROJECT_NUMBER=0.5.0"; \
     echo "INPUT=tempdoc/+GAMSTransfer doc/main.dox doc/getting_started.dox doc/container.dox doc/symbols.dox doc/records.dox"; \
     echo "OUTPUT_DIRECTORY=build/doc"; \
     echo "FILTER_PATTERNS=*m=ext/doxymatlab/m2cpp.pl"; \

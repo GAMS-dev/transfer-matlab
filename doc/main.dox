@@ -20,7 +20,7 @@ matrices. The benefits of this approach are threefold:
 \image html overview.jpg
 \image latex overview.jpg
 
-\subsection GAMSTRANSFER_MATLAB_VS Should I use GAMS Transfer Matlab or ...?
+\subsection GAMSTRANSFER_MATLAB_VS Using GAMS Transfer Matlab or ...?
 
 \subsubsection GAMSTRANSFER_MATLAB_VS_API ...GAMS Matlab API?
 
@@ -43,5 +43,25 @@ instead.
 in a future GAMS release. Please migrate to GAMS Transfer Matlab instead. While
 the purpose of these two is similar, GAMS Transfer Matlab offers more features,
 a more user-friendly interface and is actively maintained.
+
+\subsection GAMSTRANSFER_MATLAB_USE_DOC Using the GAMS Transfer Matlab Documentation
+
+If you are new to GAMS Transfer Matlab, have a look at \ref
+GAMSTRANSFER_MATLAB_GETSTARTED. This section explains how to install GAMS
+Transfer Matlab and shows a first exmaple that covers the most important
+operations. It's a good starting point to discover GAMS Transfer Matlab. For
+more details, refer to the manual for: (1) \ref gams_transfer_matlab_container,
+(2) \ref gams_transfer_matlab_symbol and (3) \ref gams_transfer_matlab_records.
+Good advice: Read the documentation in this order as it will guide you from more
+general topics like \ref GAMSTransfer.Container "Container" to more detailed
+topics like \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT. Note that at the bottom of
+each of the three, you can find a list of GAMS Transfer Matlab classes that
+belong to the corresponding topic. Those class documentations document each
+method and property of the classes and give a good overview of what the class is
+capable of. Finally, once installed, it is also possible to get help from within
+Matlab. Simply run:
+```
+help GAMSTransfer
+```
 
 */

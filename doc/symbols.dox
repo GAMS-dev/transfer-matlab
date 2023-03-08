@@ -1,14 +1,14 @@
 /**
 
-@defgroup symbol Symbols
-@ingroup container
+@defgroup gams_transfer_matlab_symbol Symbols
+@ingroup gams_transfer_matlab_container
 @brief Symbols (Set, Alias, Parameter, Variable, Equation)
 
 A symbol is either a GAMS \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Alias
 "Alias", \ref GAMSTransfer::Parameter "Parameter", \ref GAMSTransfer::Variable
 "Variable" or \ref GAMSTransfer::Equation "Equation". In GAMS Transfer Matlab, a
-symbol cannot live on it's own, but is always part of a \ref container
-"container".
+symbol cannot live on it's own, but is always part of a \ref
+gams_transfer_matlab_container "container".
 
 \section GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN Symbol Domain
 
@@ -125,9 +125,9 @@ apply, see also \ref GAMSTRANSFER_MATLAB_RECORDS_DOMVIOL.
 Need more convenience by sacrificing efficiency? Go to \ref
 GAMSTRANSFER_MATLAB_SYMBOL_CONVENIENT_RECORDS.
 
-Symbol \ref records "records" are stored in the property \ref
-GAMSTransfer::Symbol::records "Symbol.records". It is most efficient to modify
-the data inplace. Note that the records have to satisfy the chosen \ref
+Symbol \ref gams_transfer_matlab_records "records" are stored in the property
+\ref GAMSTransfer::Symbol::records "Symbol.records". It is most efficient to
+modify the data inplace. Note that the records have to satisfy the chosen \ref
 GAMSTRANSFER_MATLAB_RECORDS_FORMAT "records format". Otherwise, the symbol will
 be marked as invalid. Records are checked whenever a valid symbol is required.
 See \ref GAMSTRANSFER_MATLAB_RECORDS_VALIDATE for more information.
