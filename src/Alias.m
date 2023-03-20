@@ -506,18 +506,6 @@ classdef Alias < handle
             sparsity = obj.alias_with.getSparsity();
         end
 
-        %> Returns the cardenality of symbol records
-        %>
-        %> @see \ref GAMSTransfer::Symbol::getCardenality
-        %> "Symbol.getCardenality"
-        function card = getCardenality(obj)
-            % Returns the cardenality of symbol records
-            %
-            % See also: GAMSTransfer.Symbol.getCardenality
-
-            card = obj.alias_with.getCardenality();
-        end
-
         %> Returns the largest value in records
         %>
         %> @see \ref GAMSTransfer::Symbol::getMaxValue "Symbol.getMaxValue"

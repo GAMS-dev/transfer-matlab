@@ -123,7 +123,6 @@ function test_read(t, cfg, container_type)
         t.assert(isnan(s.sparsity));
         t.assert(s.number_records == 5);
     else
-        t.assert(isnan(s.getCardenality()));
         t.assert(isnan(s.getSparsity()));
         t.assert(s.getNumberRecords() == 5);
         t.assert(s.isValid());
@@ -148,7 +147,6 @@ function test_read(t, cfg, container_type)
         t.assert(~isnan(s.sparsity));
         t.assert(s.number_records == 1);
     else
-        t.assert(s.getCardenality() == 1);
         t.assert(~isnan(s.getSparsity()));
         t.assert(s.getNumberRecords() == 1);
         t.assert(s.isValid());
@@ -181,7 +179,6 @@ function test_read(t, cfg, container_type)
         t.assert(~isnan(s.sparsity));
         t.assert(s.number_records == 3);
     else
-        t.assert(s.getCardenality() == 5);
         t.assert(~isnan(s.getSparsity()));
         t.assert(s.getNumberRecords() == 3);
         t.assert(s.isValid());
@@ -220,7 +217,6 @@ function test_read(t, cfg, container_type)
         t.assert(~isnan(s.sparsity));
         t.assert(s.number_records == 6);
     else
-        t.assert(s.getCardenality() == 25);
         t.assert(~isnan(s.getSparsity()));
         t.assert(s.getNumberRecords() == 6);
         t.assert(s.isValid());
@@ -1322,7 +1318,6 @@ function test_readNoRecords(t, cfg, container_type)
         t.assert(s.number_records == 5);
         t.assert(s.number_values == 0);
     else
-        t.assert(isnan(s.getCardenality()));
         t.assert(isnan(s.getSparsity()));
         t.assert(s.getNumberRecords() == 0);
         t.assert(s.getNumberValues() == 0);
@@ -1350,7 +1345,6 @@ function test_readNoRecords(t, cfg, container_type)
         t.assert(s.number_records == 1);
         t.assert(s.number_values == 0);
     else
-        t.assert(s.getCardenality() == 1);
         t.assert(~isnan(s.getSparsity()));
         t.assert(s.getNumberRecords() == 0);
         t.assert(s.getNumberValues() == 0);
@@ -1390,7 +1384,6 @@ function test_readNoRecords(t, cfg, container_type)
         t.assert(s.number_records == 3);
         t.assert(s.number_values == 0);
     else
-        t.assert(s.getCardenality() == 0);
         t.assert(isnan(s.getSparsity()));
         t.assert(s.getNumberRecords() == 0);
         t.assert(s.getNumberValues() == 0);
@@ -1437,7 +1430,6 @@ function test_readNoRecords(t, cfg, container_type)
         t.assert(s.number_records == 6);
         t.assert(s.number_values == 0);
     else
-        t.assert(s.getCardenality() == 0);
         t.assert(isnan(s.getSparsity()));
         t.assert(s.getNumberRecords() == 0);
         t.assert(s.getNumberValues() == 0);

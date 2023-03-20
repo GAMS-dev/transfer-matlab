@@ -1346,19 +1346,6 @@ classdef Symbol < handle
             end
         end
 
-        %> Returns the cardenality of symbol records
-        %>
-        %> - `s = getCardenality()` returns cardenality `s` (maximum number of
-        %>   values) in the symbol records.
-        function card = getCardenality(obj)
-            % Returns the cardenality of symbol records
-            %
-            % s = getCardenality() returns cardenality s (maximum number of
-            % values) in the symbol records.
-
-            card = prod(obj.size_);
-        end
-
         %> Returns the largest value in records
         %>
         %> - `[v, w] = getMaxValue(varargin)` returns the largest value in
@@ -1780,69 +1767,6 @@ classdef Symbol < handle
                 [~,uidx,~] = unique(uels, 'first');
                 uels = uels(sort(uidx));
             end
-        end
-
-        %> Returns the UELs labels for the given UEL codes
-        %>
-        %> @deprecated Will be removed in version 1.x.x. Use \ref
-        %> GAMSTransfer::Symbol::getUELs "Symbol.getUELs".
-        %>
-        %> - `u = getUELLabels(d, i)` returns the UELs labels `u` for the given
-        %>   UEL codes `i` for the UELs stored for dimension `d`.
-        %>
-        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
-        %>
-        %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode, see \ref
-        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
-        %>
-        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
-        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
-        function uels = getUELLabels(obj, dim, codes)
-            % Returns the UELs labels for the given UEL codes (deprecated)
-            %
-            % u = getUELLabels(d, i) returns the UELs labels u for the given UEL
-            % codes i for the UELs stored for dimension d.
-            %
-            % Note: This can only be used if the symbol is valid. UELs are not
-            % available when using the indexed mode.
-            %
-            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
-
-            warning('Method ''getUELLabels'' is deprecated. Please use getUELs instead');
-            uels = obj.getUELs(dim, codes);
-        end
-
-        %> Sets the UELs without modifying UEL codes in records
-        %>
-        %> @deprecated Will be removed in version 1.x.x. Use \ref
-        %> GAMSTransfer::Symbol::setUELs "Symbol.setUELs".
-        %>
-        %> - `initUELs(d, u)` sets the UELs `u` for dimension `d`. In contrast
-        %>   to the method `setUELs(u, d)`, this method does not modify UEL codes
-        %>   used in the property records.
-        %>
-        %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode.
-        %>
-        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
-        %> GAMSTransfer::Symbol::isValid "Symbol.isValid", \ref
-        %> GAMSTransfer::Symbol::setUELs "Symbol.setUELs"
-        function initUELs(obj, dim, uels)
-            % Sets the UELs without modifying UEL codes in records (deprecated)
-            %
-            % initUELs(d, u) sets the UELs u for dimension d. In contrast to
-            % the method setUELs(u, d), this method does not modify UEL codes
-            % used in the property records.
-            %
-            % Note: This can only be used if the symbol is valid. UELs are not
-            % available when using the indexed mode.
-            %
-            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid,
-            % GAMSTransfer.Symbol.setUELs
-
-            warning('Method ''initUELs'' is deprecated. Please use setUELs instead');
-            obj.setUELs(uels, dim, 'rename', true);
         end
 
         %> Sets UELs
