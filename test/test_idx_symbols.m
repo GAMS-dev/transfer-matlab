@@ -186,7 +186,7 @@ function test_idx_changeSymbol(t, cfg)
     p1 = GAMSTransfer.Parameter(gdx, 'p1', 5);
     p2 = GAMSTransfer.Parameter(gdx, 'p2', [5,10]);
 
-    t.add('idx_change_symbol_name');
+    t.add('idx_change_symbol_name_1');
     t.assertEquals(p1.name, 'p1');
     t.assert(isfield(gdx.data, 'p1'));
     t.assert(~isfield(gdx.data, 'pp1'));
@@ -200,6 +200,8 @@ function test_idx_changeSymbol(t, cfg)
     pars = gdx.listParameters();
     t.assert(numel(pars) == 2);
     t.assertEquals(pars{1}, 'pp1');
+
+    t.add('idx_change_symbol_name_2');
     try
         t.assert(false);
         p1.name = 2;
@@ -215,12 +217,14 @@ function test_idx_changeSymbol(t, cfg)
         t.assertEquals(e.message, 'Name must be of type ''char''.');
     end
 
-    t.add('idx_change_symbol_description');
+    t.add('idx_change_symbol_description_1');
     t.assertEquals(p1.description, '');
     t.assertEquals(p2.description, '');
     p1.description = 'descr p1';
     t.assertEquals(p1.description, 'descr p1');
     t.assertEquals(p2.description, '');
+
+    t.add('idx_change_symbol_description_2');
     try
         t.assert(false);
         p1.description = 2;
@@ -236,7 +240,7 @@ function test_idx_changeSymbol(t, cfg)
         t.assertEquals(e.message, 'Description must be of type ''char''.');
     end
 
-    t.add('idx_change_symbol_dimension');
+    t.add('idx_change_symbol_dimension_1');
     t.assert(p1.dimension == 1);
     t.assert(numel(p1.size) == 1);
     t.assert(p1.size(1) == 5);
@@ -254,6 +258,8 @@ function test_idx_changeSymbol(t, cfg)
     t.assert(numel(p1.domain) == 1);
     t.assert(p1.size(1) == 5);
     t.assertEquals(p1.domain{1}, 'dim_1');
+
+    t.add('idx_change_symbol_dimension_2');
     try
         t.assert(false);
         p1.dimension = '2';
@@ -291,20 +297,7 @@ function test_idx_changeSymbol(t, cfg)
         t.assertEquals(e.message, 'Setting symbol domain not allowed in indexed mode.');
     end
 
-    t.add('idx_change_symbol_domain_label');
-    try
-        p1.domain_labels = {'dim_1'};
-        t.assert(false);
-    catch e
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            msg_end = 'has private access and cannot be set in this context';
-            t.assertEquals(e.message(end-numel(msg_end)+1:end), msg_end);
-        else
-            t.assert(~isempty(strfind(e.message, 'read-only')));
-        end
-    end
-
-    t.add('idx_change_symbol_size');
+    t.add('idx_change_symbol_size_1');
     t.assert(numel(p1.size) == 1);
     t.assert(p1.size == 5);
     t.assert(p1.dimension == 1);
@@ -325,6 +318,8 @@ function test_idx_changeSymbol(t, cfg)
     t.assert(numel(p1.domain_labels) == 2);
     t.assertEquals(p1.domain_labels{1}, 'dim_1');
     t.assertEquals(p1.domain_labels{2}, 'dim_2');
+
+    t.add('idx_change_symbol_size_2');
     try
         t.assert(false);
         p1.size = '2';
@@ -359,6 +354,44 @@ function test_idx_changeSymbol(t, cfg)
     catch e
         t.reset();
         t.assertEquals(e.message, 'Size must be non-negative.');
+    end
+
+    t.add('idx_change_symbol_domain_labels_1');
+    t.assert(numel(p1.size) == 2);
+    t.assert(p1.dimension == 2);
+    t.assert(numel(p1.domain) == 2);
+    t.assert(numel(p1.domain_labels) == 2);
+    t.assertEquals(p1.domain_labels{1}, 'dim_1');
+    t.assertEquals(p1.domain_labels{2}, 'dim_2');
+    p1.domain_labels = {'d1', 'd2'};
+    t.assert(numel(p1.size) == 2);
+    t.assert(p1.dimension == 2);
+    t.assert(numel(p1.domain) == 2);
+    t.assert(numel(p1.domain_labels) == 2);
+    t.assertEquals(p1.domain_labels{1}, 'd1');
+    t.assertEquals(p1.domain_labels{2}, 'd2');
+
+    t.add('idx_change_symbol_domain_labels_2');
+    try
+        t.assert(false);
+        p1.domain_labels = '*';
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain labels must be of type ''cellstr''.');
+    end
+    try
+        t.assert(false);
+        p1.domain_labels = {'*'};
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain labels must have length equal to symbol dimension.');
+    end
+    try
+        t.assert(false);
+        p1.domain_labels = {'*', '*'};
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain labels must be unique.');
     end
 
     t.add('idx_change_symbol_format');

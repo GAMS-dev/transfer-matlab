@@ -164,7 +164,7 @@ ans =
 
   table
 
-      i_1
+       i 
     _______
 
     seattle
@@ -184,7 +184,7 @@ ans =
 
   2×1 table
 
-       i_1
+        i 
     _________
 
     seattle
@@ -206,7 +206,7 @@ ans =
 
   2×2 table
 
-       i_1       value
+        i        value
     _________    _____
 
     seattle       300
@@ -235,7 +235,7 @@ ans =
 
   2×5 table
 
-       i_1       level    marginal    lower    upper
+        i        level    marginal    lower    upper
     _________    _____    ________    _____    _____
 
     seattle        1         11        111     1111
@@ -250,7 +250,7 @@ ans =
 
   2×6 table
 
-      i_1        j_2       level    marginal    lower    upper
+       i         j_2       level    marginal    lower    upper
     _______    ________    _____    ________    _____    _____
 
     seattle    new-york      1         11        111     1111

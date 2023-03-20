@@ -602,7 +602,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{2}, 'i3');
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -612,7 +612,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(6) == 4);
     x.setUELs({'i1', 'i3', 'i10'}, 1);
     t.assert(~x.isValid());
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -631,7 +631,7 @@ function test_symbol_uels(t, cfg)
     t.assert(c.modified);
     t.assert(x.modified);
     t.assert(~x.isValid());
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 0);
@@ -649,7 +649,7 @@ function test_symbol_uels(t, cfg)
     x.setUELs({'i1', 'i3', 'i6', 'i10'}, 1:2);
     t.assert(c.modified);
     t.assert(x.modified);
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -657,7 +657,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 3);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
-    ids = int64(x.records.j_2);
+    ids = int64(x.records.j);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 0);
     t.assert(ids(2) == 0);
@@ -671,7 +671,7 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_set_4');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -684,7 +684,7 @@ function test_symbol_uels(t, cfg)
     t.assert(c.modified);
     t.assert(x.modified);
     t.assert(x.isValid());
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -704,7 +704,7 @@ function test_symbol_uels(t, cfg)
     t.assert(c.modified);
     t.assert(x.modified);
     t.assert(x.isValid());
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -725,7 +725,7 @@ function test_symbol_uels(t, cfg)
     x = c.data.x;
 
     t.add('symbol_uels_set_5');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -733,7 +733,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 3);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
-    ids = int64(x.records.j_2);
+    ids = int64(x.records.j);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 4);
@@ -746,7 +746,7 @@ function test_symbol_uels(t, cfg)
     t.assert(c.modified);
     t.assert(x.modified);
     t.assert(x.isValid());
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -754,7 +754,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 3);
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
-    ids = int64(x.records.j_2);
+    ids = int64(x.records.j);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 4);
@@ -792,7 +792,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{2}, 'i3');
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -805,7 +805,7 @@ function test_symbol_uels(t, cfg)
     t.assert(c.modified);
     t.assert(x.modified);
     t.assert(~x.isValid());
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 0);
@@ -840,7 +840,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{2}, 'i3');
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -1000,7 +1000,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{2}, 'i3');
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -1018,7 +1018,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{2}, 'i33');
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i1010');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -1042,7 +1042,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{2}, 'i3');
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -1060,7 +1060,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{2}, 'i33');
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i1010');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -1084,7 +1084,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{2}, 'i3');
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -1102,7 +1102,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{2}, 'i33');
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i1010');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -1127,7 +1127,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{2}, 'i33');
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -1142,7 +1142,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{3}, 'i4');
     t.assertEquals(uels{4}, 'i6');
     t.assertEquals(uels{5}, 'i10');
-    ids = int64(i.records.uni_1);
+    ids = int64(i.records.uni);
     t.assert(numel(ids) == 5);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -1164,7 +1164,7 @@ function test_symbol_uels(t, cfg)
     t.assert(numel(uels) == 2);
     t.assertEquals(uels{1}, 'i6');
     t.assertEquals(uels{2}, 'i10');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -1177,7 +1177,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{1}, 'i4');
     t.assertEquals(uels{2}, 'i6');
     t.assertEquals(uels{3}, 'i10');
-    ids = int64(i.records.uni_1);
+    ids = int64(i.records.uni);
     t.assert(numel(ids) == 5);
     t.assert(ids(1) == 2);
     t.assert(ids(2) == 3);
@@ -1196,7 +1196,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{2}, 'i3');
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 1);
     t.assert(ids(2) == 2);
@@ -1214,7 +1214,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{2}, 'i10');
     t.assertEquals(uels{3}, 'i1');
     t.assertEquals(uels{4}, 'i6');
-    ids = int64(x.records.i_1);
+    ids = int64(x.records.i);
     t.assert(numel(ids) == 6);
     t.assert(ids(1) == 3);
     t.assert(ids(2) == 1);

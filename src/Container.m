@@ -397,10 +397,20 @@ classdef Container < GAMSTransfer.BaseContainer
                 % set records and store format (no need to call isValid to
                 % detect the format because at this point, we know it)
                 obj.data.(symbol.name).records = symbol.records;
-                if isnumeric(symbol.format)
-                    obj.data.(symbol.name).format_ = symbol.format;
-                else
-                    obj.data.(symbol.name).format_ = GAMSTransfer.RecordsFormat.str2int(symbol.format);
+                switch symbol.format
+                case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, 'dense_matrix',
+                    GAMSTransfer.RecordsFormat.SPARSE_MATRIX, 'sparse_matrix'}
+                    copy_format = ~any(isnan(obj.data.(symbol.name).size));
+                otherwise
+                    copy_format = true;
+
+                end
+                if copy_format
+                    if isnumeric(symbol.format)
+                        obj.data.(symbol.name).format_ = symbol.format;
+                    else
+                        obj.data.(symbol.name).format_ = GAMSTransfer.RecordsFormat.str2int(symbol.format);
+                    end
                 end
 
                 % set uels

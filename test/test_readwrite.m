@@ -115,7 +115,7 @@ function test_read(t, cfg, container_type)
     t.assert(numel(s.domain) == 1);
     t.assertEquals(s.domain{1}, '*');
     t.assert(numel(s.domain_labels) == 1);
-    t.assertEquals(s.domain_labels{1}, 'uni_1');
+    t.assertEquals(s.domain_labels{1}, 'uni');
     t.assertEquals(s.domain_type, 'none');
     t.assert(numel(s.size) == 1);
     t.assert(isnan(s.size(1)));
@@ -173,7 +173,7 @@ function test_read(t, cfg, container_type)
         t.assertEquals(s.domain{1}.name, 'i');
     end
     t.assert(numel(s.domain_labels) == 1);
-    t.assertEquals(s.domain_labels{1}, 'i_1');
+    t.assertEquals(s.domain_labels{1}, 'i');
     t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 1);
     t.assert(s.size(1) == 5);
@@ -210,8 +210,8 @@ function test_read(t, cfg, container_type)
         t.assertEquals(s.domain{2}.name, 'j');
     end
     t.assert(numel(s.domain_labels) == 2);
-    t.assertEquals(s.domain_labels{1}, 'i_1');
-    t.assertEquals(s.domain_labels{2}, 'j_2');
+    t.assertEquals(s.domain_labels{1}, 'i');
+    t.assertEquals(s.domain_labels{2}, 'j');
     t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 2);
     t.assert(s.size(1) == 5);
@@ -255,23 +255,23 @@ function test_read(t, cfg, container_type)
         t.assert(s.isValid());
     end
     t.assert(numel(fieldnames(s.records)) == 2);
-    t.assert(isfield(s.records, 'uni_1'));
+    t.assert(isfield(s.records, 'uni'));
     t.assert(isfield(s.records, 'text'));
-    t.assert(numel(s.records.uni_1) == 5);
+    t.assert(numel(s.records.uni) == 5);
     t.assert(numel(s.records.text) == 5);
     if gdx.features.categorical
-        t.assertEquals(s.records.uni_1(1), 'i1');
-        t.assertEquals(s.records.uni_1(2), 'i3');
-        t.assertEquals(s.records.uni_1(3), 'i4');
-        t.assertEquals(s.records.uni_1(4), 'i6');
-        t.assertEquals(s.records.uni_1(5), 'i10');
+        t.assertEquals(s.records.uni(1), 'i1');
+        t.assertEquals(s.records.uni(2), 'i3');
+        t.assertEquals(s.records.uni(3), 'i4');
+        t.assertEquals(s.records.uni(4), 'i6');
+        t.assertEquals(s.records.uni(5), 'i10');
     end
-    uni_1_int = int32(s.records.uni_1);
-    t.assert(uni_1_int(1) == 1);
-    t.assert(uni_1_int(2) == 2);
-    t.assert(uni_1_int(3) == 3);
-    t.assert(uni_1_int(4) == 4);
-    t.assert(uni_1_int(5) == 5);
+    uni_int = int32(s.records.uni);
+    t.assert(uni_int(1) == 1);
+    t.assert(uni_int(2) == 2);
+    t.assert(uni_int(3) == 3);
+    t.assert(uni_int(4) == 4);
+    t.assert(uni_int(5) == 5);
     if gdx.features.categorical
         t.assert(isundefined(s.records.text(1)));
         t.assertEquals(s.records.text(2), 'expl text 3');
@@ -287,7 +287,7 @@ function test_read(t, cfg, container_type)
     end
     if is_const_cont
         if gdx.features.categorical
-            uels = categories(s.records.uni_1);
+            uels = categories(s.records.uni);
         else
             uels = s.uels{1};
         end
@@ -322,25 +322,25 @@ function test_read(t, cfg, container_type)
         t.assert(s.isValid());
     end
     t.assert(numel(fieldnames(s.records)) == 2);
-    t.assert(isfield(s.records, 'i_1'));
+    t.assert(isfield(s.records, 'i'));
     t.assert(isfield(s.records, 'value'));
-    t.assert(numel(s.records.i_1) == 3);
+    t.assert(numel(s.records.i) == 3);
     t.assert(numel(s.records.value) == 3);
     if gdx.features.categorical
-        t.assertEquals(s.records.i_1(1), 'i1');
-        t.assertEquals(s.records.i_1(2), 'i3');
-        t.assertEquals(s.records.i_1(3), 'i10');
+        t.assertEquals(s.records.i(1), 'i1');
+        t.assertEquals(s.records.i(2), 'i3');
+        t.assertEquals(s.records.i(3), 'i10');
     end
-    i_1_int = int32(s.records.i_1);
-    t.assert(i_1_int(1) == 1);
-    t.assert(i_1_int(2) == 2);
-    t.assert(i_1_int(3) == 3);
+    i_int = int32(s.records.i);
+    t.assert(i_int(1) == 1);
+    t.assert(i_int(2) == 2);
+    t.assert(i_int(3) == 3);
     t.assert(s.records.value(1) == 1);
     t.assert(s.records.value(2) == 3);
     t.assert(s.records.value(3) == 10);
     if is_const_cont
         if gdx.features.categorical
-            uels = categories(s.records.i_1);
+            uels = categories(s.records.i);
         else
             uels = s.uels{1};
         end
@@ -361,48 +361,48 @@ function test_read(t, cfg, container_type)
         t.assert(s.isValid());
     end
     t.assert(numel(fieldnames(s.records)) == 7);
-    t.assert(isfield(s.records, 'i_1'));
-    t.assert(isfield(s.records, 'j_2'));
+    t.assert(isfield(s.records, 'i'));
+    t.assert(isfield(s.records, 'j'));
     t.assert(isfield(s.records, 'level'));
     t.assert(isfield(s.records, 'marginal'));
     t.assert(isfield(s.records, 'lower'));
     t.assert(isfield(s.records, 'upper'));
     t.assert(isfield(s.records, 'scale'));
-    t.assert(numel(s.records.i_1) == 6);
-    t.assert(numel(s.records.j_2) == 6);
+    t.assert(numel(s.records.i) == 6);
+    t.assert(numel(s.records.j) == 6);
     t.assert(numel(s.records.level) == 6);
     t.assert(numel(s.records.marginal) == 6);
     t.assert(numel(s.records.lower) == 6);
     t.assert(numel(s.records.upper) == 6);
     t.assert(numel(s.records.scale) == 6);
     if gdx.features.categorical
-        t.assertEquals(s.records.i_1(1), 'i1');
-        t.assertEquals(s.records.i_1(2), 'i3');
-        t.assertEquals(s.records.i_1(3), 'i3');
-        t.assertEquals(s.records.i_1(4), 'i6');
-        t.assertEquals(s.records.i_1(5), 'i6');
-        t.assertEquals(s.records.i_1(6), 'i10');
-        t.assertEquals(s.records.j_2(1), 'j2');
-        t.assertEquals(s.records.j_2(2), 'j8');
-        t.assertEquals(s.records.j_2(3), 'j9');
-        t.assertEquals(s.records.j_2(4), 'j5');
-        t.assertEquals(s.records.j_2(5), 'j7');
-        t.assertEquals(s.records.j_2(6), 'j7');
+        t.assertEquals(s.records.i(1), 'i1');
+        t.assertEquals(s.records.i(2), 'i3');
+        t.assertEquals(s.records.i(3), 'i3');
+        t.assertEquals(s.records.i(4), 'i6');
+        t.assertEquals(s.records.i(5), 'i6');
+        t.assertEquals(s.records.i(6), 'i10');
+        t.assertEquals(s.records.j(1), 'j2');
+        t.assertEquals(s.records.j(2), 'j8');
+        t.assertEquals(s.records.j(3), 'j9');
+        t.assertEquals(s.records.j(4), 'j5');
+        t.assertEquals(s.records.j(5), 'j7');
+        t.assertEquals(s.records.j(6), 'j7');
     end
-    i_1_int = int32(s.records.i_1);
-    j_2_int = int32(s.records.j_2);
-    t.assert(i_1_int(1) == 1);
-    t.assert(i_1_int(2) == 2);
-    t.assert(i_1_int(3) == 2);
-    t.assert(i_1_int(4) == 3);
-    t.assert(i_1_int(5) == 3);
-    t.assert(i_1_int(6) == 4);
-    t.assert(j_2_int(1) == 1);
-    t.assert(j_2_int(2) == 4);
-    t.assert(j_2_int(3) == 5);
-    t.assert(j_2_int(4) == 2);
-    t.assert(j_2_int(5) == 3);
-    t.assert(j_2_int(6) == 3);
+    i_int = int32(s.records.i);
+    j_int = int32(s.records.j);
+    t.assert(i_int(1) == 1);
+    t.assert(i_int(2) == 2);
+    t.assert(i_int(3) == 2);
+    t.assert(i_int(4) == 3);
+    t.assert(i_int(5) == 3);
+    t.assert(i_int(6) == 4);
+    t.assert(j_int(1) == 1);
+    t.assert(j_int(2) == 4);
+    t.assert(j_int(3) == 5);
+    t.assert(j_int(4) == 2);
+    t.assert(j_int(5) == 3);
+    t.assert(j_int(6) == 3);
     t.assert(s.records.level(1) == 2);
     t.assert(s.records.level(2) == 0);
     t.assert(s.records.level(3) == 9);
@@ -435,7 +435,7 @@ function test_read(t, cfg, container_type)
     t.assert(s.records.scale(6) == 1);
     if is_const_cont
         if gdx.features.categorical
-            uels = categories(s.records.i_1);
+            uels = categories(s.records.i);
         else
             uels = s.uels{1};
         end
@@ -449,7 +449,7 @@ function test_read(t, cfg, container_type)
     t.assertEquals(uels{4}, 'i10');
     if is_const_cont
         if gdx.features.categorical
-            uels = categories(s.records.j_2);
+            uels = categories(s.records.j);
         else
             uels = s.uels{2};
         end
@@ -493,23 +493,23 @@ function test_read(t, cfg, container_type)
             t.assert(s.isValid());
         end
         t.assert(numel(s.records.Properties.VariableNames) == 2);
-        t.assertEquals(s.records.Properties.VariableNames{1}, 'uni_1');
+        t.assertEquals(s.records.Properties.VariableNames{1}, 'uni');
         t.assertEquals(s.records.Properties.VariableNames{2}, 'text');
-        t.assert(numel(s.records.uni_1) == 5);
+        t.assert(numel(s.records.uni) == 5);
         t.assert(numel(s.records.text) == 5);
         if gdx.features.categorical
-            t.assertEquals(s.records.uni_1(1), 'i1');
-            t.assertEquals(s.records.uni_1(2), 'i3');
-            t.assertEquals(s.records.uni_1(3), 'i4');
-            t.assertEquals(s.records.uni_1(4), 'i6');
-            t.assertEquals(s.records.uni_1(5), 'i10');
+            t.assertEquals(s.records.uni(1), 'i1');
+            t.assertEquals(s.records.uni(2), 'i3');
+            t.assertEquals(s.records.uni(3), 'i4');
+            t.assertEquals(s.records.uni(4), 'i6');
+            t.assertEquals(s.records.uni(5), 'i10');
         end
-        uni_1_int = int32(s.records.uni_1);
-        t.assert(uni_1_int(1) == 1);
-        t.assert(uni_1_int(2) == 2);
-        t.assert(uni_1_int(3) == 3);
-        t.assert(uni_1_int(4) == 4);
-        t.assert(uni_1_int(5) == 5);
+        uni_int = int32(s.records.uni);
+        t.assert(uni_int(1) == 1);
+        t.assert(uni_int(2) == 2);
+        t.assert(uni_int(3) == 3);
+        t.assert(uni_int(4) == 4);
+        t.assert(uni_int(5) == 5);
         if gdx.features.categorical
             t.assert(isundefined(s.records.text(1)));
             t.assertEquals(s.records.text(2), 'expl text 3');
@@ -525,7 +525,7 @@ function test_read(t, cfg, container_type)
         end
         if is_const_cont
             if gdx.features.categorical
-                uels = categories(s.records.uni_1);
+                uels = categories(s.records.uni);
             else
                 uels = s.uels{1};
             end
@@ -561,25 +561,25 @@ function test_read(t, cfg, container_type)
             t.assert(s.isValid());
         end
         t.assert(numel(s.records.Properties.VariableNames) == 2);
-        t.assertEquals(s.records.Properties.VariableNames{1}, 'i_1');
+        t.assertEquals(s.records.Properties.VariableNames{1}, 'i');
         t.assertEquals(s.records.Properties.VariableNames{2}, 'value');
-        t.assert(numel(s.records.i_1) == 3);
+        t.assert(numel(s.records.i) == 3);
         t.assert(numel(s.records.value) == 3);
         if gdx.features.categorical
-            t.assertEquals(s.records.i_1(1), 'i1');
-            t.assertEquals(s.records.i_1(2), 'i3');
-            t.assertEquals(s.records.i_1(3), 'i10');
+            t.assertEquals(s.records.i(1), 'i1');
+            t.assertEquals(s.records.i(2), 'i3');
+            t.assertEquals(s.records.i(3), 'i10');
         end
-        i_1_int = int32(s.records.i_1);
-        t.assert(i_1_int(1) == 1);
-        t.assert(i_1_int(2) == 2);
-        t.assert(i_1_int(3) == 3);
+        i_int = int32(s.records.i);
+        t.assert(i_int(1) == 1);
+        t.assert(i_int(2) == 2);
+        t.assert(i_int(3) == 3);
         t.assert(s.records.value(1) == 1);
         t.assert(s.records.value(2) == 3);
         t.assert(s.records.value(3) == 10);
         if is_const_cont
             if gdx.features.categorical
-                uels = categories(s.records.i_1);
+                uels = categories(s.records.i);
             else
                 uels = s.uels{1};
             end
@@ -600,48 +600,48 @@ function test_read(t, cfg, container_type)
             t.assert(s.isValid());
         end
         t.assert(numel(s.records.Properties.VariableNames) == 7);
-        t.assertEquals(s.records.Properties.VariableNames{1}, 'i_1');
-        t.assertEquals(s.records.Properties.VariableNames{2}, 'j_2');
+        t.assertEquals(s.records.Properties.VariableNames{1}, 'i');
+        t.assertEquals(s.records.Properties.VariableNames{2}, 'j');
         t.assertEquals(s.records.Properties.VariableNames{3}, 'level');
         t.assertEquals(s.records.Properties.VariableNames{4}, 'marginal');
         t.assertEquals(s.records.Properties.VariableNames{5}, 'lower');
         t.assertEquals(s.records.Properties.VariableNames{6}, 'upper');
         t.assertEquals(s.records.Properties.VariableNames{7}, 'scale');
-        t.assert(numel(s.records.i_1) == 6);
-        t.assert(numel(s.records.j_2) == 6);
+        t.assert(numel(s.records.i) == 6);
+        t.assert(numel(s.records.j) == 6);
         t.assert(numel(s.records.level) == 6);
         t.assert(numel(s.records.marginal) == 6);
         t.assert(numel(s.records.lower) == 6);
         t.assert(numel(s.records.upper) == 6);
         t.assert(numel(s.records.scale) == 6);
         if gdx.features.categorical
-            t.assertEquals(s.records.i_1(1), 'i1');
-            t.assertEquals(s.records.i_1(2), 'i3');
-            t.assertEquals(s.records.i_1(3), 'i3');
-            t.assertEquals(s.records.i_1(4), 'i6');
-            t.assertEquals(s.records.i_1(5), 'i6');
-            t.assertEquals(s.records.i_1(6), 'i10');
-            t.assertEquals(s.records.j_2(1), 'j2');
-            t.assertEquals(s.records.j_2(2), 'j8');
-            t.assertEquals(s.records.j_2(3), 'j9');
-            t.assertEquals(s.records.j_2(4), 'j5');
-            t.assertEquals(s.records.j_2(5), 'j7');
-            t.assertEquals(s.records.j_2(6), 'j7');
+            t.assertEquals(s.records.i(1), 'i1');
+            t.assertEquals(s.records.i(2), 'i3');
+            t.assertEquals(s.records.i(3), 'i3');
+            t.assertEquals(s.records.i(4), 'i6');
+            t.assertEquals(s.records.i(5), 'i6');
+            t.assertEquals(s.records.i(6), 'i10');
+            t.assertEquals(s.records.j(1), 'j2');
+            t.assertEquals(s.records.j(2), 'j8');
+            t.assertEquals(s.records.j(3), 'j9');
+            t.assertEquals(s.records.j(4), 'j5');
+            t.assertEquals(s.records.j(5), 'j7');
+            t.assertEquals(s.records.j(6), 'j7');
         end
-        i_1_int = int32(s.records.i_1);
-        j_2_int = int32(s.records.j_2);
-        t.assert(i_1_int(1) == 1);
-        t.assert(i_1_int(2) == 2);
-        t.assert(i_1_int(3) == 2);
-        t.assert(i_1_int(4) == 3);
-        t.assert(i_1_int(5) == 3);
-        t.assert(i_1_int(6) == 4);
-        t.assert(j_2_int(1) == 1);
-        t.assert(j_2_int(2) == 4);
-        t.assert(j_2_int(3) == 5);
-        t.assert(j_2_int(4) == 2);
-        t.assert(j_2_int(5) == 3);
-        t.assert(j_2_int(6) == 3);
+        i_int = int32(s.records.i);
+        j_int = int32(s.records.j);
+        t.assert(i_int(1) == 1);
+        t.assert(i_int(2) == 2);
+        t.assert(i_int(3) == 2);
+        t.assert(i_int(4) == 3);
+        t.assert(i_int(5) == 3);
+        t.assert(i_int(6) == 4);
+        t.assert(j_int(1) == 1);
+        t.assert(j_int(2) == 4);
+        t.assert(j_int(3) == 5);
+        t.assert(j_int(4) == 2);
+        t.assert(j_int(5) == 3);
+        t.assert(j_int(6) == 3);
         t.assert(s.records.level(1) == 2);
         t.assert(s.records.level(2) == 0);
         t.assert(s.records.level(3) == 9);
@@ -674,7 +674,7 @@ function test_read(t, cfg, container_type)
         t.assert(s.records.scale(6) == 1);
         if is_const_cont
             if gdx.features.categorical
-                uels = categories(s.records.i_1);
+                uels = categories(s.records.i);
             else
                 uels = s.uels{1};
             end
@@ -688,7 +688,7 @@ function test_read(t, cfg, container_type)
         t.assertEquals(uels{4}, 'i10');
         if is_const_cont
             if gdx.features.categorical
-                uels = categories(s.records.j_2);
+                uels = categories(s.records.j);
             else
                 uels = s.uels{2};
             end
@@ -732,23 +732,23 @@ function test_read(t, cfg, container_type)
         t.assert(s.isValid());
     end
     t.assert(numel(fieldnames(s.records)) == 2);
-    t.assert(isfield(s.records, 'uni_1'));
+    t.assert(isfield(s.records, 'uni'));
     t.assert(isfield(s.records, 'text'));
-    t.assert(numel(s.records.uni_1) == 5);
+    t.assert(numel(s.records.uni) == 5);
     t.assert(numel(s.records.text) == 5);
     if gdx.features.categorical
-        t.assertEquals(s.records.uni_1(1), 'i1');
-        t.assertEquals(s.records.uni_1(2), 'i3');
-        t.assertEquals(s.records.uni_1(3), 'i4');
-        t.assertEquals(s.records.uni_1(4), 'i6');
-        t.assertEquals(s.records.uni_1(5), 'i10');
+        t.assertEquals(s.records.uni(1), 'i1');
+        t.assertEquals(s.records.uni(2), 'i3');
+        t.assertEquals(s.records.uni(3), 'i4');
+        t.assertEquals(s.records.uni(4), 'i6');
+        t.assertEquals(s.records.uni(5), 'i10');
     end
-    uni_1_int = int32(s.records.uni_1);
-    t.assert(uni_1_int(1) == 1);
-    t.assert(uni_1_int(2) == 2);
-    t.assert(uni_1_int(3) == 3);
-    t.assert(uni_1_int(4) == 4);
-    t.assert(uni_1_int(5) == 5);
+    uni_int = int32(s.records.uni);
+    t.assert(uni_int(1) == 1);
+    t.assert(uni_int(2) == 2);
+    t.assert(uni_int(3) == 3);
+    t.assert(uni_int(4) == 4);
+    t.assert(uni_int(5) == 5);
     if gdx.features.categorical
         t.assert(isundefined(s.records.text(1)));
         t.assertEquals(s.records.text(2), 'expl text 3');
@@ -764,7 +764,7 @@ function test_read(t, cfg, container_type)
     end
     if is_const_cont
         if gdx.features.categorical
-            uels = categories(s.records.uni_1);
+            uels = categories(s.records.uni);
         else
             uels = s.uels{1};
         end
@@ -811,7 +811,7 @@ function test_read(t, cfg, container_type)
     t.assert(s.records.value(5) == 10);
     if is_const_cont
         if gdx.features.categorical
-            uels = categories(gdx.data.i.records.uni_1);
+            uels = categories(gdx.data.i.records.uni);
         else
             uels = gdx.data.i.uels{1};
         end
@@ -901,7 +901,7 @@ function test_read(t, cfg, container_type)
     t.assert(s.records.scale(5,5) == 1);
     if is_const_cont
         if gdx.features.categorical
-            uels = categories(gdx.data.i.records.uni_1);
+            uels = categories(gdx.data.i.records.uni);
         else
             uels = gdx.data.i.uels{1};
         end
@@ -916,7 +916,7 @@ function test_read(t, cfg, container_type)
     t.assertEquals(uels{5}, 'i10');
     if is_const_cont
         if gdx.features.categorical
-            uels = categories(gdx.data.j.records.uni_1);
+            uels = categories(gdx.data.j.records.uni);
         else
             uels = gdx.data.j.uels{1};
         end
@@ -959,23 +959,23 @@ function test_read(t, cfg, container_type)
         t.assert(s.isValid());
     end
     t.assert(numel(fieldnames(s.records)) == 2);
-    t.assert(isfield(s.records, 'uni_1'));
+    t.assert(isfield(s.records, 'uni'));
     t.assert(isfield(s.records, 'text'));
-    t.assert(numel(s.records.uni_1) == 5);
+    t.assert(numel(s.records.uni) == 5);
     t.assert(numel(s.records.text) == 5);
     if gdx.features.categorical
-        t.assertEquals(s.records.uni_1(1), 'i1');
-        t.assertEquals(s.records.uni_1(2), 'i3');
-        t.assertEquals(s.records.uni_1(3), 'i4');
-        t.assertEquals(s.records.uni_1(4), 'i6');
-        t.assertEquals(s.records.uni_1(5), 'i10');
+        t.assertEquals(s.records.uni(1), 'i1');
+        t.assertEquals(s.records.uni(2), 'i3');
+        t.assertEquals(s.records.uni(3), 'i4');
+        t.assertEquals(s.records.uni(4), 'i6');
+        t.assertEquals(s.records.uni(5), 'i10');
     end
-    uni_1_int = int32(s.records.uni_1);
-    t.assert(uni_1_int(1) == 1);
-    t.assert(uni_1_int(2) == 2);
-    t.assert(uni_1_int(3) == 3);
-    t.assert(uni_1_int(4) == 4);
-    t.assert(uni_1_int(5) == 5);
+    uni_int = int32(s.records.uni);
+    t.assert(uni_int(1) == 1);
+    t.assert(uni_int(2) == 2);
+    t.assert(uni_int(3) == 3);
+    t.assert(uni_int(4) == 4);
+    t.assert(uni_int(5) == 5);
     if gdx.features.categorical
         t.assert(isundefined(s.records.text(1)));
         t.assertEquals(s.records.text(2), 'expl text 3');
@@ -991,7 +991,7 @@ function test_read(t, cfg, container_type)
     end
     if is_const_cont
         if gdx.features.categorical
-            uels = categories(gdx.data.i.records.uni_1);
+            uels = categories(gdx.data.i.records.uni);
         else
             uels = gdx.data.i.uels{1};
         end
@@ -1040,7 +1040,7 @@ function test_read(t, cfg, container_type)
     t.assert(s.records.value(5) == 10);
     if is_const_cont
         if gdx.features.categorical
-            uels = categories(gdx.data.i.records.uni_1);
+            uels = categories(gdx.data.i.records.uni);
         else
             uels = gdx.data.i.uels{1};
         end
@@ -1137,7 +1137,7 @@ function test_read(t, cfg, container_type)
     t.assert(s.records.scale(5,5) == 1);
     if is_const_cont
         if gdx.features.categorical
-            uels = categories(gdx.data.i.records.uni_1);
+            uels = categories(gdx.data.i.records.uni);
         else
             uels = gdx.data.i.uels{1};
         end
@@ -1152,7 +1152,7 @@ function test_read(t, cfg, container_type)
     t.assertEquals(uels{5}, 'i10');
     if is_const_cont
         if gdx.features.categorical
-            uels = categories(gdx.data.j.records.uni_1);
+            uels = categories(gdx.data.j.records.uni);
         else
             uels = gdx.data.j.uels{1};
         end
@@ -1203,6 +1203,78 @@ function test_readEquals(t, cfg, container_type)
     end
 end
 
+function test_readSameDomainLabels(t, cfg, container_type)
+    
+    switch container_type
+    case 'c'
+        gdx = GAMSTransfer.Container(cfg.filenames{9}, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+    case 'cc'
+        gdx = GAMSTransfer.ConstContainer(cfg.filenames{9}, 'gams_dir', ...
+            cfg.gams_dir, 'features', cfg.features);
+    case 'rc'
+        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{9});
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+    case 'rcc'
+        gdx = GAMSTransfer.ConstContainer('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx.read(cfg.filenames{9});
+        gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+    end
+    is_const_cont = isa(gdx, 'GAMSTransfer.ConstContainer');
+
+    t.add('read_same_domain_labels_1');
+    t.assert(isfield(gdx.data, 'a'));
+    s = gdx.data.a;
+    t.assertEquals(s.name, 'a');
+    t.assert(s.dimension == 2);
+    t.assert(numel(s.domain_labels) == 2);
+    t.assertEquals(s.domain_labels{1}, 'i_1');
+    t.assertEquals(s.domain_labels{2}, 'i_2');
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
+
+    t.add('read_same_domain_labels_2');
+    t.assert(isfield(gdx.data, 'b'));
+    s = gdx.data.b;
+    t.assertEquals(s.name, 'b');
+    t.assert(s.dimension == 2);
+    t.assert(numel(s.domain_labels) == 2);
+    t.assertEquals(s.domain_labels{1}, 'i');
+    t.assertEquals(s.domain_labels{2}, 'j');
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
+
+    t.add('read_same_domain_labels_3');
+    t.assert(isfield(gdx.data, 'c'));
+    s = gdx.data.c;
+    t.assertEquals(s.name, 'c');
+    t.assert(s.dimension == 3);
+    t.assert(numel(s.domain_labels) == 3);
+    t.assertEquals(s.domain_labels{1}, 'i_1');
+    t.assertEquals(s.domain_labels{2}, 'j_2');
+    t.assertEquals(s.domain_labels{3}, 'i_3');
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
+
+    t.add('read_same_domain_labels_4');
+    t.assert(isfield(gdx.data, 'd'));
+    s = gdx.data.d;
+    t.assertEquals(s.name, 'd');
+    t.assert(s.dimension == 3);
+    t.assert(numel(s.domain_labels) == 3);
+    t.assertEquals(s.domain_labels{1}, 'i');
+    t.assertEquals(s.domain_labels{2}, 'j');
+    t.assertEquals(s.domain_labels{2}, 'k');
+    if ~is_const_cont
+        t.assert(s.isValid());
+    end
+
+end
+
 function test_readNoRecords(t, cfg, container_type)
 
     switch container_type
@@ -1240,7 +1312,7 @@ function test_readNoRecords(t, cfg, container_type)
     t.assert(numel(s.domain) == 1);
     t.assertEquals(s.domain{1}, '*');
     t.assert(numel(s.domain_labels) == 1);
-    t.assertEquals(s.domain_labels{1}, 'uni_1');
+    t.assertEquals(s.domain_labels{1}, 'uni');
     t.assertEquals(s.domain_type, 'none');
     t.assert(numel(s.size) == 1);
     t.assert(isnan(s.size(1)));
@@ -1304,7 +1376,7 @@ function test_readNoRecords(t, cfg, container_type)
         t.assertEquals(s.domain{1}.name, 'i');
     end
     t.assert(numel(s.domain_labels) == 1);
-    t.assertEquals(s.domain_labels{1}, 'i_1');
+    t.assertEquals(s.domain_labels{1}, 'i');
     t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 1);
     if is_const_cont
@@ -1348,8 +1420,8 @@ function test_readNoRecords(t, cfg, container_type)
         t.assertEquals(s.domain{2}.name, 'j');
     end
     t.assert(numel(s.domain_labels) == 2);
-    t.assertEquals(s.domain_labels{1}, 'i_1');
-    t.assertEquals(s.domain_labels{2}, 'j_2');
+    t.assertEquals(s.domain_labels{1}, 'i');
+    t.assertEquals(s.domain_labels{2}, 'j');
     t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 2);
     if is_const_cont
@@ -1424,23 +1496,23 @@ function test_readPartial(t, cfg, container_type)
         t.assert(s.isValid());
     end
     t.assert(numel(fieldnames(s.records)) == 2);
-    t.assert(isfield(s.records, 'uni_1'));
+    t.assert(isfield(s.records, 'uni'));
     t.assert(isfield(s.records, 'text'));
-    t.assert(numel(s.records.uni_1) == 5);
+    t.assert(numel(s.records.uni) == 5);
     t.assert(numel(s.records.text) == 5);
     if gdx.features.categorical
-        t.assertEquals(s.records.uni_1(1), 'i1');
-        t.assertEquals(s.records.uni_1(2), 'i3');
-        t.assertEquals(s.records.uni_1(3), 'i4');
-        t.assertEquals(s.records.uni_1(4), 'i6');
-        t.assertEquals(s.records.uni_1(5), 'i10');
+        t.assertEquals(s.records.uni(1), 'i1');
+        t.assertEquals(s.records.uni(2), 'i3');
+        t.assertEquals(s.records.uni(3), 'i4');
+        t.assertEquals(s.records.uni(4), 'i6');
+        t.assertEquals(s.records.uni(5), 'i10');
     end
-    uni_1_int = int32(s.records.uni_1);
-    t.assert(uni_1_int(1) == 1);
-    t.assert(uni_1_int(2) == 2);
-    t.assert(uni_1_int(3) == 3);
-    t.assert(uni_1_int(4) == 4);
-    t.assert(uni_1_int(5) == 5);
+    uni_int = int32(s.records.uni);
+    t.assert(uni_int(1) == 1);
+    t.assert(uni_int(2) == 2);
+    t.assert(uni_int(3) == 3);
+    t.assert(uni_int(4) == 4);
+    t.assert(uni_int(5) == 5);
     if gdx.features.categorical
         t.assert(isundefined(s.records.text(1)));
         t.assertEquals(s.records.text(2), 'expl text 3');
@@ -1464,45 +1536,45 @@ function test_readPartial(t, cfg, container_type)
         t.assert(s.isValid());
     end
     t.assert(numel(fieldnames(s.records)) == 4);
-    t.assert(isfield(s.records, 'i_1'));
-    t.assert(isfield(s.records, 'j_2'));
+    t.assert(isfield(s.records, 'i'));
+    t.assert(isfield(s.records, 'j'));
     t.assert(isfield(s.records, 'level'));
     t.assert(isfield(s.records, 'marginal'));
     t.assert(~isfield(s.records, 'lower'));
     t.assert(~isfield(s.records, 'upper'));
     t.assert(~isfield(s.records, 'scale'));
-    t.assert(numel(s.records.i_1) == 6);
-    t.assert(numel(s.records.j_2) == 6);
+    t.assert(numel(s.records.i) == 6);
+    t.assert(numel(s.records.j) == 6);
     t.assert(numel(s.records.level) == 6);
     t.assert(numel(s.records.marginal) == 6);
     if gdx.features.categorical
-        t.assertEquals(s.records.i_1(1), 'i1');
-        t.assertEquals(s.records.i_1(2), 'i3');
-        t.assertEquals(s.records.i_1(3), 'i3');
-        t.assertEquals(s.records.i_1(4), 'i6');
-        t.assertEquals(s.records.i_1(5), 'i6');
-        t.assertEquals(s.records.i_1(6), 'i10');
-        t.assertEquals(s.records.j_2(1), 'j2');
-        t.assertEquals(s.records.j_2(2), 'j8');
-        t.assertEquals(s.records.j_2(3), 'j9');
-        t.assertEquals(s.records.j_2(4), 'j5');
-        t.assertEquals(s.records.j_2(5), 'j7');
-        t.assertEquals(s.records.j_2(6), 'j7');
+        t.assertEquals(s.records.i(1), 'i1');
+        t.assertEquals(s.records.i(2), 'i3');
+        t.assertEquals(s.records.i(3), 'i3');
+        t.assertEquals(s.records.i(4), 'i6');
+        t.assertEquals(s.records.i(5), 'i6');
+        t.assertEquals(s.records.i(6), 'i10');
+        t.assertEquals(s.records.j(1), 'j2');
+        t.assertEquals(s.records.j(2), 'j8');
+        t.assertEquals(s.records.j(3), 'j9');
+        t.assertEquals(s.records.j(4), 'j5');
+        t.assertEquals(s.records.j(5), 'j7');
+        t.assertEquals(s.records.j(6), 'j7');
     end
-    i_1_int = int32(s.records.i_1);
-    j_2_int = int32(s.records.j_2);
-    t.assert(i_1_int(1) == 1);
-    t.assert(i_1_int(2) == 2);
-    t.assert(i_1_int(3) == 2);
-    t.assert(i_1_int(4) == 3);
-    t.assert(i_1_int(5) == 3);
-    t.assert(i_1_int(6) == 4);
-    t.assert(j_2_int(1) == 1);
-    t.assert(j_2_int(2) == 4);
-    t.assert(j_2_int(3) == 5);
-    t.assert(j_2_int(4) == 2);
-    t.assert(j_2_int(5) == 3);
-    t.assert(j_2_int(6) == 3);
+    i_int = int32(s.records.i);
+    j_int = int32(s.records.j);
+    t.assert(i_int(1) == 1);
+    t.assert(i_int(2) == 2);
+    t.assert(i_int(3) == 2);
+    t.assert(i_int(4) == 3);
+    t.assert(i_int(5) == 3);
+    t.assert(i_int(6) == 4);
+    t.assert(j_int(1) == 1);
+    t.assert(j_int(2) == 4);
+    t.assert(j_int(3) == 5);
+    t.assert(j_int(4) == 2);
+    t.assert(j_int(5) == 3);
+    t.assert(j_int(6) == 3);
     t.assert(s.records.level(1) == 2);
     t.assert(s.records.level(2) == 0);
     t.assert(s.records.level(3) == 9);
@@ -1551,15 +1623,15 @@ function test_readPartial(t, cfg, container_type)
         t.assert(s.isValid());
     end
     t.assert(numel(fieldnames(s.records)) == 3);
-    t.assert(isfield(s.records, 'i_1'));
-    t.assert(isfield(s.records, 'j_2'));
+    t.assert(isfield(s.records, 'i'));
+    t.assert(isfield(s.records, 'j'));
     t.assert(~isfield(s.records, 'level'));
     t.assert(isfield(s.records, 'marginal'));
     t.assert(~isfield(s.records, 'lower'));
     t.assert(~isfield(s.records, 'upper'));
     t.assert(~isfield(s.records, 'scale'));
-    t.assert(numel(s.records.i_1) == 6);
-    t.assert(numel(s.records.j_2) == 6);
+    t.assert(numel(s.records.i) == 6);
+    t.assert(numel(s.records.j) == 6);
     t.assert(numel(s.records.marginal) == 6);
     t.assert(s.records.marginal(1) == 0);
     t.assert(s.records.marginal(2) == 8);
@@ -1923,7 +1995,7 @@ end
 
 function test_readWrite(t, cfg)
 
-    for i = [1,2,5,7]
+    for i = [1,2,5,7,9]
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
         gdxdump = fullfile(cfg.gams_dir, 'gdxdump');
 
@@ -1950,12 +2022,14 @@ function test_readWrite(t, cfg)
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
-        t.add(sprintf('read_write_sparse_matrix_%d', i));
-        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-        gdx.read(cfg.filenames{i}, 'format', 'sparse_matrix');
-        gdx.write(write_filename);
-        t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
-        t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
+        if i ~= 9
+            t.add(sprintf('read_write_sparse_matrix_%d', i));
+            gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx.read(cfg.filenames{i}, 'format', 'sparse_matrix');
+            gdx.write(write_filename);
+            t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
+            t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
+        end
     end
 end
 
@@ -2104,8 +2178,8 @@ function test_readWriteDomainCheck(t, cfg)
     x.domain{1} = 'k1';
     x.domain{2} = 'k2';
     x.records = struct();
-    x.records.k1_1 = records.i_1;
-    x.records.k2_2 = records.j_2;
+    x.records.k1 = records.i;
+    x.records.k2 = records.j;
     x.records.level = records.level;
     x.records.marginal = records.marginal;
     x.records.lower = records.lower;

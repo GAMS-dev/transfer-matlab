@@ -49,7 +49,7 @@ function gams_transfer_testcreate(varargin)
     mkdir(working_dir);
     olddir = cd(working_dir);
 
-    n_probs = 8;
+    n_probs = 9;
     gams_data = cell(1, n_probs);
     gdx_filenames = cell(1, n_probs);
 
@@ -144,6 +144,17 @@ function gams_transfer_testcreate(varargin)
     'Set i(i) ''set_i'' / i1, i2 /;'
     'Parameter a(i) ''par_a'' / i1=1, i2=2 /;'
     'execute_unloaddi ''data8.gdx'', i, a;'
+    };
+
+    gams_data{9} = {
+    'Set i ''set_i'' / i1*i10/;'
+    'Set j ''set_j'' / j1*j10/;'
+    'Set k ''set_k'' / k1*k10/;'
+    'Parameter a(i,i) ''par_a'';'
+    'Parameter b(i,j) ''par_b'';'
+    'Parameter c(i,j,i) ''par_c'';'
+    'Parameter d(i,j,k) ''par_d'';'
+    'execute_unloaddi ''data9.gdx'', i, j, k, a, b, c, d;'
     };
 
     for i = 1:n_probs

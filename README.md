@@ -148,7 +148,7 @@ x =
                  size: [2 3]
                domain: {[1×1 GAMSTransfer.Set]  [1×1 GAMSTransfer.Set]}
          domain_names: {'i'  'j'}
-        domain_labels: {'i_1'  'j_2'}
+        domain_labels: {'i'  'j'}
           domain_type: 'regular'
     domain_forwarding: 0
               records: [6×4 table]
@@ -160,7 +160,7 @@ ans =
 
   6×4 table
 
-       i_1         j_2       level    marginal
+        i           j        level    marginal
     _________    ________    _____    ________
 
     seattle      new-york      50          0

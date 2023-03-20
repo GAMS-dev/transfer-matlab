@@ -1,5 +1,13 @@
 GAMS Transfer Matlab v0.5.0
 ==================
+- Breaking: Changed default `Symbol.domain_labels`: If `Symbol.domain_names` is 
+  a unqiue list of domain names, then those names are used as domain labels. 
+  Otherwise, the previous label strategy "<name>_<dim>" is used. For example, a 
+  symbol with domain `{i, j}`, now expects domain labels `i` and `j` in records
+  and with a domain `{i, j, i}` it stays `i_1`, `j_2`, `i_3`.
+- Added possibility to modify `Symbol.domain_labels` to any unqiue list of
+  domain labels. If `Symbol.domain` is modified, domain labels are reset to 
+  default label strategy, described above.
 - Changed `Symbol.domain_forwarding` to be a vector of length `Symbol.dimension`
   to enable/disable domain forwarding for each dimension independently.
 - Fixed possibly incorrect order of UELs of symbols in `dense_matrix` or 

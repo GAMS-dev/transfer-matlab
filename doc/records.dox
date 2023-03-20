@@ -67,7 +67,7 @@ format.
 >> x.records
 ans =
   6×7 table
-       i_1         j_2       level    marginal    lower    upper    scale
+        i           j        level    marginal    lower    upper    scale
     _________    ________    _____    ________    _____    _____    _____
     seattle      new-york      50          0        0       Inf       1
     seattle      chicago      300          0        0       Inf       1
@@ -81,8 +81,8 @@ ans =
 >> x.records
 ans =
   struct with fields:
-         i_1: [6×1 categorical]
-         j_2: [6×1 categorical]
+           i: [6×1 categorical]
+           j: [6×1 categorical]
        level: [6×1 double]
     marginal: [6×1 double]
        lower: [6×1 double]
@@ -189,11 +189,11 @@ For example, altering `x` in \ref GAMSTRANSFER_MATLAB_GETSTARTED_EXAMPLE --
 remember that `x` has domains `{i,j}`, where `i` and `j` are \ref
 GAMSTransfer::Set "Sets" and `madison` is not part of set `i` -- as follows:
 ```
->> x.records.i_1(end) = "madison";
+>> x.records.i(end) = "madison";
 ```
 doesn't update the domain set `i`:
 ```
->> i.records.uni_1'
+>> i.records.uni'
 
 ans =
 
@@ -251,7 +251,7 @@ dv =
 
   0×0 empty cell array
 
->> i.records.uni_1'
+>> i.records.uni'
 
 ans =
 
@@ -370,7 +370,7 @@ function like `int64()` in Matlab.
 
 For example, note the `categorical` in `x` of \ref GAMSTRANSFER_MATLAB_GETSTARTED_EXAMPLE
 ```
->> transpose(x.records.i_1)
+>> transpose(x.records.i)
 
 ans =
 
@@ -378,7 +378,7 @@ ans =
 
      seattle      seattle      seattle      san-diego      san-diego      san-diego
 
->> transpose(x.records.j_2)
+>> transpose(x.records.j)
 
 ans =
 
@@ -386,13 +386,13 @@ ans =
 
      new-york      chicago      topeka      new-york      chicago      topeka
 
->> transpose(int64(x.records.i_1))
+>> transpose(int64(x.records.i))
 
 ans =
 
      1     1     1     2     2     2
 
->> transpose(int64(x.records.j_2))
+>> transpose(int64(x.records.j))
 
 ans =
 
@@ -452,7 +452,7 @@ ans =
 Changing these can invalidate some records:
 ```
 >> x.setUELs({'madison', 'new-york', 'seattle'}, 1);
->> categories(x.records.i_1)
+>> categories(x.records.i)
 
 ans =
 
@@ -462,7 +462,7 @@ ans =
     {'new-york'}
     {'seattle' }
 
->> transpose(x.records.i_1)
+>> transpose(x.records.i)
 
 ans =
 
@@ -474,8 +474,8 @@ If `categorical` is supported is recommended to work directly on the
 `categorical` array, as then new UELs will be added automatically. Let's change
 the last domain entry of the first dimension to "houston":
 ```
->> x.records.i_1(end) = "houston";
->> categories(x.records.i_1)
+>> x.records.i(end) = "houston";
+>> categories(x.records.i)
 
 ans =
 
@@ -486,7 +486,7 @@ ans =
     {'seattle' }
     {'houston' }
 
->> transpose(x.records.i_1)
+>> transpose(x.records.i)
 
 ans =
 

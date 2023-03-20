@@ -69,6 +69,14 @@ classdef Symbol < handle
 
         % domain Domain of symbol (length == dimension)
         domain
+
+
+        %> Expected domain labels in records. If the domain changes, previous
+        %> changes of the labels will be reset.
+
+        % domain_labels Expected domain labels in records. If the domain
+        % changes, previous changes of the labels will be reset.
+        domain_labels
     end
 
     properties (Dependent, SetAccess = private)
@@ -76,12 +84,6 @@ classdef Symbol < handle
 
         % domain_names Domain names of symbol
         domain_names
-
-
-        %> Expected domain labels in records
-
-        % domain_labels Expected domain labels in records
-        domain_labels
 
 
         %> Specifies if domains are stored 'relaxed' or 'regular'
@@ -283,7 +285,16 @@ classdef Symbol < handle
 
             GAMSTransfer.gt_cmex_set_sym_domain(obj, domain, obj.container.id, ...
                 obj.container.features.c_prop_setget);
-            obj.domain_ = domain;
+
+            % check if domains names are valid labels
+            if numel(unique(obj.domain_names_)) == obj.dimension_
+                obj.domain_labels_ = obj.domain_names_;
+                for i = 1:obj.dimension_
+                    if strcmp(obj.domain_labels_{i}, '*')
+                        obj.domain_labels_{i} = 'uni';
+                    end
+                end
+            end
 
             % update uels
             if ~obj.container.features.categorical
@@ -319,6 +330,22 @@ classdef Symbol < handle
 
         function domain_labels = get.domain_labels(obj)
             domain_labels = obj.domain_labels_;
+        end
+
+        function set.domain_labels(obj, labels)
+            if ~iscellstr(labels)
+                error('Domain labels must be of type ''cellstr''.');
+            end
+            if numel(labels) ~= obj.dimension_
+                error('Domain labels must have length equal to symbol dimension.');
+            end
+            if numel(unique(labels)) ~= numel(labels)
+                error('Domain labels must be unique.');
+            end
+            for i = 1:obj.dimension_
+                obj.domain_labels_{i} = labels{i};
+            end
+            obj.modified = true;
         end
 
         function domain_type = get.domain_type(obj)
@@ -2554,7 +2581,6 @@ classdef Symbol < handle
                     continue
                 end
                 obj.domain_names_{i} = obj.domain_{i}.name;
-                obj.domain_labels_{i} = sprintf('%s_%d', obj.domain_{i}.name, i);
                 size = obj.domain_{i}.getNumberRecords();
                 if size ~= obj.size_(i)
                     obj.size_(i) = size;

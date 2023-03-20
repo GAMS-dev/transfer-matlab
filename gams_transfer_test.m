@@ -51,7 +51,7 @@ function gams_transfer_test(varargin)
     % create working directory
     mkdir(working_dir);
     filenames = cell(1, 8);
-    for i = 1:8
+    for i = 1:9
         filenames{i} = fullfile(working_dir, sprintf('data%d.gdx', i));
         copyfile(fullfile(current_dir, 'test', 'gdx', sprintf('data%d.gdx', i)), filenames{i});
     end
