@@ -105,7 +105,6 @@ function test_idx_read(t, cfg, container_type)
         t.assert(~isnan(s.sparsity));
         t.assert(s.number_records == 1);
     else
-        t.assert(s.getCardenality() == 1);
         t.assert(~isnan(s.getSparsity()));
         t.assert(s.getNumberRecords() == 1);
         t.assert(s.isValid());
@@ -133,7 +132,6 @@ function test_idx_read(t, cfg, container_type)
         t.assert(~isnan(s.sparsity));
         t.assert(s.number_records == 3);
     else
-        t.assert(s.getCardenality() == 5);
         t.assert(~isnan(s.getSparsity()));
         t.assert(s.getNumberRecords() == 3);
         t.assert(s.isValid());
@@ -164,7 +162,6 @@ function test_idx_read(t, cfg, container_type)
         t.assert(~isnan(s.sparsity));
         t.assert(s.number_records == 3);
     else
-        t.assert(s.getCardenality() == 50);
         t.assert(~isnan(s.getSparsity()));
         t.assert(s.getNumberRecords() == 3);
         t.assert(s.isValid());

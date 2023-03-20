@@ -1162,17 +1162,6 @@ classdef Container < GAMSTransfer.BaseContainer
             end
         end
 
-        %> Generate universe set (UEL order in GDX)
-        %>
-        %> @deprecated Will be removed in version 1.x.x. Use \ref
-        %> GAMSTransfer::Container::getUELs "Container.getUELs".
-        function list = getUniverseSet(obj)
-            % Generate universe set (UEL order in GDX) (deprecated)
-
-            warning('Method ''getUniverseSet'' is deprecated. Please use ''getUELs'' instead');
-            list = obj.getUELs();
-        end
-
         %> Checks correctness of all symbols
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_VALIDATE for more information.
