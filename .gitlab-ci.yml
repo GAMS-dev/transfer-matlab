@@ -48,6 +48,7 @@ build_documentation:
     only:
         - merge_requests
         - master
+        - tags
     artifacts:
         name: doc
         paths:
@@ -256,3 +257,4 @@ pages:
             - public
     only:
         - master
+        - tags

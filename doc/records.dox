@@ -1,7 +1,6 @@
 /**
 
 @defgroup gams_transfer_matlab_records Records
-@ingroup gams_transfer_matlab_symbol
 @brief Symbol Records
 
 Symbol records are the actual data. In GAMS Transfer Matlab they are stored in

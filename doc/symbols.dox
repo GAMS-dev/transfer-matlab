@@ -1,7 +1,6 @@
 /**
 
 @defgroup gams_transfer_matlab_symbol Symbols
-@ingroup gams_transfer_matlab_container
 @brief Symbols (Set, Alias, Parameter, Variable, Equation)
 
 A symbol is either a GAMS \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Alias
