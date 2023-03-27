@@ -1275,7 +1275,11 @@ function test_changeSymbol(t, cfg)
     t.add('change_symbol_domain_labels_1');
     x1.domain = {i2};
     x1.records = struct();
-    x1.records.i = categorical({'i21', 'i22', 'i23'})';
+    if gdx.features.categorical
+        x1.records.i = categorical({'i21', 'i22', 'i23'})';
+    else
+        x1.records.i = [1; 2; 3];
+    end
     x1.records.level = [1; 2; 3];
     t.assert(x1.isValid());
     gdx.modified = false;
@@ -1310,8 +1314,13 @@ function test_changeSymbol(t, cfg)
     t.add('change_symbol_domain_labels_2');
     x1.domain = {'i', 'j'};
     x1.records = struct();
-    x1.records.i = categorical({'i21', 'i22', 'i23'})';
-    x1.records.j = categorical({'j21', 'j22', 'j23'})';
+    if gdx.features.categorical
+        x1.records.i = categorical({'i21', 'i22', 'i23'})';
+        x1.records.j = categorical({'j21', 'j22', 'j23'})';
+    else
+        x1.records.i = [1; 2; 3];
+        x1.records.j = [1; 2; 3];
+    end
     x1.records.level = [1; 2; 3];
     t.assert(x1.isValid());
     gdx.modified = false;
