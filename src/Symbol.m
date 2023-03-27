@@ -283,6 +283,7 @@ classdef Symbol < handle
                 error('Setting symbol domain not allowed in indexed mode.');
             end
 
+            old_domain = obj.domain_;
             GAMSTransfer.gt_cmex_set_sym_domain(obj, domain, obj.container.id, ...
                 obj.container.features.c_prop_setget);
 
@@ -298,18 +299,32 @@ classdef Symbol < handle
 
             % update uels
             if ~obj.container.features.categorical
-                uels = struct();
+                same_domain = false(1, numel(domain));
+                for i = 1:min(numel(old_domain), numel(domain))
+                    old_domain_i = old_domain{i};
+                    if isa(old_domain_i, 'GAMSTransfer.Set') || ...
+                        isa(old_domain_i, 'GAMSTransfer.Alias')
+                        old_domain_i = old_domain_i.name;
+                    end
+                    new_domain_i = domain{i};
+                    if isa(new_domain_i, 'GAMSTransfer.Set') || ...
+                        isa(new_domain_i, 'GAMSTransfer.Alias')
+                        new_domain_i = new_domain_i.name;
+                    end
+                    same_domain(i) = strcmp(old_domain_i, new_domain_i);
+                end
+
+                uels = cell(1, obj.dimension_);
                 for i = 1:obj.dimension_
-                    label = obj.domain_labels_{i};
-                    if isfield(obj.uels, label)
-                        uels.(label) = obj.uels.(label);
+                    if same_domain(i)
+                        uels{i} = obj.uels{i};
                     elseif (isa(obj.domain_{i}, 'GAMSTransfer.Set') || ...
                         isa(obj.domain_{i}, 'GAMSTransfer.Alias')) && ...
                         obj.domain_{i}.isValidAsDomain()
-                        uels.(label) = GAMSTransfer.UniqueElementList();
-                        uels.(label).set(obj.domain_{i}.getUELs(1, 'ignore_unused', true), []);
+                        uels{i} = GAMSTransfer.UniqueElementList();
+                        uels{i}.set(obj.domain_{i}.getUELs(1, 'ignore_unused', true), []);
                     else
-                        uels.(label) = GAMSTransfer.UniqueElementList();
+                        uels{i} = GAMSTransfer.UniqueElementList();
                     end
                 end
                 obj.uels = uels;
@@ -990,7 +1005,7 @@ classdef Symbol < handle
                 end
 
                 if ~obj.container.indexed && ~obj.container.features.categorical
-                    eq = eq && obj.uels.(obj.domain_labels_{i}).equals(symbol.uels.(symbol.domain_labels_{i}));
+                    eq = eq && obj.uels{i}.equals(symbol.uels{i});
                 end
             end
         end
@@ -1743,7 +1758,7 @@ classdef Symbol < handle
                             uels_i = categories(obj.records.(label));
                         end
                     else
-                        uels_i = obj.uels.(label).get();
+                        uels_i = obj.uels{i}.get();
                         if ignore_unused
                             uels_i = uels_i(unique(obj.records.(label)));
                         end
@@ -1853,7 +1868,7 @@ classdef Symbol < handle
                         obj.records.(label) = categorical(double(obj.records.(label)), ...
                             1:numel(uels), uels, 'Ordinal', true);
                     else
-                        obj.uels.(label).set(uels, []);
+                        obj.uels{i}.set(uels, []);
                     end
                 else
                     if obj.container.features.categorical
@@ -1864,9 +1879,9 @@ classdef Symbol < handle
                         end
                     else
                         if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
-                            obj.uels.(label).set(uels, []);
+                            obj.uels{i}.set(uels, []);
                         else
-                            obj.records.(label) = obj.uels.(label).set(uels, obj.records.(label));
+                            obj.records.(label) = obj.uels{i}.set(uels, obj.records.(label));
                         end
                     end
                 end
@@ -1986,7 +2001,7 @@ classdef Symbol < handle
                         obj.records.(label) = addcats(obj.records.(label), uels);
                     end
                 else
-                    obj.uels.(label).add(uels);
+                    obj.uels{i}.add(uels);
                 end
             end
 
@@ -2070,9 +2085,9 @@ classdef Symbol < handle
                         uels = setdiff(obj.getUELs(i), obj.getUELs(i, 'ignore_unused', true));
                     end
                     if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
-                        obj.records.(label) = obj.uels.(label).remove(uels, []);
+                        obj.records.(label) = obj.uels{i}.remove(uels, []);
                     else
-                        obj.records.(label) = obj.uels.(label).remove(uels, obj.records.(label));
+                        obj.records.(label) = obj.uels{i}.remove(uels, obj.records.(label));
                     end
                 end
             end
@@ -2181,7 +2196,7 @@ classdef Symbol < handle
                         olduels = categories(obj.records.(label));
                         newuels = uels;
                     else
-                        olduels = obj.uels.(label).get();
+                        olduels = obj.uels{i}.get();
                         newuels = uels;
                     end
                 end
@@ -2195,7 +2210,7 @@ classdef Symbol < handle
                     if obj.container.features.categorical
                         unavail = ~ismember(olduels, categories(obj.records.(label)));
                     else
-                        unavail = ~ismember(olduels, obj.uels.(label).get());
+                        unavail = ~ismember(olduels, obj.uels{i}.get());
                     end
                     olduels(unavail) = [];
                     newuels(unavail) = [];
@@ -2215,10 +2230,10 @@ classdef Symbol < handle
                     end
                 else
                     if allow_merge
-                        obj.records.(label) = obj.uels.(label).rename(olduels, ...
+                        obj.records.(label) = obj.uels{i}.rename(olduels, ...
                             newuels, obj.records.(label));
                     else
-                        obj.uels.(label).rename(olduels, newuels, []);
+                        obj.uels{i}.rename(olduels, newuels, []);
                     end
                 end
             end
