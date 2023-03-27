@@ -373,11 +373,7 @@ classdef Symbol < handle
                 if numel(unique(labels)) ~= numel(labels)
                     error('Domain labels must be unique.');
                 end
-                for i = 1:numel(labels)
-                    if strcmp(labels{i}, '*')
-                        labels{i} = 'uni';
-                    end
-                end
+                labels = GAMSTransfer.Symbol.createDomainLabels(labels);
             otherwise
                 error('Setting domain labels supported for ''table'' and ''struct'' format only.');
             end

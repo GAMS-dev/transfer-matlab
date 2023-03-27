@@ -1,90 +1,88 @@
+GAMS Transfer Matlab v0.6.0
+==================
+- Breaking: `Symbol.domain_labels` now mirrors the column or field names for domains in
+  `Symbol.records`. Changing `Symbol.domain_labels` will change `Symbol.records` and vice versa.
+  `Symbol.domain_labels` now exists in `struct` and `table` format only. Domain fields in records
+  are those fields that are not one of the following:
+    - Variables and equations: `level`, `marginal`, `lower`, `upper`, `scale`.
+    - Parameters: `value`.
+    - Sets: `text`.
+
 GAMS Transfer Matlab v0.5.0
 ==================
-- Breaking: Changed default `Symbol.domain_labels`: If `Symbol.domain_names` is 
-  a unqiue list of domain names, then those names are used as domain labels. 
-  Otherwise, the previous label strategy "<name>_<dim>" is used. For example, a 
-  symbol with domain `{i, j}`, now expects domain labels `i` and `j` in records
-  and with a domain `{i, j, i}` it stays `i_1`, `j_2`, `i_3`.
-- Added possibility to modify `Symbol.domain_labels` to any unqiue list of
-  domain labels. If `Symbol.domain` is modified, domain labels are reset to 
-  default label strategy, described above.
-- Changed `Symbol.domain_forwarding` to be a vector of length `Symbol.dimension`
-  to enable/disable domain forwarding for each dimension independently.
+- Breaking: Changed default `Symbol.domain_labels`: If `Symbol.domain_names` is a unqiue list of
+  domain names, then those names are used as domain labels. Otherwise, the previous label strategy
+  "<name>_<dim>" is used. For example, a symbol with domain `{i, j}`, now expects domain labels `i`
+  and `j` in records and with a domain `{i, j, i}` it stays `i_1`, `j_2`, `i_3`.
+- Added possibility to modify `Symbol.domain_labels` to any unqiue list of domain labels. If
+  `Symbol.domain` is modified, domain labels are reset to default label strategy, described above.
+- Changed `Symbol.domain_forwarding` to be a vector of length `Symbol.dimension` to enable/disable
+  domain forwarding for each dimension independently.
 - Removed `Symbol.getCardinality`, `Symbol.getUELLabels`, `Symbol.initUELs` and
   `Container.getUniverseSet`.
-- Fixed possibly incorrect order of UELs of symbols in `dense_matrix` or 
-  `sparse_matrix` format. 
+- Fixed possibly incorrect order of UELs of symbols in `dense_matrix` or `sparse_matrix` format. 
 - Fixed `Symbol.setRecords` for cell input and symbols of dimension >= 3.
 
 GAMS Transfer Matlab v0.4.0
 ==================
-- Improved performance of `Container.hasSymbols`. Among others, this has a
-  significant effect when adding many symbols.
+- Improved performance of `Container.hasSymbols`. Among others, this has a significant effect when
+  adding many symbols.
 - Added support of partial write.
-- Added parameter `symbols` to `Container.write`,
-  `Container.getDomainViolations`, `Container.resolveDomainViolations` and
-  `Container.isValid`.
-- Added parameter `allow_merge` to `Container.renameUELs` and
-  `Symbol.renameUELs` in order support merging UELs while renaming (renaming a
-  UEL to an already existing UEL).
+- Added parameter `symbols` to `Container.write`, `Container.getDomainViolations`,
+  `Container.resolveDomainViolations` and `Container.isValid`.
+- Added parameter `allow_merge` to `Container.renameUELs` and `Symbol.renameUELs` in order support
+  merging UELs while renaming (renaming a UEL to an already existing UEL).
 
 GAMS Transfer Matlab v0.3.0
 ==================
-- Breaking: Symbol name uniqueness is now checked case insensitively. For
-  example, it is not possible anymore to have two different symbols named
-  `symbol` and `Symbol` or `SYMBOL`.
-- Breaking: Changed `Symbol.addUELs` signature from `addUELs(dim, uels)` to
-  `addUELs(uels, dim)`. `dim` is now allowed to accept a vector of dimensions.
-- Breaking: Changed `Symbol.setUELs` signature from `setUELs(dim, uels)` to
-  `setUELs(uels, dim)` and `setUELS(_, 'rename', true/false)`. Setting `rename`
-  to `true` triggers the old `Symbol.initUELs`. `dim` is now allowed to accept a
-  vector of dimensions.
-- Breaking: Changed `Symbol.removeUELs` signature from `removeUELs(dim, uels)`
-  to `removeUELs()`, `removeUELs(uels)` and `removeUELs(uels, dim)`. `dim` is
-  now allowed to accept a vector of dimensions.
-- Breaking: Changed `Symbol.renameUELs` signature from `renameUELs(dim, olduels,
-  newuels)` to `renameUELs(uels)` and `renameUELs(uels, dim)`. `uels` can now be
-  `cellstr`, `struct` or `containers.Map`. `dim` is now allowed to accept a
-  vector of dimensions.
-- Added method `Container.getSymbolNames` to return the original symbol names
-  for a list of symbol names of any case.
-- Added method `Container.hasSymbols` to check if symbol name (case insensitive)
-  exists.
+- Breaking: Symbol name uniqueness is now checked case insensitively. For example, it is not
+  possible anymore to have two different symbols named `symbol` and `Symbol` or `SYMBOL`.
+- Breaking: Changed `Symbol.addUELs` signature from `addUELs(dim, uels)` to `addUELs(uels, dim)`.
+  `dim` is now allowed to accept a vector of dimensions.
+- Breaking: Changed `Symbol.setUELs` signature from `setUELs(dim, uels)` to `setUELs(uels, dim)` and
+  `setUELS(_, 'rename', true/false)`. Setting `rename` to `true` triggers the old `Symbol.initUELs`.
+  `dim` is now allowed to accept a vector of dimensions.
+- Breaking: Changed `Symbol.removeUELs` signature from `removeUELs(dim, uels)` to `removeUELs()`,
+  `removeUELs(uels)` and `removeUELs(uels, dim)`. `dim` is now allowed to accept a vector of
+  dimensions.
+- Breaking: Changed `Symbol.renameUELs` signature from `renameUELs(dim, olduels, newuels)` to
+  `renameUELs(uels)` and `renameUELs(uels, dim)`. `uels` can now be `cellstr`, `struct` or
+  `containers.Map`. `dim` is now allowed to accept a vector of dimensions.
+- Added method `Container.getSymbolNames` to return the original symbol names for a list of symbol
+  names of any case.
+- Added method `Container.hasSymbols` to check if symbol name (case insensitive) exists.
 - Added method `Container.getUELs` to get UELs from all symbols.
 - Added method `Container.removeUELs` to remove UELs from all symbols.
 - Added method `Container.renameUELs` to rename UELs in all symbols.
-- Added method `Symbol.reorderUELs` to reorder UELs without changing the meaning
-  of records.
-- Added flags `Container.modified` and `Symbol.modified` to indicate if a
-  container and/or symbol has been modified since last reset.
+- Added method `Symbol.reorderUELs` to reorder UELs without changing the meaning of records.
+- Added flags `Container.modified` and `Symbol.modified` to indicate if a container and/or symbol
+  has been modified since last reset.
 - Added possibility to filter UEL codes in `Symbol.getUELs`.
 - Added possibility to pass a vector of dimensions to `Symbol.getUELs`.
-- Added possibility to overwrite symbols with `Container.add*` if main symbol
-  definition (e.g. type, domain) is equal.
-- Changed `Container.getSymbols`, `Container.removeSymbol`,
-  `Container.renameSymbol`, `Container.describe*` and others that use
-  `Container.getSymbols` to accept symbol names case insensitively.
-- Changed behaviour of default records: Default records do not get written to
-  GDX anymore if the records format is `dense_matrix` and either the container
-  is in indexed mode or if the symbol has a regular domain.
-- Changed behaviour of `getDomainViolations`: As in GDX different character case
-  does not lead to a domain violation.
-- Categoricals for record domain labels are now created with `Ordinal` set to
-  `true`, but ordinal categoricals are not enforced, i.e. users may pass
-  categoricals with `Ordinal` set to `false`.
-- Changed symbol read order when reading a subset of symbols: Symbol order is
-  defined by source order (e.g. symbol order in GDX file) rather than user
-  supplied order. To establish a custom order after the read, use
-  `reorderSymbols`.
+- Added possibility to overwrite symbols with `Container.add*` if main symbol definition (e.g. type,
+  domain) is equal.
+- Changed `Container.getSymbols`, `Container.removeSymbol`, `Container.renameSymbol`,
+  `Container.describe*` and others that use `Container.getSymbols` to accept symbol names case
+  insensitively.
+- Changed behaviour of default records: Default records do not get written to GDX anymore if the
+  records format is `dense_matrix` and either the container is in indexed mode or if the symbol has
+  a regular domain.
+- Changed behaviour of `getDomainViolations`: As in GDX different character case does not lead to a
+  domain violation.
+- Categoricals for record domain labels are now created with `Ordinal` set to `true`, but ordinal
+  categoricals are not enforced, i.e. users may pass categoricals with `Ordinal` set to `false`.
+- Changed symbol read order when reading a subset of symbols: Symbol order is defined by source
+  order (e.g. symbol order in GDX file) rather than user supplied order. To establish a custom order
+  after the read, use `reorderSymbols`.
 - Aliases are now removed if the aliased set is removed.
 - Domains are now set to `*` (universe) if the domain set is removed.
 - Deprecated `Symbol.getUELLabels`. Use `Symbol.getUELs` instead.
 - Deprecated `Symbol.initUELs`. Use `Symbol.setUELs` instead.
 - Deprecated `Container.getUniverseSet`. Use `Container.getUELs` instead.
-- Fixed failing symbol constructors when using `domain_forwarding`, but none of
-  the optional arguments.
-- Fixed `Symbol.transformRecords` (table-like to matrix-like formats) in case
-  the domain set records and UELs differ.
+- Fixed failing symbol constructors when using `domain_forwarding`, but none of the optional
+  arguments.
+- Fixed `Symbol.transformRecords` (table-like to matrix-like formats) in case the domain set records
+  and UELs differ.
 - Fixed write of sets defined over sets.
 
 GAMS Transfer Matlab v0.2.2
@@ -92,8 +90,8 @@ GAMS Transfer Matlab v0.2.2
 - Fixed read of equation with unknown subtype (recast as `=e=`).
 - Fixed partial read of symbols in indexed container.
 - Fixed `equals` method in indexed container.
-- Fixed possible segfault when reading a subset of symbols as dense matrix with
-  at least one scalar symbol.
+- Fixed possible segfault when reading a subset of symbols as dense matrix with at least one scalar
+  symbol.
 
 GAMS Transfer Matlab v0.2.1
 ==================
@@ -105,8 +103,7 @@ GAMS Transfer Matlab v0.2.1
 GAMS Transfer Matlab v0.2.0
 ==================
 - Added documentation.
-- Added "equals" method to Container and Symbol classes to compare containers or.
-  symbols.
+- Added "equals" method to Container and Symbol classes to compare containers or. symbols.
 - Added "copy" method to Symbol classes to copy symbols to another container.
 - Added support to read symbols directly from non-const container.
 
