@@ -358,14 +358,12 @@ ans =
 
 \section GAMSTRANSFER_MATLAB_RECORDS_UELS Unique Elements (UELs)
 
-A Unique Element (UEL) is an `(i,s)` pair where `i` is an identification number
-(called code) for a string `s`. GDX uses UELs to efficiently store domain
-entries of a record by storing the UEL code `i` of a domain entry instead of the
-actual string `s`. This avoids storing the same string multiple times. The
-concept of UELs also exists in Matlab and is called a `categorical`. Therefore,
-GAMS Transfer Matlab uses `categorical` to store domain entries. It is possible
-to convert a categorical array to its codes by using any number conversion
-function like `int64()` in Matlab.
+A Unique ELement (UEL) is an `(i,s)` pair where `i` is an identification number (or index) for a
+(string) label `s`. GDX uses UELs to efficiently store domain entries of a record by storing the UEL
+index `i` of a domain entry instead of the actual string `s`. This avoids storing the same string
+multiple times. The concept of UELs also exists in Matlab and is called a `categorical`. Therefore,
+GAMS Transfer Matlab uses `categorical` to store domain entries. It is possible to convert a
+categorical array to its indices by using any number conversion function like `int64()` in Matlab.
 
 For example, note the `categorical` in `x` of \ref GAMSTRANSFER_MATLAB_GETSTARTED_EXAMPLE
 ```
@@ -402,7 +400,7 @@ ans =
 
 @attention In the very unlikely case that your Matlab (or Octave) version does
 NOT support `categorical` (Matlab earlier than R2013b or any Octave version),
-please go on and read carefully about UELs. You must store the UEL codes in the
+please go on and read carefully about UELs. You must store the UEL indices in the
 domain columns of the \ref GAMSTransfer::Symbol::records "Symbol.records".
 Storing strings is not supported. For looking up the corresponding string, use
 the method \ref GAMSTransfer::Symbol::getUELs "Symbol.getUELs". Otherwise, if
@@ -417,12 +415,12 @@ GAMSTransfer::Symbol::addUELs "Symbol.addUELs", \ref
 GAMSTransfer::Symbol::removeUELs "Symbol.removeUELs", \ref
 GAMSTransfer::Symbol::renameUELs "Symbol.renameUELs" and \ref
 GAMSTransfer::Symbol::reorderUELs "Symbol.reorderUELs" (or the Matlab functions
-for modifying `categorical` directly). The UEL codes are numbered from 1 to the
+for modifying `categorical` directly). The UEL indices are numbered from 1 to the
 number of UELs stored independently for each dimension.
 
 \attention The methods \ref GAMSTransfer::Symbol::setUELs "Symbol.setUELs" and
 \ref GAMSTransfer::Symbol::removeUELs "Symbol.removeUELs" may reassign different
-UEL codes to the UEL labels. These changes are applied to the codes used in \ref
+UEL indices to the UEL labels. These changes are applied to the indices used in \ref
 GAMSTransfer::Symbol::records "Symbol.records". This implies that removing a UEL
 that is used in the \ref GAMSTransfer::Symbol::records "Symbol.records" will
 then lead to an invalid domain entry (displayed as `<undefined>` in Matlab). For
