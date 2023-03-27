@@ -71,9 +71,15 @@ classdef Symbol < handle
         domain
 
 
-        %> Expected domain labels in records.
+        %> Domain labels in records.
+        %>
+        %> Domain labels mirror the field/column names for domains in records. They only exist for
+        %> \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT "formats" table and struct. Setting domain labels
+        %> may modify the given labels to make them unique by adding _<dim>. * is changed to uni.
 
-        % domain_labels Expected domain labels in records. 
+        % domain_labels Domain labels mirror the field/column names for domains in records. They
+        % only exist for formats table and struct. Setting domain labels may modify the given labels
+        % to make them unique by adding _<dim>. * is changed to uni.
         domain_labels
     end
 

@@ -57,8 +57,7 @@ format.
   `scale` for \ref GAMSTransfer::Variable "Variable" and \ref
   GAMSTransfer::Equation "Equation") and the records as rows. In case of
   `struct`, the columns are given as struct fields. The column names for domain
-  entry columns are the domain name postfixed with their dimension. These
-  expected names are also given by \ref GAMSTransfer::Symbol::domain_labels
+  entry columns can be shown and altered by \ref GAMSTransfer::Symbol::domain_labels
   "Symbol.domain_labels".
 
   For example, `x` in \ref GAMSTRANSFER_MATLAB_GETSTARTED_EXAMPLE as `table`:
