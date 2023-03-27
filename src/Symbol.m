@@ -69,6 +69,12 @@ classdef Symbol < handle
 
         % domain Domain of symbol (length == dimension)
         domain
+
+
+        %> Expected domain labels in records.
+
+        % domain_labels Expected domain labels in records. 
+        domain_labels
     end
 
     properties (Dependent, SetAccess = private)
@@ -76,12 +82,6 @@ classdef Symbol < handle
 
         % domain_names Domain names of symbol
         domain_names
-
-
-        %> Expected domain labels in records.
-
-        % domain_labels Expected domain labels in records. 
-        domain_labels
 
 
         %> Specifies if domains are stored 'relaxed' or 'regular'
@@ -360,21 +360,44 @@ classdef Symbol < handle
             end
         end
 
-        % function set.domain_labels(obj, labels)
-        %     if ~iscellstr(labels)
-        %         error('Domain labels must be of type ''cellstr''.');
-        %     end
-        %     if numel(labels) ~= obj.dimension_
-        %         error('Domain labels must have length equal to symbol dimension.');
-        %     end
-        %     if numel(unique(labels)) ~= numel(labels)
-        %         error('Domain labels must be unique.');
-        %     end
-        %     for i = 1:obj.dimension_
-        %         obj.domain_labels_{i} = labels{i};
-        %     end
-        %     obj.modified = true;
-        % end
+        function set.domain_labels(obj, labels)
+            switch (obj.format_)
+            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
+                old_labels = obj.domain_labels;
+                if ~iscellstr(labels)
+                    error('Domain labels must be of type ''cellstr''.');
+                end
+                if numel(labels) ~= obj.dimension_
+                    error('Domain labels must have length equal to symbol dimension.');
+                end
+                if numel(unique(labels)) ~= numel(labels)
+                    error('Domain labels must be unique.');
+                end
+                for i = 1:numel(labels)
+                    if strcmp(labels{i}, '*')
+                        labels{i} = 'uni';
+                    end
+                end
+            otherwise
+                error('Setting domain labels supported for ''table'' and ''struct'' format only.');
+            end
+            switch (obj.format_)
+            case GAMSTransfer.RecordsFormat.STRUCT
+                records = struct();
+                fields = fieldnames(obj.records);
+                for i = 1:numel(fields)
+                    idx = find(strcmp(fields{i}, old_labels), 1);
+                    if isempty(idx)
+                        records.(fields{i}) = obj.records.(fields{i});
+                    else
+                        records.(labels{idx}) = obj.records.(fields{i});
+                    end
+                end
+                obj.records = records;
+            case GAMSTransfer.RecordsFormat.TABLE
+                obj.records = renamevars(obj.records, old_labels, labels);
+            end
+        end
 
         function domain_type = get.domain_type(obj)
             domain_type = obj.domain_type_;
@@ -1226,9 +1249,11 @@ classdef Symbol < handle
             end
 
             % resolve domain violations
-            for i = 1:obj.dimension_
-                if obj.domain_forwarding_(i)
-                    obj.resolveDomainViolations(i);
+            if ~obj.container.indexed
+                for i = 1:obj.dimension_
+                    if obj.domain_forwarding_(i)
+                        obj.resolveDomainViolations(i);
+                    end
                 end
             end
         end

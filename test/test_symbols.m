@@ -1272,79 +1272,102 @@ function test_changeSymbol(t, cfg)
         end
     end
 
-    % t.add('change_symbol_domain_labels_1');
-    % x1.domain = {i1};
-    % gdx.modified = false;
-    % t.assert(numel(x1.domain) == 1);
-    % t.assertEquals(x1.domain{1}.id, i1.id);
-    % t.assertEquals(x1.domain{1}.name, 'i1');
-    % t.assertEquals(x1.domain_labels{1}, 'i1');
-    % t.assert(~gdx.modified);
-    % t.assert(~i1.modified);
-    % t.assert(~i2.modified);
-    % t.assert(~x1.modified);
-    % t.assert(~x2.modified);
-    % t.assert(~x3.modified);
-    % x1.domain_labels = {'first'};
-    % t.assert(x1.dimension == 1);
-    % t.assert(numel(x1.domain) == 1);
-    % t.assertEquals(x1.domain{1}.id, i1.id);
-    % t.assertEquals(x1.domain{1}.name, 'i1');
-    % t.assertEquals(x1.domain_labels{1}, 'first');
-    % t.assert(gdx.modified);
-    % t.assert(~i1.modified);
-    % t.assert(~i2.modified);
-    % t.assert(x1.modified);
-    % t.assert(~x2.modified);
-    % t.assert(~x3.modified);
+    t.add('change_symbol_domain_labels_1');
+    x1.domain = {i2};
+    x1.records = struct();
+    x1.records.i = categorical({'i21', 'i22', 'i23'})';
+    x1.records.level = [1; 2; 3];
+    t.assert(x1.isValid());
+    gdx.modified = false;
+    t.assert(numel(x1.domain) == 1);
+    t.assertEquals(x1.domain{1}.id, i2.id);
+    t.assertEquals(x1.domain{1}.name, 'i2');
+    t.assertEquals(x1.domain_labels{1}, 'i');
+    t.assert(isfield(x1.records, 'i'));
+    t.assert(~isfield(x1.records, 'first'));
+    t.assert(~gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(~x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
+    x1.domain_labels = {'first'};
+    t.assert(x1.dimension == 1);
+    t.assert(numel(x1.domain) == 1);
+    t.assertEquals(x1.domain{1}.id, i2.id);
+    t.assertEquals(x1.domain{1}.name, 'i2');
+    t.assertEquals(x1.domain_labels{1}, 'first');
+    t.assert(isfield(x1.records, 'first'));
+    t.assert(~isfield(x1.records, 'i'));
+    t.assert(gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
+    t.assert(x1.isValid());
 
-    % t.add('change_symbol_domain_labels_2');
-    % x1.domain = {'*', '*'};
-    % gdx.modified = false;
-    % t.assert(x1.dimension == 2);
-    % t.assertEquals(x1.domain, {'*', '*'});
-    % t.assertEquals(x1.domain_labels{1}, 'uni_1');
-    % t.assertEquals(x1.domain_labels{2}, 'uni_2');
-    % t.assert(~gdx.modified);
-    % t.assert(~i1.modified);
-    % t.assert(~i2.modified);
-    % t.assert(~x1.modified);
-    % t.assert(~x2.modified);
-    % t.assert(~x3.modified);
-    % x1.domain_labels = {'one', 'two'};
-    % t.assert(x1.dimension == 2);
-    % t.assertEquals(x1.domain, {'*', '*'});
-    % t.assertEquals(x1.domain_labels{1}, 'one');
-    % t.assertEquals(x1.domain_labels{2}, 'two');
-    % t.assert(gdx.modified);
-    % t.assert(~i1.modified);
-    % t.assert(~i2.modified);
-    % t.assert(x1.modified);
-    % t.assert(~x2.modified);
-    % t.assert(~x3.modified);
+    t.add('change_symbol_domain_labels_2');
+    x1.domain = {'i', 'j'};
+    x1.records = struct();
+    x1.records.i = categorical({'i21', 'i22', 'i23'})';
+    x1.records.j = categorical({'j21', 'j22', 'j23'})';
+    x1.records.level = [1; 2; 3];
+    t.assert(x1.isValid());
+    gdx.modified = false;
+    t.assert(x1.dimension == 2);
+    t.assertEquals(x1.domain, {'i', 'j'});
+    t.assertEquals(x1.domain_labels{1}, 'i');
+    t.assertEquals(x1.domain_labels{2}, 'j');
+    t.assert(isfield(x1.records, 'i'));
+    t.assert(isfield(x1.records, 'j'));
+    t.assert(~isfield(x1.records, 'one'));
+    t.assert(~isfield(x1.records, 'two'));
+    t.assert(~gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(~x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
+    x1.domain_labels = {'one', 'two'};
+    t.assert(x1.dimension == 2);
+    t.assertEquals(x1.domain, {'i', 'j'});
+    t.assertEquals(x1.domain_labels{1}, 'one');
+    t.assertEquals(x1.domain_labels{2}, 'two');
+    t.assert(~isfield(x1.records, 'i'));
+    t.assert(~isfield(x1.records, 'j'));
+    t.assert(isfield(x1.records, 'one'));
+    t.assert(isfield(x1.records, 'two'));
+    t.assert(gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~i2.modified);
+    t.assert(x1.modified);
+    t.assert(~x2.modified);
+    t.assert(~x3.modified);
+    t.assert(x1.isValid());
 
-    % t.add('change_symbol_domain_labels_3');
-    % try
-    %     t.assert(false);
-    %     x1.domain_labels = '*';
-    % catch e
-    %     t.reset();
-    %     t.assertEquals(e.message, 'Domain labels must be of type ''cellstr''.');
-    % end
-    % try
-    %     t.assert(false);
-    %     x1.domain_labels = {'*'};
-    % catch e
-    %     t.reset();
-    %     t.assertEquals(e.message, 'Domain labels must have length equal to symbol dimension.');
-    % end
-    % try
-    %     t.assert(false);
-    %     x1.domain_labels = {'*', '*'};
-    % catch e
-    %     t.reset();
-    %     t.assertEquals(e.message, 'Domain labels must be unique.');
-    % end
+    t.add('change_symbol_domain_labels_3');
+    try
+        t.assert(false);
+        x1.domain_labels = '*';
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain labels must be of type ''cellstr''.');
+    end
+    try
+        t.assert(false);
+        x1.domain_labels = {'*'};
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain labels must have length equal to symbol dimension.');
+    end
+    try
+        t.assert(false);
+        x1.domain_labels = {'*', '*'};
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain labels must be unique.');
+    end
     
     t.add('change_symbol_size');
     try

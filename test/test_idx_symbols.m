@@ -350,43 +350,58 @@ function test_idx_changeSymbol(t, cfg)
         t.assertEquals(e.message, 'Size must be non-negative.');
     end
 
-    % t.add('idx_change_symbol_domain_labels_1');
-    % t.assert(numel(p1.size) == 2);
-    % t.assert(p1.dimension == 2);
-    % t.assert(numel(p1.domain) == 2);
-    % t.assert(numel(p1.domain_labels) == 2);
-    % t.assertEquals(p1.domain_labels{1}, 'dim_1');
-    % t.assertEquals(p1.domain_labels{2}, 'dim_2');
-    % p1.domain_labels = {'d1', 'd2'};
-    % t.assert(numel(p1.size) == 2);
-    % t.assert(p1.dimension == 2);
-    % t.assert(numel(p1.domain) == 2);
-    % t.assert(numel(p1.domain_labels) == 2);
-    % t.assertEquals(p1.domain_labels{1}, 'd1');
-    % t.assertEquals(p1.domain_labels{2}, 'd2');
+    t.add('idx_change_symbol_domain_labels_1');
+    p1.size = [10, 10];
+    p1.records = struct();
+    p1.records.dim_1 = [1; 2; 3];
+    p1.records.dim_2 = [2; 4; 6];
+    p1.records.value = [1; 2; 3];
+    t.assert(p1.isValid());
+    t.assert(numel(p1.size) == 2);
+    t.assert(p1.dimension == 2);
+    t.assert(numel(p1.domain) == 2);
+    t.assert(numel(p1.domain_labels) == 2);
+    t.assertEquals(p1.domain_labels{1}, 'dim_1');
+    t.assertEquals(p1.domain_labels{2}, 'dim_2');
+    t.assert(isfield(p1.records, 'dim_1'));
+    t.assert(isfield(p1.records, 'dim_2'));
+    t.assert(~isfield(p1.records, 'd1'));
+    t.assert(~isfield(p1.records, 'd2'));
+    p1.domain_labels = {'d1', 'd2'};
+    t.assert(numel(p1.size) == 2);
+    t.assert(p1.dimension == 2);
+    t.assert(numel(p1.domain) == 2);
+    t.assert(numel(p1.domain_labels) == 2);
+    t.assertEquals(p1.domain_labels{1}, 'd1');
+    t.assertEquals(p1.domain_labels{2}, 'd2');
+    t.assert(~isfield(p1.records, 'dim_1'));
+    t.assert(~isfield(p1.records, 'dim_2'));
+    t.assert(isfield(p1.records, 'd1'));
+    t.assert(isfield(p1.records, 'd2'));
+    t.assert(p1.isValid());
 
-    % t.add('idx_change_symbol_domain_labels_2');
-    % try
-    %     t.assert(false);
-    %     p1.domain_labels = '*';
-    % catch e
-    %     t.reset();
-    %     t.assertEquals(e.message, 'Domain labels must be of type ''cellstr''.');
-    % end
-    % try
-    %     t.assert(false);
-    %     p1.domain_labels = {'*'};
-    % catch e
-    %     t.reset();
-    %     t.assertEquals(e.message, 'Domain labels must have length equal to symbol dimension.');
-    % end
-    % try
-    %     t.assert(false);
-    %     p1.domain_labels = {'*', '*'};
-    % catch e
-    %     t.reset();
-    %     t.assertEquals(e.message, 'Domain labels must be unique.');
-    % end
+    t.add('idx_change_symbol_domain_labels_2');
+    try
+        t.assert(false);
+        p1.domain_labels = '*';
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain labels must be of type ''cellstr''.');
+    end
+    try
+        t.assert(false);
+        p1.domain_labels = {'*'};
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain labels must have length equal to symbol dimension.');
+    end
+    try
+        t.assert(false);
+        p1.domain_labels = {'*', '*'};
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain labels must be unique.');
+    end
 
     t.add('idx_change_symbol_format');
     try
