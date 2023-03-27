@@ -266,8 +266,7 @@ void gt_mex_get_records(
     mxDouble**      mx_values,      /** values */
     mxArray**       mx_arr_domains, /** Matlab domains array */
     mxInt32**       mx_domains,     /** domains */
-    mxArray**       mx_arr_text,    /** explanatory text */
-    const char*     domains[]       /** domains of symbol */
+    mxArray**       mx_arr_text     /** explanatory text */
 );
 #else
 void gt_mex_get_records(
@@ -279,8 +278,7 @@ void gt_mex_get_records(
     double**        mx_values,      /** values */
     mxArray**       mx_arr_domains, /** Matlab domains array */
     INT32_T**       mx_domains,     /** domains */
-    mxArray**       mx_arr_text,    /** explanatory text */
-    const char*     domains[]       /** domains of symbol */
+    mxArray**       mx_arr_text     /** explanatory text */
 );
 #endif
 

@@ -54,8 +54,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(s1.domain{1}, '*');
     t.assert(numel(s1.domain_names) == 1);
     t.assertEquals(s1.domain_names{1}, '*');
-    t.assert(numel(s1.domain_labels) == 1);
-    t.assertEquals(s1.domain_labels{1}, 'uni');
+    t.assert(numel(s1.domain_labels) == 0);
     t.assertEquals(s1.domain_type, 'none');
     t.assert(numel(s1.size) == 1);
     t.assert(isnan(s1.size(1)));
@@ -80,8 +79,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(s2.domain{1}.name, 's1');
     t.assert(numel(s2.domain_names) == 1);
     t.assertEquals(s2.domain_names{1}, 's1');
-    t.assert(numel(s2.domain_labels) == 1);
-    t.assertEquals(s2.domain_labels{1}, 's1');
+    t.assert(numel(s2.domain_labels) == 0);
     t.assertEquals(s2.domain_type, 'regular');
     t.assert(numel(s2.size) == 1);
     t.assert(s2.size(1) == 0);
@@ -108,9 +106,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s3.domain_names) == 2);
     t.assertEquals(s3.domain_names{1}, 's1');
     t.assertEquals(s3.domain_names{2}, '*');
-    t.assert(numel(s3.domain_labels) == 2);
-    t.assertEquals(s3.domain_labels{1}, 's1');
-    t.assertEquals(s3.domain_labels{2}, 'uni');
+    t.assert(numel(s3.domain_labels) == 0);
     t.assertEquals(s3.domain_type, 'regular');
     t.assert(numel(s3.size) == 2);
     t.assert(s3.size(1) == 0);
@@ -137,8 +133,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(s4.domain{1}.name, 's2');
     t.assert(numel(s4.domain_names) == 1);
     t.assertEquals(s4.domain_names{1}, 's2');
-    t.assert(numel(s4.domain_labels) == 1);
-    t.assertEquals(s4.domain_labels{1}, 's2');
+    t.assert(numel(s4.domain_labels) == 0);
     t.assertEquals(s4.domain_type, 'regular');
     t.assert(numel(s4.size) == 1);
     t.assert(s4.size(1) == 0);
@@ -165,9 +160,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s5.domain_names) == 2);
     t.assertEquals(s5.domain_names{1}, 's1');
     t.assertEquals(s5.domain_names{2}, 's2');
-    t.assert(numel(s5.domain_labels) == 2);
-    t.assertEquals(s5.domain_labels{1}, 's1');
-    t.assertEquals(s5.domain_labels{2}, 's2');
+    t.assert(numel(s5.domain_labels) == 0);
     t.assertEquals(s5.domain_type, 'relaxed');
     t.assert(numel(s5.size) == 2);
     t.assert(isnan(s5.size(1)));
@@ -193,8 +186,7 @@ function test_addSymbols(t, cfg)
     t.assert(s6.domain{1} == 's1');
     t.assert(numel(s6.domain_names) == 1);
     t.assertEquals(s6.domain_names{1}, 's1');
-    t.assert(numel(s6.domain_labels) == 1);
-    t.assertEquals(s6.domain_labels{1}, 's1');
+    t.assert(numel(s6.domain_labels) == 0);
     t.assertEquals(s6.domain_type, 'relaxed');
     t.assert(numel(s6.size) == 1);
     t.assert(isnan(s6.size(1)));
@@ -300,8 +292,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(a1.domain{1}, '*');
     t.assert(numel(a1.domain_names) == 1);
     t.assertEquals(a1.domain_names{1}, '*');
-    t.assert(numel(a1.domain_labels) == 1);
-    t.assertEquals(a1.domain_labels{1}, 'uni');
+    t.assert(numel(a1.domain_labels) == 0);
     t.assertEquals(a1.domain_type, 'none');
     t.assert(numel(a1.size) == 1);
     t.assert(isnan(a1.size(1)));
@@ -368,8 +359,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p2.domain{1}.name, 's1');
     t.assert(numel(p2.domain_names) == 1);
     t.assertEquals(p2.domain_names{1}, 's1');
-    t.assert(numel(p2.domain_labels) == 1);
-    t.assertEquals(p2.domain_labels{1}, 's1');
+    t.assert(numel(p2.domain_labels) == 0);
     t.assertEquals(p2.domain_type, 'regular');
     t.assert(numel(p2.size) == 1);
     t.assert(p2.size(1) == 0);
@@ -397,10 +387,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p3.domain_names{1}, 's1');
     t.assertEquals(p3.domain_names{2}, '*');
     t.assertEquals(p3.domain_names{3}, 's2');
-    t.assert(numel(p3.domain_labels) == 3);
-    t.assertEquals(p3.domain_labels{1}, 's1');
-    t.assertEquals(p3.domain_labels{2}, 'uni');
-    t.assertEquals(p3.domain_labels{3}, 's2');
+    t.assert(numel(p3.domain_labels) == 0);
     t.assertEquals(p3.domain_type, 'relaxed');
     t.assert(numel(p3.size) == 3);
     t.assert(p3.size(1) == 0);
@@ -531,9 +518,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(v3.domain_names) == 2);
     t.assertEquals(v3.domain_names{1}, 's1');
     t.assertEquals(v3.domain_names{2}, '*');
-    t.assert(numel(v3.domain_labels) == 2);
-    t.assertEquals(v3.domain_labels{1}, 's1');
-    t.assertEquals(v3.domain_labels{2}, 'uni');
+    t.assert(numel(v3.domain_labels) == 0);
     t.assertEquals(v3.domain_type, 'regular');
     t.assert(numel(v3.size) == 2);
     t.assert(v3.size(1) == 0);
@@ -708,9 +693,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(e3.domain_names) == 2);
     t.assertEquals(e3.domain_names{1}, 's1');
     t.assertEquals(e3.domain_names{2}, '*');
-    t.assert(numel(e3.domain_labels) == 2);
-    t.assertEquals(e3.domain_labels{1}, 's1');
-    t.assertEquals(e3.domain_labels{2}, 'uni');
+    t.assert(numel(e3.domain_labels) == 0);
     t.assertEquals(e3.domain_type, 'regular');
     t.assert(numel(e3.size) == 2);
     t.assert(e3.size(1) == 0);
@@ -1227,7 +1210,6 @@ function test_changeSymbol(t, cfg)
     t.assert(numel(x1.domain) == 1);
     t.assertEquals(x1.domain{1}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
-    t.assertEquals(x1.domain_labels{1}, 'i1');
     t.assert(~gdx.modified);
     t.assert(~i1.modified);
     t.assert(~i2.modified);
@@ -1241,8 +1223,6 @@ function test_changeSymbol(t, cfg)
     t.assertEquals(x1.domain{2}.id, i1.id);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assertEquals(x1.domain{2}.name, 'i1');
-    t.assertEquals(x1.domain_labels{1}, 'i1_1');
-    t.assertEquals(x1.domain_labels{2}, 'i1_2');
     t.assert(gdx.modified);
     t.assert(~i1.modified);
     t.assert(~i2.modified);
@@ -1252,7 +1232,6 @@ function test_changeSymbol(t, cfg)
     x1.domain = {'*'};
     t.assert(x1.dimension == 1);
     t.assertEquals(x1.domain, {'*'});
-    t.assertEquals(x1.domain_labels{1}, 'uni');
     t.assert(gdx.modified);
     t.assert(~i1.modified);
     t.assert(~i2.modified);
@@ -1262,8 +1241,6 @@ function test_changeSymbol(t, cfg)
     x1.domain = {'a', 'b'};
     t.assert(x1.dimension == 2);
     t.assertEquals(x1.domain, {'a', 'b'});
-    t.assertEquals(x1.domain_labels{1}, 'a');
-    t.assertEquals(x1.domain_labels{2}, 'b');
     t.assert(gdx.modified);
     t.assert(~i1.modified);
     t.assert(~i2.modified);
@@ -1295,79 +1272,79 @@ function test_changeSymbol(t, cfg)
         end
     end
 
-    t.add('change_symbol_domain_labels_1');
-    x1.domain = {i1};
-    gdx.modified = false;
-    t.assert(numel(x1.domain) == 1);
-    t.assertEquals(x1.domain{1}.id, i1.id);
-    t.assertEquals(x1.domain{1}.name, 'i1');
-    t.assertEquals(x1.domain_labels{1}, 'i1');
-    t.assert(~gdx.modified);
-    t.assert(~i1.modified);
-    t.assert(~i2.modified);
-    t.assert(~x1.modified);
-    t.assert(~x2.modified);
-    t.assert(~x3.modified);
-    x1.domain_labels = {'first'};
-    t.assert(x1.dimension == 1);
-    t.assert(numel(x1.domain) == 1);
-    t.assertEquals(x1.domain{1}.id, i1.id);
-    t.assertEquals(x1.domain{1}.name, 'i1');
-    t.assertEquals(x1.domain_labels{1}, 'first');
-    t.assert(gdx.modified);
-    t.assert(~i1.modified);
-    t.assert(~i2.modified);
-    t.assert(x1.modified);
-    t.assert(~x2.modified);
-    t.assert(~x3.modified);
+    % t.add('change_symbol_domain_labels_1');
+    % x1.domain = {i1};
+    % gdx.modified = false;
+    % t.assert(numel(x1.domain) == 1);
+    % t.assertEquals(x1.domain{1}.id, i1.id);
+    % t.assertEquals(x1.domain{1}.name, 'i1');
+    % t.assertEquals(x1.domain_labels{1}, 'i1');
+    % t.assert(~gdx.modified);
+    % t.assert(~i1.modified);
+    % t.assert(~i2.modified);
+    % t.assert(~x1.modified);
+    % t.assert(~x2.modified);
+    % t.assert(~x3.modified);
+    % x1.domain_labels = {'first'};
+    % t.assert(x1.dimension == 1);
+    % t.assert(numel(x1.domain) == 1);
+    % t.assertEquals(x1.domain{1}.id, i1.id);
+    % t.assertEquals(x1.domain{1}.name, 'i1');
+    % t.assertEquals(x1.domain_labels{1}, 'first');
+    % t.assert(gdx.modified);
+    % t.assert(~i1.modified);
+    % t.assert(~i2.modified);
+    % t.assert(x1.modified);
+    % t.assert(~x2.modified);
+    % t.assert(~x3.modified);
 
-    t.add('change_symbol_domain_labels_2');
-    x1.domain = {'*', '*'};
-    gdx.modified = false;
-    t.assert(x1.dimension == 2);
-    t.assertEquals(x1.domain, {'*', '*'});
-    t.assertEquals(x1.domain_labels{1}, 'uni_1');
-    t.assertEquals(x1.domain_labels{2}, 'uni_2');
-    t.assert(~gdx.modified);
-    t.assert(~i1.modified);
-    t.assert(~i2.modified);
-    t.assert(~x1.modified);
-    t.assert(~x2.modified);
-    t.assert(~x3.modified);
-    x1.domain_labels = {'one', 'two'};
-    t.assert(x1.dimension == 2);
-    t.assertEquals(x1.domain, {'*', '*'});
-    t.assertEquals(x1.domain_labels{1}, 'one');
-    t.assertEquals(x1.domain_labels{2}, 'two');
-    t.assert(gdx.modified);
-    t.assert(~i1.modified);
-    t.assert(~i2.modified);
-    t.assert(x1.modified);
-    t.assert(~x2.modified);
-    t.assert(~x3.modified);
+    % t.add('change_symbol_domain_labels_2');
+    % x1.domain = {'*', '*'};
+    % gdx.modified = false;
+    % t.assert(x1.dimension == 2);
+    % t.assertEquals(x1.domain, {'*', '*'});
+    % t.assertEquals(x1.domain_labels{1}, 'uni_1');
+    % t.assertEquals(x1.domain_labels{2}, 'uni_2');
+    % t.assert(~gdx.modified);
+    % t.assert(~i1.modified);
+    % t.assert(~i2.modified);
+    % t.assert(~x1.modified);
+    % t.assert(~x2.modified);
+    % t.assert(~x3.modified);
+    % x1.domain_labels = {'one', 'two'};
+    % t.assert(x1.dimension == 2);
+    % t.assertEquals(x1.domain, {'*', '*'});
+    % t.assertEquals(x1.domain_labels{1}, 'one');
+    % t.assertEquals(x1.domain_labels{2}, 'two');
+    % t.assert(gdx.modified);
+    % t.assert(~i1.modified);
+    % t.assert(~i2.modified);
+    % t.assert(x1.modified);
+    % t.assert(~x2.modified);
+    % t.assert(~x3.modified);
 
-    t.add('change_symbol_domain_labels_3');
-    try
-        t.assert(false);
-        x1.domain_labels = '*';
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain labels must be of type ''cellstr''.');
-    end
-    try
-        t.assert(false);
-        x1.domain_labels = {'*'};
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain labels must have length equal to symbol dimension.');
-    end
-    try
-        t.assert(false);
-        x1.domain_labels = {'*', '*'};
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain labels must be unique.');
-    end
+    % t.add('change_symbol_domain_labels_3');
+    % try
+    %     t.assert(false);
+    %     x1.domain_labels = '*';
+    % catch e
+    %     t.reset();
+    %     t.assertEquals(e.message, 'Domain labels must be of type ''cellstr''.');
+    % end
+    % try
+    %     t.assert(false);
+    %     x1.domain_labels = {'*'};
+    % catch e
+    %     t.reset();
+    %     t.assertEquals(e.message, 'Domain labels must have length equal to symbol dimension.');
+    % end
+    % try
+    %     t.assert(false);
+    %     x1.domain_labels = {'*', '*'};
+    % catch e
+    %     t.reset();
+    %     t.assertEquals(e.message, 'Domain labels must be unique.');
+    % end
     
     t.add('change_symbol_size');
     try
@@ -2482,7 +2459,7 @@ function test_setRecords(t, cfg)
         s2.setRecords({{'i1', 'i4'}, [1; 4]});
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain ''uni'' is missing.');
+        t.assertEquals(e.message, 'Incorrect number of domain fields.');
     end
 
     t.add('set_records_cell_6');
@@ -2660,7 +2637,7 @@ function test_setRecords(t, cfg)
         s3.setRecords(struct('level', [1, 2, 3]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain ''i1'' is missing.');
+        t.assertEquals(e.message, 'Incorrect number of domain fields.');
     end
 
     if gdx.features.table

@@ -106,7 +106,7 @@ classdef GAMSTest < handle
                 obj.assert(iscell(symbol.domain));
                 obj.assert(numel(symbol.domain) == symbol.dimension);
                 obj.assert(iscell(symbol.domain_labels));
-                obj.assert(numel(symbol.domain_labels) == symbol.dimension);
+                obj.assert(numel(symbol.domain_labels) == 0);
                 obj.assert(ischar(symbol.domain_type));
                 obj.assert(isnumeric(symbol.size));
                 obj.assert(numel(symbol.size) == symbol.dimension);

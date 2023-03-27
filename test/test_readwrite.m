@@ -114,8 +114,12 @@ function test_read(t, cfg, container_type)
     t.assert(s.dimension == 1);
     t.assert(numel(s.domain) == 1);
     t.assertEquals(s.domain{1}, '*');
-    t.assert(numel(s.domain_labels) == 1);
-    t.assertEquals(s.domain_labels{1}, 'uni');
+    if (is_const_cont)
+        t.assert(numel(s.domain_labels) == 0);
+    else
+        t.assert(numel(s.domain_labels) == 1);
+        t.assertEquals(s.domain_labels{1}, 'uni');
+    end
     t.assertEquals(s.domain_type, 'none');
     t.assert(numel(s.size) == 1);
     t.assert(isnan(s.size(1)));
@@ -166,12 +170,13 @@ function test_read(t, cfg, container_type)
     t.assert(numel(s.domain) == 1);
     if is_const_cont
         t.assertEquals(s.domain{1}, 'i');
+        t.assert(numel(s.domain_labels) == 0);
     else
         t.assertEquals(s.domain{1}.id, gdx.data.i.id);
         t.assertEquals(s.domain{1}.name, 'i');
+        t.assert(numel(s.domain_labels) == 1);
+        t.assertEquals(s.domain_labels{1}, 'i');
     end
-    t.assert(numel(s.domain_labels) == 1);
-    t.assertEquals(s.domain_labels{1}, 'i');
     t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 1);
     t.assert(s.size(1) == 5);
@@ -200,15 +205,16 @@ function test_read(t, cfg, container_type)
     if is_const_cont
         t.assertEquals(s.domain{1}, 'i');
         t.assertEquals(s.domain{2}, 'j');
+        t.assert(numel(s.domain_labels) == 0);
     else
         t.assertEquals(s.domain{1}.id, gdx.data.i.id);
         t.assertEquals(s.domain{2}.id, gdx.data.j.id);
         t.assertEquals(s.domain{1}.name, 'i');
         t.assertEquals(s.domain{2}.name, 'j');
+        t.assert(numel(s.domain_labels) == 2);
+        t.assertEquals(s.domain_labels{1}, 'i');
+        t.assertEquals(s.domain_labels{2}, 'j');
     end
-    t.assert(numel(s.domain_labels) == 2);
-    t.assertEquals(s.domain_labels{1}, 'i');
-    t.assertEquals(s.domain_labels{2}, 'j');
     t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 2);
     t.assert(s.size(1) == 5);
@@ -1307,8 +1313,7 @@ function test_readNoRecords(t, cfg, container_type)
     t.assert(s.dimension == 1);
     t.assert(numel(s.domain) == 1);
     t.assertEquals(s.domain{1}, '*');
-    t.assert(numel(s.domain_labels) == 1);
-    t.assertEquals(s.domain_labels{1}, 'uni');
+    t.assert(numel(s.domain_labels) == 0);
     t.assertEquals(s.domain_type, 'none');
     t.assert(numel(s.size) == 1);
     t.assert(isnan(s.size(1)));
@@ -1369,8 +1374,7 @@ function test_readNoRecords(t, cfg, container_type)
         t.assertEquals(s.domain{1}.id, gdx.data.i.id);
         t.assertEquals(s.domain{1}.name, 'i');
     end
-    t.assert(numel(s.domain_labels) == 1);
-    t.assertEquals(s.domain_labels{1}, 'i');
+    t.assert(numel(s.domain_labels) == 0);
     t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 1);
     if is_const_cont
@@ -1412,9 +1416,7 @@ function test_readNoRecords(t, cfg, container_type)
         t.assertEquals(s.domain{1}.name, 'i');
         t.assertEquals(s.domain{2}.name, 'j');
     end
-    t.assert(numel(s.domain_labels) == 2);
-    t.assertEquals(s.domain_labels{1}, 'i');
-    t.assertEquals(s.domain_labels{2}, 'j');
+    t.assert(numel(s.domain_labels) == 0);
     t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 2);
     if is_const_cont

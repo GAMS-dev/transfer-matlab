@@ -229,7 +229,16 @@ void gt_mex_addsymbol(
     else
         gt_mex_addfield_dbl(mx_arr_sym_struct, "size", dim, NULL);
     gt_mex_addfield_cell_str(mx_arr_sym_struct, "domain", dim, domains);
-    gt_mex_addfield_cell_str(mx_arr_sym_struct, "domain_labels", dim, domain_labels);
+    switch (format)
+    {
+        case GT_FORMAT_TABLE:
+        case GT_FORMAT_STRUCT:
+            gt_mex_addfield_cell_str(mx_arr_sym_struct, "domain_labels", dim, domain_labels);
+            break;
+        default:
+            gt_mex_addfield_cell_str(mx_arr_sym_struct, "domain_labels", 0, NULL);
+            break;
+    }
     gt_mex_addfield_int(mx_arr_sym_struct, "domain_type", 1, &domain_type);
     if (mx_arr_records)
         mxSetFieldByNumber(mx_arr_sym_struct, 0, mxAddField(mx_arr_sym_struct, "records"), mx_arr_records);
@@ -860,8 +869,7 @@ void gt_mex_get_records(
     mxDouble**      mx_values,      /** values */
     mxArray**       mx_arr_domains, /** Matlab domains array */
     mxInt32**       mx_domains,     /** domains */
-    mxArray**       mx_arr_text,    /** explanatory text */
-    const char*     domains[]       /** domains of symbol */
+    mxArray**       mx_arr_text     /** explanatory text */
 )
 #else
 void gt_mex_get_records(
@@ -873,11 +881,11 @@ void gt_mex_get_records(
     double**        mx_values,      /** values */
     mxArray**       mx_arr_domains, /** Matlab domains array */
     INT32_T**       mx_domains,     /** domains */
-    mxArray**       mx_arr_text,    /** explanatory text */
-    const char*     domains[]       /** domains of symbol */
+    mxArray**       mx_arr_text     /** explanatory text */
 )
 #endif
 {
+    int num_domain_fields = 0;
     mxArray* mx_arr_field = NULL;
     const char* field_name = NULL;
 
@@ -916,20 +924,12 @@ void gt_mex_get_records(
         /* get domain fields */
         else
         {
-            bool valid_field_name = false;
-            for (size_t j = 0; j < dim; j++)
-            {
-                if (!strcmp(field_name, domains[j]))
-                {
-                    mx_arr_domains[j] = mx_arr_field;
-                    gt_mex_int32(&mx_arr_domains[j]);
-                    valid_field_name = true;
-                    continue;
-                }
-            }
-            if (!valid_field_name)
-                mexErrMsgIdAndTxt(ERRID"get_records", "Structure '%s' has invalid "
-                    "field '%s' in field 'records'.", name, field_name);
+            if (num_domain_fields >= dim)
+                mexErrMsgIdAndTxt(ERRID"get_records", "Structure '%s' has more domain fields than "
+                    "dimension (%d) in field 'records'.", name, dim);
+            mx_arr_domains[num_domain_fields] = mx_arr_field;
+            gt_mex_int32(&mx_arr_domains[num_domain_fields]);
+            num_domain_fields++;
         }
     }
 

@@ -50,8 +50,6 @@ void mexFunction(
     bool was_table, support_table, issorted, have_nrecs;
     char* data_name = NULL;
     idxHandle_t gdx = NULL;
-    gdxStrIndexPtrs_t domain_labels_ptr;
-    gdxStrIndex_t domain_labels;
     gdxUelIndex_t gdx_uel_index;
     gdxValues_t gdx_values;
     int sizes_int[GLOBAL_MAX_INDEX_DIM];
@@ -74,8 +72,6 @@ void mexFunction(
     mxArray* mx_arr_records = NULL;
     mxArray* mx_arr_values[GMS_VAL_MAX] = {NULL};
     mxArray** mx_arr_domains = NULL;
-
-    GDXSTRINDEXPTRS_INIT(domain_labels, domain_labels_ptr);
 
     /* check input / outputs */
     gt_mex_check_arguments_num(0, nlhs, 6, nrhs);
@@ -137,7 +133,6 @@ void mexFunction(
         /* get fields */
         gt_mex_getfield_str(mx_arr_data, data_name, "name_", "", true, name, GMS_SSSIZE);
         gt_mex_getfield_sizet(mx_arr_data, data_name, "dimension_", 0, true, GT_FILTER_NONNEGATIVE, 1, &dim);
-        gt_mex_getfield_cell_str(mx_arr_data, data_name, "domain_labels_", "", true, dim, domain_labels_ptr, GMS_SSSIZE);
         gt_mex_getfield_sizet(mx_arr_data, data_name, "size_", 1, true, GT_FILTER_NONNEGATIVE, dim, sizes);
 
         /* get optional fields */
@@ -180,7 +175,7 @@ void mexFunction(
 
         /* get domain and value fields of record field */
         gt_mex_get_records(data_name, dim, false, mx_arr_records, mx_arr_values,
-            mx_values, mx_arr_domains, mx_domains, NULL, (const char**) domain_labels_ptr);
+            mx_values, mx_arr_domains, mx_domains, NULL);
         gt_utils_type_default_values(GMS_DT_PAR, 0, false, def_values);
 
         /* get number of records */

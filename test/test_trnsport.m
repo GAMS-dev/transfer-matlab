@@ -258,8 +258,7 @@ function success = test_trnsport(cfg)
         t.assert(numel(a.domain) == 1);
         t.assertEquals(a.domain{1}.id, i.id);
         t.assertEquals(a.domain{1}.name, 'i');
-        t.assert(numel(a.domain_labels) == 1);
-        t.assertEquals(a.domain_labels{1}, 'i');
+        t.assert(numel(a.domain_labels) == 0);
         t.assertEquals(a.domain_type, 'regular');
         t.assert(numel(a.size) == 1);
         t.assert(a.size == 2);
@@ -286,8 +285,7 @@ function success = test_trnsport(cfg)
         t.assert(numel(b.domain) == 1);
         t.assertEquals(b.domain{1}.id, j.id);
         t.assertEquals(b.domain{1}.name, 'j');
-        t.assert(numel(b.domain_labels) == 1);
-        t.assertEquals(b.domain_labels{1}, 'j');
+        t.assert(numel(b.domain_labels) == 0);
         t.assertEquals(b.domain_type, 'regular');
         t.assert(numel(b.size) == 1);
         t.assert(b.size == 3);
@@ -318,9 +316,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(d.domain{2}.id, j.id);
         t.assertEquals(d.domain{1}.name, 'i');
         t.assertEquals(d.domain{2}.name, 'j');
-        t.assert(numel(d.domain_labels) == 2);
-        t.assertEquals(d.domain_labels{1}, 'i');
-        t.assertEquals(d.domain_labels{2}, 'j');
+        t.assert(numel(d.domain_labels) == 0);
         t.assertEquals(d.domain_type, 'regular');
         t.assert(numel(d.size) == 2);
         t.assert(all(d.size == [2,3]));
@@ -377,9 +373,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(c.domain{2}.id, j.id);
         t.assertEquals(c.domain{1}.name, 'i');
         t.assertEquals(c.domain{2}.name, 'j');
-        t.assert(numel(c.domain_labels) == 2);
-        t.assertEquals(c.domain_labels{1}, 'i');
-        t.assertEquals(c.domain_labels{2}, 'j');
+        t.assert(numel(c.domain_labels) == 0);
         t.assertEquals(c.domain_type, 'regular');
         t.assert(numel(c.size) == 2);
         t.assert(all(c.size == [2,3]));
@@ -417,9 +411,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(x.domain{2}.id, j.id);
         t.assertEquals(x.domain{1}.name, 'i');
         t.assertEquals(x.domain{2}.name, 'j');
-        t.assert(numel(x.domain_labels) == 2);
-        t.assertEquals(x.domain_labels{1}, 'i');
-        t.assertEquals(x.domain_labels{2}, 'j');
+        t.assert(numel(x.domain_labels) == 0);
         t.assertEquals(x.domain_type, 'regular');
         t.assert(numel(x.size) == 2);
         t.assert(all(x.size == [2,3]));
@@ -510,8 +502,7 @@ function success = test_trnsport(cfg)
         t.assert(numel(supply.domain) == 1);
         t.assertEquals(supply.domain{1}.id, i.id);
         t.assertEquals(supply.domain{1}.name, 'i');
-        t.assert(numel(supply.domain_labels) == 1);
-        t.assertEquals(supply.domain_labels{1}, 'i');
+        t.assert(numel(supply.domain_labels) == 0);
         t.assertEquals(supply.domain_type, 'regular');
         t.assert(numel(supply.size) == 1);
         t.assert(supply.size == 2);
@@ -546,8 +537,7 @@ function success = test_trnsport(cfg)
         t.assert(numel(demand.domain) == 1);
         t.assertEquals(demand.domain{1}.id, j.id);
         t.assertEquals(demand.domain{1}.name, 'j');
-        t.assert(numel(demand.domain_labels) == 1);
-        t.assertEquals(demand.domain_labels{1}, 'j');
+        t.assert(numel(demand.domain_labels) == 0);
         t.assertEquals(demand.domain_type, 'regular');
         t.assert(numel(demand.size) == 1);
         t.assert(demand.size == 3);

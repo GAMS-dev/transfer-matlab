@@ -46,7 +46,6 @@ void mexFunction(
     char domname[256], label[512];
     mxArray* mx_arr_domentry = NULL;
     mxArray* mx_arr_domnames = NULL;
-    mxArray* mx_arr_domlabels = NULL;
     mxArray* mx_arr_size = NULL;
 #ifdef WITH_R2018A_OR_NEWER
     mxDouble* mx_size;
@@ -64,7 +63,6 @@ void mexFunction(
 
     dim = mxGetNumberOfElements(prhs[1]);
     mx_arr_domnames = mxCreateCellMatrix(1, dim);
-    mx_arr_domlabels = mxCreateCellMatrix(1, dim);
     mx_arr_size = mxCreateDoubleMatrix(1, dim, mxREAL);
     dominfo_none = true;
     dominfo_regular = true;
@@ -91,7 +89,6 @@ void mexFunction(
                 dominfo_none = false;
             }
             mxSetCell(mx_arr_domnames, i, mxCreateString(domname));
-            mxSetCell(mx_arr_domlabels, i, mxCreateString(label));
 
             /* set size */
             mx_size[i] = mxGetNaN();
@@ -146,7 +143,6 @@ void mexFunction(
             /* set domain label */
             sprintf(label, "%s_%d", domname, (int) i+1);
             mxSetCell(mx_arr_domnames, i, mxCreateString(domname));
-            mxSetCell(mx_arr_domlabels, i, mxCreateString(label));
             dominfo_none = false;
         }
         else
@@ -156,7 +152,6 @@ void mexFunction(
     mxSetProperty((mxArray*) prhs[0], 0, "domain_", prhs[1]);
     mxSetProperty((mxArray*) prhs[0], 0, "dimension_", mxCreateDoubleScalar(dim));
     mxSetProperty((mxArray*) prhs[0], 0, "domain_names_", mx_arr_domnames);
-    mxSetProperty((mxArray*) prhs[0], 0, "domain_labels_", mx_arr_domlabels);
     if (dominfo_none)
         mxSetProperty((mxArray*) prhs[0], 0, "domain_type_", mxCreateString("none"));
     else if (dominfo_regular)
