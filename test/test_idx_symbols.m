@@ -68,8 +68,7 @@ function test_idx_addSymbols(t, cfg)
     t.assertEquals(p2.domain{1}, 'dim_1');
     t.assert(numel(p2.domain_names) == 1);
     t.assertEquals(p2.domain_names{1}, 'dim_1');
-    t.assert(numel(p2.domain_labels) == 1);
-    t.assertEquals(p2.domain_labels{1}, 'dim_1');
+    t.assert(numel(p2.domain_labels) == 0);
     t.assertEquals(p2.domain_type, 'relaxed');
     t.assert(numel(p2.size) == 1);
     t.assert(p2.size(1) == 0);
@@ -94,10 +93,7 @@ function test_idx_addSymbols(t, cfg)
     t.assertEquals(p3.domain_names{1}, 'dim_1');
     t.assertEquals(p3.domain_names{2}, 'dim_2');
     t.assertEquals(p3.domain_names{3}, 'dim_3');
-    t.assert(numel(p3.domain_labels) == 3);
-    t.assertEquals(p3.domain_labels{1}, 'dim_1');
-    t.assertEquals(p3.domain_labels{2}, 'dim_2');
-    t.assertEquals(p3.domain_labels{3}, 'dim_3');
+    t.assert(numel(p3.domain_labels) == 0);
     t.assertEquals(p3.domain_type, 'relaxed');
     t.assert(numel(p3.size) == 3);
     t.assert(p3.size(1) == 1);
@@ -302,12 +298,12 @@ function test_idx_changeSymbol(t, cfg)
     t.assert(p1.size == 5);
     t.assert(p1.dimension == 1);
     t.assert(numel(p1.domain) == 1);
-    t.assert(numel(p1.domain_labels) == 1);
+    t.assert(numel(p1.domain_labels) == 0);
     p1.size = 10;
     t.assert(p1.size == 10);
     t.assert(p1.dimension == 1);
     t.assert(numel(p1.domain) == 1);
-    t.assert(numel(p1.domain_labels) == 1);
+    t.assert(numel(p1.domain_labels) == 0);
     p1.size = [10, 20];
     t.assert(p1.size(1) == 10);
     t.assert(p1.size(2) == 20);
@@ -315,9 +311,7 @@ function test_idx_changeSymbol(t, cfg)
     t.assert(numel(p1.domain) == 2);
     t.assertEquals(p1.domain{1}, 'dim_1');
     t.assertEquals(p1.domain{2}, 'dim_2');
-    t.assert(numel(p1.domain_labels) == 2);
-    t.assertEquals(p1.domain_labels{1}, 'dim_1');
-    t.assertEquals(p1.domain_labels{2}, 'dim_2');
+    t.assert(numel(p1.domain_labels) == 0);
 
     t.add('idx_change_symbol_size_2');
     try
@@ -357,12 +351,22 @@ function test_idx_changeSymbol(t, cfg)
     end
 
     t.add('idx_change_symbol_domain_labels_1');
+    p1.size = [10, 10];
+    p1.records = struct();
+    p1.records.dim_1 = [1; 2; 3];
+    p1.records.dim_2 = [2; 4; 6];
+    p1.records.value = [1; 2; 3];
+    t.assert(p1.isValid());
     t.assert(numel(p1.size) == 2);
     t.assert(p1.dimension == 2);
     t.assert(numel(p1.domain) == 2);
     t.assert(numel(p1.domain_labels) == 2);
     t.assertEquals(p1.domain_labels{1}, 'dim_1');
     t.assertEquals(p1.domain_labels{2}, 'dim_2');
+    t.assert(isfield(p1.records, 'dim_1'));
+    t.assert(isfield(p1.records, 'dim_2'));
+    t.assert(~isfield(p1.records, 'd1'));
+    t.assert(~isfield(p1.records, 'd2'));
     p1.domain_labels = {'d1', 'd2'};
     t.assert(numel(p1.size) == 2);
     t.assert(p1.dimension == 2);
@@ -370,6 +374,11 @@ function test_idx_changeSymbol(t, cfg)
     t.assert(numel(p1.domain_labels) == 2);
     t.assertEquals(p1.domain_labels{1}, 'd1');
     t.assertEquals(p1.domain_labels{2}, 'd2');
+    t.assert(~isfield(p1.records, 'dim_1'));
+    t.assert(~isfield(p1.records, 'dim_2'));
+    t.assert(isfield(p1.records, 'd1'));
+    t.assert(isfield(p1.records, 'd2'));
+    t.assert(p1.isValid());
 
     t.add('idx_change_symbol_domain_labels_2');
     try
@@ -584,7 +593,7 @@ function test_idx_setRecords(t, cfg)
         p1.setRecords({[1; 4], [11; 44], [111; 444], [1111; 4444], [11111; 44444]});
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain ''dim_1'' is missing.');
+        t.assertEquals(e.message, 'Incorrect number of domain fields.');
     end
 
     t.add('set_records_cell_4');
@@ -611,9 +620,13 @@ function test_idx_setRecords(t, cfg)
     t.assert(p1.isValid());
 
     t.add('set_records_struct_2');
-    p1.setRecords(struct('marginal', [1; 2; 3; 4; 5]));
-    t.assertEquals(p1.format, 'empty');
-    t.assert(p1.isValid());
+    try
+        t.assert(false);
+        p1.setRecords(struct('marginal', [1; 2; 3; 4; 5]));
+    catch e
+        t.reset();
+        t.assertEquals(e.message, 'Domain fields not allowed in this format.');  
+    end
 
     t.add('set_records_struct_3');
     try
@@ -648,7 +661,7 @@ function test_idx_setRecords(t, cfg)
         p1.setRecords(struct('value', [1, 2, 3]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain ''dim_1'' is missing.');
+        t.assertEquals(e.message, 'Incorrect number of domain fields.');
     end
 
     if gdx.features.table

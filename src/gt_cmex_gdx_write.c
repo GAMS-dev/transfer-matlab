@@ -51,8 +51,8 @@ void mexFunction(
     bool have_nrecs, support_setget, can_skip_default_recs;
     char* data_name = NULL;
     gdxHandle_t gdx = NULL;
-    gdxStrIndexPtrs_t domains_ptr, domain_labels_ptr;
-    gdxStrIndex_t domains, domain_labels;
+    gdxStrIndexPtrs_t domains_ptr;
+    gdxStrIndex_t domains;
     gdxUelIndex_t gdx_uel_index;
     gdxValues_t gdx_values;
     mwIndex idx;
@@ -81,7 +81,6 @@ void mexFunction(
     mxArray** mx_arr_domains = NULL;
 
     GDXSTRINDEXPTRS_INIT(domains, domains_ptr);
-    GDXSTRINDEXPTRS_INIT(domain_labels, domain_labels_ptr);
 
     /* check input / outputs */
     gt_mex_check_arguments_num(0, nlhs, 10, nrhs);
@@ -188,7 +187,6 @@ void mexFunction(
         gt_mex_getfield_str(mx_arr_data, data_name, "name_", "", true, name, GMS_SSSIZE);
         gt_mex_getfield_sizet(mx_arr_data, data_name, "dimension_", 0, true, GT_FILTER_NONNEGATIVE, 1, &dim);
         gt_mex_getfield_cell_str(mx_arr_data, data_name, "domain_", "", true, dim, domains_ptr, GMS_SSSIZE);
-        gt_mex_getfield_cell_str(mx_arr_data, data_name, "domain_labels_", "", true, dim, domain_labels_ptr, GMS_SSSIZE);
 
         /* get UELs */
         mx_arr_uels = mxCreateCellMatrix(1, dim);
@@ -276,8 +274,7 @@ void mexFunction(
 
         /* get domain and value fields of record field */
         gt_mex_get_records(data_name, dim, support_categorical, mx_arr_records,
-            mx_arr_values, mx_values, mx_arr_domains, mx_domains, &mx_arr_text,
-            (const char**) domain_labels_ptr);
+            mx_arr_values, mx_values, mx_arr_domains, mx_domains, &mx_arr_text);
         gt_utils_type_default_values(type, subtype, false, def_values);
 
         /* register set explanatory texts */

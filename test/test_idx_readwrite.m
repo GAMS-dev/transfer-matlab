@@ -123,8 +123,12 @@ function test_idx_read(t, cfg, container_type)
     t.assert(s.dimension == 1);
     t.assert(numel(s.domain) == 1);
     t.assertEquals(s.domain{1}, 'dim_1');
-    t.assert(numel(s.domain_labels) == 1);
-    t.assertEquals(s.domain_labels{1}, 'dim_1');
+    if is_const_cont
+        t.assert(numel(s.domain_labels) == 0);
+    else
+        t.assert(numel(s.domain_labels) == 1);
+        t.assertEquals(s.domain_labels{1}, 'dim_1');
+    end
     t.assertEquals(s.domain_type, 'relaxed');
     t.assert(numel(s.size) == 1);
     t.assert(s.size(1) == 5);
@@ -151,9 +155,13 @@ function test_idx_read(t, cfg, container_type)
     t.assert(numel(s.domain) == 2);
     t.assertEquals(s.domain{1}, 'dim_1');
     t.assertEquals(s.domain{2}, 'dim_2');
-    t.assert(numel(s.domain_labels) == 2);
-    t.assertEquals(s.domain_labels{1}, 'dim_1');
-    t.assertEquals(s.domain_labels{2}, 'dim_2');
+    if is_const_cont
+        t.assert(numel(s.domain_labels) == 0);
+    else
+        t.assert(numel(s.domain_labels) == 2);
+        t.assertEquals(s.domain_labels{1}, 'dim_1');
+        t.assertEquals(s.domain_labels{2}, 'dim_2');
+    end
     t.assertEquals(s.domain_type, 'relaxed');
     t.assert(numel(s.size) == 2);
     t.assert(s.size(1) == 5);

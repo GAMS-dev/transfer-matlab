@@ -71,11 +71,15 @@ classdef Symbol < handle
         domain
 
 
-        %> Expected domain labels in records. If the domain changes, previous
-        %> changes of the labels will be reset.
+        %> Domain labels in records.
+        %>
+        %> Domain labels mirror the field/column names for domains in records. They only exist for
+        %> \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT "formats" table and struct. Setting domain labels
+        %> may modify the given labels to make them unique by adding _<dim>. * is changed to uni.
 
-        % domain_labels Expected domain labels in records. If the domain
-        % changes, previous changes of the labels will be reset.
+        % domain_labels Domain labels mirror the field/column names for domains in records. They
+        % only exist for formats table and struct. Setting domain labels may modify the given labels
+        % to make them unique by adding _<dim>. * is changed to uni.
         domain_labels
     end
 
@@ -160,7 +164,6 @@ classdef Symbol < handle
         dimension_
         domain_
         domain_names_
-        domain_labels_
         domain_type_
         domain_forwarding_
         size_
@@ -218,8 +221,7 @@ classdef Symbol < handle
             obj.number_records_ = nan;
             obj.domain_forwarding_ = domain_forwarding;
 
-            % the following inits dimension_, domain_, domain_names_, domain_labels_,
-            % domain_type_, uels
+            % the following inits dimension_, domain_, domain_names_, domain_type_, uels
             if container.indexed
                 obj.size = domain_size;
             else
@@ -283,33 +285,38 @@ classdef Symbol < handle
                 error('Setting symbol domain not allowed in indexed mode.');
             end
 
+            old_domain = obj.domain_;
             GAMSTransfer.gt_cmex_set_sym_domain(obj, domain, obj.container.id, ...
                 obj.container.features.c_prop_setget);
 
-            % check if domains names are valid labels
-            if numel(unique(obj.domain_names_)) == obj.dimension_
-                obj.domain_labels_ = obj.domain_names_;
-                for i = 1:obj.dimension_
-                    if strcmp(obj.domain_labels_{i}, '*')
-                        obj.domain_labels_{i} = 'uni';
-                    end
-                end
-            end
-
             % update uels
             if ~obj.container.features.categorical
-                uels = struct();
+                same_domain = false(1, numel(domain));
+                for i = 1:min(numel(old_domain), numel(domain))
+                    old_domain_i = old_domain{i};
+                    if isa(old_domain_i, 'GAMSTransfer.Set') || ...
+                        isa(old_domain_i, 'GAMSTransfer.Alias')
+                        old_domain_i = old_domain_i.name;
+                    end
+                    new_domain_i = domain{i};
+                    if isa(new_domain_i, 'GAMSTransfer.Set') || ...
+                        isa(new_domain_i, 'GAMSTransfer.Alias')
+                        new_domain_i = new_domain_i.name;
+                    end
+                    same_domain(i) = strcmp(old_domain_i, new_domain_i);
+                end
+
+                uels = cell(1, obj.dimension_);
                 for i = 1:obj.dimension_
-                    label = obj.domain_labels_{i};
-                    if isfield(obj.uels, label)
-                        uels.(label) = obj.uels.(label);
+                    if same_domain(i)
+                        uels{i} = obj.uels{i};
                     elseif (isa(obj.domain_{i}, 'GAMSTransfer.Set') || ...
                         isa(obj.domain_{i}, 'GAMSTransfer.Alias')) && ...
                         obj.domain_{i}.isValidAsDomain()
-                        uels.(label) = GAMSTransfer.UniqueElementList();
-                        uels.(label).set(obj.domain_{i}.getUELs(1, 'ignore_unused', true), []);
+                        uels{i} = GAMSTransfer.UniqueElementList();
+                        uels{i}.set(obj.domain_{i}.getUELs(1, 'ignore_unused', true), []);
                     else
-                        uels.(label) = GAMSTransfer.UniqueElementList();
+                        uels{i} = GAMSTransfer.UniqueElementList();
                     end
                 end
                 obj.uels = uels;
@@ -329,23 +336,69 @@ classdef Symbol < handle
         end
 
         function domain_labels = get.domain_labels(obj)
-            domain_labels = obj.domain_labels_;
+            rec_labels = {};
+            if obj.container.features.table && istable(obj.records)
+                rec_labels = obj.records.Properties.VariableNames;
+            elseif isstruct(obj.records)
+                rec_labels = fieldnames(obj.records);
+            end
+
+            n = 0;
+            for i = 1:numel(rec_labels)    
+                switch rec_labels{i}
+                case obj.TEXT_FIELDS
+                case obj.VALUE_FIELDS
+                otherwise
+                    n = n + 1;
+                end
+            end
+
+            domain_labels = cell(1, n);
+            n = 0;
+            for i = 1:numel(rec_labels)    
+                switch rec_labels{i}
+                case obj.TEXT_FIELDS
+                case obj.VALUE_FIELDS
+                otherwise
+                    n = n + 1;
+                    domain_labels{n} = rec_labels{i};
+                end
+            end
         end
 
         function set.domain_labels(obj, labels)
-            if ~iscellstr(labels)
-                error('Domain labels must be of type ''cellstr''.');
+            switch (obj.format_)
+            case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
+                old_labels = obj.domain_labels;
+                if ~iscellstr(labels)
+                    error('Domain labels must be of type ''cellstr''.');
+                end
+                if numel(labels) ~= obj.dimension_
+                    error('Domain labels must have length equal to symbol dimension.');
+                end
+                if numel(unique(labels)) ~= numel(labels)
+                    error('Domain labels must be unique.');
+                end
+                labels = GAMSTransfer.Symbol.createDomainLabels(labels);
+            otherwise
+                error('Setting domain labels supported for ''table'' and ''struct'' format only.');
             end
-            if numel(labels) ~= obj.dimension_
-                error('Domain labels must have length equal to symbol dimension.');
+            switch (obj.format_)
+            case GAMSTransfer.RecordsFormat.STRUCT
+                records = struct();
+                fields = fieldnames(obj.records);
+                for i = 1:numel(fields)
+                    idx = find(strcmp(fields{i}, old_labels), 1);
+                    if isempty(idx)
+                        records.(fields{i}) = obj.records.(fields{i});
+                    else
+                        records.(labels{idx}) = obj.records.(fields{i});
+                    end
+                end
+                obj.records = records;
+            case GAMSTransfer.RecordsFormat.TABLE
+                obj.records = renamevars(obj.records, old_labels, labels);
             end
-            if numel(unique(labels)) ~= numel(labels)
-                error('Domain labels must be unique.');
-            end
-            for i = 1:obj.dimension_
-                obj.domain_labels_{i} = labels{i};
-            end
-            obj.modified = true;
         end
 
         function domain_type = get.domain_type(obj)
@@ -402,12 +455,10 @@ classdef Symbol < handle
 
             % generate domain (labels)
             obj.domain_names_ = cell(1, obj.dimension_);
-            obj.domain_labels_ = cell(1, obj.dimension_);
             obj.domain_ = cell(1, obj.dimension_);
             for i = 1:obj.dimension_
                 obj.domain_{i} = sprintf('dim_%d', i);
                 obj.domain_names_{i} = obj.domain_{i};
-                obj.domain_labels_{i} = obj.domain_{i};
             end
 
             % determine domain info type
@@ -536,6 +587,8 @@ classdef Symbol < handle
                 records = varargin;
             end
 
+            domain_labels = GAMSTransfer.Symbol.createDomainLabels(obj.domain_names);
+
             % collect uels
             uels = cell(1, obj.dimension_);
 
@@ -548,7 +601,7 @@ classdef Symbol < handle
                     error('Single string as records only accepted if symbol dimension equals 1.');
                 end
                 uels{1} = {records};
-                obj.setRecordsDomainField(1, uels{1}, {records});
+                obj.setRecordsDomainField(domain_labels{1}, uels{1}, {records});
 
             % cell of strings -> domain entries
             elseif iscellstr(records)
@@ -562,7 +615,7 @@ classdef Symbol < handle
                 for i = 1:obj.dimension_
                     [~,uidx,~] = unique(records(i,:), 'first');
                     uels{i} = records(i,sort(uidx));
-                    obj.setRecordsDomainField(i, uels{i}, records(i,:));
+                    obj.setRecordsDomainField(domain_labels{i}, uels{i}, records(i,:));
                 end
 
             % numeric vector -> interpret as level values in matrix format
@@ -595,7 +648,7 @@ classdef Symbol < handle
                         end
                         [~,uidx,~] = unique(records{i}, 'first');
                         uels{n_dom_fields} = records{i}(sort(uidx));
-                        obj.setRecordsDomainField(n_dom_fields, uels{n_dom_fields}, records{i});
+                        obj.setRecordsDomainField(domain_labels{n_dom_fields}, uels{n_dom_fields}, records{i});
                     else
                         error('Cell elements must be cellstr or numeric.');
                     end
@@ -604,6 +657,7 @@ classdef Symbol < handle
             % struct -> check fields for domain or value fields
             elseif isstruct(records) && numel(records) == 1
                 fields = fieldnames(records);
+                num_domains = 0;
                 for i = 1:numel(fields)
                     field = fields{i};
                     j = find(ismember(obj.VALUE_FIELDS, field));
@@ -616,17 +670,12 @@ classdef Symbol < handle
                         obj.setRecordsTextField(records.(field));
                         continue
                     end
-                    for j = 1:obj.dimension_
-                        if strcmp(field, obj.domain_labels_{j}) || ...
-                            (isa(obj.domain_{j}, 'GAMSTransfer.Set') || ...
-                            isa(obj.domain_{j}, 'GAMSTransfer.Alias')) && ...
-                            strcmp(field, obj.domain_{j}.name)
-                            rec_field = records.(field);
-                            [~,uidx,~] = unique(rec_field, 'first');
-                            uels{j} = rec_field(sort(uidx));
-                            obj.setRecordsDomainField(j, uels{j}, rec_field);
-                            break;
-                        end
+                    if (num_domains < obj.dimension_)
+                        num_domains = num_domains + 1;
+                        rec_field = records.(field);
+                        [~,uidx,~] = unique(rec_field, 'first');
+                        uels{num_domains} = rec_field(sort(uidx));
+                        obj.setRecordsDomainField(field, uels{num_domains}, rec_field);
                     end
                 end
 
@@ -773,9 +822,11 @@ classdef Symbol < handle
                     s(1:obj.dimension_) = obj.size_;
                     if obj.dimension_ > 0
                         idx_sub = cell(1, obj.dimension_);
+                        domain_labels = obj.domain_labels;
                         for i = 1:obj.dimension_
+                            label = domain_labels{i};
                             if obj.container.indexed
-                                idx_sub{i} = obj.records.(obj.domain_labels_{i});
+                                idx_sub{i} = obj.records.(label);
                             else
                                 % get UEL mapping w.r.t. domain set
                                 domain_uels = obj.domain_{i}.getUELs(1, ...
@@ -784,7 +835,7 @@ classdef Symbol < handle
                                 if any(uel_map == 0)
                                     error('Found domain violation.');
                                 end
-                                idx_sub{i} = uel_map(obj.records.(obj.domain_labels_{i}));
+                                idx_sub{i} = uel_map(obj.records.(label));
                             end
                         end
                         idx = sub2ind(s, idx_sub{:});
@@ -856,6 +907,8 @@ classdef Symbol < handle
             case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
                 switch target_format
                 case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
+                    domain_labels = GAMSTransfer.Symbol.createDomainLabels(obj.domain_names);
+
                     % get all possible indices
                     s = ones(1, max(2, obj.dimension_));
                     s(1:obj.dimension_) = obj.size_;
@@ -902,7 +955,7 @@ classdef Symbol < handle
 
                     % store domain fields
                     for i = 1:obj.dimension_
-                        label = obj.domain_labels_{i};
+                        label = domain_labels{i};
                         records.(label) = k_sorted(:,i);
                         if ~obj.container.indexed && obj.container.features.categorical
                             records.(label) = categorical(records.(label), ...
@@ -968,7 +1021,6 @@ classdef Symbol < handle
             eq = eq && isequaln(obj.description_, symbol.description_);
             eq = eq && isequaln(obj.dimension_, symbol.dimension_);
             eq = eq && isequaln(obj.domain_names_, symbol.domain_names_);
-            eq = eq && isequaln(obj.domain_labels_, symbol.domain_labels_);
             eq = eq && isequaln(obj.domain_type_, symbol.domain_type_);
             eq = eq && isequaln(obj.domain_forwarding_, symbol.domain_forwarding_);
             eq = eq && isequaln(obj.size_, symbol.size_);
@@ -990,7 +1042,7 @@ classdef Symbol < handle
                 end
 
                 if ~obj.container.indexed && ~obj.container.features.categorical
-                    eq = eq && obj.uels.(obj.domain_labels_{i}).equals(symbol.uels.(symbol.domain_labels_{i}));
+                    eq = eq && obj.uels{i}.equals(symbol.uels{i});
                 end
             end
         end
@@ -1064,7 +1116,6 @@ classdef Symbol < handle
             newsym.dimension_ = obj.dimension_;
             newsym.domain_ = obj.domain_;
             newsym.domain_names_ = obj.domain_names_;
-            newsym.domain_labels_ = obj.domain_labels_;
             newsym.domain_type_ = obj.domain_type_;
             newsym.domain_forwarding_ = obj.domain_forwarding_;
             newsym.size_ = obj.size_;
@@ -1172,7 +1223,7 @@ classdef Symbol < handle
                 end
 
                 % check column / field names and data types
-                has_domain_label = obj.checkRecordFields(labels);
+                num_domains = obj.checkRecordFields(labels);
 
                 % check records format
                 obj.format_ = obj.checkRecordFormat(labels);
@@ -1180,11 +1231,12 @@ classdef Symbol < handle
                 % check domain fields
                 switch obj.format_
                 case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
-                    % check if domain fields are given
-                    for i = 1:obj.dimension_
-                        if ~has_domain_label(i)
-                            error('Domain ''%s'' is missing.', obj.domain_labels_{i});
-                        end
+                    if num_domains ~= obj.dimension_
+                        error('Incorrect number of domain fields.');
+                    end
+                otherwise
+                    if num_domains ~= 0
+                        error('Domain fields not allowed in this format.');
                     end
                 end
 
@@ -1199,9 +1251,11 @@ classdef Symbol < handle
             end
 
             % resolve domain violations
-            for i = 1:obj.dimension_
-                if obj.domain_forwarding_(i)
-                    obj.resolveDomainViolations(i);
+            if ~obj.container.indexed
+                for i = 1:obj.dimension_
+                    if obj.domain_forwarding_(i)
+                        obj.resolveDomainViolations(i);
+                    end
                 end
             end
         end
@@ -1562,8 +1616,9 @@ classdef Symbol < handle
                 if numel(fields) > 0
                     nrecs = numel(obj.records.(fields{1}));
                 else
+                    domain_labels = obj.domain_labels;
                     for i = 1:obj.dimension_
-                        label = obj.domain_labels_{i};
+                        label = domain_labels{i};
                         if isfield(obj.records, label)
                             nrecs = numel(obj.records.(label));
                             break;
@@ -1727,6 +1782,7 @@ classdef Symbol < handle
             end
 
             uels = {};
+            domain_labels = obj.domain_labels;
             for i = dim
                 switch obj.format_
                 case GAMSTransfer.RecordsFormat.EMPTY
@@ -1735,7 +1791,7 @@ classdef Symbol < handle
                     domain_codes = uint8(obj.domain_{i}.records.(obj.domain_{i}.domain_labels{1}));
                     uels_i = obj.domain_{i}.getUELs(1, domain_codes(codes));
                 case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
-                    label = obj.domain_labels_{i};
+                    label = domain_labels{i};
                     if obj.container.features.categorical
                         if ignore_unused
                             uels_i = categories(removecats(obj.records.(label)));
@@ -1743,7 +1799,7 @@ classdef Symbol < handle
                             uels_i = categories(obj.records.(label));
                         end
                     else
-                        uels_i = obj.uels.(label).get();
+                        uels_i = obj.uels{i}.get();
                         if ignore_unused
                             uels_i = uels_i(unique(obj.records.(label)));
                         end
@@ -1846,14 +1902,15 @@ classdef Symbol < handle
                 error('Symbol must be valid in order to manage UELs.');
             end
 
+            domain_labels = obj.domain_labels;
             for i = dim
-                label = obj.domain_labels_{i};
+                label = domain_labels{i};
                 if rename
                     if obj.container.features.categorical
                         obj.records.(label) = categorical(double(obj.records.(label)), ...
                             1:numel(uels), uels, 'Ordinal', true);
                     else
-                        obj.uels.(label).set(uels, []);
+                        obj.uels{i}.set(uels, []);
                     end
                 else
                     if obj.container.features.categorical
@@ -1864,9 +1921,9 @@ classdef Symbol < handle
                         end
                     else
                         if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
-                            obj.uels.(label).set(uels, []);
+                            obj.uels{i}.set(uels, []);
                         else
-                            obj.records.(label) = obj.uels.(label).set(uels, obj.records.(label));
+                            obj.records.(label) = obj.uels{i}.set(uels, obj.records.(label));
                         end
                     end
                 end
@@ -1972,8 +2029,9 @@ classdef Symbol < handle
                 error('Symbol must be valid in order to manage UELs.');
             end
 
+            domain_labels = obj.domain_labels;
             for i = dim
-                label = obj.domain_labels_{i};
+                label = domain_labels{i};
                 if obj.container.features.categorical
                     if isordinal(obj.records.(label))
                         cats = categories(obj.records.(label));
@@ -1986,7 +2044,7 @@ classdef Symbol < handle
                         obj.records.(label) = addcats(obj.records.(label), uels);
                     end
                 else
-                    obj.uels.(label).add(uels);
+                    obj.uels{i}.add(uels);
                 end
             end
 
@@ -2057,8 +2115,9 @@ classdef Symbol < handle
                 error('Symbol must be valid in order to manage UELs.');
             end
 
+            domain_labels = obj.domain_labels;
             for i = dim
-                label = obj.domain_labels_{i};
+                label = domain_labels{i};
                 if obj.container.features.categorical
                     if isempty(uels)
                         obj.records.(label) = removecats(obj.records.(label));
@@ -2070,9 +2129,9 @@ classdef Symbol < handle
                         uels = setdiff(obj.getUELs(i), obj.getUELs(i, 'ignore_unused', true));
                     end
                     if obj.format_ == GAMSTransfer.RecordsFormat.EMPTY
-                        obj.records.(label) = obj.uels.(label).remove(uels, []);
+                        obj.records.(label) = obj.uels{i}.remove(uels, []);
                     else
-                        obj.records.(label) = obj.uels.(label).remove(uels, obj.records.(label));
+                        obj.records.(label) = obj.uels{i}.remove(uels, obj.records.(label));
                     end
                 end
             end
@@ -2160,8 +2219,9 @@ classdef Symbol < handle
                 error('Symbol must be valid in order to manage UELs.');
             end
 
+            domain_labels = obj.domain_labels;
             for i = dim
-                label = obj.domain_labels_{i};
+                label = domain_labels{i};
 
                 if isa(uels, 'containers.Map')
                     olduels = keys(uels);
@@ -2181,7 +2241,7 @@ classdef Symbol < handle
                         olduels = categories(obj.records.(label));
                         newuels = uels;
                     else
-                        olduels = obj.uels.(label).get();
+                        olduels = obj.uels{i}.get();
                         newuels = uels;
                     end
                 end
@@ -2195,7 +2255,7 @@ classdef Symbol < handle
                     if obj.container.features.categorical
                         unavail = ~ismember(olduels, categories(obj.records.(label)));
                     else
-                        unavail = ~ismember(olduels, obj.uels.(label).get());
+                        unavail = ~ismember(olduels, obj.uels{i}.get());
                     end
                     olduels(unavail) = [];
                     newuels(unavail) = [];
@@ -2215,10 +2275,10 @@ classdef Symbol < handle
                     end
                 else
                     if allow_merge
-                        obj.records.(label) = obj.uels.(label).rename(olduels, ...
+                        obj.records.(label) = obj.uels{i}.rename(olduels, ...
                             newuels, obj.records.(label));
                     else
-                        obj.uels.(label).rename(olduels, newuels, []);
+                        obj.uels{i}.rename(olduels, newuels, []);
                     end
                 end
             end
@@ -2251,12 +2311,29 @@ classdef Symbol < handle
 
     end
 
+    methods (Hidden, Static)
+
+        function domain_labels = createDomainLabels(domain_names)
+            n = numel(domain_names);
+            domain_labels = domain_names;
+            for i = 1:n
+                if isequal(domain_labels{i}, '*')
+                    domain_labels{i} = 'uni';
+                end
+            end
+            if numel(unique(domain_labels)) ~= numel(domain_labels)
+                for i = n
+                    domain_labels{i} = sprintf('%s_%d', domain_labels{i}, i);
+                end 
+            end
+        end
+
+    end
+
     methods (Hidden, Access = protected)
 
-        function has_domain_label = checkRecordFields(obj, labels)
-            has_domain_label = zeros(1, obj.dimension_);
-
-            % check name and data type
+        function num_domains = checkRecordFields(obj, labels)
+            num_domains = 0;
             for i = 1:numel(labels)
                 field = obj.records.(labels{i});
                 switch labels{i}
@@ -2269,16 +2346,7 @@ classdef Symbol < handle
                         error('Field ''%s'' must be of type ''numeric''.', labels{i});
                     end
                 otherwise
-                    is_domain_column = false;
-                    for j = 1:obj.dimension_
-                        if strcmp(labels{i}, obj.domain_labels_{j})
-                            is_domain_column = true;
-                            has_domain_label(j) = 1;
-                        end
-                    end
-                    if ~is_domain_column
-                        error('Field ''%s'' not allowed.', labels{i});
-                    end
+                    num_domains = num_domains + 1;
                     if obj.container.features.categorical && iscategorical(field)
                         if obj.container.indexed
                             error('Field ''%s'' must not be categorical in indexed mode.', labels{i})
@@ -2419,11 +2487,9 @@ classdef Symbol < handle
             end
         end
 
-        function setRecordsDomainField(obj, dim, uels, domains)
-            label = obj.domain_labels_{dim};
-
+        function setRecordsDomainField(obj, label, uels, domains)
             if numel(size(domains)) > 2
-                error('Domain %d has invalid shape.', dim);
+                error('Domain %s has invalid shape.', label);
             end
             domains = reshape(domains, [numel(domains), 1]);
 
