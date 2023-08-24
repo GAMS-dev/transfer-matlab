@@ -830,7 +830,7 @@ classdef Symbol < handle
                             else
                                 % get UEL mapping w.r.t. domain set
                                 domain_uels = obj.domain_{i}.getUELs(1, ...
-                                    uint8(obj.domain_{i}.records.(obj.domain_{i}.domain_labels{1})));
+                                    uint64(obj.domain_{i}.records.(obj.domain_{i}.domain_labels{1})));
                                 [~, uel_map] = ismember(obj.getUELs(i), domain_uels);
                                 if any(uel_map == 0)
                                     error('Found domain violation.');
@@ -949,7 +949,7 @@ classdef Symbol < handle
                     if ~obj.container.indexed
                         for i = 1:obj.dimension_
                             uels{i} = obj.domain_{i}.getUELs(1, ...
-                                uint8(obj.domain_{i}.records.(obj.domain_{i}.domain_labels{1})));
+                                uint64(obj.domain_{i}.records.(obj.domain_{i}.domain_labels{1})));
                         end
                     end
 
@@ -1788,7 +1788,7 @@ classdef Symbol < handle
                 case GAMSTransfer.RecordsFormat.EMPTY
                     uels_i = {};
                 case {GAMSTransfer.RecordsFormat.DENSE_MATRIX, GAMSTransfer.RecordsFormat.SPARSE_MATRIX}
-                    domain_codes = uint8(obj.domain_{i}.records.(obj.domain_{i}.domain_labels{1}));
+                    domain_codes = uint64(obj.domain_{i}.records.(obj.domain_{i}.domain_labels{1}));
                     uels_i = obj.domain_{i}.getUELs(1, domain_codes(codes));
                 case {GAMSTransfer.RecordsFormat.STRUCT, GAMSTransfer.RecordsFormat.TABLE}
                     label = domain_labels{i};

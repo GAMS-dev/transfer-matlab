@@ -1,3 +1,7 @@
+GAMS Transfer Matlab v0.6.1
+==================
+- Fixed bug that limited the number of used UELs in `Symbol.transformRecords` and `Symbol.getUELs`.
+
 GAMS Transfer Matlab v0.6.0
 ==================
 - Breaking: `Symbol.domain_labels` now mirrors the column or field names for domains in
