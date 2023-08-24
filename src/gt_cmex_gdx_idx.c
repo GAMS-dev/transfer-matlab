@@ -76,16 +76,6 @@ void gt_gdx_init_write(
     }
 }
 
-void gt_gdx_fini(
-    gdxHandle_t*    gdx             /** GDX handle */
-)
-{
-    gdxClose(*gdx);
-    gdxFree(gdx);
-    gdx = NULL;
-    gdxLibraryUnload();
-}
-
 void gt_idx_init_read(
     idxHandle_t*    gdx,            /** IDX handle */
     const char*     sysdir,         /** GAMS system directory */
@@ -128,16 +118,6 @@ void gt_idx_init_write(
         idxErrorStr(*gdx, status, buf, GMS_SSSIZE);
         mexErrMsgIdAndTxt(ERRID"idxOpenWrite", buf);
     }
-}
-
-void gt_idx_fini(
-    idxHandle_t*    gdx             /** IDX handle */
-)
-{
-    idxClose(*gdx);
-    idxFree(gdx);
-    gdx = NULL;
-    // idxLibraryUnload();
 }
 
 void gt_gdx_register_uels(

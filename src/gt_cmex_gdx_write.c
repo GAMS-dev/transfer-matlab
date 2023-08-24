@@ -509,5 +509,7 @@ void mexFunction(
     if (compress)
         gdxAutoConvert(gdx, 0);
 
-    gt_gdx_fini(&gdx);
+    gdxClose(gdx);
+    gdxFree(&gdx);
+    gdxLibraryUnload();
 }
