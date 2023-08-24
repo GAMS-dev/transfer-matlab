@@ -1,5 +1,6 @@
 GAMS Transfer Matlab v0.6.1
 ==================
+- Added GDX library unload after each read/write operation.
 - Fixed bug that limited the number of used UELs in `Symbol.transformRecords` and `Symbol.getUELs`.
 
 GAMS Transfer Matlab v0.6.0

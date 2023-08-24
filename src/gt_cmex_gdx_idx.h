@@ -49,6 +49,11 @@ void gt_gdx_init_write(
     bool            compress        /** enable compression for write */
 );
 
+/** closes GDX file and frees GDX handle */
+void gt_gdx_fini(
+    gdxHandle_t*    gdx             /** GDX handle */
+);
+
 /** creates IDX handle and opens GDX file for reading */
 void gt_idx_init_read(
     idxHandle_t*    gdx,            /** IDX handle */
@@ -61,6 +66,11 @@ void gt_idx_init_write(
     idxHandle_t*    gdx,            /** IDX handle */
     const char*     sysdir,         /** GAMS system directory */
     const char*     filename        /** GDX filename */
+);
+
+/** closes GDX file and frees IDX handle */
+void gt_idx_fini(
+    idxHandle_t*    gdx             /** IDX handle */
 );
 
 /** registers uels given as a Matlab cell of strings */

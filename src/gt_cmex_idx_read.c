@@ -368,8 +368,7 @@ void mexFunction(
         }
     }
 
-    idxClose(gdx);
-    idxFree(&gdx);
+    gt_idx_fini(&gdx);
 
     mxFree(sym_enabled);
 }
