@@ -137,7 +137,7 @@ void gt_idx_fini(
     idxClose(*gdx);
     idxFree(gdx);
     gdx = NULL;
-    idxLibraryUnload();
+    // idxLibraryUnload();
 }
 
 void gt_gdx_register_uels(
