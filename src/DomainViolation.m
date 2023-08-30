@@ -156,7 +156,7 @@ classdef DomainViolation
             % get domain format
             has_text = true;
             try
-                obj.domain.records.text;
+                obj.domain.records.element_text;
             catch
                 has_text = false;
             end
@@ -164,7 +164,7 @@ classdef DomainViolation
 
             % get set texts
             if has_text
-                expl_text = obj.domain.records.text;
+                expl_text = obj.domain.records.element_text;
             end
 
             % set records
@@ -172,7 +172,7 @@ classdef DomainViolation
             obj.domain.setRecords(domain_uels);
             if has_text
                 expl_text(end+1:numel(obj.domain.records.(obj.domain.domain_labels{1}))) = '';
-                obj.domain.records.text = expl_text;
+                obj.domain.records.element_text = expl_text;
             end
             if was_table
                 obj.domain.transformRecords('table');

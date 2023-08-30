@@ -101,7 +101,7 @@ classdef Set < GAMSTransfer.Symbol
 
     properties (Hidden, Constant)
         VALUE_FIELDS = {}
-        TEXT_FIELDS = {'text'}
+        TEXT_FIELDS = {'element_text'}
         SUPPORTS_FORMAT_DENSE_MATRIX = false
         SUPPORTS_FORMAT_SPARSE_MATRIX = false
         SUPPORTS_FORMAT_STRUCT = true

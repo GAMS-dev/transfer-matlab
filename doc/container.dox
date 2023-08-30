@@ -81,7 +81,7 @@ c.read(source, 'format', 'dense_matrix');
 - \par Reading a Subset of Symbol Values:
 \parblock
 Finally note that GDX files store multiple values per symbol. \ref
-GAMSTransfer.Set "Sets" have `text`, \ref GAMSTransfer.Parameter "Parameters"
+GAMSTransfer.Set "Sets" have `element_text`, \ref GAMSTransfer.Parameter "Parameters"
 have `value` and \ref GAMSTransfer.Equation "Equations" and \ref
 GAMSTransfer.Variable "Variables" have `level`, `marginal`, `lower`, `upper`,
 `scale`, see \ref gams_transfer_matlab_records for more information. On
@@ -89,7 +89,7 @@ default, all values are read, but you can select a subset by
 ```
 c.read(source, 'values', {'level', 'marginal'});
 ```
-Note that here, `level` also enables `text` and `value`. Moreover, `marginal`
+Note that here, `level` also enables `element_text` and `value`. Moreover, `marginal`
 has no influence on \ref GAMSTransfer.Set "Sets" and \ref GAMSTransfer.Parameter
 "Parameters". It is even possible to specify no values in order to read none GDX
 records. This would then only read the symbol meta data like name or

@@ -166,9 +166,9 @@ function test_read(t, cfg, container_type)
     t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'uni'));
-    t.assert(isfield(s.records, 'text'));
+    t.assert(isfield(s.records, 'element_text'));
     t.assert(numel(s.records.uni) == 5);
-    t.assert(numel(s.records.text) == 5);
+    t.assert(numel(s.records.element_text) == 5);
     if gdx.features.categorical
         t.assertEquals(s.records.uni(1), 'i1');
         t.assertEquals(s.records.uni(2), 'i3');
@@ -183,17 +183,17 @@ function test_read(t, cfg, container_type)
     t.assert(uni_int(4) == 4);
     t.assert(uni_int(5) == 5);
     if gdx.features.categorical
-        t.assert(isundefined(s.records.text(1)));
-        t.assertEquals(s.records.text(2), 'expl text 3');
-        t.assert(isundefined(s.records.text(3)));
-        t.assert(isundefined(s.records.text(4)));
-        t.assertEquals(s.records.text(5), 'expl text 10');
+        t.assert(isundefined(s.records.element_text(1)));
+        t.assertEquals(s.records.element_text(2), 'expl text 3');
+        t.assert(isundefined(s.records.element_text(3)));
+        t.assert(isundefined(s.records.element_text(4)));
+        t.assertEquals(s.records.element_text(5), 'expl text 10');
     else
-        t.assertEquals(s.records.text{1}, '');
-        t.assertEquals(s.records.text{2}, 'expl text 3');
-        t.assertEquals(s.records.text{3}, '');
-        t.assertEquals(s.records.text{4}, '');
-        t.assertEquals(s.records.text{5}, 'expl text 10');
+        t.assertEquals(s.records.element_text{1}, '');
+        t.assertEquals(s.records.element_text{2}, 'expl text 3');
+        t.assertEquals(s.records.element_text{3}, '');
+        t.assertEquals(s.records.element_text{4}, '');
+        t.assertEquals(s.records.element_text{5}, 'expl text 10');
     end
     uels = s.getUELs(1);
     t.assertEquals(uels{1}, 'i1');
@@ -355,9 +355,9 @@ function test_read(t, cfg, container_type)
         t.assert(s.isValid());
         t.assert(numel(s.records.Properties.VariableNames) == 2);
         t.assertEquals(s.records.Properties.VariableNames{1}, 'uni');
-        t.assertEquals(s.records.Properties.VariableNames{2}, 'text');
+        t.assertEquals(s.records.Properties.VariableNames{2}, 'element_text');
         t.assert(numel(s.records.uni) == 5);
-        t.assert(numel(s.records.text) == 5);
+        t.assert(numel(s.records.element_text) == 5);
         if gdx.features.categorical
             t.assertEquals(s.records.uni(1), 'i1');
             t.assertEquals(s.records.uni(2), 'i3');
@@ -372,17 +372,17 @@ function test_read(t, cfg, container_type)
         t.assert(uni_int(4) == 4);
         t.assert(uni_int(5) == 5);
         if gdx.features.categorical
-            t.assert(isundefined(s.records.text(1)));
-            t.assertEquals(s.records.text(2), 'expl text 3');
-            t.assert(isundefined(s.records.text(3)));
-            t.assert(isundefined(s.records.text(4)));
-            t.assertEquals(s.records.text(5), 'expl text 10');
+            t.assert(isundefined(s.records.element_text(1)));
+            t.assertEquals(s.records.element_text(2), 'expl text 3');
+            t.assert(isundefined(s.records.element_text(3)));
+            t.assert(isundefined(s.records.element_text(4)));
+            t.assertEquals(s.records.element_text(5), 'expl text 10');
         else
-            t.assertEquals(s.records.text{1}, '');
-            t.assertEquals(s.records.text{2}, 'expl text 3');
-            t.assertEquals(s.records.text{3}, '');
-            t.assertEquals(s.records.text{4}, '');
-            t.assertEquals(s.records.text{5}, 'expl text 10');
+            t.assertEquals(s.records.element_text{1}, '');
+            t.assertEquals(s.records.element_text{2}, 'expl text 3');
+            t.assertEquals(s.records.element_text{3}, '');
+            t.assertEquals(s.records.element_text{4}, '');
+            t.assertEquals(s.records.element_text{5}, 'expl text 10');
         end
         uels = s.getUELs(1);
         t.assert(numel(uels) == 5);
@@ -545,9 +545,9 @@ function test_read(t, cfg, container_type)
     t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'uni'));
-    t.assert(isfield(s.records, 'text'));
+    t.assert(isfield(s.records, 'element_text'));
     t.assert(numel(s.records.uni) == 5);
-    t.assert(numel(s.records.text) == 5);
+    t.assert(numel(s.records.element_text) == 5);
     if gdx.features.categorical
         t.assertEquals(s.records.uni(1), 'i1');
         t.assertEquals(s.records.uni(2), 'i3');
@@ -562,17 +562,17 @@ function test_read(t, cfg, container_type)
     t.assert(uni_int(4) == 4);
     t.assert(uni_int(5) == 5);
     if gdx.features.categorical
-        t.assert(isundefined(s.records.text(1)));
-        t.assertEquals(s.records.text(2), 'expl text 3');
-        t.assert(isundefined(s.records.text(3)));
-        t.assert(isundefined(s.records.text(4)));
-        t.assertEquals(s.records.text(5), 'expl text 10');
+        t.assert(isundefined(s.records.element_text(1)));
+        t.assertEquals(s.records.element_text(2), 'expl text 3');
+        t.assert(isundefined(s.records.element_text(3)));
+        t.assert(isundefined(s.records.element_text(4)));
+        t.assertEquals(s.records.element_text(5), 'expl text 10');
     else
-        t.assertEquals(s.records.text{1}, '');
-        t.assertEquals(s.records.text{2}, 'expl text 3');
-        t.assertEquals(s.records.text{3}, '');
-        t.assertEquals(s.records.text{4}, '');
-        t.assertEquals(s.records.text{5}, 'expl text 10');
+        t.assertEquals(s.records.element_text{1}, '');
+        t.assertEquals(s.records.element_text{2}, 'expl text 3');
+        t.assertEquals(s.records.element_text{3}, '');
+        t.assertEquals(s.records.element_text{4}, '');
+        t.assertEquals(s.records.element_text{5}, 'expl text 10');
     end
     uels = s.getUELs(1);
     t.assert(numel(uels) == 5);
@@ -723,9 +723,9 @@ function test_read(t, cfg, container_type)
     t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'uni'));
-    t.assert(isfield(s.records, 'text'));
+    t.assert(isfield(s.records, 'element_text'));
     t.assert(numel(s.records.uni) == 5);
-    t.assert(numel(s.records.text) == 5);
+    t.assert(numel(s.records.element_text) == 5);
     if gdx.features.categorical
         t.assertEquals(s.records.uni(1), 'i1');
         t.assertEquals(s.records.uni(2), 'i3');
@@ -740,17 +740,17 @@ function test_read(t, cfg, container_type)
     t.assert(uni_int(4) == 4);
     t.assert(uni_int(5) == 5);
     if gdx.features.categorical
-        t.assert(isundefined(s.records.text(1)));
-        t.assertEquals(s.records.text(2), 'expl text 3');
-        t.assert(isundefined(s.records.text(3)));
-        t.assert(isundefined(s.records.text(4)));
-        t.assertEquals(s.records.text(5), 'expl text 10');
+        t.assert(isundefined(s.records.element_text(1)));
+        t.assertEquals(s.records.element_text(2), 'expl text 3');
+        t.assert(isundefined(s.records.element_text(3)));
+        t.assert(isundefined(s.records.element_text(4)));
+        t.assertEquals(s.records.element_text(5), 'expl text 10');
     else
-        t.assertEquals(s.records.text{1}, '');
-        t.assertEquals(s.records.text{2}, 'expl text 3');
-        t.assertEquals(s.records.text{3}, '');
-        t.assertEquals(s.records.text{4}, '');
-        t.assertEquals(s.records.text{5}, 'expl text 10');
+        t.assertEquals(s.records.element_text{1}, '');
+        t.assertEquals(s.records.element_text{2}, 'expl text 3');
+        t.assertEquals(s.records.element_text{3}, '');
+        t.assertEquals(s.records.element_text{4}, '');
+        t.assertEquals(s.records.element_text{5}, 'expl text 10');
     end
     uels = s.getUELs(1);
     t.assert(numel(uels) == 5);
@@ -1105,9 +1105,9 @@ function test_readPartial(t, cfg, container_type)
     t.assert(s.isValid());
     t.assert(numel(fieldnames(s.records)) == 2);
     t.assert(isfield(s.records, 'uni'));
-    t.assert(isfield(s.records, 'text'));
+    t.assert(isfield(s.records, 'element_text'));
     t.assert(numel(s.records.uni) == 5);
-    t.assert(numel(s.records.text) == 5);
+    t.assert(numel(s.records.element_text) == 5);
     if gdx.features.categorical
         t.assertEquals(s.records.uni(1), 'i1');
         t.assertEquals(s.records.uni(2), 'i3');
@@ -1122,17 +1122,17 @@ function test_readPartial(t, cfg, container_type)
     t.assert(uni_int(4) == 4);
     t.assert(uni_int(5) == 5);
     if gdx.features.categorical
-        t.assert(isundefined(s.records.text(1)));
-        t.assertEquals(s.records.text(2), 'expl text 3');
-        t.assert(isundefined(s.records.text(3)));
-        t.assert(isundefined(s.records.text(4)));
-        t.assertEquals(s.records.text(5), 'expl text 10');
+        t.assert(isundefined(s.records.element_text(1)));
+        t.assertEquals(s.records.element_text(2), 'expl text 3');
+        t.assert(isundefined(s.records.element_text(3)));
+        t.assert(isundefined(s.records.element_text(4)));
+        t.assertEquals(s.records.element_text(5), 'expl text 10');
     else
-        t.assertEquals(s.records.text{1}, '');
-        t.assertEquals(s.records.text{2}, 'expl text 3');
-        t.assertEquals(s.records.text{3}, '');
-        t.assertEquals(s.records.text{4}, '');
-        t.assertEquals(s.records.text{5}, 'expl text 10');
+        t.assertEquals(s.records.element_text{1}, '');
+        t.assertEquals(s.records.element_text{2}, 'expl text 3');
+        t.assertEquals(s.records.element_text{3}, '');
+        t.assertEquals(s.records.element_text{4}, '');
+        t.assertEquals(s.records.element_text{5}, 'expl text 10');
     end
 
     t.add('read_partial_variable_records_struct_1');
