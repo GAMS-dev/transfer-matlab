@@ -2712,27 +2712,27 @@ function test_setRecords(t, cfg)
     t.assertEquals(i1.format, 'struct');
     t.assert(numel(fieldnames(i1.records)) == 2);
     t.assert(isfield(i1.records, 'uni'));
-    t.assert(isfield(i1.records, 'text'));
+    t.assert(isfield(i1.records, 'element_text'));
     t.assert(numel(i1.records.uni) == 4);
-    t.assert(numel(i1.records.text) == 4);
+    t.assert(numel(i1.records.element_text) == 4);
     if gdx.features.categorical
         t.assertEquals(i1.records.uni(1), 'i1');
         t.assertEquals(i1.records.uni(2), 'i2');
         t.assertEquals(i1.records.uni(3), 'i3');
         t.assertEquals(i1.records.uni(4), 'i4');
-        t.assertEquals(i1.records.text(1), 'text_i1');
-        t.assertEquals(i1.records.text(2), 'text_i2');
-        t.assertEquals(i1.records.text(3), 'text_i3');
-        t.assertEquals(i1.records.text(4), 'text_i4');
+        t.assertEquals(i1.records.element_text(1), 'text_i1');
+        t.assertEquals(i1.records.element_text(2), 'text_i2');
+        t.assertEquals(i1.records.element_text(3), 'text_i3');
+        t.assertEquals(i1.records.element_text(4), 'text_i4');
     else
         t.assert(i1.records.uni(1) == 1);
         t.assert(i1.records.uni(2) == 2);
         t.assert(i1.records.uni(3) == 3);
         t.assert(i1.records.uni(4) == 4);
-        t.assertEquals(i1.records.text{1}, 'text_i1');
-        t.assertEquals(i1.records.text{2}, 'text_i2');
-        t.assertEquals(i1.records.text{3}, 'text_i3');
-        t.assertEquals(i1.records.text{4}, 'text_i4');
+        t.assertEquals(i1.records.element_text{1}, 'text_i1');
+        t.assertEquals(i1.records.element_text{2}, 'text_i2');
+        t.assertEquals(i1.records.element_text{3}, 'text_i3');
+        t.assertEquals(i1.records.element_text{4}, 'text_i4');
     end
     uels = i1.getUELs(1);
     t.assert(numel(uels) == 4);
@@ -2746,33 +2746,33 @@ function test_setRecords(t, cfg)
     gdx.modified = false;
     recs = struct();
     recs.uni = {'i1', 'i2', 'i3', 'i4'};
-    recs.text = {'text_i1', 'text_i2', 'text_i3', 'text_i4'};
+    recs.element_text = {'text_i1', 'text_i2', 'text_i3', 'text_i4'};
     i1.setRecords(recs);
     t.assert(i1.isValid());
     t.assertEquals(i1.format, 'struct');
     t.assert(numel(fieldnames(i1.records)) == 2);
     t.assert(isfield(i1.records, 'uni'));
-    t.assert(isfield(i1.records, 'text'));
+    t.assert(isfield(i1.records, 'element_text'));
     t.assert(numel(i1.records.uni) == 4);
-    t.assert(numel(i1.records.text) == 4);
+    t.assert(numel(i1.records.element_text) == 4);
     if gdx.features.categorical
         t.assertEquals(i1.records.uni(1), 'i1');
         t.assertEquals(i1.records.uni(2), 'i2');
         t.assertEquals(i1.records.uni(3), 'i3');
         t.assertEquals(i1.records.uni(4), 'i4');
-        t.assertEquals(i1.records.text(1), 'text_i1');
-        t.assertEquals(i1.records.text(2), 'text_i2');
-        t.assertEquals(i1.records.text(3), 'text_i3');
-        t.assertEquals(i1.records.text(4), 'text_i4');
+        t.assertEquals(i1.records.element_text(1), 'text_i1');
+        t.assertEquals(i1.records.element_text(2), 'text_i2');
+        t.assertEquals(i1.records.element_text(3), 'text_i3');
+        t.assertEquals(i1.records.element_text(4), 'text_i4');
     else
         t.assert(i1.records.uni(1) == 1);
         t.assert(i1.records.uni(2) == 2);
         t.assert(i1.records.uni(3) == 3);
         t.assert(i1.records.uni(4) == 4);
-        t.assertEquals(i1.records.text{1}, 'text_i1');
-        t.assertEquals(i1.records.text{2}, 'text_i2');
-        t.assertEquals(i1.records.text{3}, 'text_i3');
-        t.assertEquals(i1.records.text{4}, 'text_i4');
+        t.assertEquals(i1.records.element_text{1}, 'text_i1');
+        t.assertEquals(i1.records.element_text{2}, 'text_i2');
+        t.assertEquals(i1.records.element_text{3}, 'text_i3');
+        t.assertEquals(i1.records.element_text{4}, 'text_i4');
     end
     uels = i1.getUELs(1);
     t.assert(numel(uels) == 4);

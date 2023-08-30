@@ -1,5 +1,6 @@
 GAMS Transfer Matlab v0.7.0
 ==================
+- Breaking: Renamed records field `text` of Sets to `element_text`.
 - Removed `ConstContainer`.
 - Fixed bug that limited the number of used UELs in `Symbol.transformRecords` and `Symbol.getUELs`.
 

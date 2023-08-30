@@ -1995,7 +1995,7 @@ classdef Container < handle
             values_bool = false(5,1);
             for e = values
                 switch e{1}
-                case {'level', 'value', 'text'}
+                case {'level', 'value', 'element_text'}
                     values_bool(1) = true;
                 case 'marginal'
                     values_bool(2) = true;
@@ -2006,7 +2006,7 @@ classdef Container < handle
                 case 'scale'
                     values_bool(5) = true;
                 otherwise
-                    error('Invalid value option: %s. Choose from level, value, text, marginal, lower, upper, scale.', e{1});
+                    error('Invalid value option: %s. Choose from level, value, element_text, marginal, lower, upper, scale.', e{1});
                 end
             end
 

@@ -219,7 +219,7 @@ ans =
   it is interpreted as the `j`-th element of the following: (1) `level` or
   `value`, (2) `marginal`, (3) `lower`, (4) `upper`, (5) `scale`. If symbol is a
   \ref GAMSTransfer::Set "Set", the `(dim+1)`-th cellstr is considered to be the
-  set element `text`.
+  set `element_text`.
 
   \note Instead of a `cell`, it is possible to provide the elements as separate
   arguments to the method \ref GAMSTransfer::Symbol::setRecords
@@ -260,7 +260,7 @@ ans =
   \parblock
   Fields which names match domain labels, are interpreted as domain entries of
   the corresponding domain. Other supported fields are `level`, `value`,
-  `marginal`, `lower`, `upper`, `scale`, `text`. Unsopprted fields are ignored.
+  `marginal`, `lower`, `upper`, `scale`, `element_text`. Unsopprted fields are ignored.
   \endparblock
 - \par table:
   \parblock

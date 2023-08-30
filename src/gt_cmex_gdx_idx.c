@@ -175,14 +175,14 @@ void gt_gdx_addsettext(
 
     /* check input */
     if (!mxIsCell(mx_arr_text))
-        mexErrMsgIdAndTxt(ERRID"addsettext", "Text data must be of type 'cell' of 'char'.");
+        mexErrMsgIdAndTxt(ERRID"addsettext", "element_text data must be of type 'cell' of 'char'.");
 
     for (size_t i = 0; i < mxGetNumberOfElements(mx_arr_text); i++)
     {
-        /* get explanatory text */
+        /* get explanatory element_text */
         mx_text = mxGetCell(mx_arr_text, i);
         if (!mxIsChar(mx_text))
-            mexErrMsgIdAndTxt(ERRID"addsettext", "Text data must be of type 'cell' of 'char'.");
+            mexErrMsgIdAndTxt(ERRID"addsettext", "element_text data must be of type 'cell' of 'char'.");
         mxGetString(mx_text, buf, GMS_SSSIZE);
 
         /* in case we got this from a categorical we may have "<undefined>"
@@ -193,7 +193,7 @@ void gt_gdx_addsettext(
             continue;
         }
 
-        /* register text */
+        /* register element_text */
         if (!gdxAddSetText(gdx, buf, &text_id))
             mexErrMsgIdAndTxt(ERRID"addsettext", "GDX error (gdxAddSetText)");
         text_ids[i] = text_id;
