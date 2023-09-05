@@ -897,7 +897,7 @@ void gt_mex_get_records(
         /* get value fields */
         if (!strcmp(field_name, "level") || !strcmp(field_name, "value"))
             mx_arr_values[GMS_VAL_LEVEL] = mx_arr_field;
-        else if (!strcmp(field_name, "text"))
+        else if (!strcmp(field_name, "element_text"))
         {
             *mx_arr_text = mx_arr_field;
 
@@ -982,7 +982,7 @@ void gt_mex_readdata_addfields(
                 mxAddField(mx_arr_records, "value");
                 break;
             case GMS_DT_SET:
-                mxAddField(mx_arr_records, "text");
+                mxAddField(mx_arr_records, "element_text");
                 break;
             default:
                 mxAddField(mx_arr_records, "level");

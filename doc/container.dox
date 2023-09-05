@@ -8,12 +8,7 @@ gams_transfer_matlab_symbol "symbols" and is therefore comparable to a GDX file.
 It is indeed a fundamental feature of containers to read from or write to GDX
 files. GDX files can be operated in two different modes, `default` and
 `indexed`, which are also supported by GAMS Transfer Matlab containers, see \ref
-GAMSTRANSFER_MATLAB_CONTAINER_INDEXED for more info. GAMS Transfer Matlab offers
-two types of containers:
-- \ref GAMSTransfer.Container "Container": This should be your default choice.
-- \ref GAMSTransfer.ConstContainer "ConstContainer": Need even higher
-  efficiency? Try this one! But keep in mind, it's constant which means that
-  symbols can't be updated once added.
+GAMSTRANSFER_MATLAB_CONTAINER_INDEXED for more info.
 
 \section GAMSTRANSFER_MATLAB_CONTAINER_CREATE Creating a Container
 
@@ -86,7 +81,7 @@ c.read(source, 'format', 'dense_matrix');
 - \par Reading a Subset of Symbol Values:
 \parblock
 Finally note that GDX files store multiple values per symbol. \ref
-GAMSTransfer.Set "Sets" have `text`, \ref GAMSTransfer.Parameter "Parameters"
+GAMSTransfer.Set "Sets" have `element_text`, \ref GAMSTransfer.Parameter "Parameters"
 have `value` and \ref GAMSTransfer.Equation "Equations" and \ref
 GAMSTransfer.Variable "Variables" have `level`, `marginal`, `lower`, `upper`,
 `scale`, see \ref gams_transfer_matlab_records for more information. On
@@ -94,7 +89,7 @@ default, all values are read, but you can select a subset by
 ```
 c.read(source, 'values', {'level', 'marginal'});
 ```
-Note that here, `level` also enables `text` and `value`. Moreover, `marginal`
+Note that here, `level` also enables `element_text` and `value`. Moreover, `marginal`
 has no influence on \ref GAMSTransfer.Set "Sets" and \ref GAMSTransfer.Parameter
 "Parameters". It is even possible to specify no values in order to read none GDX
 records. This would then only read the symbol meta data like name or

@@ -516,7 +516,7 @@ classdef Symbol < handle
         %>   `(dim+1)`-th `cellstr` is considered to be the set element texts.
         %> - `struct`: Fields which names match domain labels, are interpreted
         %>   as domain entries of the given domain. Other supported fields are
-        %>   `level`, `value`, `marginal`, `lower`, `upper`, `scale`, `text`.
+        %>   `level`, `value`, `marginal`, `lower`, `upper`, `scale`, `element_text`.
         %>   Unsopprted fields are ignored.
         %> - `table`: used as is.
         %>
@@ -559,7 +559,7 @@ classdef Symbol < handle
             %   the set element texts.
             % - struct: Fields which names match domain labels, are interpreted
             %   as domain entries of the given domain. Other supported fields are
-            %   level, value, marginal, lower, upper, scale, text. Unsopprted
+            %   level, value, marginal, lower, upper, scale, element_text. Unsopprted
             %   fields are ignored.
             % - table: used as is.
             %
@@ -2339,7 +2339,7 @@ classdef Symbol < handle
                 switch labels{i}
                 case obj.TEXT_FIELDS
                     if (~obj.container.features.categorical || ~iscategorical(field)) && ~iscellstr(field)
-                        error('Field ''text'' must be of type ''categorical'' or ''cellstr''.');
+                        error('Field ''element_text'' must be of type ''categorical'' or ''cellstr''.');
                     end
                 case obj.VALUE_FIELDS
                     if ~isnumeric(field)
@@ -2423,7 +2423,7 @@ classdef Symbol < handle
             for i = 1:numel(labels)
                 field = obj.records.(labels{i});
                 switch labels{i}
-                case {'value', 'level', 'text', 'marginal', 'lower', 'upper', 'scale'}
+                case {'value', 'level', 'element_text', 'marginal', 'lower', 'upper', 'scale'}
                     if val_nrecs < 0
                         val_nrecs = numel(field);
                     elseif val_nrecs ~= numel(field)
@@ -2521,9 +2521,9 @@ classdef Symbol < handle
             end
             texts = reshape(texts, [numel(texts), 1]);
 
-            obj.records.text = texts;
+            obj.records.element_text = texts;
             if obj.container.features.categorical
-                obj.records.text = categorical(obj.records.text);
+                obj.records.element_text = categorical(obj.records.element_text);
             end
         end
 
