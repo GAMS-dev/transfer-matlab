@@ -355,5 +355,5 @@ void mexFunction(
 
     idxClose(gdx);
     idxFree(&gdx);
-    idxLibraryUnload();
+    // idxLibraryUnload(); // lib crashes on windows
 }
