@@ -633,6 +633,66 @@ classdef Container < handle
             end
         end
 
+        %> Gets all Set objects
+        %>
+        %> @see \ref GAMSTransfer::Container::listSets "Container.listSets", \ref
+        %> GAMSTransfer::Container::getSymbols "Container.getSymbols"
+        function symbols = getSets(obj)
+            % Gets all Set objects
+            %
+            % See also: GAMSTransfer.Container.listSets, GAMSTransfer.Container.getSymbols
+
+            symbols = obj.getSymbols(obj.listSets());
+        end
+
+        %> Gets all Parameter objects
+        %>
+        %> @see \ref GAMSTransfer::Container::listParameters "Container.listParameters", \ref
+        %> GAMSTransfer::Container::getSymbols "Container.getSymbols"
+        function symbols = getParameters(obj)
+            % Gets all Parameter objects
+            %
+            % See also: GAMSTransfer.Container.listParameters, GAMSTransfer.Container.getSymbols
+
+            symbols = obj.getSymbols(obj.listParameters());
+        end
+
+        %> Gets all Variable objects
+        %>
+        %> @see \ref GAMSTransfer::Container::listVariables "Container.listVariables", \ref
+        %> GAMSTransfer::Container::getSymbols "Container.getSymbols"
+        function symbols = getVariables(obj)
+            % Gets all Variable objects
+            %
+            % See also: GAMSTransfer.Container.listVariables, GAMSTransfer.Container.getSymbols
+
+            symbols = obj.getSymbols(obj.listVariables());
+        end
+
+        %> Gets all Equation objects
+        %>
+        %> @see \ref GAMSTransfer::Container::listEquations "Container.listEquations", \ref
+        %> GAMSTransfer::Container::getSymbols "Container.getSymbols"
+        function symbols = getEquations(obj)
+            % Gets all Equation objects
+            %
+            % See also: GAMSTransfer.Container.listEquations, GAMSTransfer.Container.getSymbols
+
+            symbols = obj.getSymbols(obj.listEquations());
+        end
+
+        %> Gets all Alias objects
+        %>
+        %> @see \ref GAMSTransfer::Container::listAliases "Container.listAliases", \ref
+        %> GAMSTransfer::Container::getSymbols "Container.getSymbols"
+        function symbols = getAliases(obj)
+            % Gets all Aliases objects
+            %
+            % See also: GAMSTransfer.Container.listAliases, GAMSTransfer.Container.getSymbols
+
+            symbols = obj.getSymbols(obj.listAliases());
+        end
+
         %> Checks if symbol exists in container (case insensitive)
         %>
         %> - `s = c.hasSymbols(a)` returns `true` if GAMS symbol named `a` (case
