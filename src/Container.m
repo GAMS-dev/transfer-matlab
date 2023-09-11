@@ -262,9 +262,16 @@ classdef Container < handle
             eq = isequaln(obj.gams_dir, container.gams_dir);
             eq = eq && obj.indexed == container.indexed;
             eq = eq && numel(fieldnames(obj.data)) == numel(fieldnames(container.data));
+            if ~eq
+                return
+            end
 
             symbols1 = fieldnames(obj.data);
             symbols2 = fieldnames(container.data);
+            if numel(symbols1) ~= numel(symbols2)
+                eq = false;
+                return
+            end
             for i = 1:numel(symbols1)
                 eq = eq && isequaln(symbols1{i}, symbols2{i});
                 eq = eq && obj.data.(symbols1{i}).equals(container.data.(symbols2{i}));
@@ -1459,7 +1466,7 @@ classdef Container < handle
             end
 
             % check if symbol exists
-            if obj.hasSymbols(newname)
+            if obj.hasSymbols(newname) && ~strcmpi(newname, oldname)
                 error('Symbol ''%s'' already exists.', newname);
             end
 
@@ -2081,20 +2088,18 @@ classdef Container < handle
             case {GAMSTransfer.SymbolType.VARIABLE, GAMSTransfer.SymbolType.EQUATION}
                 descr.type = cell(n_symbols, 1);
             case GAMSTransfer.SymbolType.SET
-                descr.is_alias = true(n_symbols, 1);
                 descr.is_singleton = true(n_symbols, 1);
             case GAMSTransfer.SymbolType.ALIAS
-                descr.is_alias = true(n_symbols, 1);
                 descr.is_singleton = true(n_symbols, 1);
                 descr.alias_with = cell(n_symbols, 1);
             end
             descr.format = cell(n_symbols, 1);
-            descr.dim = zeros(n_symbols, 1);
+            descr.dimension = zeros(n_symbols, 1);
             descr.domain_type = cell(n_symbols, 1);
             descr.domain = cell(n_symbols, 1);
             descr.size = cell(n_symbols, 1);
-            descr.num_recs = zeros(n_symbols, 1);
-            descr.num_vals = zeros(n_symbols, 1);
+            descr.number_records = zeros(n_symbols, 1);
+            descr.number_values = zeros(n_symbols, 1);
             descr.sparsity = zeros(n_symbols, 1);
             switch symtype
             case {GAMSTransfer.SymbolType.VARIABLE, GAMSTransfer.SymbolType.EQUATION}
@@ -2102,24 +2107,12 @@ classdef Container < handle
                 descr.mean_level = zeros(n_symbols, 1);
                 descr.max_level = zeros(n_symbols, 1);
                 descr.where_max_abs_level = cell(n_symbols, 1);
-                descr.count_na_level = zeros(n_symbols, 1);
-                descr.count_undef_level = zeros(n_symbols, 1);
-                descr.count_eps_level = zeros(n_symbols, 1);
-                descr.min_marginal = zeros(n_symbols, 1);
-                descr.mean_marginal = zeros(n_symbols, 1);
-                descr.max_marginal = zeros(n_symbols, 1);
-                descr.where_max_abs_marginal = cell(n_symbols, 1);
-                descr.count_na_marginal = zeros(n_symbols, 1);
-                descr.count_undef_marginal = zeros(n_symbols, 1);
-                descr.count_eps_marginal = zeros(n_symbols, 1);
             case GAMSTransfer.SymbolType.PARAMETER
-                descr.min_value = zeros(n_symbols, 1);
-                descr.mean_value = zeros(n_symbols, 1);
-                descr.max_value = zeros(n_symbols, 1);
-                descr.where_max_abs_value = cell(n_symbols, 1);
-                descr.count_na = zeros(n_symbols, 1);
-                descr.count_undef = zeros(n_symbols, 1);
-                descr.count_eps = zeros(n_symbols, 1);
+                descr.min = zeros(n_symbols, 1);
+                descr.mean = zeros(n_symbols, 1);
+                descr.max = zeros(n_symbols, 1);
+                descr.where_min = cell(n_symbols, 1);
+                descr.where_max = cell(n_symbols, 1);
             end
 
             % collect values
@@ -2130,15 +2123,6 @@ classdef Container < handle
                 if symtype == GAMSTransfer.SymbolType.VARIABLE || ...
                     symtype == GAMSTransfer.SymbolType.EQUATION
                     descr.type{i} = symbol.type;
-                elseif symtype == GAMSTransfer.SymbolType.SET || ...
-                    symtype == GAMSTransfer.SymbolType.ALIAS
-                    descr.is_alias(i) = isa(symbol, 'GAMSTransfer.Alias') || ...
-                        isfield(symbol, 'symbol_type') && strcmp(symbol.symbol_type, 'alias');
-                    if descr.is_alias(i) && isa(symbol.alias_with, 'GAMSTransfer.Symbol')
-                        symbol = symbol.alias_with;
-                    elseif descr.is_alias(i)
-                        symbol = obj.data.(symbol.alias_with);
-                    end
                 end
                 if symtype == GAMSTransfer.SymbolType.ALIAS
                     descr.alias_with{i} = symbol.name;
@@ -2146,19 +2130,19 @@ classdef Container < handle
                     descr.is_singleton(i) = symbol.is_singleton;
                 end
                 descr.format{i} = symbol.format;
-                descr.dim(i) = symbol.dimension;
+                descr.dimension(i) = symbol.dimension;
                 descr.domain_type{i} = symbol.domain_type;
                 descr.domain{i} = GAMSTransfer.Utils.list2str(symbol.domain);
                 descr.size{i} = GAMSTransfer.Utils.list2str(symbol.size);
                 if isfield(symbol, 'number_records')
-                    descr.num_recs(i) = symbol.number_records;
+                    descr.number_records(i) = symbol.number_records;
                 else
-                    descr.num_recs(i) = symbol.getNumberRecords();
+                    descr.number_records(i) = symbol.getNumberRecords();
                 end
                 if isfield(symbol, 'number_values')
-                    descr.num_vals(i) = symbol.number_values;
+                    descr.number_values(i) = symbol.number_values;
                 else
-                    descr.num_vals(i) = symbol.getNumberValues();
+                    descr.number_values(i) = symbol.getNumberValues();
                 end
                 if isfield(symbol, 'sparsity')
                     descr.sparsity(i) = symbol.sparsity;
@@ -2176,34 +2160,20 @@ classdef Container < handle
                     else
                         descr.where_max_abs_level{i} = GAMSTransfer.Utils.list2str(descr.where_max_abs_level{i});
                     end
-                    descr.count_na_level(i) = GAMSTransfer.countNA(symbol, {'level'});
-                    descr.count_undef_level(i) = GAMSTransfer.countUndef(symbol, {'level'});
-                    descr.count_eps_level(i) = GAMSTransfer.countEps(symbol, {'level'});
-                    descr.min_marginal(i) = GAMSTransfer.getMinValue(symbol, obj.indexed, 'marginal');
-                    descr.mean_marginal(i) = GAMSTransfer.getMeanValue(symbol, 'marginal');
-                    descr.max_marginal(i) = GAMSTransfer.getMaxValue(symbol, obj.indexed, 'marginal');
-                    [absmax, descr.where_max_abs_marginal{i}] = GAMSTransfer.getMaxAbsValue(symbol, obj.indexed, 'marginal');
-                    if isnan(absmax)
-                        descr.where_max_abs_marginal{i} = '';
-                    else
-                        descr.where_max_abs_marginal{i} = GAMSTransfer.Utils.list2str(descr.where_max_abs_marginal{i});
-                    end
-                    descr.count_na_marginal(i) = GAMSTransfer.countNA(symbol, {'marginal'});
-                    descr.count_undef_marginal(i) = GAMSTransfer.countUndef(symbol, {'marginal'});
-                    descr.count_eps_marginal(i) = GAMSTransfer.countEps(symbol, {'marginal'});
                 case GAMSTransfer.SymbolType.PARAMETER
-                    descr.min_value(i) = GAMSTransfer.getMinValue(symbol, obj.indexed);
-                    descr.mean_value(i) = GAMSTransfer.getMeanValue(symbol);
-                    descr.max_value(i) = GAMSTransfer.getMaxValue(symbol, obj.indexed);
-                    [absmax, descr.where_max_abs_value{i}] = GAMSTransfer.getMaxAbsValue(symbol, obj.indexed);
-                    if isnan(absmax)
-                        descr.where_max_abs_value{i} = '';
+                    [descr.min(i), descr.where_min{i}] = GAMSTransfer.getMinValue(symbol, obj.indexed);
+                    if isnan(descr.min(i))
+                        descr.where_min{i} = '';
                     else
-                        descr.where_max_abs_value{i} = GAMSTransfer.Utils.list2str(descr.where_max_abs_value{i});
+                        descr.where_min{i} = GAMSTransfer.Utils.list2str(descr.where_min{i});
                     end
-                    descr.count_na(i) = GAMSTransfer.countNA(symbol);
-                    descr.count_undef(i) = GAMSTransfer.countUndef(symbol);
-                    descr.count_eps(i) = GAMSTransfer.countEps(symbol);
+                    descr.mean(i) = GAMSTransfer.getMeanValue(symbol);
+                    [descr.max(i), descr.where_max{i}] = GAMSTransfer.getMaxValue(symbol, obj.indexed);
+                    if isnan(descr.max(i))
+                        descr.where_max{i} = '';
+                    else
+                        descr.where_max{i} = GAMSTransfer.Utils.list2str(descr.where_max{i});
+                    end
                 end
             end
 
@@ -2218,9 +2188,9 @@ classdef Container < handle
                 case {GAMSTransfer.SymbolType.VARIABLE, GAMSTransfer.SymbolType.EQUATION}
                     descr.type = categorical(descr.type);
                     descr.where_max_abs_level = categorical(descr.where_max_abs_level);
-                    descr.where_max_abs_marginal = categorical(descr.where_max_abs_marginal);
                 case GAMSTransfer.SymbolType.PARAMETER
-                    descr.where_max_abs_value = categorical(descr.where_max_abs_value);
+                    descr.where_min = categorical(descr.where_min);
+                    descr.where_max = categorical(descr.where_max);
                 case GAMSTransfer.SymbolType.ALIAS
                     descr.alias_with = categorical(descr.alias_with);
                 end
@@ -2259,9 +2229,9 @@ classdef Container < handle
 
             % add new symbol / remove old symbol
             obj.data.(newname) = obj.data.(oldname);
-            obj.name_lookup.(lower(newname)) = newname;
             obj.data = rmfield(obj.data, oldname);
             obj.name_lookup = rmfield(obj.name_lookup, lower(oldname));
+            obj.name_lookup.(lower(newname)) = newname;
 
             % get old ordering
             perm = [1:idx-1, numel(names), idx:numel(names)-1];
