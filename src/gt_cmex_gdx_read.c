@@ -617,7 +617,6 @@ void mexFunction(
 
     gdxClose(gdx);
     gdxFree(&gdx);
-    gdxLibraryUnload();
 
     for (int i = 0; i < sym_count; i++)
         if (dom_uel_dim_maps[i])

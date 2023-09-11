@@ -511,5 +511,4 @@ void mexFunction(
 
     gdxClose(gdx);
     gdxFree(&gdx);
-    gdxLibraryUnload();
 }
