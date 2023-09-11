@@ -180,7 +180,7 @@ test_matlab_macos:
         - macos
     needs: [build_matlab_macos]
     script:
-        - matlab -nodisplay -nosplash -nodesktop -r "addpath('matlab_macos'); gams_transfer_test('gams_dir', '$GAMS_PATH_MACOS', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab -batch "addpath('matlab_macos'); gams_transfer_test('gams_dir', '$GAMS_PATH_MACOS', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
