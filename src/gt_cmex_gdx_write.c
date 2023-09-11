@@ -509,7 +509,6 @@ void mexFunction(
     if (compress)
         gdxAutoConvert(gdx, 0);
 
-    /* close gdx */
     gdxClose(gdx);
     gdxFree(&gdx);
 }

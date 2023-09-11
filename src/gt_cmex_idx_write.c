@@ -353,7 +353,6 @@ void mexFunction(
         mxFree(mx_domains);
     }
 
-    /* close gdx */
     idxClose(gdx);
     idxFree(&gdx);
 }
