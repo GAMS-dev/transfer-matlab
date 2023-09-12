@@ -634,63 +634,135 @@ classdef Container < handle
         end
 
         %> Gets all Set objects
+        %> 
+        %> **Parameter Arguments:**
+        %> - is_valid (`logical` or `any`):
+        %>   Enable `valid` filter if argument is of type logical. If `true`,
+        %>   only include symbols that are valid and, if `false`, only invalid
+        %>   symbols. Default: not logical.
         %>
         %> @see \ref GAMSTransfer::Container::listSets "Container.listSets", \ref
         %> GAMSTransfer::Container::getSymbols "Container.getSymbols"
-        function symbols = getSets(obj)
+        function symbols = getSets(obj, varargin)
             % Gets all Set objects
+            %
+            % Parameter Arguments:
+            % - is_valid (logical or any):
+            %   Enable valid filter if argument is of type logical. If true,
+            %   only include symbols that are valid and, if false, only invalid
+            %   symbols. Default: not logical.
             %
             % See also: GAMSTransfer.Container.listSets, GAMSTransfer.Container.getSymbols
 
-            symbols = obj.getSymbols(obj.listSets());
+            symbols = obj.getSymbols(obj.listSets(varargin{:}));
         end
 
         %> Gets all Parameter objects
         %>
+        %> **Parameter Arguments:**
+        %> - is_valid (`logical` or `any`):
+        %>   Enable `valid` filter if argument is of type logical. If `true`,
+        %>   only include symbols that are valid and, if `false`, only invalid
+        %>   symbols. Default: not logical.
+        %>
         %> @see \ref GAMSTransfer::Container::listParameters "Container.listParameters", \ref
         %> GAMSTransfer::Container::getSymbols "Container.getSymbols"
-        function symbols = getParameters(obj)
+        function symbols = getParameters(obj, varargin)
             % Gets all Parameter objects
+            %
+            % Parameter Arguments:
+            % - is_valid (logical or any):
+            %   Enable valid filter if argument is of type logical. If true,
+            %   only include symbols that are valid and, if false, only invalid
+            %   symbols. Default: not logical.
             %
             % See also: GAMSTransfer.Container.listParameters, GAMSTransfer.Container.getSymbols
 
-            symbols = obj.getSymbols(obj.listParameters());
+            symbols = obj.getSymbols(obj.listParameters(varargin{:}));
         end
 
         %> Gets all Variable objects
         %>
+        %> **Parameter Arguments:**
+        %> - is_valid (`logical` or `any`):
+        %>   Enable `valid` filter if argument is of type logical. If `true`,
+        %>   only include symbols that are valid and, if `false`, only invalid
+        %>   symbols. Default: not logical.
+        %> - types (`any`):
+        %>   Enable filter for variable type, e.g. `type = {"binary",
+        %>   "integer"}`. Default: not applied.
+        %>
         %> @see \ref GAMSTransfer::Container::listVariables "Container.listVariables", \ref
         %> GAMSTransfer::Container::getSymbols "Container.getSymbols"
-        function symbols = getVariables(obj)
+        function symbols = getVariables(obj, varargin)
             % Gets all Variable objects
+            %
+            % Parameter Arguments:
+            % - is_valid (logical or any):
+            %   Enable valid filter if argument is of type logical. If true,
+            %   only include symbols that are valid and, if false, only invalid
+            %   symbols. Default: not logical.
+            % - types (any):
+            %   Enable filter for variable type, e.g. type = {'binary',
+            %   'integer'}. Default: not applied.
             %
             % See also: GAMSTransfer.Container.listVariables, GAMSTransfer.Container.getSymbols
 
-            symbols = obj.getSymbols(obj.listVariables());
+            symbols = obj.getSymbols(obj.listVariables(varargin{:}));
         end
 
         %> Gets all Equation objects
         %>
+        %> **Parameter Arguments:**
+        %> - is_valid (`logical` or `any`):
+        %>   Enable `valid` filter if argument is of type logical. If `true`,
+        %>   only include symbols that are valid and, if `false`, only invalid
+        %>   symbols. Default: not logical.
+        %> - types (`any`):
+        %>   Enable filter for equation type, e.g. `type = {"g", "l"}`. Default:
+        %>   not applied.
+        %>
         %> @see \ref GAMSTransfer::Container::listEquations "Container.listEquations", \ref
         %> GAMSTransfer::Container::getSymbols "Container.getSymbols"
-        function symbols = getEquations(obj)
+        function symbols = getEquations(obj, varargin)
             % Gets all Equation objects
+            %
+            % Parameter Arguments:
+            % - is_valid (logical or any):
+            %   Enable valid filter if argument is of type logical. If true,
+            %   only include symbols that are valid and, if false, only invalid
+            %   symbols. Default: not applied.
+            % - types (any):
+            %   Enable filter for equation type, e.g. type = {'g', 'l'}.
+            %   Default: not applied.
             %
             % See also: GAMSTransfer.Container.listEquations, GAMSTransfer.Container.getSymbols
 
-            symbols = obj.getSymbols(obj.listEquations());
+            symbols = obj.getSymbols(obj.listEquations(varargin));
         end
 
         %> Gets all Alias objects
         %>
+        %> **Parameter Arguments:**
+        %> - is_valid (`logical` or `any`):
+        %>   Enable `valid` filter if argument is of type logical. If `true`,
+        %>   only include symbols that are valid and, if `false`, only invalid
+        %>   symbols. Default: not logical.
+        %>
         %> @see \ref GAMSTransfer::Container::listAliases "Container.listAliases", \ref
         %> GAMSTransfer::Container::getSymbols "Container.getSymbols"
-        function symbols = getAliases(obj)
+        function symbols = getAliases(obj, varargin)
             % Gets all Aliases objects
+            %
+            % Parameter Arguments:
+            % - is_valid: logical or any
+            %   Enable valid filter if argument is of type logical. If true,
+            %   only include symbols that are valid and, if false, only invalid
+            %   symbols. Default: not logical.
             %
             % See also: GAMSTransfer.Container.listAliases, GAMSTransfer.Container.getSymbols
 
-            symbols = obj.getSymbols(obj.listAliases());
+            symbols = obj.getSymbols(obj.listAliases(varargin{:}));
         end
 
         %> Checks if symbol exists in container (case insensitive)
