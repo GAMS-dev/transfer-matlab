@@ -2286,6 +2286,96 @@ classdef Symbol < handle
             obj.modified = true;
         end
 
+        %> Converts UELs to lower case
+        %>
+        %> - `lowerUELs()` converts the UELs for all dimension(s).
+        %> - `lowerUELs(d)` converts the UELs for dimension(s) `d`. 
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
+        function lowerUELs(obj, dim)
+            % Converts UELs to lower case
+            %
+            % lowerUELs() converts the UELs for all dimension(s).
+            % lowerUELs(d) converts the UELs for dimension(s) d. 
+            %
+            % If an old UEL is provided in struct or containers.Map that is
+            % not present in the symbol UELs, it will be silently ignored.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+
+            if nargin == 1
+                symbols = obj.getUELs();
+            else
+                symbols = obj.getUELs(dim);
+            end
+
+            if isempty(symbols)
+                return
+            end
+            rename_map = containers.Map(symbols, lower(symbols));
+
+            if nargin == 1
+                obj.renameUELs(rename_map);
+            else
+                obj.renameUELs(rename_map, dim);
+            end
+        end
+
+        %> Converts UELs to upper case
+        %>
+        %> - `upperUELs()` converts the UELs for all dimension(s).
+        %> - `upperUELs(d)` converts the UELs for dimension(s) `d`. 
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
+        function upperUELs(obj, dim)
+            % Converts UELs to upper case
+            %
+            % upperUELs() converts the UELs for all dimension(s).
+            % upperUELs(d) converts the UELs for dimension(s) d. 
+            %
+            % If an old UEL is provided in struct or containers.Map that is
+            % not present in the symbol UELs, it will be silently ignored.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+
+            if nargin == 1
+                symbols = obj.getUELs();
+            else
+                symbols = obj.getUELs(dim);
+            end
+
+            if isempty(symbols)
+                return
+            end
+            rename_map = containers.Map(symbols, upper(symbols));
+
+            if nargin == 1
+                obj.renameUELs(rename_map);
+            else
+                obj.renameUELs(rename_map, dim);
+            end
+        end
+
     end
 
     methods (Hidden)
