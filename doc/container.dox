@@ -280,77 +280,57 @@ allow for an overview over the symbols of the corresponding type stored in the
 \ref GAMSTransfer::Container "Container". These methods return a table listing
 for each symbol the properties / statistics given in the following table. Here,
 an `x` means that this property / statistic is available for the symbol type.
-Note that `*_level` is called `*_value` or simply `*` for a \ref
-GAMSTransfer::Parameter "Parameter".
 
 | Property / Statistic | Description | Set | Alias | Parameter | Variable | Equation |
 |:---------------------|:------------|:----|:------|:----------|:---------|:---------|
 | name | Name of symbol | x | x | x | x | x |
-| is_alias | Indicates if set is an alias (true) or not (false) | x | x |  |  |  |
 | is_singleton | Indicates if set is a singleton set (true) or not (false) | x | x |  |  |  |
 | alias_with | Set an alias is linked to |  | x |  |  |  |
 | type | Variable or Equation type, see \ref GAMSTransfer::VariableType "VariableType" and \ref GAMSTransfer::EquationType "EquationType" |  |  |  | x | x |
 | format | Format \ref GAMSTransfer::Symbol::records "records" are stored in, see \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT | x | x | x | x | x |
-| dim | \ref GAMSTransfer::Symbol::dimension "Dimension" of symbol | x | x | x | x | x |
+| dimension | \ref GAMSTransfer::Symbol::dimension "Dimension" of symbol | x | x | x | x | x |
 | domain_type | Type of domain, e.g. relaxed or regular | x | x | x | x | x |
 | domain | \ref GAMSTransfer::Symbol::domain "Domain" of symbol | x | x | x | x | x |
 | size | \ref GAMSTransfer::Symbol::size "Size" or shape of symbol | x | x | x | x | x |
-| num_recs | Number of symbol GDX \ref GAMSTransfer::Symbol::records "records" | x | x | x | x | x |
-| num_vals | Number of stored \ref GAMSTransfer::Symbol::records "records" values | x | x | x | x | x |
+| number_records | Number of symbol GDX \ref GAMSTransfer::Symbol::records "records" | x | x | x | x | x |
+| number_values | Number of stored \ref GAMSTransfer::Symbol::records "records" values | x | x | x | x | x |
 | sparsity | Sparsity of symbol \ref GAMSTransfer::Symbol::records "records" w.r.t. to count | x | x | x | x | x |
-| min_level | Minimum value of level values |  |  | x | x | x |
-| mean_level | Mean value of level values |  |  | x | x | x |
-| max_level | Maximum value of level values |  |  | x | x | x |
-| where_max_abs_level | Domain entry of record with maximum absolute level value |  |  | x | x | x |
-| count_na_level | Number of GAMS special values \ref GAMSTransfer::SpecialValues::NA "NA" in level values |  |  | x | x | x |
-| count_undef_level | Number of GAMS special values \ref GAMSTransfer::SpecialValues::UNDEF "UNDEF" in level values |  |  | x | x | x |
-| count_eps_level | Number of GAMS special values \ref GAMSTransfer::SpecialValues::EPS "EPS" in level values |  |  | x | x | x |
-| min_marginal | Minimum value of marginal values |  |  |  | x | x |
-| mean_marginal | Mean value of marginal values |  |  |  | x | x |
-| max_marginal | Maximum value of marginal values |  |  |  | x | x |
-| where_max_abs_marginal | Domain entry of record with maximum absolute marginal value |  |  |  | x | x |
-| count_na_marginal | Number of GAMS special values \ref GAMSTransfer::SpecialValues::NA "NA" in marginal values |  |  |  | x | x |
-| count_undef_marginal | Number of GAMS special values \ref GAMSTransfer::SpecialValues::UNDEF "UNDEF" in marginal values |  |  |  | x | x |
-| count_eps_marginal | Number of GAMS special values \ref GAMSTransfer::SpecialValues::EPS "EPS" in marginal values |  |  |  | x | x |
+| min | Minimum value |  |  | x |  |  |
+| mean | Mean value |  |  | x |  |  |
+| max | Maximum value |  |  | x |  |  |
+| where_min | Domain entry of record with minimum value |  |  | x |  |  |
+| where_max | Domain entry of record with maximum value |  |  | x |  |  |
+| min_level | Minimum value of level values |  |  |  | x | x |
+| mean_level | Mean value of level values |  |  |  | x | x |
+| max_level | Maximum value of level values |  |  |  | x | x |
+| where_max_abs_level | Domain entry of record with maximum absolute level value |  |  |  | x | x |
 
 For \ref GAMSTRANSFER_MATLAB_GETSTARTED_EXAMPLE, this looks like:
 ```
 >> tbl = m.describeVariables();
->> tbl(:,1:10)
+>> tbl(:,1:9)
 
 ans =
 
-  2×10 table
+  2×9 table
 
-    name      type      format    dim    domain_type    domain    size     num_recs    num_vals    sparsity
-    ____    ________    ______    ___    ___________    ______    _____    ________    ________    ________
+    name      type      format    dimension    domain_type    domain    size     number_records    number_values
+    ____    ________    ______    _________    ___________    ______    _____    ______________    _____________
 
-     x      positive    table      2       regular      [i,j]     [2,3]       6           12         0.6
-     z      free        struct     0       none         []        []          1            1         0.8
+     x      positive    table         2          regular      [i,j]     [2,3]          6                30      
+     z      free        table         0          none         []        []             1                 5      
 
->> tbl(:,11:17)
-
-ans =
-
-  2×7 table
-
-    min_level    mean_level    max_level    where_max_abs_level    count_na_level    count_undef_level    count_eps_level
-    _________    __________    _________    ___________________    ______________    _________________    _______________
-
-          0           150          300       [seattle,chicago]           0                   0                   0
-     153.68        153.68       153.68       []                          0                   0                   0
-
->> tbl(:,18:24)
+>> tbl(:,10:14)
 
 ans =
 
-  2×7 table
+  2×5 table
 
-    min_marginal    mean_marginal    max_marginal    where_max_abs_marginal    count_na_marginal    count_undef_marginal    count_eps_marginal
-    ____________    _____________    ____________    ______________________    _________________    ____________________    __________________
+    sparsity    min_level    mean_level    max_level    where_max_abs_level
+    ________    _________    __________    _________    ___________________
 
-          0            0.0075           0.036           [seattle,topeka]               0                     0                      0
-        NaN               NaN             NaN           <undefined>                    0                     0                      0
+       0              0           150          300       [seattle,chicago] 
+       0         153.68        153.68       153.68       []                
 ```
 
 \section GAMSTRANSFER_MATLAB_CONTAINER_INDEXED Indexed GDX
