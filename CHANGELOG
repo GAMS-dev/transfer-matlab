@@ -5,6 +5,8 @@ GAMS Transfer Matlab v0.7.0
 - Added `Container.getSets`, `Container.getParameters`, `Container.getVariables`,
   `Container.getEquations` and `Container.getAliases` to get list of symbol objects of corresponding
   type.
+- Added possibility to get/remove all symbols with `Container.getSymbols` or
+  `Container.removeSymbols`, respectively.
 - Added GDX library unload before each read/write operation.
 - Added columns `where_min` and `where_max` to output of `Container.describeParameters`.
 - Changed column names in output of `Container.describe*` methods: `dim` -> `dimension`, `num_recs`
