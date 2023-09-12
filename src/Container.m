@@ -596,6 +596,7 @@ classdef Container < handle
         %>
         %> Note: The letter case of the name does not matter.
         %>
+        %> - `s = c.getSymbols()` returns the handles to all GAMS symbols.
         %> - `s = c.getSymbols(a)` returns the handle to GAMS symbol named `a`.
         %> - `s = c.getSymbols(b)` returns a list of handles to the GAMS symbols
         %>   with names equal to any element in cell `b`.
@@ -610,6 +611,7 @@ classdef Container < handle
             %
             % Note: The letter case of the name does not matter.
             %
+            % s = c.getSymbols() returns the handles to all GAMS symbols.
             % s = c.getSymbols(a) returns the handle to GAMS symbol named a.
             % s = c.getSymbols(b) returns a list of handles to the GAMS symbols
             % with names equal to any element in cell b.
@@ -617,6 +619,11 @@ classdef Container < handle
             % Example:
             % v1 = c.getSymbols('v1');
             % vars = c.getSymbols(c.listVariables());
+
+            if nargin == 1
+                symbols = struct2cell(obj.data);
+                return
+            end
 
             sym_names = obj.getSymbolNames(names);
 
@@ -1608,8 +1615,46 @@ classdef Container < handle
         end
 
         %> Removes a symbol from container
+        %>
+        %> Note: The letter case of the name does not matter.
+        %>
+        %> - `c.removeSymbols()` removes all symbols.
+        %> - `c.removeSymbols(a)` removes GAMS symbol named `a`.
+        %> - `c.removeSymbols(b)` removes a list of GAMS symbols with names equal elements in cell
+        %>   `b`.
+        %>
+        %> **Example:**
+        %> ```
+        %> c.removeSymbols('v1');
+        %> c.removeSymbols(c.listVariables());
+        %> ```
         function removeSymbols(obj, names)
             % Removes a symbol from container
+            %
+            % Note: The letter case of the name does not matter.
+            %
+            % c.removeSymbols() removes all symbols.
+            % c.removeSymbols(a) removes GAMS symbol named a.
+            % c.removeSymbols(b) removes a list of GAMS symbols with names equal elements in cell b.
+            %
+            % Example:
+            % c.removeSymbols('v1');
+            % c.removeSymbols(c.listVariables());
+
+            if nargin == 1
+                removed_symbols = obj.getSymbols();
+
+                obj.data = struct();
+                obj.name_lookup = struct();
+
+                % force recheck of deleted symbol (it may still live within an
+                % alias, domain or in the user's program)
+                for i = 1:numel(removed_symbols)
+                    removed_symbols{i}.isValid(false, true);
+                    removed_symbols{i}.unsetContainer();
+                end
+                return
+            end
 
             if isstring(names) || ischar(names)
                 names = {names};

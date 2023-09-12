@@ -1845,4 +1845,34 @@ function test_remove(t, cfg)
     t.assert(a1.modified);
     t.assert(x1.modified);
 
+    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+        'features', cfg.features);
+    i1 = GAMSTransfer.Set(gdx, 'i1');
+    a1 = GAMSTransfer.Alias(gdx, 'a1', i1);
+    x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
+    gdx.modified = false;
+
+    t.add('remove_all');
+    t.assert(numel(fieldnames(gdx.data)) == 3);
+    t.assert(isfield(gdx.data, 'i1'));
+    t.assert(isfield(gdx.data, 'a1'));
+    t.assert(isfield(gdx.data, 'x1'));
+    t.assert(i1.isValid());
+    t.assert(a1.isValid());
+    t.assert(x1.isValid());
+    t.assert(~gdx.modified);
+    t.assert(~i1.modified);
+    t.assert(~a1.modified);
+    t.assert(~x1.modified);
+    gdx.removeSymbols();
+    t.assert(numel(fieldnames(gdx.data)) == 0);
+    t.assert(~isfield(gdx.data, 'x1'));
+    t.assert(~i1.isValid());
+    t.assert(~a1.isValid());
+    t.assert(~x1.isValid());
+    t.assert(gdx.modified);
+    t.assert(i1.modified);
+    t.assert(a1.modified);
+    t.assert(x1.modified);
+
 end
