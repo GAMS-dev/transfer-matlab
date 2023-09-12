@@ -207,8 +207,12 @@ ans =
     demand: [1×1 GAMSTransfer.Equation]
 ```
 
-In addition to accessing \ref GAMSTransfer::Container::data "Container.data"
-directly, symbol handle lists can be queried via the method \ref
+In addition to accessing \ref GAMSTransfer::Container::data "Container.data" directly, symbol handle
+lists can be queried via the methods \ref GAMSTransfer::Container::getSets "Container.getSets", \ref
+GAMSTransfer::Container::getParameters "Container.getParameters", \ref
+GAMSTransfer::Container::getVariables "Container.getVariables", \ref
+GAMSTransfer::Container::getEquations "Container.getEquations", \ref
+GAMSTransfer::Container::getAliases "Container.getAliases" or via \ref
 GAMSTransfer::Container::getSymbols "Container.getSymbols" given a list of symbol names.
 ```
 >> vars = transpose(m.getSymbols({'x', 'z'}))
