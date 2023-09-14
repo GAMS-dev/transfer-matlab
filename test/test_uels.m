@@ -1246,4 +1246,82 @@ function test_symbol_uels(t, cfg)
         t.assertEquals(e.message, 'Adding new UELs not supported for reordering');
     end
 
+    c = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    c.read(cfg.filenames{1}, 'format', 'struct');
+    x = c.data.x;
+
+    t.add('symbol_uels_lower_upper_1');
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 4);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i6');
+    t.assertEquals(uels{4}, 'i10');
+    c.modified = false;
+    x.upperUELs(1);
+    t.assert(c.modified);
+    t.assert(x.modified);
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 4);
+    t.assertEquals(uels{1}, 'I1');
+    t.assertEquals(uels{2}, 'I3');
+    t.assertEquals(uels{3}, 'I6');
+    t.assertEquals(uels{4}, 'I10');
+
+    t.add('symbol_uels_lower_upper_2');
+    x.lowerUELs(1);
+    t.assert(c.modified);
+    t.assert(x.modified);
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 4);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i6');
+    t.assertEquals(uels{4}, 'i10');
+
+    t.add('symbol_uels_lower_upper_3');
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 4);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i6');
+    t.assertEquals(uels{4}, 'i10');
+    uels = x.getUELs(2);
+    t.assert(numel(uels) == 5);
+    t.assertEquals(uels{1}, 'j2');
+    t.assertEquals(uels{2}, 'j5');
+    t.assertEquals(uels{3}, 'j7');
+    t.assertEquals(uels{4}, 'j8');
+    t.assertEquals(uels{5}, 'j9');
+    x.upperUELs();
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 4);
+    t.assertEquals(uels{1}, 'I1');
+    t.assertEquals(uels{2}, 'I3');
+    t.assertEquals(uels{3}, 'I6');
+    t.assertEquals(uels{4}, 'I10');
+    uels = x.getUELs(2);
+    t.assert(numel(uels) == 5);
+    t.assertEquals(uels{1}, 'J2');
+    t.assertEquals(uels{2}, 'J5');
+    t.assertEquals(uels{3}, 'J7');
+    t.assertEquals(uels{4}, 'J8');
+    t.assertEquals(uels{5}, 'J9');
+
+    t.add('symbol_uels_lower_upper_4');
+    x.lowerUELs();
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 4);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i6');
+    t.assertEquals(uels{4}, 'i10');
+    uels = x.getUELs(2);
+    t.assert(numel(uels) == 5);
+    t.assertEquals(uels{1}, 'j2');
+    t.assertEquals(uels{2}, 'j5');
+    t.assertEquals(uels{3}, 'j7');
+    t.assertEquals(uels{4}, 'j8');
+    t.assertEquals(uels{5}, 'j9');
+
 end

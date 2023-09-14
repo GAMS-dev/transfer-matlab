@@ -2142,6 +2142,80 @@ classdef Container < handle
             end
         end
 
+        %> Converts UELs to lower case
+        %>
+        %> - `lowerUELs()` converts all UELs to lower case.
+        %> - `lowerUELs('symbols', s)` converts all UELs to lower case for symbols `s`.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
+        function lowerUELs(obj, varargin)
+            % Converts UELs to lower case
+            %
+            % lowerUELs() converts all UELs to lower case.
+            % lowerUELs('symbols', s) converts all UELs to lower case for symbols s.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+
+            % input arguments
+            p = inputParser();
+            addParameter(p, 'symbols', {}, @iscellstr);
+            parse(p, varargin{:});
+            if isempty(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            end
+
+            for i = 1:numel(symbols)
+                obj.data.(symbols{i}).lowerUELs();
+            end
+        end
+
+        %> Converts UELs to upper case
+        %>
+        %> - `upperUELs()` converts all UELs to upper case.
+        %> - `upperUELs('symbols', s)` converts all UELs to upper case for symbols `s`.
+        %>
+        %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
+        %>
+        %> @note This can only be used if the symbol is valid. UELs are not
+        %> available when using the indexed mode, see \ref
+        %> GAMSTRANSFER_MATLAB_CONTAINER_INDEXED.
+        %>
+        %> @see \ref GAMSTransfer::Container::indexed "Container.indexed", \ref
+        %> GAMSTransfer::Symbol::isValid "Symbol.isValid"
+        function upperUELs(obj, varargin)
+            % Converts UELs to upper case
+            %
+            % upperUELs() converts all UELs to upper case.
+            % upperUELs('symbols', s) converts all UELs to upper case for symbols s.
+            %
+            % Note: This can only be used if the symbol is valid. UELs are not
+            % available when using the indexed mode.
+            %
+            % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
+
+            % input arguments
+            p = inputParser();
+            addParameter(p, 'symbols', {}, @iscellstr);
+            parse(p, varargin{:});
+            if isempty(p.Results.symbols)
+                symbols = fieldnames(obj.data);
+            end
+
+            for i = 1:numel(symbols)
+                obj.data.(symbols{i}).upperUELs();
+            end
+        end
+
     end
 
     methods (Hidden, Access = {?GAMSTransfer.Symbol, ?GAMSTransfer.Alias})

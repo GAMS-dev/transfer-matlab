@@ -7,6 +7,8 @@ GAMS Transfer Matlab v0.7.0
   type.
 - Added possibility to get/remove all symbols with `Container.getSymbols` or
   `Container.removeSymbols`, respectively.
+- Added `Container.lowerUELs`, `Container.upperUELs`, `Symbol.lowerUELs` and `Symbol.upperUELs` to
+  convert (all) UELs to lower or upper case, respectively.
 - Added GDX library unload before each read/write operation.
 - Added columns `where_min` and `where_max` to output of `Container.describeParameters`.
 - Changed column names in output of `Container.describe*` methods: `dim` -> `dimension`, `num_recs`
