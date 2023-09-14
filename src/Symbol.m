@@ -2325,9 +2325,9 @@ classdef Symbol < handle
             rename_map = containers.Map(symbols, lower(symbols));
 
             if nargin == 1
-                obj.renameUELs(rename_map);
+                obj.renameUELs(rename_map, 'allow_merge', true);
             else
-                obj.renameUELs(rename_map, dim);
+                obj.renameUELs(rename_map, dim, 'allow_merge', true);
             end
         end
 
@@ -2370,9 +2370,9 @@ classdef Symbol < handle
             rename_map = containers.Map(symbols, upper(symbols));
 
             if nargin == 1
-                obj.renameUELs(rename_map);
+                obj.renameUELs(rename_map, 'allow_merge', true);
             else
-                obj.renameUELs(rename_map, dim);
+                obj.renameUELs(rename_map, dim, 'allow_merge', true);
             end
         end
 
