@@ -126,7 +126,7 @@ build_matlab_windows:
     tags:
         - windows-shell
     script:
-        - C:\"Program Files"\MATLAB\R2022a\bin\matlab.exe -batch "gams_transfer_setup('target_dir', 'matlab_windows')"
+        - matlab.exe -batch "gams_transfer_setup('target_dir', 'matlab_windows')"
     only:
         - merge_requests
         - master
@@ -196,7 +196,7 @@ test_matlab_windows:
         - curl -o gdx.zip $URL_MINIGAMS_WINDOWS
         - tar -xf gdx.zip
         - cd ..
-        - C:\"Program Files"\MATLAB\R2022a\bin\matlab.exe -batch "addpath('matlab_windows'); gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab.exe -batch "addpath('matlab_windows'); gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
