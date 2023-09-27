@@ -93,6 +93,15 @@ void mexFunction(
             /* set size */
             mx_size[i] = mxGetNaN();
         }
+        else if (mxIsClass(mx_arr_domentry, "GAMSTransfer.UniverseAlias"))
+        {
+            /* set domain label */
+            sprintf(label, "uni_%d", (int) i+1);
+            mxSetCell(mx_arr_domnames, i, mxCreateString("*"));
+
+            /* set size */
+            mx_size[i] = mxGetNaN();
+        }
         else if (mxIsClass(mx_arr_domentry, "GAMSTransfer.Set") ||
             mxIsClass(mx_arr_domentry, "GAMSTransfer.Alias"))
         {
@@ -146,7 +155,7 @@ void mexFunction(
             dominfo_none = false;
         }
         else
-            mexErrMsgIdAndTxt(ERRID"domain", "Domain entry must be of type 'GAMSTransfer.Set' or 'char'.");
+            mexErrMsgIdAndTxt(ERRID"domain", "Domain entry must be of type 'GAMSTransfer.Set', 'GAMSTransfer.Alias', 'GAMSTransfer.UniverseAlias' or 'char'.");
     }
 
     mxSetProperty((mxArray*) prhs[0], 0, "domain_", prhs[1]);

@@ -139,6 +139,12 @@ void mexFunction(
             gt_gdx_addalias(gdx, name, buf);
             continue;
         }
+        else if (mxIsClass(mx_arr_data, "GAMSTransfer.UniverseAlias"))
+        {
+            gt_mex_getfield_str(mx_arr_data, data_name, "name_", "", true, name, GMS_SSSIZE);
+            gt_gdx_addalias(gdx, name, "*");
+            continue;
+        }
         else if (mxIsClass(mx_arr_data, "GAMSTransfer.Set"))
         {
             gt_mex_getfield_bool(mx_arr_data, data_name, "is_singleton", false, true, 1, &singleton);

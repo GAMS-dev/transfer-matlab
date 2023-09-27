@@ -136,8 +136,9 @@ function gams_transfer_testcreate(varargin)
     gams_data{7} = {
     'Set i ''set_i'' / i1, i2 /;'
     'Alias (a,i);'
+    'Alias (u,*);'
     'Parameter b(a) ''par_b'' / i1=1, i2=2 /;'
-    'execute_unloaddi ''data7.gdx'', i, a, b;'
+    'execute_unloaddi ''data7.gdx'', i, a, u, b;'
     };
 
     gams_data{8} = {

@@ -380,11 +380,14 @@ classdef Container < handle
                 % handle alias differently
                 switch symbol.symbol_type
                 case {GAMSTransfer.SymbolType.ALIAS, 'alias'}
-                    if ~obj.hasSymbols(symbol.alias_with)
+                    if strcmp(symbol.alias_with, '*')
+                        GAMSTransfer.UniverseAlias(obj, symbol.name);
+                    elseif obj.hasSymbols(symbol.alias_with)
+                        GAMSTransfer.Alias(obj, symbol.name, obj.getSymbols(symbol.alias_with));
+                    else
                         error('Alias reference for symbol ''%s'' not found: %s.', ...
                             symbol.name, symbol.alias_with);
                     end
-                    GAMSTransfer.Alias(obj, symbol.name, obj.getSymbols(symbol.alias_with));
                     continue;
                 end
 
@@ -641,7 +644,7 @@ classdef Container < handle
         end
 
         %> Gets all Set objects
-        %> 
+        %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
         %>   Enable `valid` filter if argument is of type logical. If `true`,
@@ -1582,6 +1585,43 @@ classdef Container < handle
             end
         end
 
+        %> Adds a universe alias to the container
+        %>
+        %> Arguments are identical to the \ref GAMSTransfer::UniverseAlias "UniverseAlias"
+        %> constructor. Alternatively, use the constructor directly. In contrast
+        %> to the constructor, this method may overwrite an alias.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> u = c.addUniverseAlias('u');
+        %> ```
+        %>
+        %> @see \ref GAMSTransfer::UniverseAlias "UniverseAlias", \ref GAMSTransfer::Alias "Alias",
+        %> \ref GAMSTransfer::Set "Set"
+        function symbol = addUniverseAlias(obj, name)
+            % Adds a universe alias to the container
+            %
+            % Arguments are identical to the GAMSTransfer.UniverseAlias constructor.
+            % Alternatively, use the constructor directly. In contrast to the
+            % constructor, this method may overwrite an alias.
+            %
+            % Example:
+            % c = Container();
+            % u = c.addUniverseAlias('u');
+            %
+            % See also: GAMSTransfer.UniverseAlias, GAMSTransfer.Alias, GAMSTransfer.Set
+
+            if obj.hasSymbols(name)
+                symbol = obj.getSymbols(name);
+                if ~isa(symbol, 'GAMSTransfer.UniverseAlias')
+                    error('Symbol ''%s'' (with different definition) already exists.', name);
+                end
+            else
+                symbol = GAMSTransfer.UniverseAlias(obj, name);
+            end
+        end
+
         %> Rename a symbol
         %>
         %> - `renameSymbol(oldname, newname)` renames the symbol with name
@@ -2010,6 +2050,9 @@ classdef Container < handle
 
             uels = {};
             for i = 1:numel(symbols)
+                if isa(obj.data.(symbols{i}), 'GAMSTransfer.UniverseAlias')
+                    continue
+                end
                 uels = [uels; obj.data.(symbols{i}).getUELs('ignore_unused', p.Results.ignore_unused)];
                 [~,uidx,~] = unique(uels, 'first');
                 uels = uels(sort(uidx));
@@ -2218,7 +2261,7 @@ classdef Container < handle
 
     end
 
-    methods (Hidden, Access = {?GAMSTransfer.Symbol, ?GAMSTransfer.Alias})
+    methods (Hidden, Access = {?GAMSTransfer.Symbol, ?GAMSTransfer.Alias, ?GAMSTransfer.UniverseAlias})
 
         function add(obj, symbol)
             if obj.indexed && ~isa(symbol, 'GAMSTransfer.Parameter')
