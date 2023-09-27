@@ -145,7 +145,12 @@ test_octave_linux:
         name: $CI_REGISTRY_IMAGE/linux/builder
     needs: [build_octave_linux]
     script:
-        - octave --no-gui --no-window-system --path $PWD/octave_linux --eval "gams_transfer_test('gams_dir', '$GAMS_PATH_LINUX', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
+        - mkdir gdx
+        - cd gdx
+        - curl -o gdx.zip $URL_GDX_LINUX
+        - unzip gdx.zip
+        - cd ..
+        - octave --no-gui --no-window-system --path $PWD/octave_linux --eval "gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
     only:
         - merge_requests
         - master
@@ -156,7 +161,12 @@ test_octave_macos:
         - macos
     needs: [build_octave_macos]
     script:
-        - octave --no-gui --no-window-system --path $PWD/octave_macos --eval "gams_transfer_test('gams_dir', '$GAMS_PATH_MACOS', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
+        - mkdir gdx
+        - cd gdx
+        - curl -o gdx.zip $URL_GDX_MACOS
+        - tar -xf gdx.zip
+        - cd ..
+        - octave --no-gui --no-window-system --path $PWD/octave_macos --eval "gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
     only:
         - merge_requests
         - master
@@ -169,7 +179,12 @@ test_matlab_linux:
         name: $CI_REGISTRY_IMAGE/linux/builder
     needs: [build_matlab_linux]
     script:
-        - ~/Documents/MATLAB/runmatlab.sh "addpath('matlab_linux'); gams_transfer_test('gams_dir', '$GAMS_PATH_LINUX', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - mkdir gdx
+        - cd gdx
+        - curl -o gdx.zip $URL_GDX_LINUX
+        - unzip gdx.zip
+        - cd ..
+        - ~/Documents/MATLAB/runmatlab.sh "addpath('matlab_linux'); gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -180,7 +195,12 @@ test_matlab_macos:
         - macos
     needs: [build_matlab_macos]
     script:
-        - matlab -batch "addpath('matlab_macos'); gams_transfer_test('gams_dir', '$GAMS_PATH_MACOS', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - mkdir gdx
+        - cd gdx
+        - curl -o gdx.zip $URL_GDX_MACOS
+        - tar -xf gdx.zip
+        - cd ..
+        - matlab -batch "addpath('matlab_macos'); gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -193,7 +213,7 @@ test_matlab_windows:
     script:
         - mkdir gdx
         - cd gdx
-        - curl -o gdx.zip $URL_MINIGAMS_WINDOWS
+        - curl -o gdx.zip $URL_GDX_WINDOWS
         - tar -xf gdx.zip
         - cd ..
         - matlab.exe -batch "addpath('matlab_windows'); gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"

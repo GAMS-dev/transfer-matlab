@@ -11,6 +11,7 @@ GAMS Transfer Matlab v0.7.0
   convert (all) UELs to lower or upper case, respectively.
 - Added GDX library unload before each read/write operation.
 - Added columns `where_min` and `where_max` to output of `Container.describeParameters`.
+- Changed used GDX library to `gdxcclib64`.
 - Changed column names in output of `Container.describe*` methods: `dim` -> `dimension`, `num_recs`
   -> `number_records`, `num_vals` -> `number_values`, `min_value` -> `min`, `max_value` -> `max`,
   `mean_value` -> `mean`.
@@ -42,7 +43,7 @@ GAMS Transfer Matlab v0.5.0
   domain forwarding for each dimension independently.
 - Removed `Symbol.getCardinality`, `Symbol.getUELLabels`, `Symbol.initUELs` and
   `Container.getUniverseSet`.
-- Fixed possibly incorrect order of UELs of symbols in `dense_matrix` or `sparse_matrix` format. 
+- Fixed possibly incorrect order of UELs of symbols in `dense_matrix` or `sparse_matrix` format.
 - Fixed `Symbol.setRecords` for cell input and symbols of dimension >= 3.
 
 GAMS Transfer Matlab v0.4.0
