@@ -1223,7 +1223,48 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 4);
     t.assert(ids(6) == 2);
 
-    t.add('symbol_uels_reorder_2');
+    t.add('symbol_uels_reorder_2')
+    x.addUELs({'unused1', 'unused2'}, 1);
+    x.reorderUELs({'i3', 'unused1', 'i10', 'i1', 'unused2', 'i6'}, 1);
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 6);
+    t.assertEquals(uels{1}, 'i3');
+    t.assertEquals(uels{2}, 'unused1');
+    t.assertEquals(uels{3}, 'i10');
+    t.assertEquals(uels{4}, 'i1');
+    t.assertEquals(uels{5}, 'unused2');
+    t.assertEquals(uels{6}, 'i6');
+    ids = int64(x.records.i);
+    t.assert(numel(ids) == 6);
+    t.assert(ids(1) == 4);
+    t.assert(ids(2) == 1);
+    t.assert(ids(3) == 1);
+    t.assert(ids(4) == 6);
+    t.assert(ids(5) == 6);
+    t.assert(ids(6) == 3);
+    c.modified = false;
+    x.reorderUELs();
+    t.assert(c.modified);
+    t.assert(x.modified);
+    uels = x.getUELs(1);
+    t.assert(numel(uels) == 6);
+    t.assertEquals(uels{1}, 'i1');
+    t.assertEquals(uels{2}, 'i3');
+    t.assertEquals(uels{3}, 'i6');
+    t.assertEquals(uels{4}, 'i10');
+    t.assertEquals(uels{5}, 'unused1');
+    t.assertEquals(uels{6}, 'unused2');
+    ids = int64(x.records.i);
+    t.assert(numel(ids) == 6);
+    t.assert(ids(1) == 1);
+    t.assert(ids(2) == 2);
+    t.assert(ids(3) == 2);
+    t.assert(ids(4) == 3);
+    t.assert(ids(5) == 3);
+    t.assert(ids(6) == 4);
+
+    t.add('symbol_uels_reorder_3');
+    x.removeUELs({'unused1', 'unused2'}, 1);
     try
         t.assert(false);
         x.reorderUELs({'i6', 'i3'}, 1);
