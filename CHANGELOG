@@ -3,6 +3,8 @@ GAMS Transfer Matlab v0.7.0
 - Breaking: Renamed records field `text` of Sets to `element_text`.
 - Added symbol `UniverseAlias` to represent alises to the universe set.
 - Added possibility to change symbol name case with `Container.renameSymbol`.
+- Added possibility to reorder UELs by record order with `Symbol.reorderUELs` (passing no
+  arguments).
 - Added `Container.getSets`, `Container.getParameters`, `Container.getVariables`,
   `Container.getEquations` and `Container.getAliases` to get list of symbol objects of corresponding
   type.

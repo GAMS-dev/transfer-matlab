@@ -344,7 +344,7 @@ classdef Symbol < handle
             end
 
             n = 0;
-            for i = 1:numel(rec_labels)    
+            for i = 1:numel(rec_labels)
                 switch rec_labels{i}
                 case obj.TEXT_FIELDS
                 case obj.VALUE_FIELDS
@@ -355,7 +355,7 @@ classdef Symbol < handle
 
             domain_labels = cell(1, n);
             n = 0;
-            for i = 1:numel(rec_labels)    
+            for i = 1:numel(rec_labels)
                 switch rec_labels{i}
                 case obj.TEXT_FIELDS
                 case obj.VALUE_FIELDS
@@ -1724,6 +1724,13 @@ classdef Symbol < handle
                 return;
             end
 
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+            if obj.container.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
             is_parname = @(x) strcmpi(x, 'ignore_unused');
 
             % check optional arguments
@@ -1772,13 +1779,6 @@ classdef Symbol < handle
             % check number of arguments
             if i <= nargin - 1
                 error('Invalid number of arguments');
-            end
-
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
-            end
-            if obj.container.indexed
-                error('UELs not supported in indexed mode.');
             end
 
             uels = {};
@@ -1857,8 +1857,16 @@ classdef Symbol < handle
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
-            % check required arguments
-            if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+            if obj.container.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
+            if nargin <= 2
+                dim = 1:obj.dimension_;
+            elseif ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
                 error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
             end
             if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
@@ -1885,13 +1893,6 @@ classdef Symbol < handle
             % check number of arguments
             if i <= nargin - 3
                 error('Invalid number of arguments');
-            end
-
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
-            end
-            if obj.container.indexed
-                error('UELs not supported in indexed mode.');
             end
 
             switch obj.format_
@@ -1937,6 +1938,9 @@ classdef Symbol < handle
         %> Same functionality as `setUELs(uels, dim)`, but checks that no new
         %> categories are added. The meaning of records does not change.
         %>
+        %> - `reorderUELs()` reorders UELs by record order for each dimension. Unused UELs are
+        %>   appended.
+        %>
         %> @see \ref GAMSTransfer::Symbol::setUELs "Symbol.setUELs"
         function reorderUELs(obj, uels, dim)
             % Reorders UELs
@@ -1944,20 +1948,38 @@ classdef Symbol < handle
             % Same functionality as setUELs(uels, dim), but checks that no new
             % categories are added. The meaning of records does not change.
             %
+            % - `reorderUELs()` reorders UELs by record order for each dimension. Unused UELs are
+            %   appended.
+            %
             % See also: GAMSTransfer.Symbol.setUELs
-
-            if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
-                error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
-            end
-            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
-                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
-            end
 
             if ~obj.isValid()
                 error('Symbol must be valid in order to manage UELs.');
             end
             if obj.container.indexed
                 error('UELs not supported in indexed mode.');
+            end
+
+            if nargin == 1
+                domain_labels = obj.domain_labels;
+                for i = 1:obj.dimension_
+                    uels = obj.getUELs(i);
+                    rec_uels_ids = uint64(obj.records.(domain_labels{i}));
+                    [~,uidx,~] = unique(rec_uels_ids, 'first');
+                    rec_uels_ids = rec_uels_ids(sort(uidx));
+                    rec_uels_ids = rec_uels_ids(rec_uels_ids ~= nan);
+                    obj.setUELs(uels(rec_uels_ids), i);
+                    obj.addUELs(uels, i);
+                end
+                return
+            end
+            if nargin <= 2
+                dim = 1:obj.dimension_;
+            elseif ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
+                error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
+            end
+            if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
+                error('Argument ''uels'' must be ''char'' or ''cellstr''.');
             end
 
             for i = dim
@@ -1999,6 +2021,13 @@ classdef Symbol < handle
             %
             % See also: GAMSTransfer.Container.indexed, GAMSTransfer.Symbol.isValid
 
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+            if obj.container.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
             if nargin < 3
                 dim = 1:obj.dimension_;
             end
@@ -2007,13 +2036,6 @@ classdef Symbol < handle
             end
             if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels);
                 error('Argument ''uels'' must be ''char'' or ''cellstr''.');
-            end
-
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
-            end
-            if obj.container.indexed
-                error('UELs not supported in indexed mode.');
             end
 
             switch obj.format_
@@ -2083,6 +2105,13 @@ classdef Symbol < handle
                 return
             end
 
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+            if obj.container.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
             if nargin < 2
                 uels = {};
             end
@@ -2094,13 +2123,6 @@ classdef Symbol < handle
             end
             if ~isnumeric(dim) || ~isvector(dim) || all(dim ~= round(dim)) || min(dim) < 1 || max(dim) > obj.dimension_
                 error('Argument ''dimension'' must be integer vector with elements in [1,%d]', obj.dimension_);
-            end
-
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
-            end
-            if obj.container.indexed
-                error('UELs not supported in indexed mode.');
             end
 
             switch obj.format_
@@ -2187,6 +2209,13 @@ classdef Symbol < handle
                 return
             end
 
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+            if obj.container.indexed
+                error('UELs not supported in indexed mode.');
+            end
+
             p = inputParser();
             is_dim = @(x) isnumeric(x) && isvector(x) && all(x == round(x)) && min(x) >= 1 && max(x) <= obj.dimension_;
             addOptional(p, 'dim', 1:obj.dimension_, is_dim);
@@ -2198,13 +2227,6 @@ classdef Symbol < handle
             if ~(isstring(uels) && numel(uels) == 1) && ~ischar(uels) && ~iscellstr(uels) && ...
                 ~isa(uels, 'containers.Map') && ~isstruct(uels);
                 error('Argument ''uels'' must be ''char'', ''cellstr'', ''struct'' or ''containers.Map''.');
-            end
-
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
-            end
-            if obj.container.indexed
-                error('UELs not supported in indexed mode.');
             end
 
             switch obj.format_
@@ -2289,7 +2311,7 @@ classdef Symbol < handle
         %> Converts UELs to lower case
         %>
         %> - `lowerUELs()` converts the UELs for all dimension(s).
-        %> - `lowerUELs(d)` converts the UELs for dimension(s) `d`. 
+        %> - `lowerUELs(d)` converts the UELs for dimension(s) `d`.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -2303,7 +2325,7 @@ classdef Symbol < handle
             % Converts UELs to lower case
             %
             % lowerUELs() converts the UELs for all dimension(s).
-            % lowerUELs(d) converts the UELs for dimension(s) d. 
+            % lowerUELs(d) converts the UELs for dimension(s) d.
             %
             % If an old UEL is provided in struct or containers.Map that is
             % not present in the symbol UELs, it will be silently ignored.
@@ -2334,7 +2356,7 @@ classdef Symbol < handle
         %> Converts UELs to upper case
         %>
         %> - `upperUELs()` converts the UELs for all dimension(s).
-        %> - `upperUELs(d)` converts the UELs for dimension(s) `d`. 
+        %> - `upperUELs(d)` converts the UELs for dimension(s) `d`.
         %>
         %> See \ref GAMSTRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
@@ -2348,7 +2370,7 @@ classdef Symbol < handle
             % Converts UELs to upper case
             %
             % upperUELs() converts the UELs for all dimension(s).
-            % upperUELs(d) converts the UELs for dimension(s) d. 
+            % upperUELs(d) converts the UELs for dimension(s) d.
             %
             % If an old UEL is provided in struct or containers.Map that is
             % not present in the symbol UELs, it will be silently ignored.
@@ -2414,7 +2436,7 @@ classdef Symbol < handle
             if numel(unique(domain_labels)) ~= numel(domain_labels)
                 for i = n
                     domain_labels{i} = sprintf('%s_%d', domain_labels{i}, i);
-                end 
+                end
             end
         end
 
