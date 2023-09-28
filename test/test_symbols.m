@@ -1266,9 +1266,9 @@ function test_changeSymbol(t, cfg)
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_cmex_set_sym_domain: Domain entry must be of type ''GAMSTransfer.Set'' or ''char''.');
+            t.assertEquals(e.message, 'gt_cmex_set_sym_domain: Domain entry must be of type ''GAMSTransfer.Set'', ''GAMSTransfer.Alias'', ''GAMSTransfer.UniverseAlias'' or ''char''.');
         else
-            t.assertEquals(e.message, 'Domain entry must be of type ''GAMSTransfer.Set'' or ''char''.');
+            t.assertEquals(e.message, 'Domain entry must be of type ''GAMSTransfer.Set'', ''GAMSTransfer.Alias'', ''GAMSTransfer.UniverseAlias'' or ''char''.');
         end
     end
 
@@ -1377,7 +1377,7 @@ function test_changeSymbol(t, cfg)
         t.reset();
         t.assertEquals(e.message, 'Domain labels must be unique.');
     end
-    
+
     t.add('change_symbol_size');
     try
         t.assert(false);

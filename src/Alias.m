@@ -401,7 +401,7 @@ classdef Alias < handle
             p = inputParser();
             is_dest = @(x) isa(x, 'GAMSTransfer.Container');
             addRequired(p, 'destination', is_dest);
-            addOptional(p, 'overwrite', '', @islogical);
+            addOptional(p, 'overwrite', false, @islogical);
             parse(p, varargin{:});
             destination = p.Results.destination;
             overwrite = p.Results.overwrite;
@@ -686,6 +686,28 @@ classdef Alias < handle
             % See also: GAMSTransfer.Symbol.renameUELs
 
             obj.alias_with.renameUELs(uels, dim);
+        end
+
+        %> Converts UELs to lower case
+        %>
+        %> @see \ref GAMSTransfer::Symbol::lowerUELs "Symbol.lowerUELs"
+        function lowerUELs(obj, dim)
+            % Converts UELs to lower case
+            %
+            % See also: GAMSTransfer.Symbol.lowerUELs
+
+            obj.alias_with.lowerUELs(dim);
+        end
+
+        %> Converts UELs to lower case
+        %>
+        %> @see \ref GAMSTransfer::Symbol::upperUELs "Symbol.upperUELs"
+        function upperUELs(obj, dim)
+            % Converts UELs to upper case
+            %
+            % See also: GAMSTransfer.Symbol.upperUELs
+
+            obj.alias_with.upperUELs(dim);
         end
 
     end

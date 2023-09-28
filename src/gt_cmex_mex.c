@@ -409,7 +409,7 @@ void gt_mex_getfield_str(
         mx_field = mxGetField(mx_struct, 0, fieldname);
     else if (mxIsClass(mx_struct, "GAMSTransfer.Set") || mxIsClass(mx_struct, "GAMSTransfer.Alias") ||
         mxIsClass(mx_struct, "GAMSTransfer.Parameter") || mxIsClass(mx_struct, "GAMSTransfer.Variable") ||
-        mxIsClass(mx_struct, "GAMSTransfer.Equation"))
+        mxIsClass(mx_struct, "GAMSTransfer.Equation") || mxIsClass(mx_struct, "GAMSTransfer.UniverseAlias"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_str", "Structure '%s' has invalid type.", structname, fieldname);
@@ -424,7 +424,7 @@ void gt_mex_getfield_str(
     /* check field */
     if (mxIsClass(mx_field, "GAMSTransfer.Set") || mxIsClass(mx_field, "GAMSTransfer.Alias") ||
         mxIsClass(mx_field, "GAMSTransfer.Parameter") || mxIsClass(mx_field, "GAMSTransfer.Variable") ||
-        mxIsClass(mx_field, "GAMSTransfer.Equation"))
+        mxIsClass(mx_field, "GAMSTransfer.Equation") || mxIsClass(mx_field, "GAMSTransfer.UniverseAlias"))
         mxGetString(mxGetProperty(mx_field, 0, "name_"), value, strsize);
     else if (mxIsChar(mx_field))
         mxGetString(mx_field, value, strsize);
@@ -451,7 +451,7 @@ void gt_mex_getfield_cell_str(
         mx_field = mxGetField(mx_struct, 0, fieldname);
     else if (mxIsClass(mx_struct, "GAMSTransfer.Set") || mxIsClass(mx_struct, "GAMSTransfer.Alias") ||
         mxIsClass(mx_struct, "GAMSTransfer.Parameter") || mxIsClass(mx_struct, "GAMSTransfer.Variable") ||
-        mxIsClass(mx_struct, "GAMSTransfer.Equation"))
+        mxIsClass(mx_struct, "GAMSTransfer.Equation") || mxIsClass(mx_struct, "GAMSTransfer.UniverseAlias"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_str", "Structure '%s' has invalid type.", structname, fieldname);
@@ -472,7 +472,7 @@ void gt_mex_getfield_cell_str(
         mx_entry = mxGetCell(mx_field, i);
         if (mxIsClass(mx_entry, "GAMSTransfer.Set") || mxIsClass(mx_entry, "GAMSTransfer.Alias") ||
             mxIsClass(mx_entry, "GAMSTransfer.Parameter") || mxIsClass(mx_entry, "GAMSTransfer.Variable") ||
-            mxIsClass(mx_entry, "GAMSTransfer.Equation"))
+            mxIsClass(mx_entry, "GAMSTransfer.Equation") || mxIsClass(mx_entry, "GAMSTransfer.UniverseAlias"))
             mxGetString(mxGetProperty(mx_entry, 0, "name_"), value[i], strsize);
         else if (mxIsChar(mx_entry))
             mxGetString(mx_entry, value[i], strsize);
@@ -499,7 +499,7 @@ void gt_mex_getfield_int(
         mx_field = mxGetField(mx_struct, 0, fieldname);
     else if (mxIsClass(mx_struct, "GAMSTransfer.Set") || mxIsClass(mx_struct, "GAMSTransfer.Alias") ||
         mxIsClass(mx_struct, "GAMSTransfer.Parameter") || mxIsClass(mx_struct, "GAMSTransfer.Variable") ||
-        mxIsClass(mx_struct, "GAMSTransfer.Equation"))
+        mxIsClass(mx_struct, "GAMSTransfer.Equation") || mxIsClass(mx_struct, "GAMSTransfer.UniverseAlias"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_int", "Structure '%s' has invalid type.", structname, fieldname);
@@ -580,7 +580,7 @@ void gt_mex_getfield_dbl(
         mx_field = mxGetField(mx_struct, 0, fieldname);
     else if (mxIsClass(mx_struct, "GAMSTransfer.Set") || mxIsClass(mx_struct, "GAMSTransfer.Alias") ||
         mxIsClass(mx_struct, "GAMSTransfer.Parameter") || mxIsClass(mx_struct, "GAMSTransfer.Variable") ||
-        mxIsClass(mx_struct, "GAMSTransfer.Equation"))
+        mxIsClass(mx_struct, "GAMSTransfer.Equation") || mxIsClass(mx_struct, "GAMSTransfer.UniverseAlias"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_dbl", "Structure '%s' has invalid type.", structname, fieldname);
@@ -630,7 +630,7 @@ void gt_mex_getfield_sizet(
         mx_field = mxGetField(mx_struct, 0, fieldname);
     else if (mxIsClass(mx_struct, "GAMSTransfer.Set") || mxIsClass(mx_struct, "GAMSTransfer.Alias") ||
         mxIsClass(mx_struct, "GAMSTransfer.Parameter") || mxIsClass(mx_struct, "GAMSTransfer.Variable") ||
-        mxIsClass(mx_struct, "GAMSTransfer.Equation"))
+        mxIsClass(mx_struct, "GAMSTransfer.Equation") || mxIsClass(mx_struct, "GAMSTransfer.UniverseAlias"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_str", "Structure '%s' has invalid type.", structname, fieldname);
@@ -709,7 +709,7 @@ void gt_mex_getfield_bool(
         mx_field = mxGetField(mx_struct, 0, fieldname);
     else if (mxIsClass(mx_struct, "GAMSTransfer.Set") || mxIsClass(mx_struct, "GAMSTransfer.Alias") ||
         mxIsClass(mx_struct, "GAMSTransfer.Parameter") || mxIsClass(mx_struct, "GAMSTransfer.Variable") ||
-        mxIsClass(mx_struct, "GAMSTransfer.Equation"))
+        mxIsClass(mx_struct, "GAMSTransfer.Equation") || mxIsClass(mx_struct, "GAMSTransfer.UniverseAlias"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_str", "Structure '%s' has invalid type.", structname, fieldname);
@@ -749,7 +749,7 @@ void gt_mex_getfield_struct(
         *value = mxGetField(mx_struct, 0, fieldname);
     else if (mxIsClass(mx_struct, "GAMSTransfer.Set") || mxIsClass(mx_struct, "GAMSTransfer.Alias") ||
         mxIsClass(mx_struct, "GAMSTransfer.Parameter") || mxIsClass(mx_struct, "GAMSTransfer.Variable") ||
-        mxIsClass(mx_struct, "GAMSTransfer.Equation"))
+        mxIsClass(mx_struct, "GAMSTransfer.Equation") || mxIsClass(mx_struct, "GAMSTransfer.UniverseAlias"))
         *value = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_str", "Structure '%s' has invalid type.", structname, fieldname);
@@ -776,7 +776,7 @@ void gt_mex_getfield_cell(
         *value = mxGetField(mx_struct, 0, fieldname);
     else if (mxIsClass(mx_struct, "GAMSTransfer.Set") || mxIsClass(mx_struct, "GAMSTransfer.Alias") ||
         mxIsClass(mx_struct, "GAMSTransfer.Parameter") || mxIsClass(mx_struct, "GAMSTransfer.Variable") ||
-        mxIsClass(mx_struct, "GAMSTransfer.Equation"))
+        mxIsClass(mx_struct, "GAMSTransfer.Equation") || mxIsClass(mx_struct, "GAMSTransfer.UniverseAlias"))
         *value = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_cell", "Structure '%s' has invalid type.", structname, fieldname);
@@ -809,7 +809,7 @@ void gt_mex_getfield_table2struct(
         *value = mxGetField(mx_struct, 0, fieldname);
     else if (mxIsClass(mx_struct, "GAMSTransfer.Set") || mxIsClass(mx_struct, "GAMSTransfer.Alias") ||
         mxIsClass(mx_struct, "GAMSTransfer.Parameter") || mxIsClass(mx_struct, "GAMSTransfer.Variable") ||
-        mxIsClass(mx_struct, "GAMSTransfer.Equation"))
+        mxIsClass(mx_struct, "GAMSTransfer.Equation") || mxIsClass(mx_struct, "GAMSTransfer.UniverseAlias"))
         *value = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_table2struct", "Structure '%s' has invalid type.", structname, fieldname);
