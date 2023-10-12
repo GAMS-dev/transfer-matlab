@@ -1,3 +1,7 @@
+GAMS Transfer Matlab v0.8.0
+==================
+- Added MacOS Arm64 build.
+
 GAMS Transfer Matlab v0.7.0
 ==================
 - Breaking: Renamed records field `text` of Sets to `element_text`.
