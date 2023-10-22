@@ -99,7 +99,7 @@ classdef GAMSTest < handle
 
         function testEmptySymbol(obj, symbol)
             switch class(symbol)
-            case {'GAMSTransfer.Set', 'GAMSTransfer.Parameter', 'GAMSTransfer.Variable', 'GAMSTransfer.Equation'}
+            case {'gams.transfer.Set', 'gams.transfer.Parameter', 'gams.transfer.Variable', 'gams.transfer.Equation'}
                 obj.assert(ischar(symbol.name));
                 obj.assert(ischar(symbol.description));
                 obj.assert(symbol.dimension >= 0);
@@ -121,21 +121,21 @@ classdef GAMSTest < handle
                 obj.assert(islogical(symbol.isValid()));
                 obj.assert(ischar(symbol.format));
                 obj.assert(strcmp(symbol.format, 'not_read') || strcmp(symbol.format, 'empty'));
-            case 'GAMSTransfer.Alias'
+            case 'gams.transfer.Alias'
                 obj.assert(ischar(symbol.name));
-                obj.assert(isa(symbol.alias_with, 'GAMSTransfer.Set'));
+                obj.assert(isa(symbol.alias_with, 'gams.transfer.Set'));
             otherwise
                 obj.assert(false);
             end
             switch class(symbol)
-            case 'GAMSTransfer.Set'
+            case 'gams.transfer.Set'
                 obj.assert(islogical(symbol.is_singleton));
-            case 'GAMSTransfer.Variable'
+            case 'gams.transfer.Variable'
                 obj.assert(ischar(symbol.type));
-                obj.assert(GAMSTransfer.VariableType.isValid(symbol.type));
-            case 'GAMSTransfer.Equation'
+                obj.assert(gams.transfer.VariableType.isValid(symbol.type));
+            case 'gams.transfer.Equation'
                 obj.assert(ischar(symbol.type));
-                obj.assert(GAMSTransfer.EquationType.isValid(symbol.type));
+                obj.assert(gams.transfer.EquationType.isValid(symbol.type));
             end
         end
 

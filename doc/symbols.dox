@@ -3,20 +3,20 @@
 @defgroup gams_transfer_matlab_symbol Symbols
 @brief Symbols (Set, Alias, Parameter, Variable, Equation)
 
-A symbol is either a GAMS \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Alias
-"Alias", \ref GAMSTransfer::Parameter "Parameter", \ref GAMSTransfer::Variable
-"Variable" or \ref GAMSTransfer::Equation "Equation". In GAMS Transfer Matlab, a
+A symbol is either a GAMS \ref gams::transfer::Set "Set", \ref gams::transfer::Alias
+"Alias", \ref gams::transfer::Parameter "Parameter", \ref gams::transfer::Variable
+"Variable" or \ref gams::transfer::Equation "Equation". In GAMS Transfer Matlab, a
 symbol cannot live on it's own, but is always part of a \ref
 gams_transfer_matlab_container "container".
 
-\section GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN Symbol Domain
+\section GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN Symbol Domain
 
 Before we can dive into the symbol details, it is important to learn about some
 GDX basics. In GDX, symbols are defined over a domain. The domain specifies the
-\ref GAMSTransfer::Symbol::dimension "dimension" and \ref
-GAMSTransfer::Symbol::size "size" of a symbol, e.g., whether it's a scalar, a
+\ref gams::transfer::Symbol::dimension "dimension" and \ref
+gams::transfer::Symbol::size "size" of a symbol, e.g., whether it's a scalar, a
 vector or a matrix. There are three different \ref
-GAMSTransfer::Symbol::domain_type "domain types", `none`, `regular` and
+gams::transfer::Symbol::domain_type "domain types", `none`, `regular` and
 `relaxed`. For GAMS Transfer Matlab users it is important to especially know the
 difference between the latter two.
 - \par None: Symbol is Either a Scalar or Defined Over the Universe Set.
@@ -28,7 +28,7 @@ Parameter(c, 'p_vector', {'*'});
 Parameter(c, 'p_matrix', {'*', '*'});
 ```
   Here, `*` represents the universe set. Any domain entries are allowed. If a
-  universe set is part of the domain, the \ref GAMSTransfer::Symbol::size "size"
+  universe set is part of the domain, the \ref gams::transfer::Symbol::size "size"
   of the symbol is undefined.
 \endparblock
 - \par Regular: Symbol is Defined Over Another Set.
@@ -41,10 +41,10 @@ Parameter(c, 'p_vector', {i});
 Parameter(c, 'p_matrix', {i, j});
 Parameter(c, 'p_matrix2', {*, j});
 ```
-  Only domain entries that are in the \ref GAMSTransfer::Set "Sets" `i`, `i x j`
+  Only domain entries that are in the \ref gams::transfer::Set "Sets" `i`, `i x j`
   or `* x j`, respectively, are allowed. Incorrect domain entries will lead to
-  domain violations, see \ref GAMSTRANSFER_MATLAB_RECORDS_DOMVIOL. The \ref
-  GAMSTransfer::Symbol::size "size" of a symbol is given by the number of
+  domain violations, see \ref GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL. The \ref
+  gams::transfer::Symbol::size "size" of a symbol is given by the number of
   records in `i` and `j` (undefined for the `p_matrix3`).
 \endparblock
 - \par Relaxed: Symbol is Defined Over a (Set) Name.
@@ -57,25 +57,25 @@ Parameter(c, 'p_matrix2', {i, 'j'});
 Parameter(c, 'p_matrix3', {'i', *});
 ```
   Any domain entries are allowed (independently of possible previously defined
-  \ref GAMSTransfer::Set "Sets" `i` and `j`). Domain violation checking is
-  disabled! The \ref GAMSTransfer::Symbol::size "size" is undefined.
+  \ref gams::transfer::Set "Sets" `i` and `j`). Domain violation checking is
+  disabled! The \ref gams::transfer::Symbol::size "size" is undefined.
 \endparblock
 
-\section GAMSTRANSFER_MATLAB_SYMBOL_CREATE Creating a Symbol
+\section GAMS_TRANSFER_MATLAB_SYMBOL_CREATE Creating a Symbol
 
 To create a symbol, two equivalent ways exist:
-- The constructors of \ref GAMSTransfer::Set "Set", \ref GAMSTransfer::Alias
-  "Alias", \ref GAMSTransfer::Parameter "Parameter", \ref GAMSTransfer::Variable
-  "Variable" and \ref GAMSTransfer::Equation "Equation", e.g.:
+- The constructors of \ref gams::transfer::Set "Set", \ref gams::transfer::Alias
+  "Alias", \ref gams::transfer::Parameter "Parameter", \ref gams::transfer::Variable
+  "Variable" and \ref gams::transfer::Equation "Equation", e.g.:
 ```
 c = Container();
 p = Parameter(c, 'p');
 ```
-- The methods \ref GAMSTransfer::Container::addSet "Container.addSet", \ref
-  GAMSTransfer::Container::addAlias "Container.addAlias", \ref
-  GAMSTransfer::Container::addParameter "Container.addParameter", \ref
-  GAMSTransfer::Container::addVariable "Container.addVariable" and \ref
-  GAMSTransfer::Container::addEquation "Container.addEquation", e.g.:
+- The methods \ref gams::transfer::Container::addSet "Container.addSet", \ref
+  gams::transfer::Container::addAlias "Container.addAlias", \ref
+  gams::transfer::Container::addParameter "Container.addParameter", \ref
+  gams::transfer::Container::addVariable "Container.addVariable" and \ref
+  gams::transfer::Container::addEquation "Container.addEquation", e.g.:
 ```
 c = Container();
 p = c.addParameter('p');
@@ -93,64 +93,64 @@ value if the argument is not required.
 | Argument | Type | Description| Set | Alias | Parameter | Variable | Equation |
 |:---------|:-----|:-----------|:----|:------|:----------|:---------|:---------|
 | name | string | Name of symbol | required #1 | required #1 | required #1 | required #1 | required #1 |
-| \ref GAMSTransfer::Alias::alias_with "alias_with" | \ref GAMSTransfer::Set "Set" | Set an alias is linked to | - | required #2 | - | - | - |
-| \ref GAMSTransfer::Variable::type "type" | string, int | Variable or Equation type, see \ref GAMSTransfer::VariableType "VariableType" and \ref GAMSTransfer::EquationType "EquationType" | - | - | - | optional #2 ('free') | required #2 |
-| \ref GAMSTransfer::Symbol::domain "domain" | cell, \ref GAMSTransfer::Set "Set", string | List of domains given either as string ('*' for universe set) or as reference to a \ref GAMSTransfer::Set "Set" object | optional #2 ('*') | - | optional #2 ({}) | optional #3 ({}) | optional #3 ({}) |
+| \ref gams::transfer::Alias::alias_with "alias_with" | \ref gams::transfer::Set "Set" | Set an alias is linked to | - | required #2 | - | - | - |
+| \ref gams::transfer::Variable::type "type" | string, int | Variable or Equation type, see \ref gams::transfer::VariableType "VariableType" and \ref gams::transfer::EquationType "EquationType" | - | - | - | optional #2 ('free') | required #2 |
+| \ref gams::transfer::Symbol::domain "domain" | cell, \ref gams::transfer::Set "Set", string | List of domains given either as string ('*' for universe set) or as reference to a \ref gams::transfer::Set "Set" object | optional #2 ('*') | - | optional #2 ({}) | optional #3 ({}) | optional #3 ({}) |
 | description | string | Description of symbol | parameter ('') | - | parameter ('') | parameter ('') | parameter ('') |
-| \ref GAMSTransfer::Symbol::records "records" | any | Symbol records, see also \ref GAMSTRANSFER_MATLAB_SYMBOL_EFFICIENT_RECORDS | parameter ([]) | - | parameter ([]) | parameter ([]) | parameter ([]) |
-| \ref GAMSTransfer::Set::is_singleton "is_singleton" | logical | Indicates if set is a singleton set (true) or not (false) | parameter (false) | - | - | - | - |
+| \ref gams::transfer::Symbol::records "records" | any | Symbol records, see also \ref GAMS_TRANSFER_MATLAB_SYMBOL_EFFICIENT_RECORDS | parameter ([]) | - | parameter ([]) | parameter ([]) | parameter ([]) |
+| \ref gams::transfer::Set::is_singleton "is_singleton" | logical | Indicates if set is a singleton set (true) or not (false) | parameter (false) | - | - | - | - |
 
 The other symbol properties are implied by those listed above. For example, \ref
-GAMSTransfer::Symbol::dimension "dimension" is the number of elements in \ref
-GAMSTransfer::Symbol::domain "domain".
+gams::transfer::Symbol::dimension "dimension" is the number of elements in \ref
+gams::transfer::Symbol::domain "domain".
 
 All the above symbol properties can be modified at any time after the addition
 to the container. Furthermore, changing the property \ref
-GAMSTransfer::Symbol::dimension "dimension" has the following effect: Decreasing
-the \ref GAMSTransfer::Symbol::dimension "dimension" will remove \ref
-GAMSTransfer::Symbol::domain "domain" elements at the back, while increasing the
-\ref GAMSTransfer::Symbol::dimension "dimension" will append appropriately many
+gams::transfer::Symbol::dimension "dimension" has the following effect: Decreasing
+the \ref gams::transfer::Symbol::dimension "dimension" will remove \ref
+gams::transfer::Symbol::domain "domain" elements at the back, while increasing the
+\ref gams::transfer::Symbol::dimension "dimension" will append appropriately many
 universe set domains `*`. Changing symbol properties may cause reevaluation of
 validity once an operation requires this changed symbol to be valid.
 
 \note If any domain element is passed as string except for `*` (universe set),
 the domain is handled `relaxed` instead of `regular` as indicated by the
-property \ref GAMSTransfer::Symbol::domain_type "domain_type", see also \ref
-GAMSTRANSFER_MATLAB_SYMBOL_DOMAIN. This means that domain checking does not
-apply, see also \ref GAMSTRANSFER_MATLAB_RECORDS_DOMVIOL.
+property \ref gams::transfer::Symbol::domain_type "domain_type", see also \ref
+GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN. This means that domain checking does not
+apply, see also \ref GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL.
 
-\section GAMSTRANSFER_MATLAB_SYMBOL_EFFICIENT_RECORDS Efficiently Assigning Symbol Records
+\section GAMS_TRANSFER_MATLAB_SYMBOL_EFFICIENT_RECORDS Efficiently Assigning Symbol Records
 
 Need more convenience by sacrificing efficiency? Go to \ref
-GAMSTRANSFER_MATLAB_SYMBOL_CONVENIENT_RECORDS.
+GAMS_TRANSFER_MATLAB_SYMBOL_CONVENIENT_RECORDS.
 
 Symbol \ref gams_transfer_matlab_records "records" are stored in the property
-\ref GAMSTransfer::Symbol::records "Symbol.records". It is most efficient to
+\ref gams::transfer::Symbol::records "Symbol.records". It is most efficient to
 modify the data inplace. Note that the records have to satisfy the chosen \ref
-GAMSTRANSFER_MATLAB_RECORDS_FORMAT "records format". Otherwise, the symbol will
+GAMS_TRANSFER_MATLAB_RECORDS_FORMAT "records format". Otherwise, the symbol will
 be marked as invalid. Records are checked whenever a valid symbol is required.
-See \ref GAMSTRANSFER_MATLAB_RECORDS_VALIDATE for more information.
+See \ref GAMS_TRANSFER_MATLAB_RECORDS_VALIDATE for more information.
 
 \note Performance hint: In case symbol records are updated within a loop, try to
 avoid checking the symbol validity within the loop. Note that symbol methods to
 query, for example, the number of records will check for a valid symbol
 internally. You can use the Matlab Profiler to verify that \ref
-GAMSTransfer::Symbol::isValid "Symbol.isValid" is not called within your loop.
+gams::transfer::Symbol::isValid "Symbol.isValid" is not called within your loop.
 
-\section GAMSTRANSFER_MATLAB_SYMBOL_CONVENIENT_RECORDS Conveniently Assigning Symbol Records
+\section GAMS_TRANSFER_MATLAB_SYMBOL_CONVENIENT_RECORDS Conveniently Assigning Symbol Records
 
 Modifying the data as described in \ref
-GAMSTRANSFER_MATLAB_SYMBOL_EFFICIENT_RECORDS requires to provide the data in one
-of the supported \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT "records format". For
-more convenience, the method \ref GAMSTransfer::Symbol::setRecords
+GAMS_TRANSFER_MATLAB_SYMBOL_EFFICIENT_RECORDS requires to provide the data in one
+of the supported \ref GAMS_TRANSFER_MATLAB_RECORDS_FORMAT "records format". For
+more convenience, the method \ref gams::transfer::Symbol::setRecords
 "Symbol.setRecords" accepts a wide range of formats that will be transformed
-internally to one of the \ref GAMSTRANSFER_MATLAB_RECORDS_FORMAT
-"records format". Note that \ref GAMSTransfer::Symbol::setRecords
+internally to one of the \ref GAMS_TRANSFER_MATLAB_RECORDS_FORMAT
+"records format". Note that \ref gams::transfer::Symbol::setRecords
 "Symbol.setRecords" is also called by the symbol constructor of the argument
 `records` is provided.
 
 The following transformations are supported (sample code uses symbols of \ref
-GAMSTRANSFER_MATLAB_GETSTARTED_EXAMPLE):
+GAMS_TRANSFER_MATLAB_GETSTARTED_EXAMPLE):
 - \par string:
   \parblock
   Interpreted as domain entry for first dimension.
@@ -163,7 +163,7 @@ ans =
 
   table
 
-       i 
+       i
     _______
 
     seattle
@@ -183,7 +183,7 @@ ans =
 
   2×1 table
 
-        i 
+        i
     _________
 
     seattle
@@ -218,11 +218,11 @@ ans =
   entries for the `i`-th domain. If element is the `j`-th numeric vector/matrix,
   it is interpreted as the `j`-th element of the following: (1) `level` or
   `value`, (2) `marginal`, (3) `lower`, (4) `upper`, (5) `scale`. If symbol is a
-  \ref GAMSTransfer::Set "Set", the `(dim+1)`-th cellstr is considered to be the
+  \ref gams::transfer::Set "Set", the `(dim+1)`-th cellstr is considered to be the
   set `element_text`.
 
   \note Instead of a `cell`, it is possible to provide the elements as separate
-  arguments to the method \ref GAMSTransfer::Symbol::setRecords
+  arguments to the method \ref gams::transfer::Symbol::setRecords
   "Symbol.setRecords".
 
 ```

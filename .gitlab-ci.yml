@@ -1,11 +1,12 @@
 
 stages:
   - images
-  - build_octave
-  - test_octave
-  - build_matlab
-  - test_matlab
-  - build_doc
+  - doc
+  - download
+  - octave:build
+  - octave:test
+  - matlab:build
+  - matlab:test
   - package
   - release
   - deploy
@@ -40,12 +41,13 @@ image_linux:
           when: manual
           allow_failure: true
 
-build_documentation:
-    stage: build_doc
+doc:build:
+    stage: doc
     tags:
         - linux
     image:
         name: $CI_REGISTRY_IMAGE/linux/builder
+    needs: []
     script:
         - ./gams_transfer_doc.sh
     only:
@@ -56,233 +58,305 @@ build_documentation:
         name: doc
         paths:
             - build/doc/html
-        expire_in: 1 day
+        expire_in: 10 min
 
-build_octave_linux:
-    stage: build_octave
+download:linux:
+    stage: download
     tags:
         - linux
     image:
         name: $CI_REGISTRY_IMAGE/linux/builder
+    needs: []
     script:
-        - octave --no-gui --no-window-system --eval "gams_transfer_setup('target_dir', 'octave_linux')"
+        - mkdir -p linux/gdx
+        - curl -o gdx.zip $URL_GDX_LINUX
+        - unzip gdx.zip -d linux/gdx
     only:
         - merge_requests
         - master
+        - tags
     artifacts:
-        name: gams_transfer_octave_linux
+        name: linux:gdx
         paths:
-            - octave_linux
-        expire_in: 1 day
+            - linux/gdx
+        expire_in: 10 min
 
-build_octave_macos:
-    stage: build_octave
+download:macos:
+    stage: download
     tags:
         - macos
+    needs: []
     script:
-        - octave --no-gui --no-window-system --eval "gams_transfer_setup('target_dir', 'octave_macos')"
+        - mkdir -p macos/gdx
+        - curl -o gdx.zip $URL_GDX_MACOS
+        - tar -xf gdx.zip -C macos/gdx
     only:
         - merge_requests
         - master
+        - tags
     artifacts:
-        name: gams_transfer_octave_macos
+        name: macos:gdx
         paths:
-            - octave_macos
-        expire_in: 1 day
+            - macos/gdx
+        expire_in: 10 min
 
-build_octave_macos_arm:
-    stage: build_octave
+download:macos_arm:
+    stage: download
     tags:
         - macos-arm64
+    needs: []
     script:
-        - octave --no-gui --no-window-system --eval "gams_transfer_setup('target_dir', 'octave_macos_arm')"
-    only:
-        - merge_requests
-        - master
-    artifacts:
-        name: gams_transfer_octave_macos_arm
-        paths:
-            - octave_macos_arm
-        expire_in: 1 day
-
-build_matlab_linux:
-    stage: build_matlab
-    tags:
-        - linux
-    image:
-        name: $CI_REGISTRY_IMAGE/linux/builder
-    script:
-        - ~/Documents/MATLAB/runmatlab.sh "gams_transfer_setup('target_dir', 'matlab_linux')"
+        - mkdir -p macos_arm/gdx
+        - curl -o gdx.zip $URL_GDX_MACOS_ARM
+        - tar -xf gdx.zip -C macos_arm/gdx
     only:
         - merge_requests
         - master
         - tags
     artifacts:
-        name: gams_transfer_matlab_linux
+        name: macos_arm:gdx
         paths:
-            - matlab_linux
-        expire_in: 1 day
+            - macos_arm/gdx
+        expire_in: 10 min
 
-build_matlab_macos:
-    stage: build_matlab
-    tags:
-        - macos
-    script:
-        - matlab -nodisplay -nosplash -nodesktop -r "gams_transfer_setup('target_dir', 'matlab_macos')"
-    only:
-        - merge_requests
-        - master
-        - tags
-    artifacts:
-        name: gams_transfer_matlab_macos
-        paths:
-            - matlab_macos
-        expire_in: 1 day
-
-build_matlab_macos_arm:
-    stage: build_matlab
-    tags:
-        - macos-arm64
-    script:
-        - matlab -nodisplay -nosplash -nodesktop -r "gams_transfer_setup('target_dir', 'matlab_macos_arm')"
-    only:
-        - merge_requests
-        - master
-        - tags
-    artifacts:
-        name: gams_transfer_matlab_macos_arm
-        paths:
-            - matlab_macos_arm
-        expire_in: 1 day
-
-build_matlab_windows:
-    stage: build_matlab
+download:windows:
+    stage: download
     tags:
         - windows-shell
+    needs: []
     script:
-        - matlab.exe -batch "gams_transfer_setup('target_dir', 'matlab_windows')"
-    only:
-        - merge_requests
-        - master
-        - tags
-    artifacts:
-        name: gams_transfer_matlab_windows
-        paths:
-            - matlab_windows
-        expire_in: 1 day
-
-test_octave_linux:
-    stage: test_octave
-    tags:
-        - linux
-    image:
-        name: $CI_REGISTRY_IMAGE/linux/builder
-    needs: [build_octave_linux]
-    script:
-        - mkdir gdx
-        - cd gdx
-        - curl -o gdx.zip $URL_GDX_LINUX
-        - unzip gdx.zip
-        - cd ..
-        - octave --no-gui --no-window-system --path $PWD/octave_linux --eval "gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
-    only:
-        - merge_requests
-        - master
-
-test_octave_macos:
-    stage: test_octave
-    tags:
-        - macos
-    needs: [build_octave_macos]
-    script:
-        - mkdir gdx
-        - cd gdx
-        - curl -o gdx.zip $URL_GDX_MACOS
-        - tar -xf gdx.zip
-        - cd ..
-        - octave --no-gui --no-window-system --path $PWD/octave_macos --eval "gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
-    only:
-        - merge_requests
-        - master
-
-test_octave_macos_arm:
-    stage: test_octave
-    tags:
-        - macos-arm64
-    needs: [build_octave_macos_arm]
-    script:
-        - mkdir gdx
-        - cd gdx
-        - curl -o gdx.zip $URL_GDX_MACOS_ARM
-        - tar -xf gdx.zip
-        - cd ..
-        - octave --no-gui --no-window-system --path $PWD/octave_macos_arm --eval "gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
-    only:
-        - merge_requests
-        - master
-
-test_matlab_linux:
-    stage: test_matlab
-    tags:
-        - linux
-    image:
-        name: $CI_REGISTRY_IMAGE/linux/builder
-    needs: [build_matlab_linux]
-    script:
-        - mkdir gdx
-        - cd gdx
-        - curl -o gdx.zip $URL_GDX_LINUX
-        - unzip gdx.zip
-        - cd ..
-        - ~/Documents/MATLAB/runmatlab.sh "addpath('matlab_linux'); gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
-    only:
-        - merge_requests
-        - master
-
-test_matlab_macos:
-    stage: test_matlab
-    tags:
-        - macos
-    needs: [build_matlab_macos]
-    script:
-        - mkdir gdx
-        - cd gdx
-        - curl -o gdx.zip $URL_GDX_MACOS
-        - tar -xf gdx.zip
-        - cd ..
-        - matlab -batch "addpath('matlab_macos'); gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
-    only:
-        - merge_requests
-        - master
-
-test_matlab_macos_arm:
-    stage: test_matlab
-    tags:
-        - macos-arm64
-    needs: [build_matlab_macos_arm]
-    script:
-        - mkdir gdx
-        - cd gdx
-        - curl -o gdx.zip $URL_GDX_MACOS_ARM
-        - tar -xf gdx.zip
-        - cd ..
-        - matlab -batch "addpath('matlab_macos_arm'); gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
-    only:
-        - merge_requests
-        - master
-
-test_matlab_windows:
-    stage: test_matlab
-    tags:
-        - windows-shell
-    needs: [build_matlab_windows]
-    script:
-        - mkdir gdx
-        - cd gdx
+        - mkdir -p windows/gdx
         - curl -o gdx.zip $URL_GDX_WINDOWS
-        - tar -xf gdx.zip
-        - cd ..
-        - matlab.exe -batch "addpath('matlab_windows'); gams_transfer_test('gams_dir', 'gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - tar -xf gdx.zip -C windows/gdx
+    only:
+        - merge_requests
+        - master
+        - tags
+    artifacts:
+        name: windows:gdx
+        paths:
+            - windows/gdx
+        expire_in: 10 min
+
+octave:build:linux:
+    stage: octave:build
+    tags:
+        - linux
+    image:
+        name: $CI_REGISTRY_IMAGE/linux/builder
+    needs: [download:linux]
+    script:
+        - mkdir -p linux/octave
+        - cp -r +gams linux/octave
+        - cd linux/octave
+        - octave --no-gui --no-window-system --eval "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+    only:
+        - merge_requests
+        - master
+    artifacts:
+        name: linux:octave
+        paths:
+            - linux/octave/+gams
+        expire_in: 10 min
+
+octave:build:macos:
+    stage: octave:build
+    tags:
+        - macos
+    needs: [download:macos]
+    script:
+        - mkdir -p macos/octave
+        - cp -r +gams macos/octave
+        - cd macos/octave
+        - octave --no-gui --no-window-system --eval "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+    only:
+        - merge_requests
+        - master
+    artifacts:
+        name: macos:octave
+        paths:
+            - macos/octave/+gams
+        expire_in: 10 min
+
+octave:build:macos_arm:
+    stage: octave:build
+    tags:
+        - macos-arm64
+    needs: [download:macos_arm]
+    script:
+        - mkdir -p macos_arm/octave
+        - cp -r +gams macos_arm/octave
+        - cd macos_arm/octave
+        - octave --no-gui --no-window-system --eval "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+    only:
+        - merge_requests
+        - master
+    artifacts:
+        name: macos_arm:octave
+        paths:
+            - macos_arm/octave/+gams
+        expire_in: 10 min
+
+matlab:build:linux:
+    stage: matlab:build
+    tags:
+        - linux
+    image:
+        name: $CI_REGISTRY_IMAGE/linux/builder
+    needs: [download:linux]
+    script:
+        - mkdir -p linux/matlab
+        - cp -r +gams linux/matlab
+        - cd linux/matlab
+        - ~/Documents/MATLAB/runmatlab.sh "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+    only:
+        - merge_requests
+        - master
+        - tags
+    artifacts:
+        name: linux:matlab
+        paths:
+            - linux/matlab/+gams
+        expire_in: 10 min
+
+matlab:build:macos:
+    stage: matlab:build
+    tags:
+        - macos
+    needs: [download:macos]
+    script:
+        - mkdir -p macos/matlab
+        - cp -r +gams macos/matlab
+        - cd macos/matlab
+        - matlab -nodisplay -nosplash -nodesktop -r "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+    only:
+        - merge_requests
+        - master
+        - tags
+    artifacts:
+        name: macos:matlab
+        paths:
+            - macos/matlab/+gams
+        expire_in: 10 min
+
+matlab:build:macos_arm:
+    stage: matlab:build
+    tags:
+        - macos-arm64
+    needs: [download:macos_arm]
+    script:
+        - mkdir -p macos_arm/matlab
+        - cp -r +gams macos_arm/matlab
+        - cd macos_arm/matlab
+        - matlab -nodisplay -nosplash -nodesktop -r "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+    only:
+        - merge_requests
+        - master
+        - tags
+    artifacts:
+        name: macos_arm:matlab
+        paths:
+            - macos_arm/matlab/+gams
+        expire_in: 10 min
+
+matlab:build:windows:
+    stage: matlab:build
+    tags:
+        - windows-shell
+    needs: [download:windows]
+    script:
+        - mkdir -p windows/matlab
+        - cp -r +gams windows/matlab
+        - cd windows/matlab
+        - matlab.exe -batch "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+    only:
+        - merge_requests
+        - master
+        - tags
+    artifacts:
+        name: windows:matlab
+        paths:
+            - windows/matlab/+gams
+        expire_in: 10 min
+
+octave:test:linux:
+    stage: octave:test
+    tags:
+        - linux
+    image:
+        name: $CI_REGISTRY_IMAGE/linux/builder
+    needs: [download:linux, octave:build:linux]
+    script:
+        - ls -Rla
+        - octave --no-gui --no-window-system --eval "gams_transfer_test('linux/octave', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
+    only:
+        - merge_requests
+        - master
+
+octave:test:macos:
+    stage: octave:test
+    tags:
+        - macos
+    needs: [download:macos, octave:build:macos]
+    script:
+        - octave --no-gui --no-window-system --eval "gams_transfer_test('macos/octave', 'gams_dir', 'macos/gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
+    only:
+        - merge_requests
+        - master
+
+octave:test:macos_arm:
+    stage: octave:test
+    tags:
+        - macos-arm64
+    needs: [download:macos_arm, octave:build:macos_arm]
+    script:
+        - octave --no-gui --no-window-system --eval "gams_transfer_test('macos_arm/octave', 'gams_dir', 'macos_arm/gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
+    only:
+        - merge_requests
+        - master
+
+matlab:test:linux:
+    stage: matlab:test
+    tags:
+        - linux
+    image:
+        name: $CI_REGISTRY_IMAGE/linux/builder
+    needs: [download:linux, matlab:build:linux]
+    script:
+        - ~/Documents/MATLAB/runmatlab.sh "gams_transfer_test('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+    only:
+        - merge_requests
+        - master
+
+matlab:test:macos:
+    stage: matlab:test
+    tags:
+        - macos
+    needs: [download:macos, matlab:build:macos]
+    script:
+        - matlab -batch "gams_transfer_test('macos/matlab', 'gams_dir', 'macos/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+    only:
+        - merge_requests
+        - master
+
+matlab:test:macos_arm:
+    stage: matlab:test
+    tags:
+        - macos-arm64
+    needs: [download:macos_arm, matlab:build:macos_arm]
+    script:
+        - matlab -batch "gams_transfer_test('macos_arm/matlab', 'gams_dir', 'macos_arm/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+    only:
+        - merge_requests
+        - master
+
+matlab:test:windows:
+    stage: matlab:test
+    tags:
+        - windows-shell
+    needs: [download:windows, matlab:build:windows]
+    script:
+        - matlab.exe -batch "gams_transfer_test('windows/matlab', 'gams_dir', 'windows/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -294,25 +368,22 @@ package:
     image:
         name: $CI_REGISTRY_IMAGE/linux/builder
     script:
-        - cd matlab_macos
-        - sudo zip -r gams_transfer_matlab_macos.zip +GAMSTransfer
-        - |
-            curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_macos.zip ${PACKAGE_REGISTRY_URL}
-        - cd ..
-        - cd matlab_macos_arm
-        - sudo zip -r gams_transfer_matlab_macos_arm.zip +GAMSTransfer
-        - |
-            curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_macos_arm.zip ${PACKAGE_REGISTRY_URL}
-        - cd ..
-        - cd matlab_windows
-        - sudo zip -r gams_transfer_matlab_windows.zip +GAMSTransfer
-        - |
-            curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_windows.zip ${PACKAGE_REGISTRY_URL}
-        - cd ..
-        - cd matlab_linux
-        - sudo zip -r gams_transfer_matlab_linux.zip +GAMSTransfer
+        - cd linux/matlab
+        - sudo zip -r gams_transfer_matlab_linux.zip +gams
         - |
             curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_linux.zip ${PACKAGE_REGISTRY_URL}
+        - cd ../../macos/matlab
+        - sudo zip -r gams_transfer_matlab_macos.zip +gams
+        - |
+            curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_macos.zip ${PACKAGE_REGISTRY_URL}
+        - cd ../../macos_arm/matlab
+        - sudo zip -r gams_transfer_matlab_macos_arm.zip +gams
+        - |
+            curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_macos_arm.zip ${PACKAGE_REGISTRY_URL}
+        - cd ../../windows/matlab
+        - sudo zip -r gams_transfer_matlab_windows.zip +gams
+        - |
+            curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_windows.zip ${PACKAGE_REGISTRY_URL}
     only:
         - tags
 

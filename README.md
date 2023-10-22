@@ -25,42 +25,34 @@ See [GAMS Transfer Matlab Documentation](http://devel.pages.gams.com/gams-transf
 GAMS comes with a ready-to-use GAMS Transfer Matlab (for Matlab 2018a or newer).
 Simply add the GAMS Matlab API to the Matlab path:
 ```
-addpath("[PathToGAMS]/apifiles/Matlab/api")
+addpath("[PathToGAMS]/api/matlab")
 ```
 
 Note that GAMS Transfer Matlab comes as a Matlab package and, thus, all classes
-must be prefixed with `GAMSTransfer.`. In order to avoid this, you can import
+must be prefixed with `gams.transfer.`. In order to avoid this, you can import
 the package with:
 ```
-import GAMSTransfer.*
+import gams.transfer.*
 ```
 
 ## Install From Source
 
 ### Build
 
-To build GAMSTransfer, open Matlab and run `gams_transfer_setup`:
+To build GAMS Transfer, open Matlab and run `gams.transfer.setup`:
 ```matlab
-gams_transfer_setup()
-gams_transfer_setup(_, 'target_dir', <install_directory>)
-gams_transfer_setup(_, 'gams_dir', <gams_gams_dir>)
-gams_transfer_setup(_, 'verbose', <level>)
+gams.transfer.setup()
+gams.transfer.setup(_, 'gdx_path', <c_gdx_api_path>)
+gams.transfer.setup(_, 'verbose', <level>)
 ```
 Description of parameters:
-- `target_dir`: Installation directory. Default: `'.'`.
-- `gams_dir`: GAMS system directory. Default: found from PATH environment variable.
+- `gdx_path`: C GDX API path, e.g. `[PathToGAMS]/apifiles/C/api`.
 - `verbose`: Compilation verbosity level from 0 (no compiler output) to 2 (all
   compiler output). Default: 0.
 
-Add the GAMS Transfer installation directory to the Matlab Path:
-```matlab
-addpath(<install_directory>)
-```
-
 ### Run Unit Tests
 
-Make sure that the GAMSTransfer build is part of the Matlab PATH. Then, run
-`gams_transfer_test`:
+Make sure that the GAMS Transfer build is part of the Matlab PATH. Then, run `gams_transfer_test`:
 ```matlab
 gams_transfer_test()
 gams_transfer_test(_, 'working_dir', <test_directory>)
@@ -84,7 +76,7 @@ gams trnsport GDX=trnsport.gdx
 
 ### Create with Matlab:
 ```matlab
-import GAMSTransfer.*
+import gams.transfer.*
 
 % create an empty container
 m = Container();
@@ -146,7 +138,7 @@ x =
        default_values: [1×1 struct]
             dimension: 2
                  size: [2 3]
-               domain: {[1×1 GAMSTransfer.Set]  [1×1 GAMSTransfer.Set]}
+               domain: {[1×1 gams.transfer.Set]  [1×1 gams.transfer.Set]}
          domain_names: {'i'  'j'}
         domain_labels: {'i'  'j'}
           domain_type: 'regular'

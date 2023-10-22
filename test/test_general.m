@@ -31,21 +31,21 @@ function success = test_general(cfg)
 end
 
 function test_specialValues(t, cfg)
-    geps = GAMSTransfer.SpecialValues.EPS;
-    gna = GAMSTransfer.SpecialValues.NA;
-    gundef = GAMSTransfer.SpecialValues.UNDEF;
+    geps = gams.transfer.SpecialValues.EPS;
+    gna = gams.transfer.SpecialValues.NA;
+    gundef = gams.transfer.SpecialValues.UNDEF;
     vec = [1, 2, 0, -0, geps, nan, gna, gundef];
     srow = [1, 2, 3, 4, 5, 6, 7, 8];
     scol = [7, 3, 1, 2, 8, 4, 6, 5];
     svec = sparse(srow, scol, vec);
 
     t.add('special_values_eps');
-    t.assert(GAMSTransfer.SpecialValues.isEps(geps));
-    t.assert(~GAMSTransfer.SpecialValues.isEps(0));
-    t.assert(GAMSTransfer.SpecialValues.isEps(vec) == [0, 0, 0, 1, 1, 0, 0, 0]);
+    t.assert(gams.transfer.SpecialValues.isEps(geps));
+    t.assert(~gams.transfer.SpecialValues.isEps(0));
+    t.assert(gams.transfer.SpecialValues.isEps(vec) == [0, 0, 0, 1, 1, 0, 0, 0]);
 
     t.add('special_values_eps_sparse');
-    seps = GAMSTransfer.SpecialValues.isEps(svec);
+    seps = gams.transfer.SpecialValues.isEps(svec);
     for i = 1:8
         for j = 1:8
             t.assert(~seps(i, j));
@@ -53,12 +53,12 @@ function test_specialValues(t, cfg)
     end
 
     t.add('special_values_na');
-    t.assert(GAMSTransfer.SpecialValues.isNA(gna));
-    t.assert(~GAMSTransfer.SpecialValues.isNA(nan));
-    t.assert(GAMSTransfer.SpecialValues.isNA(vec) == [0, 0, 0, 0, 0, 0, 1, 0]);
+    t.assert(gams.transfer.SpecialValues.isNA(gna));
+    t.assert(~gams.transfer.SpecialValues.isNA(nan));
+    t.assert(gams.transfer.SpecialValues.isNA(vec) == [0, 0, 0, 0, 0, 0, 1, 0]);
 
     t.add('special_values_na_sparse');
-    seps = GAMSTransfer.SpecialValues.isNA(svec);
+    seps = gams.transfer.SpecialValues.isNA(svec);
     for i = 1:8
         for j = 1:8
             if i == srow(7) && j == scol(7)
@@ -70,12 +70,12 @@ function test_specialValues(t, cfg)
     end
 
     t.add('special_values_undef');
-    t.assert(GAMSTransfer.SpecialValues.isUndef(gundef));
-    t.assert(GAMSTransfer.SpecialValues.isUndef(nan));
-    t.assert(GAMSTransfer.SpecialValues.isUndef(vec) == [0, 0, 0, 0, 0, 1, 0, 1]);
+    t.assert(gams.transfer.SpecialValues.isUndef(gundef));
+    t.assert(gams.transfer.SpecialValues.isUndef(nan));
+    t.assert(gams.transfer.SpecialValues.isUndef(vec) == [0, 0, 0, 0, 0, 1, 0, 1]);
 
     t.add('special_values_undef_sparse');
-    seps = GAMSTransfer.SpecialValues.isUndef(svec);
+    seps = gams.transfer.SpecialValues.isUndef(svec);
     for i = 1:8
         for j = 1:8
             if i == srow(6) && j == scol(6) || i == srow(8) && j == scol(8)

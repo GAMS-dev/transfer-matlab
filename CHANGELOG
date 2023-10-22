@@ -1,6 +1,11 @@
 GAMS Transfer Matlab v0.8.0
 ==================
+- Breaking: Renamed package to `gams.transfer` (previously: `GAMSTransfer`) and moved MEX interface
+  to `gams.transfer.cmex` (internal use only).
 - Added MacOS Arm64 build.
+- Added `gams.transfer.setup` and `*.c` MEX source files of internal interface to
+  `gams.transfer.cmex`. Calling `gams.transfer.setup` allows to build GAMS Transfer Matlab from
+  source. Check with `mex -setup` which C compiler is enbaled in Matlab.
 
 GAMS Transfer Matlab v0.7.0
 ==================

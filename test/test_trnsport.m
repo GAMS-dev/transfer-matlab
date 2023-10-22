@@ -26,79 +26,79 @@
 function success = test_trnsport(cfg)
     t = GAMSTest('trnsport');
 
-    geps = GAMSTransfer.SpecialValues.EPS;
+    geps = gams.transfer.SpecialValues.EPS;
 
     for k = 1:3
         if k == 1
-            m = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+            m = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
                 'features', cfg.features);
-            i = GAMSTransfer.Set(m, 'i', ...
+            i = gams.transfer.Set(m, 'i', ...
                 'records', {'seattle', 'san-diego'}, ...
                 'description', 'canning plants');
-            j = GAMSTransfer.Set(m, 'j', ...
+            j = gams.transfer.Set(m, 'j', ...
                 'records', {'new-york', 'chicago', 'topeka'}, ...
                 'description', 'markets');
-            a = GAMSTransfer.Parameter(m, 'a', i, ...
+            a = gams.transfer.Parameter(m, 'a', i, ...
                 'records', [350, 600], ...
                 'description', 'capacity of plant i in cases');
-            b = GAMSTransfer.Parameter(m, 'b', j, ...
+            b = gams.transfer.Parameter(m, 'b', j, ...
                 'records', [325, 300, 275], ...
                 'description', 'demand at market j in cases');
-            d = GAMSTransfer.Parameter(m, 'd', {i,j}, ...
+            d = gams.transfer.Parameter(m, 'd', {i,j}, ...
                 'records', [2.5, 1.7, 1.8; 2.5, 1.8, 1.4], ...
                 'description', 'distance in thousands of miles');
-            f = GAMSTransfer.Parameter(m, 'f', ...
+            f = gams.transfer.Parameter(m, 'f', ...
                 'records', 90, ...
                 'description', 'freight in dollars per case per thousand miles');
-            c = GAMSTransfer.Parameter(m, 'c', {i,j}, ...
+            c = gams.transfer.Parameter(m, 'c', {i,j}, ...
                 'records', [0.225, 0.153, 0.162; 0.225, 0.162, 0.126], ...
                 'description', 'transport cost in thousands of dollars per case');
-            x = GAMSTransfer.Variable(m, 'x', 'positive', {i,j}, ...
+            x = gams.transfer.Variable(m, 'x', 'positive', {i,j}, ...
                 'records', {[50, 300, 0; 275, 0, 275], [0, 0, 0.036; 0, 0.009, 0]}, ...
                 'description', 'shipment quantities in cases');
-            z = GAMSTransfer.Variable(m, 'z', ...
+            z = gams.transfer.Variable(m, 'z', ...
                 'records', 153.675, ...
                 'description', 'total transportation costs in thousands of dollars');
-            cost = GAMSTransfer.Equation(m, 'cost', 'e', {}, ...
+            cost = gams.transfer.Equation(m, 'cost', 'e', {}, ...
                 'records', {0, 1, 0, 0}, ...
                 'description', 'define objective function');
-            supply = GAMSTransfer.Equation(m, 'supply', 'l', i, ...
+            supply = gams.transfer.Equation(m, 'supply', 'l', i, ...
                 'records', struct('level', [350, 550], 'marginal', [geps, 0], 'upper', [350, 600]), ...
                 'description', 'observe supply limit at plant i');
-            demand = GAMSTransfer.Equation(m, 'demand', 'g', j, ...
+            demand = gams.transfer.Equation(m, 'demand', 'g', j, ...
                 'records', {[325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]}, ...
                 'description', 'satisfy demand at market j');
         elseif k == 2
-            m = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+            m = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
                 'features', cfg.features);
-            i = GAMSTransfer.Set(m, 'i', 'description', 'canning plants');
+            i = gams.transfer.Set(m, 'i', 'description', 'canning plants');
             i.setRecords({'seattle', 'san-diego'});
-            j = GAMSTransfer.Set(m, 'j', 'description', 'markets');
+            j = gams.transfer.Set(m, 'j', 'description', 'markets');
             j.setRecords({'new-york', 'chicago', 'topeka'});
-            a = GAMSTransfer.Parameter(m, 'a', i, 'description', 'capacity of plant i in cases');
+            a = gams.transfer.Parameter(m, 'a', i, 'description', 'capacity of plant i in cases');
             a.setRecords([350, 600]);
-            b = GAMSTransfer.Parameter(m, 'b', j, 'description', 'demand at market j in cases');
+            b = gams.transfer.Parameter(m, 'b', j, 'description', 'demand at market j in cases');
             b.setRecords([325, 300, 275]);
-            d = GAMSTransfer.Parameter(m, 'd', {i,j}, 'description', 'distance in thousands of miles');
+            d = gams.transfer.Parameter(m, 'd', {i,j}, 'description', 'distance in thousands of miles');
             d.setRecords([2.5, 1.7, 1.8; 2.5, 1.8, 1.4]);
-            f = GAMSTransfer.Parameter(m, 'f', 'description', 'freight in dollars per case per thousand miles');
+            f = gams.transfer.Parameter(m, 'f', 'description', 'freight in dollars per case per thousand miles');
             f.setRecords(90);
-            c = GAMSTransfer.Parameter(m, 'c', {i,j}, 'description', 'transport cost in thousands of dollars per case');
+            c = gams.transfer.Parameter(m, 'c', {i,j}, 'description', 'transport cost in thousands of dollars per case');
             c.setRecords([0.225, 0.153, 0.162; 0.225, 0.162, 0.126]);
-            x = GAMSTransfer.Variable(m, 'x', 'positive', {i,j}, 'description', 'shipment quantities in cases');
+            x = gams.transfer.Variable(m, 'x', 'positive', {i,j}, 'description', 'shipment quantities in cases');
             x.setRecords([50, 300, 0; 275, 0, 275], [0, 0, 0.036; 0, 0.009, 0]);
-            z = GAMSTransfer.Variable(m, 'z', 'description', 'total transportation costs in thousands of dollars');
+            z = gams.transfer.Variable(m, 'z', 'description', 'total transportation costs in thousands of dollars');
             z.setRecords(153.675);
-            cost = GAMSTransfer.Equation(m, 'cost', 'e', 'description', 'define objective function');
+            cost = gams.transfer.Equation(m, 'cost', 'e', 'description', 'define objective function');
             cost.setRecords(0, 1, 0, 0);
-            supply = GAMSTransfer.Equation(m, 'supply', 'l', i, 'description', 'observe supply limit at plant i');
+            supply = gams.transfer.Equation(m, 'supply', 'l', i, 'description', 'observe supply limit at plant i');
             supply.setRecords(struct('level', [350, 550], 'marginal', [geps, 0], 'upper', [350, 600]));
-            demand = GAMSTransfer.Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
+            demand = gams.transfer.Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
             demand.setRecords([325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]);
         elseif k == 3
-            m = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+            m = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
                 'features', cfg.features);
-            i = GAMSTransfer.Set(m, 'i', 'description', 'canning plants');
+            i = gams.transfer.Set(m, 'i', 'description', 'canning plants');
             if m.features.categorical
                 i.records = struct('uni', categorical({'seattle'; 'san-diego'}, ...
                     {'seattle'; 'san-diego'}));
@@ -106,7 +106,7 @@ function success = test_trnsport(cfg)
                 i.records = struct('uni', (1:2)');
                 i.setUELs({'seattle'; 'san-diego'}, 1, 'rename', true);
             end
-            j = GAMSTransfer.Set(m, 'j', 'description', 'markets');
+            j = gams.transfer.Set(m, 'j', 'description', 'markets');
             if m.features.categorical
                 j.records = struct('uni', categorical({'new-york'; 'chicago'; 'topeka'}, ...
                     {'new-york'; 'chicago'; 'topeka'}));
@@ -114,34 +114,34 @@ function success = test_trnsport(cfg)
                 j.records = struct('uni', (1:3)');
                 j.setUELs({'new-york'; 'chicago'; 'topeka'}, 1, 'rename', true);
             end
-            a = GAMSTransfer.Parameter(m, 'a', i, 'description', 'capacity of plant i in cases');
+            a = gams.transfer.Parameter(m, 'a', i, 'description', 'capacity of plant i in cases');
             a.records = struct('value', [350; 600]);
-            b = GAMSTransfer.Parameter(m, 'b', j, 'description', 'demand at market j in cases');
+            b = gams.transfer.Parameter(m, 'b', j, 'description', 'demand at market j in cases');
             b.records = struct('value', [325; 300; 275]);
-            d = GAMSTransfer.Parameter(m, 'd', {i,j}, 'description', 'distance in thousands of miles');
+            d = gams.transfer.Parameter(m, 'd', {i,j}, 'description', 'distance in thousands of miles');
             d.records = struct('value', [2.5, 1.7, 1.8; 2.5, 1.8, 1.4]);
-            f = GAMSTransfer.Parameter(m, 'f', 'description', 'freight in dollars per case per thousand miles');
+            f = gams.transfer.Parameter(m, 'f', 'description', 'freight in dollars per case per thousand miles');
             f.records = struct('value', 90);
-            c = GAMSTransfer.Parameter(m, 'c', {i,j}, 'description', 'transport cost in thousands of dollars per case');
+            c = gams.transfer.Parameter(m, 'c', {i,j}, 'description', 'transport cost in thousands of dollars per case');
             c.records = struct('value', [0.225, 0.153, 0.162; 0.225, 0.162, 0.126]);
-            x = GAMSTransfer.Variable(m, 'x', 'positive', {i,j}, 'description', 'shipment quantities in cases');
+            x = gams.transfer.Variable(m, 'x', 'positive', {i,j}, 'description', 'shipment quantities in cases');
             x.records = struct('level', [50, 300, 0; 275, 0, 275], 'marginal', [0, 0, 0.036; 0, 0.009, 0]);
-            z = GAMSTransfer.Variable(m, 'z', 'description', 'total transportation costs in thousands of dollars');
+            z = gams.transfer.Variable(m, 'z', 'description', 'total transportation costs in thousands of dollars');
             z.records = struct('level', 153.675);
-            cost = GAMSTransfer.Equation(m, 'cost', 'e', 'description', 'define objective function');
+            cost = gams.transfer.Equation(m, 'cost', 'e', 'description', 'define objective function');
             cost.records = struct('level', 0, 'marginal', 1, 'lower', 0, 'upper', 0);
-            supply = GAMSTransfer.Equation(m, 'supply', 'l', i, 'description', 'observe supply limit at plant i');
+            supply = gams.transfer.Equation(m, 'supply', 'l', i, 'description', 'observe supply limit at plant i');
             supply.records = struct('level', [350; 550], 'marginal', [geps; 0], 'upper', [350; 600]);
-            demand = GAMSTransfer.Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
+            demand = gams.transfer.Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
             demand.records = struct('level', [325; 300; 275], 'marginal', [0.225; 0.153; 0.126], 'lower', [325; 300; 275]);
         elseif k == 4
-            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_1.gdx'), ...
+            m = gams.transfer.Container(fullfile(cfg.working_dir, 'write_trnsport_1.gdx'), ...
                 'gams_dir', cfg.gams_dir, 'features', cfg.features);
         elseif k == 5
-            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_2.gdx'), ...
+            m = gams.transfer.Container(fullfile(cfg.working_dir, 'write_trnsport_2.gdx'), ...
                 'gams_dir', cfg.gams_dir, 'features', cfg.features);
         elseif k == 6
-            m = GAMSTransfer.Container(fullfile(cfg.working_dir, 'write_trnsport_3.gdx'), ...
+            m = gams.transfer.Container(fullfile(cfg.working_dir, 'write_trnsport_3.gdx'), ...
                 'gams_dir', cfg.gams_dir, 'features', cfg.features);
         end
 
@@ -184,7 +184,7 @@ function success = test_trnsport(cfg)
         t.assert(isfield(m.data, 'demand'));
 
         t.add(sprintf('test_trnsport_symbol_i_%d', k));
-        t.assert(isa(i, 'GAMSTransfer.Set'));
+        t.assert(isa(i, 'gams.transfer.Set'));
         t.assertEquals(i.name, 'i');
         t.assertEquals(i.description, 'canning plants');
         t.assert(~i.is_singleton);
@@ -216,7 +216,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{2}, 'san-diego');
 
         t.add(sprintf('test_trnsport_symbol_j_%d', k));
-        t.assert(isa(j, 'GAMSTransfer.Set'));
+        t.assert(isa(j, 'gams.transfer.Set'));
         t.assertEquals(j.name, 'j');
         t.assertEquals(j.description, 'markets');
         t.assert(~j.is_singleton);
@@ -251,7 +251,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_a_%d', k));
-        t.assert(isa(a, 'GAMSTransfer.Parameter'));
+        t.assert(isa(a, 'gams.transfer.Parameter'));
         t.assertEquals(a.name, 'a');
         t.assertEquals(a.description, 'capacity of plant i in cases');
         t.assert(a.dimension == 1);
@@ -278,7 +278,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{2}, 'san-diego');
 
         t.add(sprintf('test_trnsport_symbol_b_%d', k));
-        t.assert(isa(b, 'GAMSTransfer.Parameter'));
+        t.assert(isa(b, 'gams.transfer.Parameter'));
         t.assertEquals(b.name, 'b');
         t.assertEquals(b.description, 'demand at market j in cases');
         t.assert(b.dimension == 1);
@@ -307,7 +307,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_d_%d', k));
-        t.assert(isa(d, 'GAMSTransfer.Parameter'));
+        t.assert(isa(d, 'gams.transfer.Parameter'));
         t.assertEquals(d.name, 'd');
         t.assertEquals(d.description, 'distance in thousands of miles');
         t.assert(d.dimension == 2);
@@ -345,7 +345,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_f_%d', k));
-        t.assert(isa(f, 'GAMSTransfer.Parameter'));
+        t.assert(isa(f, 'gams.transfer.Parameter'));
         t.assertEquals(f.name, 'f');
         t.assertEquals(f.description, 'freight in dollars per case per thousand miles');
         t.assert(f.dimension == 0);
@@ -364,7 +364,7 @@ function success = test_trnsport(cfg)
         t.assert(f.records.value(1) == 90);
 
         t.add(sprintf('test_trnsport_symbol_c_%d', k));
-        t.assert(isa(c, 'GAMSTransfer.Parameter'));
+        t.assert(isa(c, 'gams.transfer.Parameter'));
         t.assertEquals(c.name, 'c');
         t.assertEquals(c.description, 'transport cost in thousands of dollars per case');
         t.assert(c.dimension == 2);
@@ -402,7 +402,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_x_%d', k));
-        t.assert(isa(x, 'GAMSTransfer.Variable'));
+        t.assert(isa(x, 'gams.transfer.Variable'));
         t.assertEquals(x.name, 'x');
         t.assertEquals(x.description, 'shipment quantities in cases');
         t.assert(x.dimension == 2);
@@ -448,7 +448,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_z_%d', k));
-        t.assert(isa(z, 'GAMSTransfer.Variable'));
+        t.assert(isa(z, 'gams.transfer.Variable'));
         t.assertEquals(z.name, 'z');
         t.assertEquals(z.description, 'total transportation costs in thousands of dollars');
         t.assert(z.dimension == 0);
@@ -467,7 +467,7 @@ function success = test_trnsport(cfg)
         t.assert(z.records.level(1) == 153.675);
 
         t.add(sprintf('test_trnsport_symbol_cost_%d', k));
-        t.assert(isa(cost, 'GAMSTransfer.Equation'));
+        t.assert(isa(cost, 'gams.transfer.Equation'));
         t.assertEquals(cost.name, 'cost');
         t.assertEquals(cost.description, 'define objective function');
         t.assert(cost.dimension == 0);
@@ -495,7 +495,7 @@ function success = test_trnsport(cfg)
         t.assert(cost.records.upper(1) == 0);
 
         t.add(sprintf('test_trnsport_symbol_supply_%d', k));
-        t.assert(isa(supply, 'GAMSTransfer.Equation'));
+        t.assert(isa(supply, 'gams.transfer.Equation'));
         t.assertEquals(supply.name, 'supply');
         t.assertEquals(supply.description, 'observe supply limit at plant i');
         t.assert(supply.dimension == 1);
@@ -520,7 +520,7 @@ function success = test_trnsport(cfg)
         t.assert(numel(supply.records.upper) == 2);
         t.assert(supply.records.level(1) == 350);
         t.assert(supply.records.level(2) == 550);
-        t.assert(GAMSTransfer.SpecialValues.isEps(supply.records.marginal(1)));
+        t.assert(gams.transfer.SpecialValues.isEps(supply.records.marginal(1)));
         t.assert(supply.records.marginal(2) == 0);
         t.assert(supply.records.upper(1) == 350);
         t.assert(supply.records.upper(2) == 600);
@@ -530,7 +530,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{2}, 'san-diego');
 
         t.add(sprintf('test_trnsport_symbol_demand_%d', k));
-        t.assert(isa(demand, 'GAMSTransfer.Equation'));
+        t.assert(isa(demand, 'gams.transfer.Equation'));
         t.assertEquals(demand.name, 'demand');
         t.assertEquals(demand.description, 'satisfy demand at market j');
         t.assert(demand.dimension == 1);
