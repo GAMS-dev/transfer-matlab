@@ -1,4 +1,4 @@
-% Tests GAMSTransfer
+% Tests GAMS Transfer
 %
 
 %
@@ -26,17 +26,21 @@
 % SOFTWARE.
 %
 
-function gams_transfer_test(varargin)
+function gams_transfer_test(transfer_dir, varargin)
+
+    transfer_dir = gams.transfer.Utils.checkFilename(transfer_dir, '', false);
+    addpath(transfer_dir);
 
     current_dir = fileparts(mfilename('fullpath'));
     addpath(fullfile(current_dir, 'test'));
-    addpath(fullfile(current_dir, 'src'));
+
+    fprintf("Testing %s ...\n", fullfile(transfer_dir, '+gams', '+transfer'));
 
     p = inputParser();
     is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
         ~strcmpi(x, 'working_dir') && ~strcmpi(x, 'gams_dir');
     addParameter(p, 'working_dir', tempname, is_string_char);
-    addParameter(p, 'gams_dir', find_gams(), is_string_char);
+    addParameter(p, 'gams_dir', gams.transfer.find_gams(), is_string_char);
     addParameter(p, 'exit_on_fail', false, @islogical);
     addParameter(p, 'only_default_config', false, @islogical);
     parse(p, varargin{:});
@@ -45,8 +49,8 @@ function gams_transfer_test(varargin)
     end
 
     % check paths
-    working_dir = Utils.checkFilename(p.Results.working_dir, '', false);
-    gams_dir = Utils.checkFilename(p.Results.gams_dir, '', false);
+    working_dir = gams.transfer.Utils.checkFilename(p.Results.working_dir, '', false);
+    gams_dir = gams.transfer.Utils.checkFilename(p.Results.gams_dir, '', false);
 
     % create working directory
     mkdir(working_dir);
@@ -66,7 +70,7 @@ function gams_transfer_test(varargin)
         cfg.working_dir = working_dir;
         cfg.gams_dir = gams_dir;
         cfg.filenames = filenames;
-        features = GAMSTransfer.Utils.checkFeatureSupport();
+        features = gams.transfer.Utils.checkFeatureSupport();
 
         % run tests
         success = success & test_general(cfg);
@@ -119,11 +123,9 @@ function gams_transfer_test(varargin)
 
         cd(olddir);
         rmpath(fullfile(current_dir, 'test'));
-        rmpath(fullfile(current_dir, 'src'));
     catch e
         cd(olddir);
         rmpath(fullfile(current_dir, 'test'));
-        rmpath(fullfile(current_dir, 'src'));
         rethrow(e);
     end
 

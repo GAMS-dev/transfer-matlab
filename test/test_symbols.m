@@ -41,10 +41,10 @@ end
 
 function test_addSymbols(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
 
     t.add('add_symbols_set_1');
-    s1 = GAMSTransfer.Set(gdx, 's1');
+    s1 = gams.transfer.Set(gdx, 's1');
     t.testEmptySymbol(s1);
     t.assertEquals(s1.name, 's1');
     t.assertEquals(s1.description, '');
@@ -68,7 +68,7 @@ function test_addSymbols(t, cfg)
     t.assert(s1.modified);
 
     t.add('add_symbols_set_2');
-    s2 = GAMSTransfer.Set(gdx, 's2', {s1}, 'description', 'descr s2');
+    s2 = gams.transfer.Set(gdx, 's2', {s1}, 'description', 'descr s2');
     t.testEmptySymbol(s2);
     t.assertEquals(s2.name, 's2');
     t.assertEquals(s2.description, 'descr s2');
@@ -93,7 +93,7 @@ function test_addSymbols(t, cfg)
     t.assert(s2.modified);
 
     t.add('add_symbols_set_3');
-    s3 = GAMSTransfer.Set(gdx, 's3', {s1, '*'}, 'is_singleton', true);
+    s3 = gams.transfer.Set(gdx, 's3', {s1, '*'}, 'is_singleton', true);
     t.testEmptySymbol(s3);
     t.assertEquals(s3.name, 's3');
     t.assertEquals(s3.description, '');
@@ -122,7 +122,7 @@ function test_addSymbols(t, cfg)
     t.assert(s3.modified);
 
     t.add('add_symbols_set_4');
-    s4 = GAMSTransfer.Set(gdx, 's4', s2, 'description', 'descr s4', 'is_singleton', true);
+    s4 = gams.transfer.Set(gdx, 's4', s2, 'description', 'descr s4', 'is_singleton', true);
     t.testEmptySymbol(s4);
     t.assertEquals(s4.name, 's4');
     t.assertEquals(s4.description, 'descr s4');
@@ -147,7 +147,7 @@ function test_addSymbols(t, cfg)
     t.assert(s4.modified);
 
     t.add('add_symbols_set_5');
-    s5 = GAMSTransfer.Set(gdx, 's5', {'s1', s2});
+    s5 = gams.transfer.Set(gdx, 's5', {'s1', s2});
     t.testEmptySymbol(s5);
     t.assertEquals(s5.name, 's5');
     t.assertEquals(s5.description, '');
@@ -176,7 +176,7 @@ function test_addSymbols(t, cfg)
     t.assert(s5.modified);
 
     t.add('add_symbols_set_6');
-    s6 = GAMSTransfer.Set(gdx, 's6', 's1');
+    s6 = gams.transfer.Set(gdx, 's6', 's1');
     t.testEmptySymbol(s6);
     t.assertEquals(s6.name, 's6');
     t.assertEquals(s6.description, '');
@@ -202,85 +202,85 @@ function test_addSymbols(t, cfg)
     t.add('add_symbols_set_fails');
     try
         t.assert(false);
-        GAMSTransfer.Set(gdx, 4);
+        gams.transfer.Set(gdx, 4);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Set(gdx, s1);
+        gams.transfer.Set(gdx, s1);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Set(gdx, 's', 2);
+        gams.transfer.Set(gdx, 's', 2);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Set(gdx, 's', {2, 3});
+        gams.transfer.Set(gdx, 's', {2, 3});
     catch
         t.reset();
     end
     if exist('OCTAVE_VERSION', 'builtin') <= 0
         try
             t.assert(false);
-            GAMSTransfer.Set(gdx, 's', ["s1", "s2"]);
+            gams.transfer.Set(gdx, 's', ["s1", "s2"]);
         catch
             t.reset();
         end
     end
     try
         t.assert(false);
-        GAMSTransfer.Set(gdx, 's', s1, [], 'description', 2);
+        gams.transfer.Set(gdx, 's', s1, [], 'description', 2);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Set(gdx, 's', s1, [], 'is_singleton', 1);
+        gams.transfer.Set(gdx, 's', s1, [], 'is_singleton', 1);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Set(gdx, 's', s3);
+        gams.transfer.Set(gdx, 's', s3);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Set(gdx, repmat('s', [1, 64]));
+        gams.transfer.Set(gdx, repmat('s', [1, 64]));
     catch e
         t.reset();
         t.assertEquals(e.message, 'Symbol name too long. Name length must be smaller than 64.');
     end
     try
         t.assert(false);
-        GAMSTransfer.Set(gdx, 's', 'description', repmat('d', [1, 256]));
+        gams.transfer.Set(gdx, 's', 'description', repmat('d', [1, 256]));
     catch e
         t.reset();
         t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
     end
     try
         t.assert(false);
-        GAMSTransfer.Set(gdx, 's1');
+        gams.transfer.Set(gdx, 's1');
     catch e
         t.reset();
         t.assertEquals(e.message, 'Symbol ''s1'' already exists.');
     end
     try
         t.assert(false);
-        GAMSTransfer.Set(gdx, 'S1');
+        gams.transfer.Set(gdx, 'S1');
     catch e
         t.reset();
         t.assertEquals(e.message, 'Symbol ''S1'' already exists.');
     end
 
     t.add('add_symbols_alias_1');
-    a1 = GAMSTransfer.Alias(gdx, 'a1', s1);
+    a1 = gams.transfer.Alias(gdx, 'a1', s1);
     t.testEmptySymbol(a1);
     t.assertEquals(a1.name, 'a1');
     t.assert(a1.alias_with.id == s1.id);
@@ -306,7 +306,7 @@ function test_addSymbols(t, cfg)
     t.assert(a1.modified);
 
     t.add('add_symbols_alias_2');
-    a2 = GAMSTransfer.Alias(gdx, 'a2', a1);
+    a2 = gams.transfer.Alias(gdx, 'a2', a1);
     t.testEmptySymbol(a2);
     t.assertEquals(a2.name, 'a2');
     t.assert(a2.alias_with.id == s1.id);
@@ -318,7 +318,7 @@ function test_addSymbols(t, cfg)
     t.assert(a2.modified);
 
     t.add('add_symbols_alias_3');
-    a3 = GAMSTransfer.Alias(gdx, 'a3', a2);
+    a3 = gams.transfer.Alias(gdx, 'a3', a2);
     t.testEmptySymbol(a3);
     t.assertEquals(a3.name, 'a3');
     t.assert(a3.alias_with.id == s1.id);
@@ -330,7 +330,7 @@ function test_addSymbols(t, cfg)
     t.assert(a3.modified);
 
     t.add('add_symbols_parameter_1');
-    p1 = GAMSTransfer.Parameter(gdx, 'p1');
+    p1 = gams.transfer.Parameter(gdx, 'p1');
     t.testEmptySymbol(p1);
     t.assertEquals(p1.name, 'p1');
     t.assertEquals(p1.description, '');
@@ -349,7 +349,7 @@ function test_addSymbols(t, cfg)
     t.assert(p1.modified);
 
     t.add('add_symbols_parameter_2');
-    p2 = GAMSTransfer.Parameter(gdx, 'p2', s1, 'description', 'descr par 2');
+    p2 = gams.transfer.Parameter(gdx, 'p2', s1, 'description', 'descr par 2');
     t.testEmptySymbol(p2);
     t.assertEquals(p2.name, 'p2');
     t.assertEquals(p2.description, 'descr par 2');
@@ -373,7 +373,7 @@ function test_addSymbols(t, cfg)
     t.assert(p2.modified);
 
     t.add('add_symbols_parameter_3');
-    p3 = GAMSTransfer.Parameter(gdx, 'p3', {s1, '*', 's2'}, 'description', 'descr par 3');
+    p3 = gams.transfer.Parameter(gdx, 'p3', {s1, '*', 's2'}, 'description', 'descr par 3');
     t.testEmptySymbol(p3);
     t.assertEquals(p3.name, 'p3');
     t.assertEquals(p3.description, 'descr par 3');
@@ -407,65 +407,65 @@ function test_addSymbols(t, cfg)
     t.add('add_symbols_parameter_fails');
     try
         t.assert(false);
-        GAMSTransfer.Parameter(gdx, 4);
+        gams.transfer.Parameter(gdx, 4);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Parameter(gdx, s1);
+        gams.transfer.Parameter(gdx, s1);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Parameter(gdx, 's', 2);
+        gams.transfer.Parameter(gdx, 's', 2);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Parameter(gdx, 's', {2, 3});
+        gams.transfer.Parameter(gdx, 's', {2, 3});
     catch
         t.reset();
     end
     if exist('OCTAVE_VERSION', 'builtin') <= 0
         try
             t.assert(false);
-            GAMSTransfer.Parameter(gdx, 's', ["s1", "s2"]);
+            gams.transfer.Parameter(gdx, 's', ["s1", "s2"]);
         catch
             t.reset();
         end
     end
     try
         t.assert(false);
-        GAMSTransfer.Parameter(gdx, 's', s1, [], 'description', 2);
+        gams.transfer.Parameter(gdx, 's', s1, [], 'description', 2);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Parameter(gdx, 's', s3);
+        gams.transfer.Parameter(gdx, 's', s3);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Parameter(gdx, repmat('s', [1, 64]));
+        gams.transfer.Parameter(gdx, repmat('s', [1, 64]));
     catch e
         t.reset();
         t.assertEquals(e.message, 'Symbol name too long. Name length must be smaller than 64.');
     end
     try
         t.assert(false);
-        GAMSTransfer.Parameter(gdx, 's', 'description', repmat('d', [1, 256]));
+        gams.transfer.Parameter(gdx, 's', 'description', repmat('d', [1, 256]));
     catch e
         t.reset();
         t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
     end
 
     t.add('add_symbols_variable_1');
-    v1 = GAMSTransfer.Variable(gdx, 'v1');
+    v1 = gams.transfer.Variable(gdx, 'v1');
     t.testEmptySymbol(v1);
     t.assertEquals(v1.name, 'v1');
     t.assertEquals(v1.description, '');
@@ -485,7 +485,7 @@ function test_addSymbols(t, cfg)
     t.assert(v1.modified);
 
     t.add('add_symbols_variable_2');
-    v2 = GAMSTransfer.Variable(gdx, 'v2', GAMSTransfer.VariableType.BINARY, {}, 'description', 'descr var 2');
+    v2 = gams.transfer.Variable(gdx, 'v2', gams.transfer.VariableType.BINARY, {}, 'description', 'descr var 2');
     t.testEmptySymbol(v2);
     t.assertEquals(v2.name, 'v2');
     t.assertEquals(v2.description, 'descr var 2');
@@ -505,7 +505,7 @@ function test_addSymbols(t, cfg)
     t.assert(v2.modified);
 
     t.add('add_symbols_variable_3');
-    v3 = GAMSTransfer.Variable(gdx, 'v3', 'sos1', {s1, '*'});
+    v3 = gams.transfer.Variable(gdx, 'v3', 'sos1', {s1, '*'});
     t.testEmptySymbol(v3);
     t.assertEquals(v3.name, 'v3');
     t.assertEquals(v3.description, '');
@@ -534,113 +534,113 @@ function test_addSymbols(t, cfg)
     t.assert(v3.modified);
 
     t.add('add_symbols_variable_4');
-    v = GAMSTransfer.Variable(gdx, 'v41', 'binary');
+    v = gams.transfer.Variable(gdx, 'v41', 'binary');
     t.assertEquals(v.type, 'binary');
-    v = GAMSTransfer.Variable(gdx, 'v42', 'integer');
+    v = gams.transfer.Variable(gdx, 'v42', 'integer');
     t.assertEquals(v.type, 'integer');
-    v = GAMSTransfer.Variable(gdx, 'v43', 'positive');
+    v = gams.transfer.Variable(gdx, 'v43', 'positive');
     t.assertEquals(v.type, 'positive');
-    v = GAMSTransfer.Variable(gdx, 'v44', 'negative');
+    v = gams.transfer.Variable(gdx, 'v44', 'negative');
     t.assertEquals(v.type, 'negative');
-    v = GAMSTransfer.Variable(gdx, 'v45', 'free');
+    v = gams.transfer.Variable(gdx, 'v45', 'free');
     t.assertEquals(v.type, 'free');
-    v = GAMSTransfer.Variable(gdx, 'v46', 'sos1');
+    v = gams.transfer.Variable(gdx, 'v46', 'sos1');
     t.assertEquals(v.type, 'sos1');
-    v = GAMSTransfer.Variable(gdx, 'v47', 'sos2');
+    v = gams.transfer.Variable(gdx, 'v47', 'sos2');
     t.assertEquals(v.type, 'sos2');
-    v = GAMSTransfer.Variable(gdx, 'v48', 'semiint');
+    v = gams.transfer.Variable(gdx, 'v48', 'semiint');
     t.assertEquals(v.type, 'semiint');
-    v = GAMSTransfer.Variable(gdx, 'v49', 'semicont');
+    v = gams.transfer.Variable(gdx, 'v49', 'semicont');
     t.assertEquals(v.type, 'semicont');
 
     t.add('add_symbols_variable_5');
-    v = GAMSTransfer.Variable(gdx, 'v51', 1);
+    v = gams.transfer.Variable(gdx, 'v51', 1);
     t.assertEquals(v.type, 'binary');
-    v = GAMSTransfer.Variable(gdx, 'v52', 2);
+    v = gams.transfer.Variable(gdx, 'v52', 2);
     t.assertEquals(v.type, 'integer');
-    v = GAMSTransfer.Variable(gdx, 'v53', 3);
+    v = gams.transfer.Variable(gdx, 'v53', 3);
     t.assertEquals(v.type, 'positive');
-    v = GAMSTransfer.Variable(gdx, 'v54', 4);
+    v = gams.transfer.Variable(gdx, 'v54', 4);
     t.assertEquals(v.type, 'negative');
-    v = GAMSTransfer.Variable(gdx, 'v55', 5);
+    v = gams.transfer.Variable(gdx, 'v55', 5);
     t.assertEquals(v.type, 'free');
-    v = GAMSTransfer.Variable(gdx, 'v56', 6);
+    v = gams.transfer.Variable(gdx, 'v56', 6);
     t.assertEquals(v.type, 'sos1');
-    v = GAMSTransfer.Variable(gdx, 'v57', 7);
+    v = gams.transfer.Variable(gdx, 'v57', 7);
     t.assertEquals(v.type, 'sos2');
-    v = GAMSTransfer.Variable(gdx, 'v58', 8);
+    v = gams.transfer.Variable(gdx, 'v58', 8);
     t.assertEquals(v.type, 'semicont');
-    v = GAMSTransfer.Variable(gdx, 'v59', 9);
+    v = gams.transfer.Variable(gdx, 'v59', 9);
     t.assertEquals(v.type, 'semiint');
 
     t.add('add_symbols_variable_fails');
     try
         t.assert(false);
-        GAMSTransfer.Variable(gdx, 4);
+        gams.transfer.Variable(gdx, 4);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Variable(gdx, s1);
+        gams.transfer.Variable(gdx, s1);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Variable(gdx, s1, 'stupid');
+        gams.transfer.Variable(gdx, s1, 'stupid');
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Variable(gdx, 's', 'free', 2);
+        gams.transfer.Variable(gdx, 's', 'free', 2);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Variable(gdx, 's', 'free', {2, 3});
+        gams.transfer.Variable(gdx, 's', 'free', {2, 3});
     catch
         t.reset();
     end
     if exist('OCTAVE_VERSION', 'builtin') <= 0
         try
             t.assert(false);
-            GAMSTransfer.Variable(gdx, 's', 'free', ["s1", "s2"]);
+            gams.transfer.Variable(gdx, 's', 'free', ["s1", "s2"]);
         catch
             t.reset();
         end
     end
     try
         t.assert(false);
-        GAMSTransfer.Variable(gdx, 's', 'free', s1, [], 'description', 2);
+        gams.transfer.Variable(gdx, 's', 'free', s1, [], 'description', 2);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Variable(gdx, 's', 'free', s3);
+        gams.transfer.Variable(gdx, 's', 'free', s3);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Variable(gdx, repmat('s', [1, 64]));
+        gams.transfer.Variable(gdx, repmat('s', [1, 64]));
     catch e
         t.reset();
         t.assertEquals(e.message, 'Symbol name too long. Name length must be smaller than 64.');
     end
     try
         t.assert(false);
-        GAMSTransfer.Variable(gdx, 's', 'description', repmat('d', [1, 256]));
+        gams.transfer.Variable(gdx, 's', 'description', repmat('d', [1, 256]));
     catch e
         t.reset();
         t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
     end
 
     t.add('add_symbols_equation_1');
-    e1 = GAMSTransfer.Equation(gdx, 'e1', 'n');
+    e1 = gams.transfer.Equation(gdx, 'e1', 'n');
     t.testEmptySymbol(e1);
     t.assertEquals(e1.name, 'e1');
     t.assertEquals(e1.description, '');
@@ -660,7 +660,7 @@ function test_addSymbols(t, cfg)
     t.assert(e1.modified);
 
     t.add('add_symbols_equation_2');
-    e2 = GAMSTransfer.Equation(gdx, 'e2', GAMSTransfer.EquationType.EQ, {}, 'description', 'descr equ 2');
+    e2 = gams.transfer.Equation(gdx, 'e2', gams.transfer.EquationType.EQ, {}, 'description', 'descr equ 2');
     t.testEmptySymbol(e2);
     t.assertEquals(e2.name, 'e2');
     t.assertEquals(e2.description, 'descr equ 2');
@@ -680,7 +680,7 @@ function test_addSymbols(t, cfg)
     t.assert(e2.modified);
 
     t.add('add_symbols_equation_3');
-    e3 = GAMSTransfer.Equation(gdx, 'e3', 'leq', {s1, '*'});
+    e3 = gams.transfer.Equation(gdx, 'e3', 'leq', {s1, '*'});
     t.testEmptySymbol(e3);
     t.assertEquals(e3.name, 'e3');
     t.assertEquals(e3.description, '');
@@ -709,120 +709,120 @@ function test_addSymbols(t, cfg)
     t.assert(e3.modified);
 
     t.add('add_symbols_equation_4');
-    e = GAMSTransfer.Equation(gdx, 'e41', 'eq');
+    e = gams.transfer.Equation(gdx, 'e41', 'eq');
     t.assertEquals(e.type, 'eq');
-    e = GAMSTransfer.Equation(gdx, 'e42', 'geq');
+    e = gams.transfer.Equation(gdx, 'e42', 'geq');
     t.assertEquals(e.type, 'geq');
-    e = GAMSTransfer.Equation(gdx, 'e43', 'leq');
+    e = gams.transfer.Equation(gdx, 'e43', 'leq');
     t.assertEquals(e.type, 'leq');
-    e = GAMSTransfer.Equation(gdx, 'e44', 'nonbinding');
+    e = gams.transfer.Equation(gdx, 'e44', 'nonbinding');
     t.assertEquals(e.type, 'nonbinding');
-    e = GAMSTransfer.Equation(gdx, 'e45', 'external');
+    e = gams.transfer.Equation(gdx, 'e45', 'external');
     t.assertEquals(e.type, 'external');
-    e = GAMSTransfer.Equation(gdx, 'e46', 'cone');
+    e = gams.transfer.Equation(gdx, 'e46', 'cone');
     t.assertEquals(e.type, 'cone');
-    e = GAMSTransfer.Equation(gdx, 'e47', 'boolean');
+    e = gams.transfer.Equation(gdx, 'e47', 'boolean');
     t.assertEquals(e.type, 'boolean');
 
     t.add('add_symbols_equation_5');
-    e = GAMSTransfer.Equation(gdx, 'e51', 'e');
+    e = gams.transfer.Equation(gdx, 'e51', 'e');
     t.assertEquals(e.type, 'eq');
-    e = GAMSTransfer.Equation(gdx, 'e52', 'g');
+    e = gams.transfer.Equation(gdx, 'e52', 'g');
     t.assertEquals(e.type, 'geq');
-    e = GAMSTransfer.Equation(gdx, 'e53', 'l');
+    e = gams.transfer.Equation(gdx, 'e53', 'l');
     t.assertEquals(e.type, 'leq');
-    e = GAMSTransfer.Equation(gdx, 'e54', 'n');
+    e = gams.transfer.Equation(gdx, 'e54', 'n');
     t.assertEquals(e.type, 'nonbinding');
-    e = GAMSTransfer.Equation(gdx, 'e55', 'x');
+    e = gams.transfer.Equation(gdx, 'e55', 'x');
     t.assertEquals(e.type, 'external');
-    e = GAMSTransfer.Equation(gdx, 'e56', 'c');
+    e = gams.transfer.Equation(gdx, 'e56', 'c');
     t.assertEquals(e.type, 'cone');
-    e = GAMSTransfer.Equation(gdx, 'e57', 'b');
+    e = gams.transfer.Equation(gdx, 'e57', 'b');
     t.assertEquals(e.type, 'boolean');
 
     t.add('add_symbols_equation_6');
-    e = GAMSTransfer.Equation(gdx, 'e61', 0);
+    e = gams.transfer.Equation(gdx, 'e61', 0);
     t.assertEquals(e.type, 'eq');
-    e = GAMSTransfer.Equation(gdx, 'e62', 1);
+    e = gams.transfer.Equation(gdx, 'e62', 1);
     t.assertEquals(e.type, 'geq');
-    e = GAMSTransfer.Equation(gdx, 'e63', 2);
+    e = gams.transfer.Equation(gdx, 'e63', 2);
     t.assertEquals(e.type, 'leq');
-    e = GAMSTransfer.Equation(gdx, 'e64', 3);
+    e = gams.transfer.Equation(gdx, 'e64', 3);
     t.assertEquals(e.type, 'nonbinding');
-    e = GAMSTransfer.Equation(gdx, 'e65', 4);
+    e = gams.transfer.Equation(gdx, 'e65', 4);
     t.assertEquals(e.type, 'external');
-    e = GAMSTransfer.Equation(gdx, 'e66', 5);
+    e = gams.transfer.Equation(gdx, 'e66', 5);
     t.assertEquals(e.type, 'cone');
-    e = GAMSTransfer.Equation(gdx, 'e67', 6);
+    e = gams.transfer.Equation(gdx, 'e67', 6);
     t.assertEquals(e.type, 'boolean');
 
     t.add('add_symbols_equation_fails');
     try
         t.assert(false);
-        GAMSTransfer.Equation(gdx, 4);
+        gams.transfer.Equation(gdx, 4);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Equation(gdx, s1);
+        gams.transfer.Equation(gdx, s1);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Equation(gdx, 's');
+        gams.transfer.Equation(gdx, 's');
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Equation(gdx, s1, 'stupid');
+        gams.transfer.Equation(gdx, s1, 'stupid');
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Equation(gdx, 's', 'e', 2);
+        gams.transfer.Equation(gdx, 's', 'e', 2);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Equation(gdx, 's', 'e', {2, 3});
+        gams.transfer.Equation(gdx, 's', 'e', {2, 3});
     catch
         t.reset();
     end
     if exist('OCTAVE_VERSION', 'builtin') <= 0
         try
             t.assert(false);
-            GAMSTransfer.Equation(gdx, 's', 'e', ["s1", "s2"]);
+            gams.transfer.Equation(gdx, 's', 'e', ["s1", "s2"]);
         catch
             t.reset();
         end
     end
     try
         t.assert(false);
-        GAMSTransfer.Equation(gdx, 's', 'e', s1, [], 'description', 2);
+        gams.transfer.Equation(gdx, 's', 'e', s1, [], 'description', 2);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Equation(gdx, 's', 'e', s3);
+        gams.transfer.Equation(gdx, 's', 'e', s3);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Equation(gdx, repmat('s', [1, 64]), 'n');
+        gams.transfer.Equation(gdx, repmat('s', [1, 64]), 'n');
     catch e
         t.reset();
         t.assertEquals(e.message, 'Symbol name too long. Name length must be smaller than 64.');
     end
     try
         t.assert(false);
-        GAMSTransfer.Equation(gdx, 's', 'n', 'description', repmat('d', [1, 256]));
+        gams.transfer.Equation(gdx, 's', 'n', 'description', repmat('d', [1, 256]));
     catch e
         t.reset();
         t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
@@ -832,7 +832,7 @@ end
 
 function test_overwriteSymbols(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
 
     t.add('overwrite_symbols_set_1');
     s = gdx.addSet('s');
@@ -1011,13 +1011,13 @@ end
 
 function test_changeSymbol(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
         'features', cfg.features);
-    i1 = GAMSTransfer.Set(gdx, 'i1');
-    i2 = GAMSTransfer.Set(gdx, 'i2', 'records', {'i21', 'i22', 'i23'});
-    x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
-    x2 = GAMSTransfer.Variable(gdx, 'x2', 'free', {i1,i1});
-    x3 = GAMSTransfer.Variable(gdx, 'x3', 'free', {i2}, 'records', {{'i21', 'i22', 'i23'}, [1 2 3]});
+    i1 = gams.transfer.Set(gdx, 'i1');
+    i2 = gams.transfer.Set(gdx, 'i2', 'records', {'i21', 'i22', 'i23'});
+    x1 = gams.transfer.Variable(gdx, 'x1', 'free', {i1});
+    x2 = gams.transfer.Variable(gdx, 'x2', 'free', {i1,i1});
+    x3 = gams.transfer.Variable(gdx, 'x3', 'free', {i2}, 'records', {{'i21', 'i22', 'i23'}, [1 2 3]});
 
     t.add('change_symbol_name_1');
     gdx.modified = false;
@@ -1255,7 +1255,7 @@ function test_changeSymbol(t, cfg)
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_cmex_set_sym_domain: Domain must be of type ''cell''.');
+            t.assertEquals(e.message, 'gt_set_sym_domain: Domain must be of type ''cell''.');
         else
             t.assertEquals(e.message, 'Domain must be of type ''cell''.');
         end
@@ -1266,9 +1266,9 @@ function test_changeSymbol(t, cfg)
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_cmex_set_sym_domain: Domain entry must be of type ''GAMSTransfer.Set'', ''GAMSTransfer.Alias'', ''GAMSTransfer.UniverseAlias'' or ''char''.');
+            t.assertEquals(e.message, 'gt_set_sym_domain: Domain entry must be of type ''gams.transfer.Set'', ''gams.transfer.Alias'', ''gams.transfer.UniverseAlias'' or ''char''.');
         else
-            t.assertEquals(e.message, 'Domain entry must be of type ''GAMSTransfer.Set'', ''GAMSTransfer.Alias'', ''GAMSTransfer.UniverseAlias'' or ''char''.');
+            t.assertEquals(e.message, 'Domain entry must be of type ''gams.transfer.Set'', ''gams.transfer.Alias'', ''gams.transfer.UniverseAlias'' or ''char''.');
         end
     end
 
@@ -1404,16 +1404,16 @@ end
 
 function test_copySymbol(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-    i = GAMSTransfer.Set(gdx, 'i', 'description', 'set i', 'records', {'i1', 'i2', 'i3'});
-    a = GAMSTransfer.Alias(gdx, 'a', i);
-    x = GAMSTransfer.Variable(gdx, 'x', 'binary', {i});
-    e = GAMSTransfer.Equation(gdx, 'e', 'leq', {a, i}, 'description', 'equ e');
-    p = GAMSTransfer.Parameter(gdx, 'p', {i}, 'records', {{'i1', 'i2'}, [1 2]});
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    i = gams.transfer.Set(gdx, 'i', 'description', 'set i', 'records', {'i1', 'i2', 'i3'});
+    a = gams.transfer.Alias(gdx, 'a', i);
+    x = gams.transfer.Variable(gdx, 'x', 'binary', {i});
+    e = gams.transfer.Equation(gdx, 'e', 'leq', {a, i}, 'description', 'equ e');
+    p = gams.transfer.Parameter(gdx, 'p', {i}, 'records', {{'i1', 'i2'}, [1 2]});
     gdx.modified = false;
 
     t.add('copy_symbol_set_empty');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     gdx2.modified = false;
     i.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1444,8 +1444,8 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_set_overwrite_1');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-    GAMSTransfer.Set(gdx2, 'i');
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gams.transfer.Set(gdx2, 'i');
     gdx2.modified = false;
     i.copy(gdx2, true);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1476,8 +1476,8 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_set_overwrite_2');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-    GAMSTransfer.Set(gdx2, 'i');
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gams.transfer.Set(gdx2, 'i');
     try
         t.assert(false);
         i.copy(gdx2, false);
@@ -1487,7 +1487,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_set_indexed');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
     try
         t.assert(false);
         i.copy(gdx2);
@@ -1497,7 +1497,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_alias_empty_1');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     try
         t.assert(false);
         a.copy(gdx2);
@@ -1507,7 +1507,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_alias_empty_2');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     gdx2.modified = false;
     i.copy(gdx2);
     a.copy(gdx2);
@@ -1525,10 +1525,10 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_alias_overwrite_1');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     i.copy(gdx2);
-    j = GAMSTransfer.Set(gdx2, 'j');
-    GAMSTransfer.Alias(gdx2, 'a', j);
+    j = gams.transfer.Set(gdx2, 'j');
+    gams.transfer.Alias(gdx2, 'a', j);
     gdx2.modified = false;
     a.copy(gdx2, true);
     t.assert(numel(fieldnames(gdx2.data)) == 3);
@@ -1545,11 +1545,11 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_alias_overwrite_2');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-    GAMSTransfer.Set(gdx2, 'i');
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gams.transfer.Set(gdx2, 'i');
     i.copy(gdx2);
-    j = GAMSTransfer.Set(gdx2, 'j');
-    GAMSTransfer.Alias(gdx2, 'a', j);
+    j = gams.transfer.Set(gdx2, 'j');
+    gams.transfer.Alias(gdx2, 'a', j);
     try
         t.assert(false);
         a.copy(gdx2, false);
@@ -1559,7 +1559,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_variable_empty_1');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     gdx2.modified = false;
     x.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1581,7 +1581,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_empty_2');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     gdx2.modified = false;
     i.copy(gdx2);
     x.copy(gdx2);
@@ -1606,8 +1606,8 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_overwrite_1');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-    GAMSTransfer.Variable(gdx2, 'x');
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gams.transfer.Variable(gdx2, 'x');
     gdx2.modified = false;
     x.copy(gdx2, true);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1629,8 +1629,8 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_overwrite_2');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-    GAMSTransfer.Variable(gdx2, 'x');
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gams.transfer.Variable(gdx2, 'x');
     try
         t.assert(false);
         x.copy(gdx2, false);
@@ -1640,7 +1640,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_variable_indexed');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
     try
         t.assert(false);
         x.copy(gdx2);
@@ -1650,7 +1650,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_equation_empty_1');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     gdx2.modified = false;
     e.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1675,7 +1675,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_equation_empty_2');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     gdx2.modified = false;
     i.copy(gdx2);
     a.copy(gdx2);
@@ -1704,8 +1704,8 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_equation_overwrite_1');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-    GAMSTransfer.Equation(gdx2, 'e', 'geq');
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gams.transfer.Equation(gdx2, 'e', 'geq');
     gdx2.modified = false;
     e.copy(gdx2, true);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1730,8 +1730,8 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_overwrite_2');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-    GAMSTransfer.Equation(gdx2, 'e', 'geq');
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gams.transfer.Equation(gdx2, 'e', 'geq');
     try
         t.assert(false);
         e.copy(gdx2, false);
@@ -1741,7 +1741,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_variable_indexed');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
     try
         t.assert(false);
         e.copy(gdx2);
@@ -1751,7 +1751,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_parameter_empty_1');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     gdx2.modified = false;
     p.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1785,7 +1785,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_parameter_empty_2');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     gdx2.modified = false;
     i.copy(gdx2);
     p.copy(gdx2);
@@ -1822,8 +1822,8 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_parameter_overwrite_1');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-    GAMSTransfer.Parameter(gdx2, 'p');
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gams.transfer.Parameter(gdx2, 'p');
     gdx2.modified = false;
     p.copy(gdx2, true);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1857,8 +1857,8 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_parameter_overwrite_2');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-    GAMSTransfer.Parameter(gdx2, 'p');
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gams.transfer.Parameter(gdx2, 'p');
     try
         t.assert(false);
         p.copy(gdx2, false);
@@ -1868,7 +1868,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_parameter_indexed');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
     try
         t.assert(false);
         p.copy(gdx2);
@@ -1881,58 +1881,58 @@ end
 
 function test_defaultvalues(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
 
     t.add('default_values_variables');
-    s = GAMSTransfer.Variable(gdx, 'x1', 'binary');
+    s = gams.transfer.Variable(gdx, 'x1', 'binary');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 0);
     t.assert(s.default_values.upper == 1);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Variable(gdx, 'x2', 'integer');
+    s = gams.transfer.Variable(gdx, 'x2', 'integer');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 0);
     t.assert(s.default_values.upper == Inf);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Variable(gdx, 'x3', 'positive');
+    s = gams.transfer.Variable(gdx, 'x3', 'positive');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 0);
     t.assert(s.default_values.upper == Inf);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Variable(gdx, 'x4', 'negative');
+    s = gams.transfer.Variable(gdx, 'x4', 'negative');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == -Inf);
     t.assert(s.default_values.upper == 0);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Variable(gdx, 'x5', 'free');
+    s = gams.transfer.Variable(gdx, 'x5', 'free');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == -Inf);
     t.assert(s.default_values.upper == Inf);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Variable(gdx, 'x6', 'sos1');
+    s = gams.transfer.Variable(gdx, 'x6', 'sos1');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 0);
     t.assert(s.default_values.upper == Inf);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Variable(gdx, 'x7', 'sos2');
+    s = gams.transfer.Variable(gdx, 'x7', 'sos2');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 0);
     t.assert(s.default_values.upper == Inf);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Variable(gdx, 'x8', 'semiint');
+    s = gams.transfer.Variable(gdx, 'x8', 'semiint');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 1);
     t.assert(s.default_values.upper == Inf);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Variable(gdx, 'x9', 'semicont');
+    s = gams.transfer.Variable(gdx, 'x9', 'semicont');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 1);
@@ -1940,43 +1940,43 @@ function test_defaultvalues(t, cfg)
     t.assert(s.default_values.scale == 1);
 
     t.add('default_values_equations');
-    s = GAMSTransfer.Equation(gdx, 'e1', 'e');
+    s = gams.transfer.Equation(gdx, 'e1', 'e');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 0);
     t.assert(s.default_values.upper == 0);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Equation(gdx, 'e2', 'l');
+    s = gams.transfer.Equation(gdx, 'e2', 'l');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == -Inf);
     t.assert(s.default_values.upper == 0);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Equation(gdx, 'e3', 'g');
+    s = gams.transfer.Equation(gdx, 'e3', 'g');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 0);
     t.assert(s.default_values.upper == Inf);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Equation(gdx, 'e4', 'n');
+    s = gams.transfer.Equation(gdx, 'e4', 'n');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == -Inf);
     t.assert(s.default_values.upper == Inf);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Equation(gdx, 'e5', 'x');
+    s = gams.transfer.Equation(gdx, 'e5', 'x');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 0);
     t.assert(s.default_values.upper == 0);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Equation(gdx, 'e6', 'b');
+    s = gams.transfer.Equation(gdx, 'e6', 'b');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 0);
     t.assert(s.default_values.upper == 0);
     t.assert(s.default_values.scale == 1);
-    s = GAMSTransfer.Equation(gdx, 'e7', 'c');
+    s = gams.transfer.Equation(gdx, 'e7', 'c');
     t.assert(s.default_values.level == 0);
     t.assert(s.default_values.marginal == 0);
     t.assert(s.default_values.lower == 0);
@@ -1987,16 +1987,16 @@ end
 
 function test_domainViolation(t, cfg);
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
-    i1 = GAMSTransfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
-    i2 = GAMSTransfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
-    a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
+    i1 = gams.transfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
+    i2 = gams.transfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
+    a1 = gams.transfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
         {{'i0', 'i0', 'I1', 'i1'}, {'i1', 'I2', 'I1', 'i2'}, [1;2;3;4]});
-    a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
+    a2 = gams.transfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
         {{'i1', 'I1', 'i5', 'I5'}, {'i1', 'I5', 'I1', 'i5'}, [1;2;3;4]});
-    a3 = GAMSTransfer.Parameter(gdx, 'a3', i2, 'records', ...
+    a3 = gams.transfer.Parameter(gdx, 'a3', i2, 'records', ...
         {{'I1', 'i7'}, [1;2]});
 
     t.add('domain_violation_1');
@@ -2011,9 +2011,9 @@ function test_domainViolation(t, cfg);
     t.assert(~a3.domain_forwarding(1));
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 3);
-    t.assert(isa(domviol{1}, 'GAMSTransfer.DomainViolation'));
-    t.assert(isa(domviol{2}, 'GAMSTransfer.DomainViolation'));
-    t.assert(isa(domviol{3}, 'GAMSTransfer.DomainViolation'));
+    t.assert(isa(domviol{1}, 'gams.transfer.DomainViolation'));
+    t.assert(isa(domviol{2}, 'gams.transfer.DomainViolation'));
+    t.assert(isa(domviol{3}, 'gams.transfer.DomainViolation'));
     t.assertEquals(domviol{1}.symbol.name, 'a1');
     t.assertEquals(domviol{2}.symbol.name, 'a2');
     t.assertEquals(domviol{3}.symbol.name, 'a3');
@@ -2040,7 +2040,7 @@ function test_domainViolation(t, cfg);
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_cmex_gdx_write: GDX error for a1: Domain violation');
+            t.assertEquals(e.message, 'gt_gdx_write: GDX error for a1: Domain violation');
         else
             t.assertEquals(e.message, 'GDX error for a1: Domain violation');
         end
@@ -2068,16 +2068,16 @@ function test_domainViolation(t, cfg);
     t.add('domain_violation_4');
     gdx.write(write_filename);
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
-    i1 = GAMSTransfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
-    i2 = GAMSTransfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
-    a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
+    i1 = gams.transfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
+    i2 = gams.transfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
+    a1 = gams.transfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
         {{'i0', 'i0', 'I1', 'i1'}, {'i1', 'I2', 'I1', 'i2'}, [1;2;3;4]});
-    a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
+    a2 = gams.transfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
         {{'i1', 'I1', 'i5', 'I5'}, {'i1', 'I5', 'I1', 'i5'}, [1;2;3;4]});
-    a3 = GAMSTransfer.Parameter(gdx, 'a3', i2, 'records', ...
+    a3 = gams.transfer.Parameter(gdx, 'a3', i2, 'records', ...
         {{'I1', 'i7'}, [1;2]});
 
     t.add('domain_violation_with_grow_1');
@@ -2092,9 +2092,9 @@ function test_domainViolation(t, cfg);
     t.assert(~a3.domain_forwarding(1));
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 3);
-    t.assert(isa(domviol{1}, 'GAMSTransfer.DomainViolation'));
-    t.assert(isa(domviol{2}, 'GAMSTransfer.DomainViolation'));
-    t.assert(isa(domviol{3}, 'GAMSTransfer.DomainViolation'));
+    t.assert(isa(domviol{1}, 'gams.transfer.DomainViolation'));
+    t.assert(isa(domviol{2}, 'gams.transfer.DomainViolation'));
+    t.assert(isa(domviol{3}, 'gams.transfer.DomainViolation'));
     t.assertEquals(domviol{1}.symbol.name, 'a1');
     t.assertEquals(domviol{2}.symbol.name, 'a2');
     t.assertEquals(domviol{3}.symbol.name, 'a3');
@@ -2140,18 +2140,18 @@ function test_domainViolation(t, cfg);
     t.assert(a2.isValid());
     t.assert(a3.isValid());
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
-    i1 = GAMSTransfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
-    i2 = GAMSTransfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
-    a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
+    i1 = gams.transfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
+    i2 = gams.transfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
+    a1 = gams.transfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
         {{'i0', 'i0', 'I1', 'i1'}, {'i1', 'I2', 'I1', 'i2'}, [1;2;3;4]}, ...
         'domain_forwarding', true);
-    a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
+    a2 = gams.transfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
         {{'i1', 'I1', 'i5', 'I5'}, {'i1', 'I5', 'I1', 'i5'}, [1;2;3;4]}, ...
         'domain_forwarding', true);
-    a3 = GAMSTransfer.Parameter(gdx, 'a3', i2, 'records', ...
+    a3 = gams.transfer.Parameter(gdx, 'a3', i2, 'records', ...
         {{'I1', 'i7'}, [1;2]}, 'domain_forwarding', true);
 
     t.add('domain_violation_with_grow_3');
@@ -2176,16 +2176,16 @@ function test_domainViolation(t, cfg);
     t.assert(a2.isValid());
     t.assert(a3.isValid());
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
-    i1 = GAMSTransfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
-    i2 = GAMSTransfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
-    a1 = GAMSTransfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
+    i1 = gams.transfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
+    i2 = gams.transfer.Set(gdx, 'i2', i1, 'records', {'i1', 'i2'});
+    a1 = gams.transfer.Parameter(gdx, 'a1', {i1, i1}, 'records', ...
         {{'i0', 'i0', 'I1', 'i1'}, {'i1', 'I2', 'I1', 'i2'}, [1;2;3;4]});
-    a2 = GAMSTransfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
+    a2 = gams.transfer.Parameter(gdx, 'a2', {i1, '*'}, 'records', ...
         {{'i1', 'I1', 'i5', 'I5'}, {'i1', 'I5', 'I1', 'i5'}, [1;2;3;4]});
-    a3 = GAMSTransfer.Parameter(gdx, 'a3', i2, 'records', ...
+    a3 = gams.transfer.Parameter(gdx, 'a3', i2, 'records', ...
         {{'I1', 'i7'}, [1;2]});
 
     t.add('domain_violation_with_grow_4');
@@ -2199,8 +2199,8 @@ function test_domainViolation(t, cfg);
     t.assert(a3.domain_forwarding(1));
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 2);
-    t.assert(isa(domviol{1}, 'GAMSTransfer.DomainViolation'));
-    t.assert(isa(domviol{2}, 'GAMSTransfer.DomainViolation'));
+    t.assert(isa(domviol{1}, 'gams.transfer.DomainViolation'));
+    t.assert(isa(domviol{2}, 'gams.transfer.DomainViolation'));
     t.assertEquals(domviol{1}.symbol.name, 'a1');
     t.assertEquals(domviol{2}.symbol.name, 'a2');
     t.assert(domviol{1}.dimension == 1);
@@ -2217,12 +2217,12 @@ end
 
 function test_setRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
 
-    i1 = GAMSTransfer.Set(gdx, 'i1');
-    s1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {'i'});
-    s2 = GAMSTransfer.Variable(gdx, 'x2', 'free', {'i', '*'});
-    s3 = GAMSTransfer.Variable(gdx, 'x3', 'free', {gdx.data.i1});
+    i1 = gams.transfer.Set(gdx, 'i1');
+    s1 = gams.transfer.Variable(gdx, 'x1', 'free', {'i'});
+    s2 = gams.transfer.Variable(gdx, 'x2', 'free', {'i', '*'});
+    s3 = gams.transfer.Variable(gdx, 'x3', 'free', {gdx.data.i1});
 
     t.add('set_records_string_1');
     gdx.modified = false;
@@ -2786,12 +2786,12 @@ end
 
 function test_writeUnordered(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
-    i = GAMSTransfer.Set(gdx, 'i', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
-    j = GAMSTransfer.Set(gdx, 'j', 'records', {'j1', 'j2', 'j3', 'j4', 'j5'});
-    c = GAMSTransfer.Parameter(gdx, 'c', {i,j});
+    i = gams.transfer.Set(gdx, 'i', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
+    j = gams.transfer.Set(gdx, 'j', 'records', {'j1', 'j2', 'j3', 'j4', 'j5'});
+    c = gams.transfer.Parameter(gdx, 'c', {i,j});
     c.setRecords({'i1', 'i1', 'i2', 'i2', 'i4', 'i4', 'i3', 'i3'}, ...
         {'j1', 'j2', 'j1', 'j2', 'j1', 'j2', 'j1', 'j2'}, ...
         [11, 12, 21, 22, 41, 42, 31, 32]);
@@ -2803,7 +2803,7 @@ function test_writeUnordered(t, cfg)
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_cmex_gdx_write: GDX error in record c(i3,j1): Data not sorted when writing raw');
+            t.assertEquals(e.message, 'gt_gdx_write: GDX error in record c(i3,j1): Data not sorted when writing raw');
         else
             t.assertEquals(e.message, 'GDX error in record c(i3,j1): Data not sorted when writing raw');
         end
@@ -2825,7 +2825,7 @@ function test_writeUnordered(t, cfg)
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_cmex_gdx_write: GDX error in record c(i2,j1): Data not sorted when writing raw');
+            t.assertEquals(e.message, 'gt_gdx_write: GDX error in record c(i2,j1): Data not sorted when writing raw');
         else
             t.assertEquals(e.message, 'GDX error in record c(i2,j1): Data not sorted when writing raw');
         end
@@ -2838,13 +2838,13 @@ end
 
 function test_reorder(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
-    s1 = GAMSTransfer.Set(gdx, 's1', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
-    s2 = GAMSTransfer.Set(gdx, 's2');
-    s3 = GAMSTransfer.Set(gdx, 's3');
-    s4 = GAMSTransfer.Set(gdx, 's4', 'records', {'j1', 'j2', 'j3', 'j4', 'j5'});
+    s1 = gams.transfer.Set(gdx, 's1', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
+    s2 = gams.transfer.Set(gdx, 's2');
+    s3 = gams.transfer.Set(gdx, 's3');
+    s4 = gams.transfer.Set(gdx, 's4', 'records', {'j1', 'j2', 'j3', 'j4', 'j5'});
 
     t.add('reorder_1');
     t.assert(numel(fieldnames(gdx.data)) == 4);
@@ -2933,9 +2933,9 @@ function test_reorder(t, cfg)
         t.assertEquals(e.message, 'Circular domain set dependency in: [s2,s3].');
     end
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
 
-    s1 = GAMSTransfer.Set(gdx, 's1', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
+    s1 = gams.transfer.Set(gdx, 's1', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
     s1.domain = {s1};
 
     t.add('reorder_6');
@@ -2975,7 +2975,7 @@ function test_transformRecords(t, cfg)
         if strcmp(formats{i}, 'table') && ~gdx.features.table
             continue
         end
-        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         gdx.read(cfg.filenames{1}, 'format', formats{i});
         i_recs{i} = gdx.data.i.records;
         j_recs{i} = gdx.data.j.records;
@@ -3000,7 +3000,7 @@ function test_transformRecords(t, cfg)
             end
 
             t.add(sprintf('transform_records_%s_to_%s', formats{i}, formats{j}));
-            gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
             gdx.read(cfg.filenames{1}, 'format', formats{i});
             try
                 if strcmp(formats{j}, 'dense_matrix') || strcmp(formats{j}, 'sparse_matrix')

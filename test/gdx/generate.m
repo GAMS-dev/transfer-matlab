@@ -1,4 +1,4 @@
-% Tests GAMSTransfer
+% Tests GAMS Transfer
 %
 
 %

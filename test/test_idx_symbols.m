@@ -37,11 +37,11 @@ end
 
 function test_idx_addSymbols(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
         'indexed', true, 'features', cfg.features);
 
     t.add('idx_add_symbols_parameter_1');
-    p1 = GAMSTransfer.Parameter(gdx, 'p1');
+    p1 = gams.transfer.Parameter(gdx, 'p1');
     t.testEmptySymbol(p1);
     t.assertEquals(p1.name, 'p1');
     t.assertEquals(p1.description, '');
@@ -59,7 +59,7 @@ function test_idx_addSymbols(t, cfg)
     t.assert(gdx.data.p1.id == p1.id);
 
     t.add('idx_add_symbols_parameter_2');
-    p2 = GAMSTransfer.Parameter(gdx, 'p2', 0, 'description', 'descr par 2');
+    p2 = gams.transfer.Parameter(gdx, 'p2', 0, 'description', 'descr par 2');
     t.testEmptySymbol(p2);
     t.assertEquals(p2.name, 'p2');
     t.assertEquals(p2.description, 'descr par 2');
@@ -80,7 +80,7 @@ function test_idx_addSymbols(t, cfg)
     t.assert(gdx.data.p2.id == p2.id);
 
     t.add('idx_add_symbols_parameter_3');
-    p3 = GAMSTransfer.Parameter(gdx, 'p3', [1,2,3], 'description', 'descr par 3');
+    p3 = gams.transfer.Parameter(gdx, 'p3', [1,2,3], 'description', 'descr par 3');
     t.testEmptySymbol(p3);
     t.assertEquals(p3.name, 'p3');
     t.assertEquals(p3.description, 'descr par 3');
@@ -109,39 +109,39 @@ function test_idx_addSymbols(t, cfg)
     t.add('idx_add_symbols_parameter_fails');
     try
         t.assert(false);
-        GAMSTransfer.Parameter(gdx, 4);
+        gams.transfer.Parameter(gdx, 4);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Parameter(gdx, p1);
+        gams.transfer.Parameter(gdx, p1);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Parameter(gdx, 's', {2, 3});
+        gams.transfer.Parameter(gdx, 's', {2, 3});
     catch
         t.reset();
     end
     if exist('OCTAVE_VERSION', 'builtin') <= 0
         try
             t.assert(false);
-            GAMSTransfer.Parameter(gdx, 's', ["s1", "s2"]);
+            gams.transfer.Parameter(gdx, 's', ["s1", "s2"]);
         catch
             t.reset();
         end
     end
     try
         t.assert(false);
-        GAMSTransfer.Parameter(gdx, 's', 5, 'description', 2);
+        gams.transfer.Parameter(gdx, 's', 5, 'description', 2);
     catch
         t.reset();
     end
     try
         t.assert(false);
-        GAMSTransfer.Parameter(gdx, 's', p3);
+        gams.transfer.Parameter(gdx, 's', p3);
     catch
         t.reset();
     end
@@ -149,7 +149,7 @@ function test_idx_addSymbols(t, cfg)
     t.add('idx_add_symbols_set');
     try
         t.assert(false);
-        GAMSTransfer.Set(gdx, 's1');
+        gams.transfer.Set(gdx, 's1');
     catch e
         t.reset();
         t.assertEquals(e.message, 'Set not allowed in indexed mode.');
@@ -158,7 +158,7 @@ function test_idx_addSymbols(t, cfg)
     t.add('idx_add_symbols_variable');
     try
         t.assert(false);
-        GAMSTransfer.Variable(gdx, 'v1');
+        gams.transfer.Variable(gdx, 'v1');
     catch e
         t.reset();
         t.assertEquals(e.message, 'Variable not allowed in indexed mode.');
@@ -167,7 +167,7 @@ function test_idx_addSymbols(t, cfg)
     t.add('idx_add_symbols_equation');
     try
         t.assert(false);
-        GAMSTransfer.Equation(gdx, 'e1', 'n');
+        gams.transfer.Equation(gdx, 'e1', 'n');
     catch e
         t.reset();
         t.assertEquals(e.message, 'Equation not allowed in indexed mode.');
@@ -177,10 +177,10 @@ end
 
 function test_idx_changeSymbol(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
         'indexed', true, 'features', cfg.features);
-    p1 = GAMSTransfer.Parameter(gdx, 'p1', 5);
-    p2 = GAMSTransfer.Parameter(gdx, 'p2', [5,10]);
+    p1 = gams.transfer.Parameter(gdx, 'p1', 5);
+    p2 = gams.transfer.Parameter(gdx, 'p2', [5,10]);
 
     t.add('idx_change_symbol_name_1');
     t.assertEquals(p1.name, 'p1');
@@ -419,15 +419,15 @@ end
 
 function test_idx_copySymbol(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
         'features', cfg.features);
-    p = GAMSTransfer.Parameter(gdx, 'p', [10]);
+    p = gams.transfer.Parameter(gdx, 'p', [10]);
     p.records.dim_1 = [2 4]';
     p.records.value = [1 2]';
     t.assert(p.isValid());
 
     t.add('idx_copy_symbol_parameter_empty');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
         'features', cfg.features);
     p.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -452,9 +452,9 @@ function test_idx_copySymbol(t, cfg)
     t.assert(gdx2.data.p.records.value(2) == 2);
 
     t.add('idx_copy_symbol_parameter_overwrite_1');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
         'features', cfg.features);
-    GAMSTransfer.Parameter(gdx2, 'p');
+    gams.transfer.Parameter(gdx2, 'p');
     p.copy(gdx2, true);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
     t.assert(isfield(gdx2.data, 'p'));
@@ -478,9 +478,9 @@ function test_idx_copySymbol(t, cfg)
     t.assert(gdx2.data.p.records.value(2) == 2);
 
     t.add('idx_copy_symbol_parameter_overwrite_2');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
         'features', cfg.features);
-    GAMSTransfer.Parameter(gdx2, 'p');
+    gams.transfer.Parameter(gdx2, 'p');
     try
         t.assert(false);
         p.copy(gdx2, false);
@@ -490,7 +490,7 @@ function test_idx_copySymbol(t, cfg)
     end
 
     t.add('idx_copy_symbol_parameter_indexed');
-    gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', false, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', false, 'features', cfg.features);
     try
         t.assert(false);
         p.copy(gdx2);
@@ -503,10 +503,10 @@ end
 
 function test_idx_setRecords(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
         'indexed', true, 'features', cfg.features);
 
-    p1 = GAMSTransfer.Parameter(gdx, 'p1', 5);
+    p1 = gams.transfer.Parameter(gdx, 'p1', 5);
 
     t.add('set_records_string');
     try
@@ -625,7 +625,7 @@ function test_idx_setRecords(t, cfg)
         p1.setRecords(struct('marginal', [1; 2; 3; 4; 5]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain fields not allowed in this format.');  
+        t.assertEquals(e.message, 'Domain fields not allowed in this format.');
     end
 
     t.add('set_records_struct_3');
@@ -685,11 +685,11 @@ end
 
 function test_idx_writeUnordered(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
         'indexed', true, 'features', cfg.features);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
-    c = GAMSTransfer.Parameter(gdx, 'c', [5,10]);
+    c = gams.transfer.Parameter(gdx, 'c', [5,10]);
     c.setRecords(struct('dim_1', [1, 1, 2, 2, 4, 4, 3, 3], ...
         'dim_2', [1, 2, 1, 2, 1, 2, 1, 2], 'value', [11, 12, 21, 22, 41, 42, 31, 32]));
 
@@ -700,7 +700,7 @@ function test_idx_writeUnordered(t, cfg)
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_cmex_idx_write: GDX error in record c(3,1): Data not sorted when writing raw');
+            t.assertEquals(e.message, 'gt_idx_write: GDX error in record c(3,1): Data not sorted when writing raw');
         else
             t.assertEquals(e.message, 'GDX error in record c(3,1): Data not sorted when writing raw');
         end
@@ -719,7 +719,7 @@ function test_idx_writeUnordered(t, cfg)
     catch e
         t.reset();
         if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_cmex_idx_write: GDX error in record c(2,1): Data not sorted when writing raw');
+            t.assertEquals(e.message, 'gt_idx_write: GDX error in record c(2,1): Data not sorted when writing raw');
         else
             t.assertEquals(e.message, 'GDX error in record c(2,1): Data not sorted when writing raw');
         end
@@ -744,7 +744,7 @@ function test_idx_transformRecords(t, cfg)
         if strcmp(formats{i}, 'table') && ~gdx.features.table
             continue
         end
-        gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
             'features', cfg.features);
         gdx.read(cfg.filenames{4}, 'format', formats{i});
         a_recs{i} = gdx.data.a.records;
@@ -766,7 +766,7 @@ function test_idx_transformRecords(t, cfg)
             end
 
             t.add(sprintf('idx_transform_records_%s_to_%s', formats{i}, formats{j}));
-            gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
                 'features', cfg.features);
             gdx.read(cfg.filenames{4}, 'format', formats{i});
             gdx.data.a.transformRecords(formats{j});

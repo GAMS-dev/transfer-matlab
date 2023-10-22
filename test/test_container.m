@@ -48,13 +48,13 @@ function test_equals(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx1 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-        gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx1 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
     case 'rc'
-        gdx1 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-        gdx1 = GAMSTransfer.Container(gdx1, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
-        gdx2 = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-        gdx2 = GAMSTransfer.Container(gdx2, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx1 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx1 = gams.transfer.Container(gdx1, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx2 = gams.transfer.Container(gdx2, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
     end
 
     t.add('equals_1');
@@ -65,12 +65,12 @@ function test_getlist(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = GAMSTransfer.Container(cfg.filenames{3}, 'gams_dir', ...
+        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     case 'rc'
-        gdx = GAMSTransfer.Container(cfg.filenames{3}, 'gams_dir', ...
+        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
-        gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
+        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     end
 
@@ -107,60 +107,60 @@ function test_getlist(t, cfg, container_type)
 
     t.add('get_list_set_1');
     l = gdx.getSymbols('i');
-    t.assert(isa(l, 'GAMSTransfer.Set'));
+    t.assert(isa(l, 'gams.transfer.Set'));
     t.assertEquals(l.name, 'i');
 
     t.add('get_list_set_2');
     l = gdx.getSymbols('I');
-    t.assert(isa(l, 'GAMSTransfer.Set'));
+    t.assert(isa(l, 'gams.transfer.Set'));
     t.assertEquals(l.name, 'i');
 
     t.add('get_list_variable_1');
     l = gdx.getSymbols('x1');
-    t.assert(isa(l, 'GAMSTransfer.Variable'));
+    t.assert(isa(l, 'gams.transfer.Variable'));
     t.assertEquals(l.name, 'x1');
 
     t.add('get_list_variable_2');
     l = gdx.getSymbols('X1');
-    t.assert(isa(l, 'GAMSTransfer.Variable'));
+    t.assert(isa(l, 'gams.transfer.Variable'));
     t.assertEquals(l.name, 'x1');
 
     t.add('get_list_equation_1');
     l = gdx.getSymbols('e1');
-    t.assert(isa(l, 'GAMSTransfer.Equation'));
+    t.assert(isa(l, 'gams.transfer.Equation'));
     t.assertEquals(l.name, 'e1');
 
     t.add('get_list_equation_2');
     l = gdx.getSymbols('E1');
-    t.assert(isa(l, 'GAMSTransfer.Equation'));
+    t.assert(isa(l, 'gams.transfer.Equation'));
     t.assertEquals(l.name, 'e1');
 
     t.add('get_list_parameter_1');
     l = gdx.getSymbols('a');
-    t.assert(isa(l, 'GAMSTransfer.Parameter'));
+    t.assert(isa(l, 'gams.transfer.Parameter'));
     t.assertEquals(l.name, 'a');
 
     t.add('get_list_parameter_2');
     l = gdx.getSymbols('A');
-    t.assert(isa(l, 'GAMSTransfer.Parameter'));
+    t.assert(isa(l, 'gams.transfer.Parameter'));
     t.assertEquals(l.name, 'a');
 
     t.add('get_list_alias_1');
     l = gdx.getSymbols('i2');
-    t.assert(isa(l, 'GAMSTransfer.Alias'));
+    t.assert(isa(l, 'gams.transfer.Alias'));
     t.assertEquals(l.name, 'i2');
 
     t.add('get_list_alias_2');
     l = gdx.getSymbols('I2');
-    t.assert(isa(l, 'GAMSTransfer.Alias'));
+    t.assert(isa(l, 'gams.transfer.Alias'));
     t.assertEquals(l.name, 'i2');
 
     t.add('get_list_sets');
     l = gdx.getSymbols(gdx.listSets());
     t.assert(iscell(l));
     t.assert(numel(l) == 2);
-    t.assert(isa(l{1}, 'GAMSTransfer.Set'));
-    t.assert(isa(l{2}, 'GAMSTransfer.Set'));
+    t.assert(isa(l{1}, 'gams.transfer.Set'));
+    t.assert(isa(l{2}, 'gams.transfer.Set'));
     t.assertEquals(l{1}.name, 'i');
     t.assertEquals(l{2}.name, 'j');
 
@@ -168,17 +168,17 @@ function test_getlist(t, cfg, container_type)
     l = gdx.getSymbols(gdx.listVariables());
     t.assert(iscell(l));
     t.assert(numel(l) == 11);
-    t.assert(isa(l{1}, 'GAMSTransfer.Variable'));
-    t.assert(isa(l{2}, 'GAMSTransfer.Variable'));
-    t.assert(isa(l{3}, 'GAMSTransfer.Variable'));
-    t.assert(isa(l{4}, 'GAMSTransfer.Variable'));
-    t.assert(isa(l{5}, 'GAMSTransfer.Variable'));
-    t.assert(isa(l{6}, 'GAMSTransfer.Variable'));
-    t.assert(isa(l{7}, 'GAMSTransfer.Variable'));
-    t.assert(isa(l{8}, 'GAMSTransfer.Variable'));
-    t.assert(isa(l{9}, 'GAMSTransfer.Variable'));
-    t.assert(isa(l{10}, 'GAMSTransfer.Variable'));
-    t.assert(isa(l{11}, 'GAMSTransfer.Variable'));
+    t.assert(isa(l{1}, 'gams.transfer.Variable'));
+    t.assert(isa(l{2}, 'gams.transfer.Variable'));
+    t.assert(isa(l{3}, 'gams.transfer.Variable'));
+    t.assert(isa(l{4}, 'gams.transfer.Variable'));
+    t.assert(isa(l{5}, 'gams.transfer.Variable'));
+    t.assert(isa(l{6}, 'gams.transfer.Variable'));
+    t.assert(isa(l{7}, 'gams.transfer.Variable'));
+    t.assert(isa(l{8}, 'gams.transfer.Variable'));
+    t.assert(isa(l{9}, 'gams.transfer.Variable'));
+    t.assert(isa(l{10}, 'gams.transfer.Variable'));
+    t.assert(isa(l{11}, 'gams.transfer.Variable'));
     t.assertEquals(l{1}.name, 'x1');
     t.assertEquals(l{2}.name, 'x2');
     t.assertEquals(l{3}.name, 'x3');
@@ -195,9 +195,9 @@ function test_getlist(t, cfg, container_type)
     l = gdx.getSymbols(gdx.listEquations());
     t.assert(iscell(l));
     t.assert(numel(l) == 3);
-    t.assert(isa(l{1}, 'GAMSTransfer.Equation'));
-    t.assert(isa(l{2}, 'GAMSTransfer.Equation'));
-    t.assert(isa(l{3}, 'GAMSTransfer.Equation'));
+    t.assert(isa(l{1}, 'gams.transfer.Equation'));
+    t.assert(isa(l{2}, 'gams.transfer.Equation'));
+    t.assert(isa(l{3}, 'gams.transfer.Equation'));
     t.assertEquals(l{1}.name, 'e1');
     t.assertEquals(l{2}.name, 'e2');
     t.assertEquals(l{3}.name, 'e3');
@@ -206,15 +206,15 @@ function test_getlist(t, cfg, container_type)
     l = gdx.getSymbols(gdx.listParameters());
     t.assert(iscell(l));
     t.assert(numel(l) == 1);
-    t.assert(isa(l{1}, 'GAMSTransfer.Parameter'));
+    t.assert(isa(l{1}, 'gams.transfer.Parameter'));
     t.assertEquals(l{1}.name, 'a');
 
     t.add('get_list_aliases');
     l = gdx.getSymbols(gdx.listAliases());
     t.assert(iscell(l));
     t.assert(numel(l) == 2);
-    t.assert(isa(l{1}, 'GAMSTransfer.Alias'));
-    t.assert(isa(l{2}, 'GAMSTransfer.Alias'));
+    t.assert(isa(l{1}, 'gams.transfer.Alias'));
+    t.assert(isa(l{2}, 'gams.transfer.Alias'));
     t.assertEquals(l{1}.name, 'i2');
     t.assertEquals(l{2}.name, 'j2');
 
@@ -243,7 +243,7 @@ function test_getlist(t, cfg, container_type)
     t.assertEquals(l{1}, 'e2');
     t.assertEquals(l{2}, 'e3');
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
 
     t.add('get_list_sets_is_valid_1');
     l = gdx.listSets('is_valid', true);
@@ -259,7 +259,7 @@ function test_getlist(t, cfg, container_type)
     case 'c'
         gdx.read(cfg.filenames{1}, 'symbols', {'x'});
     case 'rc'
-        cgdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        cgdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         cgdx.read(cfg.filenames{1}, 'symbols', {'x'});
         gdx.read(cgdx, 'symbols', {'x'});
     end
@@ -283,7 +283,7 @@ function test_getlist(t, cfg, container_type)
     case 'c'
         gdx.read(cfg.filenames{1}, 'symbols', {'i', 'j'});
     case 'rc'
-        cgdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        cgdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
         cgdx.read(cfg.filenames{1}, 'symbols', {'i', 'j', 'x'});
         gdx.read(cgdx, 'symbols', {'i', 'j'});
     end
@@ -308,12 +308,12 @@ function test_describe(t, cfg, container_type)
         case 1
             switch container_type
             case 'c'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
                 gdx.read(cfg.filenames{1}, 'format', 'struct');
             case 'rc'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
                 gdx.read(cfg.filenames{1}, 'format', 'struct');
-                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
             end
             test_name_describe_sets = 'describe_sets_struct';
             test_name_describe_parameters = 'describe_parameters_struct';
@@ -324,12 +324,12 @@ function test_describe(t, cfg, container_type)
             end
             switch container_type
             case 'c'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
                 gdx.read(cfg.filenames{1}, 'format', 'table');
             case 'rc'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
                 gdx.read(cfg.filenames{1}, 'format', 'table');
-                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
             end
             test_name_describe_sets = 'describe_sets_table';
             test_name_describe_parameters = 'describe_parameters_table';
@@ -337,12 +337,12 @@ function test_describe(t, cfg, container_type)
         case 3
             switch container_type
             case 'c'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
                 gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
             case 'rc'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
                 gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
-                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
             end
             test_name_describe_sets = 'describe_sets_dense_matrix';
             test_name_describe_parameters = 'describe_parameters_dense_matrix';
@@ -350,12 +350,12 @@ function test_describe(t, cfg, container_type)
         case 4
             switch container_type
             case 'c'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
                 gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
             case 'rc'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
                 gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
-                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
             end
             test_name_describe_sets = 'describe_sets_sparse_matrix';
             test_name_describe_parameters = 'describe_parameters_sparse_matrix';
@@ -975,18 +975,18 @@ function test_describePartial(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = GAMSTransfer.Container(cfg.filenames{3}, 'gams_dir', ...
+        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     case 'rc'
-        gdx = GAMSTransfer.Container(cfg.filenames{3}, 'gams_dir', ...
+        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
-        gdx = GAMSTransfer.Container(gdx, 'gams_dir', ...
+        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
             cfg.gams_dir, 'features', cfg.features);
     end
 
     t.add('describe_partial_sets_1');
     tbl = gdx.describeSets(gdx.listSymbols('types', ...
-        [GAMSTransfer.SymbolType.SET, GAMSTransfer.SymbolType.ALIAS]));
+        [gams.transfer.SymbolType.SET, gams.transfer.SymbolType.ALIAS]));
     if gdx.features.table
         t.assert(height(tbl) == 4);
         if gdx.features.categorical
@@ -1244,14 +1244,14 @@ function test_idx_describe(t, cfg, container_type)
         case 1
             switch container_type
             case 'c'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
                 gdx.read(cfg.filenames{4}, 'format', 'struct');
             case 'rc'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
                 gdx.read(cfg.filenames{4}, 'format', 'struct');
-                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
             end
             test_name_describe_parameters = 'idx_describe_parameters_struct';
@@ -1261,42 +1261,42 @@ function test_idx_describe(t, cfg, container_type)
             end
             switch container_type
             case 'c'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
                 gdx.read(cfg.filenames{4}, 'format', 'table');
             case 'rc'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
                 gdx.read(cfg.filenames{4}, 'format', 'table');
-                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
             end
             test_name_describe_parameters = 'idx_describe_parameters_table';
         case 3
             switch container_type
             case 'c'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
                 gdx.read(cfg.filenames{4}, 'format', 'dense_matrix');
             case 'rc'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
                 gdx.read(cfg.filenames{4}, 'format', 'dense_matrix');
-                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
             end
             test_name_describe_parameters = 'idx_describe_parameters_dense_matrix';
         case 4
             switch container_type
             case 'c'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
                 gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix');
             case 'rc'
-                gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
                 gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix');
-                gdx = GAMSTransfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
                     'features', cfg.features);
             end
             test_name_describe_parameters = 'idx_describe_parameters_sparse_matrix';
@@ -1761,11 +1761,11 @@ end
 
 function test_remove(t, cfg)
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
         'features', cfg.features);
-    i1 = GAMSTransfer.Set(gdx, 'i1');
-    a1 = GAMSTransfer.Alias(gdx, 'a1', i1);
-    x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
+    i1 = gams.transfer.Set(gdx, 'i1');
+    a1 = gams.transfer.Alias(gdx, 'a1', i1);
+    x1 = gams.transfer.Variable(gdx, 'x1', 'free', {i1});
     gdx.modified = false;
 
     t.add('remove_1');
@@ -1803,11 +1803,11 @@ function test_remove(t, cfg)
     t.assert(a1.modified);
     t.assert(x1.modified);
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
         'features', cfg.features);
-    i1 = GAMSTransfer.Set(gdx, 'i1');
-    a1 = GAMSTransfer.Alias(gdx, 'a1', i1);
-    x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
+    i1 = gams.transfer.Set(gdx, 'i1');
+    a1 = gams.transfer.Alias(gdx, 'a1', i1);
+    x1 = gams.transfer.Variable(gdx, 'x1', 'free', {i1});
     gdx.modified = false;
 
     t.add('remove_diffcase_1');
@@ -1845,11 +1845,11 @@ function test_remove(t, cfg)
     t.assert(a1.modified);
     t.assert(x1.modified);
 
-    gdx = GAMSTransfer.Container('gams_dir', cfg.gams_dir, ...
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
         'features', cfg.features);
-    i1 = GAMSTransfer.Set(gdx, 'i1');
-    a1 = GAMSTransfer.Alias(gdx, 'a1', i1);
-    x1 = GAMSTransfer.Variable(gdx, 'x1', 'free', {i1});
+    i1 = gams.transfer.Set(gdx, 'i1');
+    a1 = gams.transfer.Alias(gdx, 'a1', i1);
+    x1 = gams.transfer.Variable(gdx, 'x1', 'free', {i1});
     gdx.modified = false;
 
     t.add('remove_all');
