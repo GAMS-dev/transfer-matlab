@@ -35,7 +35,6 @@
 % compatibility (e.g. for Octave).
 %
 
-%> @ingroup symbol
 %> @brief GAMS Transfer Symbol Types
 %>
 %> This class holds the possible GAMS Transfer symbol types similar to an

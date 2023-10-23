@@ -38,7 +38,6 @@
 % (NaN, Inf and -Inf, respectively), NA and EPS do not. The latter two are
 % therefore mapped to a special NaN and -0, respectively.
 
-%> @ingroup records
 %> @brief GAMS Special Values
 %>
 %> GAMS GDX offers five special values: \ref gams::transfer::SpecialValues::NA

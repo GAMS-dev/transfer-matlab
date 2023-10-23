@@ -3,7 +3,7 @@
 mkdir -p build
 
 (cat doc/Doxyfile && \
-    echo "PROJECT_NUMBER=0.7.0"; \
+    echo "PROJECT_NUMBER=0.8.0"; \
     echo "INPUT=+gams doc/main.dox doc/getting_started.dox doc/container.dox doc/symbols.dox doc/records.dox"; \
     echo "OUTPUT_DIRECTORY=build/doc"; \
     echo "FILTER_PATTERNS=*m=ext/doxymatlab/m2cpp.pl"; \

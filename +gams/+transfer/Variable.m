@@ -66,7 +66,6 @@
 % See also: gams.transfer.Container, gams.transfer.VariableType, gams.transfer.Set
 %
 
-%> @ingroup symbol
 %> @brief GAMS Variable
 %>
 %> **Example:**

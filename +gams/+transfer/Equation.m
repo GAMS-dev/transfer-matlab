@@ -65,7 +65,6 @@
 % See also: gams.transfer.Container, gams.transfer.EquationType, gams.transfer.Set
 %
 
-%> @ingroup symbol
 %> @brief GAMS Equation
 %>
 %> **Example:**

@@ -63,7 +63,6 @@
 % See also: gams.transfer.Container, gams.transfer.Set
 %
 
-%> @ingroup symbol
 %> @brief GAMS Parameter
 %>
 %> **Example:**

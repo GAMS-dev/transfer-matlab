@@ -36,7 +36,6 @@
 % gams.transfer.Variable, gams.transfer.Equation
 %
 
-%> @ingroup symbol
 %> @brief GAMS Symbol (Set, Alias, Parameter, Variable or Equation)
 %>
 %> Use subclasses to create a GAMS Symbol, see subclass help.

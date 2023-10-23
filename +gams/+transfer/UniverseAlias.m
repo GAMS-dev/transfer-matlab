@@ -44,7 +44,6 @@
 %
 % See also: gams.transfer.Set, gams.transfer.Container, gams.transfer.Alias
 
-%> @ingroup symbol
 %> @brief GAMS Alias to Universe
 %>
 %> This class represents a GAMS Alias to Universe.

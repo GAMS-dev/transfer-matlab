@@ -35,7 +35,6 @@
 % compatibility (e.g. for Octave).
 %
 
-%> @ingroup records
 %> @brief GAMS Transfer Records Formats
 %>
 %> This class holds the possible GAMS Transfer formats of records similar to

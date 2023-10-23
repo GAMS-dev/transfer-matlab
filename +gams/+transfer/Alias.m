@@ -47,7 +47,6 @@
 %
 % See also: gams.transfer.Set, gams.transfer.Container
 
-%> @ingroup symbol
 %> @brief GAMS Alias
 %>
 %> This class represents a GAMS Alias, which is a link to another GAMS \ref

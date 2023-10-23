@@ -67,13 +67,12 @@
 % gams.transfer.Variable, gams.transfer.Equation
 %
 
-%> @ingroup container
 %> @brief GAMS Transfer Container stores (multiple) symbols
 %>
 %> A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
 %> parameters), each holding multiple symbol records. In GAMS Transfer the
 %> Container is the main object that holds different symbols and allows to read
-%> and write those to GDX. See \ref gams_transfer_matlab_container for more
+%> and write those to GDX. See \ref GAMS_TRANSFER_MATLAB_CONTAINER for more
 %> information.
 %>
 %> **Indexed Mode:**

@@ -1,18 +1,18 @@
 /** \page GAMS_TRANSFER_MATLAB_GETSTARTED Getting Started
 
+\tableofcontents
+
 \section GAMS_TRANSFER_MATLAB_GETSTARTED_INSTALL Install
 
 GAMS comes with a ready-to-use GAMS Transfer Matlab (for Matlab 2018a or newer).
 Simply add the GAMS Matlab API to the Matlab path:
 ```
-addpath("[PathToGAMS]/apifiles/Matlab/api")
+addpath("[PathToGAMS]/api/matlab")
 ```
 
-Note that GAMS Transfer Matlab comes as a Matlab package and, thus, all classes
-must be prefixed with `gams.transfer.`. In order to avoid this, you can import
-the package with:
+For other software products, e.g. Octave, you must compile the MEX source code first. Simply run:
 ```
-import gams.transfer.*
+gams.transfer.setup()
 ```
 
 \section GAMS_TRANSFER_MATLAB_GETSTARTED_EXAMPLE Example
