@@ -394,7 +394,7 @@ release:
     image:
         name: $CI_REGISTRY_IMAGE/linux/builder
     script:
-        - DESCR=$(grep -Pzo "(?s)GAMS Transfer Matlab $CI_COMMIT_TAG.*?((?=\nGAMS Transfer Matlab v)|$)" CHANGELOG | tr -d '\0')
+        - DESCR=$(grep -Pzo "(?s)GAMS Transfer Matlab $CI_COMMIT_TAG.*?((?=\nGAMS Transfer Matlab v)|$)" CHANGELOG.md | tr -d '\0')
         - |
             release-cli create \
                 --name "Release $CI_COMMIT_TAG" \

@@ -22,7 +22,7 @@ gams::transfer::Container "Container" to more detailed topics like \ref
 GAMS_TRANSFER_MATLAB_RECORDS_FORMAT. Furthermore, it is also possible to get help from within
 Matlab:
 ```
-help GAMSTransfer
+help gams.transfer
 ```
 
 */
