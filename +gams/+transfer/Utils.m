@@ -261,11 +261,6 @@ classdef Utils
             end
         end
 
-        function list = unique(list)
-            [~,idx,~] = unique(list, 'first');
-            list = list(sort(idx));
-        end
-
     end
 
 end

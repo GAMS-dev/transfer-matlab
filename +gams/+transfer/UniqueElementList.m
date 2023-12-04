@@ -48,6 +48,10 @@ classdef UniqueElementList < handle
                 obj.uels_label2ids.equals(obj.uels_label2ids);
         end
 
+        function size = size(obj)
+            size = numel(obj.uels_id2labels);
+        end
+
         function list = get(obj)
             list = obj.uels_id2labels;
         end
