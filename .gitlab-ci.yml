@@ -49,7 +49,8 @@ doc:build:
         name: $CI_REGISTRY_IMAGE/linux/builder
     needs: []
     script:
-        - ./gams_transfer_doc.sh
+        - mkdir -p build
+        - doxygen doc/Doxyfile
     only:
         - merge_requests
         - master
@@ -287,8 +288,7 @@ octave:test:linux:
         name: $CI_REGISTRY_IMAGE/linux/builder
     needs: [download:linux, octave:build:linux]
     script:
-        - ls -Rla
-        - octave --no-gui --no-window-system --eval "gams_transfer_test('linux/octave', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
+        - octave --no-gui --no-window-system --path $PWD/test --eval "run_tests('linux/octave', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
     only:
         - merge_requests
         - master
@@ -299,7 +299,7 @@ octave:test:macos:
         - macos
     needs: [download:macos, octave:build:macos]
     script:
-        - octave --no-gui --no-window-system --eval "gams_transfer_test('macos/octave', 'gams_dir', 'macos/gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
+        - octave --no-gui --no-window-system --path $PWD/test --eval "run_tests('macos/octave', 'gams_dir', 'macos/gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
     only:
         - merge_requests
         - master
@@ -310,7 +310,7 @@ octave:test:macos_arm:
         - macos-arm64
     needs: [download:macos_arm, octave:build:macos_arm]
     script:
-        - octave --no-gui --no-window-system --eval "gams_transfer_test('macos_arm/octave', 'gams_dir', 'macos_arm/gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
+        - octave --no-gui --no-window-system --path $PWD/test --eval "run_tests('macos_arm/octave', 'gams_dir', 'macos_arm/gdx', 'working_dir', 'unittest', 'exit_on_fail', true, 'only_default_config', true)"
     only:
         - merge_requests
         - master
@@ -323,7 +323,7 @@ matlab:test:linux:
         name: $CI_REGISTRY_IMAGE/linux/builder
     needs: [download:linux, matlab:build:linux]
     script:
-        - ~/Documents/MATLAB/runmatlab.sh "gams_transfer_test('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -334,7 +334,7 @@ matlab:test:macos:
         - macos
     needs: [download:macos, matlab:build:macos]
     script:
-        - matlab -batch "gams_transfer_test('macos/matlab', 'gams_dir', 'macos/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab -batch "addpath('test'); run_tests('macos/matlab', 'gams_dir', 'macos/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -345,7 +345,7 @@ matlab:test:macos_arm:
         - macos-arm64
     needs: [download:macos_arm, matlab:build:macos_arm]
     script:
-        - matlab -batch "gams_transfer_test('macos_arm/matlab', 'gams_dir', 'macos_arm/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab -batch "addpath('test'); run_tests('macos_arm/matlab', 'gams_dir', 'macos_arm/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -356,7 +356,7 @@ matlab:test:windows:
         - windows-shell
     needs: [download:windows, matlab:build:windows]
     script:
-        - matlab.exe -batch "gams_transfer_test('windows/matlab', 'gams_dir', 'windows/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab.exe -batch "addpath('test'); run_tests('windows/matlab', 'gams_dir', 'windows/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master

@@ -26,13 +26,12 @@
 % SOFTWARE.
 %
 
-function gams_transfer_test(transfer_dir, varargin)
+function run_tests(transfer_dir, varargin)
 
     transfer_dir = gams.transfer.Utils.checkFilename(transfer_dir, '', false);
     addpath(transfer_dir);
 
-    current_dir = fileparts(mfilename('fullpath'));
-    addpath(fullfile(current_dir, 'test'));
+    test_dir = fileparts(mfilename('fullpath'));
 
     fprintf("Testing %s ...\n", fullfile(transfer_dir, '+gams', '+transfer'));
 
@@ -57,7 +56,7 @@ function gams_transfer_test(transfer_dir, varargin)
     filenames = cell(1, 8);
     for i = 1:9
         filenames{i} = fullfile(working_dir, sprintf('data%d.gdx', i));
-        copyfile(fullfile(current_dir, 'test', 'gdx', sprintf('data%d.gdx', i)), filenames{i});
+        copyfile(fullfile(test_dir, 'gdx', sprintf('data%d.gdx', i)), filenames{i});
     end
     olddir = cd(working_dir);
 
@@ -122,10 +121,8 @@ function gams_transfer_test(transfer_dir, varargin)
         end
 
         cd(olddir);
-        rmpath(fullfile(current_dir, 'test'));
     catch e
         cd(olddir);
-        rmpath(fullfile(current_dir, 'test'));
         rethrow(e);
     end
 
