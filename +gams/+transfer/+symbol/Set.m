@@ -1,4 +1,4 @@
-% Parameter Symbol
+% Set Symbol
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,15 +28,48 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Parameter Symbol
+% Set Symbol
 %
 
-%> @brief Parameter Symbol
-classdef Parameter < gams.transfer.symbol.Abstract
+%> @brief Set Symbol
+classdef Set < gams.transfer.symbol.Abstract
+
+    properties (Hidden, SetAccess = protected)
+        is_singleton_ = false
+    end
+
+    methods (Hidden, Static)
+
+        function arg = validateIsSingleton(name, index, arg)
+            if ~islogical(arg)
+                error('Argument ''%s'' (at position %d) must be ''logical''.', name, index);
+            end
+            if ~isscalar(arg)
+                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
+            end
+        end
+
+    end
+
+    properties (Dependent)
+        is_singleton
+    end
 
     methods
 
-        function obj = Parameter(varargin)
+        function is_singleton = get.is_singleton(obj)
+            is_singleton = obj.is_singleton_;
+        end
+
+        function obj = set.is_singleton(obj, is_singleton)
+            obj.is_singleton_ = obj.validateIsSingleton('is_singleton', 1, is_singleton);
+        end
+
+    end
+
+    methods
+
+        function obj = Set(varargin)
 
             % parse input arguments
             try
@@ -57,6 +90,11 @@ classdef Parameter < gams.transfer.symbol.Abstract
                             index + 1, 'domain_forwarding', @gams.transfer.def.Domain.validateForwarding);
                         index = index + 2;
                         is_pararg = true;
+                    elseif strcmpi(varargin{index}, 'is_singleton')
+                        obj.is_singleton = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'is_singleton', @obj.validateIsSingleton);
+                        index = index + 2;
+                        is_pararg = true;
                     elseif ~is_pararg && index == 3
                         domain_bases = gams.transfer.utils.parse_argument(varargin, ...
                             index, 'domain', []);
@@ -71,9 +109,8 @@ classdef Parameter < gams.transfer.symbol.Abstract
             end
 
             % create default value definition
-            gdx_default_values = gams.transfer.cmex.gt_get_defaults(obj);
             obj.def_.values_ = struct(...
-                'value', gams.transfer.def.Value('value', gams.transfer.def.ValueType(), gdx_default_values(1)));
+                'element_text', gams.transfer.def.Value('element_text', gams.transfer.def.ValueType(2), ''));
         end
 
     end

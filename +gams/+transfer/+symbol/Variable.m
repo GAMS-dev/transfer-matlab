@@ -1,4 +1,4 @@
-% Parameter Symbol
+% Variable Symbol
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,15 +28,50 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Parameter Symbol
+% Variable Symbol
 %
 
-%> @brief Parameter Symbol
-classdef Parameter < gams.transfer.symbol.Abstract
+%> @brief Variable Symbol
+classdef Variable < gams.transfer.symbol.Abstract
+
+    properties (Hidden, SetAccess = protected)
+        type_ = gams.transfer.symbol.VariableType()
+    end
+
+    methods (Hidden, Static)
+
+        function arg = validateType(name, index, arg)
+            if isa(arg, 'gams.transfer.symbol.VariableType')
+                return
+            end
+            try
+                arg = gams.transfer.symbol.VariableType(arg);
+            catch e
+                error('Argument ''%s'' (at position %d) cannot create ''gams.transfer.symbol.VariableType'': %s.', name, index, e.message);
+            end
+        end
+
+    end
+
+    properties (Dependent)
+        type
+    end
 
     methods
 
-        function obj = Parameter(varargin)
+        function type = get.type(obj)
+            type = lower(obj.type_.select);
+        end
+
+        function obj = set.type(obj, type)
+            obj.type_ = obj.validateType('type', 1, type);
+        end
+
+    end
+
+    methods
+
+        function obj = Variable(varargin)
 
             % parse input arguments
             try
@@ -58,6 +93,9 @@ classdef Parameter < gams.transfer.symbol.Abstract
                         index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 3
+                        obj.type_ = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'type', @obj.validateType);
+                    elseif ~is_pararg && index == 4
                         domain_bases = gams.transfer.utils.parse_argument(varargin, ...
                             index, 'domain', []);
                         obj.def_.domains_ = gams.transfer.def.Domain.createFromBases(domain_bases);
@@ -71,9 +109,14 @@ classdef Parameter < gams.transfer.symbol.Abstract
             end
 
             % create default value definition
-            gdx_default_values = gams.transfer.cmex.gt_get_defaults(obj);
+            % gdx_default_values = gams.transfer.cmex.gt_get_defaults(obj);
+            gdx_default_values = zeros(1, 5);
             obj.def_.values_ = struct(...
-                'value', gams.transfer.def.Value('value', gams.transfer.def.ValueType(), gdx_default_values(1)));
+                'level', gams.transfer.def.Value('level', gams.transfer.def.ValueType(), gdx_default_values(1)), ...
+                'marginal', gams.transfer.def.Value('marginal', gams.transfer.def.ValueType(), gdx_default_values(2)), ...
+                'lower', gams.transfer.def.Value('lower', gams.transfer.def.ValueType(), gdx_default_values(3)), ...
+                'upper', gams.transfer.def.Value('upper', gams.transfer.def.ValueType(), gdx_default_values(4)), ...
+                'scale', gams.transfer.def.Value('scale', gams.transfer.def.ValueType(), gdx_default_values(5)));
         end
 
     end

@@ -35,22 +35,104 @@
 classdef (Abstract) Abstract < handle
 
     properties (Hidden, SetAccess = protected)
+        container_
         name_ = ''
         description_ = ''
-        data_
+        def_ = gams.transfer.def.Definition()
+        data_ = gams.transfer.data.Empty()
         modified_ = true
     end
 
-    properties (Dependent)
-        name
-        description
-        dimension
-        data
-        modified
+    methods (Hidden, Static)
+
+        function arg = validateContainer(name, index, arg)
+            if ~isa(arg, 'gams.transfer.Container')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.Container''.', name, index);
+            end
+        end
+
+        function arg = validateName(name, index, arg)
+            if isstring(arg)
+                arg = char(arg);
+            elseif ~ischar(arg)
+                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
+            end
+            if numel(arg) <= 0
+                error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
+            end
+            if numel(arg) >= gams.transfer.Constants.MAX_NAME_LENGTH
+                error('Argument ''%s'' (at position %d) length must be smaller than %d.', name, index, gams.transfer.Constants.MAX_NAME_LENGTH);
+            end
+        end
+
+        function arg = validateDescription(name, index, arg)
+            if isstring(arg)
+                arg = char(arg);
+            elseif ~ischar(arg)
+                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
+            end
+            if numel(arg) >= gams.transfer.Constants.MAX_DESCRIPTION_LENGTH
+                error('Argument ''%s'' (at position %d) length must be smaller than %d.', name, index, gams.transfer.Constants.MAX_DESCRIPTION_LENGTH);
+            end
+        end
+
+        function arg = validateDef(name, index, arg, keys)
+            if ~isa(arg, 'gams.transfer.def.Definition')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.def.Definition''.', name, index);
+            end
+        end
+
+        function arg = validateData(name, index, arg)
+            if ~isa(arg, 'gams.transfer.data.Abstract')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.data.Abstract''.', name, index);
+            end
+        end
+
+        function arg = validateModified(name, index, arg)
+            if ~islogical(arg)
+                error('Argument ''%s'' (at position %d) must be ''logical''.', name, index);
+            end
+            if ~isscalar(arg)
+                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
+            end
+        end
+
     end
 
-    properties (Abstract, Constant)
-        VALUE_FIELDS
+    properties (Dependent)
+        container
+        name
+        description
+    end
+
+    properties (Dependent, Hidden)
+        def
+        data
+    end
+
+    properties (Dependent)
+        dimension
+        size
+        domain
+        domain_labels
+    end
+
+    properties (Dependent, SetAccess = private)
+        domain_names
+        domain_type
+    end
+
+    properties (Dependent)
+        domain_forwarding
+        records
+    end
+
+    properties (Dependent, SetAccess = private)
+        format
+    end
+
+    properties (Dependent)
+        modified
     end
 
     methods
@@ -60,17 +142,9 @@ classdef (Abstract) Abstract < handle
         end
 
         function set.name(obj, name)
-            validateattributes(name, {'string', 'char'}, {}, 'set.name', 'name', 1);
-            name = char(name);
-            if numel(name) >= gams.transfer.Globals.MAX_NAME_LENGTH
-                error('Name length must be smaller than %d.', gams.transfer.Globals.MAX_NAME_LENGTH);
-            end
-            if strcmp(obj.name, name)
-                return
-            end
+            obj.name_ = obj.validateName('name', 1, name);
             % obj.container.renameSymbol(obj.name, name);
-            obj.name_ = name;
-            obj.modified = true;
+            obj.modified_ = true;
         end
 
         function description = get.description(obj)
@@ -78,26 +152,84 @@ classdef (Abstract) Abstract < handle
         end
 
         function set.description(obj, description)
-            validateattributes(description, {'string', 'char'}, {}, 'set.description', 'description', 1);
-            description = char(description);
-            if numel(description) >= gams.transfer.Globals.MAX_DESCRIPTION_LENGTH
-                error('Description length must be smaller than %d.', gams.transfer.Globals.MAX_DESCRIPTION_LENGTH);
-            end
-            obj.description_ = description;
-            obj.modified = true;
+            obj.description_ = obj.validateDescription('description', 1, description);
+            obj.modified_ = true;
         end
 
-        function dim = get.dimension(obj)
-            dim = obj.data.dimension;
+        function def = get.def(obj)
+            def = obj.def_;
+        end
+
+        function obj = set.def(obj, def)
+            obj.def_ = obj.validateDef('def', 1, def, obj.VALUE_KEYS);
+            obj.modified_ = true;
         end
 
         function data = get.data(obj)
             data = obj.data_;
         end
 
-        function set.data(obj, data)
-            validateattributes(data, {'gams.transfer.data.Abstract'}, {}, 'set.data', 'data', 1);
-            obj.data_ = data;
+        function obj = set.data(obj, data)
+            obj.data_ = obj.validateData('data', 1, data);
+            obj.modified_ = true;
+        end
+
+        function dimension = get.dimension(obj)
+            dimension = obj.def_.dimension();
+        end
+
+        function size = get.size(obj)
+            size = obj.def_.size();
+        end
+
+        function domain = get.domain(obj)
+            domain = obj.def_.domainBases();
+        end
+
+        function obj = set.domain(obj, domain)
+            obj.def_.setDomainBases(domain);
+        end
+
+        function domain_labels = get.domain_labels(obj)
+            domain_labels = obj.def_.domainLabels();
+        end
+
+        function obj = set.domain_labels(obj, domain_labels)
+            obj.def_.setDomainLabels(domain_labels);
+        end
+
+        function domain_names = get.domain_names(obj)
+            domain_names = obj.def_.domainNames();
+        end
+
+        function domain_type = get.domain_type(obj)
+            domain_type = lower(obj.def_.domainType().select);
+        end
+
+        function domain_forwarding = get.domain_forwarding(obj)
+            dim = obj.dimension;
+            domain_forwarding = false;
+            for i = 1:dim
+                domain_forwarding = domain_forwarding || obj.def_.domains{i}.forwarding;
+            end
+        end
+
+        function obj = set.domain_forwarding(obj, domain_forwarding)
+            for i = 1:obj.dimension
+                obj.def_.domains{i}.forwarding = domain_forwarding;
+            end
+        end
+
+        function records = get.records(obj)
+            records = obj.data_.records;
+        end
+
+        function obj = set.records(obj, records)
+            obj.data_.records = records;
+        end
+
+        function format = get.format(obj)
+            format = obj.data_.name();
         end
 
         function modified = get.modified(obj)
@@ -105,8 +237,19 @@ classdef (Abstract) Abstract < handle
         end
 
         function obj = set.modified(obj, modified)
-            validateattributes(modified, {'logical'}, {'scalar'}, 'set.modified', 'modified', 1);
-            obj.modified_ = modified;
+            obj.modified_ = obj.validateModified('modified', 1, modified);
+        end
+
+    end
+
+    methods
+
+        function eq = equals(obj, symbol)
+            error('todo');
+        end
+
+        function copy(obj, varargin)
+            error('todo');
         end
 
     end
