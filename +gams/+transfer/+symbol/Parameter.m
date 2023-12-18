@@ -73,7 +73,7 @@ classdef Parameter < gams.transfer.symbol.Abstract
             % create default value definition
             gdx_default_values = gams.transfer.cmex.gt_get_defaults(obj);
             obj.def_.values_ = struct(...
-                'value', gams.transfer.def.Value('value', gams.transfer.def.ValueType(), gdx_default_values(1)));
+                'value', gams.transfer.def.Value('value', gams.transfer.def.ValueType.Numeric, gdx_default_values(1)));
         end
 
     end

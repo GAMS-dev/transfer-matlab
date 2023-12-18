@@ -110,7 +110,7 @@ classdef Set < gams.transfer.symbol.Abstract
 
             % create default value definition
             obj.def_.values_ = struct(...
-                'element_text', gams.transfer.def.Value('element_text', gams.transfer.def.ValueType(2), ''));
+                'element_text', gams.transfer.def.Value('element_text', gams.transfer.def.ValueType.String, ''));
         end
 
     end

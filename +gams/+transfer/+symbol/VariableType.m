@@ -168,4 +168,52 @@ classdef VariableType
 
     end
 
+    methods (Static)
+
+        function obj = Binary()
+            obj = gams.transfer.symbol.VariableType();
+            obj.value_ = gams.transfer.symbol.VariableType.BINARY;
+        end
+
+        function obj = Integer()
+            obj = gams.transfer.symbol.VariableType();
+            obj.value_ = gams.transfer.symbol.VariableType.INTEGER;
+        end
+
+        function obj = Positive()
+            obj = gams.transfer.symbol.VariableType();
+            obj.value_ = gams.transfer.symbol.VariableType.POSITIVE;
+        end
+
+        function obj = Negative()
+            obj = gams.transfer.symbol.VariableType();
+            obj.value_ = gams.transfer.symbol.VariableType.NEGATIVE;
+        end
+
+        function obj = Free()
+            obj = gams.transfer.symbol.VariableType();
+        end
+
+        function obj = Sos1()
+            obj = gams.transfer.symbol.VariableType();
+            obj.value_ = gams.transfer.symbol.VariableType.SOS1;
+        end
+
+        function obj = Sos2()
+            obj = gams.transfer.symbol.VariableType();
+            obj.value_ = gams.transfer.symbol.VariableType.SOS2;
+        end
+
+        function obj = SemiCont()
+            obj = gams.transfer.symbol.VariableType();
+            obj.value_ = gams.transfer.symbol.VariableType.SEMICONT;
+        end
+
+        function obj = SemiInt()
+            obj = gams.transfer.symbol.VariableType();
+            obj.value_ = gams.transfer.symbol.VariableType.SemiInt;
+        end
+
+    end
+
 end

@@ -1,4 +1,4 @@
-% GAMS Equation Type
+% GAMS Domain Index Type
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,24 +28,19 @@
 %
 % ------------------------------------------------------------------------------
 %
-% GAMS Equation Type
+% GAMS Domain Index Type
 %
 
-%> @brief Equation Type
-classdef EquationType
+%> @brief Domain Index Type
+classdef DomainIndexType
 
     properties (Constant)
-        EQ = uint8(0)
-        GEQ = uint8(1)
-        LEQ = uint8(2)
-        NONBINDING = uint8(3)
-        EXTERNAL = uint8(4)
-        CONE = uint8(5)
-        BOOLEAN = uint8(6)
+        CATEGORICAL = uint8(1)
+        INTEGER = uint8(2)
     end
 
     properties (Hidden, SetAccess = protected)
-        value_ = uint8(3)
+        value_ = uint8(1)
     end
 
     methods (Hidden, Static)
@@ -60,8 +55,8 @@ classdef EquationType
             if round(arg) ~= arg
                 error('Argument ''%s'' (at position %d) must be integer.', name, index);
             end
-            if arg < 0 || arg > 6
-                error('Argument ''%s'' (at position %d) must be in [0, 6].', name, index);
+            if arg < 1 || arg > 2
+                error('Argument ''%s'' (at position %d) must be in [1, 2].', name, index);
             end
             arg = uint8(arg);
         end
@@ -76,20 +71,10 @@ classdef EquationType
                 error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
             end
             switch upper(arg)
-            case {'EQ', 'E'}
-                arg = gams.transfer.symbol.EquationType.EQ;
-            case {'GEQ', 'G'}
-                arg = gams.transfer.symbol.EquationType.GEQ;
-            case {'LEQ', 'L'}
-                arg = gams.transfer.symbol.EquationType.LEQ;
-            case {'NONBINDING', 'N'}
-                arg = gams.transfer.symbol.EquationType.NONBINDING;
-            case {'EXTERNAL', 'X'}
-                arg = gams.transfer.symbol.EquationType.EXTERNAL;
-            case {'CONE', 'C'}
-                arg = gams.transfer.symbol.EquationType.CONE;
-            case {'BOOLEAN', 'B'}
-                arg = gams.transfer.symbol.EquationType.BOOLEAN;
+            case 'CATEGORICAL'
+                arg = gams.transfer.symbol.DomainIndexType.CATEGORICAL;
+            case 'INTEGER'
+                arg = gams.transfer.symbol.DomainIndexType.INTEGER;
             otherwise
                 error('Argument ''%s'' (at position %d) is invalid selection: %s.', name, index, arg);
             end
@@ -108,22 +93,12 @@ classdef EquationType
 
         function select = get.select(obj)
             switch obj.value_
-            case obj.EQ
-                select = 'EQ';
-            case obj.GEQ
-                select = 'GEQ';
-            case obj.LEQ
-                select = 'LEQ';
-            case obj.NONBINDING
-                select = 'NONBINDING';
-            case obj.EXTERNAL
-                select = 'EXTERNAL';
-            case obj.CONE
-                select = 'CONE';
-            case obj.BOOLEAN
-                select = 'BOOLEAN';
+            case obj.CATEGORICAL
+                select = 'CATEGORICAL';
+            case obj.INTEGER
+                select = 'INTEGER';
             otherwise
-                error('Invalid equation type value: %d', obj.value_);
+                error('Invalid value type value: %d', obj.value_);
             end
         end
 
@@ -143,7 +118,7 @@ classdef EquationType
 
     methods
 
-        function obj = EquationType(value)
+        function obj = DomainIndexType(value)
             if nargin == 0
                 return
             end
@@ -160,39 +135,15 @@ classdef EquationType
 
     methods (Static)
 
-        function obj = Eq()
-            obj = gams.transfer.symbol.EquationType();
-            obj.value_ = gams.transfer.symbol.EquationType.EQ;
+        function obj = Categorical()
+            obj = gams.transfer.def.DomainIndexType();
         end
 
-        function obj = Leq()
-            obj = gams.transfer.symbol.EquationType();
-            obj.value_ = gams.transfer.symbol.EquationType.LEQ;
+        function obj = Integer()
+            obj = gams.transfer.def.DomainIndexType();
+            obj.value_ = gams.transfer.def.DomainIndexType.INTEGER;
         end
 
-        function obj = Geq()
-            obj = gams.transfer.symbol.EquationType();
-            obj.value_ = gams.transfer.symbol.EquationType.GEQ;
-        end
-
-        function obj = NonBinding()
-            obj = gams.transfer.symbol.EquationType();
-        end
-
-        function obj = External()
-            obj = gams.transfer.symbol.EquationType();
-            obj.value_ = gams.transfer.symbol.EquationType.EXTERNAL;
-        end
-
-        function obj = Cone()
-            obj = gams.transfer.symbol.EquationType();
-            obj.value_ = gams.transfer.symbol.EquationType.CONE;
-        end
-
-        function obj = Boolean()
-            obj = gams.transfer.symbol.EquationType();
-            obj.value_ = gams.transfer.symbol.EquationType.BOOLEAN;
-        end
     end
 
 end
