@@ -1,4 +1,4 @@
-function arg = validate(name, index, arg, classes)
+function arg = validate(name, index, arg, classes, dim)
     is_class = false;
     assert(numel(classes) > 0);
     for i = 1:numel(classes)
@@ -20,5 +20,16 @@ function arg = validate(name, index, arg, classes)
             class_list = strcat(class_list, '''', classes{i}, '''');
         end
         error('Argument ''%s'' (at position %d) must be %s.', name, index, class_list);
+    end
+
+    switch dim
+    case 0
+        if ~isscalar(arg)
+            error('Argument ''%s'' (at position %d) must be scalar.', name, index);
+        end
+    case 1
+        if ~isvector(arg)
+            error('Argument ''%s'' (at position %d) must be vector.', name, index);
+        end
     end
 end

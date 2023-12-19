@@ -1,4 +1,4 @@
-% Domain
+% Relaxed Domain
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,21 +28,20 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Domain
+% Relaxed Domain
 %
 
-%> @brief Domain
-classdef (Abstract) Domain < handle
+%> @brief Relaxed Domain
+classdef RelaxedDomain < gams.transfer.def.Domain
 
     properties (Hidden, SetAccess = protected)
-        label_
-        index_type_ = gams.transfer.def.DomainIndexType()
-        forwarding_ = false
+        name_
+        unique_labels_ = []
     end
 
     methods (Hidden, Static)
 
-        function arg = validateLabel(name, index, arg)
+        function arg = validateName(name, index, arg)
             if isstring(arg)
                 arg = char(arg);
             elseif ~ischar(arg)
@@ -51,87 +50,76 @@ classdef (Abstract) Domain < handle
             if numel(arg) <= 0
                 error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
             end
+            if ~strcmp(arg, '*') && ~isvarname(arg)
+                error('Argument ''%s'' (at position %d) must start with letter and must only consist of letters, digits and underscores.', name, index)
+            end
         end
 
-        function arg = validateIndexType(name, index, arg)
-            if isa(arg, 'gams.transfer.def.DomainIndexType')
+        function arg = validateUniqueLabels(name, index, arg)
+            if isnumeric(unique_labels) && isempty(unique_labels)
+                arg = [];
                 return
             end
-            try
-                arg = gams.transfer.def.DomainIndexType(arg);
-            catch e
-                error('Argument ''%s'' (at position %d) cannot create ''gams.transfer.def.DomainIndexType'': %s.', name, index, e.message);
-            end
-        end
-
-        function arg = validateForwarding(name, index, arg)
-            if ~islogical(arg)
-                error('Argument ''%s'' (at position %d) must be ''logical''.', name, index);
-            end
-            if ~isscalar(arg)
-                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
+            if ~isa(arg, 'gams.transfer.unique_labels.Abstract')
+                error('Argument ''%s'' (at position %d) must be empty or ''gams.transfer.unique_labels.Abstract''.', name, index);
             end
         end
 
     end
 
     properties (Dependent)
-        label
-    end
-
-    properties (Dependent)
-        index_type
-        forwarding
-    end
-
-    properties (Abstract)
         name
+        unique_labels
     end
 
-    properties (Abstract, SetAccess = private)
+    properties (Dependent, SetAccess = private)
         size
     end
 
     methods
 
-        function label = get.label(obj)
-            label = obj.label_;
+        function name = get.name(obj)
+            name = obj.name_;
         end
 
-        function obj = set.label(obj, label)
-            obj.label_ = obj.validateLabel('label', label, true);
+        function obj = set.name(obj, name)
+            obj.name_ = obj.validateName('name', 1, name);
         end
 
-        function index_type = get.index_type(obj)
-            index_type = obj.index_type_;
+        function unique_labels = get.unique_labels(obj)
+            unique_labels = obj.unique_labels_;
         end
 
-        function obj = set.index_type(obj, index_type)
-            obj.index_type_ = obj.validateIndexType('index_type', 1, index_type);
+        function obj = set.unique_labels(obj, unique_labels)
+            obj.unique_labels_ = obj.validateUniqueLabels('unique_labels', 1, unique_labels);
         end
 
-        function forwarding = get.forwarding(obj)
-            forwarding = obj.forwarding_;
+        function size = get.size(obj)
+            if isempty(obj.unique_labels_)
+                size = nan;
+            else
+                size = obj.unique_labels_.size();
+            end
         end
 
-        function obj = set.forwarding(obj, forwarding)
-            obj.forwarding_ = obj.validateForwarding('forwarding', 1, forwarding);
-        end
-
-    end
-
-    methods (Abstract)
-        flag = hasUniqueLabels(obj)
-        uels = getUniqueLabels(obj)
     end
 
     methods
 
-        function appendLabelIndex(obj, index)
-            add = ['_', int2str(index)];
-            if ~endsWith(obj.label_, add)
-                obj.label_ = strcat(obj.label_, add);
+        function obj = RelaxedDomain(name)
+            obj.name = name;
+            obj.label_ = name;
+        end
+
+        function flag = hasUniqueLabels(obj)
+            flag = ~isempty(obj.unique_labels_);
+        end
+
+        function uels = getUniqueLabels(obj)
+            if ~obj.hasUniqueLabels()
+                error('Relaxed domain ''%s'' does not have unique labels.', obj.name_);
             end
+            uels = obj.unique_labels_.get();
         end
 
     end

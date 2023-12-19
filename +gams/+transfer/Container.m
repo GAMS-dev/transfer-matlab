@@ -428,25 +428,26 @@ classdef Container < handle
                 % detect the format because at this point, we know it)
                 obj.data.(symbol.name).records = symbol.records;
                 switch symbol.format
-                case {gams.transfer.RecordsFormat.DENSE_MATRIX, 'dense_matrix',
-                    gams.transfer.RecordsFormat.SPARSE_MATRIX, 'sparse_matrix'}
+                case {3, 'dense_matrix',
+                    4, 'sparse_matrix'}
                     copy_format = ~any(isnan(obj.data.(symbol.name).size));
                 otherwise
                     copy_format = true;
                 end
-                if copy_format
-                    if isnumeric(symbol.format)
-                        obj.data.(symbol.name).format_ = symbol.format;
-                    else
-                        obj.data.(symbol.name).format_ = gams.transfer.RecordsFormat.str2int(symbol.format);
-                    end
-                end
+                % TODO
+                % if copy_format
+                %     if isnumeric(symbol.format)
+                %         obj.data.(symbol.name).format_ = symbol.format;
+                %     else
+                %         obj.data.(symbol.name).format_ = gams.transfer.RecordsFormat.str2int(symbol.format);
+                %     end
+                % end
 
                 % set uels
                 if isfield(symbol, 'uels') && ~obj.features.categorical
                     switch symbol.format
-                    case {gams.transfer.RecordsFormat.DENSE_MATRIX, 'dense_matrix',
-                        gams.transfer.RecordsFormat.SPARSE_MATRIX, 'sparse_matrix'}
+                    case {3, 'dense_matrix',
+                        4, 'sparse_matrix'}
                     otherwise
                         for j = 1:numel(symbol.domain)
                             if isempty(symbol.uels{j})
@@ -1353,25 +1354,21 @@ classdef Container < handle
             %
             % See also: gams.transfer.Set
 
-            if obj.hasSymbols(name)
-                symbol = obj.getSymbols(name);
-                args = gams.transfer.Set.parseConstructArguments(name, varargin{:});
-                if isa(symbol, 'gams.transfer.Set') && ...
-                    isequal(symbol.is_singleton, args.is_singleton) && ...
-                    isequal(symbol.domain, args.domain) && ...
-                    isequal(symbol.domain_forwarding, args.domain_forwarding)
-                    if args.isset_description
-                        symbol.description = args.description;
-                    end
-                    if args.isset_records
-                        symbol.setRecords(args.records);
-                    end
-                else
-                    error('Symbol ''%s'' (with different definition) already exists.', name);
-                end
-            else
-                symbol = gams.transfer.Set(obj, name, varargin{:});
+            new_symbol = gams.transfer.symbol.Set(obj, name, varargin{:});
+
+            if ~obj.hasSymbols(name)
+                symbol = obj.add(new_symbol);
+                return
             end
+
+            symbol = obj.getSymbols(name);
+            if ~isa(symbol, 'gams.transfer.symbol.Set')
+                error('Symbol ''%s'' (with different symbol type) already exists.', name);
+            end
+            if ~symbol.def.equals(new_symbol.def)
+                error('Symbol ''%s'' (with different definition) already exists.', name);
+            end
+            symbol.copyFrom(new_symbol);
         end
 
         %> Adds a parameter to the container
@@ -1408,25 +1405,21 @@ classdef Container < handle
             %
             % See also: gams.transfer.Parameter
 
-            if obj.hasSymbols(name)
-                symbol = obj.getSymbols(name);
-                args = gams.transfer.Parameter.parseConstructArguments(obj.indexed, ...
-                    name, varargin{:});
-                if isa(symbol, 'gams.transfer.Parameter') && ...
-                    isequal(symbol.domain, args.domain) && ...
-                    isequal(symbol.domain_forwarding, args.domain_forwarding)
-                    if args.isset_description
-                        symbol.description = args.description;
-                    end
-                    if args.isset_records
-                        symbol.setRecords(args.records);
-                    end
-                else
-                    error('Symbol ''%s'' (with different definition) already exists.', name);
-                end
-            else
-                symbol = gams.transfer.Parameter(obj, name, varargin{:});
+            new_symbol = gams.transfer.symbol.Parameter(obj, name, varargin{:});
+
+            if ~obj.hasSymbols(name)
+                symbol = obj.add(new_symbol);
+                return
             end
+
+            symbol = obj.getSymbols(name);
+            if ~isa(symbol, 'gams.transfer.symbol.Parameter')
+                error('Symbol ''%s'' (with different symbol type) already exists.', name);
+            end
+            if ~symbol.def.equals(new_symbol.def)
+                error('Symbol ''%s'' (with different definition) already exists.', name);
+            end
+            symbol.copyFrom(new_symbol);
         end
 
         %> Adds a variable to the container
@@ -1465,26 +1458,21 @@ classdef Container < handle
             %
             % See also: gams.transfer.Variable, gams.transfer.VariableType
 
-            if obj.hasSymbols(name)
-                symbol = obj.getSymbols(name);
-                args = gams.transfer.Variable.parseConstructArguments(name, varargin{:});
-                if isa(symbol, 'gams.transfer.Variable') && ...
-                    isequal(symbol.domain, args.domain) && ...
-                    (~isnumeric(args.type) && isequal(symbol.type, args.type) || ...
-                    isnumeric(args.type) && isequal(symbol.type, gams.transfer.VariableType.int2str(args.type))) && ...
-                    isequal(symbol.domain_forwarding, args.domain_forwarding)
-                    if args.isset_description
-                        symbol.description = args.description;
-                    end
-                    if args.isset_records
-                        symbol.setRecords(args.records);
-                    end
-                else
-                    error('Symbol ''%s'' (with different definition) already exists.', name);
-                end
-            else
-                symbol = gams.transfer.Variable(obj, name, varargin{:});
+            new_symbol = gams.transfer.symbol.Variable(obj, name, varargin{:});
+
+            if ~obj.hasSymbols(name)
+                symbol = obj.add(new_symbol);
+                return
             end
+
+            symbol = obj.getSymbols(name);
+            if ~isa(symbol, 'gams.transfer.symbol.Variable')
+                error('Symbol ''%s'' (with different symbol type) already exists.', name);
+            end
+            if ~symbol.def.equals(new_symbol.def)
+                error('Symbol ''%s'' (with different definition) already exists.', name);
+            end
+            symbol.copyFrom(new_symbol);
         end
 
         %> Adds an equation to the container
@@ -1521,26 +1509,21 @@ classdef Container < handle
             %
             % See also: gams.transfer.Equation, gams.transfer.EquationType
 
-            if obj.hasSymbols(name)
-                symbol = obj.getSymbols(name);
-                args = gams.transfer.Equation.parseConstructArguments(name, etype, varargin{:});
-                if isa(symbol, 'gams.transfer.Equation') && ...
-                    isequal(symbol.domain, args.domain) && ...
-                    (~isnumeric(args.type) && isequal(symbol.type, args.type) || ...
-                    isnumeric(args.type) && isequal(symbol.type, gams.transfer.EquationType.int2str(args.type))) && ...
-                    isequal(symbol.domain_forwarding, args.domain_forwarding)
-                    if args.isset_description
-                        symbol.description = args.description;
-                    end
-                    if args.isset_records
-                        symbol.setRecords(args.records);
-                    end
-                else
-                    error('Symbol ''%s'' (with different definition) already exists.', name);
-                end
-            else
-                symbol = gams.transfer.Equation(obj, name, etype, varargin{:});
+            new_symbol = gams.transfer.symbol.Equation(obj, name, varargin{:});
+
+            if ~obj.hasSymbols(name)
+                symbol = obj.add(new_symbol);
+                return
             end
+
+            symbol = obj.getSymbols(name);
+            if ~isa(symbol, 'gams.transfer.symbol.Equation')
+                error('Symbol ''%s'' (with different symbol type) already exists.', name);
+            end
+            if ~symbol.def.equals(new_symbol.def)
+                error('Symbol ''%s'' (with different definition) already exists.', name);
+            end
+            symbol.copyFrom(new_symbol);
         end
 
         %> Adds an alias to the container
@@ -2260,9 +2243,9 @@ classdef Container < handle
 
     end
 
-    methods (Hidden, Access = {?gams.transfer.Symbol, ?gams.transfer.Alias, ?gams.transfer.UniverseAlias})
+    methods (Hidden, Access = {?gams.transfer.Symbol_, ?gams.transfer.Alias, ?gams.transfer.UniverseAlias})
 
-        function add(obj, symbol)
+        function symbol = add(obj, symbol)
             if obj.indexed && ~isa(symbol, 'gams.transfer.Parameter')
                 error('Symbol must be of type ''gams.transfer.Parameter'' in indexed mode.');
             end
@@ -2282,12 +2265,16 @@ classdef Container < handle
 
             % parsing input arguments
             switch format
-            case {'struct', 'dense_matrix', 'sparse_matrix'}
-                format_int = gams.transfer.RecordsFormat.str2int(format);
+            case 'struct'
+                format_int = 2;
+            case 'dense_matrix'
+                format_int = 3;
+            case 'sparse_matrix'
+                format_int = 4;
             case 'table'
-                format_int = gams.transfer.RecordsFormat.TABLE;
+                format_int = 5;
                 if ~obj.features.table
-                    format_int = gams.transfer.RecordsFormat.STRUCT;
+                    format_int = 2;
                 end
             otherwise
                 error('Invalid format option: %s. Choose from: struct, table, dense_matrix, sparse_matrix.', format);

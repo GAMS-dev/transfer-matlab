@@ -38,8 +38,8 @@ classdef (Abstract) Abstract < handle
         container_
         name_ = ''
         description_ = ''
-        def_ = gams.transfer.def.Definition()
-        data_ = gams.transfer.data.Empty()
+        def_
+        data_
         modified_ = true
     end
 
@@ -250,6 +250,100 @@ classdef (Abstract) Abstract < handle
 
         function copy(obj, varargin)
             error('todo');
+        end
+
+        function sparsity = getSparsity(obj)
+            sparsity = obj.data_.getSparsity(obj.def_);
+        end
+
+        function n = countNA(obj, varargin)
+            values = obj.validateValueKeys(varargin);
+            n = obj.data_.countNA(values);
+        end
+
+        function n = countUndef(obj, varargin)
+            values = obj.validateValueKeys(varargin);
+            n = obj.data_.countUndef(values);
+        end
+
+        function n = countEps(obj, varargin)
+            values = obj.validateValueKeys(varargin);
+            n = obj.data_.countEps(values);
+        end
+
+        function n = countPosInf(obj, varargin)
+            values = obj.validateValueKeys(varargin);
+            n = obj.data_.countPosInf(values);
+        end
+
+        function n = countNegInf(obj, varargin)
+            values = obj.validateValueKeys(varargin);
+            n = obj.data_.countNegInf(values);
+        end
+
+        function nrecs = getNumberRecords(obj)
+            nrecs = obj.data_.getNumberRecords();
+        end
+
+        function nvals = getNumberValues(obj, varargin)
+            values = obj.validateValueKeys(varargin);
+            nvals = obj.data_.getNumberValues(values);
+        end
+
+        function uels = getUELs(obj, varargin)
+            if nargin >= 2 && isnumeric(varargin{1})
+                varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
+            end
+            uels = obj.data_.getUELs(varargin{:});
+        end
+
+        function setUELs(obj, varargin)
+            if nargin >= 3 && isnumeric(varargin{2})
+                varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+            end
+            obj.data_.setUELs(varargin{:});
+        end
+
+        function reorderUELs(obj, varargin)
+            if nargin >= 3 && isnumeric(varargin{2})
+                varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+            end
+            obj.data_.reorderUELs(varargin{:});
+        end
+
+        function addUELs(obj, varargin)
+            if nargin >= 3 && isnumeric(varargin{2})
+                varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+            end
+            obj.data_.addUELs(varargin{:});
+        end
+
+        function removeUELs(obj, varargin)
+            if nargin >= 3 && isnumeric(varargin{2})
+                varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+            end
+            obj.data_.removeUELs(varargin{:});
+        end
+
+        function renameUELs(obj, varargin)
+            if nargin >= 3 && isnumeric(varargin{2})
+                varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+            end
+            obj.data_.renameUELs(varargin{:});
+        end
+
+        function lowerUELs(obj, varargin)
+            if nargin >= 2 && isnumeric(varargin{1})
+                varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
+            end
+            obj.data_.lowerUELs(varargin{:});
+        end
+
+        function upperUELs(obj, varargin)
+            if nargin >= 2 && isnumeric(varargin{1})
+                varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
+            end
+            obj.data_.upperUELs(varargin{:});
         end
 
     end

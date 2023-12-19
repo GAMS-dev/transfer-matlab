@@ -1,11 +1,11 @@
-% Returns the number of GAMS MINF (negative infinity) values in records
+% Numeric Value Definition
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
+% Copyright  (c) 2020-2023 GAMS Software GmbH <support@gams.com>
 % Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,23 +28,45 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Returns the number of GAMS MINF (negative infinity) values in records
+% Numeric Value Definition
 %
-% n = countNegInf(s, varargin) returns the number of GAMS MINF values
-% n in symbol s records. varargin can include a list of value fields that
-% should be considered: level, value, lower, upper, scale. If none
-% is given all available for the symbol are considered.
-function n = countNegInf(symbol, varargin)
-    n = 0;
 
-    % get available value fields
-    values = gams.transfer.Utils.getAvailableValueFields(symbol, varargin{:});
-    if isempty(values)
-        return
+%> @brief Numeric Value Definition
+classdef NumericValue < gams.transfer.def.Value
+
+    properties (Hidden, SetAccess = {?gams.transfer.def.NumericValue, ?gams.transfer.symbol.Abstract})
+        default_ = 0
     end
 
-    % get count
-    for i = 1:numel(values)
-        n = n + sum(gams.transfer.SpecialValues.isNegInf(symbol.records.(values{i})(:)));
+    methods (Hidden, Static)
+
+        function arg = validateDefault(name, index, arg)
+            if ~isnumeric(arg)
+                error('Argument ''%s'' (at position %d) must be ''numeric''.', name, index);
+            end
+        end
+
     end
+
+    properties (Dependent, SetAccess = private)
+        default
+    end
+
+    methods
+
+        function default = get.default(obj)
+            default = obj.default_;
+        end
+
+    end
+
+    methods (Hidden, Access = {?gams.transfer.def.Value, ?gams.transfer.symbol.Abstract})
+
+        function obj = NumericValue(label, default)
+            obj.label_ = label;
+            obj.default_ = default;
+        end
+
+    end
+
 end

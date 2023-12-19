@@ -157,9 +157,11 @@ void gt_mex_check_argument_symbol_obj(
     size_t          arg_position    /** array index of requested element */
 )
 {
-    if (!mxIsClass(mx_arr_values[arg_position], "gams.transfer.Set") &&
+    if (!mxIsClass(mx_arr_values[arg_position], "gams.transfer.symbol.Parameter") &&
+        !mxIsClass(mx_arr_values[arg_position], "gams.transfer.symbol.Variable") &&
+        !mxIsClass(mx_arr_values[arg_position], "gams.transfer.Set") &&
         !mxIsClass(mx_arr_values[arg_position], "gams.transfer.Alias") &&
-        !mxIsClass(mx_arr_values[arg_position], "gams.transfer.Parameter") &&
+        !mxIsClass(mx_arr_values[arg_position], "gams.transfer.Parameter_") &&
         !mxIsClass(mx_arr_values[arg_position], "gams.transfer.Variable") &&
         !mxIsClass(mx_arr_values[arg_position], "gams.transfer.Equation"))
         mexErrMsgIdAndTxt(ERRID"gt_mex_check_argument_symbol_obj",
@@ -497,7 +499,8 @@ void gt_mex_getfield_int(
     /* get field */
     if (mxIsStruct(mx_struct))
         mx_field = mxGetField(mx_struct, 0, fieldname);
-    else if (mxIsClass(mx_struct, "gams.transfer.Set") || mxIsClass(mx_struct, "gams.transfer.Alias") ||
+    else if (mxIsClass(mx_struct, "gams.transfer.symbol.Parameter") || mxIsClass(mx_struct, "gams.transfer.symbol.Variable") ||
+        mxIsClass(mx_struct, "gams.transfer.Set") || mxIsClass(mx_struct, "gams.transfer.Alias") ||
         mxIsClass(mx_struct, "gams.transfer.Parameter") || mxIsClass(mx_struct, "gams.transfer.Variable") ||
         mxIsClass(mx_struct, "gams.transfer.Equation") || mxIsClass(mx_struct, "gams.transfer.UniverseAlias"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);

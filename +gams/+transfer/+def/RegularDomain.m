@@ -1,4 +1,4 @@
-% Value Definition
+% Regular Domain
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,49 +28,71 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Value Definition
+% Regular Domain
 %
 
-% TODO: split into StringValue and NumericValue and remove Type?
+%> @brief RegularDomain
+classdef RegularDomain < gams.transfer.def.Domain
 
-%> @brief Value Definition
-classdef (Abstract) Value < handle
-
-    properties (Hidden, SetAccess = {?gams.transfer.def.Value, ?gams.transfer.symbol.Abstract})
-        label_
+    properties (Hidden, SetAccess = protected)
+        symbol_
     end
 
     methods (Hidden, Static)
 
-        function arg = validateLabel(name, index, arg)
-            if isstring(arg)
-                arg = char(arg);
-            elseif ~ischar(arg)
-                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
-            end
-            if numel(arg) <= 0
-                error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
+        function arg = validateSymbol(name, index, arg)
+            if ~isa(arg, 'gams.transfer.symbol.Set')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Set''.', name, index);
             end
         end
 
     end
 
     properties (Dependent)
-        label
+        symbol
+        name
     end
 
-    properties (Abstract, Dependent, SetAccess = private)
-        default
+    properties (Dependent, SetAccess = private)
+        size
     end
 
     methods
 
-        function label = get.label(obj)
-            label = obj.label_;
+        function symbol = get.symbol(obj)
+            symbol = obj.symbol_;
         end
 
-        function obj = set.label(obj, label)
-            obj.label_ = obj.validateLabel('label', 1, label);
+        function obj = set.symbol(obj, symbol)
+            obj.symbol_ = obj.validateSymbol('symbol', 1, symbol);
+        end
+
+        function name = get.name(obj)
+            name = obj.symbol_.name;
+        end
+
+        function size = get.size(obj)
+            size = obj.symbol_.getNumberRecords();
+        end
+
+    end
+
+    methods
+
+        function obj = RegularDomain(symbol)
+            obj.symbol = symbol;
+            obj.label_ = symbol.name;
+        end
+
+        function flag = hasUniqueLabels(obj)
+            flag = true;
+        end
+
+        function uels = getUniqueLabels(obj)
+            assert(obj.symbol_.dimension == 1);
+            % TODO: better if getUELs would have argument 'order_by' = 'records'
+            label = obj.symbol_.def.domains{1}.label;
+            uels = obj.symbol_.getUELs(1, uint64(obj.symbol_.records.(label)));
         end
 
     end

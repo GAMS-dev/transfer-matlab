@@ -71,6 +71,9 @@ classdef Set < gams.transfer.symbol.Abstract
 
         function obj = Set(varargin)
 
+            obj.def_ = gams.transfer.def.Definition();
+            obj.data_ = gams.transfer.data.Unknown();
+
             % parse input arguments
             try
                 obj.container_ = gams.transfer.utils.parse_argument(varargin, ...
@@ -96,9 +99,8 @@ classdef Set < gams.transfer.symbol.Abstract
                         index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 3
-                        domain_bases = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'domain', []);
-                        obj.def_.domains_ = gams.transfer.def.Domain.createFromBases(domain_bases);
+                        obj.def_.domains_ = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'domains', @gams.transfer.def.Definition.validateDomains);
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
@@ -110,7 +112,7 @@ classdef Set < gams.transfer.symbol.Abstract
 
             % create default value definition
             obj.def_.values_ = struct(...
-                'element_text', gams.transfer.def.Value('element_text', gams.transfer.def.ValueType.String, ''));
+                'element_text', gams.transfer.def.StringValue('element_text', ''));
         end
 
     end

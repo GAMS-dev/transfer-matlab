@@ -32,7 +32,7 @@
 %
 
 %> @brief Data Definition
-classdef Definition
+classdef Definition < handle
 
     properties (Hidden, SetAccess = {?gams.transfer.def.Definition, ?gams.transfer.symbol.Abstract})
         domains_ = {}
@@ -46,8 +46,14 @@ classdef Definition
                 error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
             end
             for i = 1:numel(arg)
-                if ~isa(arg{i}, 'gams.transfer.def.Domain')
-                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.def.Domain''.', name, index, i);
+                if isa(arg{i}, 'gams.transfer.def.Domain')
+                    continue
+                elseif isa(arg{i}, 'gams.transfer.symbol.Set')
+                    arg{i} = gams.transfer.def.RegularDomain(arg{i});
+                elseif ischar(arg{i}) || isstring(arg{i})
+                    arg{i} = gams.transfer.def.RelaxedDomain(arg{i});
+                else
+                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.def.Domain'', ''gams.transfer.symbol.Set'', ''char'' or ''string''.', name, index, i);
                 end
             end
         end
@@ -67,6 +73,9 @@ classdef Definition
 
     properties (Dependent)
         domains
+    end
+
+    properties (Dependent, SetAccess = private)
         values
     end
 
@@ -84,17 +93,14 @@ classdef Definition
             values = obj.values_;
         end
 
-        function obj = set.values(obj, values)
-            obj.values_ = obj.validateValues('values', 1, values);
-        end
-
     end
 
-    methods (Hidden, Access = {?gams.transfer.def.Definition, ?gams.transfer.symbol.Abstract})
+    methods
 
-        function obj = Definition(domains, values)
-            obj.domains_ = domains;
-            obj.values_ = values;
+        function obj = Definition(domains)
+            if nargin >= 1
+                obj.domains = domains;
+            end
         end
 
     end

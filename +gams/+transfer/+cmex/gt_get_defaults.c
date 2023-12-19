@@ -66,12 +66,12 @@ void mexFunction(
         type = GMS_DT_SET;
         subtype = (singleton) ? GMS_SETTYPE_SINGLETON : GMS_SETTYPE_DEFAULT;
     }
-    else if (mxIsClass(prhs[0], "gams.transfer.Parameter"))
+    else if (mxIsClass(prhs[0], "gams.transfer.symbol.Parameter"))
     {
         type = GMS_DT_PAR;
         subtype = 0;
     }
-    else if (mxIsClass(prhs[0], "gams.transfer.Variable"))
+    else if (mxIsClass(prhs[0], "gams.transfer.symbol.Variable"))
     {
         gt_mex_getfield_int(prhs[0], "symbol", "type_", 0, true, GT_FILTER_NONE, 1, &subtype);
         type = GMS_DT_VAR;

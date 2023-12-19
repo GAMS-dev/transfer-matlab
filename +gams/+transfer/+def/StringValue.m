@@ -1,11 +1,11 @@
-% Returns the number of GAMS EPS values in records
+% String Value Definition
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
+% Copyright  (c) 2020-2023 GAMS Software GmbH <support@gams.com>
 % Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,26 +28,47 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Returns the number of GAMS EPS values in records
+% String Value Definition
 %
-% n = countEps(s, varargin) returns the number of GAMS EPS values n in
-% symbol s records. varargin can include a list of value fields that should
-% be considered: level, value, lower, upper, scale. If none is given
-% all available for the symbol are considered.
-%
-% See also: gams.transfer.SpecialValues.EPS, gams.transfer.SpecialValues.iseps
-%
-function n = countEps(symbol, varargin)
-    n = 0;
 
-    % get available value fields
-    values = gams.transfer.Utils.getAvailableValueFields(symbol, varargin{:});
-    if isempty(values)
-        return
+%> @brief String Value Definition
+classdef StringValue < gams.transfer.def.Value
+
+    properties (Hidden, SetAccess = {?gams.transfer.def.StringValue, ?gams.transfer.symbol.Abstract})
+        default_ = ''
     end
 
-    % get count
-    for i = 1:numel(values)
-        n = n + sum(gams.transfer.SpecialValues.isEps(symbol.records.(values{i})(:)));
+    methods (Hidden, Static)
+
+        function arg = validateDefault(name, index, arg)
+            if isstring(arg)
+                arg = char(arg);
+            elseif ~ischar(arg)
+                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
+            end
+        end
+
     end
+
+    properties (Dependent, SetAccess = private)
+        default
+    end
+
+    methods
+
+        function default = get.default(obj)
+            default = obj.default_;
+        end
+
+    end
+
+    methods (Hidden, Access = {?gams.transfer.def.Value, ?gams.transfer.symbol.Abstract})
+
+        function obj = StringValue(label, default)
+            obj.label_ = label;
+            obj.default_ = default;
+        end
+
+    end
+
 end
