@@ -47,7 +47,7 @@ classdef Variable < gams.transfer.symbol.Abstract
             try
                 arg = gams.transfer.symbol.VariableType(arg);
             catch e
-                error('Argument ''%s'' (at position %d) cannot create ''gams.transfer.symbol.VariableType'': %s.', name, index, e.message);
+                error('Argument ''%s'' (at position %d) cannot create ''gams.transfer.symbol.VariableType'': %s', name, index, e.message);
             end
         end
 

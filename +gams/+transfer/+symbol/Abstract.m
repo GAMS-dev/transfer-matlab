@@ -99,8 +99,11 @@ classdef (Abstract) Abstract < handle
 
     end
 
-    properties (Dependent)
+    properties (Dependent, SetAccess = protected)
         container
+    end
+
+    properties (Dependent)
         name
         description
     end
@@ -136,6 +139,10 @@ classdef (Abstract) Abstract < handle
     end
 
     methods
+
+        function container = get.container(obj)
+            container = obj.container_;
+        end
 
         function name = get.name(obj)
             name = obj.name_;

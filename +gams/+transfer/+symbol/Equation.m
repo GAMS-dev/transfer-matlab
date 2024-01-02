@@ -47,7 +47,7 @@ classdef Equation < gams.transfer.symbol.Abstract
             try
                 arg = gams.transfer.symbol.EquationType(arg);
             catch e
-                error('Argument ''%s'' (at position %d) cannot create ''gams.transfer.symbol.EquationType'': %s.', name, index, e.message);
+                error('Argument ''%s'' (at position %d) cannot create ''gams.transfer.symbol.EquationType'': %s', name, index, e.message);
             end
         end
 
