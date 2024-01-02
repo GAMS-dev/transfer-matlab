@@ -80,4 +80,71 @@ classdef Parameter < gams.transfer.symbol.Abstract
 
     end
 
+    methods (Static)
+
+        function descr = describe(symbols)
+
+            symbols = gams.transfer.utils.validate_cell('symbols', 1, symbols, ...
+                {'gams.transfer.symbol.Parameter'}, 1);
+
+            descr = struct();
+            descr.name = cell(numel(symbols), 1);
+            descr.format = cell(numel(symbols), 1);
+            descr.dimension = zeros(numel(symbols), 1);
+            descr.domain_type = cell(numel(symbols), 1);
+            descr.domain = cell(numel(symbols), 1);
+            descr.size = cell(numel(symbols), 1);
+            descr.number_records = zeros(numel(symbols), 1);
+            descr.number_values = zeros(numel(symbols), 1);
+            descr.sparsity = zeros(numel(symbols), 1);
+            descr.min = zeros(numel(symbols), 1);
+            descr.mean = zeros(numel(symbols), 1);
+            descr.max = zeros(numel(symbols), 1);
+            descr.where_min = cell(numel(symbols), 1);
+            descr.where_max = cell(numel(symbols), 1);
+
+            for i = 1:numel(symbols)
+                descr.name{i} = symbols{i}.name;
+                descr.format{i} = symbols{i}.format;
+                descr.dimension(i) = symbols{i}.dimension;
+                % descr.domain_type{i} = symbols{i}.domain_type;
+                % descr.domain{i} = gams.transfer.Utils.list2str(symbols{i}.domain);
+                % descr.size{i} = gams.transfer.Utils.list2str(symbols{i}.size);
+                descr.number_records(i) = symbols{i}.getNumberRecords();
+                % descr.number_values(i) = symbols{i}.getNumberValues();
+                % descr.sparsity(i) = symbols{i}.getSparsity();
+                % [descr.min(i), descr.where_min{i}] = gams.transfer.getMinValue(symbols{i}, symbols{i}.container.indexed);
+                % if isnan(descr.min(i))
+                %     descr.where_min{i} = '';
+                % else
+                %     descr.where_min{i} = gams.transfer.Utils.list2str(descr.where_min{i});
+                % end
+                % descr.mean(i) = gams.transfer.getMeanValue(symbols{i});
+                % [descr.max(i), descr.where_max{i}] = gams.transfer.getMaxValue(symbols{i}, symbols{i}.container.indexed);
+                % if isnan(descr.max(i))
+                %     descr.where_max{i} = '';
+                % else
+                %     descr.where_max{i} = gams.transfer.Utils.list2str(descr.where_max{i});
+                % end
+            end
+
+            % convert to categorical if possible
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
+                descr.name = categorical(descr.name);
+                descr.format = categorical(descr.format);
+                % descr.domain_type = categorical(descr.domain_type);
+                % descr.domain = categorical(descr.domain);
+                % descr.size = categorical(descr.size);
+                % descr.where_min = categorical(descr.where_min);
+                % descr.where_max = categorical(descr.where_max);
+            end
+
+            % convert to table if possible
+            if gams.transfer.Constants.SUPPORTS_TABLE
+                descr = struct2table(descr);
+            end
+        end
+
+    end
+
 end

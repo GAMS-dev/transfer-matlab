@@ -214,6 +214,46 @@ classdef VariableType
             obj.value_ = gams.transfer.symbol.VariableType.SemiInt;
         end
 
+        function values = values(input)
+            if isnumeric(input)
+                values = zeros(size(input));
+                for i = 1:numel(input)
+                    values(i) = gams.transfer.symbol.VariableType(input(i)).value;
+                end
+            elseif iscell(input)
+                values = zeros(size(input));
+                for i = 1:numel(input)
+                    if isa(input{i}, 'gams.transfer.symbol.VariableType')
+                        values(i) = input{i}.value;
+                    else
+                        values(i) = gams.transfer.symbol.VariableType(input{i}).value;
+                    end
+                end
+            else
+                values = gams.transfer.symbol.VariableType(input).value;
+            end
+        end
+
+        function selects = selects(input)
+            if isnumeric(input)
+                selects = cell(size(input));
+                for i = 1:numel(input)
+                    selects{i} = gams.transfer.symbol.VariableType(input(i)).select;
+                end
+            elseif iscell(input)
+                selects = cell(size(input));
+                for i = 1:numel(input)
+                    if isa(input{i}, 'gams.transfer.symbol.VariableType')
+                        selects{i} = input{i}.select;
+                    else
+                        selects{i} = gams.transfer.symbol.VariableType(input{i}).select;
+                    end
+                end
+            else
+                selects = {gams.transfer.symbol.VariableType(input).select};
+            end
+        end
+
     end
 
 end

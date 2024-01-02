@@ -378,7 +378,7 @@ classdef Container < handle
 
                 % handle alias differently
                 switch symbol.symbol_type
-                case {gams.transfer.SymbolType.ALIAS, 'alias'}
+                case {gams.transfer.cmex.SymbolType.ALIAS, 'alias'}
                     if strcmp(symbol.alias_with, '*')
                         gams.transfer.UniverseAlias(obj, symbol.name);
                     elseif obj.hasSymbols(symbol.alias_with)
@@ -408,17 +408,17 @@ classdef Container < handle
 
                 % convert symbol to GDXSymbol
                 switch symbol.symbol_type
-                case {gams.transfer.SymbolType.SET, 'set'}
-                    gams.transfer.Set(obj, symbol.name, domain, 'description', ...
+                case {gams.transfer.cmex.SymbolType.SET, 'set'}
+                    obj.addSet(symbol.name, domain, 'description', ...
                         symbol.description, 'is_singleton', symbol.is_singleton);
-                case {gams.transfer.SymbolType.PARAMETER, 'parameter'}
-                    gams.transfer.Parameter(obj, symbol.name, domain, 'description', ...
+                case {gams.transfer.cmex.SymbolType.PARAMETER, 'parameter'}
+                    obj.addParameter(symbol.name, domain, 'description', ...
                         symbol.description);
-                case {gams.transfer.SymbolType.VARIABLE, 'variable'}
-                    gams.transfer.Variable(obj, symbol.name, symbol.type, domain, ...
+                case {gams.transfer.cmex.SymbolType.VARIABLE, 'variable'}
+                    obj.addVariable(symbol.name, symbol.type, domain, ...
                         'description', symbol.description);
-                case {gams.transfer.SymbolType.EQUATION, 'equation'}
-                    gams.transfer.Equation(obj, symbol.name, symbol.type, domain, ...
+                case {gams.transfer.cmex.SymbolType.EQUATION, 'equation'}
+                    obj.addEquation(symbol.name, symbol.type, domain, ...
                         'description', symbol.description);
                 otherwise
                     error('Invalid symbol type');
@@ -847,6 +847,36 @@ classdef Container < handle
             end
         end
 
+    end
+
+    methods (Hidden, Static, Access = private)
+
+        function [is_valid, types] = parseArgumentsListSymbols(args, has_types)
+            is_valid = nan;
+            types = {};
+            index = 1;
+            is_pararg = false;
+            while index < numel(args)
+                if strcmpi(args{index}, 'is_valid')
+                    is_valid = gams.transfer.utils.parse_argument(args, ...
+                        index + 1, 'is_valid', []);
+                    index = index + 2;
+                    is_pararg = true;
+                elseif has_types && strcmpi(args{index}, 'types')
+                    types = gams.transfer.utils.parse_argument(args, ...
+                        index + 1, 'types', []);
+                    index = index + 2;
+                    is_pararg = true;
+                else
+                    error('Invalid argument at position %d', index);
+                end
+            end
+        end
+
+    end
+
+    methods
+
         %> Lists all symbols in container
         %>
         %> **Parameter Arguments:**
@@ -873,12 +903,11 @@ classdef Container < handle
             % gams.transfer.Container.listVariables, gams.transfer.Container.listEquations,
             % gams.transfer.Container.listAliases
 
-            p = inputParser();
-            addParameter(p, 'types', [], @isnumeric);
-            addParameter(p, 'is_valid', nan);
-            parse(p, varargin{:});
-            types = p.Results.types;
-            is_valid = p.Results.is_valid;
+            try
+                [is_valid, types] = obj.parseArgumentsListSymbols(varargin, true);
+            catch e
+                error(e.message);
+            end
 
             names = fieldnames(obj.data);
             if isempty(types) && ~islogical(is_valid)
@@ -895,26 +924,8 @@ classdef Container < handle
                     % check type
                     matched_type = isempty(types);
                     for j = 1:numel(types)
-                        if isfield(symbol, 'symbol_type')
-                            matched_type = strcmp(symbol.symbol_type, ...
-                                gams.transfer.SymbolType.int2str(types(j)));
-                        else
-                            switch types(j)
-                            case gams.transfer.SymbolType.SET
-                                matched_type = isa(symbol, 'gams.transfer.Set');
-                            case gams.transfer.SymbolType.PARAMETER
-                                matched_type = isa(symbol, 'gams.transfer.Parameter');
-                            case gams.transfer.SymbolType.VARIABLE
-                                matched_type = isa(symbol, 'gams.transfer.Variable');
-                            case gams.transfer.SymbolType.EQUATION
-                                matched_type = isa(symbol, 'gams.transfer.Equation');
-                            case gams.transfer.SymbolType.ALIAS
-                                matched_type = isa(symbol, 'gams.transfer.Alias');
-                            otherwise
-                                error('Invalid symbol type.');
-                            end
-                        end
-                        if matched_type
+                        if isa(symbol, types{j})
+                            matched_type = true;
                             break;
                         end
                     end
@@ -966,12 +977,12 @@ classdef Container < handle
             % gams.transfer.Container.listVariables, gams.transfer.Container.listEquations,
             % gams.transfer.Container.listAliases
 
-            p = inputParser();
-            addParameter(p, 'is_valid', nan);
-            parse(p, varargin{:});
-
-            list = obj.listSymbols('types', gams.transfer.SymbolType.SET, ...
-                'is_valid', p.Results.is_valid);
+            try
+                is_valid = obj.parseArgumentsListSymbols(varargin, false);
+            catch e
+                error(e.message);
+            end
+            list = obj.listSymbols('types', {'gams.transfer.symbol.Set'}, 'is_valid', is_valid);
         end
 
         %> Lists all parameters in container
@@ -1000,12 +1011,12 @@ classdef Container < handle
             % gams.transfer.Container.listVariables, gams.transfer.Container.listEquations,
             % gams.transfer.Container.listAliases
 
-            p = inputParser();
-            addParameter(p, 'is_valid', nan);
-            parse(p, varargin{:});
-
-            list = obj.listSymbols('types', gams.transfer.SymbolType.PARAMETER, ...
-                'is_valid', p.Results.is_valid);
+            try
+                is_valid = obj.parseArgumentsListSymbols(varargin, false);
+            catch e
+                error(e.message);
+            end
+            list = obj.listSymbols('types', {'gams.transfer.symbol.Parameter'}, 'is_valid', is_valid);
         end
 
         %> Lists all variables in container
@@ -1040,36 +1051,28 @@ classdef Container < handle
             % gams.transfer.Container.listParameters, gams.transfer.Container.listEquations,
             % gams.transfer.Container.listAliases
 
-            p = inputParser();
-            addParameter(p, 'is_valid', nan);
-            addParameter(p, 'types', nan);
-            parse(p, varargin{:});
+            % parse input arguments
+            try
+                [is_valid, types] = obj.parseArgumentsListSymbols(varargin, true);
+            catch e
+                error(e.message);
+            end
+            try
+                types = gams.transfer.symbol.VariableType.values(types);
+            catch e
+                error('Argument ''types'' cannot create ''gams.transfer.symbol.VariableType'': %s', e.message);
+            end
 
-            list = obj.listSymbols('types', gams.transfer.SymbolType.VARIABLE, ...
-                'is_valid', p.Results.is_valid);
+            list = obj.listSymbols('types', {'gams.transfer.symbol.Variable'}, 'is_valid', is_valid);
 
-            % check for further filtering
-            if isstring(p.Results.types) && numel(p.Results.types) == 1 || ischar(p.Results.types)
-                type_request = [gams.transfer.VariableType.str2int(p.Results.types)];
-            elseif iscellstr(p.Results.types)
-                type_request = zeros(size(p.Results.types));
-                for i = 1:numel(type_request)
-                    type_request(i) = gams.transfer.VariableType.str2int(p.Results.types{i});
+            % filter by type
+            if numel(types) > 0
+                filter = false(size(list));
+                for i = 1:numel(list)
+                    filter(i) = sum(types == gams.transfer.symbol.VariableType(obj.data.(list{i}).type).value) > 0;
                 end
-            elseif isnan(p.Results.types)
-                return;
-            else
-                error('Type must be cellstr or string.');
+                list = list(filter);
             end
-
-            % filter
-            filter = false(size(list));
-            for i = 1:numel(list)
-                symbol = obj.data.(list{i});
-                type_sym = gams.transfer.VariableType.str2int(symbol.type);
-                filter(i) = sum(type_request == type_sym) > 0;
-            end
-            list = list(filter);
         end
 
         %> Lists all equations in container
@@ -1104,36 +1107,28 @@ classdef Container < handle
             % gams.transfer.Container.listParameters, gams.transfer.Container.listVariables,
             % gams.transfer.Container.listAliases
 
-            p = inputParser();
-            addParameter(p, 'is_valid', nan);
-            addParameter(p, 'types', nan);
-            parse(p, varargin{:});
+            % parse input arguments
+            try
+                [is_valid, types] = obj.parseArgumentsListSymbols(varargin, true);
+            catch e
+                error(e.message);
+            end
+            try
+                types = gams.transfer.symbol.EquationType.values(types);
+            catch e
+                error('Argument ''types'' cannot create ''gams.transfer.symbol.EquationType'': %s', e.message);
+            end
 
-            list = obj.listSymbols('types', gams.transfer.SymbolType.EQUATION, ...
-                'is_valid', p.Results.is_valid);
+            list = obj.listSymbols('types', {'gams.transfer.symbol.Equation'}, 'is_valid', is_valid);
 
-            % check for further filtering
-            if isstring(p.Results.types) && numel(p.Results.types) == 1 || ischar(p.Results.types)
-                type_request = [gams.transfer.EquationType.str2int(p.Results.types)];
-            elseif iscellstr(p.Results.types)
-                type_request = zeros(size(p.Results.types));
-                for i = 1:numel(type_request)
-                    type_request(i) = gams.transfer.EquationType.str2int(p.Results.types{i});
+            % filter by type
+            if numel(types) > 0
+                filter = false(size(list));
+                for i = 1:numel(list)
+                    filter(i) = sum(types == gams.transfer.symbol.EquationType(obj.data.(list{i}).type).value) > 0;
                 end
-            elseif isnan(p.Results.types)
-                return;
-            else
-                error('Type must be cellstr or string.');
+                list = list(filter);
             end
-
-            % filter
-            filter = false(size(list));
-            for i = 1:numel(list)
-                symbol = obj.data.(list{i});
-                type_sym = gams.transfer.EquationType.str2int(symbol.type);
-                filter(i) = sum(type_request == type_sym) > 0;
-            end
-            list = list(filter);
         end
 
         %> Lists all aliases in container
@@ -1162,12 +1157,12 @@ classdef Container < handle
             % gams.transfer.Container.listParameters, gams.transfer.Container.listVariables,
             % gams.transfer.Container.listEquations
 
-            p = inputParser();
-            addParameter(p, 'is_valid', nan);
-            parse(p, varargin{:});
-
-            list = obj.listSymbols('types', gams.transfer.SymbolType.ALIAS, ...
-                'is_valid', p.Results.is_valid);
+            try
+                is_valid = obj.parseArgumentsListSymbols(varargin, false);
+            catch e
+                error(e.message);
+            end
+            list = obj.listSymbols('types', {'gams.transfer.alias.Set'}, 'is_valid', is_valid);
         end
 
         %> Returns an overview over all sets in container
@@ -1195,12 +1190,11 @@ classdef Container < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = obj.getSymbolNames(varargin{1});
+                symbols = obj.getSymbols(varargin{1});
             else
-                symbols = obj.listSets();
+                symbols = obj.getSets();
             end
-
-            descr = obj.describeSymbols(gams.transfer.SymbolType.SET, symbols);
+            descr = gams.transfer.symbol.Set.describe(symbols);
         end
 
         %> Returns an overview over all parameters in container
@@ -1224,12 +1218,11 @@ classdef Container < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = obj.getSymbolNames(varargin{1});
+                symbols = obj.getSymbols(varargin{1});
             else
-                symbols = obj.listParameters();
+                symbols = obj.getParameters();
             end
-
-            descr = obj.describeSymbols(gams.transfer.SymbolType.PARAMETER, symbols);
+            descr = gams.transfer.symbol.Parameter.describe(symbols);
         end
 
         %> Returns an overview over all variables in container
@@ -1253,12 +1246,11 @@ classdef Container < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = obj.getSymbolNames(varargin{1});
+                symbols = obj.getSymbols(varargin{1});
             else
-                symbols = obj.listVariables();
+                symbols = obj.getVariables();
             end
-
-            descr = obj.describeSymbols(gams.transfer.SymbolType.VARIABLE, symbols);
+            descr = gams.transfer.symbol.Variable.describe(symbols);
         end
 
         %> Returns an overview over all equations in container
@@ -1282,12 +1274,11 @@ classdef Container < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = obj.getSymbolNames(varargin{1});
+                symbols = obj.getSymbols(varargin{1});
             else
-                symbols = obj.listEquations();
+                symbols = obj.getEquations();
             end
-
-            descr = obj.describeSymbols(gams.transfer.SymbolType.EQUATION, symbols);
+            descr = gams.transfer.symbol.Equation.describe(symbols);
         end
 
         %> Returns an overview over all aliases in container
@@ -1311,12 +1302,11 @@ classdef Container < handle
             % main characteristics and some statistics.
 
             if nargin == 2
-                symbols = obj.getSymbolNames(varargin{1});
+                symbols = obj.getSymbols(varargin{1});
             else
-                symbols = obj.listAliases();
+                symbols = obj.getAliases();
             end
-
-            descr = obj.describeSymbols(gams.transfer.SymbolType.ALIAS, symbols);
+            descr = gams.transfer.alias.Abstract.describe(symbols);
         end
 
         %> Adds a set to the container
@@ -1494,7 +1484,7 @@ classdef Container < handle
         %>
         %> @see \ref gams::transfer::Equation "Equation", \ref
         %> gams::transfer::EquationType "EquationType"
-        function symbol = addEquation(obj, name, etype, varargin)
+        function symbol = addEquation(obj, name, varargin)
             % Adds an equation to the container
             %
             % Arguments are identical to the gams.transfer.Equation constructor.
@@ -1554,17 +1544,18 @@ classdef Container < handle
             %
             % See also: gams.transfer.Alias, gams.transfer.Set
 
-            if obj.hasSymbols(name)
-                symbol = obj.getSymbols(name);
-                args = gams.transfer.Alias.parseConstructArguments(name, alias_with);
-                if isa(symbol, 'gams.transfer.Alias')
-                    symbol.alias_with = args.alias_with;
-                else
-                    error('Symbol ''%s'' (with different definition) already exists.', name);
-                end
-            else
-                symbol = gams.transfer.Alias(obj, name, alias_with);
+            new_symbol = gams.transfer.alias.Set(obj, name, alias_with);
+
+            if ~obj.hasSymbols(name)
+                symbol = obj.add(new_symbol);
+                return
             end
+
+            symbol = obj.getSymbols(name);
+            if ~isa(symbol, 'gams.transfer.alias.Set')
+                error('Symbol ''%s'' (with different symbol type) already exists.', name);
+            end
+            symbol.copyFrom(new_symbol);
         end
 
         %> Adds a universe alias to the container
@@ -1594,14 +1585,18 @@ classdef Container < handle
             %
             % See also: gams.transfer.UniverseAlias, gams.transfer.Alias, gams.transfer.Set
 
-            if obj.hasSymbols(name)
-                symbol = obj.getSymbols(name);
-                if ~isa(symbol, 'gams.transfer.UniverseAlias')
-                    error('Symbol ''%s'' (with different definition) already exists.', name);
-                end
-            else
-                symbol = gams.transfer.UniverseAlias(obj, name);
+            new_symbol = gams.transfer.alias.Universe(obj, name);
+
+            if ~obj.hasSymbols(name)
+                symbol = obj.add(new_symbol);
+                return
             end
+
+            symbol = obj.getSymbols(name);
+            if ~isa(symbol, 'gams.transfer.alias.Universe')
+                error('Symbol ''%s'' (with different symbol type) already exists.', name);
+            end
+            symbol.copyFrom(new_symbol);
         end
 
         %> Rename a symbol
@@ -2305,180 +2300,6 @@ classdef Container < handle
                 data = gams.transfer.cmex.gt_gdx_read(obj.gams_dir, filename, ...
                     symbols, int32(format_int), records, values_bool, ...
                     obj.features.categorical, obj.features.c_prop_setget);
-            end
-        end
-
-        function descr = describeSymbols(obj, symtype, wanted_symbols)
-            % get list of elements (ignore invalid labels)
-
-            symbols = cell(1, numel(wanted_symbols));
-            n_symbols = 0;
-            for i = 1:numel(wanted_symbols)
-                if ~isfield(obj.data, wanted_symbols{i})
-                    continue;
-                end
-                symbol = obj.data.(wanted_symbols{i});
-
-                if isfield(symbol, 'symbol_type')
-                    symbol_type = symbol.symbol_type;
-                elseif isa(symbol, 'gams.transfer.Set')
-                    symbol_type = 'set';
-                elseif isa(symbol, 'gams.transfer.Parameter')
-                    symbol_type = 'parameter';
-                elseif isa(symbol, 'gams.transfer.Variable')
-                    symbol_type = 'variable';
-                elseif isa(symbol, 'gams.transfer.Equation')
-                    symbol_type = 'equation';
-                elseif isa(symbol, 'gams.transfer.Alias')
-                    symbol_type = 'alias';
-                else
-                    error('Invalid symbol type');
-                end
-
-                if symtype == gams.transfer.SymbolType.SET && ...
-                    ~strcmp(symbol_type, 'set') && ~strcmp(symbol_type, 'alias')
-                    continue
-                end
-                if symtype == gams.transfer.SymbolType.PARAMETER && ...
-                    ~strcmp(symbol_type, 'parameter')
-                    continue
-                end
-                if symtype == gams.transfer.SymbolType.VARIABLE && ...
-                    ~strcmp(symbol_type, 'variable')
-                    continue
-                end
-                if symtype == gams.transfer.SymbolType.EQUATION && ...
-                    ~strcmp(symbol_type, 'equation')
-                    continue
-                end
-                if symtype == gams.transfer.SymbolType.ALIAS && ...
-                    ~strcmp(symbol_type, 'alias')
-                    continue
-                end
-
-                n_symbols = n_symbols + 1;
-                symbols{n_symbols} = symbol;
-            end
-            symbols = symbols(1:n_symbols);
-
-            % init describe table
-            descr = struct();
-            descr.name = cell(n_symbols, 1);
-            switch symtype
-            case {gams.transfer.SymbolType.VARIABLE, gams.transfer.SymbolType.EQUATION}
-                descr.type = cell(n_symbols, 1);
-            case gams.transfer.SymbolType.SET
-                descr.is_singleton = true(n_symbols, 1);
-            case gams.transfer.SymbolType.ALIAS
-                descr.is_singleton = true(n_symbols, 1);
-                descr.alias_with = cell(n_symbols, 1);
-            end
-            descr.format = cell(n_symbols, 1);
-            descr.dimension = zeros(n_symbols, 1);
-            descr.domain_type = cell(n_symbols, 1);
-            descr.domain = cell(n_symbols, 1);
-            descr.size = cell(n_symbols, 1);
-            descr.number_records = zeros(n_symbols, 1);
-            descr.number_values = zeros(n_symbols, 1);
-            descr.sparsity = zeros(n_symbols, 1);
-            switch symtype
-            case {gams.transfer.SymbolType.VARIABLE, gams.transfer.SymbolType.EQUATION}
-                descr.min_level = zeros(n_symbols, 1);
-                descr.mean_level = zeros(n_symbols, 1);
-                descr.max_level = zeros(n_symbols, 1);
-                descr.where_max_abs_level = cell(n_symbols, 1);
-            case gams.transfer.SymbolType.PARAMETER
-                descr.min = zeros(n_symbols, 1);
-                descr.mean = zeros(n_symbols, 1);
-                descr.max = zeros(n_symbols, 1);
-                descr.where_min = cell(n_symbols, 1);
-                descr.where_max = cell(n_symbols, 1);
-            end
-
-            % collect values
-            for i = 1:n_symbols
-                symbol = symbols{i};
-
-                descr.name{i} = symbol.name;
-                if symtype == gams.transfer.SymbolType.VARIABLE || ...
-                    symtype == gams.transfer.SymbolType.EQUATION
-                    descr.type{i} = symbol.type;
-                end
-                if symtype == gams.transfer.SymbolType.ALIAS
-                    descr.alias_with{i} = symbol.name;
-                elseif symtype == gams.transfer.SymbolType.SET
-                    descr.is_singleton(i) = symbol.is_singleton;
-                end
-                descr.format{i} = symbol.format;
-                descr.dimension(i) = symbol.dimension;
-                descr.domain_type{i} = symbol.domain_type;
-                descr.domain{i} = gams.transfer.Utils.list2str(symbol.domain);
-                descr.size{i} = gams.transfer.Utils.list2str(symbol.size);
-                if isfield(symbol, 'number_records')
-                    descr.number_records(i) = symbol.number_records;
-                else
-                    descr.number_records(i) = symbol.getNumberRecords();
-                end
-                if isfield(symbol, 'number_values')
-                    descr.number_values(i) = symbol.number_values;
-                else
-                    descr.number_values(i) = symbol.getNumberValues();
-                end
-                if isfield(symbol, 'sparsity')
-                    descr.sparsity(i) = symbol.sparsity;
-                else
-                    descr.sparsity(i) = symbol.getSparsity();
-                end
-                switch symtype
-                case {gams.transfer.SymbolType.VARIABLE, gams.transfer.SymbolType.EQUATION}
-                    descr.min_level(i) = gams.transfer.getMinValue(symbol, obj.indexed, 'level');
-                    descr.mean_level(i) = gams.transfer.getMeanValue(symbol, 'level');
-                    descr.max_level(i) = gams.transfer.getMaxValue(symbol, obj.indexed, 'level');
-                    [absmax, descr.where_max_abs_level{i}] = gams.transfer.getMaxAbsValue(symbol, obj.indexed, 'level');
-                    if isnan(absmax)
-                        descr.where_max_abs_level{i} = '';
-                    else
-                        descr.where_max_abs_level{i} = gams.transfer.Utils.list2str(descr.where_max_abs_level{i});
-                    end
-                case gams.transfer.SymbolType.PARAMETER
-                    [descr.min(i), descr.where_min{i}] = gams.transfer.getMinValue(symbol, obj.indexed);
-                    if isnan(descr.min(i))
-                        descr.where_min{i} = '';
-                    else
-                        descr.where_min{i} = gams.transfer.Utils.list2str(descr.where_min{i});
-                    end
-                    descr.mean(i) = gams.transfer.getMeanValue(symbol);
-                    [descr.max(i), descr.where_max{i}] = gams.transfer.getMaxValue(symbol, obj.indexed);
-                    if isnan(descr.max(i))
-                        descr.where_max{i} = '';
-                    else
-                        descr.where_max{i} = gams.transfer.Utils.list2str(descr.where_max{i});
-                    end
-                end
-            end
-
-            % convert to categorical if possible
-            if obj.features.categorical
-                descr.name = categorical(descr.name);
-                descr.format = categorical(descr.format);
-                descr.domain_type = categorical(descr.domain_type);
-                descr.domain = categorical(descr.domain);
-                descr.size = categorical(descr.size);
-                switch symtype
-                case {gams.transfer.SymbolType.VARIABLE, gams.transfer.SymbolType.EQUATION}
-                    descr.type = categorical(descr.type);
-                    descr.where_max_abs_level = categorical(descr.where_max_abs_level);
-                case gams.transfer.SymbolType.PARAMETER
-                    descr.where_min = categorical(descr.where_min);
-                    descr.where_max = categorical(descr.where_max);
-                case gams.transfer.SymbolType.ALIAS
-                    descr.alias_with = categorical(descr.alias_with);
-                end
-            end
-
-            % convert to table if possible
-            if obj.features.table
-                descr = struct2table(descr);
             end
         end
 
