@@ -89,6 +89,7 @@ classdef (Abstract) Domain < handle
     end
 
     properties (Abstract, SetAccess = private)
+        base
         size
     end
 

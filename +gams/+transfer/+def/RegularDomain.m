@@ -54,6 +54,7 @@ classdef RegularDomain < gams.transfer.def.Domain
     end
 
     properties (Dependent, SetAccess = private)
+        base
         size
     end
 
@@ -69,6 +70,10 @@ classdef RegularDomain < gams.transfer.def.Domain
 
         function name = get.name(obj)
             name = obj.symbol_.name;
+        end
+
+        function base = get.base(obj)
+            base = obj.symbol_;
         end
 
         function size = get.size(obj)

@@ -73,6 +73,7 @@ classdef RelaxedDomain < gams.transfer.def.Domain
     end
 
     properties (Dependent, SetAccess = private)
+        base
         size
     end
 
@@ -92,6 +93,10 @@ classdef RelaxedDomain < gams.transfer.def.Domain
 
         function obj = set.unique_labels(obj, unique_labels)
             obj.unique_labels_ = obj.validateUniqueLabels('unique_labels', 1, unique_labels);
+        end
+
+        function base = get.base(obj)
+            base = obj.name_;
         end
 
         function size = get.size(obj)

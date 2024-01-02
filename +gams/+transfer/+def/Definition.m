@@ -123,11 +123,19 @@ classdef Definition < handle
             n = numel(obj.domains_);
         end
 
+        function bases = domainBases(obj)
+            dim = obj.dimension();
+            bases = cell(1, dim);
+            for i = 1:dim
+                bases{i} = obj.domains_{i}.base;
+            end
+        end
+
         function labels = domainLabels(obj)
             dim = obj.dimension();
             labels = cell(1, dim);
             for i = 1:dim
-                labels{i} = obj.domain_{i}.label;
+                labels{i} = obj.domains_{i}.label;
             end
         end
 
@@ -135,7 +143,7 @@ classdef Definition < handle
             dim = obj.dimension();
             names = cell(1, dim);
             for i = 1:dim
-                names{i} = obj.domain_{i}.name;
+                names{i} = obj.domains_{i}.name;
             end
         end
 
