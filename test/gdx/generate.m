@@ -43,7 +43,7 @@ function gams_transfer_testcreate(varargin)
     end
 
     % check paths
-    gams_dir = Utils.checkFilename(p.Results.gams_dir, '', false);
+    gams_dir = gams.transfer.utils.absolute_path(p.Results.gams_dir);
     working_dir = tempname;
 
     mkdir(working_dir);

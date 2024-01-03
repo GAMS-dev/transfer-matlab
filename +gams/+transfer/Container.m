@@ -121,6 +121,22 @@ classdef Container < handle
             end
         end
 
+        function arg = validateGdxFile(name, index, arg)
+            if isstring(arg)
+                arg = char(arg);
+            elseif ~ischar(arg)
+                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
+            end
+            arg = gams.transfer.utils.absolute_path(arg);
+            [~, ~, ext] = fileparts(arg);
+            if ~strcmpi(ext, '.gdx')
+                error('Argument ''%s'' (at position %d) must be file name with ''.gdx'' extension.', name, index);
+            end
+            if ~isfile(arg)
+                error('Argument ''%s'' (at position %d) must name a file that exists.', name, index);
+            end
+        end
+
         function arg = validateIndexed(name, index, arg)
             if ~islogical(arg)
                 error('Argument ''%s'' (at position %d) must be ''logical''.', name, index);
@@ -428,8 +444,10 @@ classdef Container < handle
                 return
             end
 
+            source = obj.validateGdxFile('source', 1, p.Results.source);
+
             % read raw data
-            data = obj.readRaw(p.Results.source, p.Results.symbols, p.Results.format, ...
+            data = obj.readRaw(source, p.Results.symbols, p.Results.format, ...
                 p.Results.records, p.Results.values);
             symbols = fieldnames(data);
             is_partial_read = numel(p.Results.symbols) > 0;
@@ -643,8 +661,7 @@ classdef Container < handle
             end
 
             % get full path
-            filename = gams.transfer.Utils.checkFilename(...
-                char(p.Results.filename), '.gdx', false);
+            filename = obj.validateGdxFile('filename', 1, p.Results.filename);
 
             % write data
             if obj.indexed_
@@ -2308,9 +2325,6 @@ classdef Container < handle
         function data = readRaw(obj, filename, symbols, format, records, values)
             % Reads symbol records from GDX file
             %
-
-            % get full path
-            filename = gams.transfer.Utils.checkFilename(char(filename), '.gdx', false);
 
             % parsing input arguments
             switch format
