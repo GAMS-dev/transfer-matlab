@@ -198,19 +198,19 @@ classdef EquationType
             if isnumeric(input)
                 values = zeros(size(input));
                 for i = 1:numel(input)
-                    values(i) = gams.transfer.symbol.VariableType(input(i)).value;
+                    values(i) = gams.transfer.symbol.EquationType(input(i)).value;
                 end
             elseif iscell(input)
                 values = zeros(size(input));
                 for i = 1:numel(input)
-                    if isa(input{i}, 'gams.transfer.symbol.VariableType')
+                    if isa(input{i}, 'gams.transfer.symbol.EquationType')
                         values(i) = input{i}.value;
                     else
-                        values(i) = gams.transfer.symbol.VariableType(input{i}).value;
+                        values(i) = gams.transfer.symbol.EquationType(input{i}).value;
                     end
                 end
             else
-                values = gams.transfer.symbol.VariableType(input).value;
+                values = gams.transfer.symbol.EquationType(input).value;
             end
         end
 
@@ -218,19 +218,19 @@ classdef EquationType
             if isnumeric(input)
                 selects = cell(size(input));
                 for i = 1:numel(input)
-                    selects{i} = gams.transfer.symbol.VariableType(input(i)).select;
+                    selects{i} = gams.transfer.symbol.EquationType(input(i)).select;
                 end
             elseif iscell(input)
                 selects = cell(size(input));
                 for i = 1:numel(input)
-                    if isa(input{i}, 'gams.transfer.symbol.VariableType')
+                    if isa(input{i}, 'gams.transfer.symbol.EquationType')
                         selects{i} = input{i}.select;
                     else
-                        selects{i} = gams.transfer.symbol.VariableType(input{i}).select;
+                        selects{i} = gams.transfer.symbol.EquationType(input{i}).select;
                     end
                 end
             else
-                selects = {gams.transfer.symbol.VariableType(input).select};
+                selects = {gams.transfer.symbol.EquationType(input).select};
             end
         end
 

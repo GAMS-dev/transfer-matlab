@@ -37,8 +37,7 @@ end
 
 function test_idx_addSymbols(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-        'indexed', true, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
 
     t.add('idx_add_symbols_parameter_1');
     p1 = gams.transfer.Parameter(gdx, 'p1');
@@ -177,8 +176,7 @@ end
 
 function test_idx_changeSymbol(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-        'indexed', true, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
     p1 = gams.transfer.Parameter(gdx, 'p1', 5);
     p2 = gams.transfer.Parameter(gdx, 'p2', [5,10]);
 
@@ -419,16 +417,14 @@ end
 
 function test_idx_copySymbol(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-        'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
     p = gams.transfer.Parameter(gdx, 'p', [10]);
     p.records.dim_1 = [2 4]';
     p.records.value = [1 2]';
     t.assert(p.isValid());
 
     t.add('idx_copy_symbol_parameter_empty');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-        'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
     p.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
     t.assert(isfield(gdx2.data, 'p'));
@@ -452,8 +448,7 @@ function test_idx_copySymbol(t, cfg)
     t.assert(gdx2.data.p.records.value(2) == 2);
 
     t.add('idx_copy_symbol_parameter_overwrite_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-        'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
     gams.transfer.Parameter(gdx2, 'p');
     p.copy(gdx2, true);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -478,8 +473,7 @@ function test_idx_copySymbol(t, cfg)
     t.assert(gdx2.data.p.records.value(2) == 2);
 
     t.add('idx_copy_symbol_parameter_overwrite_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-        'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
     gams.transfer.Parameter(gdx2, 'p');
     try
         t.assert(false);
@@ -490,7 +484,7 @@ function test_idx_copySymbol(t, cfg)
     end
 
     t.add('idx_copy_symbol_parameter_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', false, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', false);
     try
         t.assert(false);
         p.copy(gdx2);
@@ -503,8 +497,7 @@ end
 
 function test_idx_setRecords(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-        'indexed', true, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
 
     p1 = gams.transfer.Parameter(gdx, 'p1', 5);
 
@@ -664,7 +657,7 @@ function test_idx_setRecords(t, cfg)
         t.assertEquals(e.message, 'Incorrect number of domain fields.');
     end
 
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.add('set_records_table_1');
         tbl = table([1; 2; 3], [1; 2; 3]);
         try
@@ -685,8 +678,7 @@ end
 
 function test_idx_writeUnordered(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-        'indexed', true, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     c = gams.transfer.Parameter(gdx, 'c', [5,10]);
@@ -741,11 +733,10 @@ function test_idx_transformRecords(t, cfg)
     c_format = cell(1, numel(formats));
 
     for i = 1:numel(formats)
-        if strcmp(formats{i}, 'table') && ~gdx.features.table
+        if strcmp(formats{i}, 'table') && ~gams.transfer.Constants.SUPPORTS_TABLE
             continue
         end
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-            'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
         gdx.read(cfg.filenames{4}, 'format', formats{i});
         a_recs{i} = gdx.data.a.records;
         b_recs{i} = gdx.data.b.records;
@@ -756,18 +747,17 @@ function test_idx_transformRecords(t, cfg)
     end
 
     for i = 1:numel(formats)
-        if strcmp(formats{i}, 'table') && ~gdx.features.table
+        if strcmp(formats{i}, 'table') && ~gams.transfer.Constants.SUPPORTS_TABLE
             continue
         end
 
         for j = 1:numel(formats)
-            if strcmp(formats{j}, 'table') && ~gdx.features.table
+            if strcmp(formats{j}, 'table') && ~gams.transfer.Constants.SUPPORTS_TABLE
                 continue
             end
 
             t.add(sprintf('idx_transform_records_%s_to_%s', formats{i}, formats{j}));
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-                'features', cfg.features);
+            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
             gdx.read(cfg.filenames{4}, 'format', formats{i});
             gdx.data.a.transformRecords(formats{j});
             gdx.data.b.transformRecords(formats{j});

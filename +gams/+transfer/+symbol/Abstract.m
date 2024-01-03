@@ -259,6 +259,10 @@ classdef (Abstract) Abstract < handle
             error('todo');
         end
 
+        function flag = isValid(obj, varargin)
+            flag = false;
+        end
+
         function sparsity = getSparsity(obj)
             sparsity = obj.data_.getSparsity(obj.def_);
         end

@@ -36,60 +36,6 @@ classdef Utils
 
     methods (Static)
 
-        function feature_support = checkFeatureSupport()
-            % Checks support of different Matlab features
-            %
-            % s = Utils.checkFeatureSupport() returns a struct of boolean fields
-            % indicating which feature is supported by the current Matlab/Octave
-            % environment. The fields of s are:
-            % - categorical:       categorical arrays
-            % - table:             data type table
-            % - c_prop_setget:     calling set/get methods when querying data from c
-            %
-            % Note that a latest Matlab version should return true for all
-            % fields.
-            %
-
-            feature_support = struct('categorical', true, 'table', true, ...
-                'c_prop_setget', true, 'handle_compare', true);
-
-            if exist('OCTAVE_VERSION', 'builtin') > 0
-                feature_support.categorical = false;
-                feature_support.table = false;
-                feature_support.c_prop_setget = false;
-                feature_support.handle_compare = false;
-                v_release = strsplit(version(), '.');
-                for i = 1:3
-                    v_release{i} = str2double(v_release{i});
-                end
-            else
-                v_release = regexp(version(), 'R[0-9]{4}[ab]', 'match');
-                if ~isempty(v_release)
-                    v_release_year = str2double(v_release{1}(2:5));
-                    v_release_ab = v_release{1}(6);
-                    if v_release_year < 2015
-                        feature_support.categorical = false;
-                    end
-                    if v_release_year < 2013 || (v_release_year == 2013 && strcmp(v_release_ab, 'a'))
-                        feature_support.table = false;
-                    end
-                end
-            end
-        end
-
-        function gams_dir = checkGamsDirectory(gams_dir)
-            % Checks if given path is a valid GAMS system directory
-            %
-            % Utils.checkGamsDirectory(d) returns the given system
-            % directory, finds a system directory if none is given or raises an
-            % error if the given system directory is invalid.
-            %
-
-            if strcmp(gams_dir, '')
-                gams_dir = gams.transfer.find_gams();
-            end
-        end
-
         function filename = checkFilename(filename, extension, check_exists)
             % Validates a file name
             %

@@ -48,13 +48,13 @@ function test_equals(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx1 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-        gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx1 = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     case 'rc'
-        gdx1 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-        gdx1 = gams.transfer.Container(gdx1, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
-        gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-        gdx2 = gams.transfer.Container(gdx2, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx1 = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx1 = gams.transfer.Container(gdx1, 'gams_dir', cfg.gams_dir);
+        gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx2 = gams.transfer.Container(gdx2, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('equals_1');
@@ -65,13 +65,10 @@ function test_getlist(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', cfg.gams_dir);
     case 'rc'
-        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('get_list_has');
@@ -107,60 +104,60 @@ function test_getlist(t, cfg, container_type)
 
     t.add('get_list_set_1');
     l = gdx.getSymbols('i');
-    t.assert(isa(l, 'gams.transfer.Set'));
+    t.assert(isa(l, 'gams.transfer.symbol.Set'));
     t.assertEquals(l.name, 'i');
 
     t.add('get_list_set_2');
     l = gdx.getSymbols('I');
-    t.assert(isa(l, 'gams.transfer.Set'));
+    t.assert(isa(l, 'gams.transfer.symbol.Set'));
     t.assertEquals(l.name, 'i');
 
     t.add('get_list_variable_1');
     l = gdx.getSymbols('x1');
-    t.assert(isa(l, 'gams.transfer.Variable'));
+    t.assert(isa(l, 'gams.transfer.symbol.Variable'));
     t.assertEquals(l.name, 'x1');
 
     t.add('get_list_variable_2');
     l = gdx.getSymbols('X1');
-    t.assert(isa(l, 'gams.transfer.Variable'));
+    t.assert(isa(l, 'gams.transfer.symbol.Variable'));
     t.assertEquals(l.name, 'x1');
 
     t.add('get_list_equation_1');
     l = gdx.getSymbols('e1');
-    t.assert(isa(l, 'gams.transfer.Equation'));
+    t.assert(isa(l, 'gams.transfer.symbol.Equation'));
     t.assertEquals(l.name, 'e1');
 
     t.add('get_list_equation_2');
     l = gdx.getSymbols('E1');
-    t.assert(isa(l, 'gams.transfer.Equation'));
+    t.assert(isa(l, 'gams.transfer.symbol.Equation'));
     t.assertEquals(l.name, 'e1');
 
     t.add('get_list_parameter_1');
     l = gdx.getSymbols('a');
-    t.assert(isa(l, 'gams.transfer.Parameter'));
+    t.assert(isa(l, 'gams.transfer.symbol.Parameter'));
     t.assertEquals(l.name, 'a');
 
     t.add('get_list_parameter_2');
     l = gdx.getSymbols('A');
-    t.assert(isa(l, 'gams.transfer.Parameter'));
+    t.assert(isa(l, 'gams.transfer.symbol.Parameter'));
     t.assertEquals(l.name, 'a');
 
     t.add('get_list_alias_1');
     l = gdx.getSymbols('i2');
-    t.assert(isa(l, 'gams.transfer.Alias'));
+    t.assert(isa(l, 'gams.transfer.alias.Set'));
     t.assertEquals(l.name, 'i2');
 
     t.add('get_list_alias_2');
     l = gdx.getSymbols('I2');
-    t.assert(isa(l, 'gams.transfer.Alias'));
+    t.assert(isa(l, 'gams.transfer.alias.Set'));
     t.assertEquals(l.name, 'i2');
 
     t.add('get_list_sets');
     l = gdx.getSymbols(gdx.listSets());
     t.assert(iscell(l));
     t.assert(numel(l) == 2);
-    t.assert(isa(l{1}, 'gams.transfer.Set'));
-    t.assert(isa(l{2}, 'gams.transfer.Set'));
+    t.assert(isa(l{1}, 'gams.transfer.symbol.Set'));
+    t.assert(isa(l{2}, 'gams.transfer.symbol.Set'));
     t.assertEquals(l{1}.name, 'i');
     t.assertEquals(l{2}.name, 'j');
 
@@ -168,17 +165,17 @@ function test_getlist(t, cfg, container_type)
     l = gdx.getSymbols(gdx.listVariables());
     t.assert(iscell(l));
     t.assert(numel(l) == 11);
-    t.assert(isa(l{1}, 'gams.transfer.Variable'));
-    t.assert(isa(l{2}, 'gams.transfer.Variable'));
-    t.assert(isa(l{3}, 'gams.transfer.Variable'));
-    t.assert(isa(l{4}, 'gams.transfer.Variable'));
-    t.assert(isa(l{5}, 'gams.transfer.Variable'));
-    t.assert(isa(l{6}, 'gams.transfer.Variable'));
-    t.assert(isa(l{7}, 'gams.transfer.Variable'));
-    t.assert(isa(l{8}, 'gams.transfer.Variable'));
-    t.assert(isa(l{9}, 'gams.transfer.Variable'));
-    t.assert(isa(l{10}, 'gams.transfer.Variable'));
-    t.assert(isa(l{11}, 'gams.transfer.Variable'));
+    t.assert(isa(l{1}, 'gams.transfer.symbol.Variable'));
+    t.assert(isa(l{2}, 'gams.transfer.symbol.Variable'));
+    t.assert(isa(l{3}, 'gams.transfer.symbol.Variable'));
+    t.assert(isa(l{4}, 'gams.transfer.symbol.Variable'));
+    t.assert(isa(l{5}, 'gams.transfer.symbol.Variable'));
+    t.assert(isa(l{6}, 'gams.transfer.symbol.Variable'));
+    t.assert(isa(l{7}, 'gams.transfer.symbol.Variable'));
+    t.assert(isa(l{8}, 'gams.transfer.symbol.Variable'));
+    t.assert(isa(l{9}, 'gams.transfer.symbol.Variable'));
+    t.assert(isa(l{10}, 'gams.transfer.symbol.Variable'));
+    t.assert(isa(l{11}, 'gams.transfer.symbol.Variable'));
     t.assertEquals(l{1}.name, 'x1');
     t.assertEquals(l{2}.name, 'x2');
     t.assertEquals(l{3}.name, 'x3');
@@ -195,9 +192,9 @@ function test_getlist(t, cfg, container_type)
     l = gdx.getSymbols(gdx.listEquations());
     t.assert(iscell(l));
     t.assert(numel(l) == 3);
-    t.assert(isa(l{1}, 'gams.transfer.Equation'));
-    t.assert(isa(l{2}, 'gams.transfer.Equation'));
-    t.assert(isa(l{3}, 'gams.transfer.Equation'));
+    t.assert(isa(l{1}, 'gams.transfer.symbol.Equation'));
+    t.assert(isa(l{2}, 'gams.transfer.symbol.Equation'));
+    t.assert(isa(l{3}, 'gams.transfer.symbol.Equation'));
     t.assertEquals(l{1}.name, 'e1');
     t.assertEquals(l{2}.name, 'e2');
     t.assertEquals(l{3}.name, 'e3');
@@ -206,15 +203,15 @@ function test_getlist(t, cfg, container_type)
     l = gdx.getSymbols(gdx.listParameters());
     t.assert(iscell(l));
     t.assert(numel(l) == 1);
-    t.assert(isa(l{1}, 'gams.transfer.Parameter'));
+    t.assert(isa(l{1}, 'gams.transfer.symbol.Parameter'));
     t.assertEquals(l{1}.name, 'a');
 
     t.add('get_list_aliases');
     l = gdx.getSymbols(gdx.listAliases());
     t.assert(iscell(l));
     t.assert(numel(l) == 2);
-    t.assert(isa(l{1}, 'gams.transfer.Alias'));
-    t.assert(isa(l{2}, 'gams.transfer.Alias'));
+    t.assert(isa(l{1}, 'gams.transfer.alias.Set'));
+    t.assert(isa(l{2}, 'gams.transfer.alias.Set'));
     t.assertEquals(l{1}.name, 'i2');
     t.assertEquals(l{2}.name, 'j2');
 
@@ -243,7 +240,7 @@ function test_getlist(t, cfg, container_type)
     t.assertEquals(l{1}, 'e2');
     t.assertEquals(l{2}, 'e3');
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
 
     t.add('get_list_sets_is_valid_1');
     l = gdx.listSets('is_valid', true);
@@ -259,7 +256,7 @@ function test_getlist(t, cfg, container_type)
     case 'c'
         gdx.read(cfg.filenames{1}, 'symbols', {'x'});
     case 'rc'
-        cgdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        cgdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         cgdx.read(cfg.filenames{1}, 'symbols', {'x'});
         gdx.read(cgdx, 'symbols', {'x'});
     end
@@ -283,7 +280,7 @@ function test_getlist(t, cfg, container_type)
     case 'c'
         gdx.read(cfg.filenames{1}, 'symbols', {'i', 'j'});
     case 'rc'
-        cgdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        cgdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         cgdx.read(cfg.filenames{1}, 'symbols', {'i', 'j', 'x'});
         gdx.read(cgdx, 'symbols', {'i', 'j'});
     end
@@ -308,28 +305,28 @@ function test_describe(t, cfg, container_type)
         case 1
             switch container_type
             case 'c'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
                 gdx.read(cfg.filenames{1}, 'format', 'struct');
             case 'rc'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
                 gdx.read(cfg.filenames{1}, 'format', 'struct');
-                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
             end
             test_name_describe_sets = 'describe_sets_struct';
             test_name_describe_parameters = 'describe_parameters_struct';
             test_name_describe_variables = 'describe_variables_struct';
         case 2
-            if ~cfg.features.table
+            if ~gams.transfer.Constants.SUPPORTS_TABLE
                 continue
             end
             switch container_type
             case 'c'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
                 gdx.read(cfg.filenames{1}, 'format', 'table');
             case 'rc'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
                 gdx.read(cfg.filenames{1}, 'format', 'table');
-                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
             end
             test_name_describe_sets = 'describe_sets_table';
             test_name_describe_parameters = 'describe_parameters_table';
@@ -337,12 +334,12 @@ function test_describe(t, cfg, container_type)
         case 3
             switch container_type
             case 'c'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
                 gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
             case 'rc'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
                 gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
-                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
             end
             test_name_describe_sets = 'describe_sets_dense_matrix';
             test_name_describe_parameters = 'describe_parameters_dense_matrix';
@@ -350,12 +347,12 @@ function test_describe(t, cfg, container_type)
         case 4
             switch container_type
             case 'c'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
                 gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
             case 'rc'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
                 gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
-                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
             end
             test_name_describe_sets = 'describe_sets_sparse_matrix';
             test_name_describe_parameters = 'describe_parameters_sparse_matrix';
@@ -365,7 +362,7 @@ function test_describe(t, cfg, container_type)
         tbl = gdx.describeSets();
 
         t.add(test_name_describe_sets);
-        if gdx.features.table
+        if gams.transfer.Constants.SUPPORTS_TABLE
             t.assert(istable(tbl));
             t.assert(numel(tbl.Properties.VariableNames) == 10);
             t.assert(height(tbl) == 2);
@@ -379,7 +376,7 @@ function test_describe(t, cfg, container_type)
             t.assertEquals(tbl.Properties.VariableNames{8}, 'number_records');
             t.assertEquals(tbl.Properties.VariableNames{9}, 'number_values');
             t.assertEquals(tbl.Properties.VariableNames{10}, 'sparsity');
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'name'}, 'i');
                 switch i
                 case {1,3,4}
@@ -398,7 +395,7 @@ function test_describe(t, cfg, container_type)
             end
             t.assert(~tbl{1,'is_singleton'});
             t.assert(tbl{1,'dimension'} == 1);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'domain_type'}, 'none');
                 t.assertEquals(tbl{1,'domain'}, '[*]');
                 t.assertEquals(tbl{1,'size'}, '[NaN]');
@@ -423,7 +420,7 @@ function test_describe(t, cfg, container_type)
             t.assert(isfield(tbl, 'number_records'));
             t.assert(isfield(tbl, 'number_values'));
             t.assert(isfield(tbl, 'sparsity'));
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.name(1), 'i');
                 switch i
                 case {1,3,4}
@@ -442,7 +439,7 @@ function test_describe(t, cfg, container_type)
             end
             t.assert(~tbl.is_singleton(1));
             t.assert(tbl.dimension(1) == 1);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.domain_type(1), 'none');
                 t.assertEquals(tbl.domain(1), '[*]');
                 t.assertEquals(tbl.size(1), '[NaN]');
@@ -459,7 +456,7 @@ function test_describe(t, cfg, container_type)
         tbl = gdx.describeParameters();
 
         t.add(test_name_describe_parameters);
-        if gdx.features.table
+        if gams.transfer.Constants.SUPPORTS_TABLE
             t.assert(istable(tbl));
             t.assert(numel(tbl.Properties.VariableNames) == 14);
             t.assert(height(tbl) == 2);
@@ -477,7 +474,7 @@ function test_describe(t, cfg, container_type)
             t.assertEquals(tbl.Properties.VariableNames{12}, 'max');
             t.assertEquals(tbl.Properties.VariableNames{13}, 'where_min');
             t.assertEquals(tbl.Properties.VariableNames{14}, 'where_max');
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'name'}, 'a');
                 switch i
                 case {1,3}
@@ -499,7 +496,7 @@ function test_describe(t, cfg, container_type)
                 end
             end
             t.assert(tbl{1,'dimension'} == 0);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'domain_type'}, 'none');
                 t.assertEquals(tbl{1,'domain'}, '[]');
                 t.assertEquals(tbl{1,'size'}, '[]');
@@ -521,17 +518,17 @@ function test_describe(t, cfg, container_type)
             t.assert(tbl{1,'min'} == 4);
             t.assert(tbl{1,'mean'} == 4);
             t.assert(tbl{1,'max'} == 4);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'where_min'}, '[]');
             else
                 t.assertEquals(tbl{1,'where_min'}{1}, '[]');
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'where_max'}, '[]');
             else
                 t.assertEquals(tbl{1,'where_max'}{1}, '[]');
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{2,'name'}, 'b');
                 switch i
                 case 1
@@ -557,7 +554,7 @@ function test_describe(t, cfg, container_type)
                 end
             end
             t.assert(tbl{2,'dimension'} == 1);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{2,'domain_type'}, 'regular');
                 t.assertEquals(tbl{2,'domain'}, '[i]');
                 t.assertEquals(tbl{2,'size'}, '[5]');
@@ -591,19 +588,19 @@ function test_describe(t, cfg, container_type)
             t.assert(tbl{2,'max'} == 10);
             switch i
             case {1,2}
-                if gdx.features.categorical
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     t.assertEquals(tbl{2,'where_min'}, '[i1]');
                 else
                     t.assertEquals(tbl{2,'where_min'}{1}, '[i1]');
                 end
             case {3,4}
-                if gdx.features.categorical
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     t.assertEquals(tbl{2,'where_min'}, '[i4]');
                 else
                     t.assertEquals(tbl{2,'where_min'}{1}, '[i4]');
                 end
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{2,'where_max'}, '[i10]');
             else
                 t.assertEquals(tbl{2,'where_max'}{1}, '[i10]');
@@ -626,7 +623,7 @@ function test_describe(t, cfg, container_type)
             t.assert(isfield(tbl, 'max'));
             t.assert(isfield(tbl, 'where_min'));
             t.assert(isfield(tbl, 'where_max'));
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.name(1), 'a');
                 switch i
                 case {1,3}
@@ -648,7 +645,7 @@ function test_describe(t, cfg, container_type)
                 end
             end
             t.assert(tbl.dimension(1) == 0);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.domain_type(1), 'none');
                 t.assertEquals(tbl.domain(1), '[]');
                 t.assertEquals(tbl.size(1), '[]');
@@ -670,17 +667,17 @@ function test_describe(t, cfg, container_type)
             t.assert(tbl.min(1) == 4);
             t.assert(tbl.mean(1) == 4);
             t.assert(tbl.max(1) == 4);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.where_min(1), '[]');
             else
                 t.assertEquals(tbl.where_min{1}, '[]');
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.where_max(1), '[]');
             else
                 t.assertEquals(tbl.where_max{1}, '[]');
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.name(2), 'b');
                 switch i
                 case 1
@@ -706,7 +703,7 @@ function test_describe(t, cfg, container_type)
                 end
             end
             t.assert(tbl.dimension(2) == 1);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.domain_type(2), 'regular');
                 t.assertEquals(tbl.domain(2), '[i]');
                 t.assertEquals(tbl.size(2), '[5]');
@@ -740,19 +737,19 @@ function test_describe(t, cfg, container_type)
             t.assert(tbl.max(2) == 10);
             switch i
             case {1,2}
-                if gdx.features.categorical
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     t.assertEquals(tbl.where_min(2), '[i1]');
                 else
                     t.assertEquals(tbl.where_min{2}, '[i1]');
                 end
             case {3,4}
-                if gdx.features.categorical
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     t.assertEquals(tbl.where_min(2), '[i4]');
                 else
                     t.assertEquals(tbl.where_min{2}, '[i4]');
                 end
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.where_max(2), '[i10]');
             else
                 t.assertEquals(tbl.where_max{2}, '[i10]');
@@ -762,7 +759,7 @@ function test_describe(t, cfg, container_type)
         tbl = gdx.describeVariables();
 
         t.add(test_name_describe_variables);
-        if gdx.features.table
+        if gams.transfer.Constants.SUPPORTS_TABLE
             t.assert(istable(tbl));
             t.assert(numel(tbl.Properties.VariableNames) == 14);
             t.assert(height(tbl) == 1);
@@ -780,7 +777,7 @@ function test_describe(t, cfg, container_type)
             t.assertEquals(tbl.Properties.VariableNames{12}, 'mean_level');
             t.assertEquals(tbl.Properties.VariableNames{13}, 'max_level');
             t.assertEquals(tbl.Properties.VariableNames{14}, 'where_max_abs_level');
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'name'}, 'x');
                 t.assertEquals(tbl{1,'type'}, 'positive');
                 switch i
@@ -808,7 +805,7 @@ function test_describe(t, cfg, container_type)
                 end
             end
             t.assert(tbl{1,'dimension'} == 2);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'domain_type'}, 'regular');
                 t.assertEquals(tbl{1,'domain'}, '[i,j]');
                 t.assertEquals(tbl{1,'size'}, '[5,5]');
@@ -839,7 +836,7 @@ function test_describe(t, cfg, container_type)
                 t.assert(tbl{1,'mean_level'} == 18/25);
             end
             t.assert(tbl{1,'max_level'} == 9);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'where_max_abs_level'}, '[i3,j9]');
             else
                 t.assertEquals(tbl{1,'where_max_abs_level'}{1}, '[i3,j9]');
@@ -862,7 +859,7 @@ function test_describe(t, cfg, container_type)
             t.assert(isfield(tbl, 'mean_level'));
             t.assert(isfield(tbl, 'max_level'));
             t.assert(isfield(tbl, 'where_max_abs_level'));
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.name(1), 'x');
                 t.assertEquals(tbl.type(1), 'positive');
                 switch i
@@ -890,7 +887,7 @@ function test_describe(t, cfg, container_type)
                 end
             end
             t.assert(tbl.dimension(1) == 2);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.domain_type(1), 'regular');
                 t.assertEquals(tbl.domain(1), '[i,j]');
                 t.assertEquals(tbl.size(1), '[5,5]');
@@ -921,7 +918,7 @@ function test_describe(t, cfg, container_type)
                 t.assert(tbl.mean_level(1) == 18/25);
             end
             t.assert(tbl.max_level(1) == 9);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.where_max_abs_level(1), '[i3,j9]');
             else
                 t.assertEquals(tbl.where_max_abs_level{1}, '[i3,j9]');
@@ -932,7 +929,7 @@ function test_describe(t, cfg, container_type)
     tbl = gdx.describeEquations();
 
     t.add('describe_equations');
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.assert(istable(tbl));
         t.assert(numel(tbl.Properties.VariableNames) == 14);
         t.assert(height(tbl) == 0);
@@ -975,21 +972,18 @@ function test_describePartial(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', cfg.gams_dir);
     case 'rc'
-        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('describe_partial_sets_1');
     tbl = gdx.describeSets(gdx.listSymbols('types', ...
-        [gams.transfer.SymbolType.SET, gams.transfer.SymbolType.ALIAS]));
-    if gdx.features.table
+        {'gams.transfer.symbol.Set', 'gams.transfer.alias.Set'}));
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.assert(height(tbl) == 4);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl{1,'name'}, 'i');
             t.assertEquals(tbl{2,'name'}, 'j');
             t.assertEquals(tbl{3,'name'}, 'i2');
@@ -1002,7 +996,7 @@ function test_describePartial(t, cfg, container_type)
         end
     else
         t.assert(numel(tbl.name) == 4);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl.name(1), 'i');
             t.assertEquals(tbl.name(2), 'j');
             t.assertEquals(tbl.name(3), 'i2');
@@ -1017,9 +1011,9 @@ function test_describePartial(t, cfg, container_type)
 
     t.add('describe_partial_sets_2');
     tbl = gdx.describeSets({'i', 'i2'});
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.assert(height(tbl) == 2);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl{1,'name'}, 'i');
             t.assertEquals(tbl{2,'name'}, 'i2');
         else
@@ -1028,7 +1022,7 @@ function test_describePartial(t, cfg, container_type)
         end
     else
         t.assert(numel(tbl.name) == 2);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl.name(1), 'i');
             t.assertEquals(tbl.name(2), 'i2');
         else
@@ -1039,9 +1033,9 @@ function test_describePartial(t, cfg, container_type)
 
     t.add('describe_partial_alias_1');
     tbl = gdx.describeAliases();
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.assert(height(tbl) == 2);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl{1,'name'}, 'i2');
             t.assertEquals(tbl{2,'name'}, 'j2');
         else
@@ -1050,7 +1044,7 @@ function test_describePartial(t, cfg, container_type)
         end
     else
         t.assert(numel(tbl.name) == 2);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl.name(1), 'i2');
             t.assertEquals(tbl.name(2), 'j2');
         else
@@ -1061,16 +1055,16 @@ function test_describePartial(t, cfg, container_type)
 
     t.add('describe_partial_sets_2');
     tbl = gdx.describeAliases({'i2'});
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.assert(height(tbl) == 1);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl{1,'name'}, 'i2');
         else
             t.assertEquals(tbl{1,'name'}{1}, 'i2');
         end
     else
         t.assert(numel(tbl.name) == 1);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl.name(1), 'i2');
         else
             t.assertEquals(tbl.name{1}, 'i2');
@@ -1079,16 +1073,16 @@ function test_describePartial(t, cfg, container_type)
 
     t.add('describe_partial_parameters_1');
     tbl = gdx.describeParameters();
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.assert(height(tbl) == 1);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl{1,'name'}, 'a');
         else
             t.assertEquals(tbl{1,'name'}{1}, 'a');
         end
     else
         t.assert(numel(tbl.name) == 1);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl.name(1), 'a');
         else
             t.assertEquals(tbl.name{1}, 'a');
@@ -1097,7 +1091,7 @@ function test_describePartial(t, cfg, container_type)
 
     t.add('describe_partial_parameters_2');
     tbl = gdx.describeParameters({});
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.assert(height(tbl) == 0);
     else
         t.assert(numel(tbl.name) == 0);
@@ -1105,9 +1099,9 @@ function test_describePartial(t, cfg, container_type)
 
     t.add('describe_partial_variables_1');
     tbl = gdx.describeVariables();
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.assert(height(tbl) == 11);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl{1,'name'}, 'x1');
             t.assertEquals(tbl{2,'name'}, 'x2');
             t.assertEquals(tbl{3,'name'}, 'x3');
@@ -1134,7 +1128,7 @@ function test_describePartial(t, cfg, container_type)
         end
     else
         t.assert(numel(tbl.name) == 11);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl.name(1), 'x1');
             t.assertEquals(tbl.name(2), 'x2');
             t.assertEquals(tbl.name(3), 'x3');
@@ -1163,9 +1157,9 @@ function test_describePartial(t, cfg, container_type)
 
     t.add('describe_partial_variables_2');
     tbl = gdx.describeVariables({'x9', 'x4', 'x2'});
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.assert(height(tbl) == 3);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl{1,'name'}, 'x9');
             t.assertEquals(tbl{2,'name'}, 'x4');
             t.assertEquals(tbl{3,'name'}, 'x2');
@@ -1176,7 +1170,7 @@ function test_describePartial(t, cfg, container_type)
         end
     else
         t.assert(numel(tbl.name) == 3);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl.name(1), 'x9');
             t.assertEquals(tbl.name(2), 'x4');
             t.assertEquals(tbl.name(3), 'x2');
@@ -1189,9 +1183,9 @@ function test_describePartial(t, cfg, container_type)
 
     t.add('describe_partial_equations_1');
     tbl = gdx.describeEquations();
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.assert(height(tbl) == 3);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl{1,'name'}, 'e1');
             t.assertEquals(tbl{2,'name'}, 'e2');
             t.assertEquals(tbl{3,'name'}, 'e3');
@@ -1202,7 +1196,7 @@ function test_describePartial(t, cfg, container_type)
         end
     else
         t.assert(numel(tbl.name) == 3);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl.name(1), 'e1');
             t.assertEquals(tbl.name(2), 'e2');
             t.assertEquals(tbl.name(3), 'e3');
@@ -1215,9 +1209,9 @@ function test_describePartial(t, cfg, container_type)
 
     t.add('describe_partial_equations_2');
     tbl = gdx.describeEquations({'e1', 'e1'});
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.assert(height(tbl) == 2);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl{1,'name'}, 'e1');
             t.assertEquals(tbl{2,'name'}, 'e1');
         else
@@ -1226,7 +1220,7 @@ function test_describePartial(t, cfg, container_type)
         end
     else
         t.assert(numel(tbl.name) == 2);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(tbl.name(1), 'e1');
             t.assertEquals(tbl.name(2), 'e1');
         else
@@ -1244,60 +1238,48 @@ function test_idx_describe(t, cfg, container_type)
         case 1
             switch container_type
             case 'c'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-                    'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
                 gdx.read(cfg.filenames{4}, 'format', 'struct');
             case 'rc'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-                    'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
                 gdx.read(cfg.filenames{4}, 'format', 'struct');
-                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
-                    'features', cfg.features);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true);
             end
             test_name_describe_parameters = 'idx_describe_parameters_struct';
         case 2
-            if ~cfg.features.table
+            if ~gams.transfer.Constants.SUPPORTS_TABLE
                 continue
             end
             switch container_type
             case 'c'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-                    'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
                 gdx.read(cfg.filenames{4}, 'format', 'table');
             case 'rc'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-                    'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
                 gdx.read(cfg.filenames{4}, 'format', 'table');
-                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
-                    'features', cfg.features);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true);
             end
             test_name_describe_parameters = 'idx_describe_parameters_table';
         case 3
             switch container_type
             case 'c'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-                    'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
                 gdx.read(cfg.filenames{4}, 'format', 'dense_matrix');
             case 'rc'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-                    'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
                 gdx.read(cfg.filenames{4}, 'format', 'dense_matrix');
-                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
-                    'features', cfg.features);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true);
             end
             test_name_describe_parameters = 'idx_describe_parameters_dense_matrix';
         case 4
             switch container_type
             case 'c'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-                    'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
                 gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix');
             case 'rc'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-                    'features', cfg.features);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
                 gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix');
-                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true, ...
-                    'features', cfg.features);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true);
             end
             test_name_describe_parameters = 'idx_describe_parameters_sparse_matrix';
         end
@@ -1305,7 +1287,7 @@ function test_idx_describe(t, cfg, container_type)
         tbl = gdx.describeParameters();
 
         t.add(test_name_describe_parameters);
-        if gdx.features.table
+        if gams.transfer.Constants.SUPPORTS_TABLE
             t.assert(istable(tbl));
             t.assert(numel(tbl.Properties.VariableNames) == 14);
             t.assert(height(tbl) == 3);
@@ -1323,7 +1305,7 @@ function test_idx_describe(t, cfg, container_type)
             t.assertEquals(tbl.Properties.VariableNames{12}, 'max');
             t.assertEquals(tbl.Properties.VariableNames{13}, 'where_min');
             t.assertEquals(tbl.Properties.VariableNames{14}, 'where_max');
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'name'}, 'a');
                 switch i
                 case {1,3}
@@ -1345,7 +1327,7 @@ function test_idx_describe(t, cfg, container_type)
                 end
             end
             t.assert(tbl{1,'dimension'} == 0);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'domain_type'}, 'relaxed');
                 t.assertEquals(tbl{1,'domain'}, '[]');
                 t.assertEquals(tbl{1,'size'}, '[]');
@@ -1367,17 +1349,17 @@ function test_idx_describe(t, cfg, container_type)
             t.assert(tbl{1,'min'} == 4);
             t.assert(tbl{1,'mean'} == 4);
             t.assert(tbl{1,'max'} == 4);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'where_min'}, '[]');
             else
                 t.assertEquals(tbl{1,'where_min'}{1}, '[]');
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'where_max'}, '[]');
             else
                 t.assertEquals(tbl{1,'where_max'}{1}, '[]');
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{2,'name'}, 'b');
                 switch i
                 case 1
@@ -1403,7 +1385,7 @@ function test_idx_describe(t, cfg, container_type)
                 end
             end
             t.assert(tbl{2,'dimension'} == 1);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{2,'domain_type'}, 'relaxed');
                 t.assertEquals(tbl{2,'domain'}, '[dim_1]');
                 t.assertEquals(tbl{2,'size'}, '[5]');
@@ -1437,24 +1419,24 @@ function test_idx_describe(t, cfg, container_type)
             t.assert(tbl{2,'max'} == 5);
             switch i
             case {1,2}
-                if gdx.features.categorical
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     t.assertEquals(tbl{2,'where_min'}, '[1]');
                 else
                     t.assertEquals(tbl{2,'where_min'}{1}, '[1]');
                 end
             case {3,4}
-                if gdx.features.categorical
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     t.assertEquals(tbl{2,'where_min'}, '[2]');
                 else
                     t.assertEquals(tbl{2,'where_min'}{1}, '[2]');
                 end
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{2,'where_max'}, '[5]');
             else
                 t.assertEquals(tbl{2,'where_max'}{1}, '[5]');
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{3,'name'}, 'c');
                 switch i
                 case 1
@@ -1480,7 +1462,7 @@ function test_idx_describe(t, cfg, container_type)
                 end
             end
             t.assert(tbl{3,'dimension'} == 2);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{3,'domain_type'}, 'relaxed');
                 t.assertEquals(tbl{3,'domain'}, '[dim_1,dim_2]');
                 t.assertEquals(tbl{3,'size'}, '[5,10]');
@@ -1514,19 +1496,19 @@ function test_idx_describe(t, cfg, container_type)
             t.assert(tbl{3,'max'} == 49);
             switch i
             case {1,2}
-                if gdx.features.categorical
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     t.assertEquals(tbl{3,'where_min'}, '[1,6]');
                 else
                     t.assertEquals(tbl{3,'where_min'}{1}, '[1,6]');
                 end
             case {3,4}
-                if gdx.features.categorical
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     t.assertEquals(tbl{3,'where_min'}, '[1,1]');
                 else
                     t.assertEquals(tbl{3,'where_min'}{1}, '[1,1]');
                 end
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{3,'where_max'}, '[4,9]');
             else
                 t.assertEquals(tbl{3,'where_max'}{1}, '[4,9]');
@@ -1549,7 +1531,7 @@ function test_idx_describe(t, cfg, container_type)
             t.assert(isfield(tbl, 'max'));
             t.assert(isfield(tbl, 'where_min'));
             t.assert(isfield(tbl, 'where_max'));
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.name(1), 'a');
                 switch i
                 case {1,3}
@@ -1571,7 +1553,7 @@ function test_idx_describe(t, cfg, container_type)
                 end
             end
             t.assert(tbl.dimension(1) == 0);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.domain_type(1), 'relaxed');
                 t.assertEquals(tbl.domain(1), '[]');
                 t.assertEquals(tbl.size(1), '[]');
@@ -1591,17 +1573,17 @@ function test_idx_describe(t, cfg, container_type)
             t.assert(tbl.min(1) == 4);
             t.assert(tbl.mean(1) == 4);
             t.assert(tbl.max(1) == 4);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.where_min(1), '[]');
             else
                 t.assertEquals(tbl.where_min{1}, '[]');
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.where_max(1), '[]');
             else
                 t.assertEquals(tbl.where_max{1}, '[]');
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.name(2), 'b');
                 switch i
                 case 1
@@ -1627,7 +1609,7 @@ function test_idx_describe(t, cfg, container_type)
                 end
             end
             t.assert(tbl.dimension(2) == 1);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.domain_type(2), 'relaxed');
                 t.assertEquals(tbl.domain(2), '[dim_1]');
                 t.assertEquals(tbl.size(2), '[5]');
@@ -1661,24 +1643,24 @@ function test_idx_describe(t, cfg, container_type)
             t.assert(tbl.max(2) == 5);
             switch i
             case {1,2}
-                if gdx.features.categorical
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     t.assertEquals(tbl.where_min(2), '[1]');
                 else
                     t.assertEquals(tbl.where_min{2}, '[1]');
                 end
             case {3,4}
-                if gdx.features.categorical
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     t.assertEquals(tbl.where_min(2), '[2]');
                 else
                     t.assertEquals(tbl.where_min{2}, '[2]');
                 end
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.where_max(2), '[5]');
             else
                 t.assertEquals(tbl.where_max{2}, '[5]');
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.name(3), 'c');
                 switch i
                 case 1
@@ -1704,7 +1686,7 @@ function test_idx_describe(t, cfg, container_type)
                 end
             end
             t.assert(tbl.dimension(3) == 2);
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.domain_type(3), 'relaxed');
                 t.assertEquals(tbl.domain(3), '[dim_1,dim_2]');
                 t.assertEquals(tbl.size(3), '[5,10]');
@@ -1738,19 +1720,19 @@ function test_idx_describe(t, cfg, container_type)
             t.assert(tbl.max(3) == 49);
             switch i
             case {1,2}
-                if gdx.features.categorical
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     t.assertEquals(tbl.where_min(3), '[1,6]');
                 else
                     t.assertEquals(tbl.where_min{3}, '[1,6]');
                 end
             case {3,4}
-                if gdx.features.categorical
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     t.assertEquals(tbl.where_min(3), '[1,1]');
                 else
                     t.assertEquals(tbl.where_min{3}, '[1,1]');
                 end
             end
-            if gdx.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.where_max(3), '[4,9]');
             else
                 t.assertEquals(tbl.where_max{3}, '[4,9]');
@@ -1761,8 +1743,7 @@ end
 
 function test_remove(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-        'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     i1 = gams.transfer.Set(gdx, 'i1');
     a1 = gams.transfer.Alias(gdx, 'a1', i1);
     x1 = gams.transfer.Variable(gdx, 'x1', 'free', {i1});
@@ -1803,8 +1784,7 @@ function test_remove(t, cfg)
     t.assert(a1.modified);
     t.assert(x1.modified);
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-        'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     i1 = gams.transfer.Set(gdx, 'i1');
     a1 = gams.transfer.Alias(gdx, 'a1', i1);
     x1 = gams.transfer.Variable(gdx, 'x1', 'free', {i1});
@@ -1845,8 +1825,7 @@ function test_remove(t, cfg)
     t.assert(a1.modified);
     t.assert(x1.modified);
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-        'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     i1 = gams.transfer.Set(gdx, 'i1');
     a1 = gams.transfer.Alias(gdx, 'a1', i1);
     x1 = gams.transfer.Variable(gdx, 'x1', 'free', {i1});

@@ -41,7 +41,7 @@ end
 
 function test_addSymbols(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
 
     t.add('add_symbols_set_1');
     s1 = gams.transfer.Set(gdx, 's1');
@@ -832,7 +832,7 @@ end
 
 function test_overwriteSymbols(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
 
     t.add('overwrite_symbols_set_1');
     s = gdx.addSet('s');
@@ -1011,8 +1011,7 @@ end
 
 function test_changeSymbol(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-        'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     i1 = gams.transfer.Set(gdx, 'i1');
     i2 = gams.transfer.Set(gdx, 'i2', 'records', {'i21', 'i22', 'i23'});
     x1 = gams.transfer.Variable(gdx, 'x1', 'free', {i1});
@@ -1275,7 +1274,7 @@ function test_changeSymbol(t, cfg)
     t.add('change_symbol_domain_labels_1');
     x1.domain = {i2};
     x1.records = struct();
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         x1.records.i = categorical({'i21', 'i22', 'i23'})';
     else
         x1.records.i = [1; 2; 3];
@@ -1314,7 +1313,7 @@ function test_changeSymbol(t, cfg)
     t.add('change_symbol_domain_labels_2');
     x1.domain = {'i', 'j'};
     x1.records = struct();
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         x1.records.i = categorical({'i21', 'i22', 'i23'})';
         x1.records.j = categorical({'j21', 'j22', 'j23'})';
     else
@@ -1404,7 +1403,7 @@ end
 
 function test_copySymbol(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     i = gams.transfer.Set(gdx, 'i', 'description', 'set i', 'records', {'i1', 'i2', 'i3'});
     a = gams.transfer.Alias(gdx, 'a', i);
     x = gams.transfer.Variable(gdx, 'x', 'binary', {i});
@@ -1413,7 +1412,7 @@ function test_copySymbol(t, cfg)
     gdx.modified = false;
 
     t.add('copy_symbol_set_empty');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     i.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1427,7 +1426,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.i.domain{1}, '*');
     t.assert(isfield(gdx2.data.i.records, 'uni'));
     t.assert(numel(gdx2.data.i.records.uni) == 3);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(gdx2.data.i.records.uni(1), 'i1');
         t.assertEquals(gdx2.data.i.records.uni(2), 'i2');
         t.assertEquals(gdx2.data.i.records.uni(3), 'i3');
@@ -1444,7 +1443,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_set_overwrite_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Set(gdx2, 'i');
     gdx2.modified = false;
     i.copy(gdx2, true);
@@ -1459,7 +1458,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.i.domain{1}, '*');
     t.assert(isfield(gdx2.data.i.records, 'uni'));
     t.assert(numel(gdx2.data.i.records.uni) == 3);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(gdx2.data.i.records.uni(1), 'i1');
         t.assertEquals(gdx2.data.i.records.uni(2), 'i2');
         t.assertEquals(gdx2.data.i.records.uni(3), 'i3');
@@ -1476,7 +1475,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_set_overwrite_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Set(gdx2, 'i');
     try
         t.assert(false);
@@ -1487,7 +1486,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_set_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
     try
         t.assert(false);
         i.copy(gdx2);
@@ -1497,7 +1496,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_alias_empty_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     try
         t.assert(false);
         a.copy(gdx2);
@@ -1507,7 +1506,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_alias_empty_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     i.copy(gdx2);
     a.copy(gdx2);
@@ -1525,7 +1524,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_alias_overwrite_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     i.copy(gdx2);
     j = gams.transfer.Set(gdx2, 'j');
     gams.transfer.Alias(gdx2, 'a', j);
@@ -1545,7 +1544,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_alias_overwrite_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Set(gdx2, 'i');
     i.copy(gdx2);
     j = gams.transfer.Set(gdx2, 'j');
@@ -1559,7 +1558,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_variable_empty_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     x.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1581,7 +1580,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_empty_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     i.copy(gdx2);
     x.copy(gdx2);
@@ -1606,7 +1605,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_overwrite_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Variable(gdx2, 'x');
     gdx2.modified = false;
     x.copy(gdx2, true);
@@ -1629,7 +1628,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_overwrite_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Variable(gdx2, 'x');
     try
         t.assert(false);
@@ -1640,7 +1639,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_variable_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
     try
         t.assert(false);
         x.copy(gdx2);
@@ -1650,7 +1649,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_equation_empty_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     e.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1675,7 +1674,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_equation_empty_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     i.copy(gdx2);
     a.copy(gdx2);
@@ -1704,7 +1703,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_equation_overwrite_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Equation(gdx2, 'e', 'geq');
     gdx2.modified = false;
     e.copy(gdx2, true);
@@ -1730,7 +1729,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_overwrite_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Equation(gdx2, 'e', 'geq');
     try
         t.assert(false);
@@ -1741,7 +1740,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_variable_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
     try
         t.assert(false);
         e.copy(gdx2);
@@ -1751,7 +1750,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_parameter_empty_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     p.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1769,7 +1768,7 @@ function test_copySymbol(t, cfg)
     t.assert(isfield(gdx2.data.p.records, 'i'));
     t.assert(isfield(gdx2.data.p.records, 'value'));
     t.assert(numel(gdx2.data.p.records.i) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(gdx2.data.p.records.i(1), 'i1');
         t.assertEquals(gdx2.data.p.records.i(2), 'i2');
     else
@@ -1785,7 +1784,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_parameter_empty_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     i.copy(gdx2);
     p.copy(gdx2);
@@ -1806,7 +1805,7 @@ function test_copySymbol(t, cfg)
     t.assert(isfield(gdx2.data.p.records, 'i'));
     t.assert(isfield(gdx2.data.p.records, 'value'));
     t.assert(numel(gdx2.data.p.records.i) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(gdx2.data.p.records.i(1), 'i1');
         t.assertEquals(gdx2.data.p.records.i(2), 'i2');
     else
@@ -1822,7 +1821,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_parameter_overwrite_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Parameter(gdx2, 'p');
     gdx2.modified = false;
     p.copy(gdx2, true);
@@ -1841,7 +1840,7 @@ function test_copySymbol(t, cfg)
     t.assert(isfield(gdx2.data.p.records, 'i'));
     t.assert(isfield(gdx2.data.p.records, 'value'));
     t.assert(numel(gdx2.data.p.records.i) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(gdx2.data.p.records.i(1), 'i1');
         t.assertEquals(gdx2.data.p.records.i(2), 'i2');
     else
@@ -1857,7 +1856,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_parameter_overwrite_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Parameter(gdx2, 'p');
     try
         t.assert(false);
@@ -1868,7 +1867,7 @@ function test_copySymbol(t, cfg)
     end
 
     t.add('copy_symbol_parameter_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
     try
         t.assert(false);
         p.copy(gdx2);
@@ -1881,7 +1880,7 @@ end
 
 function test_defaultvalues(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
 
     t.add('default_values_variables');
     s = gams.transfer.Variable(gdx, 'x1', 'binary');
@@ -1987,7 +1986,7 @@ end
 
 function test_domainViolation(t, cfg);
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i1 = gams.transfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
@@ -2068,7 +2067,7 @@ function test_domainViolation(t, cfg);
     t.add('domain_violation_4');
     gdx.write(write_filename);
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i1 = gams.transfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
@@ -2140,7 +2139,7 @@ function test_domainViolation(t, cfg);
     t.assert(a2.isValid());
     t.assert(a3.isValid());
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i1 = gams.transfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
@@ -2176,7 +2175,7 @@ function test_domainViolation(t, cfg);
     t.assert(a2.isValid());
     t.assert(a3.isValid());
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i1 = gams.transfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
@@ -2217,7 +2216,7 @@ end
 
 function test_setRecords(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
 
     i1 = gams.transfer.Set(gdx, 'i1');
     s1 = gams.transfer.Variable(gdx, 'x1', 'free', {'i'});
@@ -2232,7 +2231,7 @@ function test_setRecords(t, cfg)
     t.assert(numel(fieldnames(s1.records)) == 1);
     t.assert(isfield(s1.records, 'i'));
     t.assert(numel(s1.records.i) == 1);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s1.records.i(1), 'test');
     else
         t.assert(s1.records.i(1) == 1);
@@ -2260,7 +2259,7 @@ function test_setRecords(t, cfg)
     t.assert(numel(fieldnames(s1.records)) == 1);
     t.assert(isfield(s1.records, 'i'));
     t.assert(numel(s1.records.i) == 3);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s1.records.i(1), 'test1');
         t.assertEquals(s1.records.i(2), 'test2');
         t.assertEquals(s1.records.i(3), 'test3');
@@ -2296,7 +2295,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(s2.records, 'uni'));
     t.assert(numel(s2.records.i) == 3);
     t.assert(numel(s2.records.uni) == 3);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s2.records.i(1), 'test11');
         t.assertEquals(s2.records.i(2), 'test12');
         t.assertEquals(s2.records.i(3), 'test13');
@@ -2400,7 +2399,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(s3.records, 'level'));
     t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s3.records.i1(1), 'i1');
         t.assertEquals(s3.records.i1(2), 'i4');
     else
@@ -2427,7 +2426,7 @@ function test_setRecords(t, cfg)
     t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
     t.assert(numel(s3.records.marginal) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s3.records.i1(1), 'i1');
         t.assertEquals(s3.records.i1(2), 'i4');
     else
@@ -2462,7 +2461,7 @@ function test_setRecords(t, cfg)
     t.assert(numel(s3.records.lower) == 2);
     t.assert(numel(s3.records.upper) == 2);
     t.assert(numel(s3.records.scale) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s3.records.i1(1), 'i1');
         t.assertEquals(s3.records.i1(2), 'i4');
     else
@@ -2564,7 +2563,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(s3.records, 'level'));
     t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s3.records.i1(1), 'i1');
         t.assertEquals(s3.records.i1(2), 'i4');
     else
@@ -2593,7 +2592,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(s3.records, 'level'));
     t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s3.records.i1(1), 'i1');
         t.assertEquals(s3.records.i1(2), 'i4');
     else
@@ -2621,7 +2620,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(s3.records, 'level'));
     t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s3.records.i1(1), 'i1');
         t.assertEquals(s3.records.i1(2), 'i4');
     else
@@ -2672,9 +2671,9 @@ function test_setRecords(t, cfg)
         t.assertEquals(e.message, 'Incorrect number of domain fields.');
     end
 
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.add('set_records_table_1');
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
         else
             tbl = table([1; 2; 3], [1; 2; 3]);
@@ -2689,7 +2688,7 @@ function test_setRecords(t, cfg)
 
         t.add('set_records_table_2');
         gdx.modified = false;
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
         else
             tbl = table([1; 2; 3], [1; 2; 3]);
@@ -2697,7 +2696,7 @@ function test_setRecords(t, cfg)
         end
         tbl.Properties.VariableNames = {'i1', 'level'};
         s3.setRecords(tbl);
-        if ~gdx.features.categorical
+        if ~gams.transfer.Constants.SUPPORTS_CATEGORICAL
             s3.setUELs({'i1'; 'i2'; 'i3'}, 1, 'rename', true);
         end
         t.assertEquals(s3.format, 'table');
@@ -2715,7 +2714,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(i1.records, 'element_text'));
     t.assert(numel(i1.records.uni) == 4);
     t.assert(numel(i1.records.element_text) == 4);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(i1.records.uni(1), 'i1');
         t.assertEquals(i1.records.uni(2), 'i2');
         t.assertEquals(i1.records.uni(3), 'i3');
@@ -2755,7 +2754,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(i1.records, 'element_text'));
     t.assert(numel(i1.records.uni) == 4);
     t.assert(numel(i1.records.element_text) == 4);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(i1.records.uni(1), 'i1');
         t.assertEquals(i1.records.uni(2), 'i2');
         t.assertEquals(i1.records.uni(3), 'i3');
@@ -2786,7 +2785,7 @@ end
 
 function test_writeUnordered(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i = gams.transfer.Set(gdx, 'i', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
@@ -2838,7 +2837,7 @@ end
 
 function test_reorder(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     s1 = gams.transfer.Set(gdx, 's1', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
@@ -2933,7 +2932,7 @@ function test_reorder(t, cfg)
         t.assertEquals(e.message, 'Circular domain set dependency in: [s2,s3].');
     end
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
 
     s1 = gams.transfer.Set(gdx, 's1', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
     s1.domain = {s1};
@@ -2972,10 +2971,10 @@ function test_transformRecords(t, cfg)
     x_format = cell(1, numel(formats));
 
     for i = 1:numel(formats)
-        if strcmp(formats{i}, 'table') && ~gdx.features.table
+        if strcmp(formats{i}, 'table') && ~gams.transfer.Constants.SUPPORTS_TABLE
             continue
         end
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', formats{i});
         i_recs{i} = gdx.data.i.records;
         j_recs{i} = gdx.data.j.records;
@@ -2990,17 +2989,17 @@ function test_transformRecords(t, cfg)
     end
 
     for i = 1:numel(formats)
-        if strcmp(formats{i}, 'table') && ~gdx.features.table
+        if strcmp(formats{i}, 'table') && ~gams.transfer.Constants.SUPPORTS_TABLE
             continue
         end
 
         for j = 1:numel(formats)
-            if strcmp(formats{j}, 'table') && ~gdx.features.table
+            if strcmp(formats{j}, 'table') && ~gams.transfer.Constants.SUPPORTS_TABLE
                 continue
             end
 
             t.add(sprintf('transform_records_%s_to_%s', formats{i}, formats{j}));
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
             gdx.read(cfg.filenames{1}, 'format', formats{i});
             try
                 if strcmp(formats{j}, 'dense_matrix') || strcmp(formats{j}, 'sparse_matrix')

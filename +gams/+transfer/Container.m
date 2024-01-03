@@ -101,23 +101,74 @@
 %> \ref gams::transfer::Equation "Equation"
 classdef Container < handle
 
-    properties (SetAccess = protected)
+    properties (Hidden, SetAccess = protected)
+        gams_dir_ = ''
+        indexed_ = false
+        modified_ = true
+        data_
+    end
+
+    methods (Hidden, Static)
+
+        function arg = validateGamsDir(name, index, arg)
+            if isstring(arg)
+                arg = char(arg);
+            elseif ~ischar(arg)
+                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
+            end
+            if ~isfile(fullfile(arg, gams.transfer.Constants.GDX_LIB_NAME))
+                error('Argument ''%s'' (at position %d) does not contain a path to the GDX library.', name, index);
+            end
+        end
+
+        function arg = validateIndexed(name, index, arg)
+            if ~islogical(arg)
+                error('Argument ''%s'' (at position %d) must be ''logical''.', name, index);
+            end
+            if ~isscalar(arg)
+                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
+            end
+        end
+
+        function arg = validateModified(name, index, arg)
+            if ~islogical(arg)
+                error('Argument ''%s'' (at position %d) must be ''logical''.', name, index);
+            end
+            if ~isscalar(arg)
+                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
+            end
+        end
+
+        function arg = validateReadSource(name, index, arg)
+            if isa(arg, 'gams.transfer.Container')
+                return
+            end
+            if isstring(arg)
+                arg = char(arg);
+            elseif ~ischar(arg)
+                error('Argument ''%s'' (at position %d) must be ''string'', ''char'' or ''gams.transfer.Container''.', name, index);
+            end
+        end
+
+    end
+
+    properties (Dependent, SetAccess = protected)
         %> GAMS system directory
 
         % gams_dir GAMS system directory
-        gams_dir = ''
+        gams_dir
 
 
         %> Flag for indexed mode
 
         % indexed Flag for indexed mode
-        indexed = false
+        indexed
 
 
         %> GAMS (GDX) symbols
 
         % data GAMS (GDX) symbols
-        data = struct()
+        data
     end
 
     properties (Dependent)
@@ -137,11 +188,43 @@ classdef Container < handle
 
     end
 
-    properties (Hidden, SetAccess = protected)
-        id
-        features
-        modified_ = true
-        name_lookup = struct();
+    methods
+
+        function gams_dir = get.gams_dir(obj)
+            gams_dir = obj.gams_dir_;
+        end
+
+        function indexed = get.indexed(obj)
+            indexed = obj.indexed_;
+        end
+
+        function data = get.data(obj)
+            data = obj.data_.entries_;
+        end
+
+        function modified = get.modified(obj)
+            modified = obj.modified_;
+            if modified
+                return
+            end
+            symbols = obj.data_.getAllEntries();
+            for i = 1:numel(symbols)
+                if modified
+                    return
+                end
+                modified = modified || symbols{i}.modified;
+            end
+        end
+
+        function obj = set.modified(obj, modified)
+            modified = obj.validateModified('modified', 1, modified);
+            symbols = obj.data_.getAllEntries();
+            for i = 1:numel(symbols)
+                symbols{i}.modified = modified;
+            end
+            obj.modified_ = modified;
+        end
+
     end
 
     methods
@@ -174,67 +257,46 @@ classdef Container < handle
         function obj = Container(varargin)
             % Constructs a GAMS Transfer Container, see class help
 
-            % input arguments
-            p = inputParser();
-            is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-                ~strcmpi(x, 'gams_dir') && ~strcmpi(x, 'indexed') && ...
-                ~strcmpi(x, 'features');
-            is_source = @(x) is_string_char(x) || isa(x, 'gams.transfer.Container');
-            addOptional(p, 'source', '', is_source);
-            addParameter(p, 'gams_dir', '', is_string_char);
-            addParameter(p, 'indexed', false, @islogical);
-            addParameter(p, 'features', struct(), @isstruct);
-            parse(p, varargin{:});
+            obj.data_ = gams.transfer.ordered_dict.CaseInsensitiveStruct();
 
-            obj.id = int32(randi(100000));
-
-            % check support of features
-            obj.features = gams.transfer.Utils.checkFeatureSupport();
-
-            % input arguments
-            obj.gams_dir = gams.transfer.Utils.checkGamsDirectory(p.Results.gams_dir);
-            obj.indexed = p.Results.indexed;
-            feature_names = fieldnames(obj.features);
-            for i = 1:numel(feature_names)
-                if isfield(p.Results.features, feature_names{i})
-                    obj.features.(feature_names{i}) = p.Results.features.(feature_names{i});
+            % parse input arguments
+            has_gams_dir = false;
+            source = '';
+            try
+                index = 1;
+                is_pararg = false;
+                while index <= nargin
+                    if strcmpi(varargin{index}, 'gams_dir')
+                        obj.gams_dir_ = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'gams_dir', @obj.validateGamsDir);
+                        has_gams_dir = true;
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif strcmpi(varargin{index}, 'indexed')
+                        obj.indexed_ = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'indexed', @obj.validateIndexed);
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif ~is_pararg && index == 1
+                        source = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'source', @obj.validateReadSource);
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
                 end
+            catch e
+                error(e.message);
+            end
+
+            % find GDX directory from PATH if not given
+            if ~has_gams_dir
+                obj.gams_dir_ = gams.transfer.utils.find_gdx();
             end
 
             % read GDX file
-            if ~strcmp(p.Results.source, '')
-                obj.read(p.Results.source);
-            end
-        end
-
-    end
-
-    methods
-
-        function set.data(obj, data)
-            obj.data = data;
-            obj.modified_ = true;
-        end
-
-        function set.modified(obj, modified)
-            if ~islogical(modified)
-                error('Modified must be logical.');
-            end
-            symbols = fieldnames(obj.data);
-            for i = 1:numel(symbols)
-                obj.data.(symbols{i}).modified = modified;
-            end
-            obj.modified_ = modified;
-        end
-
-        function modified = get.modified(obj)
-            modified = obj.modified_;
-            symbols = fieldnames(obj.data);
-            for i = 1:numel(symbols)
-                if modified
-                    return
-                end
-                modified = modified || obj.data.(symbols{i}).modified;
+            if ~strcmp(source, '')
+                obj.read(source);
             end
         end
 
@@ -255,26 +317,26 @@ classdef Container < handle
             %    Other Container
 
             eq = false;
-            if ~isa(container, 'gams.transfer.Container')
-                return
-            end
-            eq = isequaln(obj.gams_dir, container.gams_dir);
-            eq = eq && obj.indexed == container.indexed;
-            eq = eq && numel(fieldnames(obj.data)) == numel(fieldnames(container.data));
-            if ~eq
-                return
-            end
+            % if ~isa(container, 'gams.transfer.Container')
+            %     return
+            % end
+            % eq = isequaln(obj.gams_dir_, container.gams_dir);
+            % eq = eq && obj.indexed_ == container.indexed;
+            % eq = eq && numel(fieldnames(obj.data_)) == numel(fieldnames(container.data));
+            % if ~eq
+            %     return
+            % end
 
-            symbols1 = fieldnames(obj.data);
-            symbols2 = fieldnames(container.data);
-            if numel(symbols1) ~= numel(symbols2)
-                eq = false;
-                return
-            end
-            for i = 1:numel(symbols1)
-                eq = eq && isequaln(symbols1{i}, symbols2{i});
-                eq = eq && obj.data.(symbols1{i}).equals(container.data.(symbols2{i}));
-            end
+            % symbols1 = fieldnames(obj.data_);
+            % symbols2 = fieldnames(container.data);
+            % if numel(symbols1) ~= numel(symbols2)
+            %     eq = false;
+            %     return
+            % end
+            % for i = 1:numel(symbols1)
+            %     eq = eq && isequaln(symbols1{i}, symbols2{i});
+            %     eq = eq && obj.data_.(symbols1{i}).equals(container.data.(symbols2{i}));
+            % end
         end
 
         %> Reads symbols from GDX file
@@ -348,7 +410,7 @@ classdef Container < handle
 
             % copy symbols from container
             if isa(p.Results.source, 'gams.transfer.Container')
-                if p.Results.source.indexed ~= obj.indexed
+                if p.Results.source.indexed ~= obj.indexed_
                     error('Indexed flags of source and this container must match.');
                 end
                 source_data = p.Results.source.data;
@@ -391,7 +453,7 @@ classdef Container < handle
                 end
 
                 % create cross-referenced domain if possible
-                if obj.indexed
+                if obj.indexed_
                     domain = symbol.size;
                 else
                     domain = symbol.domain;
@@ -409,16 +471,16 @@ classdef Container < handle
                 % convert symbol to GDXSymbol
                 switch symbol.symbol_type
                 case {gams.transfer.cmex.SymbolType.SET, 'set'}
-                    obj.addSet(symbol.name, domain, 'description', ...
+                    symbol_ = obj.addSet(symbol.name, domain, 'description', ...
                         symbol.description, 'is_singleton', symbol.is_singleton);
                 case {gams.transfer.cmex.SymbolType.PARAMETER, 'parameter'}
-                    obj.addParameter(symbol.name, domain, 'description', ...
+                    symbol_ = obj.addParameter(symbol.name, domain, 'description', ...
                         symbol.description);
                 case {gams.transfer.cmex.SymbolType.VARIABLE, 'variable'}
-                    obj.addVariable(symbol.name, symbol.type, domain, ...
+                    symbol_ = obj.addVariable(symbol.name, symbol.type, domain, ...
                         'description', symbol.description);
                 case {gams.transfer.cmex.SymbolType.EQUATION, 'equation'}
-                    obj.addEquation(symbol.name, symbol.type, domain, ...
+                    symbol_ = obj.addEquation(symbol.name, symbol.type, domain, ...
                         'description', symbol.description);
                 otherwise
                     error('Invalid symbol type');
@@ -426,25 +488,25 @@ classdef Container < handle
 
                 % set records and store format (no need to call isValid to
                 % detect the format because at this point, we know it)
-                obj.data.(symbol.name).records = symbol.records;
+                symbol_.records = symbol.records;
                 switch symbol.format
                 case {3, 'dense_matrix',
                     4, 'sparse_matrix'}
-                    copy_format = ~any(isnan(obj.data.(symbol.name).size));
+                    copy_format = ~any(isnan(symbol_.size));
                 otherwise
                     copy_format = true;
                 end
                 % TODO
                 % if copy_format
                 %     if isnumeric(symbol.format)
-                %         obj.data.(symbol.name).format_ = symbol.format;
+                %         symbol_.format_ = symbol.format;
                 %     else
-                %         obj.data.(symbol.name).format_ = gams.transfer.RecordsFormat.str2int(symbol.format);
+                %         symbol_.format_ = gams.transfer.RecordsFormat.str2int(symbol.format);
                 %     end
                 % end
 
                 % set uels
-                if isfield(symbol, 'uels') && ~obj.features.categorical
+                if isfield(symbol, 'uels') && ~gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     switch symbol.format
                     case {3, 'dense_matrix',
                         4, 'sparse_matrix'}
@@ -453,7 +515,7 @@ classdef Container < handle
                             if isempty(symbol.uels{j})
                                 continue
                             end
-                            obj.data.(symbol.name).setUELs(symbol.uels{j}, j, 'rename', true);
+                            symbol_.setUELs(symbol.uels{j}, j, 'rename', true);
                         end
                     end
                 end
@@ -550,7 +612,7 @@ classdef Container < handle
             parse(p, varargin{:});
 
             if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
+                symbols = obj.data_.getAllKeys();
             else
                 symbols = obj.getSymbolNames(p.Results.symbols);
             end
@@ -569,14 +631,14 @@ classdef Container < handle
                 enable = true(1, numel(symbols));
             else
                 enable = false(1, numel(symbols));
-                allsymbols = fieldnames(obj.data);
+                allsymbols = obj.data_.getAllKeys();
                 allsymbols = containers.Map(allsymbols, 1:numel(allsymbols));
                 for i = 1:numel(symbols)
                     enable(allsymbols(symbols{i})) = true;
                 end
             end
 
-            if p.Results.compress && obj.indexed
+            if p.Results.compress && obj.indexed_
                 error('Compression not supported for indexed GDX.');
             end
 
@@ -585,13 +647,14 @@ classdef Container < handle
                 char(p.Results.filename), '.gdx', false);
 
             % write data
-            if obj.indexed
-                gams.transfer.cmex.gt_idx_write(obj.gams_dir, filename, obj.data, ...
-                    enable, p.Results.sorted, obj.features.table);
+            if obj.indexed_
+                gams.transfer.cmex.gt_idx_write(obj.gams_dir_, filename, obj.data_.entries, ...
+                    enable, p.Results.sorted, gams.transfer.Constants.SUPPORTS_TABLE);
             else
-                gams.transfer.cmex.gt_gdx_write(obj.gams_dir, filename, obj.data, ...
+                gams.transfer.cmex.gt_gdx_write(obj.gams_dir_, filename, obj.data_.entries, ...
                     enable, p.Results.uel_priority, p.Results.compress, p.Results.sorted, ...
-                    obj.features.table, obj.features.categorical, obj.features.c_prop_setget);
+                    gams.transfer.Constants.SUPPORTS_TABLE, gams.transfer.Constants.SUPPORTS_CATEGORICAL, ...
+                    false);
             end
         end
 
@@ -624,22 +687,17 @@ classdef Container < handle
             % vars = c.getSymbols(c.listVariables());
 
             if nargin == 1
-                symbols = struct2cell(obj.data);
+                symbols = obj.data_.getAllEntries();
                 return
             end
-
-            sym_names = obj.getSymbolNames(names);
-
-            if ischar(names) || isstring(names)
-                symbols = obj.data.(sym_names);
-            elseif iscellstr(names)
-                n = numel(names);
-                symbols = cell(size(names));
-                for i = 1:n
-                    symbols{i} = obj.data.(sym_names{i});
+            try
+                if iscell(names)
+                    symbols = obj.data_.getEntries(names);
+                else
+                    symbols = obj.data_.getEntry(names);
                 end
-            else
-                error('Name must be of type ''char'' or ''cellstr''.');
+            catch e
+                error('Cannot get symbols: %s', e.message);
             end
         end
 
@@ -791,16 +849,10 @@ classdef Container < handle
             % true if GAMS symbol named b{i} (case does not matter) exists.
             % false otherwise.
 
-            if ischar(names) || isstring(names)
-                bool = isfield(obj.name_lookup, lower(names));
-            elseif iscellstr(names)
-                n = numel(names);
-                bool = true(1, n);
-                for i = 1:n
-                    bool(i) = isfield(obj.name_lookup, lower(names{i}));
-                end
+            if iscell(names)
+                bool = obj.data_.hasKeys(names);
             else
-                error('Name must be of type ''char'' or ''cellstr''.');
+                bool = obj.data_.hasKey(names);
             end
         end
 
@@ -826,24 +878,10 @@ classdef Container < handle
             % Example:
             % v1 = c.getSymbolNames('v1'); % equals c.getSymbolNames('V1');
 
-            if ischar(names) || isstring(names)
-                name_lower = lower(names);
-                if ~isfield(obj.name_lookup, name_lower)
-                    error('Symbol ''%s'' does not exist.', names);
-                end
-                symbols = obj.name_lookup.(name_lower);
-            elseif iscellstr(names)
-                n = numel(names);
-                symbols = cell(size(names));
-                for i = 1:n
-                    name_lower = lower(names{i});
-                    if ~isfield(obj.name_lookup, name_lower)
-                        error('Symbol ''%s'' does not exist.', names{i});
-                    end
-                    symbols{i} = obj.name_lookup.(name_lower);
-                end
+            if iscell(names)
+                symbols = obj.data_.getKeys(names);
             else
-                error('Name must be of type ''char'' or ''cellstr''.');
+                symbols = obj.data_.getKey(names);
             end
         end
 
@@ -909,22 +947,21 @@ classdef Container < handle
                 error(e.message);
             end
 
-            names = fieldnames(obj.data);
             if isempty(types) && ~islogical(is_valid)
-                list = names;
+                list = obj.data_.getAllKeys();
                 return
             end
 
             % count matched symbols
+            symbols = obj.data_.getAllEntries();
             for k = 1:2
                 n = 0;
-                for i = 1:numel(names)
-                    symbol = obj.data.(names{i});
+                for i = 1:numel(symbols)
 
                     % check type
                     matched_type = isempty(types);
                     for j = 1:numel(types)
-                        if isa(symbol, types{j})
+                        if isa(symbols{i}, types{j})
                             matched_type = true;
                             break;
                         end
@@ -934,15 +971,15 @@ classdef Container < handle
                     end
 
                     % check invalid
-                    if islogical(is_valid) && isa(symbol, 'gams.transfer.Symbol') && ...
-                        xor(is_valid, symbol.isValid())
+                    if islogical(is_valid) && isa(symbols{i}, 'gams.transfer.Symbol') && ...
+                        xor(is_valid, symbols{i}.isValid())
                         continue
                     end
 
                     % add name to list
                     n = n + 1;
                     if k == 2
-                        list{n} = names{i};
+                        list{n} = symbols{i}.name;
                     end
                 end
                 if k == 1
@@ -1069,7 +1106,8 @@ classdef Container < handle
             if numel(types) > 0
                 filter = false(size(list));
                 for i = 1:numel(list)
-                    filter(i) = sum(types == gams.transfer.symbol.VariableType(obj.data.(list{i}).type).value) > 0;
+                    symbol = obj.data_.getEntry(list{i});
+                    filter(i) = sum(types == gams.transfer.symbol.VariableType(symbol.type).value) > 0;
                 end
                 list = list(filter);
             end
@@ -1125,7 +1163,8 @@ classdef Container < handle
             if numel(types) > 0
                 filter = false(size(list));
                 for i = 1:numel(list)
-                    filter(i) = sum(types == gams.transfer.symbol.EquationType(obj.data.(list{i}).type).value) > 0;
+                    symbol = obj.data_.getEntry(list{i});
+                    filter(i) = sum(types == gams.transfer.symbol.EquationType(symbol.type).value) > 0;
                 end
                 list = list(filter);
             end
@@ -1194,6 +1233,14 @@ classdef Container < handle
             else
                 symbols = obj.getSets();
             end
+
+            % get sets for aliases
+            for i = 1:numel(symbols)
+                if isa(symbols{i}, 'gams.transfer.alias.Set')
+                    symbols{i} = symbols{i}.alias_with;
+                end
+            end
+
             descr = gams.transfer.symbol.Set.describe(symbols);
         end
 
@@ -1344,10 +1391,15 @@ classdef Container < handle
             %
             % See also: gams.transfer.Set
 
+            if obj.indexed_
+                error('Set not supported in indexed mode.');
+            end
+
             new_symbol = gams.transfer.symbol.Set(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
-                symbol = obj.add(new_symbol);
+                obj.data_.add(name, new_symbol);
+                symbol = new_symbol;
                 return
             end
 
@@ -1398,7 +1450,8 @@ classdef Container < handle
             new_symbol = gams.transfer.symbol.Parameter(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
-                symbol = obj.add(new_symbol);
+                obj.data_.add(name, new_symbol);
+                symbol = new_symbol;
                 return
             end
 
@@ -1448,10 +1501,15 @@ classdef Container < handle
             %
             % See also: gams.transfer.Variable, gams.transfer.VariableType
 
+            if obj.indexed_
+                error('Variable not supported in indexed mode.');
+            end
+
             new_symbol = gams.transfer.symbol.Variable(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
-                symbol = obj.add(new_symbol);
+                obj.data_.add(name, new_symbol);
+                symbol = new_symbol;
                 return
             end
 
@@ -1499,10 +1557,15 @@ classdef Container < handle
             %
             % See also: gams.transfer.Equation, gams.transfer.EquationType
 
+            if obj.indexed_
+                error('Equation not supported in indexed mode.');
+            end
+
             new_symbol = gams.transfer.symbol.Equation(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
-                symbol = obj.add(new_symbol);
+                obj.data_.add(name, new_symbol);
+                symbol = new_symbol;
                 return
             end
 
@@ -1544,10 +1607,15 @@ classdef Container < handle
             %
             % See also: gams.transfer.Alias, gams.transfer.Set
 
+            if obj.indexed_
+                error('Alias not supported in indexed mode.');
+            end
+
             new_symbol = gams.transfer.alias.Set(obj, name, alias_with);
 
             if ~obj.hasSymbols(name)
-                symbol = obj.add(new_symbol);
+                obj.data_.add(name, new_symbol);
+                symbol = new_symbol;
                 return
             end
 
@@ -1585,10 +1653,15 @@ classdef Container < handle
             %
             % See also: gams.transfer.UniverseAlias, gams.transfer.Alias, gams.transfer.Set
 
+            if obj.indexed_
+                error('UniverseAlias not supported in indexed mode.');
+            end
+
             new_symbol = gams.transfer.alias.Universe(obj, name);
 
             if ~obj.hasSymbols(name)
-                symbol = obj.add(new_symbol);
+                obj.data_.add(name, new_symbol);
+                symbol = new_symbol;
                 return
             end
 
@@ -1620,15 +1693,11 @@ classdef Container < handle
             if strcmp(oldname, newname)
                 return
             end
-
-            % check if symbol exists
             if obj.hasSymbols(newname) && ~strcmpi(newname, oldname)
                 error('Symbol ''%s'' already exists.', newname);
             end
-
-            oldname = obj.getSymbolNames(oldname);
-            obj.data.(oldname).name_ = char(newname);
-            obj.renameData(oldname, newname);
+            symbol = obj.data_.rename(oldname, newname);
+            symbol.name = newname;
         end
 
         %> Removes a symbol from container
@@ -1660,15 +1729,12 @@ classdef Container < handle
 
             if nargin == 1
                 removed_symbols = obj.getSymbols();
-
-                obj.data = struct();
-                obj.name_lookup = struct();
+                obj.data_.clear();
 
                 % force recheck of deleted symbol (it may still live within an
                 % alias, domain or in the user's program)
                 for i = 1:numel(removed_symbols)
                     removed_symbols{i}.isValid(false, true);
-                    removed_symbols{i}.unsetContainer();
                 end
                 return
             end
@@ -1688,30 +1754,26 @@ classdef Container < handle
                 removed_symbols{j} = obj.getSymbols(names{i});
 
                 % remove symbol
-                obj.removeFromData(removed_symbols{j}.name);
+                obj.data_.remove(removed_symbols{j}.name);
 
                 % force recheck of deleted symbol (it may still live within an
                 % alias, domain or in the user's program)
                 removed_symbols{j}.isValid(false, true);
-
-                % unlink container
-                removed_symbols{j}.unsetContainer();
             end
             removed_symbols = removed_symbols(1:j);
 
-            % remove symbols from domain references
-            symbols = fieldnames(obj.data);
+            % remove aliases to removed sets
+            symbols = obj.data_.getAllEntries();
             remove_aliases = {};
             for i = 1:numel(symbols)
-                symbol = obj.data.(symbols{i});
-                if isa(symbol, 'gams.transfer.Alias')
-                    for j = 1:numel(removed_symbols)
-                        if symbol.alias_with.name == removed_symbols{j}.name
-                            remove_aliases{end+1} = symbol.name;
-                        end
+                if ~isa(symbols{i}, 'gams.transfer.alias.Set')
+                    continue
+                end
+                for j = 1:numel(removed_symbols)
+                    if symbols{i}.alias_with.name == removed_symbols{j}.name
+                        remove_aliases{end+1} = symbols{i}.name;
+                        break;
                     end
-                else
-                    symbol.unsetDomain(removed_symbols);
                 end
             end
             if numel(remove_aliases) > 0
@@ -1723,12 +1785,14 @@ classdef Container < handle
         function reorderSymbols(obj)
             % Reestablishes a valid GDX symbol order
 
-            names = fieldnames(obj.data);
+            error('todo')
+
+            names = fieldnames(obj.data_);
 
             % get number of set/alias
             n_sets = 0;
             for i = 1:numel(names)
-                symbol = obj.data.(names{i});
+                symbol = obj.data_.(names{i});
                 if isa(symbol, 'gams.transfer.Set') || isa(symbol, 'gams.transfer.Alias')
                     n_sets = n_sets + 1;
                 end
@@ -1743,7 +1807,7 @@ classdef Container < handle
 
             % get index by type
             for i = 1:numel(names)
-                symbol = obj.data.(names{i});
+                symbol = obj.data_.(names{i});
                 if isa(symbol, 'gams.transfer.Set') || isa(symbol, 'gams.transfer.Alias')
                     n_sets = n_sets + 1;
                     idx_sets(n_sets) = i;
@@ -1764,7 +1828,7 @@ classdef Container < handle
                 while n_handled < n_sets
                     % check if we can add the next set
                     curr_is_next = true;
-                    current_set = obj.data.(sets{idx(n_handled+1)});
+                    current_set = obj.data_.(sets{idx(n_handled+1)});
                     for i = 1:current_set.dimension
                         if (isa(current_set.domain{i}, 'gams.transfer.Set') || ...
                             isa(current_set.domain{i}, 'gams.transfer.Alias')) && ...
@@ -1797,7 +1861,7 @@ classdef Container < handle
             end
 
             % apply permutation
-            obj.data = orderfields(obj.data, [idx_sets, idx_other]);
+            obj.data_ = orderfields(obj.data_, [idx_sets, idx_other]);
 
             % force recheck of all remaining symbols in container
             obj.isValid(false, true);
@@ -1855,18 +1919,17 @@ classdef Container < handle
             addParameter(p, 'symbols', {}, @iscellstr);
             parse(p, varargin{:});
             if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
+                symbols = obj.data_.getAllEntries();
             else
-                symbols = obj.getSymbolNames(p.Results.symbols);
+                symbols = obj.getSymbols(p.Results.symbols);
             end
 
             for i = 1:numel(symbols)
-                symbol = obj.data.(symbols{i});
-                if isa(symbol, 'gams.transfer.Alias')
+                if isa(symbols{i}, 'gams.transfer.Alias')
                     continue
                 end
 
-                dom_violations_sym = symbol.getDomainViolations();
+                dom_violations_sym = symbols{i}.getDomainViolations();
                 dom_violations(end+1:end+numel(dom_violations_sym)) = dom_violations_sym;
             end
         end
@@ -1966,17 +2029,16 @@ classdef Container < handle
             addParameter(p, 'symbols', {}, @iscellstr);
             parse(p, varargin{:});
             if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
+                symbols = obj.data_.getAllEntries();
             else
-                symbols = obj.getSymbolNames(p.Results.symbols);
+                symbols = obj.getSymbols(p.Results.symbols);
             end
             verbose = p.Results.verbose;
             force = p.Results.force;
 
             valid = true;
             for i = 1:numel(symbols)
-                symbol = obj.data.(symbols{i});
-                if symbol.isValid(verbose, force)
+                if symbols{i}.isValid(verbose, force)
                     continue
                 end
                 valid = false;
@@ -2020,19 +2082,17 @@ classdef Container < handle
             addParameter(p, 'ignore_unused', false, @islogical);
             parse(p, varargin{:});
             if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
+                symbols = obj.data_.getAllEntries();
             else
-                symbols = obj.getSymbolNames(p.Results.symbols);
+                symbols = obj.getSymbols(p.Results.symbols);
             end
 
             uels = {};
             for i = 1:numel(symbols)
-                if isa(obj.data.(symbols{i}), 'gams.transfer.UniverseAlias')
+                if isa(symbols{i}, 'gams.transfer.UniverseAlias')
                     continue
                 end
-                uels = [uels; obj.data.(symbols{i}).getUELs('ignore_unused', p.Results.ignore_unused)];
-                [~,uidx,~] = unique(uels, 'first');
-                uels = uels(sort(uidx));
+                uels = gams.transfer.utils.unique([uels; symbols{i}.getUELs('ignore_unused', p.Results.ignore_unused)]);
             end
         end
 
@@ -2100,13 +2160,13 @@ classdef Container < handle
             end
 
             if isempty(symbols)
-                symbols = fieldnames(obj.data);
+                symbols = obj.data_.getAllEntries();
             else
-                symbols = obj.getSymbolNames(symbols);
+                symbols = obj.getSymbols(symbols);
             end
 
             for i = 1:numel(symbols)
-                obj.data.(symbols{i}).removeUELs(uels);
+                symbols{i}.removeUELs(uels);
             end
         end
 
@@ -2152,13 +2212,13 @@ classdef Container < handle
             addParameter(p, 'allow_merge', false, @islogical);
             parse(p, varargin{:});
             if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
+                symbols = obj.data_.getAllEntries();
             else
-                symbols = obj.getSymbolNames(p.Results.symbols);
+                symbols = obj.getSymbols(p.Results.symbols);
             end
 
             for i = 1:numel(symbols)
-                obj.data.(symbols{i}).renameUELs(uels, 'allow_merge', p.Results.allow_merge);
+                symbols{i}.renameUELs(uels, 'allow_merge', p.Results.allow_merge);
             end
         end
 
@@ -2190,12 +2250,15 @@ classdef Container < handle
             p = inputParser();
             addParameter(p, 'symbols', {}, @iscellstr);
             parse(p, varargin{:});
+
             if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
+                symbols = obj.data_.getAllEntries();
+            else
+                symbols = obj.getSymbols(p.Results.symbols);
             end
 
             for i = 1:numel(symbols)
-                obj.data.(symbols{i}).lowerUELs();
+                symbols{i}.lowerUELs();
             end
         end
 
@@ -2228,23 +2291,14 @@ classdef Container < handle
             addParameter(p, 'symbols', {}, @iscellstr);
             parse(p, varargin{:});
             if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
+                symbols = obj.data_.getAllEntries();
+            else
+                symbols = obj.getSymbols(p.Results.symbols);
             end
 
             for i = 1:numel(symbols)
-                obj.data.(symbols{i}).upperUELs();
+                symbols{i}.upperUELs();
             end
-        end
-
-    end
-
-    methods (Hidden, Access = {?gams.transfer.Symbol_, ?gams.transfer.Alias, ?gams.transfer.UniverseAlias})
-
-        function symbol = add(obj, symbol)
-            if obj.indexed && ~isa(symbol, 'gams.transfer.Parameter')
-                error('Symbol must be of type ''gams.transfer.Parameter'' in indexed mode.');
-            end
-            obj.addToData(symbol.name_, symbol);
         end
 
     end
@@ -2268,7 +2322,7 @@ classdef Container < handle
                 format_int = 4;
             case 'table'
                 format_int = 5;
-                if ~obj.features.table
+                if ~gams.transfer.Constants.SUPPORTS_TABLE
                     format_int = 2;
                 end
             otherwise
@@ -2293,59 +2347,14 @@ classdef Container < handle
             end
 
             % read records
-            if obj.indexed
-                data = gams.transfer.cmex.gt_idx_read(obj.gams_dir, filename, ...
+            if obj.indexed_
+                data = gams.transfer.cmex.gt_idx_read(obj.gams_dir_, filename, ...
                     symbols, int32(format_int), records);
             else
-                data = gams.transfer.cmex.gt_gdx_read(obj.gams_dir, filename, ...
+                data = gams.transfer.cmex.gt_gdx_read(obj.gams_dir_, filename, ...
                     symbols, int32(format_int), records, values_bool, ...
-                    obj.features.categorical, obj.features.c_prop_setget);
+                    gams.transfer.Constants.SUPPORTS_CATEGORICAL, false);
             end
-        end
-
-        function clearData(obj)
-            obj.data = struct();
-            obj.name_lookup = struct();
-        end
-
-        function addToData(obj, name, symbol)
-            if obj.hasSymbols(name)
-                error('Symbol ''%s'' already exists.', name);
-            end
-            obj.data.(name) = symbol;
-            obj.name_lookup.(lower(name)) = name;
-        end
-
-        function renameData(obj, oldname, newname)
-            if ~obj.hasSymbols(oldname)
-                return
-            end
-
-            % get index of symbol
-            names = fieldnames(obj.data);
-            idx = find(strcmp(names, oldname), 1);
-            if isempty(idx)
-                return
-            end
-
-            % add new symbol / remove old symbol
-            obj.data.(newname) = obj.data.(oldname);
-            obj.data = rmfield(obj.data, oldname);
-            obj.name_lookup = rmfield(obj.name_lookup, lower(oldname));
-            obj.name_lookup.(lower(newname)) = newname;
-
-            % get old ordering
-            perm = [1:idx-1, numel(names), idx:numel(names)-1];
-            obj.data = orderfields(obj.data, perm);
-            obj.name_lookup = orderfields(obj.name_lookup, perm);
-        end
-
-        function removeFromData(obj, name)
-            if ~obj.hasSymbols(name)
-                return
-            end
-            obj.data = rmfield(obj.data, name);
-            obj.name_lookup = rmfield(obj.name_lookup, lower(name));
         end
 
     end

@@ -1,4 +1,4 @@
-% Find GAMS system directory from PATH
+% Find GDX library from PATH
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,33 +28,30 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Find GAMS system directory from PATH
+% Find GDX library from PATH
 %
-% sysdir = find_gams() returns the path to the GAMS system directory if it is
+% sysdir = find_gdx() returns the path to the GAMS system directory if it is
 % part of the PATH environment variable and an empty string otherwise.
-function gamsDirectory = find_gams()
-    gamsDirectory = '';
+function gdx_path = find_gdx()
+    gdx_path = '';
 
-    % name of GAMS executable
-    if ispc
-        gams_exe = 'gams.exe';
-    else
-        gams_exe = 'gams';
-    end
-
-    % find GAMS executable in any of the PATH paths
+    % find gdx in any of the PATH paths
     paths = [pathsep, getenv('PATH'), pathsep];
     idx = find(paths == pathsep);
     for i = 1:numel(idx)-1
         p = paths(idx(i)+1:idx(i+1)-1);
-        if isfile([p, filesep, gams_exe])
-            gamsDirectory = p;
+        if isfile(fullfile(p, gams.transfer.Constants.GDX_LIB_NAME))
+            gdx_path = p;
             break;
         end
     end
 
     % trim path
-    if numel(gamsDirectory) > 0 && strcmp(gamsDirectory(end), filesep)
-        gamsDirectory = gamsDirectory(1:end-1);
+    if numel(gdx_path) > 0 && strcmp(gdx_path(end), filesep)
+        gdx_path = gdx_path(1:end-1);
+    end
+
+    if numel(gdx_path) == 0
+        error('Cannot find GDX library from PATH.');
     end
 end

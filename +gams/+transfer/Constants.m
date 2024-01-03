@@ -11,6 +11,10 @@ classdef Constants
 
         SUPPORTS_TABLE = gams.transfer.Constants.supportsTable()
         SUPPORTS_CATEGORICAL = gams.transfer.Constants.supportsCategorical()
+
+        OPERATING_SYSTEM = gams.transfer.Constants.operatingSystem()
+
+        GDX_LIB_NAME = gams.transfer.Constants.gdxLibName()
     end
 
     methods (Hidden, Static)
@@ -30,6 +34,37 @@ classdef Constants
                 categorical();
             catch
                 flag = false;
+            end
+        end
+
+        function os = operatingSystem()
+            os = '';
+            if ispc
+                os = 'windows';
+            elseif ismac
+                [~,result] = system('uname -v');
+                if any(strfind(result, 'ARM64'))
+                    os = 'macos_arm';
+                else
+                    os = 'macos';
+                end
+            elseif isunix
+                os = 'linux';
+            else
+                error('Unknown operating system.');
+            end
+        end
+
+        function gdxlibname = gdxLibName()
+            switch gams.transfer.Constants.OPERATING_SYSTEM
+            case 'windows'
+                gdxlibname = 'gdxcclib64.dll';
+            case 'linux'
+                gdxlibname = 'libgdxcclib64.so';
+            case {'macos', 'macos_arm'}
+                gdxlibname = 'libgdxcclib64.dylib';
+            otherwise
+                error('Unknown operating system.');
             end
         end
 
