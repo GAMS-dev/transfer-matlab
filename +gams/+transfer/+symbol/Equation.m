@@ -1,4 +1,4 @@
-% Equation Symbol
+% GAMS Equation
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,10 +28,57 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Equation Symbol
+% GAMS Equation
 %
+% Represents a GAMS Equation.
+%
+% Required Arguments:
+% 1. container (Container):
+%    gams.transfer.Container object this symbol should be stored in
+% 2. name (string):
+%    Name of equation
+% 3. type (string, int or gams.transfer.symbol.EquationType):
+%    Specifies the variable type, either as string, as integer given by any of the
+%    constants in gams.transfer.symbol.EquationType or
+%    gams.transfer.symbol.EquationType.
+%
+% Optional Arguments:
+% 4. domain (cellstr or Set):
+%    List of domains given either as string or as reference to a
+%    gams.transfer.symbol.Set object. Default is {} (for scalar).
+%
+% Parameter Arguments:
+% - records:
+%   Equation records. Default is [].
+% - description (string):
+%   Description of symbol. Default is "".
+% - domain_forwarding (logical):
+%   If true, domain entries in records will recursively be added to the domains in case
+%   they are not present in the domains already. With a logical vector domain forwarding
+%   can be enabled/disabled independently for each domain. Default: false.
+%
+% Example:
+% c = Container();
+% e2 = symbol.Equation(c, 'e2', 'l', {'*', '*'});
+% e3 = symbol.Equation(c, 'e3', symbol.EquationType.EQ, '*', 'description', 'equ e3');
+%
+% See also: gams.transfer.Equation, gams.transfer.Container.addEquation,
+% gams.transfer.symbol.EquationType
 
-%> @brief Equation Symbol
+%> @brief GAMS Equation
+%>
+%> Represents a GAMS Equation.
+%>
+%> **Example:**
+%> ```
+%> c = Container();
+%> e2 = symbol.Equation(c, 'e2', 'l', {'*', '*'});
+%> e3 = symbol.Equation(c, 'e3', symbol.EquationType.EQ, '*', 'description', 'equ e3');
+%> ```
+%>
+%> @see \ref gams::transfer::Equation "Equation", \ref
+%> gams::transfer::Container::addEquation "Container.addEquation", \ref
+%> gams::transfer::symbol::EquationType "symbol.EquationType"
 classdef Equation < gams.transfer.symbol.Abstract
 
     properties (Hidden, SetAccess = protected)
@@ -54,7 +101,17 @@ classdef Equation < gams.transfer.symbol.Abstract
     end
 
     properties (Dependent)
+        %> Equation type, e.g. `leq`
+
+        % type Equation type, e.g. 'leq'
         type
+    end
+
+    properties (Dependent, SetAccess = private)
+        %> Equation default values
+
+        % default_values Equation default values
+        default_values
     end
 
     methods
@@ -67,11 +124,60 @@ classdef Equation < gams.transfer.symbol.Abstract
             obj.type_ = obj.validateType('type', 1, type);
         end
 
+        function default_values = get.default_values(obj)
+            default_values = struct();
+            default_values.level = obj.def_.values.level.default;
+            default_values.marginal = obj.def_.values.marginal.default;
+            default_values.lower = obj.def_.values.lower.default;
+            default_values.upper = obj.def_.values.upper.default;
+            default_values.scale = obj.def_.values.scale.default;
+        end
+
     end
 
     methods
 
+        %> @brief Constructs a GAMS Equation
+        %>
+        %> See \ref GAMS_TRANSFER_MATLAB_SYMBOL_CREATE for more information.
+        %>
+        %> **Required Arguments:**
+        %> 1. container (`Container`):
+        %>    \ref gams::transfer::Container "Container" object this symbol should be stored in
+        %> 2. name (`string`):
+        %>    Name of equation
+        %> 3. type (`string`, `int` or \ref gams::transfer::symbol::EquationType "symbol.EquationType"):
+        %>    Specifies the variable type, either as `string`, as `integer` given by any of the
+        %>    constants in \ref gams::transfer::symbol::EquationType "symbol.EquationType" or \ref
+        %>    gams::transfer::symbol::EquationType "symbol.EquationType".
+        %>
+        %> **Optional Arguments:**
+        %> 4. domain (`cellstr` or `Set`):
+        %>    List of domains given either as `string` or as reference to a \ref
+        %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{}` (for scalar).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Equation records. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the domains in case
+        %>   they are not present in the domains already. With a logical vector domain forwarding
+        %>   can be enabled/disabled independently for each domain. Default: `false`.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> e2 = symbol.Equation(c, 'e2', 'l', {'*', '*'});
+        %> e3 = symbol.Equation(c, 'e3', symbol.EquationType.EQ, '*', 'description', 'equ e3');
+        %> ```
+        %>
+        %> @see \ref gams::transfer::Equation "Equation", \ref
+        %> gams::transfer::Container::addEquation "Container.addEquation", \ref
+        %> gams::transfer::symbol::EquationType "symbol.EquationType"
         function obj = Equation(varargin)
+            % Constructs a GAMS Equation, see class help
 
             obj.def_ = gams.transfer.def.Definition();
             obj.data_ = gams.transfer.data.Unknown();
@@ -124,7 +230,25 @@ classdef Equation < gams.transfer.symbol.Abstract
 
     methods (Static)
 
+        %> Returns an overview over all equations given
+        %>
+        %> See \ref GAMS_TRANSFER_MATLAB_CONTAINER_OVERVIEW for more information.
+        %>
+        %> **Required Arguments:**
+        %> 1. symbols (list):
+        %>    List of equations to include.
+        %>
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describe(symbols)
+            % Returns an overview over all equations given
+            %
+            % Optional Arguments:
+            % 1. symbols (list):
+            %    List of equations to include.
+            %
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             symbols = gams.transfer.utils.validate_cell('symbols', 1, symbols, ...
                 {'gams.transfer.symbol.Equation'}, 1);

@@ -1,4 +1,4 @@
-% Variable Symbol
+% GAMS Variable
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,10 +28,59 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Variable Symbol
+% GAMS Variable
 %
+% Represents a GAMS Variable.
+%
+% Required Arguments:
+% 1. container (Container):
+%    gams.transfer.Container object this symbol should be stored in
+% 2. name (string):
+%    Name of variable
+%
+% Optional Arguments:
+% 3. type (string, int or gams.transfer.symbol.VariableType):
+%    Specifies the variable type, either as string, as integer given by any of the
+%    constants in gams.transfer.symbol.VariableType or
+%    gams.transfer.symbol.VariableType. Default is "free".
+% 4. domain (cellstr or Set):
+%    List of domains given either as string or as reference to a
+%    gams.transfer.symbol.Set object. Default is {} (for scalar).
+%
+% Parameter Arguments:
+% - records:
+%   Set records, e.g. a list of strings. Default is [].
+% - description (string):
+%   Description of symbol. Default is "".
+% - domain_forwarding (logical):
+%   If true, domain entries in records will recursively be added to the domains in case
+%   they are not present in the domains already. With a logical vector domain forwarding
+%   can be enabled/disabled independently for each domain. Default: false.
+%
+% Example:
+% c = Container();
+% v1 = symbol.Variable(c, 'v1');
+% v2 = symbol.Variable(c, 'v2', 'binary', {'*', '*'});
+% v3 = symbol.Variable(c, 'v3', symbol.VariableType.BINARY, '*', 'description', 'var v3');
+%
+% See also: gams.transfer.Variable, gams.transfer.Container.addVariable,
+% gams.transfer.symbol.VariableType
 
-%> @brief Variable Symbol
+%> @brief GAMS Variable
+%>
+%> Represents a GAMS Variable.
+%>
+%> **Example:**
+%> ```
+%> c = Container();
+%> v1 = symbol.Variable(c, 'v1');
+%> v2 = symbol.Variable(c, 'v2', 'binary', {'*', '*'});
+%> v3 = symbol.Variable(c, 'v3', symbol.VariableType.BINARY, '*', 'description', 'var v3');
+%> ```
+%>
+%> @see \ref gams::transfer::Variable "Variable", \ref
+%> gams::transfer::Container::addVariable "Container.addVariable", \ref
+%> gams::transfer::symbol::VariableType "VariableType"
 classdef Variable < gams.transfer.symbol.Abstract
 
     properties (Hidden, SetAccess = protected)
@@ -54,7 +103,17 @@ classdef Variable < gams.transfer.symbol.Abstract
     end
 
     properties (Dependent)
+        %> Variable type, e.g. 'free'
+
+        % type Variable type, e.g. 'free'
         type
+    end
+
+    properties (Dependent, SetAccess = private)
+        %> Variable default values
+
+        % default_values Variable default values
+        default_values
     end
 
     methods
@@ -67,11 +126,59 @@ classdef Variable < gams.transfer.symbol.Abstract
             obj.type_ = obj.validateType('type', 1, type);
         end
 
+        function default_values = get.default_values(obj)
+            default_values = struct();
+            default_values.level = obj.def_.values.level.default;
+            default_values.marginal = obj.def_.values.marginal.default;
+            default_values.lower = obj.def_.values.lower.default;
+            default_values.upper = obj.def_.values.upper.default;
+            default_values.scale = obj.def_.values.scale.default;
+        end
+
     end
 
     methods
 
+        %> @brief Constructs a GAMS Variable
+        %>
+        %> **Required Arguments:**
+        %> 1. container (`Container`):
+        %>    \ref gams::transfer::Container "Container" object this symbol should be stored in
+        %> 2. name (`string`):
+        %>    Name of variable
+        %>
+        %> **Optional Arguments:**
+        %> 3. type (`string`, `int` or \ref gams::transfer::symbol::VariableType "symbol.VariableType"):
+        %>    Specifies the variable type, either as `string`, as `integer` given by any of the
+        %>    constants in \ref gams::transfer::symbol::VariableType "symbol.VariableType" or \ref
+        %>    gams::transfer::symbol::VariableType "symbol.VariableType". Default is `"free"`.
+        %> 4. domain (`cellstr` or `Set`):
+        %>    List of domains given either as string or as reference to a \ref
+        %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{}` (for scalar).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Set records, e.g. a list of strings. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the domains in case
+        %>   they are not present in the domains already. With a logical vector domain forwarding
+        %>   can be enabled/disabled independently for each domain. Default: `false`.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> v1 = symbol.Variable(c, 'v1');
+        %> v2 = symbol.Variable(c, 'v2', 'binary', {'*', '*'});
+        %> v3 = symbol.Variable(c, 'v3', symbol.VariableType.BINARY, '*', 'description', 'var v3');
+        %> ```
+        %>
+        %> @see \ref gams::transfer::Variable "Variable", \ref
+        %> gams::transfer::Container::addVariable "Container.addVariable", \ref
+        %> gams::transfer::symbol::VariableType "VariableType"
         function obj = Variable(varargin)
+            % Constructs a GAMS Variable, see class help
 
             obj.def_ = gams.transfer.def.Definition();
             obj.data_ = gams.transfer.data.Unknown();
@@ -126,7 +233,25 @@ classdef Variable < gams.transfer.symbol.Abstract
 
     methods (Static)
 
+        %> Returns an overview over all variables given
+        %>
+        %> See \ref GAMS_TRANSFER_MATLAB_CONTAINER_OVERVIEW for more information.
+        %>
+        %> **Required Arguments:**
+        %> 1. symbols (list):
+        %>    List of variables to include.
+        %>
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describe(symbols)
+            % Returns an overview over all variables given
+            %
+            % Optional Arguments:
+            % 1. symbols (list):
+            %    List of variables to include.
+            %
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             symbols = gams.transfer.utils.validate_cell('symbols', 1, symbols, ...
                 {'gams.transfer.symbol.Variable'}, 1);

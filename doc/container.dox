@@ -42,9 +42,8 @@ gams::transfer::Container "Container" constructor: `c = Container("gams_dir",
 
 \section GAMS_TRANSFER_MATLAB_CONTAINER_READ Reading From GDX
 
-Above was a first example of how to read a whole GDX file into a container. But
-often it is useful to only read certain symbols or to specify the \ref
-gams::transfer::RecordsFormat "records format". With the container's \ref
+Above was a first example of how to read a whole GDX file into a container. But often it is useful
+to only read certain symbols or to specify the records format. With the container's \ref
 gams::transfer::Container::read "Container.read" method, you get more control.
 
 Consider for the following that `c` is some container and `source` is either a GDX
@@ -67,11 +66,9 @@ c.read(source, 'symbols', {'x', 'z'});
 
 - \par Reading Symbols in a Certain Records Format:
 \parblock
-GAMS Transfer can load the symbol records into different Matlab data structures
-also referred to as \ref gams::transfer::RecordsFormat "records format". There are
-`struct`, `table` (default), `dense_matrix` and `sparse_matrix`, each with
-certain \ref gams::transfer::RecordsFormat "advantages and disadvantages". In order
-to read in a symbols as `dense_matrix`, do
+GAMS Transfer can load the symbol records into different Matlab data structures also referred to as
+records format. There are `struct`, `table` (default), `dense_matrix` and `sparse_matrix`, each with
+certain advantages and disadvantages. In order to read in a symbols as `dense_matrix`, do
 ```
 c.read(source, 'format', 'dense_matrix');
 ```
@@ -80,16 +77,16 @@ c.read(source, 'format', 'dense_matrix');
 - \par Reading a Subset of Symbol Values:
 \parblock
 Finally note that GDX files store multiple values per symbol. \ref
-gams::transfer::Set "Sets" have `element_text`, \ref gams::transfer::Parameter "Parameters"
-have `value` and \ref gams::transfer::Equation "Equations" and \ref
-gams::transfer::Variable "Variables" have `level`, `marginal`, `lower`, `upper`,
+gams::transfer::symbol::Set "Sets" have `element_text`, \ref gams::transfer::symbol::Parameter "Parameters"
+have `value` and \ref gams::transfer::symbol::Equation "Equations" and \ref
+gams::transfer::symbol::Variable "Variables" have `level`, `marginal`, `lower`, `upper`,
 `scale`, see \ref GAMS_TRANSFER_MATLAB_RECORDS for more information. On
 default, all values are read, but you can select a subset by
 ```
 c.read(source, 'values', {'level', 'marginal'});
 ```
 Note that here, `level` also enables `element_text` and `value`. Moreover, `marginal`
-has no influence on \ref gams::transfer::Set "Sets" and \ref gams::transfer::Parameter
+has no influence on \ref gams::transfer::symbol::Set "Sets" and \ref gams::transfer::symbol::Parameter
 "Parameters". It is even possible to specify no values in order to read none GDX
 records. This would then only read the symbol meta data like name or
 description.
@@ -257,16 +254,16 @@ m.removeSymbols('x');
 m.removeSymbols({'a', 'b'});
 ```
 
-\attention If a \ref gams::transfer::Set "Set" is removed from the \ref
-gams::transfer::Container "Container", a handle to that \ref gams::transfer::Set
+\attention If a \ref gams::transfer::symbol::Set "Set" is removed from the \ref
+gams::transfer::Container "Container", a handle to that \ref gams::transfer::symbol::Set
 "Set" can still exist as a domain of another symbol or be linked to by an alias.
 This will make these other symbols invalid, see \ref
-gams::transfer::Symbol::isValid "isValid".
+gams::transfer::symbol::Abstract::isValid "isValid".
 
 \section GAMS_TRANSFER_MATLAB_CONTAINER_REORDER Reordering Symbols
 
 The GDX file requires the symbols to be sorted such that, for example, a \ref
-gams::transfer::Set "Set" used as domain of another symbol appears before that
+gams::transfer::symbol::Set "Set" used as domain of another symbol appears before that
 symbol. The \ref gams::transfer::Container "Container" will try to establish a
 valid ordering when writing the data to GDX. However, this operation can also be
 invoked manually by calling the method \ref
@@ -289,15 +286,15 @@ an `x` means that this property / statistic is available for the symbol type.
 | name | Name of symbol | x | x | x | x | x |
 | is_singleton | Indicates if set is a singleton set (true) or not (false) | x | x |  |  |  |
 | alias_with | Set an alias is linked to |  | x |  |  |  |
-| type | Variable or Equation type, see \ref gams::transfer::VariableType "VariableType" and \ref gams::transfer::EquationType "EquationType" |  |  |  | x | x |
-| format | Format \ref gams::transfer::Symbol::records "records" are stored in, see \ref GAMS_TRANSFER_MATLAB_RECORDS_FORMAT | x | x | x | x | x |
-| dimension | \ref gams::transfer::Symbol::dimension "Dimension" of symbol | x | x | x | x | x |
+| type | Variable or Equation type, see \ref gams::transfer::symbol::VariableType "VariableType" and \ref gams::transfer::symbol::EquationType "EquationType" |  |  |  | x | x |
+| format | Format \ref gams::transfer::symbol::Abstract::records "records" are stored in, see \ref GAMS_TRANSFER_MATLAB_RECORDS_FORMAT | x | x | x | x | x |
+| dimension | \ref gams::transfer::symbol::Abstract::dimension "Dimension" of symbol | x | x | x | x | x |
 | domain_type | Type of domain, e.g. relaxed or regular | x | x | x | x | x |
-| domain | \ref gams::transfer::Symbol::domain "Domain" of symbol | x | x | x | x | x |
-| size | \ref gams::transfer::Symbol::size "Size" or shape of symbol | x | x | x | x | x |
-| number_records | Number of symbol GDX \ref gams::transfer::Symbol::records "records" | x | x | x | x | x |
-| number_values | Number of stored \ref gams::transfer::Symbol::records "records" values | x | x | x | x | x |
-| sparsity | Sparsity of symbol \ref gams::transfer::Symbol::records "records" w.r.t. to count | x | x | x | x | x |
+| domain | \ref gams::transfer::symbol::Abstract::domain "Domain" of symbol | x | x | x | x | x |
+| size | \ref gams::transfer::symbol::Abstract::size "Size" or shape of symbol | x | x | x | x | x |
+| number_records | Number of symbol GDX \ref gams::transfer::symbol::Abstract::records "records" | x | x | x | x | x |
+| number_values | Number of stored \ref gams::transfer::symbol::Abstract::records "records" values | x | x | x | x | x |
+| sparsity | Sparsity of symbol \ref gams::transfer::symbol::Abstract::records "records" w.r.t. to count | x | x | x | x | x |
 | min | Minimum value |  |  | x |  |  |
 | mean | Mean value |  |  | x |  |  |
 | max | Maximum value |  |  | x |  |  |
@@ -340,14 +337,14 @@ ans =
 
 GDX files can be operated in two different modes, `default` and `indexed` (also
 called IDX), which are also supported by GAMS Transfer Matlab containers:
-- `default`: Symbol \ref gams::transfer::Symbol::dimension "dimension" and shape
-  are defined by \ref gams::transfer::Symbol::domain "domain". Symbol \ref
-  gams::transfer::Symbol::records "records" are identified by \ref
+- `default`: Symbol \ref gams::transfer::symbol::Abstract::dimension "dimension" and shape
+  are defined by \ref gams::transfer::symbol::Abstract::domain "domain". Symbol \ref
+  gams::transfer::symbol::Abstract::records "records" are identified by \ref
   GAMS_TRANSFER_MATLAB_RECORDS_UELS "UELs".
-- `indexed`: Symbol \ref gams::transfer::Symbol::dimension "dimension" and shape
-  are defined by \ref gams::transfer::Symbol::size "size". \ref
+- `indexed`: Symbol \ref gams::transfer::symbol::Abstract::dimension "dimension" and shape
+  are defined by \ref gams::transfer::symbol::Abstract::size "size". \ref
   GAMS_TRANSFER_MATLAB_RECORDS_UELS "UELs" do not exist. Symbol \ref
-  gams::transfer::Symbol::records "records" are identified by numerical indices.
+  gams::transfer::symbol::Abstract::records "records" are identified by numerical indices.
 
 The mode -- `default` or `indexed` -- can be specified when creating a \ref
 gams::transfer::Container "Container" and cannot be changed thereafter:
@@ -362,12 +359,12 @@ d = Parameter(m, 'd', [2, 3], 'description', 'distance in thousands of miles');
 ```
 
 \note The only supported symbols in indexed mode are \ref
-gams::transfer::Parameter "Parameters".
+gams::transfer::symbol::Parameter "Parameters".
 \note In indexed mode it is not possible to set the property \ref
-gams::transfer::Symbol::domain "domain" or using the UEL related methods (e.g.
-\ref gams::transfer::Symbol::getUELs "getUELs" or \ref
-gams::transfer::Symbol::setUELs "setUELs"), while in default mode the property
-\ref gams::transfer::Symbol::size "size" cannot be set and is inferred from by the
+gams::transfer::symbol::Abstract::domain "domain" or using the UEL related methods (e.g.
+\ref gams::transfer::symbol::Abstract::getUELs "getUELs" or \ref
+gams::transfer::symbol::Abstract::setUELs "setUELs"), while in default mode the property
+\ref gams::transfer::symbol::Abstract::size "size" cannot be set and is inferred from by the
 domain.
 
 */

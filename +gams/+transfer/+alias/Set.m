@@ -45,12 +45,12 @@
 % s = Set(c, 's');
 % a = Alias(c, 'a', s);
 %
-% See also: gams.transfer.Set, gams.transfer.Container
+% See also: gams.transfer.symbol.Set, gams.transfer.Container
 
 %> @brief GAMS Alias
 %>
 %> This class represents a GAMS Alias, which is a link to another GAMS \ref
-%> gams::transfer::Set "Set".
+%> gams::transfer::symbol::Set "Set".
 %>
 %> **Example:**
 %> ```
@@ -59,7 +59,7 @@
 %> a = Alias(c, 'a', s);
 %> ```
 %>
-%> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Container "Container"
+%> @see \ref gams::transfer::symbol::Set "Set", \ref gams::transfer::Container "Container"
 %>
 classdef Set < gams.transfer.alias.Abstract
 
@@ -78,6 +78,7 @@ classdef Set < gams.transfer.alias.Abstract
     end
 
     properties (Dependent)
+        %> alias_with
         alias_with
         description
         is_singleton

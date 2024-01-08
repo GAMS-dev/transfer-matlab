@@ -30,6 +30,8 @@
 %
 % Data Definition
 %
+% TODO: add SetDefinition etc. and include is_singleton.
+%
 
 %> @brief Data Definition
 classdef Definition < handle

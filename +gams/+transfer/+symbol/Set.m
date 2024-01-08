@@ -1,4 +1,4 @@
-% Set Symbol
+% GAMS Set
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,10 +28,55 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Set Symbol
+% GAMS Set
 %
+% Represents a GAMS Set.
+%
+% Required Arguments:
+% 1. container (Container):
+%    gams.transfer.Container object this symbol should be stored in
+% 2. name (string):
+%    Name of set
+%
+% Optional Arguments:
+% 3. domain (cellstr or Set):
+%    List of domains given either as string or as reference to a
+%    gams.transfer.symbol.Set object. Default is {"*"} (for 1-dim with universe domain).
+%
+% Parameter Arguments:
+% - records:
+%   Set records, e.g. a list of strings. Default is `[]`.
+% - description (string):
+%   Description of symbol. Default is "".
+% - is_singleton (logical):
+%   Indicates if set is a is_singleton set (true) or not (false). Default is false.
+% - domain_forwarding (logical):
+%   If true, domain entries in records will recursively be added to the domains in case
+%   they are not present in the domains already. With a logical vector domain forwarding
+%   can be enabled/disabled independently for each domain. Default: false.
+%
+% Example:
+% c = Container();
+% s1 = symbol.Set(c, 's1');
+% s2 = symbol.Set(c, 's2', {s1, '*', '*'});
+% s3 = symbol.Set(c, 's3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
+%
+% See also: gams.transfer.Set, gams.transfer.Container.addSet
 
-%> @brief Set Symbol
+%> @brief GAMS Set
+%>
+%> Represents a GAMS Set.
+%>
+%> **Example:**
+%> ```
+%> c = Container();
+%> s1 = symbol.Set(c, 's1');
+%> s2 = symbol.Set(c, 's2', {s1, '*', '*'});
+%> s3 = symbol.Set(c, 's3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
+%> ```
+%>
+%> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Container::addSet
+%> "Container.addSet"
 classdef Set < gams.transfer.symbol.Abstract
 
     properties (Hidden, SetAccess = protected)
@@ -52,6 +97,9 @@ classdef Set < gams.transfer.symbol.Abstract
     end
 
     properties (Dependent)
+        %> indicator if Set is is_singleton
+
+        % is_singleton indicator if Set is is_singleton
         is_singleton
     end
 
@@ -69,7 +117,44 @@ classdef Set < gams.transfer.symbol.Abstract
 
     methods
 
+        %> @brief Constructs a GAMS Set
+        %>
+        %> **Required Arguments:**
+        %> 1. container (`Container`):
+        %>    \ref gams::transfer::Container "Container" object this symbol should be stored in
+        %> 2. name (`string`):
+        %>    Name of set
+        %>
+        %> **Optional Arguments:**
+        %> 3. domain (`cellstr` or `Set`):
+        %>    List of domains given either as `string` or as reference to a \ref
+        %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{"*"}` (for 1-dim with
+        %>    universe domain).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Set records, e.g. a list of strings. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - is_singleton (`logical`):
+        %>   Indicates if set is a is_singleton set (`true`) or not (`false`). Default is `false`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the domains in case
+        %>   they are not present in the domains already. With a logical vector domain forwarding
+        %>   can be enabled/disabled independently for each domain. Default: `false`.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> s1 = symbol.Set(c, 's1');
+        %> s2 = symbol.Set(c, 's2', {s1, '*', '*'});
+        %> s3 = symbol.Set(c, 's3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
+        %> ```
+        %>
+        %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Container::addSet
+        %> "Container.addSet"
         function obj = Set(varargin)
+            % Constructs a GAMS Set, see class help
 
             obj.def_ = gams.transfer.def.Definition();
             obj.data_ = gams.transfer.data.Unknown();
@@ -119,7 +204,25 @@ classdef Set < gams.transfer.symbol.Abstract
 
     methods (Static)
 
+        %> Returns an overview over all sets given
+        %>
+        %> See \ref GAMS_TRANSFER_MATLAB_CONTAINER_OVERVIEW for more information.
+        %>
+        %> **Required Arguments:**
+        %> 1. symbols (list):
+        %>    List of sets to include.
+        %>
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describe(symbols)
+            % Returns an overview over all sets given
+            %
+            % Optional Arguments:
+            % 1. symbols (list):
+            %    List of sets to include.
+            %
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             symbols = gams.transfer.utils.validate_cell('symbols', 1, symbols, ...
                 {'gams.transfer.symbol.Set'}, 1);

@@ -44,20 +44,20 @@
 % 4. violations (cellstr):
 %    List of domain entries that are used in symbol but are missing in domain.
 %
-% See also: gams.transfer.Set, gams.transfer.Symbol
+% See also: gams.transfer.symbol.Set, gams.transfer.Symbol
 %
 
 %> @brief Domain Violation
 %>
-%> Domain violations occur when a symbol uses other \ref gams::transfer::Set
-%> "Sets" as \ref gams::transfer::Symbol::domain "domain"(s) -- and is thus of
+%> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set
+%> "Sets" as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of
 %> domain type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses
-%> a domain entry in its \ref gams::transfer::Symbol::records "records" that is
+%> a domain entry in its \ref gams::transfer::symbol::Abstract::records "records" that is
 %> not present in the corresponding referenced domain set. Such a domain
 %> violation will lead to a GDX error when writing the data! See \ref
 %> GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
 %>
-%> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Symbol "Symbol"
+%> @see \ref gams::transfer::symbol::Set "Set", \ref gams::transfer::symbol::Abstract "Symbol"
 classdef DomainViolation
 
 
@@ -98,11 +98,11 @@ classdef DomainViolation
         %> 2. dimension (`int`):
         %>    The dimension of the domain in which the domain violation occurs.
         %> 3. domain (`Set`):
-        %>    The GAMS \ref gams::transfer::Set "Set" that is the domain of symbol.
+        %>    The GAMS \ref gams::transfer::symbol::Set "Set" that is the domain of symbol.
         %> 4. violations (`cellstr`):
         %>    List of domain entries that are used in symbol but are missing in domain.
         %>
-        %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Symbol "Symbol"
+        %> @see \ref gams::transfer::symbol::Set "Set", \ref gams::transfer::symbol::Abstract "Symbol"
         function obj = DomainViolation(symbol, dimension, domain, violations)
             % Constructs a domain violation, see class help
 
@@ -113,10 +113,10 @@ classdef DomainViolation
                 dimension > symbol.dimension
                 error('Argument ''dimension'' must be integer in [1,%d].', symbol.dimension);
             end
-            if ~isa(domain, 'gams.transfer.Set') || ...
-                ~isa(symbol.domain{dimension}, 'gams.transfer.Set') || ...
+            if ~isa(domain, 'gams.transfer.symbol.Set') || ...
+                ~isa(symbol.domain{dimension}, 'gams.transfer.symbol.Set') || ...
                 ~strcmp(domain.name, symbol.domain{dimension}.name)
-                error('Argument ''domain'' must be of type ''gams.transfer.Set''.');
+                error('Argument ''domain'' must be of type ''gams.transfer.symbol.Set''.');
             end
             if ~iscellstr(violations)
                 error('Argument ''violations'' must be of type ''cellstr''.');

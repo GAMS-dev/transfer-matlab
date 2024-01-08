@@ -80,9 +80,9 @@ m.write('trnsport.gdx');
 
 The example illustrates the general GAMS Transfer workflow: A \ref
 gams::transfer::Container "Container" can be filled with different symbols, here
-are shown \ref gams::transfer::Set "Set", \ref gams::transfer::Parameter
-"Parameter", \ref gams::transfer::Variable "Variable" and \ref
-gams::transfer::Equation "Equation" (not shown: \ref gams::transfer::Alias "Alias")
+are shown \ref gams::transfer::symbol::Set "Set", \ref gams::transfer::symbol::Parameter
+"Parameter", \ref gams::transfer::symbol::Variable "Variable" and \ref
+gams::transfer::symbol::Equation "Equation" (not shown: \ref gams::transfer::alias::Set "Alias")
 and is later \ref GAMS_TRANSFER_MATLAB_CONTAINER_WRITE "written to a GDX file".
 
 Instead of starting with an empty container in
@@ -116,7 +116,7 @@ x =
        default_values: [1×1 struct]
             dimension: 2
                  size: [2 3]
-               domain: {[1×1 gams.transfer.Set]  [1×1 gams.transfer.Set]}
+               domain: {[1×1 gams.transfer.symbol.Set]  [1×1 gams.transfer.symbol.Set]}
          domain_names: {'i'  'j'}
         domain_labels: {'i'  'j'}
           domain_type: 'regular'

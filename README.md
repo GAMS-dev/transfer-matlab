@@ -138,7 +138,7 @@ x =
        default_values: [1×1 struct]
             dimension: 2
                  size: [2 3]
-               domain: {[1×1 gams.transfer.Set]  [1×1 gams.transfer.Set]}
+               domain: {[1×1 gams.transfer.symbol.Set]  [1×1 gams.transfer.symbol.Set]}
          domain_names: {'i'  'j'}
         domain_labels: {'i'  'j'}
           domain_type: 'regular'

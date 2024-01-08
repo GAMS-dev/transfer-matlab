@@ -382,8 +382,6 @@ classdef Container < handle
         %> c.read('path/to/file.gdx', 'format', 'dense_matrix');
         %> c.read('path/to/file.gdx', 'symbols', {'x', 'z'}, 'format', 'struct', 'values', {'level'});
         %> ```
-        %>
-        %> @see \ref gams::transfer::RecordsFormat "RecordsFormat"
         function read(obj, varargin)
             % Reads symbols from GDX file
             %
@@ -1375,13 +1373,32 @@ classdef Container < handle
 
         %> Adds a set to the container
         %>
-        %> Arguments are identical to the \ref gams::transfer::Set "Set"
-        %> constructor. Alternatively, use the constructor directly. In contrast
-        %> to the constructor, this method may overwrite a set if its definition
-        %> (\ref gams::transfer::Set::is_singleton "is_singleton", \ref
-        %> gams::transfer::Set::domain "domain", \ref
-        %> gams::transfer::Set::domain_forwarding "domain_forwarding") doesn't
-        %> differ.
+        %> **Required Arguments:**
+        %> 1. name (`string`):
+        %>    Name of set
+        %>
+        %> **Optional Arguments:**
+        %> 2. domain (`cellstr` or `Set`):
+        %>    List of domains given either as `string` or as reference to a \ref
+        %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{"*"}` (for 1-dim with
+        %>    universe domain).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Set records, e.g. a list of strings. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - is_singleton (`logical`):
+        %>   Indicates if set is a is_singleton set (`true`) or not (`false`). Default is `false`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the domains in case
+        %>   they are not present in the domains already. With a logical vector domain forwarding
+        %>   can be enabled/disabled independently for each domain. Default: `false`.
+        %>
+        %> Note, this method may overwrite a set if its definition (\ref
+        %> gams::transfer::symbol::Set::is_singleton "is_singleton", \ref
+        %> gams::transfer::symbol::Set::domain "domain", \ref
+        %> gams::transfer::symbol::Set::domain_forwarding "domain_forwarding") doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -1391,14 +1408,33 @@ classdef Container < handle
         %> s3 = c.addSet('s3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
         %> ```
         %>
-        %> @see \ref gams::transfer::Set "Set"
+        %> @see \ref gams::transfer::symbol::Set "symbol.Set", \ref gams::transfer::Set "Set"
         function symbol = addSet(obj, name, varargin)
             % Adds a set to the container
             %
-            % Arguments are identical to the gams.transfer.Set constructor.
-            % Alternatively, use the constructor directly. In contrast to the
-            % constructor, this method may overwrite a set if its definition
-            % (is_singleton, domain, domain_forwarding) doesn't differ.
+            % Required Arguments:
+            % 1. name (string):
+            %    Name of set
+            %
+            % Optional Arguments:
+            % 2. domain (cellstr or Set):
+            %    List of domains given either as string or as reference to a
+            %    gams.transfer.symbol.Set object. Default is {"*"} (for 1-dim with universe domain).
+            %
+            % Parameter Arguments:
+            % - records:
+            %   Set records, e.g. a list of strings. Default is `[]`.
+            % - description (string):
+            %   Description of symbol. Default is "".
+            % - is_singleton (logical):
+            %   Indicates if set is a is_singleton set (true) or not (false). Default is false.
+            % - domain_forwarding (logical):
+            %   If true, domain entries in records will recursively be added to the domains in case
+            %   they are not present in the domains already. With a logical vector domain forwarding
+            %   can be enabled/disabled independently for each domain. Default: false.
+            %
+            % Note, this method may overwrite a set if its definition (is_singleton, domain,
+            % domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -1406,7 +1442,7 @@ classdef Container < handle
             % s2 = c.addSet('s2', {s1, '*', '*'});
             % s3 = c.addSet('s3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
             %
-            % See also: gams.transfer.Set
+            % See also: gams.transfer.symbol.Set, gams.transfer.Set
 
             if obj.indexed_
                 error('Set not supported in indexed mode.');
@@ -1432,12 +1468,28 @@ classdef Container < handle
 
         %> Adds a parameter to the container
         %>
-        %> Arguments are identical to the \ref gams::transfer::Parameter
-        %> "Parameter" constructor. Alternatively, use the constructor directly.
-        %> In contrast to the constructor, this method may overwrite a parameter
-        %> if its definition (\ref gams::transfer::Parameter::domain "domain",
-        %> \ref gams::transfer::Parameter::domain_forwarding "domain_forwarding")
-        %> doesn't differ.
+        %> **Required Arguments:**
+        %> 1. name (`string`):
+        %>    Name of parameter
+        %>
+        %> **Optional Arguments:**
+        %> 2. domain (`cellstr` or `Set`):
+        %>    List of domains given either as `string` or as reference to a \ref
+        %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{}` (for scalar).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Parameter records. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the domains in case
+        %>   they are not present in the domains already. With a logical vector domain forwarding
+        %>   can be enabled/disabled independently for each domain. Default: `false`.
+        %>
+        %> Note, this method may overwrite a parameter if its definition (\ref
+        %> gams::transfer::symbol::Parameter::domain "domain", \ref
+        %> gams::transfer::symbol::Parameter::domain_forwarding "domain_forwarding") doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -1447,14 +1499,32 @@ classdef Container < handle
         %> p3 = c.addParameter('p3', '*', 'description', 'par p3');
         %> ```
         %>
-        %> @see \ref gams::transfer::Parameter "Parameter"
+        %> @see \ref gams::transfer::symbol::Parameter "symbol.Parameter", \ref
+        %> gams::transfer::Parameter "Parameter"
         function symbol = addParameter(obj, name, varargin)
             % Adds a parameter to the container
             %
-            % Arguments are identical to the gams.transfer.Parameter constructor.
-            % Alternatively, use the constructor directly. In contrast to the
-            % constructor, this method may overwrite a parameter if its
-            % definition (domain, domain_forwarding) doesn't differ.
+            % Required Arguments:
+            % 1. name (string):
+            %    Name of parameter
+            %
+            % Optional Arguments:
+            % 2. domain (cellstr or Set):
+            %    List of domains given either as string or as reference to a
+            %    gams.transfer.symbol.Set object. Default is {} (for scalar).
+            %
+            % Parameter Arguments:
+            % - records:
+            %   Parameter records. Default is [].
+            % - description (string):
+            %   Description of symbol. Default is "".
+            % - domain_forwarding (logical):
+            %   If true, domain entries in records will recursively be added to the domains in case
+            %   they are not present in the domains already. With a logical vector domain
+            %   forwarding can be enabled/disabled independently for each domain. Default: false.
+            %
+            % Note, this method may overwrite a parameter if its definition (domain,
+            % domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -1462,7 +1532,7 @@ classdef Container < handle
             % p2 = c.addParameter('p2', {'*', '*'});
             % p3 = c.addParameter('p3', '*', 'description', 'par p3');
             %
-            % See also: gams.transfer.Parameter
+            % See also: gams.transfer.symbol.Parameter, gams.transfer.Parameter
 
             new_symbol = gams.transfer.symbol.Parameter(obj, name, varargin{:});
 
@@ -1484,13 +1554,33 @@ classdef Container < handle
 
         %> Adds a variable to the container
         %>
-        %> Arguments are identical to the \ref gams::transfer::Variable "Variable"
-        %> constructor. Alternatively, use the constructor directly. In contrast
-        %> to the constructor, this method may overwrite a variable if its
-        %> definition (\ref gams::transfer::Variable::type "type", \ref
-        %> gams::transfer::Variable::domain "domain", \ref
-        %> gams::transfer::Variable::domain_forwarding "domain_forwarding")
-        %> doesn't differ.
+        %> **Required Arguments:**
+        %> 1. name (`string`):
+        %>    Name of variable
+        %>
+        %> **Optional Arguments:**
+        %> 2. type (`string`, `int` or \ref gams::transfer::symbol::VariableType "symbol.VariableType"):
+        %>    Specifies the variable type, either as `string`, as `integer` given by any of the
+        %>    constants in \ref gams::transfer::symbol::VariableType "symbol.VariableType" or \ref
+        %>    gams::transfer::symbol::VariableType "symbol.VariableType". Default is `"free"`.
+        %> 3. domain (`cellstr` or `Set`):
+        %>    List of domains given either as string or as reference to a \ref
+        %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{}` (for scalar).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Set records, e.g. a list of strings. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the domains in case
+        %>   they are not present in the domains already. With a logical vector domain forwarding
+        %>   can be enabled/disabled independently for each domain. Default: `false`.
+        %>
+        %> Note, this method may overwrite a variable if its definition (\ref
+        %> gams::transfer::symbol::Variable::type "type", \ref
+        %> gams::transfer::symbol::Variable::domain "domain", \ref
+        %> gams::transfer::symbol::Variable::domain_forwarding "domain_forwarding") doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -1500,15 +1590,37 @@ classdef Container < handle
         %> v3 = c.addVariable('v3', VariableType.BINARY, '*', 'description', 'var v3');
         %> ```
         %>
-        %> @see \ref gams::transfer::Variable "Variable", \ref
-        %> gams::transfer::VariableType "VariableType"
+        %> @see \ref gams::transfer::symbol::Variable "symbol.Variable", \ref
+        %> gams::transfer::Variable "Variable", \ref gams::transfer::symbol::VariableType
+        %> "VariableType"
         function symbol = addVariable(obj, name, varargin)
             % Adds a variable to the container
             %
-            % Arguments are identical to the gams.transfer.Variable constructor.
-            % Alternatively, use the constructor directly. In contrast to the
-            % constructor, this method may overwrite a variable if its
-            % definition (type, domain, domain_forwarding) doesn't differ.
+            % Required Arguments:
+            % 1. name (string):
+            %    Name of variable
+            %
+            % Optional Arguments:
+            % 2. type (string, int or gams.transfer.symbol.VariableType):
+            %    Specifies the variable type, either as string, as integer given by any of the
+            %    constants in gams.transfer.symbol.VariableType or
+            %    gams.transfer.symbol.VariableType. Default is "free".
+            % 3. domain (cellstr or Set):
+            %    List of domains given either as string or as reference to a
+            %    gams.transfer.symbol.Set object. Default is {} (for scalar).
+            %
+            % Parameter Arguments:
+            % - records:
+            %   Set records, e.g. a list of strings. Default is [].
+            % - description (string):
+            %   Description of symbol. Default is "".
+            % - domain_forwarding (logical):
+            %   If true, domain entries in records will recursively be added to the domains in case
+            %   they are not present in the domains already. With a logical vector domain forwarding
+            %   can be enabled/disabled independently for each domain. Default: false.
+            %
+            % Note, this method may overwrite a variable if its definition (type, domain,
+            % domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -1516,7 +1628,8 @@ classdef Container < handle
             % v2 = c.addVariable('v2', 'binary', {'*', '*'});
             % v3 = c.addVariable('v3', VariableType.BINARY, '*', 'description', 'var v3');
             %
-            % See also: gams.transfer.Variable, gams.transfer.VariableType
+            % See also: gams.transfer.symbol.Variable, gams.transfer.Variable,
+            % gams.transfer.symbol.VariableType
 
             if obj.indexed_
                 error('Variable not supported in indexed mode.');
@@ -1542,13 +1655,33 @@ classdef Container < handle
 
         %> Adds an equation to the container
         %>
-        %> Arguments are identical to the \ref gams::transfer::Equation "Equation"
-        %> constructor. Alternatively, use the constructor directly. In contrast
-        %> to the constructor, this method may overwrite an equation if its
-        %> definition (\ref gams::transfer::Equation::type "type", \ref
-        %> gams::transfer::Equation::domain "domain", \ref
-        %> gams::transfer::Equation::domain_forwarding "domain_forwarding")
-        %> doesn't differ.
+        %> **Required Arguments:**
+        %> 1. name (`string`):
+        %>    Name of equation
+        %> 2. type (`string`, `int` or \ref gams::transfer::symbol::EquationType "symbol.EquationType"):
+        %>    Specifies the variable type, either as `string`, as `integer` given by any of the
+        %>    constants in \ref gams::transfer::symbol::EquationType "symbol.EquationType" or \ref
+        %>    gams::transfer::symbol::EquationType "symbol.EquationType".
+        %>
+        %> **Optional Arguments:**
+        %> 3. domain (`cellstr` or `Set`):
+        %>    List of domains given either as `string` or as reference to a \ref
+        %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{}` (for scalar).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Equation records. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the domains in case
+        %>   they are not present in the domains already. With a logical vector domain forwarding
+        %>   can be enabled/disabled independently for each domain. Default: `false`.
+        %>
+        %> Note, this method may overwrite an equation if its definition (\ref
+        %> gams::transfer::symbol::Equation::type "type", \ref
+        %> gams::transfer::symbol::Equation::domain "domain", \ref
+        %> gams::transfer::symbol::Equation::domain_forwarding "domain_forwarding") doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -1557,22 +1690,45 @@ classdef Container < handle
         %> e3 = c.addEquation('e3', EquationType.EQ, '*', 'description', 'equ e3');
         %> ```
         %>
-        %> @see \ref gams::transfer::Equation "Equation", \ref
-        %> gams::transfer::EquationType "EquationType"
+        %> @see \ref gams::transfer::symbol::Equation "symbol.Equation", \ref
+        %> gams::transfer::Equation "Equation", \ref gams::transfer::symbol::EquationType
+        %> "symbol.EquationType"
         function symbol = addEquation(obj, name, varargin)
             % Adds an equation to the container
             %
-            % Arguments are identical to the gams.transfer.Equation constructor.
-            % Alternatively, use the constructor directly. In contrast to the
-            % constructor, this method may overwrite an equation if its
-            % definition (type, domain, domain_forwarding) doesn't differ.
+            % Required Arguments:
+            % 1. name (string):
+            %    Name of equation
+            % 2. type (string, int or gams.transfer.symbol.EquationType):
+            %    Specifies the variable type, either as string, as integer given by any of the
+            %    constants in gams.transfer.symbol.EquationType or
+            %    gams.transfer.symbol.EquationType.
+            %
+            % Optional Arguments:
+            % 3. domain (cellstr or Set):
+            %    List of domains given either as string or as reference to a
+            %    gams.transfer.symbol.Set object. Default is {} (for scalar).
+            %
+            % Parameter Arguments:
+            % - records:
+            %   Equation records. Default is [].
+            % - description (string):
+            %   Description of symbol. Default is "".
+            % - domain_forwarding (logical):
+            %   If true, domain entries in records will recursively be added to the domains in case
+            %   they are not present in the domains already. With a logical vector domain forwarding
+            %   can be enabled/disabled independently for each domain. Default: false.
+            %
+            % Note, this method may overwrite an equation if its definition (type, domain,
+            % domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
             % e2 = c.addEquation('e2', 'l', {'*', '*'});
             % e3 = c.addEquation('e3', EquationType.EQ, '*', 'description', 'equ e3');
             %
-            % See also: gams.transfer.Equation, gams.transfer.EquationType
+            % See also: gams.transfer.symbol.Equation, gams.transfer.Equation,
+            % gams.transfer.symbol.EquationType
 
             if obj.indexed_
                 error('Equation not supported in indexed mode.');
@@ -1598,9 +1754,11 @@ classdef Container < handle
 
         %> Adds an alias to the container
         %>
-        %> Arguments are identical to the \ref gams::transfer::Alias "Alias"
-        %> constructor. Alternatively, use the constructor directly. In contrast
-        %> to the constructor, this method may overwrite an alias.
+        %> **Required Arguments:**
+        %> 1. name (`string`):
+        %>    name of alias
+        %> 2. alias_with (`Set` or `Alias`):
+        %>    \ref gams::transfer::symbol::Set "symbol.Set" to be linked to.
         %>
         %> **Example:**
         %> ```
@@ -1609,20 +1767,23 @@ classdef Container < handle
         %> a = c.addAlias('a', s);
         %> ```
         %>
-        %> @see \ref gams::transfer::Alias "Alias", \ref gams::transfer::Set "Set"
+        %> @see \ref gams::transfer::alias::Set "alias.Set", \ref gams::transfer::Alias "Alias",
+        %> \ref gams::transfer::symbol::Set "symbol.Set"
         function symbol = addAlias(obj, name, alias_with)
             % Adds an alias to the container
             %
-            % Arguments are identical to the gams.transfer.Alias constructor.
-            % Alternatively, use the constructor directly. In contrast to the
-            % constructor, this method may overwrite an alias.
+            % Required Arguments:
+            % 1. name (string):
+            %    name of alias
+            % 2. alias_with (Set or Alias):
+            %    gams.transfer.symbol.Set to be linked to.
             %
             % Example:
             % c = Container();
             % s = c.addSet('s');
             % a = c.addAlias('a', s);
             %
-            % See also: gams.transfer.Alias, gams.transfer.Set
+            % See also: gams.transfer.alias.Set, gams.transfer.Alias, gams.transfer.symbol.Set
 
             if obj.indexed_
                 error('Alias not supported in indexed mode.');
@@ -1645,9 +1806,9 @@ classdef Container < handle
 
         %> Adds a universe alias to the container
         %>
-        %> Arguments are identical to the \ref gams::transfer::UniverseAlias "UniverseAlias"
-        %> constructor. Alternatively, use the constructor directly. In contrast
-        %> to the constructor, this method may overwrite an alias.
+        %> **Required Arguments:**
+        %> 1. name (`string`):
+        %>    name of alias
         %>
         %> **Example:**
         %> ```
@@ -1655,20 +1816,22 @@ classdef Container < handle
         %> u = c.addUniverseAlias('u');
         %> ```
         %>
-        %> @see \ref gams::transfer::UniverseAlias "UniverseAlias", \ref gams::transfer::Alias "Alias",
-        %> \ref gams::transfer::Set "Set"
+        %> @see \ref gams::transfer::alias::Universe "alias.Universe", \ref
+        %> gams::transfer::UniverseAlias "UniverseAlias", \ref gams::transfer::symbol::Set
+        %> "symbol.Set"
         function symbol = addUniverseAlias(obj, name)
             % Adds a universe alias to the container
             %
-            % Arguments are identical to the gams.transfer.UniverseAlias constructor.
-            % Alternatively, use the constructor directly. In contrast to the
-            % constructor, this method may overwrite an alias.
+            % Required Arguments:
+            % 1. name (string):
+            %    name of alias
             %
             % Example:
             % c = Container();
             % u = c.addUniverseAlias('u');
             %
-            % See also: gams.transfer.UniverseAlias, gams.transfer.Alias, gams.transfer.Set
+            % See also: gams.transfer.alias.Universe, gams.transfer.UniverseAlias,
+            % gams.transfer.symbol.Set
 
             if obj.indexed_
                 error('UniverseAlias not supported in indexed mode.');
@@ -1810,7 +1973,7 @@ classdef Container < handle
             n_sets = 0;
             for i = 1:numel(names)
                 symbol = obj.data_.(names{i});
-                if isa(symbol, 'gams.transfer.Set') || isa(symbol, 'gams.transfer.Alias')
+                if isa(symbol, 'gams.transfer.symbol.Set') || isa(symbol, 'gams.transfer.Alias')
                     n_sets = n_sets + 1;
                 end
             end
@@ -1825,7 +1988,7 @@ classdef Container < handle
             % get index by type
             for i = 1:numel(names)
                 symbol = obj.data_.(names{i});
-                if isa(symbol, 'gams.transfer.Set') || isa(symbol, 'gams.transfer.Alias')
+                if isa(symbol, 'gams.transfer.symbol.Set') || isa(symbol, 'gams.transfer.Alias')
                     n_sets = n_sets + 1;
                     idx_sets(n_sets) = i;
                     sets{n_sets} = names{i};
@@ -1847,7 +2010,7 @@ classdef Container < handle
                     curr_is_next = true;
                     current_set = obj.data_.(sets{idx(n_handled+1)});
                     for i = 1:current_set.dimension
-                        if (isa(current_set.domain{i}, 'gams.transfer.Set') || ...
+                        if (isa(current_set.domain{i}, 'gams.transfer.symbol.Set') || ...
                             isa(current_set.domain{i}, 'gams.transfer.Alias')) && ...
                             ~set_handled(current_set.domain{i}.name)
                             curr_is_next = false;
@@ -1887,10 +2050,10 @@ classdef Container < handle
         %> Get domain violations for all symbols
         %>
         %> Domain violations occur when a symbol uses other \ref
-        %> gams::transfer::Set "Sets" as \ref gams::transfer::Symbol::domain
+        %> gams::transfer::symbol::Set "Sets" as \ref gams::transfer::symbol::Abstract::domain
         %> "domain"(s) -- and is thus of domain type `regular`, see \ref
         %> GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in its
-        %> \ref gams::transfer::Symbol::records "records" that is not present in
+        %> \ref gams::transfer::symbol::Abstract::records "records" that is not present in
         %> the corresponding referenced domain set. Such a domain violation will
         %> lead to a GDX error when writing the data!
         %>
@@ -1906,7 +2069,7 @@ classdef Container < handle
         %>
         %> @see \ref gams::transfer::Container::resolveDomainViolations
         %> "Container.resolveDomainViolations", \ref
-        %> gams::transfer::Symbol::getDomainViolations
+        %> gams::transfer::symbol::Abstract::getDomainViolations
         %> "Symbol.getDomainViolations", \ref gams::transfer::DomainViolation
         %> "DomainViolation"
         function dom_violations = getDomainViolations(obj, varargin)
@@ -1954,10 +2117,10 @@ classdef Container < handle
         %> Extends domain sets in order to remove domain violations
         %>
         %> Domain violations occur when a symbol uses other \ref
-        %> gams::transfer::Set "Sets" as \ref gams::transfer::Symbol::domain
+        %> gams::transfer::symbol::Set "Sets" as \ref gams::transfer::symbol::Abstract::domain
         %> "domain"(s) -- and is thus of domain type `regular`, see \ref
         %> GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in its
-        %> \ref gams::transfer::Symbol::records "records" that is not present in
+        %> \ref gams::transfer::symbol::Abstract::records "records" that is not present in
         %> the corresponding referenced domain set. Such a domain violation will
         %> lead to a GDX error when writing the data!
         %>
@@ -1973,7 +2136,7 @@ classdef Container < handle
         %>
         %> @see \ref gams::transfer::Container::getDomainViolations
         %> "Container.getDomainViolations", \ref
-        %> gams::transfer::Symbol::resolveDomainViolations
+        %> gams::transfer::symbol::Abstract::resolveDomainViolations
         %> "Symbol.resolveDomainViolations", \ref gams::transfer::DomainViolation
         %> "DomainViolation"
         function resolveDomainViolations(obj, varargin)
@@ -2022,7 +2185,7 @@ classdef Container < handle
         %>   List of symbols to be considered. All if empty. Case doesn't
         %>   matter. Default is `{}`.
         %>
-        %> @see \ref gams::transfer::Symbol::isValid "Symbol.isValid"
+        %> @see \ref gams::transfer::symbol::Abstract::isValid "Symbol.isValid"
         function valid = isValid(obj, varargin)
             % Checks correctness of all symbols
             %
@@ -2205,7 +2368,7 @@ classdef Container < handle
         %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::Symbol::isValid "Symbol.isValid"
+        %> gams::transfer::symbol::Abstract::isValid "Symbol.isValid"
         function renameUELs(obj, uels, varargin)
             % Renames UELs in all symbol
             %
@@ -2251,7 +2414,7 @@ classdef Container < handle
         %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::Symbol::isValid "Symbol.isValid"
+        %> gams::transfer::symbol::Abstract::isValid "Symbol.isValid"
         function lowerUELs(obj, varargin)
             % Converts UELs to lower case
             %
@@ -2291,7 +2454,7 @@ classdef Container < handle
         %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::Symbol::isValid "Symbol.isValid"
+        %> gams::transfer::symbol::Abstract::isValid "Symbol.isValid"
         function upperUELs(obj, varargin)
             % Converts UELs to upper case
             %

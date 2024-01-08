@@ -42,7 +42,7 @@
 % c = Container();
 % u = UniverseAlias(c, 'u');
 %
-% See also: gams.transfer.Set, gams.transfer.Container, gams.transfer.Alias
+% See also: gams.transfer.symbol.Set, gams.transfer.Container, gams.transfer.Alias
 
 %> @brief GAMS Alias to Universe
 %>
@@ -54,8 +54,8 @@
 %> u = UniverseAlias(c, 'u');
 %> ```
 %>
-%> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Container "Container", \ref
-%> gams::transfer::Alias "Alias"
+%> @see \ref gams::transfer::symbol::Set "Set", \ref gams::transfer::Container "Container", \ref
+%> gams::transfer::alias::Set "Alias"
 %>
 classdef Universe < gams.transfer.alias.Abstract
 

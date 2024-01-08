@@ -1,4 +1,4 @@
-% Parameter Symbol
+% GAMS Parameter
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,15 +28,94 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Parameter Symbol
+% GAMS Parameter
 %
+% Represents a GAMS Parameter.
+%
+% Required Arguments:
+% 1. container (Container):
+%    gams.transfer.Container object this symbol should be stored in
+% 2. name (string):
+%    Name of parameter
+%
+% Optional Arguments:
+% 3. domain (cellstr or Set):
+%    List of domains given either as string or as reference to a
+%    gams.transfer.symbol.Set object. Default is {} (for scalar).
+%
+% Parameter Arguments:
+% - records:
+%   Parameter records. Default is [].
+% - description (string):
+%   Description of symbol. Default is "".
+% - domain_forwarding (logical):
+%   If true, domain entries in records will recursively be added to the domains in case
+%   they are not present in the domains already. With a logical vector domain
+%   forwarding can be enabled/disabled independently for each domain. Default: false.
+%
+% Example:
+% c = Container();
+% p1 = symbol.Parameter(c, 'p1');
+% p2 = symbol.Parameter(c, 'p2', {'*', '*'});
+% p3 = symbol.Parameter(c, 'p3', '*', 'description', 'par p3');
+%
+% See also: gams.transfer.Parameter, gams.transfer.Container.addParameter
 
-%> @brief Parameter Symbol
+%> @brief GAMS Parameter
+%>
+%> Represents a GAMS Parameter.
+%>
+%> **Example:**
+%> ```
+%> c = Container();
+%> p1 = symbol.Parameter(c, 'p1');
+%> p2 = symbol.Parameter(c, 'p2', {'*', '*'});
+%> p3 = symbol.Parameter(c, 'p3', '*', 'description', 'par p3');
+%> ```
+%>
+%> @see \ref gams::transfer::Parameter "Parameter", \ref
+%> gams::transfer::Container::addParameter "Container.addParameter"
 classdef Parameter < gams.transfer.symbol.Abstract
 
     methods
 
+        %> @brief Constructs a GAMS Parameter
+        %>
+        %> See \ref GAMS_TRANSFER_MATLAB_SYMBOL_CREATE for more information.
+        %>
+        %> **Required Arguments:**
+        %> 1. container (`Container`):
+        %>    \ref gams::transfer::Container "Container" object this symbol should be stored in
+        %> 2. name (`string`):
+        %>    Name of parameter
+        %>
+        %> **Optional Arguments:**
+        %> 3. domain (`cellstr` or `Set`):
+        %>    List of domains given either as `string` or as reference to a \ref
+        %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{}` (for scalar).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Parameter records. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the domains in case
+        %>   they are not present in the domains already. With a logical vector domain forwarding
+        %>   can be enabled/disabled independently for each domain. Default: `false`.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> p1 = symbol.Parameter(c, 'p1');
+        %> p2 = symbol.Parameter(c, 'p2', {'*', '*'});
+        %> p3 = symbol.Parameter(c, 'p3', '*', 'description', 'par p3');
+        %> ```
+        %>
+        %> @see \ref gams::transfer::Parameter "Parameter", \ref
+        %> gams::transfer::Container::addParameter "Container.addParameter"
         function obj = Parameter(varargin)
+            % Constructs a GAMS Parameter, see class help
 
             obj.def_ = gams.transfer.def.Definition();
             obj.data_ = gams.transfer.data.Unknown();
@@ -82,7 +161,25 @@ classdef Parameter < gams.transfer.symbol.Abstract
 
     methods (Static)
 
+        %> Returns an overview over all parameters given
+        %>
+        %> See \ref GAMS_TRANSFER_MATLAB_CONTAINER_OVERVIEW for more information.
+        %>
+        %> **Required Arguments:**
+        %> 1. symbols (list):
+        %>    List of parameters to include.
+        %>
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describe(symbols)
+            % Returns an overview over all parameters given
+            %
+            % Optional Arguments:
+            % 1. symbols (list):
+            %    List of parameters to include.
+            %
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             symbols = gams.transfer.utils.validate_cell('symbols', 1, symbols, ...
                 {'gams.transfer.symbol.Parameter'}, 1);

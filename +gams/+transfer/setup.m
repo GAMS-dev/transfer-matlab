@@ -1,11 +1,12 @@
-% Setups GAMS Transfer
+% GAMS Transfer Setup
 %
-
+% ------------------------------------------------------------------------------
 %
-% GAMS - General Algebraic Modeling System Matlab API
+% GAMS - General Algebraic Modeling System
+% GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -25,7 +26,9 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 % SOFTWARE.
 %
-
+% ------------------------------------------------------------------------------
+%
+% GAMS Transfer Setup
 function setup(varargin)
 
     current_dir = fileparts(mfilename('fullpath'));
