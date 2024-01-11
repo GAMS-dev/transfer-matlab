@@ -32,7 +32,7 @@
 %
 classdef Set < gams.transfer.symbol.definition.Definition
 
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.Set, ?gams.transfer.symbol.definition.Set})
+    properties (Hidden, SetAccess = protected)
         is_singleton_ = false
     end
 
@@ -73,8 +73,7 @@ classdef Set < gams.transfer.symbol.definition.Definition
         end
 
         function resetValues(obj)
-            obj.values_ = struct(...
-                'element_text', gams.transfer.symbol.value.String('element_text', ''));
+            obj.values_ = struct('element_text', gams.transfer.symbol.value.String('element_text', ''));
         end
 
     end

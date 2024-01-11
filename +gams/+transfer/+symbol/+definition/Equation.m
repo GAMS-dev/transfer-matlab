@@ -32,7 +32,7 @@
 %
 classdef Equation < gams.transfer.symbol.definition.Definition
 
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.Equation, ?gams.transfer.symbol.definition.Equation})
+    properties (Hidden, SetAccess = protected)
         type_ = gams.transfer.EquationType.NonBinding;
     end
 
@@ -75,8 +75,8 @@ classdef Equation < gams.transfer.symbol.definition.Definition
         end
 
         function resetValues(obj)
-            % gdx_default_values = gams.transfer.cmex.gt_get_defaults(obj);
-            gdx_default_values = zeros(1, 5);
+            gdx_default_values = gams.transfer.gdx.gt_get_defaults(...
+                int32(gams.transfer.gdx.SymbolType.EQUATION), int32(obj.type_.value));
             obj.values_ = struct(...
                 'level', gams.transfer.symbol.value.Numeric('level', gdx_default_values(1)), ...
                 'marginal', gams.transfer.symbol.value.Numeric('marginal', gdx_default_values(2)), ...

@@ -136,12 +136,12 @@ classdef Parameter < gams.transfer.symbol.Symbol
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'domain_forwarding')
                         obj.domain_forwarding = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'domain_forwarding', @gams.transfer.symbol.domain.Domain.validateForwarding);
+                            index + 1, 'domain_forwarding', []);
                         index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 3
-                        obj.def_.domains_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'domains', @gams.transfer.symbol.definition.Definition.validateDomains);
+                        obj.def_.domains = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'domains', []);
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);

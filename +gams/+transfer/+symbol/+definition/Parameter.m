@@ -39,10 +39,7 @@ classdef Parameter < gams.transfer.symbol.definition.Definition
         end
 
         function resetValues(obj)
-            % gdx_default_values = gams.transfer.cmex.gt_get_defaults(obj);
-            gdx_default_values = zeros(1, 5);
-            obj.values_ = struct(...
-                'value', gams.transfer.symbol.value.Numeric('value', gdx_default_values(1)));
+            obj.values_ = struct('value', gams.transfer.symbol.value.Numeric('value', 0));
         end
 
     end

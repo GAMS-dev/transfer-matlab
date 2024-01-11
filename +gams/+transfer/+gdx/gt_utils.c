@@ -181,6 +181,9 @@ void gt_utils_type_default_values(
                 def_values[i] = gmsDefRecEqu[equ_subtype][i];
             break;
         }
+        default:
+            mexErrMsgIdAndTxt(ERRID"type_default_values", "Unknown symbol type: %d", type);
+            break;
     }
 
     if (sv_matlab)

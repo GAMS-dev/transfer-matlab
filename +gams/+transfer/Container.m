@@ -550,9 +550,9 @@ classdef Container < handle
 
             % read records
             if obj.indexed_
-                symbols = gams.transfer.cmex.gt_idx_read(obj.gams_dir_, source, symbols, format, records);
+                symbols = gams.transfer.gdx.gt_idx_read(obj.gams_dir_, source, symbols, format, records);
             else
-                symbols = gams.transfer.cmex.gt_gdx_read(obj.gams_dir_, source, symbols, format, records, ...
+                symbols = gams.transfer.gdx.gt_gdx_read(obj.gams_dir_, source, symbols, format, records, ...
                     values, gams.transfer.Constants.SUPPORTS_CATEGORICAL, false);
             end
             symbol_names = fieldnames(symbols);
@@ -563,7 +563,7 @@ classdef Container < handle
 
                 % handle alias differently
                 switch symbol.symbol_type
-                case {gams.transfer.cmex.SymbolType.ALIAS, 'alias'}
+                case {gams.transfer.gdx.SymbolType.ALIAS, 'alias'}
                     if strcmp(symbol.alias_with, gams.transfer.Constants.UNIVERSE_NAME)
                         gams.transfer.UniverseAlias(obj, symbol.name);
                     elseif obj.hasSymbols(symbol.alias_with)
@@ -572,13 +572,13 @@ classdef Container < handle
                         error('Alias reference for symbol ''%s'' not found: %s.', symbol.name, symbol.alias_with);
                     end
                     continue
-                case {gams.transfer.cmex.SymbolType.SET, 'set'}
+                case {gams.transfer.gdx.SymbolType.SET, 'set'}
                     new_symbol = obj.addSet(symbol.name, 'is_singleton', symbol.is_singleton);
-                case {gams.transfer.cmex.SymbolType.PARAMETER, 'parameter'}
+                case {gams.transfer.gdx.SymbolType.PARAMETER, 'parameter'}
                     new_symbol = obj.addParameter(symbol.name);
-                case {gams.transfer.cmex.SymbolType.VARIABLE, 'variable'}
+                case {gams.transfer.gdx.SymbolType.VARIABLE, 'variable'}
                     new_symbol = obj.addVariable(symbol.name, symbol.type);
-                case {gams.transfer.cmex.SymbolType.EQUATION, 'equation'}
+                case {gams.transfer.gdx.SymbolType.EQUATION, 'equation'}
                     new_symbol = obj.addEquation(symbol.name, symbol.type);
                 otherwise
                     error('Invalid symbol type');
@@ -758,10 +758,10 @@ classdef Container < handle
 
             % write data
             if obj.indexed_
-                gams.transfer.cmex.gt_idx_write(obj.gams_dir_, filename, obj.data_.entries, ...
+                gams.transfer.gdx.gt_idx_write(obj.gams_dir_, filename, obj.data_.entries, ...
                     enable, p.Results.sorted, gams.transfer.Constants.SUPPORTS_TABLE);
             else
-                gams.transfer.cmex.gt_gdx_write(obj.gams_dir_, filename, obj.data_.entries, ...
+                gams.transfer.gdx.gt_gdx_write(obj.gams_dir_, filename, obj.data_.entries, ...
                     enable, p.Results.uel_priority, p.Results.compress, p.Results.sorted, ...
                     gams.transfer.Constants.SUPPORTS_TABLE, gams.transfer.Constants.SUPPORTS_CATEGORICAL, ...
                     false);
