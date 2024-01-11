@@ -36,7 +36,7 @@
 %> @brief Data Definition
 classdef Definition < handle
 
-    properties (Hidden, SetAccess = {?gams.transfer.def.Definition, ?gams.transfer.symbol.Abstract})
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.Definition, ?gams.transfer.symbol.Symbol})
         domains_ = {}
         values_ = struct()
     end
@@ -48,14 +48,14 @@ classdef Definition < handle
                 error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
             end
             for i = 1:numel(arg)
-                if isa(arg{i}, 'gams.transfer.def.Domain')
+                if isa(arg{i}, 'gams.transfer.symbol.domain.Domain')
                     continue
                 elseif isa(arg{i}, 'gams.transfer.symbol.Set')
-                    arg{i} = gams.transfer.def.RegularDomain(arg{i});
+                    arg{i} = gams.transfer.symbol.domain.Regular(arg{i});
                 elseif ischar(arg{i}) || isstring(arg{i})
-                    arg{i} = gams.transfer.def.RelaxedDomain(arg{i});
+                    arg{i} = gams.transfer.symbol.domain.Relaxed(arg{i});
                 else
-                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.def.Domain'', ''gams.transfer.symbol.Set'', ''char'' or ''string''.', name, index, i);
+                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.symbol.domain.Domain'', ''gams.transfer.symbol.Set'', ''char'' or ''string''.', name, index, i);
                 end
             end
         end
@@ -65,8 +65,8 @@ classdef Definition < handle
                 error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
             end
             for i = 1:numel(arg)
-                if ~isa(arg{i}, 'gams.transfer.def.Value')
-                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.def.Value''.', name, index, i);
+                if ~isa(arg{i}, 'gams.transfer.symbol.value.Value')
+                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.symbol.value.Value''.', name, index, i);
                 end
             end
         end

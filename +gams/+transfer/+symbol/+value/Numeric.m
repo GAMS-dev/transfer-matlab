@@ -1,4 +1,4 @@
-% Value Definition
+% Numeric Value Definition
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,49 +28,43 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Value Definition
+% Numeric Value Definition
 %
 
-% TODO: split into StringValue and NumericValue and remove Type?
+%> @brief Numeric Value Definition
+classdef Numeric < gams.transfer.symbol.value.Value
 
-%> @brief Value Definition
-classdef (Abstract) Value < handle
-
-    properties (Hidden, SetAccess = {?gams.transfer.def.Value, ?gams.transfer.symbol.Abstract})
-        label_
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Numeric, ?gams.transfer.symbol.Symbol})
+        default_ = 0
     end
 
     methods (Hidden, Static)
 
-        function arg = validateLabel(name, index, arg)
-            if isstring(arg)
-                arg = char(arg);
-            elseif ~ischar(arg)
-                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
-            end
-            if numel(arg) <= 0
-                error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
+        function arg = validateDefault(name, index, arg)
+            if ~isnumeric(arg)
+                error('Argument ''%s'' (at position %d) must be ''numeric''.', name, index);
             end
         end
 
     end
 
-    properties (Dependent)
-        label
-    end
-
-    properties (Abstract, Dependent, SetAccess = private)
+    properties (Dependent, SetAccess = private)
         default
     end
 
     methods
 
-        function label = get.label(obj)
-            label = obj.label_;
+        function default = get.default(obj)
+            default = obj.default_;
         end
 
-        function obj = set.label(obj, label)
-            obj.label_ = obj.validateLabel('label', 1, label);
+    end
+
+    methods (Hidden, Access = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.Symbol})
+
+        function obj = Numeric(label, default)
+            obj.label_ = label;
+            obj.default_ = default;
         end
 
     end

@@ -492,7 +492,7 @@ classdef Container < handle
                         is_pararg = true;
                     elseif ~is_pararg && index == 4
                         obj.def_.domains_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'domains', @gams.transfer.def.Definition.validateDomains);
+                            index, 'domains', @gams.transfer.symbol.Definition.validateDomains);
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
@@ -2145,10 +2145,10 @@ classdef Container < handle
         %> Get domain violations for all symbols
         %>
         %> Domain violations occur when a symbol uses other \ref
-        %> gams::transfer::symbol::Set "Sets" as \ref gams::transfer::symbol::Abstract::domain
+        %> gams::transfer::symbol::Set "Sets" as \ref gams::transfer::symbol::Symbol::domain
         %> "domain"(s) -- and is thus of domain type `regular`, see \ref
         %> GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in its
-        %> \ref gams::transfer::symbol::Abstract::records "records" that is not present in
+        %> \ref gams::transfer::symbol::Symbol::records "records" that is not present in
         %> the corresponding referenced domain set. Such a domain violation will
         %> lead to a GDX error when writing the data!
         %>
@@ -2164,7 +2164,7 @@ classdef Container < handle
         %>
         %> @see \ref gams::transfer::Container::resolveDomainViolations
         %> "Container.resolveDomainViolations", \ref
-        %> gams::transfer::symbol::Abstract::getDomainViolations
+        %> gams::transfer::symbol::Symbol::getDomainViolations
         %> "Symbol.getDomainViolations", \ref gams::transfer::DomainViolation
         %> "DomainViolation"
         function dom_violations = getDomainViolations(obj, varargin)
@@ -2212,10 +2212,10 @@ classdef Container < handle
         %> Extends domain sets in order to remove domain violations
         %>
         %> Domain violations occur when a symbol uses other \ref
-        %> gams::transfer::symbol::Set "Sets" as \ref gams::transfer::symbol::Abstract::domain
+        %> gams::transfer::symbol::Set "Sets" as \ref gams::transfer::symbol::Symbol::domain
         %> "domain"(s) -- and is thus of domain type `regular`, see \ref
         %> GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in its
-        %> \ref gams::transfer::symbol::Abstract::records "records" that is not present in
+        %> \ref gams::transfer::symbol::Symbol::records "records" that is not present in
         %> the corresponding referenced domain set. Such a domain violation will
         %> lead to a GDX error when writing the data!
         %>
@@ -2231,7 +2231,7 @@ classdef Container < handle
         %>
         %> @see \ref gams::transfer::Container::getDomainViolations
         %> "Container.getDomainViolations", \ref
-        %> gams::transfer::symbol::Abstract::resolveDomainViolations
+        %> gams::transfer::symbol::Symbol::resolveDomainViolations
         %> "Symbol.resolveDomainViolations", \ref gams::transfer::DomainViolation
         %> "DomainViolation"
         function resolveDomainViolations(obj, varargin)
@@ -2280,7 +2280,7 @@ classdef Container < handle
         %>   List of symbols to be considered. All if empty. Case doesn't
         %>   matter. Default is `{}`.
         %>
-        %> @see \ref gams::transfer::symbol::Abstract::isValid "Symbol.isValid"
+        %> @see \ref gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
         function valid = isValid(obj, varargin)
             % Checks correctness of all symbols
             %
@@ -2463,7 +2463,7 @@ classdef Container < handle
         %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::symbol::Abstract::isValid "Symbol.isValid"
+        %> gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
         function renameUELs(obj, uels, varargin)
             % Renames UELs in all symbol
             %
@@ -2509,7 +2509,7 @@ classdef Container < handle
         %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::symbol::Abstract::isValid "Symbol.isValid"
+        %> gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
         function lowerUELs(obj, varargin)
             % Converts UELs to lower case
             %
@@ -2549,7 +2549,7 @@ classdef Container < handle
         %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::symbol::Abstract::isValid "Symbol.isValid"
+        %> gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
         function upperUELs(obj, varargin)
             % Converts UELs to upper case
             %

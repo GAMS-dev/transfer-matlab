@@ -77,7 +77,7 @@
 %>
 %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Container::addSet
 %> "Container.addSet"
-classdef Set < gams.transfer.symbol.Abstract
+classdef Set < gams.transfer.symbol.Symbol
 
     properties (Hidden, SetAccess = protected)
         is_singleton_ = false
@@ -156,8 +156,8 @@ classdef Set < gams.transfer.symbol.Abstract
         function obj = Set(varargin)
             % Constructs a GAMS Set, see class help
 
-            obj.def_ = gams.transfer.def.Definition();
-            obj.data_ = gams.transfer.data.Unknown();
+            obj.def_ = gams.transfer.symbol.Definition();
+            obj.data_ = gams.transfer.symbol.data.Unknown();
 
             % parse input arguments
             try
@@ -175,7 +175,7 @@ classdef Set < gams.transfer.symbol.Abstract
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'domain_forwarding')
                         obj.domain_forwarding = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'domain_forwarding', @gams.transfer.def.Domain.validateForwarding);
+                            index + 1, 'domain_forwarding', @gams.transfer.symbol.domain.Domain.validateForwarding);
                         index = index + 2;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'is_singleton')
@@ -185,7 +185,7 @@ classdef Set < gams.transfer.symbol.Abstract
                         is_pararg = true;
                     elseif ~is_pararg && index == 3
                         obj.def_.domains_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'domains', @gams.transfer.def.Definition.validateDomains);
+                            index, 'domains', @gams.transfer.symbol.Definition.validateDomains);
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
@@ -197,7 +197,7 @@ classdef Set < gams.transfer.symbol.Abstract
 
             % create default value definition
             obj.def_.values_ = struct(...
-                'element_text', gams.transfer.def.StringValue('element_text', ''));
+                'element_text', gams.transfer.symbol.value.String('element_text', ''));
         end
 
     end

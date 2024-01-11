@@ -32,7 +32,7 @@
 %
 
 %> @brief Relaxed Domain
-classdef RelaxedDomain < gams.transfer.def.Domain
+classdef Relaxed < gams.transfer.symbol.domain.Domain
 
     properties (Hidden, SetAccess = protected)
         name_
@@ -111,7 +111,7 @@ classdef RelaxedDomain < gams.transfer.def.Domain
 
     methods
 
-        function obj = RelaxedDomain(name)
+        function obj = Relaxed(name)
             obj.name = name;
             obj.label_ = name;
         end

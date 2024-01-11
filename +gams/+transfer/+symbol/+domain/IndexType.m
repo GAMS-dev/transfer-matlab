@@ -32,7 +32,7 @@
 %
 
 %> @brief Domain Index Type
-classdef DomainIndexType
+classdef IndexType
 
     properties (Constant)
         CATEGORICAL = uint8(1)
@@ -118,7 +118,7 @@ classdef DomainIndexType
 
     methods
 
-        function obj = DomainIndexType(value)
+        function obj = IndexType(value)
             if nargin == 0
                 return
             end
@@ -136,12 +136,12 @@ classdef DomainIndexType
     methods (Static)
 
         function obj = Categorical()
-            obj = gams.transfer.def.DomainIndexType();
+            obj = gams.transfer.symbol.domain.IndexType();
         end
 
         function obj = Integer()
-            obj = gams.transfer.def.DomainIndexType();
-            obj.value_ = gams.transfer.def.DomainIndexType.INTEGER;
+            obj = gams.transfer.symbol.domain.IndexType();
+            obj.value_ = gams.transfer.symbol.domain.IndexType.INTEGER;
         end
 
     end

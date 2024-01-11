@@ -43,7 +43,7 @@
 %> @see \ref gams::transfer::symbol::Set "symbol.Set", \ref gams::transfer::symbol::Parameter
 %> "symbol.Parameter", \ref gams::transfer::symbol::Variable "symbol.Variable", \ref
 %> gams::transfer::symbol::Equation "symbol.Equation"
-classdef (Abstract) Abstract < handle
+classdef (Abstract) Symbol < handle
 
     properties (Hidden, SetAccess = protected)
         container_
@@ -88,14 +88,14 @@ classdef (Abstract) Abstract < handle
         end
 
         function arg = validateDef(name, index, arg, keys)
-            if ~isa(arg, 'gams.transfer.def.Definition')
-                error('Argument ''%s'' (at position %d) must be ''gams.transfer.def.Definition''.', name, index);
+            if ~isa(arg, 'gams.transfer.symbol.Definition')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Definition''.', name, index);
             end
         end
 
         function arg = validateData(name, index, arg)
-            if ~isa(arg, 'gams.transfer.data.Abstract')
-                error('Argument ''%s'' (at position %d) must be ''gams.transfer.data.Abstract''.', name, index);
+            if ~isa(arg, 'gams.transfer.symbol.data.Abstract')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.data.Abstract''.', name, index);
             end
         end
 
@@ -209,7 +209,7 @@ classdef (Abstract) Abstract < handle
         %> Format in which records are stored in
         %>
         %> If records are changed, this gets reset to 'unknown'. Calling \ref
-        %> gams::transfer::symbol::Abstract::isValid "symbol.Abstract.isValid" will detect the
+        %> gams::transfer::symbol::Symbol::isValid "symbol.Symbol.isValid" will detect the
         %> format again.
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_FORMAT for more information.
@@ -285,11 +285,11 @@ classdef (Abstract) Abstract < handle
         end
 
         function domain = get.domain(obj)
-            domain = obj.def_.domainBases();
+            domain = obj.def_.domains;
         end
 
         function obj = set.domain(obj, domain)
-            obj.def_.setDomainBases(domain);
+            obj.def_.domains = domain;
         end
 
         function domain_labels = get.domain_labels(obj)
@@ -431,9 +431,9 @@ classdef (Abstract) Abstract < handle
         %> Get domain violations
         %>
         %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
-        %> as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain
+        %> as \ref gams::transfer::symbol::Symbol::domain "domain"(s) -- and is thus of domain
         %> type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
-        %> its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+        %> its \ref gams::transfer::symbol::Symbol::records "records" that is not present in the
         %> corresponding referenced domain set. Such a domain violation will lead to a GDX error
         %> when writing the data!
         %>
@@ -444,8 +444,8 @@ classdef (Abstract) Abstract < handle
         %> - `dom_violations = getDomainViolations(d)` returns a list of domain violations for
         %>   dimension(s) `d`.
         %>
-        %> @see \ref gams::transfer::symbol::Abstract::resolveDomainViolations
-        %> "symbol.Abstract.resolveDomainViolations", \ref gams::transfer::Container::getDomainViolations
+        %> @see \ref gams::transfer::symbol::Symbol::resolveDomainViolations
+        %> "symbol.Symbol.resolveDomainViolations", \ref gams::transfer::Container::getDomainViolations
         %> "Container.getDomainViolations", \ref gams::transfer::DomainViolation "DomainViolation"
         function getDomainViolations(obj)
             % Get domain violations
@@ -459,7 +459,7 @@ classdef (Abstract) Abstract < handle
             % dom_violations = getDomainViolations(d) returns a list of domain violations for
             % dimension(s) d.
             %
-            % See also: gams.transfer.symbol.Abstract.resolveDomainViolations,
+            % See also: gams.transfer.symbol.Symbol.resolveDomainViolations,
             % gams.transfer.Container.getDomainViolations, gams.transfer.DomainViolation
 
         end
@@ -467,9 +467,9 @@ classdef (Abstract) Abstract < handle
         %> Extends domain sets in order to resolve domain violations
         %>
         %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
-        %> as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain
+        %> as \ref gams::transfer::symbol::Symbol::domain "domain"(s) -- and is thus of domain
         %> type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
-        %> its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+        %> its \ref gams::transfer::symbol::Symbol::records "records" that is not present in the
         %> corresponding referenced domain set. Such a domain violation will lead to a GDX error
         %> when writing the data!
         %>
@@ -480,8 +480,8 @@ classdef (Abstract) Abstract < handle
         %> - `resolveDomainViolations(d)` extends the domain sets with the violated domain entries
         %>   for dimension(s) `d`. Hence, the domain violations disappear for those dimension(s).
         %>
-        %> @see \ref gams::transfer::symbol::Abstract::getDomainViolations
-        %> "symbol.Abstract.getDomainViolations", \ref
+        %> @see \ref gams::transfer::symbol::Symbol::getDomainViolations
+        %> "symbol.Symbol.getDomainViolations", \ref
         %> gams::transfer::Container::resolveDomainViolations "Container.resolveDomainViolations",
         %> \ref gams::transfer::DomainViolation "DomainViolation"
         function resolveDomainViolations(obj)
@@ -496,7 +496,7 @@ classdef (Abstract) Abstract < handle
             % resolveDomainViolations(d) extends the domain sets with the violated domain entries
             % for dimension(s) d. Hence, the domain violations disappear for those dimension(s).
             %
-            % See also: gams.transfer.symbol.Abstract.getDomainViolations,
+            % See also: gams.transfer.symbol.Symbol.getDomainViolations,
             % gams.transfer.Container.resolveDomainViolations, gams.transfer.DomainViolation
 
         end
@@ -635,7 +635,7 @@ classdef (Abstract) Abstract < handle
         %>   value fields that should be considered: `"level"`, `"value"`, `"lower"`, `"upper"`,
         %>   `"scale"`. If none is given all available for the symbol are considered.
         %>
-        %> @see \ref gams::transfer::symbol::Abstract::getSparsity "symbol.Abstract.getSparsity"
+        %> @see \ref gams::transfer::symbol::Symbol::getSparsity "symbol.Symbol.getSparsity"
         function nvals = getNumberValues(obj, varargin)
             % Returns the number of values stored for this symbol.
             %
@@ -645,7 +645,7 @@ classdef (Abstract) Abstract < handle
             % considered: level, value, lower, upper, scale. If none is given all available for the
             % symbol are considered.
             %
-            % See also: gams.transfer.symbol.Abstract.getSparsity
+            % See also: gams.transfer.symbol.Symbol.getSparsity
 
             values = obj.validateValueKeys(varargin);
             nvals = obj.data_.getNumberValues(values);
@@ -665,7 +665,7 @@ classdef (Abstract) Abstract < handle
         %> indexed mode, see \ref GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::symbol::Abstract::isValid "symbol.Abstract.isValid"
+        %> gams::transfer::symbol::Symbol::isValid "symbol.Symbol.isValid"
         function uels = getUELs(obj, varargin)
             % Returns the UELs used in this symbol
             %
@@ -678,7 +678,7 @@ classdef (Abstract) Abstract < handle
             % Note: This can only be used if the symbol is valid. UELs are not available when using
             % the indexed mode.
             %
-            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Abstract.isValid
+            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 2 && isnumeric(varargin{1})
                 varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
@@ -701,7 +701,7 @@ classdef (Abstract) Abstract < handle
         %> indexed mode, see \ref GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::symbol::Abstract::isValid "symbol.Abstract.isValid"
+        %> gams::transfer::symbol::Symbol::isValid "symbol.Symbol.isValid"
         function setUELs(obj, varargin)
             % Sets UELs
             %
@@ -714,7 +714,7 @@ classdef (Abstract) Abstract < handle
             % Note: This can only be used if the symbol is valid. UELs are not available when using
             % the indexed mode.
             %
-            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Abstract.isValid
+            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 3 && isnumeric(varargin{2})
                 varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
@@ -730,7 +730,7 @@ classdef (Abstract) Abstract < handle
         %> - `reorderUELs()` reorders UELs by record order for each dimension. Unused UELs are
         %>   appended.
         %>
-        %> @see \ref gams::transfer::symbol::Abstract::setUELs "symbol.Abstract.setUELs"
+        %> @see \ref gams::transfer::symbol::Symbol::setUELs "symbol.Symbol.setUELs"
         function reorderUELs(obj, varargin)
             % Reorders UELs
             %
@@ -740,7 +740,7 @@ classdef (Abstract) Abstract < handle
             % - `reorderUELs()` reorders UELs by record order for each dimension. Unused UELs are
             %   appended.
             %
-            % See also: gams.transfer.symbol.Abstract.setUELs
+            % See also: gams.transfer.symbol.Symbol.setUELs
 
             if nargin >= 3 && isnumeric(varargin{2})
                 varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
@@ -759,7 +759,7 @@ classdef (Abstract) Abstract < handle
         %> indexed mode, see \ref GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::symbol::Abstract::isValid "symbol.Abstract.isValid"
+        %> gams::transfer::symbol::Symbol::isValid "symbol.Symbol.isValid"
         function addUELs(obj, varargin)
             % Adds UELs to the symbol
             %
@@ -769,7 +769,7 @@ classdef (Abstract) Abstract < handle
             % Note: This can only be used if the symbol is valid. UELs are not available when using
             % the indexed mode.
             %
-            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Abstract.isValid
+            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 3 && isnumeric(varargin{2})
                 varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
@@ -790,7 +790,7 @@ classdef (Abstract) Abstract < handle
         %> indexed mode, see \ref GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::symbol::Abstract::isValid "symbol.Abstract.isValid"
+        %> gams::transfer::symbol::Symbol::isValid "symbol.Symbol.isValid"
         function removeUELs(obj, varargin)
             % Removes UELs from the symbol
             %
@@ -802,7 +802,7 @@ classdef (Abstract) Abstract < handle
             % Note: This can only be used if the symbol is valid. UELs are not available when using
             % the indexed mode.
             %
-            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Abstract.isValid
+            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 3 && isnumeric(varargin{2})
                 varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
@@ -829,7 +829,7 @@ classdef (Abstract) Abstract < handle
         %> indexed mode, see \ref GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::symbol::Abstract::isValid "symbol.Abstract.isValid"
+        %> gams::transfer::symbol::Symbol::isValid "symbol.Symbol.isValid"
         function renameUELs(obj, varargin)
             % Renames UELs in the symbol
             %
@@ -847,7 +847,7 @@ classdef (Abstract) Abstract < handle
             % Note: This can only be used if the symbol is valid. UELs are not available when using
             % the indexed mode.
             %
-            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Abstract.isValid
+            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 3 && isnumeric(varargin{2})
                 varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
@@ -866,7 +866,7 @@ classdef (Abstract) Abstract < handle
         %> indexed mode, see \ref GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::symbol::Abstract::isValid "symbol.Abstract.isValid"
+        %> gams::transfer::symbol::Symbol::isValid "symbol.Symbol.isValid"
         function lowerUELs(obj, varargin)
             % Converts UELs to lower case
             %
@@ -879,7 +879,7 @@ classdef (Abstract) Abstract < handle
             % Note: This can only be used if the symbol is valid. UELs are not available when using
             % the indexed mode.
             %
-            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Abstract.isValid
+            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 2 && isnumeric(varargin{1})
                 varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
@@ -898,7 +898,7 @@ classdef (Abstract) Abstract < handle
         %> indexed mode, see \ref GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
         %>
         %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::symbol::Abstract::isValid "symbol.Abstract.isValid"
+        %> gams::transfer::symbol::Symbol::isValid "symbol.Symbol.isValid"
         function upperUELs(obj, varargin)
             % Converts UELs to upper case
             %
@@ -911,7 +911,7 @@ classdef (Abstract) Abstract < handle
             % Note: This can only be used if the symbol is valid. UELs are not available when using
             % the indexed mode.
             %
-            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Abstract.isValid
+            % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 2 && isnumeric(varargin{1})
                 varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});

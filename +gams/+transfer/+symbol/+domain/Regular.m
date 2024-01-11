@@ -1,4 +1,4 @@
-% Numeric Value Definition
+% Regular Domain
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,43 +28,76 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Numeric Value Definition
+% Regular Domain
 %
 
-%> @brief Numeric Value Definition
-classdef NumericValue < gams.transfer.def.Value
+%> @brief Regular
+classdef Regular < gams.transfer.symbol.domain.Domain
 
-    properties (Hidden, SetAccess = {?gams.transfer.def.NumericValue, ?gams.transfer.symbol.Abstract})
-        default_ = 0
+    properties (Hidden, SetAccess = protected)
+        symbol_
     end
 
     methods (Hidden, Static)
 
-        function arg = validateDefault(name, index, arg)
-            if ~isnumeric(arg)
-                error('Argument ''%s'' (at position %d) must be ''numeric''.', name, index);
+        function arg = validateSymbol(name, index, arg)
+            if ~isa(arg, 'gams.transfer.symbol.Set')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Set''.', name, index);
             end
         end
 
     end
 
+    properties (Dependent)
+        symbol
+        name
+    end
+
     properties (Dependent, SetAccess = private)
-        default
+        base
+        size
     end
 
     methods
 
-        function default = get.default(obj)
-            default = obj.default_;
+        function symbol = get.symbol(obj)
+            symbol = obj.symbol_;
+        end
+
+        function obj = set.symbol(obj, symbol)
+            obj.symbol_ = obj.validateSymbol('symbol', 1, symbol);
+        end
+
+        function name = get.name(obj)
+            name = obj.symbol_.name;
+        end
+
+        function base = get.base(obj)
+            base = obj.symbol_;
+        end
+
+        function size = get.size(obj)
+            size = obj.symbol_.getNumberRecords();
         end
 
     end
 
-    methods (Hidden, Access = {?gams.transfer.def.Value, ?gams.transfer.symbol.Abstract})
+    methods
 
-        function obj = NumericValue(label, default)
-            obj.label_ = label;
-            obj.default_ = default;
+        function obj = Regular(symbol)
+            obj.symbol = symbol;
+            obj.label_ = symbol.name;
+        end
+
+        function flag = hasUniqueLabels(obj)
+            flag = true;
+        end
+
+        function uels = getUniqueLabels(obj)
+            assert(obj.symbol_.dimension == 1);
+            % TODO: better if getUELs would have argument 'order_by' = 'records'
+            label = obj.symbol_.def.domains{1}.label;
+            uels = obj.symbol_.getUELs(1, uint64(obj.symbol_.records.(label)));
         end
 
     end

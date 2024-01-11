@@ -75,7 +75,7 @@
 %>
 %> @see \ref gams::transfer::Parameter "Parameter", \ref
 %> gams::transfer::Container::addParameter "Container.addParameter"
-classdef Parameter < gams.transfer.symbol.Abstract
+classdef Parameter < gams.transfer.symbol.Symbol
 
     methods
 
@@ -117,8 +117,8 @@ classdef Parameter < gams.transfer.symbol.Abstract
         function obj = Parameter(varargin)
             % Constructs a GAMS Parameter, see class help
 
-            obj.def_ = gams.transfer.def.Definition();
-            obj.data_ = gams.transfer.data.Unknown();
+            obj.def_ = gams.transfer.symbol.Definition();
+            obj.data_ = gams.transfer.symbol.data.Unknown();
 
             % parse input arguments
             try
@@ -136,12 +136,12 @@ classdef Parameter < gams.transfer.symbol.Abstract
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'domain_forwarding')
                         obj.domain_forwarding = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'domain_forwarding', @gams.transfer.def.Domain.validateForwarding);
+                            index + 1, 'domain_forwarding', @gams.transfer.symbol.domain.Domain.validateForwarding);
                         index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 3
                         obj.def_.domains_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'domains', @gams.transfer.def.Definition.validateDomains);
+                            index, 'domains', @gams.transfer.symbol.Definition.validateDomains);
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
@@ -154,7 +154,7 @@ classdef Parameter < gams.transfer.symbol.Abstract
             % create default value definition
             gdx_default_values = gams.transfer.cmex.gt_get_defaults(obj);
             obj.def_.values_ = struct(...
-                'value', gams.transfer.def.NumericValue('value', gdx_default_values(1)));
+                'value', gams.transfer.symbol.value.Numeric('value', gdx_default_values(1)));
         end
 
     end

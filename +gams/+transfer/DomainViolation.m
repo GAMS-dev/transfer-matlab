@@ -50,14 +50,14 @@
 %> @brief Domain Violation
 %>
 %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set
-%> "Sets" as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of
+%> "Sets" as \ref gams::transfer::symbol::Symbol::domain "domain"(s) -- and is thus of
 %> domain type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses
-%> a domain entry in its \ref gams::transfer::symbol::Abstract::records "records" that is
+%> a domain entry in its \ref gams::transfer::symbol::Symbol::records "records" that is
 %> not present in the corresponding referenced domain set. Such a domain
 %> violation will lead to a GDX error when writing the data! See \ref
 %> GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
 %>
-%> @see \ref gams::transfer::symbol::Set "Set", \ref gams::transfer::symbol::Abstract "Symbol"
+%> @see \ref gams::transfer::symbol::Set "Set", \ref gams::transfer::symbol::Symbol "Symbol"
 classdef DomainViolation
 
 
@@ -102,7 +102,7 @@ classdef DomainViolation
         %> 4. violations (`cellstr`):
         %>    List of domain entries that are used in symbol but are missing in domain.
         %>
-        %> @see \ref gams::transfer::symbol::Set "Set", \ref gams::transfer::symbol::Abstract "Symbol"
+        %> @see \ref gams::transfer::symbol::Set "Set", \ref gams::transfer::symbol::Symbol "Symbol"
         function obj = DomainViolation(symbol, dimension, domain, violations)
             % Constructs a domain violation, see class help
 

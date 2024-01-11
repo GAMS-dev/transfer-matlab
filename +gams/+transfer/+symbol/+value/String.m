@@ -32,9 +32,9 @@
 %
 
 %> @brief String Value Definition
-classdef StringValue < gams.transfer.def.Value
+classdef String < gams.transfer.symbol.value.Value
 
-    properties (Hidden, SetAccess = {?gams.transfer.def.StringValue, ?gams.transfer.symbol.Abstract})
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.String, ?gams.transfer.symbol.Symbol})
         default_ = ''
     end
 
@@ -62,9 +62,9 @@ classdef StringValue < gams.transfer.def.Value
 
     end
 
-    methods (Hidden, Access = {?gams.transfer.def.Value, ?gams.transfer.symbol.Abstract})
+    methods (Hidden, Access = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.Symbol})
 
-        function obj = StringValue(label, default)
+        function obj = String(label, default)
             obj.label_ = label;
             obj.default_ = default;
         end

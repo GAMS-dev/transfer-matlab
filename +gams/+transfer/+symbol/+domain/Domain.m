@@ -36,7 +36,7 @@ classdef (Abstract) Domain < handle
 
     properties (Hidden, SetAccess = protected)
         label_
-        index_type_ = gams.transfer.def.DomainIndexType()
+        index_type_ = gams.transfer.symbol.domain.IndexType()
         forwarding_ = false
     end
 
@@ -54,13 +54,13 @@ classdef (Abstract) Domain < handle
         end
 
         function arg = validateIndexType(name, index, arg)
-            if isa(arg, 'gams.transfer.def.DomainIndexType')
+            if isa(arg, 'gams.transfer.symbol.domain.IndexType')
                 return
             end
             try
-                arg = gams.transfer.def.DomainIndexType(arg);
+                arg = gams.transfer.symbol.domain.IndexType(arg);
             catch e
-                error('Argument ''%s'' (at position %d) cannot create ''gams.transfer.def.DomainIndexType'': %s.', name, index, e.message);
+                error('Argument ''%s'' (at position %d) cannot create ''gams.transfer.symbol.domain.IndexType'': %s.', name, index, e.message);
             end
         end
 

@@ -32,57 +32,37 @@
 %
 
 %> @brief Table Record
-classdef Table < gams.transfer.data.Tabular
+classdef Table < gams.transfer.symbol.data.Tabular
 
-    properties (Dependent)
+    properties (Dependent, SetAccess = private)
         labels
     end
 
     methods
 
         function labels = get.labels(obj)
-            labels = obj.records.Properties.VariableNames;
+            try
+                labels = obj.records_.Properties.VariableNames;
+            catch
+                labels = {};
+            end
         end
 
     end
 
     methods
 
-        function obj = Table(varargin)
-
-            % parse input arguments
-            p = inputParser();
-            addRequired(p, 'domains', ...
-                @(x) validateattributes(x, {'cell'}, {'nonempty'}, 'Table', 'domains', 1));
-            parse(p, varargin{:});
-
-            obj.domains = p.Results.domains;
-            obj.domain_labels = obj.domains{1}.makeLabels();
-
-            records = struct();
-            labels = obj.domain_labels;
-            for i = 1:numel(labels)
-                records.(labels{i}) = categorical([], [], {}, 'Ordinal', true);
-            end
-            labels = obj.value_labels;
-            for i = 1:numel(labels)
-                records.(labels{i}) = [];
-            end
-            obj.records = struct2table(records);
-        end
-
         function name = name(obj)
             name = 'table';
         end
 
-        function [flag, msg] = isValid(obj)
-            if ~istable(obj.records)
-                flag = false;
-                msg = "Record data must be 'table'.";
+        function status = isValid(obj, def)
+            if ~istable(obj.records_)
+                status = gams.transfer.utils.Status("Record data must be 'table'.");
                 return
             end
 
-            [flag, msg] = isValid@gams.transfer.data.Tabular(obj);
+            status = isValid@gams.transfer.symbol.data.Tabular(obj, def);
         end
 
     end

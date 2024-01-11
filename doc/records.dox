@@ -20,20 +20,20 @@ GAMS_TRANSFER_MATLAB_RECORDS_FORMAT "record formats".
 When working with symbol records, there are two things that can go wrong:
 - \par Record data does not satisfy any of the supported formats.
   \parblock
-  Simply ask whats wrong with \ref gams::transfer::symbol::Abstract::isValid
+  Simply ask whats wrong with \ref gams::transfer::symbol::Symbol::isValid
   "Symbol.isValid", see \ref GAMS_TRANSFER_MATLAB_RECORDS_VALIDATE.
   \endparblock
 - \par Record data contains invalid domain entries, so called domain violations.
   \parblock
   Simply ask for domain violations with \ref
-  gams::transfer::symbol::Abstract::getDomainViolations "Symbol.getDomainViolations", see
+  gams::transfer::symbol::Symbol::getDomainViolations "Symbol.getDomainViolations", see
   \ref GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL.
   \endparblock
 
 @note In the very unlikely case that your Matlab (or Octave) version does NOT
 support `categorical` (Matlab earlier than R2013b or any Octave version), please
 read carefully about \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS "UELs". Otherwise --
-very likely --, you won't need the \ref gams::transfer::symbol::Abstract "Symbol" methods
+very likely --, you won't need the \ref gams::transfer::symbol::Symbol "Symbol" methods
 regarding adding or modifying \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS "UELs".
 
 \section GAMS_TRANSFER_MATLAB_RECORDS_FORMAT Records Format
@@ -48,13 +48,13 @@ format.
 - \par Table-Like Formats:
   \parblock
   The formats `table` and `struct` store the domain entries in the first \ref
-  gams::transfer::symbol::Abstract::dimension "dimension" columns followed by value columns
+  gams::transfer::symbol::Symbol::dimension "dimension" columns followed by value columns
   (`element_text` for \ref gams::transfer::symbol::Set "Set", `value` for \ref
   gams::transfer::symbol::Parameter "Parameter" and `level`, `marginal`, `lower`, `upper`,
   `scale` for \ref gams::transfer::symbol::Variable "Variable" and \ref
   gams::transfer::symbol::Equation "Equation") and the records as rows. In case of
   `struct`, the columns are given as struct fields. The column names for domain
-  entry columns can be shown and altered by \ref gams::transfer::symbol::Abstract::domain_labels
+  entry columns can be shown and altered by \ref gams::transfer::symbol::Symbol::domain_labels
   "Symbol.domain_labels".
 
   For example, `x` in \ref GAMS_TRANSFER_MATLAB_GETSTARTED_EXAMPLE as `table`:
@@ -99,11 +99,11 @@ ans =
   \parblock
   The formats `dense_matrix` and `sparse_matrix` store the record values
   individually as matrices with dimension `max(2,d)`, where `d` is the symbol
-  \ref gams::transfer::symbol::Abstract::dimension "dimension", and shape \ref
-  gams::transfer::symbol::Abstract::size "size". If \ref gams::transfer::symbol::Abstract::size "size"
+  \ref gams::transfer::symbol::Symbol::dimension "dimension", and shape \ref
+  gams::transfer::symbol::Symbol::size "size". If \ref gams::transfer::symbol::Symbol::size "size"
   is undefined (see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN), a matrix-like
   format is not possible. Domain entries cannot be stored in the matrix, but can
-  be queried using the symbol method \ref gams::transfer::symbol::Abstract::getUELs
+  be queried using the symbol method \ref gams::transfer::symbol::Symbol::getUELs
   "getUELs" (see also \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS). Assume a symbol
   `s` has two dimensions. Then, a `(row,col)` matrix entry corresponds to the
   domain entry `s.getUELs(1, [row, col])`. The logic is analogue for different
@@ -164,21 +164,21 @@ relatively for each category.
 | `dense_matrix`  | 20 (GAMS limit)  | `+`  | `--` | `++` | `-`  |
 | `sparse_matrix` | 2 (Matlab limit) | `o`  | `++` | `+`  | `--` |
 
-\note For scalar symbols (\ref gams::transfer::symbol::Abstract::dimension "dimension"
+\note For scalar symbols (\ref gams::transfer::symbol::Symbol::dimension "dimension"
 equals 0), the formats `struct` and `dense_matrix` are equivalent. GAMS Transfer
 will usually prefer `struct` in case of ambiguity.
 
 \section GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL Domain Violations
 
 Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
-as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain type
+as \ref gams::transfer::symbol::Symbol::domain "domain"(s) -- and is thus of domain type
 `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
-its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+its \ref gams::transfer::symbol::Symbol::records "records" that is not present in the
 corresponding referenced domain set. Such a domain violation will lead to a GDX
 error when writing the data!
 
 \note Checking for domain violations is not part of \ref
-gams::transfer::symbol::Abstract::isValid "Symbol.isValid" for performance reasons.
+gams::transfer::symbol::Symbol::isValid "Symbol.isValid" for performance reasons.
 
 For example, altering `x` in \ref GAMS_TRANSFER_MATLAB_GETSTARTED_EXAMPLE --
 remember that `x` has domains `{i,j}`, where `i` and `j` are \ref
@@ -207,11 +207,11 @@ Error in gams.transfer.Container/write (line 341)
 ```
 
 To ask for domain violations, call the method \ref
-gams::transfer::symbol::Abstract::getDomainViolations "Symbol.getDomainViolations". It
+gams::transfer::symbol::Symbol::getDomainViolations "Symbol.getDomainViolations". It
 returns a list of \ref gams::transfer::DomainViolation "DomainViolation" objects
 w.r.t. each dimension of the symbol which can then be used to resolve the domain
 violations: The GAMS Transfer Matlab methods \ref
-gams::transfer::symbol::Abstract::resolveDomainViolations "Symbol.resolveDomainViolations"
+gams::transfer::symbol::Symbol::resolveDomainViolations "Symbol.resolveDomainViolations"
 and \ref gams::transfer::DomainViolation::resolve "DomainViolation.resolve" offer
 an automatic expansion of the domain sets with the violated entries in order to
 eliminate domain violations.
@@ -256,20 +256,20 @@ ans =
 ```
 
 This resolving feature can further be triggered automatically by setting the
-symbol property \ref gams::transfer::symbol::Abstract::domain_forwarding
-"Symbol.domain_forwarding" to `true`. If \ref gams::transfer::symbol::Abstract::records
+symbol property \ref gams::transfer::symbol::Symbol::domain_forwarding
+"Symbol.domain_forwarding" to `true`. If \ref gams::transfer::symbol::Symbol::records
 "records" are updated by direct access (see \ref
 GAMS_TRANSFER_MATLAB_SYMBOL_EFFICIENT_RECORDS), the domain update will happen
 delayed for improved efficiency, but can be forced by calling \ref
-gams::transfer::symbol::Abstract::isValid "isValid" or the resolving methods mentioned
+gams::transfer::symbol::Symbol::isValid "isValid" or the resolving methods mentioned
 above.
 
 \note The method for automatically resolving the domain violations can be
 convenient, but it effectively disables domain checking, which is a valuable
 tool for error detection. We encourage to use \ref
-gams::transfer::symbol::Abstract::resolveDomainViolations "Symbol.resolveDomainViolations",
+gams::transfer::symbol::Symbol::resolveDomainViolations "Symbol.resolveDomainViolations",
 \ref gams::transfer::DomainViolation::resolve "DomainViolation.resolve" or \ref
-gams::transfer::symbol::Abstract::domain_forwarding "Symbol.domain_forwarding" enabled as
+gams::transfer::symbol::Symbol::domain_forwarding "Symbol.domain_forwarding" enabled as
 rarely as possible. The same holds for using `relaxed` domain information when
 `regular` domain information would be possible, see \ref
 GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN.
@@ -280,16 +280,16 @@ GAMS Transfer Matlab requires the symbol records to be stored in one of the
 supported \ref GAMS_TRANSFER_MATLAB_RECORDS_FORMAT "record formats" in order to
 understand and write them to GDX. However, it can easily happen that a certain
 criteria of the format is not met and the symbol is marked as invalid, i.e., the
-symbol method \ref gams::transfer::symbol::Abstract::isValid "Symbol.isValid" returns
+symbol method \ref gams::transfer::symbol::Symbol::isValid "Symbol.isValid" returns
 `false`. In that case setting the argument `verbose` of \ref
-gams::transfer::symbol::Abstract::isValid "Symbol.isValid" to `true` will print the reason
+gams::transfer::symbol::Symbol::isValid "Symbol.isValid" to `true` will print the reason
 for invalidity and can thus help to resolve the issue.
 
 \note Performance hint: In case symbol records are updated within a loop, try to
 avoid checking the symbol validity within the loop. Note that symbol methods to
 query, for example, the number of records will check for a valid symbol
 internally. You can use the Matlab Profiler to verify that \ref
-gams::transfer::symbol::Abstract::isValid "Symbol.isValid" is not called within your loop.
+gams::transfer::symbol::Symbol::isValid "Symbol.isValid" is not called within your loop.
 
 For example, take `x` of \ref GAMS_TRANSFER_MATLAB_GETSTARTED_EXAMPLE, which is
 of course valid:
@@ -397,30 +397,30 @@ ans =
 @attention In the very unlikely case that your Matlab (or Octave) version does
 NOT support `categorical` (Matlab earlier than R2013b or any Octave version),
 please go on and read carefully about UELs. You must store the UEL indices in the
-domain columns of the \ref gams::transfer::symbol::Abstract::records "Symbol.records".
+domain columns of the \ref gams::transfer::symbol::Symbol::records "Symbol.records".
 Storing strings is not supported. For looking up the corresponding string, use
-the method \ref gams::transfer::symbol::Abstract::getUELs "Symbol.getUELs". Otherwise, if
+the method \ref gams::transfer::symbol::Symbol::getUELs "Symbol.getUELs". Otherwise, if
 you can use `categorical` -- very likely --, you won't need the \ref
-gams::transfer::symbol::Abstract "Symbol" methods regarding adding or modifying UELs,
+gams::transfer::symbol::Symbol "Symbol" methods regarding adding or modifying UELs,
 explained below.
 
 Each symbol maintains its own list of UELs per dimension, which can be accessed
-and modified via the methods \ref gams::transfer::symbol::Abstract::getUELs
-"Symbol.getUELs", \ref gams::transfer::symbol::Abstract::setUELs "Symbol.setUELs", \ref
-gams::transfer::symbol::Abstract::addUELs "Symbol.addUELs", \ref
-gams::transfer::symbol::Abstract::removeUELs "Symbol.removeUELs", \ref
-gams::transfer::symbol::Abstract::renameUELs "Symbol.renameUELs" and \ref
-gams::transfer::symbol::Abstract::reorderUELs "Symbol.reorderUELs" (or the Matlab functions
+and modified via the methods \ref gams::transfer::symbol::Symbol::getUELs
+"Symbol.getUELs", \ref gams::transfer::symbol::Symbol::setUELs "Symbol.setUELs", \ref
+gams::transfer::symbol::Symbol::addUELs "Symbol.addUELs", \ref
+gams::transfer::symbol::Symbol::removeUELs "Symbol.removeUELs", \ref
+gams::transfer::symbol::Symbol::renameUELs "Symbol.renameUELs" and \ref
+gams::transfer::symbol::Symbol::reorderUELs "Symbol.reorderUELs" (or the Matlab functions
 for modifying `categorical` directly). The UEL indices are numbered from 1 to the
 number of UELs stored independently for each dimension.
 
-\attention The methods \ref gams::transfer::symbol::Abstract::setUELs "Symbol.setUELs" and
-\ref gams::transfer::symbol::Abstract::removeUELs "Symbol.removeUELs" may reassign different
+\attention The methods \ref gams::transfer::symbol::Symbol::setUELs "Symbol.setUELs" and
+\ref gams::transfer::symbol::Symbol::removeUELs "Symbol.removeUELs" may reassign different
 UEL indices to the UEL labels. These changes are applied to the indices used in \ref
-gams::transfer::symbol::Abstract::records "Symbol.records". This implies that removing a UEL
-that is used in the \ref gams::transfer::symbol::Abstract::records "Symbol.records" will
+gams::transfer::symbol::Symbol::records "Symbol.records". This implies that removing a UEL
+that is used in the \ref gams::transfer::symbol::Symbol::records "Symbol.records" will
 then lead to an invalid domain entry (displayed as `<undefined>` in Matlab). For
-\ref gams::transfer::symbol::Abstract::setUELs "Symbol.setUELs", these updates can be
+\ref gams::transfer::symbol::Symbol::setUELs "Symbol.setUELs", these updates can be
 disabled by passing the arguments `'rename', true`.
 
 For example, continuing the \ref GAMS_TRANSFER_MATLAB_GETSTARTED_EXAMPLE from
@@ -494,10 +494,10 @@ GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL.
 \par Advanced Users Only:
 \parblock
 Even with support of `categorical` it can be useful to explicitly add a UEL with
-\ref gams::transfer::symbol::Abstract::addUELs "Symbol.addUELs", although simply using a new
-UEL in \ref gams::transfer::symbol::Abstract::records "Symbol.records" will add it
+\ref gams::transfer::symbol::Symbol::addUELs "Symbol.addUELs", although simply using a new
+UEL in \ref gams::transfer::symbol::Symbol::records "Symbol.records" will add it
 automatically to the UEL list. However, it is possible to store more UELs than
-those actually used in the \ref gams::transfer::symbol::Abstract::records "records".
+those actually used in the \ref gams::transfer::symbol::Symbol::records "records".
 Advanced users can use this fact to sort the universe set of a GDX file to their
 needs, see also \ref GAMS_TRANSFER_MATLAB_CONTAINER_WRITE.
 \endparblock

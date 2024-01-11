@@ -79,7 +79,7 @@
 %> @see \ref gams::transfer::Equation "Equation", \ref
 %> gams::transfer::Container::addEquation "Container.addEquation", \ref
 %> gams::transfer::symbol::EquationType "symbol.EquationType"
-classdef Equation < gams.transfer.symbol.Abstract
+classdef Equation < gams.transfer.symbol.Symbol
 
     properties (Hidden, SetAccess = protected)
         type_
@@ -179,8 +179,8 @@ classdef Equation < gams.transfer.symbol.Abstract
         function obj = Equation(varargin)
             % Constructs a GAMS Equation, see class help
 
-            obj.def_ = gams.transfer.def.Definition();
-            obj.data_ = gams.transfer.data.Unknown();
+            obj.def_ = gams.transfer.symbol.Definition();
+            obj.data_ = gams.transfer.symbol.data.Unknown();
 
             % parse input arguments
             try
@@ -200,12 +200,12 @@ classdef Equation < gams.transfer.symbol.Abstract
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'domain_forwarding')
                         obj.domain_forwarding = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'domain_forwarding', @gams.transfer.def.Domain.validateForwarding);
+                            index + 1, 'domain_forwarding', @gams.transfer.symbol.domain.Domain.validateForwarding);
                         index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 4
                         obj.def_.domains_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'domains', @gams.transfer.def.Definition.validateDomains);
+                            index, 'domains', @gams.transfer.symbol.Definition.validateDomains);
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
@@ -219,11 +219,11 @@ classdef Equation < gams.transfer.symbol.Abstract
             % gdx_default_values = gams.transfer.cmex.gt_get_defaults(obj);
             gdx_default_values = zeros(1, 5);
             obj.def_.values_ = struct(...
-                'level', gams.transfer.def.NumericValue('level', gdx_default_values(1)), ...
-                'marginal', gams.transfer.def.NumericValue('marginal', gdx_default_values(2)), ...
-                'lower', gams.transfer.def.NumericValue('lower', gdx_default_values(3)), ...
-                'upper', gams.transfer.def.NumericValue('upper', gdx_default_values(4)), ...
-                'scale', gams.transfer.def.NumericValue('scale', gdx_default_values(5)));
+                'level', gams.transfer.symbol.value.Numeric('level', gdx_default_values(1)), ...
+                'marginal', gams.transfer.symbol.value.Numeric('marginal', gdx_default_values(2)), ...
+                'lower', gams.transfer.symbol.value.Numeric('lower', gdx_default_values(3)), ...
+                'upper', gams.transfer.symbol.value.Numeric('upper', gdx_default_values(4)), ...
+                'scale', gams.transfer.symbol.value.Numeric('scale', gdx_default_values(5)));
         end
 
     end
