@@ -39,10 +39,10 @@
 %    Name of variable
 %
 % Optional Arguments:
-% 3. type (string, int or gams.transfer.symbol.VariableType):
+% 3. type (string, int or gams.transfer.VariableType):
 %    Specifies the variable type, either as string, as integer given by any of the
-%    constants in gams.transfer.symbol.VariableType or
-%    gams.transfer.symbol.VariableType. Default is "free".
+%    constants in gams.transfer.VariableType or
+%    gams.transfer.VariableType. Default is "free".
 % 4. domain (cellstr or Set):
 %    List of domains given either as string or as reference to a
 %    gams.transfer.symbol.Set object. Default is {} (for scalar).
@@ -64,10 +64,10 @@
 % c = Container();
 % v1 = Variable(c, 'v1');
 % v2 = Variable(c, 'v2', 'binary', {'*', '*'});
-% v3 = Variable(c, 'v3', symbol.VariableType.BINARY, '*', 'description', 'var v3');
+% v3 = Variable(c, 'v3', VariableType.BINARY, '*', 'description', 'var v3');
 %
 % See also: gams.transfer.symbol.Variable, gams.transfer.Container.addVariable,
-% gams.transfer.symbol.VariableType
+% gams.transfer.VariableType
 
 %> @brief GAMS Variable Creator
 %>
@@ -78,10 +78,10 @@
 %>    Name of variable
 %>
 %> **Optional Arguments:**
-%> 3. type (`string`, `int` or \ref gams::transfer::symbol::VariableType "symbol.VariableType"):
+%> 3. type (`string`, `int` or \ref gams::transfer::VariableType "VariableType"):
 %>    Specifies the variable type, either as `string`, as `integer` given by any of the
-%>    constants in \ref gams::transfer::symbol::VariableType "symbol.VariableType" or \ref
-%>    gams::transfer::symbol::VariableType "symbol.VariableType". Default is `"free"`.
+%>    constants in \ref gams::transfer::VariableType "VariableType" or \ref
+%>    gams::transfer::VariableType "VariableType". Default is `"free"`.
 %> 4. domain (`cellstr` or `Set`):
 %>    List of domains given either as string or as reference to a \ref
 %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{}` (for scalar).
@@ -106,12 +106,12 @@
 %> c = Container();
 %> v1 = Variable(c, 'v1');
 %> v2 = Variable(c, 'v2', 'binary', {'*', '*'});
-%> v3 = Variable(c, 'v3', symbol.VariableType.BINARY, '*', 'description', 'var v3');
+%> v3 = Variable(c, 'v3', VariableType.BINARY, '*', 'description', 'var v3');
 %> ```
 %>
 %> @see \ref gams::transfer::symbol::Variable "symbol.Variable", \ref
 %> gams::transfer::Container::addVariable "Container.addVariable", \ref
-%> gams::transfer::symbol::VariableType "VariableType"
+%> gams::transfer::VariableType "VariableType"
 function symbol = Variable(container, varargin)
     symbol = container.addVariable(varargin{:});
 end

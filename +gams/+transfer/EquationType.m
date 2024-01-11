@@ -77,19 +77,19 @@ classdef EquationType
             end
             switch upper(arg)
             case {'EQ', 'E'}
-                arg = gams.transfer.symbol.EquationType.EQ;
+                arg = gams.transfer.EquationType.EQ;
             case {'GEQ', 'G'}
-                arg = gams.transfer.symbol.EquationType.GEQ;
+                arg = gams.transfer.EquationType.GEQ;
             case {'LEQ', 'L'}
-                arg = gams.transfer.symbol.EquationType.LEQ;
+                arg = gams.transfer.EquationType.LEQ;
             case {'NONBINDING', 'N'}
-                arg = gams.transfer.symbol.EquationType.NONBINDING;
+                arg = gams.transfer.EquationType.NONBINDING;
             case {'EXTERNAL', 'X'}
-                arg = gams.transfer.symbol.EquationType.EXTERNAL;
+                arg = gams.transfer.EquationType.EXTERNAL;
             case {'CONE', 'C'}
-                arg = gams.transfer.symbol.EquationType.CONE;
+                arg = gams.transfer.EquationType.CONE;
             case {'BOOLEAN', 'B'}
-                arg = gams.transfer.symbol.EquationType.BOOLEAN;
+                arg = gams.transfer.EquationType.BOOLEAN;
             otherwise
                 error('Argument ''%s'' (at position %d) is invalid selection: %s.', name, index, arg);
             end
@@ -161,56 +161,56 @@ classdef EquationType
     methods (Static)
 
         function obj = Eq()
-            obj = gams.transfer.symbol.EquationType();
-            obj.value_ = gams.transfer.symbol.EquationType.EQ;
+            obj = gams.transfer.EquationType();
+            obj.value_ = gams.transfer.EquationType.EQ;
         end
 
         function obj = Leq()
-            obj = gams.transfer.symbol.EquationType();
-            obj.value_ = gams.transfer.symbol.EquationType.LEQ;
+            obj = gams.transfer.EquationType();
+            obj.value_ = gams.transfer.EquationType.LEQ;
         end
 
         function obj = Geq()
-            obj = gams.transfer.symbol.EquationType();
-            obj.value_ = gams.transfer.symbol.EquationType.GEQ;
+            obj = gams.transfer.EquationType();
+            obj.value_ = gams.transfer.EquationType.GEQ;
         end
 
         function obj = NonBinding()
-            obj = gams.transfer.symbol.EquationType();
+            obj = gams.transfer.EquationType();
         end
 
         function obj = External()
-            obj = gams.transfer.symbol.EquationType();
-            obj.value_ = gams.transfer.symbol.EquationType.EXTERNAL;
+            obj = gams.transfer.EquationType();
+            obj.value_ = gams.transfer.EquationType.EXTERNAL;
         end
 
         function obj = Cone()
-            obj = gams.transfer.symbol.EquationType();
-            obj.value_ = gams.transfer.symbol.EquationType.CONE;
+            obj = gams.transfer.EquationType();
+            obj.value_ = gams.transfer.EquationType.CONE;
         end
 
         function obj = Boolean()
-            obj = gams.transfer.symbol.EquationType();
-            obj.value_ = gams.transfer.symbol.EquationType.BOOLEAN;
+            obj = gams.transfer.EquationType();
+            obj.value_ = gams.transfer.EquationType.BOOLEAN;
         end
 
         function values = values(input)
             if isnumeric(input)
                 values = zeros(size(input));
                 for i = 1:numel(input)
-                    values(i) = gams.transfer.symbol.EquationType(input(i)).value;
+                    values(i) = gams.transfer.EquationType(input(i)).value;
                 end
             elseif iscell(input)
                 values = zeros(size(input));
                 for i = 1:numel(input)
-                    if isa(input{i}, 'gams.transfer.symbol.EquationType')
+                    if isa(input{i}, 'gams.transfer.EquationType')
                         values(i) = input{i}.value;
                     else
-                        values(i) = gams.transfer.symbol.EquationType(input{i}).value;
+                        values(i) = gams.transfer.EquationType(input{i}).value;
                     end
                 end
             else
-                values = gams.transfer.symbol.EquationType(input).value;
+                values = gams.transfer.EquationType(input).value;
             end
         end
 
@@ -218,19 +218,19 @@ classdef EquationType
             if isnumeric(input)
                 selects = cell(size(input));
                 for i = 1:numel(input)
-                    selects{i} = gams.transfer.symbol.EquationType(input(i)).select;
+                    selects{i} = gams.transfer.EquationType(input(i)).select;
                 end
             elseif iscell(input)
                 selects = cell(size(input));
                 for i = 1:numel(input)
-                    if isa(input{i}, 'gams.transfer.symbol.EquationType')
+                    if isa(input{i}, 'gams.transfer.EquationType')
                         selects{i} = input{i}.select;
                     else
-                        selects{i} = gams.transfer.symbol.EquationType(input{i}).select;
+                        selects{i} = gams.transfer.EquationType(input{i}).select;
                     end
                 end
             else
-                selects = {gams.transfer.symbol.EquationType(input).select};
+                selects = {gams.transfer.EquationType(input).select};
             end
         end
 

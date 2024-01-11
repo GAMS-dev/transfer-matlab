@@ -1205,9 +1205,9 @@ classdef Container < handle
                 error(e.message);
             end
             try
-                types = gams.transfer.symbol.VariableType.values(types);
+                types = gams.transfer.VariableType.values(types);
             catch e
-                error('Argument ''types'' cannot create ''gams.transfer.symbol.VariableType'': %s', e.message);
+                error('Argument ''types'' cannot create ''gams.transfer.VariableType'': %s', e.message);
             end
 
             list = obj.listSymbols('types', {'gams.transfer.symbol.Variable'}, 'is_valid', is_valid);
@@ -1217,7 +1217,7 @@ classdef Container < handle
                 filter = false(size(list));
                 for i = 1:numel(list)
                     symbol = obj.data_.getEntry(list{i});
-                    filter(i) = sum(types == gams.transfer.symbol.VariableType(symbol.type).value) > 0;
+                    filter(i) = sum(types == gams.transfer.VariableType(symbol.type).value) > 0;
                 end
                 list = list(filter);
             end
@@ -1262,9 +1262,9 @@ classdef Container < handle
                 error(e.message);
             end
             try
-                types = gams.transfer.symbol.EquationType.values(types);
+                types = gams.transfer.EquationType.values(types);
             catch e
-                error('Argument ''types'' cannot create ''gams.transfer.symbol.EquationType'': %s', e.message);
+                error('Argument ''types'' cannot create ''gams.transfer.EquationType'': %s', e.message);
             end
 
             list = obj.listSymbols('types', {'gams.transfer.symbol.Equation'}, 'is_valid', is_valid);
@@ -1274,7 +1274,7 @@ classdef Container < handle
                 filter = false(size(list));
                 for i = 1:numel(list)
                     symbol = obj.data_.getEntry(list{i});
-                    filter(i) = sum(types == gams.transfer.symbol.EquationType(symbol.type).value) > 0;
+                    filter(i) = sum(types == gams.transfer.EquationType(symbol.type).value) > 0;
                 end
                 list = list(filter);
             end
@@ -1654,10 +1654,10 @@ classdef Container < handle
         %>    Name of variable
         %>
         %> **Optional Arguments:**
-        %> 2. type (`string`, `int` or \ref gams::transfer::symbol::VariableType "symbol.VariableType"):
+        %> 2. type (`string`, `int` or \ref gams::transfer::VariableType "VariableType"):
         %>    Specifies the variable type, either as `string`, as `integer` given by any of the
-        %>    constants in \ref gams::transfer::symbol::VariableType "symbol.VariableType" or \ref
-        %>    gams::transfer::symbol::VariableType "symbol.VariableType". Default is `"free"`.
+        %>    constants in \ref gams::transfer::VariableType "VariableType" or \ref
+        %>    gams::transfer::VariableType "VariableType". Default is `"free"`.
         %> 3. domain (`cellstr` or `Set`):
         %>    List of domains given either as string or as reference to a \ref
         %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{}` (for scalar).
@@ -1686,7 +1686,7 @@ classdef Container < handle
         %> ```
         %>
         %> @see \ref gams::transfer::symbol::Variable "symbol.Variable", \ref
-        %> gams::transfer::Variable "Variable", \ref gams::transfer::symbol::VariableType
+        %> gams::transfer::Variable "Variable", \ref gams::transfer::VariableType
         %> "VariableType"
         function symbol = addVariable(obj, name, varargin)
             % Adds a variable to the container
@@ -1696,10 +1696,10 @@ classdef Container < handle
             %    Name of variable
             %
             % Optional Arguments:
-            % 2. type (string, int or gams.transfer.symbol.VariableType):
+            % 2. type (string, int or gams.transfer.VariableType):
             %    Specifies the variable type, either as string, as integer given by any of the
-            %    constants in gams.transfer.symbol.VariableType or
-            %    gams.transfer.symbol.VariableType. Default is "free".
+            %    constants in gams.transfer.VariableType or
+            %    gams.transfer.VariableType. Default is "free".
             % 3. domain (cellstr or Set):
             %    List of domains given either as string or as reference to a
             %    gams.transfer.symbol.Set object. Default is {} (for scalar).
@@ -1724,7 +1724,7 @@ classdef Container < handle
             % v3 = c.addVariable('v3', VariableType.BINARY, '*', 'description', 'var v3');
             %
             % See also: gams.transfer.symbol.Variable, gams.transfer.Variable,
-            % gams.transfer.symbol.VariableType
+            % gams.transfer.VariableType
 
             if obj.indexed_
                 error('Variable not supported in indexed mode.');
@@ -1753,10 +1753,10 @@ classdef Container < handle
         %> **Required Arguments:**
         %> 1. name (`string`):
         %>    Name of equation
-        %> 2. type (`string`, `int` or \ref gams::transfer::symbol::EquationType "symbol.EquationType"):
+        %> 2. type (`string`, `int` or \ref gams::transfer::EquationType "EquationType"):
         %>    Specifies the variable type, either as `string`, as `integer` given by any of the
-        %>    constants in \ref gams::transfer::symbol::EquationType "symbol.EquationType" or \ref
-        %>    gams::transfer::symbol::EquationType "symbol.EquationType".
+        %>    constants in \ref gams::transfer::EquationType "EquationType" or \ref
+        %>    gams::transfer::EquationType "EquationType".
         %>
         %> **Optional Arguments:**
         %> 3. domain (`cellstr` or `Set`):
@@ -1786,18 +1786,18 @@ classdef Container < handle
         %> ```
         %>
         %> @see \ref gams::transfer::symbol::Equation "symbol.Equation", \ref
-        %> gams::transfer::Equation "Equation", \ref gams::transfer::symbol::EquationType
-        %> "symbol.EquationType"
+        %> gams::transfer::Equation "Equation", \ref gams::transfer::EquationType
+        %> "EquationType"
         function symbol = addEquation(obj, name, varargin)
             % Adds an equation to the container
             %
             % Required Arguments:
             % 1. name (string):
             %    Name of equation
-            % 2. type (string, int or gams.transfer.symbol.EquationType):
+            % 2. type (string, int or gams.transfer.EquationType):
             %    Specifies the variable type, either as string, as integer given by any of the
-            %    constants in gams.transfer.symbol.EquationType or
-            %    gams.transfer.symbol.EquationType.
+            %    constants in gams.transfer.EquationType or
+            %    gams.transfer.EquationType.
             %
             % Optional Arguments:
             % 3. domain (cellstr or Set):
@@ -1823,7 +1823,7 @@ classdef Container < handle
             % e3 = c.addEquation('e3', EquationType.EQ, '*', 'description', 'equ e3');
             %
             % See also: gams.transfer.symbol.Equation, gams.transfer.Equation,
-            % gams.transfer.symbol.EquationType
+            % gams.transfer.EquationType
 
             if obj.indexed_
                 error('Equation not supported in indexed mode.');

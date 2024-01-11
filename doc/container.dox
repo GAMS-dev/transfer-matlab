@@ -286,7 +286,7 @@ an `x` means that this property / statistic is available for the symbol type.
 | name | Name of symbol | x | x | x | x | x |
 | is_singleton | Indicates if set is a singleton set (true) or not (false) | x | x |  |  |  |
 | alias_with | Set an alias is linked to |  | x |  |  |  |
-| type | Variable or Equation type, see \ref gams::transfer::symbol::VariableType "VariableType" and \ref gams::transfer::symbol::EquationType "EquationType" |  |  |  | x | x |
+| type | Variable or Equation type, see \ref gams::transfer::VariableType "VariableType" and \ref gams::transfer::EquationType "EquationType" |  |  |  | x | x |
 | format | Format \ref gams::transfer::symbol::Symbol::records "records" are stored in, see \ref GAMS_TRANSFER_MATLAB_RECORDS_FORMAT | x | x | x | x | x |
 | dimension | \ref gams::transfer::symbol::Symbol::dimension "Dimension" of symbol | x | x | x | x | x |
 | domain_type | Type of domain, e.g. relaxed or regular | x | x | x | x | x |

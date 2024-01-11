@@ -93,7 +93,7 @@ value if the argument is not required.
 |:---------|:-----|:-----------|:----|:------|:----------|:---------|:---------|
 | name | string | Name of symbol | required #1 | required #1 | required #1 | required #1 | required #1 |
 | \ref gams::transfer::alias::Set::alias_with "alias_with" | \ref gams::transfer::symbol::Set "Set" | Set an alias is linked to | - | required #2 | - | - | - |
-| \ref gams::transfer::symbol::Variable::type "type" | string, int | Variable or Equation type, see \ref gams::transfer::symbol::VariableType "VariableType" and \ref gams::transfer::symbol::EquationType "EquationType" | - | - | - | optional #2 ('free') | required #2 |
+| \ref gams::transfer::symbol::Variable::type "type" | string, int | Variable or Equation type, see \ref gams::transfer::VariableType "VariableType" and \ref gams::transfer::EquationType "EquationType" | - | - | - | optional #2 ('free') | required #2 |
 | \ref gams::transfer::symbol::Symbol::domain "domain" | cell, \ref gams::transfer::symbol::Set "Set", string | List of domains given either as string ('*' for universe set) or as reference to a \ref gams::transfer::symbol::Set "Set" object | optional #2 ('*') | - | optional #2 ({}) | optional #3 ({}) | optional #3 ({}) |
 | description | string | Description of symbol | parameter ('') | - | parameter ('') | parameter ('') | parameter ('') |
 | \ref gams::transfer::symbol::Symbol::records "records" | any | Symbol records, see also \ref GAMS_TRANSFER_MATLAB_SYMBOL_EFFICIENT_RECORDS | parameter ([]) | - | parameter ([]) | parameter ([]) | parameter ([]) |

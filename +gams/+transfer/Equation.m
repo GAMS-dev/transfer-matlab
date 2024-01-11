@@ -37,10 +37,10 @@
 %    gams.transfer.Container object this symbol should be stored in
 % 2. name (string):
 %    Name of equation
-% 3. type (string, int or gams.transfer.symbol.EquationType):
+% 3. type (string, int or gams.transfer.EquationType):
 %    Specifies the variable type, either as string, as integer given by any of the
-%    constants in gams.transfer.symbol.EquationType or
-%    gams.transfer.symbol.EquationType.
+%    constants in gams.transfer.EquationType or
+%    gams.transfer.EquationType.
 %
 % Optional Arguments:
 % 4. domain (cellstr or Set):
@@ -63,10 +63,10 @@
 % Example:
 % c = Container();
 % e2 = Equation(c, 'e2', 'l', {'*', '*'});
-% e3 = Equation(c, 'e3', symbol.EquationType.EQ, '*', 'description', 'equ e3');
+% e3 = Equation(c, 'e3', EquationType.EQ, '*', 'description', 'equ e3');
 %
 % See also: gams.transfer.symbol.Equation, gams.transfer.Container.addEquation,
-% gams.transfer.symbol.EquationType
+% gams.transfer.EquationType
 
 %> @brief GAMS Equation Creator
 %>
@@ -77,10 +77,10 @@
 %>    \ref gams::transfer::Container "Container" object this symbol should be stored in
 %> 2. name (`string`):
 %>    Name of equation
-%> 3. type (`string`, `int` or \ref gams::transfer::symbol::EquationType "symbol.EquationType"):
+%> 3. type (`string`, `int` or \ref gams::transfer::EquationType "EquationType"):
 %>    Specifies the variable type, either as `string`, as `integer` given by any of the
-%>    constants in \ref gams::transfer::symbol::EquationType "symbol.EquationType" or \ref
-%>    gams::transfer::symbol::EquationType "symbol.EquationType".
+%>    constants in \ref gams::transfer::EquationType "EquationType" or \ref
+%>    gams::transfer::EquationType "EquationType".
 %>
 %> **Optional Arguments:**
 %> 4. domain (`cellstr` or `Set`):
@@ -106,12 +106,12 @@
 %> ```
 %> c = Container();
 %> e2 = Equation(c, 'e2', 'l', {'*', '*'});
-%> e3 = Equation(c, 'e3', symbol.EquationType.EQ, '*', 'description', 'equ e3');
+%> e3 = Equation(c, 'e3', EquationType.EQ, '*', 'description', 'equ e3');
 %> ```
 %>
 %> @see \ref gams::transfer::symbol::Equation "symbol.Equation", \ref
 %> gams::transfer::Container::addEquation "Container.addEquation", \ref
-%> gams::transfer::symbol::EquationType "symbol.EquationType"
+%> gams::transfer::EquationType "EquationType"
 function symbol = Equation(container, varargin)
     symbol = container.addEquation(varargin{:});
 end

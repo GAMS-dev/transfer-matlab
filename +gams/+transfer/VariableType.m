@@ -79,23 +79,23 @@ classdef VariableType
             end
             switch upper(arg)
             case 'BINARY'
-                arg = gams.transfer.symbol.VariableType.BINARY;
+                arg = gams.transfer.VariableType.BINARY;
             case 'INTEGER'
-                arg = gams.transfer.symbol.VariableType.INTEGER;
+                arg = gams.transfer.VariableType.INTEGER;
             case 'POSITIVE'
-                arg = gams.transfer.symbol.VariableType.POSITIVE;
+                arg = gams.transfer.VariableType.POSITIVE;
             case 'NEGATIVE'
-                arg = gams.transfer.symbol.VariableType.NEGATIVE;
+                arg = gams.transfer.VariableType.NEGATIVE;
             case 'FREE'
-                arg = gams.transfer.symbol.VariableType.FREE;
+                arg = gams.transfer.VariableType.FREE;
             case 'SOS1'
-                arg = gams.transfer.symbol.VariableType.SOS1;
+                arg = gams.transfer.VariableType.SOS1;
             case 'SOS2'
-                arg = gams.transfer.symbol.VariableType.SOS2;
+                arg = gams.transfer.VariableType.SOS2;
             case 'SEMICONT'
-                arg = gams.transfer.symbol.VariableType.SEMICONT;
+                arg = gams.transfer.VariableType.SEMICONT;
             case 'SEMIINT'
-                arg = gams.transfer.symbol.VariableType.SEMIINT;
+                arg = gams.transfer.VariableType.SEMIINT;
             otherwise
                 error('Argument ''%s'' (at position %d) is invalid selection: %s.', name, index, arg);
             end
@@ -171,66 +171,66 @@ classdef VariableType
     methods (Static)
 
         function obj = Binary()
-            obj = gams.transfer.symbol.VariableType();
-            obj.value_ = gams.transfer.symbol.VariableType.BINARY;
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.BINARY;
         end
 
         function obj = Integer()
-            obj = gams.transfer.symbol.VariableType();
-            obj.value_ = gams.transfer.symbol.VariableType.INTEGER;
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.INTEGER;
         end
 
         function obj = Positive()
-            obj = gams.transfer.symbol.VariableType();
-            obj.value_ = gams.transfer.symbol.VariableType.POSITIVE;
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.POSITIVE;
         end
 
         function obj = Negative()
-            obj = gams.transfer.symbol.VariableType();
-            obj.value_ = gams.transfer.symbol.VariableType.NEGATIVE;
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.NEGATIVE;
         end
 
         function obj = Free()
-            obj = gams.transfer.symbol.VariableType();
+            obj = gams.transfer.VariableType();
         end
 
         function obj = Sos1()
-            obj = gams.transfer.symbol.VariableType();
-            obj.value_ = gams.transfer.symbol.VariableType.SOS1;
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.SOS1;
         end
 
         function obj = Sos2()
-            obj = gams.transfer.symbol.VariableType();
-            obj.value_ = gams.transfer.symbol.VariableType.SOS2;
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.SOS2;
         end
 
         function obj = SemiCont()
-            obj = gams.transfer.symbol.VariableType();
-            obj.value_ = gams.transfer.symbol.VariableType.SEMICONT;
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.SEMICONT;
         end
 
         function obj = SemiInt()
-            obj = gams.transfer.symbol.VariableType();
-            obj.value_ = gams.transfer.symbol.VariableType.SemiInt;
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.SemiInt;
         end
 
         function values = values(input)
             if isnumeric(input)
                 values = zeros(size(input));
                 for i = 1:numel(input)
-                    values(i) = gams.transfer.symbol.VariableType(input(i)).value;
+                    values(i) = gams.transfer.VariableType(input(i)).value;
                 end
             elseif iscell(input)
                 values = zeros(size(input));
                 for i = 1:numel(input)
-                    if isa(input{i}, 'gams.transfer.symbol.VariableType')
+                    if isa(input{i}, 'gams.transfer.VariableType')
                         values(i) = input{i}.value;
                     else
-                        values(i) = gams.transfer.symbol.VariableType(input{i}).value;
+                        values(i) = gams.transfer.VariableType(input{i}).value;
                     end
                 end
             else
-                values = gams.transfer.symbol.VariableType(input).value;
+                values = gams.transfer.VariableType(input).value;
             end
         end
 
@@ -238,19 +238,19 @@ classdef VariableType
             if isnumeric(input)
                 selects = cell(size(input));
                 for i = 1:numel(input)
-                    selects{i} = gams.transfer.symbol.VariableType(input(i)).select;
+                    selects{i} = gams.transfer.VariableType(input(i)).select;
                 end
             elseif iscell(input)
                 selects = cell(size(input));
                 for i = 1:numel(input)
-                    if isa(input{i}, 'gams.transfer.symbol.VariableType')
+                    if isa(input{i}, 'gams.transfer.VariableType')
                         selects{i} = input{i}.select;
                     else
-                        selects{i} = gams.transfer.symbol.VariableType(input{i}).select;
+                        selects{i} = gams.transfer.VariableType(input{i}).select;
                     end
                 end
             else
-                selects = {gams.transfer.symbol.VariableType(input).select};
+                selects = {gams.transfer.VariableType(input).select};
             end
         end
 
