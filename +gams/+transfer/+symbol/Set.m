@@ -79,23 +79,6 @@
 %> "Container.addSet"
 classdef Set < gams.transfer.symbol.Symbol
 
-    properties (Hidden, SetAccess = protected)
-        is_singleton_ = false
-    end
-
-    methods (Hidden, Static)
-
-        function arg = validateIsSingleton(name, index, arg)
-            if ~islogical(arg)
-                error('Argument ''%s'' (at position %d) must be ''logical''.', name, index);
-            end
-            if ~isscalar(arg)
-                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
-            end
-        end
-
-    end
-
     properties (Dependent)
         %> indicator if Set is is_singleton
 
@@ -106,11 +89,11 @@ classdef Set < gams.transfer.symbol.Symbol
     methods
 
         function is_singleton = get.is_singleton(obj)
-            is_singleton = obj.is_singleton_;
+            is_singleton = obj.def_.is_singleton_;
         end
 
         function obj = set.is_singleton(obj, is_singleton)
-            obj.is_singleton_ = obj.validateIsSingleton('is_singleton', 1, is_singleton);
+            obj.def_.is_singleton = singleton;
         end
 
     end
@@ -156,7 +139,7 @@ classdef Set < gams.transfer.symbol.Symbol
         function obj = Set(varargin)
             % Constructs a GAMS Set, see class help
 
-            obj.def_ = gams.transfer.symbol.Definition();
+            obj.def_ = gams.transfer.symbol.definition.Set();
             obj.data_ = gams.transfer.symbol.data.Unknown();
 
             % parse input arguments
@@ -179,13 +162,13 @@ classdef Set < gams.transfer.symbol.Symbol
                         index = index + 2;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'is_singleton')
-                        obj.is_singleton = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'is_singleton', @obj.validateIsSingleton);
+                        obj.def_.is_singleton_ = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'is_singleton', @gams.transfer.symbol.definition.Set.validateIsSingleton);
                         index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 3
                         obj.def_.domains_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'domains', @gams.transfer.symbol.Definition.validateDomains);
+                            index, 'domains', @gams.transfer.symbol.definition.Set.validateDomains);
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
@@ -194,10 +177,6 @@ classdef Set < gams.transfer.symbol.Symbol
             catch e
                 error(e.message);
             end
-
-            % create default value definition
-            obj.def_.values_ = struct(...
-                'element_text', gams.transfer.symbol.value.String('element_text', ''));
         end
 
     end

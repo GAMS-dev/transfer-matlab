@@ -1,11 +1,11 @@
-% Symbol Value (internal)
+% GAMS Parameter Definition (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright  (c) 2020-2023 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
 % Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,45 +28,21 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Symbol Value (internal)
+% GAMS Parameter Definition (internal
 %
-classdef (Abstract) Value < handle
-
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.Symbol})
-        label_
-    end
-
-    methods (Hidden, Static)
-
-        function arg = validateLabel(name, index, arg)
-            if isstring(arg)
-                arg = char(arg);
-            elseif ~ischar(arg)
-                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
-            end
-            if numel(arg) <= 0
-                error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
-            end
-        end
-
-    end
-
-    properties (Dependent)
-        label
-    end
-
-    properties (Abstract, Dependent, SetAccess = private)
-        default
-    end
+classdef Parameter < gams.transfer.symbol.definition.Definition
 
     methods
 
-        function label = get.label(obj)
-            label = obj.label_;
+        function obj = Parameter()
+            obj.resetValues();
         end
 
-        function obj = set.label(obj, label)
-            obj.label_ = obj.validateLabel('label', 1, label);
+        function resetValues(obj)
+            % gdx_default_values = gams.transfer.cmex.gt_get_defaults(obj);
+            gdx_default_values = zeros(1, 5);
+            obj.values_ = struct(...
+                'value', gams.transfer.symbol.value.Numeric('value', gdx_default_values(1)));
         end
 
     end

@@ -37,7 +37,7 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Abstract
     methods
 
         function status = isValid(obj, def)
-            validateattributes(def, {'gams.transfer.symbol.Definition'}, {}, 'isValid', 'def', 1);
+            validateattributes(def, {'gams.transfer.symbol.definition.Definition'}, {}, 'isValid', 'def', 1);
 
             status = obj.isValidDomains(def.domains);
             if status.isOK()

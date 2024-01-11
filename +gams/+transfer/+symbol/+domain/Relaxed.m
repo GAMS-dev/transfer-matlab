@@ -1,4 +1,4 @@
-% Relaxed Domain
+% Symbol Relaxed Domain (internal)
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,10 +28,8 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Relaxed Domain
+% Symbol Relaxed Domain (internal)
 %
-
-%> @brief Relaxed Domain
 classdef Relaxed < gams.transfer.symbol.domain.Domain
 
     properties (Hidden, SetAccess = protected)

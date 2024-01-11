@@ -1,4 +1,4 @@
-% Data Definition
+% Symbol Definition (internal)
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,15 +28,11 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Data Definition
+% Symbol Definition (internal)
 %
-% TODO: add SetDefinition etc. and include is_singleton.
-%
+classdef (Abstract) Definition < handle
 
-%> @brief Data Definition
-classdef Definition < handle
-
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.Definition, ?gams.transfer.symbol.Symbol})
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Definition, ?gams.transfer.symbol.Symbol})
         domains_ = {}
         values_ = struct()
     end
@@ -93,16 +89,6 @@ classdef Definition < handle
 
         function values = get.values(obj)
             values = obj.values_;
-        end
-
-    end
-
-    methods
-
-        function obj = Definition(domains)
-            if nargin >= 1
-                obj.domains = domains;
-            end
         end
 
     end

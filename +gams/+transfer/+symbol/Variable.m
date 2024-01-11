@@ -83,25 +83,6 @@
 %> gams::transfer::VariableType "VariableType"
 classdef Variable < gams.transfer.symbol.Symbol
 
-    properties (Hidden, SetAccess = protected)
-        type_ = gams.transfer.VariableType.Free
-    end
-
-    methods (Hidden, Static)
-
-        function arg = validateType(name, index, arg)
-            if isa(arg, 'gams.transfer.VariableType')
-                return
-            end
-            try
-                arg = gams.transfer.VariableType(arg);
-            catch e
-                error('Argument ''%s'' (at position %d) cannot create ''gams.transfer.VariableType'': %s', name, index, e.message);
-            end
-        end
-
-    end
-
     properties (Dependent)
         %> Variable type, e.g. 'free'
 
@@ -119,11 +100,11 @@ classdef Variable < gams.transfer.symbol.Symbol
     methods
 
         function type = get.type(obj)
-            type = lower(obj.type_.select);
+            type = lower(obj.def_.type.select);
         end
 
         function obj = set.type(obj, type)
-            obj.type_ = obj.validateType('type', 1, type);
+            obj.def_.type = type;
         end
 
         function default_values = get.default_values(obj)
@@ -180,7 +161,7 @@ classdef Variable < gams.transfer.symbol.Symbol
         function obj = Variable(varargin)
             % Constructs a GAMS Variable, see class help
 
-            obj.def_ = gams.transfer.symbol.Definition();
+            obj.def_ = gams.transfer.symbol.definition.Variable();
             obj.data_ = gams.transfer.symbol.data.Unknown();
 
             % parse input arguments
@@ -203,12 +184,12 @@ classdef Variable < gams.transfer.symbol.Symbol
                         index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 3
-                        obj.type_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'type', @obj.validateType);
+                        obj.def_.type_ = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'type', @gams.transfer.symbol.definition.Variable.validateType);
                         index = index + 1;
                     elseif ~is_pararg && index == 4
                         obj.def_.domains_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'domains', @gams.transfer.symbol.Definition.validateDomains);
+                            index, 'domains', @gams.transfer.symbol.definition.Variable.validateDomains);
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
@@ -217,16 +198,6 @@ classdef Variable < gams.transfer.symbol.Symbol
             catch e
                 error(e.message);
             end
-
-            % create default value definition
-            % gdx_default_values = gams.transfer.cmex.gt_get_defaults(obj);
-            gdx_default_values = zeros(1, 5);
-            obj.def_.values_ = struct(...
-                'level', gams.transfer.symbol.value.Numeric('level', gdx_default_values(1)), ...
-                'marginal', gams.transfer.symbol.value.Numeric('marginal', gdx_default_values(2)), ...
-                'lower', gams.transfer.symbol.value.Numeric('lower', gdx_default_values(3)), ...
-                'upper', gams.transfer.symbol.value.Numeric('upper', gdx_default_values(4)), ...
-                'scale', gams.transfer.symbol.value.Numeric('scale', gdx_default_values(5)));
         end
 
     end

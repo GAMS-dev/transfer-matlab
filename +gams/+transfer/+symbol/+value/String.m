@@ -1,4 +1,4 @@
-% String Value Definition
+% Symbol String Value (internal)
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,10 +28,8 @@
 %
 % ------------------------------------------------------------------------------
 %
-% String Value Definition
+% Symbol String Value (internal)
 %
-
-%> @brief String Value Definition
 classdef String < gams.transfer.symbol.value.Value
 
     properties (Hidden, SetAccess = {?gams.transfer.symbol.value.String, ?gams.transfer.symbol.Symbol})
@@ -62,7 +60,7 @@ classdef String < gams.transfer.symbol.value.Value
 
     end
 
-    methods (Hidden, Access = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.Symbol})
+    methods (Hidden, Access = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.definition.Definition})
 
         function obj = String(label, default)
             obj.label_ = label;

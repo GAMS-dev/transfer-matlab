@@ -1,4 +1,4 @@
-% Regular Domain
+% Symbol Regular Domain (internal)
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,10 +28,8 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Regular Domain
+% Symbol Regular Domain (internal)
 %
-
-%> @brief Regular
 classdef Regular < gams.transfer.symbol.domain.Domain
 
     properties (Hidden, SetAccess = protected)

@@ -1,4 +1,4 @@
-% Domain
+% Symbol Domain (internal)
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,10 +28,8 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Domain
+% Symbol Domain (internal)
 %
-
-%> @brief Domain
 classdef (Abstract) Domain < handle
 
     properties (Hidden, SetAccess = protected)

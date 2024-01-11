@@ -1,4 +1,4 @@
-% GAMS Domain Index Type
+% Symbol Domain Index Type (internal)
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,10 +28,8 @@
 %
 % ------------------------------------------------------------------------------
 %
-% GAMS Domain Index Type
+% Symbol Domain Index Type (internal)
 %
-
-%> @brief Domain Index Type
 classdef IndexType
 
     properties (Constant)

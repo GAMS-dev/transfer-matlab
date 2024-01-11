@@ -1,4 +1,4 @@
-% Numeric Value Definition
+% Symbol Numeric Value (internal)
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,10 +28,8 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Numeric Value Definition
+% Symbol Numeric Value (internal)
 %
-
-%> @brief Numeric Value Definition
 classdef Numeric < gams.transfer.symbol.value.Value
 
     properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Numeric, ?gams.transfer.symbol.Symbol})
@@ -60,7 +58,7 @@ classdef Numeric < gams.transfer.symbol.value.Value
 
     end
 
-    methods (Hidden, Access = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.Symbol})
+    methods (Hidden, Access = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.definition.Definition})
 
         function obj = Numeric(label, default)
             obj.label_ = label;

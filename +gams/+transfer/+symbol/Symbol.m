@@ -87,9 +87,9 @@ classdef (Abstract) Symbol < handle
             end
         end
 
-        function arg = validateDef(name, index, arg, keys)
-            if ~isa(arg, 'gams.transfer.symbol.Definition')
-                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Definition''.', name, index);
+        function arg = validateDef(name, index, arg)
+            if ~isa(arg, 'gams.transfer.symbol.definition.Definition')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.definition.Definition''.', name, index);
             end
         end
 
@@ -260,11 +260,6 @@ classdef (Abstract) Symbol < handle
 
         function def = get.def(obj)
             def = obj.def_;
-        end
-
-        function obj = set.def(obj, def)
-            obj.def_ = obj.validateDef('def', 1, def, obj.VALUE_KEYS);
-            obj.modified_ = true;
         end
 
         function data = get.data(obj)

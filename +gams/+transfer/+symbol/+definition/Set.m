@@ -1,11 +1,11 @@
-% Symbol Value (internal)
+% GAMS Set Definition (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright  (c) 2020-2023 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
 % Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,45 +28,53 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Symbol Value (internal)
+% GAMS Set Definition (internal)
 %
-classdef (Abstract) Value < handle
+classdef Set < gams.transfer.symbol.definition.Definition
 
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.Symbol})
-        label_
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.Set, ?gams.transfer.symbol.definition.Set})
+        is_singleton_ = false
     end
 
     methods (Hidden, Static)
 
-        function arg = validateLabel(name, index, arg)
-            if isstring(arg)
-                arg = char(arg);
-            elseif ~ischar(arg)
-                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
+        function arg = validateIsSingleton(name, index, arg)
+            if ~islogical(arg)
+                error('Argument ''%s'' (at position %d) must be ''logical''.', name, index);
             end
-            if numel(arg) <= 0
-                error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
+            if ~isscalar(arg)
+                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
             end
         end
 
     end
 
     properties (Dependent)
-        label
-    end
-
-    properties (Abstract, Dependent, SetAccess = private)
-        default
+        is_singleton
     end
 
     methods
 
-        function label = get.label(obj)
-            label = obj.label_;
+        function is_singleton = get.is_singleton(obj)
+            is_singleton = obj.is_singleton_;
         end
 
-        function obj = set.label(obj, label)
-            obj.label_ = obj.validateLabel('label', 1, label);
+        function obj = set.is_singleton(obj, is_singleton)
+            obj.is_singleton_ = obj.validateIsSingleton('is_singleton', 1, is_singleton);
+            obj.resetValues();
+        end
+
+    end
+
+    methods
+
+        function obj = Set()
+            obj.resetValues();
+        end
+
+        function resetValues(obj)
+            obj.values_ = struct(...
+                'element_text', gams.transfer.symbol.value.String('element_text', ''));
         end
 
     end
