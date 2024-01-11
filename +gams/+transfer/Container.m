@@ -355,6 +355,50 @@ classdef Container < handle
             % end
         end
 
+    end
+
+    methods (Hidden)
+
+        function copyFrom(obj, varargin)
+
+            % parse input arguments
+            has_symbols = false;
+            try
+                validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'gams.transfer.Container'}, 0));
+                container = gams.transfer.utils.parse_argument(varargin, ...
+                    1, 'container', validate);
+                index = 2;
+                is_pararg = false;
+                while index < nargin
+                    if strcmpi(varargin{index}, 'symbols')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
+                        symbols = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'symbols', validate);
+                        symbols = container.getSymbols(symbols);
+                        has_symbols = true;
+                        index = index + 2;
+                        is_pararg = true;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+            if ~has_symbols
+                symbols = container.getSymbols();
+            end
+
+            for i = 1:numel(symbols)
+                symbols{i}.copy(obj);
+            end
+
+        end
+
+    end
+
+    methods
+
         %> Reads symbols from GDX file
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_CONTAINER_READ for more information.
@@ -406,112 +450,166 @@ classdef Container < handle
             % c.read('path/to/file.gdx');
             % c.read('path/to/file.gdx', 'format', 'dense_matrix');
             % c.read('path/to/file.gdx', 'symbols', {'x', 'z'}, 'format', 'struct', 'values', {'level'});
-            %
-            % See also: gams.transfer.RecordsFormat
 
-            % input arguments
-            p = inputParser();
-            is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
-            is_source = @(x) is_string_char(x) || isa(x, 'gams.transfer.Container');
-            is_values = @(x) iscellstr(x) && numel(x) <= 5;
-            addRequired(p, 'source', is_source);
-            addParameter(p, 'symbols', {}, @iscellstr);
-            addParameter(p, 'format', 'table', is_string_char);
-            addParameter(p, 'records', true, @islogical);
-            addParameter(p, 'values', {'level', 'marginal', 'lower', 'upper', 'scale'}, ...
-                is_values);
-            parse(p, varargin{:});
-
-            % copy symbols from container
-            if isa(p.Results.source, 'gams.transfer.Container')
-                if p.Results.source.indexed ~= obj.indexed_
-                    error('Indexed flags of source and this container must match.');
-                end
-                source_data = p.Results.source.data;
-                symbols = p.Results.source.listSymbols();
-                if ~isempty(p.Results.symbols)
-                    sym_enabled = false(size(symbols));
-                    for i = 1:numel(p.Results.symbols)
-                        sym_enabled(strcmp(symbols, p.Results.symbols{i})) = true;
+            % parse input arguments
+            symbols = {};
+            has_symbols = false;
+            format = 'table';
+            records = true;
+            values = {'level', 'marginal', 'lower', 'upper', 'scale'};
+            % try
+                validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, ...
+                    {'string', 'char', 'gams.transfer.Container'}, -1));
+                source = gams.transfer.utils.parse_argument(varargin, ...
+                    1, 'source', validate);
+                index = 2;
+                is_pararg = false;
+                while index < nargin
+                    if strcmpi(varargin{index}, 'symbols')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
+                        symbols = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'symbols', validate);
+                        has_symbols = true;
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif strcmpi(varargin{index}, 'format')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'string', 'char'}, -1));
+                        format = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'format', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif strcmpi(varargin{index}, 'records')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
+                        records = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'records', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif strcmpi(varargin{index}, 'values')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
+                        symbols = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'values', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif ~is_pararg && index == 4
+                        obj.def_.domains_ = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'domains', @gams.transfer.def.Definition.validateDomains);
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
                     end
-                    symbols = symbols(sym_enabled);
                 end
-                for i = 1:numel(symbols)
-                    source_data.(symbols{i}).copy(obj);
+            % catch e
+            %     error(e.message);
+            % end
+
+            % read from other container?
+            if isa(source, 'gams.transfer.Container')
+                if has_symbols
+                    obj.copyFrom(source, 'symbols', symbols);
+                else
+                    obj.copyFrom(source);
                 end
                 return
             end
 
-            source = obj.validateGdxFile('source', 1, p.Results.source);
+            % validate input arguments
+            source = obj.validateGdxFile('source', 1, source);
+            switch format
+            case 'struct'
+                format = int32(2);
+            case 'dense_matrix'
+                format = int32(3);
+            case 'sparse_matrix'
+                format = int32(4);
+            case 'table'
+                format = int32(5);
+                if ~gams.transfer.Constants.SUPPORTS_TABLE
+                    format = int32(2);
+                end
+            otherwise
+                error('Argument ''format'' must be ''struct'', ''table'', ''dense_matrix'' or ''sparse_matrix''.');
+            end
+            values_bool = false(5,1);
+            for e = values
+                switch e{1}
+                case {'level', 'value', 'element_text'}
+                    values_bool(1) = true;
+                case 'marginal'
+                    values_bool(2) = true;
+                case 'lower'
+                    values_bool(3) = true;
+                case 'upper'
+                    values_bool(4) = true;
+                case 'scale'
+                    values_bool(5) = true;
+                otherwise
+                    error('Argument ''values'' contains invalid selection ''%s''. Must be subset of ''level'', ''value'', ''element_text'', ''marginal'', ''lower'', ''upper'', ''scale''.', e{1});
+                end
+            end
+            values = values_bool;
 
-            % read raw data
-            data = obj.readRaw(source, p.Results.symbols, p.Results.format, ...
-                p.Results.records, p.Results.values);
-            symbols = fieldnames(data);
-            is_partial_read = numel(p.Results.symbols) > 0;
+            % read records
+            if obj.indexed_
+                symbols = gams.transfer.cmex.gt_idx_read(obj.gams_dir_, source, symbols, format, records);
+            else
+                symbols = gams.transfer.cmex.gt_gdx_read(obj.gams_dir_, source, symbols, format, records, ...
+                    values, gams.transfer.Constants.SUPPORTS_CATEGORICAL, false);
+            end
+            symbol_names = fieldnames(symbols);
 
             % transform data into Symbol object
-            for i = 1:numel(symbols)
-                symbol = data.(symbols{i});
+            for i = 1:numel(symbol_names)
+                symbol = symbols.(symbol_names{i});
 
                 % handle alias differently
                 switch symbol.symbol_type
                 case {gams.transfer.cmex.SymbolType.ALIAS, 'alias'}
-                    if strcmp(symbol.alias_with, '*')
+                    if strcmp(symbol.alias_with, gams.transfer.Constants.UNIVERSE_NAME)
                         gams.transfer.UniverseAlias(obj, symbol.name);
                     elseif obj.hasSymbols(symbol.alias_with)
                         gams.transfer.Alias(obj, symbol.name, obj.getSymbols(symbol.alias_with));
                     else
-                        error('Alias reference for symbol ''%s'' not found: %s.', ...
-                            symbol.name, symbol.alias_with);
+                        error('Alias reference for symbol ''%s'' not found: %s.', symbol.name, symbol.alias_with);
                     end
-                    continue;
-                end
-
-                % create cross-referenced domain if possible
-                if obj.indexed_
-                    domain = symbol.size;
-                else
-                    domain = symbol.domain;
-                    for j = 1:numel(domain)
-                        if strcmp(domain{j}, '*')
-                            continue
-                        elseif symbol.domain_type == 2
-                            continue
-                        elseif obj.hasSymbols(domain{j}) && isfield(data, domain{j})
-                            domain{j} = obj.getSymbols(domain{j});
-                        end
-                    end
-                end
-
-                % convert symbol to GDXSymbol
-                switch symbol.symbol_type
+                    continue
                 case {gams.transfer.cmex.SymbolType.SET, 'set'}
-                    symbol_ = obj.addSet(symbol.name, domain, 'description', ...
-                        symbol.description, 'is_singleton', symbol.is_singleton);
+                    new_symbol = obj.addSet(symbol.name, 'is_singleton', symbol.is_singleton);
                 case {gams.transfer.cmex.SymbolType.PARAMETER, 'parameter'}
-                    symbol_ = obj.addParameter(symbol.name, domain, 'description', ...
-                        symbol.description);
+                    new_symbol = obj.addParameter(symbol.name);
                 case {gams.transfer.cmex.SymbolType.VARIABLE, 'variable'}
-                    symbol_ = obj.addVariable(symbol.name, symbol.type, domain, ...
-                        'description', symbol.description);
+                    new_symbol = obj.addVariable(symbol.name, symbol.type);
                 case {gams.transfer.cmex.SymbolType.EQUATION, 'equation'}
-                    symbol_ = obj.addEquation(symbol.name, symbol.type, domain, ...
-                        'description', symbol.description);
+                    new_symbol = obj.addEquation(symbol.name, symbol.type);
                 otherwise
                     error('Invalid symbol type');
                 end
 
-                % set records and store format (no need to call isValid to
-                % detect the format because at this point, we know it)
-                symbol_.records = symbol.records;
-                switch symbol.format
-                case {3, 'dense_matrix',
-                    4, 'sparse_matrix'}
-                    copy_format = ~any(isnan(symbol_.size));
-                otherwise
-                    copy_format = true;
+                new_symbol.description = symbol.description;
+
+                % set domain and description
+                if obj.indexed_
+                    new_symbol.size = symbol.size;
+                else
+                    domain = symbol.domain;
+                    for j = 1:numel(domain)
+                        if strcmp(domain{j}, gams.transfer.Constants.UNIVERSE_NAME) || symbol.domain_type == 2
+                            continue
+                        elseif obj.hasSymbols(domain{j}) && isfield(symbols, domain{j})
+                            domain{j} = obj.getSymbols(domain{j});
+                        end
+                    end
+                    new_symbol.domain = domain;
                 end
+
+                % set records
+                symbol_.records = symbol.records;
+                % switch symbol.format
+                % case {3, 'dense_matrix',
+                %     4, 'sparse_matrix'}
+                %     copy_format = ~any(isnan(symbol_.size));
+                % otherwise
+                %     copy_format = true;
+                % end
                 % TODO
                 % if copy_format
                 %     if isnumeric(symbol.format)
@@ -524,14 +622,10 @@ classdef Container < handle
                 % set uels
                 if isfield(symbol, 'uels') && ~gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     switch symbol.format
-                    case {3, 'dense_matrix',
-                        4, 'sparse_matrix'}
-                    otherwise
+                    case {3, 'dense_matrix', 4, 'sparse_matrix'}
+                    case {1, 'table', 2, 'struct'}
                         for j = 1:numel(symbol.domain)
-                            if isempty(symbol.uels{j})
-                                continue
-                            end
-                            symbol_.setUELs(symbol.uels{j}, j, 'rename', true);
+                            new_symbol.setUELs(symbol.uels{j}, j, 'rename', true);
                         end
                     end
                 end
@@ -540,13 +634,14 @@ classdef Container < handle
             % check for format of read symbols in case of partial read (done by
             % forced call to isValid). Domains may not be read and may cause
             % invalid symbols.
-            if is_partial_read
-                for j = 1:numel(symbols)
-                    if obj.hasSymbols(symbols{i})
-                        obj.getSymbols(symbols{i}).isValid(false, true);
-                    end
-                end
-            end
+            % TODO
+            % if is_partial_read
+            %     for j = 1:numel(symbols)
+            %         if obj.hasSymbols(symbols{i})
+            %             obj.getSymbols(symbols{i}).isValid(false, true);
+            %         end
+            %     end
+            % end
         end
 
         %> Writes symbols with symbol records to GDX file
@@ -2478,59 +2573,6 @@ classdef Container < handle
 
             for i = 1:numel(symbols)
                 symbols{i}.upperUELs();
-            end
-        end
-
-    end
-
-    methods (Hidden, Access = protected)
-
-        function data = readRaw(obj, filename, symbols, format, records, values)
-            % Reads symbol records from GDX file
-            %
-
-            % parsing input arguments
-            switch format
-            case 'struct'
-                format_int = 2;
-            case 'dense_matrix'
-                format_int = 3;
-            case 'sparse_matrix'
-                format_int = 4;
-            case 'table'
-                format_int = 5;
-                if ~gams.transfer.Constants.SUPPORTS_TABLE
-                    format_int = 2;
-                end
-            otherwise
-                error('Invalid format option: %s. Choose from: struct, table, dense_matrix, sparse_matrix.', format);
-            end
-            values_bool = false(5,1);
-            for e = values
-                switch e{1}
-                case {'level', 'value', 'element_text'}
-                    values_bool(1) = true;
-                case 'marginal'
-                    values_bool(2) = true;
-                case 'lower'
-                    values_bool(3) = true;
-                case 'upper'
-                    values_bool(4) = true;
-                case 'scale'
-                    values_bool(5) = true;
-                otherwise
-                    error('Invalid value option: %s. Choose from level, value, element_text, marginal, lower, upper, scale.', e{1});
-                end
-            end
-
-            % read records
-            if obj.indexed_
-                data = gams.transfer.cmex.gt_idx_read(obj.gams_dir_, filename, ...
-                    symbols, int32(format_int), records);
-            else
-                data = gams.transfer.cmex.gt_gdx_read(obj.gams_dir_, filename, ...
-                    symbols, int32(format_int), records, values_bool, ...
-                    gams.transfer.Constants.SUPPORTS_CATEGORICAL, false);
             end
         end
 
