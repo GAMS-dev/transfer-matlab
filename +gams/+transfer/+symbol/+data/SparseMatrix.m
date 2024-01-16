@@ -1,4 +1,4 @@
-% Table Records (internal)
+% Sparse Matrix Records (internal)
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,53 +28,32 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Table Records (internal)
+% Sparse Matrix Records (internal)
 %
-classdef Table < gams.transfer.symbol.data.Tabular
-
-    properties (Dependent, SetAccess = private)
-        labels
-    end
+classdef SparseMatrix < gams.transfer.symbol.data.Matrix
 
     methods
 
-        function labels = get.labels(obj)
-            try
-                labels = obj.records_.Properties.VariableNames;
-            catch
-                labels = {};
-            end
-        end
-
-    end
-
-    methods
-
-        function obj = Table(records)
+        function obj = SparseMatrix(records)
             if nargin >= 1
                 obj.records = records;
             end
         end
 
         function name = name(obj)
-            name = 'table';
+            name = 'sparse_matrix';
         end
 
         function status = isValid(obj, def)
-            if ~istable(obj.records_)
-                status = gams.transfer.utils.Status("Record data must be 'table'.");
-                return
-            end
-
-            status = isValid@gams.transfer.symbol.data.Tabular(obj, def);
+            status = isValid@gams.transfer.symbol.data.Matrix(obj, def);
         end
 
-        function nrecs = getNumberRecords(obj, def)
-            if obj.isValid(def).flag ~= gams.transfer.utils.Status.OK
-                nrecs = nan;
-                return
+        function nvals = getNumberValues(obj, def, varargin)
+            [~, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            nvals = 0;
+            for i = 1:numel(values)
+                nvals = nvals + nnz(obj.records_.(values{i}.label));
             end
-            nrecs = height(obj.records_);
         end
 
     end

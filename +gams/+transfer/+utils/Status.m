@@ -1,4 +1,4 @@
-% Table Records (internal)
+% Status
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,21 +28,49 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Table Records (internal)
+% Status
 %
-classdef Table < gams.transfer.symbol.data.Tabular
+
+%> @brief Status
+classdef Status
+
+    properties (Hidden, SetAccess = protected)
+        message_ = ''
+    end
+
+    properties (Dependent)
+        message
+    end
 
     properties (Dependent, SetAccess = private)
-        labels
+        flag
+    end
+
+    properties (Constant)
+        UNKNOWN = -1
+        FAIL = 0
+        OK = 1
     end
 
     methods
 
-        function labels = get.labels(obj)
-            try
-                labels = obj.records_.Properties.VariableNames;
-            catch
-                labels = {};
+        function message = get.message(obj)
+            message = obj.message_;
+        end
+
+        function obj = set.message(obj, message)
+            if isstring(message)
+                message = char(message);
+            end
+            validateattributes(message, {'char'}, {}, 'set', 'message', 1);
+            obj.message_ = message;
+        end
+
+        function flag = get.flag(obj)
+            if isempty(obj.message_)
+                flag = obj.UNKNOWN;
+            else
+                flag = strcmpi(obj.message_, 'OK');
             end
         end
 
@@ -50,31 +78,38 @@ classdef Table < gams.transfer.symbol.data.Tabular
 
     methods
 
-        function obj = Table(records)
+        function obj = Status(message)
             if nargin >= 1
-                obj.records = records;
+                obj.message = message;
             end
         end
 
-        function name = name(obj)
-            name = 'table';
+        function flag = isUnknown(obj)
+            flag = obj.flag() == obj.UNKNOWN;
         end
 
-        function status = isValid(obj, def)
-            if ~istable(obj.records_)
-                status = gams.transfer.utils.Status("Record data must be 'table'.");
-                return
-            end
-
-            status = isValid@gams.transfer.symbol.data.Tabular(obj, def);
+        function flag = isFail(obj)
+            flag = obj.flag() == obj.FAIL;
         end
 
-        function nrecs = getNumberRecords(obj, def)
-            if obj.isValid(def).flag ~= gams.transfer.utils.Status.OK
-                nrecs = nan;
-                return
-            end
-            nrecs = height(obj.records_);
+        function flag = isOK(obj)
+            flag = obj.flag() == obj.OK;
+        end
+
+        function setUnknown(obj)
+            obj.message_ = '';
+        end
+
+        function setOK(obj)
+            obj.message_ = 'OK';
+        end
+
+    end
+
+    methods (Static)
+
+        function obj = createOK()
+            obj = gams.transfer.utils.Status('OK');
         end
 
     end

@@ -39,7 +39,7 @@ classdef Parameter < gams.transfer.symbol.definition.Definition
         end
 
         function resetValues(obj)
-            obj.values_ = struct('value', gams.transfer.symbol.value.Numeric('value', 0));
+            obj.values_ = {gams.transfer.symbol.value.Numeric('value', 0)};
         end
 
     end

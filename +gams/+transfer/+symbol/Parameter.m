@@ -118,9 +118,9 @@ classdef Parameter < gams.transfer.symbol.Symbol
             % Constructs a GAMS Parameter, see class help
 
             obj.def_ = gams.transfer.symbol.definition.Parameter();
-            obj.data_ = gams.transfer.symbol.data.Unknown();
 
             % parse input arguments
+            has_records = false;
             try
                 obj.container_ = gams.transfer.utils.parse_argument(varargin, ...
                     1, 'container', @obj.validateContainer);
@@ -139,6 +139,12 @@ classdef Parameter < gams.transfer.symbol.Symbol
                             index + 1, 'domain_forwarding', []);
                         index = index + 2;
                         is_pararg = true;
+                    elseif strcmpi(varargin{index}, 'records')
+                        obj.data_ = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'records', @obj.validateData);
+                        has_records = true;
+                        index = index + 2;
+                        is_pararg = true;
                     elseif ~is_pararg && index == 3
                         obj.def_.domains = gams.transfer.utils.parse_argument(varargin, ...
                             index, 'domains', []);
@@ -149,6 +155,9 @@ classdef Parameter < gams.transfer.symbol.Symbol
                 end
             catch e
                 error(e.message);
+            end
+            if ~has_records
+                obj.data_ = gams.transfer.symbol.data.Struct();
             end
         end
 
@@ -199,36 +208,36 @@ classdef Parameter < gams.transfer.symbol.Symbol
                 descr.name{i} = symbols{i}.name;
                 descr.format{i} = symbols{i}.format;
                 descr.dimension(i) = symbols{i}.dimension;
-                % descr.domain_type{i} = symbols{i}.domain_type;
-                % descr.domain{i} = gams.transfer.Utils.list2str(symbols{i}.domain);
-                % descr.size{i} = gams.transfer.Utils.list2str(symbols{i}.size);
+                descr.domain_type{i} = symbols{i}.domain_type;
+                descr.domain{i} = gams.transfer.utils.list2str(symbols{i}.domain_names);
+                descr.size{i} = gams.transfer.utils.list2str(symbols{i}.size);
                 descr.number_records(i) = symbols{i}.getNumberRecords();
-                % descr.number_values(i) = symbols{i}.getNumberValues();
-                % descr.sparsity(i) = symbols{i}.getSparsity();
-                % [descr.min(i), descr.where_min{i}] = gams.transfer.getMinValue(symbols{i}, symbols{i}.container.indexed);
-                % if isnan(descr.min(i))
-                %     descr.where_min{i} = '';
-                % else
-                %     descr.where_min{i} = gams.transfer.Utils.list2str(descr.where_min{i});
-                % end
-                % descr.mean(i) = gams.transfer.getMeanValue(symbols{i});
-                % [descr.max(i), descr.where_max{i}] = gams.transfer.getMaxValue(symbols{i}, symbols{i}.container.indexed);
-                % if isnan(descr.max(i))
-                %     descr.where_max{i} = '';
-                % else
-                %     descr.where_max{i} = gams.transfer.Utils.list2str(descr.where_max{i});
-                % end
+                descr.number_values(i) = symbols{i}.getNumberValues();
+                descr.sparsity(i) = symbols{i}.getSparsity();
+                [descr.min(i), descr.where_min{i}] = symbols{i}.getMinValue();
+                if isnan(descr.min(i))
+                    descr.where_min{i} = '';
+                else
+                    descr.where_min{i} = gams.transfer.utils.list2str(descr.where_min{i});
+                end
+                descr.mean(i) = symbols{i}.getMeanValue();
+                [descr.max(i), descr.where_max{i}] = symbols{i}.getMaxValue();
+                if isnan(descr.max(i))
+                    descr.where_max{i} = '';
+                else
+                    descr.where_max{i} = gams.transfer.utils.list2str(descr.where_max{i});
+                end
             end
 
             % convert to categorical if possible
             if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 descr.name = categorical(descr.name);
                 descr.format = categorical(descr.format);
-                % descr.domain_type = categorical(descr.domain_type);
-                % descr.domain = categorical(descr.domain);
-                % descr.size = categorical(descr.size);
-                % descr.where_min = categorical(descr.where_min);
-                % descr.where_max = categorical(descr.where_max);
+                descr.domain_type = categorical(descr.domain_type);
+                descr.domain = categorical(descr.domain);
+                descr.size = categorical(descr.size);
+                descr.where_min = categorical(descr.where_min);
+                descr.where_max = categorical(descr.where_max);
             end
 
             % convert to table if possible

@@ -34,7 +34,7 @@ classdef (Abstract) Definition < handle
 
     properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Definition, ?gams.transfer.symbol.Symbol})
         domains_ = {}
-        values_ = struct()
+        values_ = {}
     end
 
     methods (Hidden, Static)
@@ -136,20 +136,20 @@ classdef (Abstract) Definition < handle
         end
 
         function n = numberValues(obj)
-            n = numel(fieldnames(obj.values_));
+            n = numel(obj.values_);
         end
 
-        function keys = valueKeys(obj)
-            keys = fieldnames(obj.values_);
-        end
+        % function keys = valueKeys(obj)
+        %     keys = fieldnames(obj.values_);
+        % end
 
-        function labels = valueLabels(obj)
-            labels = cell(1, obj.numberValues());
-            keys = obj.valueKeys();
-            for i = 1:numel(keys)
-                labels{i} = obj.domainValue(i, keys{i});
-            end
-        end
+        % function labels = valueLabels(obj)
+        %     labels = cell(1, obj.numberValues());
+        %     keys = obj.valueKeys();
+        %     for i = 1:numel(keys)
+        %         labels{i} = obj.domainValue(i, keys{i});
+        %     end
+        % end
 
     end
 

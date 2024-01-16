@@ -94,8 +94,8 @@ classdef (Abstract) Symbol < handle
         end
 
         function arg = validateData(name, index, arg)
-            if ~isa(arg, 'gams.transfer.symbol.data.Abstract')
-                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.data.Abstract''.', name, index);
+            if ~isa(arg, 'gams.transfer.symbol.data.Data')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.data.Data''.', name, index);
             end
         end
 
@@ -281,6 +281,16 @@ classdef (Abstract) Symbol < handle
 
         function domain = get.domain(obj)
             domain = obj.def_.domains;
+            for i = 1:numel(domain)
+                switch class(domain{i})
+                case 'gams.transfer.symbol.domain.Regular'
+                    domain{i} = domain{i}.symbol;
+                case 'gams.transfer.symbol.domain.Relaxed'
+                    domain{i} = domain{i}.name;
+                otherwise
+                    error('Unknown domain type: %s', class(domain{i}));
+                end
+            end
         end
 
         function obj = set.domain(obj, domain)
@@ -300,7 +310,32 @@ classdef (Abstract) Symbol < handle
         end
 
         function domain_type = get.domain_type(obj)
-            domain_type = lower(obj.def_.domainType().select);
+
+            domains = obj.def_.domains;
+
+            is_regular = numel(domains) > 0;
+            is_none = true;
+            for i = 1:numel(domains)
+                switch class(domains{i})
+                case 'gams.transfer.symbol.domain.Regular'
+                    is_none = false;
+                case 'gams.transfer.symbol.domain.Relaxed'
+                    is_regular = false;
+                    if ~strcmp(domains{i}.name, gams.transfer.Constants.UNIVERSE_NAME)
+                        is_none = false;
+                    end
+                otherwise
+                    error('Unknown domain type: %s', class(domains{i}));
+                end
+            end
+
+            if is_regular
+                domain_type = 'regular';
+            elseif is_none
+                domain_type = 'none';
+            else
+                domain_type = 'relaxed';
+            end
         end
 
         function domain_forwarding = get.domain_forwarding(obj)
@@ -507,6 +542,166 @@ classdef (Abstract) Symbol < handle
             sparsity = obj.data_.getSparsity(obj.def_);
         end
 
+    end
+
+    methods (Hidden, Access = protected)
+
+        function values = parseValues(obj, varargin)
+
+            % parse input arguments
+            try
+                index = 1;
+                is_pararg = false;
+                while index < nargin
+                    if strcmpi(varargin{index}, 'values')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
+                        values = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'values', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            for i = 1:numel(values)
+                found_value = false;
+                for j = 1:numel(obj.def_.values)
+                    if strcmpi(obj.def_.values{j}.label, values{i})
+                        values{i} = obj.def_.values{j};
+                        found_value = true;
+                        break;
+                    end
+                end
+                if ~found_value
+                    error('Argument ''values'' contains invalid value: %s.', values{i});
+                end
+            end
+        end
+
+    end
+
+    methods
+
+        %> Returns the largest value in records
+        %>
+        %> - `[v, w] = getMaxValue(varargin)` returns the largest value in records `v` and where it
+        %>   is `w`. `varargin` can include a list of value fields that should be considered:
+        %>   `"level"`, `"value"`, `"lower"`, `"upper"`, `"scale"`. If none is given all available
+        %>   for the symbol are considered.
+        function [value, where] = getMaxValue(obj, varargin)
+            % Returns the largest value in records
+            %
+            % [v, w] = getMaxValue(varargin) returns the largest value in records v and where it is
+            % w. varargin can include a list of value fields that should be considered: level,
+            % value, lower, upper, scale. If none is given all available for the symbol are
+            % considered.
+
+            % TODO adapt documentation
+
+            if nargin == 1
+                args = {};
+            else
+                try
+                    args = {'values', obj.parseValues(varargin{:})};
+                catch e
+                    error(e.message);
+                end
+            end
+
+            [value, where] = obj.data_.getMaxValue(obj.def_, args{:});
+        end
+
+
+        %> Returns the smallest value in records
+        %>
+        %> - `[v, w] = getMinValue(varargin)` returns the smallest value in records `v` and where it
+        %>   is `w`. `varargin` can include a list of value fields that should be considered:
+        %>   `"level"`, `"value"`, `"lower"`, `"upper"`, `"scale"`. If none is given all available
+        %>   for the symbol are considered.
+        function [value, where] = getMinValue(obj, varargin)
+            % Returns the smallest value in records
+            %
+            % [v, w] = getMinValue(varargin) returns the smallest value in records v and where it is
+            % w. varargin can include a list of value fields that should be considered: level,
+            % value, lower, upper, scale. If none is given all available for the symbol are
+            % considered.
+
+            % TODO adapt documentation
+
+            if nargin == 1
+                args = {};
+            else
+                try
+                    args = {'values', obj.parseValues(varargin{:})};
+                catch e
+                    error(e.message);
+                end
+            end
+
+            [value, where] = obj.data_.getMinValue(obj.def_, args{:});
+        end
+
+        %> Returns the mean value over all values in records
+        %>
+        %> - `v = getMeanValue(varargin)` returns the mean value over all values in records `v`.
+        %>   `varargin` can include a list of value fields that should be considered: `"level"`,
+        %>   `"value"`, `"lower"`, `"upper"`, `"scale"`. If none is given all available for the
+        %>   symbol are considered.
+        function value = getMeanValue(obj, varargin)
+            % Returns the mean value over all values in records
+            %
+            % v = getMeanValue(varargin) returns the mean value over all values in records v.
+            % varargin can include a list of value fields that should be considered: level, value,
+            % lower, upper, scale. If none is given all available for the symbol are considered.
+
+            % TODO adapt documentation
+
+            if nargin == 1
+                args = {};
+            else
+                try
+                    args = {'values', obj.parseValues(varargin{:})};
+                catch e
+                    error(e.message);
+                end
+            end
+
+            value = obj.data_.getMeanValue(obj.def_, args{:});
+        end
+
+        %> Returns the largest absolute value in records
+        %>
+        %> - `[v, w] = getMaxAbsValue(varargin)` returns the largest absolute value in records `v`
+        %>   and where it is `w`. `varargin` can include a list of value fields that should be
+        %>   considered: `"level"`, `"value"`, `"lower"`, `"upper"`, `"scale"`. If none is given all
+        %>   available for the symbol are considered.
+        function [value, where] = getMaxAbsValue(obj, varargin)
+            % Returns the largest absolute value in records
+            %
+            % [v, w] = getMaxAbsValue(varargin) returns the largest absolute value in records v and
+            % where it is w. varargin can include a list of value fields that should be considered:
+            % level, value, lower, upper, scale. If none is given all available for the symbol are
+            % considered.
+
+            % TODO adapt documentation
+
+            if nargin == 1
+                args = {};
+            else
+                try
+                    args = {'values', obj.parseValues(varargin{:})};
+                catch e
+                    error(e.message);
+                end
+            end
+
+            [value, where] = obj.data_.getMaxAbsValue(obj.def_, args{:});
+        end
+
         %> Returns the number of GAMS NA values in records
         %>
         %> - `n = countNA(varargin)` returns the number of GAMS NA values `n` in records. `varargin`
@@ -525,10 +720,19 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.SpecialValues.NA, gams.transfer.SpecialValues.isna
 
-            % TODO: check input varargin (also for similar methods)
+            % TODO adapt documentation
 
-            values = obj.validateValueKeys(varargin);
-            n = obj.data_.countNA(values);
+            if nargin == 1
+                args = {};
+            else
+                try
+                    args = {'values', obj.parseValues(varargin{:})};
+                catch e
+                    error(e.message);
+                end
+            end
+
+            n = obj.data_.countNA(args{:});
         end
 
         %> Returns the number of GAMS UNDEF values in records
@@ -544,8 +748,19 @@ classdef (Abstract) Symbol < handle
             % varargin can include a list of value fields that should be considered: level, value,
             % lower, upper, scale. If none is given all available for the symbol are considered.
 
-            values = obj.validateValueKeys(varargin);
-            n = obj.data_.countUndef(values);
+            % TODO adapt documentation
+
+            if nargin == 1
+                args = {};
+            else
+                try
+                    args = {'values', obj.parseValues(varargin{:})};
+                catch e
+                    error(e.message);
+                end
+            end
+
+            n = obj.data_.countUndef(args{:});
         end
 
         %> Returns the number of GAMS EPS values in records
@@ -566,8 +781,19 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.SpecialValues.EPS, gams.transfer.SpecialValues.isEps
 
-            values = obj.validateValueKeys(varargin);
-            n = obj.data_.countEps(values);
+            % TODO adapt documentation
+
+            if nargin == 1
+                args = {};
+            else
+                try
+                    args = {'values', obj.parseValues(varargin{:})};
+                catch e
+                    error(e.message);
+                end
+            end
+
+            n = obj.data_.countEps(args{:});
         end
 
         %> Returns the number of GAMS PINF (positive infinity) values in
@@ -585,8 +811,19 @@ classdef (Abstract) Symbol < handle
             % varargin can include a list of value fields that should be considered: level, value,
             % lower, upper, scale. If none is given all available for the symbol are considered.
 
-            values = obj.validateValueKeys(varargin);
-            n = obj.data_.countPosInf(values);
+            % TODO adapt documentation
+
+            if nargin == 1
+                args = {};
+            else
+                try
+                    args = {'values', obj.parseValues(varargin{:})};
+                catch e
+                    error(e.message);
+                end
+            end
+
+            n = obj.data_.countPosInf(args{:});
         end
 
         %> Returns the number of GAMS MINF (negative infinity) values in
@@ -604,8 +841,19 @@ classdef (Abstract) Symbol < handle
             % varargin can include a list of value fields that should be considered: level, value,
             % lower, upper, scale. If none is given all available for the symbol are considered.
 
-            values = obj.validateValueKeys(varargin);
-            n = obj.data_.countNegInf(values);
+            % TODO adapt documentation
+
+            if nargin == 1
+                args = {};
+            else
+                try
+                    args = {'values', obj.parseValues(varargin{:})};
+                catch e
+                    error(e.message);
+                end
+            end
+
+            n = obj.data_.countNegInf(args{:});
         end
 
         %> Returns the number of GDX records (not available for matrix formats)
@@ -619,7 +867,7 @@ classdef (Abstract) Symbol < handle
             % n = getNumberRecords() returns the number of records that would be stored in a GDX
             % file if this symbol would be written to GDX. For matrix formats n is NaN.
 
-            nrecs = obj.data_.getNumberRecords();
+            nrecs = obj.data_.getNumberRecords(obj.def_);
         end
 
         %> Returns the number of values stored for this symbol.
@@ -642,9 +890,36 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.symbol.Symbol.getSparsity
 
-            values = obj.validateValueKeys(varargin);
-            nvals = obj.data_.getNumberValues(values);
+            % values = obj.validateValueKeys(varargin); % TODO
+            nvals = obj.data_.getNumberValues(obj.def_);
         end
+
+    end
+
+    methods (Hidden, Access = protected)
+
+        function argout = validateDimensionToDomain(obj, name, index, arg)
+            if ~isnumeric(arg)
+                error('Argument ''%s'' (at position %d) must be numeric.', name, index);
+            end
+            if ~isvector(arg)
+                error('Argument ''%s'' (at position %d) must be vector.', name, index);
+            end
+            if any(round(arg) ~= arg)
+                error('Argument ''%s'' (at position %d) must be integer.', name, index);
+            end
+            argout = cell(1, numel(arg));
+            for i = 1:numel(arg)
+                if arg(i) < 1 || arg(i) > obj.dimension
+                    error('Argument ''%s'' (at position %d) must have values in [1, %d].', name, index, obj.dimension);
+                end
+                argout{i} = obj.def_.domains{arg(i)};
+            end
+        end
+
+    end
+
+    methods
 
         %> Returns the UELs used in this symbol
         %>
@@ -676,7 +951,11 @@ classdef (Abstract) Symbol < handle
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 2 && isnumeric(varargin{1})
-                varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
+                try
+                    varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
+                catch e
+                    error(e.message);
+                end
             end
             uels = obj.data_.getUELs(varargin{:});
         end
@@ -712,7 +991,11 @@ classdef (Abstract) Symbol < handle
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 3 && isnumeric(varargin{2})
-                varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+                try
+                    varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+                catch e
+                    error(e.message);
+                end
             end
             obj.data_.setUELs(varargin{:});
         end
@@ -738,7 +1021,11 @@ classdef (Abstract) Symbol < handle
             % See also: gams.transfer.symbol.Symbol.setUELs
 
             if nargin >= 3 && isnumeric(varargin{2})
-                varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+                try
+                    varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+                catch e
+                    error(e.message);
+                end
             end
             obj.data_.reorderUELs(varargin{:});
         end
@@ -767,7 +1054,11 @@ classdef (Abstract) Symbol < handle
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 3 && isnumeric(varargin{2})
-                varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+                try
+                    varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+                catch e
+                    error(e.message);
+                end
             end
             obj.data_.addUELs(varargin{:});
         end
@@ -800,7 +1091,11 @@ classdef (Abstract) Symbol < handle
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 3 && isnumeric(varargin{2})
-                varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+                try
+                    varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+                catch e
+                    error(e.message);
+                end
             end
             obj.data_.removeUELs(varargin{:});
         end
@@ -845,7 +1140,11 @@ classdef (Abstract) Symbol < handle
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 3 && isnumeric(varargin{2})
-                varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+                try
+                    varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
+                catch e
+                    error(e.message);
+                end
             end
             obj.data_.renameUELs(varargin{:});
         end
@@ -877,7 +1176,11 @@ classdef (Abstract) Symbol < handle
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 2 && isnumeric(varargin{1})
-                varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
+                try
+                    varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
+                catch e
+                    error(e.message);
+                end
             end
             obj.data_.lowerUELs(varargin{:});
         end
@@ -909,7 +1212,11 @@ classdef (Abstract) Symbol < handle
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
             if nargin >= 2 && isnumeric(varargin{1})
-                varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
+                try
+                    varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
+                catch e
+                    error(e.message);
+                end
             end
             obj.data_.upperUELs(varargin{:});
         end

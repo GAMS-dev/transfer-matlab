@@ -49,6 +49,9 @@ classdef (Abstract) Domain < handle
             if numel(arg) <= 0
                 error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
             end
+            if ~isvarname(arg)
+                error('Argument ''%s'' (at position %d) must start with letter and must only consist of letters, digits and underscores.', name, index)
+            end
         end
 
         function arg = validateIndexType(name, index, arg)

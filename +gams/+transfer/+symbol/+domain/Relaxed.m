@@ -111,7 +111,11 @@ classdef Relaxed < gams.transfer.symbol.domain.Domain
 
         function obj = Relaxed(name)
             obj.name = name;
-            obj.label_ = name;
+            if strcmp(obj.name_, gams.transfer.Constants.UNIVERSE_NAME)
+                obj.label_ = gams.transfer.Constants.UNIVERSE_LABEL;
+            else
+                obj.label_ = name;
+            end
         end
 
         function flag = hasUniqueLabels(obj)

@@ -561,6 +561,19 @@ classdef Container < handle
             for i = 1:numel(symbol_names)
                 symbol = symbols.(symbol_names{i});
 
+                if isfield(symbol, 'format')
+                    switch symbol.format
+                    case 2
+                        records = gams.transfer.symbol.data.Struct(symbol.records);
+                    case 3
+                        records = gams.transfer.symbol.data.DenseMatrix(symbol.records);
+                    case 4
+                        records = gams.transfer.symbol.data.SparseMatrix(symbol.records);
+                    case 5
+                        records = gams.transfer.symbol.data.Table(symbol.records);
+                    end
+                end
+
                 % handle alias differently
                 switch symbol.symbol_type
                 case {gams.transfer.gdx.SymbolType.ALIAS, 'alias'}
@@ -573,13 +586,13 @@ classdef Container < handle
                     end
                     continue
                 case {gams.transfer.gdx.SymbolType.SET, 'set'}
-                    new_symbol = obj.addSet(symbol.name, 'is_singleton', symbol.is_singleton);
+                    new_symbol = obj.addSet(symbol.name, 'is_singleton', symbol.is_singleton, 'records', records);
                 case {gams.transfer.gdx.SymbolType.PARAMETER, 'parameter'}
-                    new_symbol = obj.addParameter(symbol.name);
+                    new_symbol = obj.addParameter(symbol.name, 'records', records);
                 case {gams.transfer.gdx.SymbolType.VARIABLE, 'variable'}
-                    new_symbol = obj.addVariable(symbol.name, symbol.type);
+                    new_symbol = obj.addVariable(symbol.name, symbol.type, 'records', records);
                 case {gams.transfer.gdx.SymbolType.EQUATION, 'equation'}
-                    new_symbol = obj.addEquation(symbol.name, symbol.type);
+                    new_symbol = obj.addEquation(symbol.name, symbol.type, 'records', records);
                 otherwise
                     error('Invalid symbol type');
                 end
@@ -600,24 +613,6 @@ classdef Container < handle
                     end
                     new_symbol.domain = domain;
                 end
-
-                % set records
-                symbol_.records = symbol.records;
-                % switch symbol.format
-                % case {3, 'dense_matrix',
-                %     4, 'sparse_matrix'}
-                %     copy_format = ~any(isnan(symbol_.size));
-                % otherwise
-                %     copy_format = true;
-                % end
-                % TODO
-                % if copy_format
-                %     if isnumeric(symbol.format)
-                %         symbol_.format_ = symbol.format;
-                %     else
-                %         symbol_.format_ = gams.transfer.RecordsFormat.str2int(symbol.format);
-                %     end
-                % end
 
                 % set uels
                 if isfield(symbol, 'uels') && ~gams.transfer.Constants.SUPPORTS_CATEGORICAL
@@ -1345,13 +1340,19 @@ classdef Container < handle
             end
 
             % get sets for aliases
+            names = cell(1, numel(symbols));
             for i = 1:numel(symbols)
+                names{i} = symbols{i}.name;
                 if isa(symbols{i}, 'gams.transfer.alias.Set')
                     symbols{i} = symbols{i}.alias_with;
                 end
             end
 
             descr = gams.transfer.symbol.Set.describe(symbols);
+
+            for i = 1:numel(names)
+                descr.name(i) = names{i};
+            end
         end
 
         %> Returns an overview over all parameters in container

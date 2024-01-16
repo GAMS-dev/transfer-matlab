@@ -140,9 +140,9 @@ classdef Set < gams.transfer.symbol.Symbol
             % Constructs a GAMS Set, see class help
 
             obj.def_ = gams.transfer.symbol.definition.Set();
-            obj.data_ = gams.transfer.symbol.data.Unknown();
 
             % parse input arguments
+            has_records = false;
             try
                 obj.container_ = gams.transfer.utils.parse_argument(varargin, ...
                     1, 'container', @obj.validateContainer);
@@ -166,6 +166,12 @@ classdef Set < gams.transfer.symbol.Symbol
                             index + 1, 'is_singleton', []);
                         index = index + 2;
                         is_pararg = true;
+                    elseif strcmpi(varargin{index}, 'records')
+                        obj.data_ = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'records', @obj.validateData);
+                        has_records = true;
+                        index = index + 2;
+                        is_pararg = true;
                     elseif ~is_pararg && index == 3
                         obj.def_.domains = gams.transfer.utils.parse_argument(varargin, ...
                             index, 'domains', []);
@@ -176,6 +182,9 @@ classdef Set < gams.transfer.symbol.Symbol
                 end
             catch e
                 error(e.message);
+            end
+            if ~has_records
+                obj.data_ = gams.transfer.symbol.data.Struct();
             end
         end
 
@@ -223,21 +232,21 @@ classdef Set < gams.transfer.symbol.Symbol
                 descr.is_singleton(i) = symbols{i}.is_singleton;
                 descr.format{i} = symbols{i}.format;
                 descr.dimension(i) = symbols{i}.dimension;
-                % descr.domain_type{i} = symbols{i}.domain_type;
-                % descr.domain{i} = gams.transfer.Utils.list2str(symbols{i}.domain);
-                % descr.size{i} = gams.transfer.Utils.list2str(symbols{i}.size);
+                descr.domain_type{i} = symbols{i}.domain_type;
+                descr.domain{i} = gams.transfer.utils.list2str(symbols{i}.domain_names);
+                descr.size{i} = gams.transfer.utils.list2str(symbols{i}.size);
                 descr.number_records(i) = symbols{i}.getNumberRecords();
-                % descr.number_values(i) = symbols{i}.getNumberValues();
-                % descr.sparsity(i) = symbols{i}.getSparsity();
+                descr.number_values(i) = symbols{i}.getNumberValues();
+                descr.sparsity(i) = symbols{i}.getSparsity();
             end
 
             % convert to categorical if possible
             if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 descr.name = categorical(descr.name);
                 descr.format = categorical(descr.format);
-                % descr.domain_type = categorical(descr.domain_type);
-                % descr.domain = categorical(descr.domain);
-                % descr.size = categorical(descr.size);
+                descr.domain_type = categorical(descr.domain_type);
+                descr.domain = categorical(descr.domain);
+                descr.size = categorical(descr.size);
             end
 
             % convert to table if possible

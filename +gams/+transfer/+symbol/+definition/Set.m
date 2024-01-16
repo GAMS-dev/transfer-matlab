@@ -73,7 +73,7 @@ classdef Set < gams.transfer.symbol.definition.Definition
         end
 
         function resetValues(obj)
-            obj.values_ = struct('element_text', gams.transfer.symbol.value.String('element_text', ''));
+            obj.values_ = {gams.transfer.symbol.value.String('element_text', '')};
         end
 
     end

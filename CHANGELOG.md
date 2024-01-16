@@ -1,3 +1,8 @@
+GAMS Transfer Matlab v0.9.0
+==================
+- Added subpackages `gams.transfer.symbol` and `gams.transfer.alias`.
+- Renamed subpackage `gams.transfer.cmex` to `gams.transfer.gdx`.
+
 GAMS Transfer Matlab v0.8.0
 ==================
 - Breaking: Renamed package to `gams.transfer` (previously: `GAMSTransfer`) and moved MEX interface

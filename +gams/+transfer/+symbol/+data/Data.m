@@ -1,4 +1,4 @@
-% Abstract Data
+% Abstract Records (internal)
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,18 +28,54 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Abstract Data
+% Abstract Records (internal)
 %
-
-%> @brief Abstract Data
-classdef (Abstract) Abstract < handle
+classdef (Abstract) Data < handle
 
     properties (Hidden, SetAccess = protected)
         records_ = []
         last_update_ = now()
     end
 
+    methods (Hidden, Static)
+
+        function arg = validateDefinition(name, index, arg)
+            if ~isa(arg, 'gams.transfer.symbol.definition.Definition')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.definition.Definition''.', name, index);
+            end
+        end
+
+        function [domains, values] = parseDefinitionWithValueFilter(varargin)
+
+            % parse input arguments
+            try
+                def = gams.transfer.utils.parse_argument(varargin, ...
+                    1, 'def', @gams.transfer.symbol.data.Data.validateDefinition);
+                domains = def.domains;
+                values = def.values;
+                index = 2;
+                is_pararg = false;
+                while index <= nargin
+                    if strcmpi(varargin{index}, 'values')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'gams.transfer.symbol.value.Value'}, 1));
+                        values = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'values', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+        end
+
+    end
+
     properties (Abstract, SetAccess = private)
+        % TODO: make method
         labels
     end
 
@@ -53,17 +89,20 @@ classdef (Abstract) Abstract < handle
 
     methods (Abstract)
         name = name(obj)
-        [flag, msg] = isValid(obj, def)
-        nrecs = getNumberRecords(obj)
-        nvals = getNumberValues(obj, values)
+        status = isValid(obj, def)
+        nrecs = getNumberRecords(obj, def)
+        nvals = getNumberValues(obj, def, varargin)
+        value = getMeanValue(obj, def, varargin)
     end
 
     methods (Abstract, Hidden, Access = protected)
-        arg = validateDomains(name, index, arg)
-        uels = getUniqueLabelsAt(obj, domain, ignore_unused)
-        setUniqueLabelsAt(obj, uels, domain, rename)
-        addUniqueLabelsAt(obj, uels, domain)
-        removeUniqueLabelsAt(obj, uels, domain)
+        arg = validateDomains_(obj, name, index, arg)
+        arg = validateValues_(obj, name, index, arg)
+        subindex = ind2sub_(obj, domains, value, linindex)
+        uels = getUniqueLabelsAt_(obj, domain, ignore_unused)
+        setUniqueLabelsAt_(obj, uels, domain, rename)
+        addUniqueLabelsAt_(obj, uels, domain)
+        removeUniqueLabelsAt_(obj, uels, domain)
     end
 
     methods
@@ -89,16 +128,24 @@ classdef (Abstract) Abstract < handle
             flag = ismember(label, obj.labels);
         end
 
+        function values = availableNumericValues(obj, values)
+            for i = 1:numel(values)
+                if ~isa(values{i}, 'gams.transfer.symbol.value.Numeric') ||~obj.isLabel(values{i}.label)
+                    values(i) = [];
+                end
+            end
+        end
+
         function uels = getUELs(obj, varargin)
             % parse input arguments
             codes = [];
             ignore_unused = false;
             try
                 domains = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'domains', @obj.validateDomains);
+                    1, 'domains', @obj.validateDomains_);
                 index = 2;
                 is_pararg = false;
-                while index <= nargin
+                while index < nargin
                     if strcmpi(varargin{index}, 'ignore_unused')
                         validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
                         ignore_unused = gams.transfer.utils.parse_argument(varargin, ...
@@ -121,10 +168,9 @@ classdef (Abstract) Abstract < handle
             uels = {};
 
             for i = 1:numel(domains)
-                uels_i0 = obj.getUniqueLabelsAt(domains{i}, ignore_unused);
+                uels_i0 = obj.getUniqueLabelsAt_(domains{i}, ignore_unused);
 
                 % filter for given codes
-                codes = p.Results.codes;
                 if ~isempty(codes)
                     idx = codes >= 1 & codes <= numel(uels_i0);
                     uels_i = cell(numel(codes), 1);
@@ -135,7 +181,7 @@ classdef (Abstract) Abstract < handle
                 uels = [uels; reshape(uels_i, numel(uels_i), 1)];
             end
 
-            if numel(domain) > 1
+            if numel(domains) > 1
                 uels = gams.transfer.utils.unique(uels);
             end
         end
@@ -147,7 +193,7 @@ classdef (Abstract) Abstract < handle
                 uels = gams.transfer.utils.parse_argument(varargin, ...
                     1, 'uels', @obj.validateUels);
                 domains = gams.transfer.utils.parse_argument(varargin, ...
-                    2, 'domains', @obj.validateDomains);
+                    2, 'domains', @obj.validateDomains_);
                 index = 2;
                 is_pararg = false;
                 while index <= nargin
@@ -166,7 +212,7 @@ classdef (Abstract) Abstract < handle
             end
 
             for i = 1:numel(domains)
-                obj.setUniqueLabelsAt(uels, domains{i}, rename);
+                obj.setUniqueLabelsAt_(uels, domains{i}, rename);
             end
         end
 
@@ -174,17 +220,17 @@ classdef (Abstract) Abstract < handle
             % parse input arguments
             try
                 domains = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'domains', @obj.validateDomains);
+                    1, 'domains', @obj.validateDomains_);
             catch e
                 error(e.message);
             end
 
             for i = 1:numel(domains)
-                uels = obj.getUniqueLabelsAt(domains{i});
+                uels = obj.getUniqueLabelsAt_(domains{i});
                 rec_uels_ids = gams.transfer.utils.unique(uint64(obj.records_.(domains{i}.label)));
                 rec_uels_ids = rec_uels_ids(rec_uels_ids ~= nan);
-                obj.setUniqueLabelsAt(uels(rec_uels_ids), domains{i});
-                obj.addUniqueLabelsAt(uels, domains{i});
+                obj.setUniqueLabelsAt_(uels(rec_uels_ids), domains{i});
+                obj.addUniqueLabelsAt_(uels, domains{i});
             end
         end
 
@@ -194,20 +240,20 @@ classdef (Abstract) Abstract < handle
                 uels = gams.transfer.utils.parse_argument(varargin, ...
                     1, 'uels', @obj.validateUels);
                 domains = gams.transfer.utils.parse_argument(varargin, ...
-                    2, 'domains', @obj.validateDomains);
+                    2, 'domains', @obj.validateDomains_);
             catch e
                 error(e.message);
             end
 
             for i = 1:numel(domains)
-                current_uels = obj.getUniqueLabelsAt(domains{i});
+                current_uels = obj.getUniqueLabelsAt_(domains{i});
                 if numel(uels) ~= numel(current_uels)
                     error('Number of UELs %d not equal to number of current UELs %d', numel(uels), numel(current_uels));
                 end
                 if ~all(ismember(current_uels, uels))
                     error('Adding new UELs not supported for reordering');
                 end
-                obj.setUniqueLabelsAt(uels, domains{i});
+                obj.setUniqueLabelsAt_(uels, domains{i});
             end
         end
 
@@ -217,13 +263,13 @@ classdef (Abstract) Abstract < handle
                 uels = gams.transfer.utils.parse_argument(varargin, ...
                     1, 'uels', @obj.validateUels);
                 domains = gams.transfer.utils.parse_argument(varargin, ...
-                    2, 'domains', @obj.validateDomains);
+                    2, 'domains', @obj.validateDomains_);
             catch e
                 error(e.message);
             end
 
             for i = 1:numel(domains)
-                obj.addUniqueLabelsAt(uels, domains{i});
+                obj.addUniqueLabelsAt_(uels, domains{i});
             end
         end
 
@@ -233,13 +279,13 @@ classdef (Abstract) Abstract < handle
                 uels = gams.transfer.utils.parse_argument(varargin, ...
                     1, 'uels', @obj.validateUels);
                 domains = gams.transfer.utils.parse_argument(varargin, ...
-                    2, 'domains', @obj.validateDomains);
+                    2, 'domains', @obj.validateDomains_);
             catch e
                 error(e.message);
             end
 
             for i = 1:numel(domains)
-                obj.removeUniqueLabelsAt(uels, domains{i});
+                obj.removeUniqueLabelsAt_(uels, domains{i});
             end
         end
 
@@ -251,13 +297,13 @@ classdef (Abstract) Abstract < handle
             % parse input arguments
             try
                 domains = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'domains', @obj.validateDomains);
+                    1, 'domains', @obj.validateDomains_);
             catch e
                 error(e.message);
             end
 
             for i = 1:numel(domains)
-                obj.renameUniqueLabelsAt(lower(obj.getUniqueLabelsAt(domains{i})), domains{i}, true);
+                obj.renameUniqueLabelsAt(lower(obj.getUniqueLabelsAt_(domains{i})), domains{i}, true);
             end
         end
 
@@ -265,18 +311,23 @@ classdef (Abstract) Abstract < handle
             % parse input arguments
             try
                 domains = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'domains', @obj.validateDomains);
+                    1, 'domains', @obj.validateDomains_);
             catch e
                 error(e.message);
             end
 
             for i = 1:numel(domains)
-                obj.renameUniqueLabelsAt(upper(obj.getUniqueLabelsAt(domains{i})), domains{i}, true);
+                obj.renameUniqueLabelsAt(upper(obj.getUniqueLabelsAt_(domains{i})), domains{i}, true);
             end
         end
 
-        function n = countNA(obj, values)
-            values = obj.validateValues('values', 1, values);
+    end
+
+    methods
+
+        function n = countNA(obj, def, varargin)
+            [~, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            values = obj.availableNumericValues(values);
 
             n = 0;
             for i = 1:numel(values)
@@ -284,8 +335,9 @@ classdef (Abstract) Abstract < handle
             end
         end
 
-        function n = countUndef(obj, varargin)
-            values = obj.validateValues('values', 1, values);
+        function n = countUndef(obj, def, varargin)
+            [~, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            values = obj.availableNumericValues(values);
 
             n = 0;
             for i = 1:numel(values)
@@ -293,8 +345,9 @@ classdef (Abstract) Abstract < handle
             end
         end
 
-        function n = countEps(obj, varargin)
-            values = obj.validateValues('values', 1, values);
+        function n = countEps(obj, def, varargin)
+            [~, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            values = obj.availableNumericValues(values);
 
             n = 0;
             for i = 1:numel(values)
@@ -302,8 +355,9 @@ classdef (Abstract) Abstract < handle
             end
         end
 
-        function n = countPosInf(obj, varargin)
-            values = obj.validateValues('values', 1, values);
+        function n = countPosInf(obj, def, varargin)
+            [~, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            values = obj.availableNumericValues(values);
 
             n = 0;
             for i = 1:numel(values)
@@ -311,8 +365,9 @@ classdef (Abstract) Abstract < handle
             end
         end
 
-        function n = countNegInf(obj, varargin)
-            values = obj.validateValues('values', 1, values);
+        function n = countNegInf(obj, def, varargin)
+            [~, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            values = obj.availableNumericValues(values);
 
             n = 0;
             for i = 1:numel(values)
@@ -320,14 +375,93 @@ classdef (Abstract) Abstract < handle
             end
         end
 
-        function sparsity = getSparsity(obj, def)
-            def = obj.validateDef('def', 1, def);
+        function sparsity = getSparsity(obj, def, varargin)
+            [~, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            values = obj.availableNumericValues(values);
 
-            n_dense = prod(def.size) * numel(def.values);
+            n_dense = prod(def.size) * numel(values);
             if n_dense == 0
                 sparsity = NaN;
             else
-                sparsity = 1 - obj.getNumberValues(def.values) / n_dense;
+                sparsity = 1 - obj.getNumberValues(def) / n_dense;
+            end
+        end
+
+        function [value, where] = getMinValue(obj, def, varargin)
+
+            [domains, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            values = obj.availableNumericValues(values);
+
+            value = nan;
+            where = {};
+
+            idx = [];
+            for i = 1:numel(values)
+                [value_, idx_] = min(obj.records_.(values{i}.label)(:));
+                if ~isempty(value_) && (isempty(idx) || value > value_)
+                    value = value_;
+                    idx = obj.ind2sub_(domains, values{i}, idx_);
+                end
+            end
+
+            if ~isempty(idx)
+                where = cell(1, numel(domains));
+                for i = 1:numel(domains)
+                    uels = obj.getUniqueLabelsAt_(domains{i}, false);
+                    where{i} = uels{idx(i)};
+                end
+            end
+        end
+
+        function [value, where] = getMaxValue(obj, def, varargin)
+
+            [domains, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            values = obj.availableNumericValues(values);
+
+            value = nan;
+            where = {};
+
+            idx = [];
+            for i = 1:numel(values)
+                [value_, idx_] = max(obj.records_.(values{i}.label)(:));
+                if ~isempty(value_) && (isempty(idx) || value < value_)
+                    value = value_;
+                    idx = obj.ind2sub_(domains, values{i}, idx_);
+                end
+            end
+
+            if ~isempty(idx)
+                where = cell(1, numel(domains));
+                for i = 1:numel(domains)
+                    uels = obj.getUniqueLabelsAt_(domains{i}, false);
+                    where{i} = uels{idx(i)};
+                end
+            end
+        end
+
+        function [value, where] = getMaxAbsValue(obj, def, varargin)
+
+            [domains, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            values = obj.availableNumericValues(values);
+
+            value = nan;
+            where = {};
+
+            idx = [];
+            for i = 1:numel(values)
+                [value_, idx_] = max(abs(obj.records_.(values{i}.label)(:)));
+                if ~isempty(value_) && (isempty(idx) || value > value_)
+                    value = value_;
+                    idx = obj.ind2sub_(domains, values{i}, idx_);
+                end
+            end
+
+            if ~isempty(idx)
+                where = cell(1, numel(domains));
+                for i = 1:numel(domains)
+                    uels = obj.getUniqueLabelsAt_(domains{i}, false);
+                    where{i} = uels{idx(i)};
+                end
             end
         end
 

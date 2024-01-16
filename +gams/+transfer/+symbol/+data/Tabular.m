@@ -1,4 +1,4 @@
-% Tabular Record
+% Tabular Records (internal)
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,28 +28,46 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Tabular Record
+% Tabular Records (internal)
 %
-
-%> @brief Tabular Record
-classdef (Abstract) Tabular < gams.transfer.symbol.data.Abstract
+classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
 
     methods
 
         function status = isValid(obj, def)
-            validateattributes(def, {'gams.transfer.symbol.definition.Definition'}, {}, 'isValid', 'def', 1);
+            def = obj.validateDefinition('def', 1, def);
 
-            status = obj.isValidDomains(def.domains);
-            if status.isOK()
-                status = obj.isValidValues(def.valueLabels());
+            status = obj.isValidDomains_(def.domains);
+            if status.flag == status.OK
+                return
             end
+
+            status = obj.isValidValues_(def.values);
+        end
+
+        function nvals = getNumberValues(obj, def, varargin)
+            [~, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            nvals = obj.getNumberRecords(def) * numel(obj.availableNumericValues(values));
+        end
+
+        function value = getMeanValue(obj, def, varargin)
+
+            [domains, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            values = obj.availableNumericValues(values);
+
+            value = 0;
+            for i = 1:numel(values)
+                value = value + sum(obj.records_.(values{i}.label)(:));
+            end
+
+            value = value / obj.getNumberValues(def, 'values', values);
         end
 
     end
 
     methods (Hidden, Access = protected)
 
-        function status = isValidDomains(obj, domains)
+        function status = isValidDomains_(obj, domains)
             for i = 1:numel(domains)
                 label = domains{i}.label;
 
@@ -64,22 +82,33 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Abstract
                 end
             end
 
-            status = gams.transfer.utils.Status('OK');
+            status = gams.transfer.utils.Status.createOK();
         end
 
-        function status = isValidValues(obj, value_labels)
+        function status = isValidValues_(obj, values)
 
             prev_size = [];
-            for i = 1:numel(obj.value_labels)
-                label = value_labels{i};
+            for i = 1:numel(values)
+                label = values{i}.label;
 
                 if ~obj.isLabel(label)
                     continue
                 end
 
-                if ~isnumeric(obj.records_.(label))
-                    status = gams.transfer.utils.Status(sprintf("Records value column '%s' must be numeric.", label));
-                    return
+                switch class(values{i})
+                case 'gams.transfer.symbol.value.Numeric'
+                    if ~isnumeric(obj.records_.(label))
+                        status = gams.transfer.utils.Status(sprintf("Records value column '%s' must be numeric.", label));
+                        return
+                    end
+                case 'gams.transfer.symbol.value.String'
+
+                    if (~gams.transfer.Constants.SUPPORTS_CATEGORICAL || ~iscategorical(obj.records_.(label))) && ~iscellstr(obj.records_.(label))
+                        status = gams.transfer.utils.Status(sprintf("Records value column '%s' must be categorical or cellstr.", label));
+                        return
+                    end
+                otherwise
+                    error('Unknown symbol value type: %s', class(values{i}));
                 end
 
                 if issparse(obj.records_.(label))
@@ -87,12 +116,12 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Abstract
                     return
                 end
 
-                curr_size = size(obj.records_.(label));
-                if numel(curr_size) ~= 2 || curr_size(1) ~= 1
+                if ~iscolumn(obj.records_.(label))
                     status = gams.transfer.utils.Status(sprintf("Records value column '%s' must be column vector.", label));
                     return
                 end
 
+                curr_size = size(obj.records_.(label));
                 if i > 1 && any(curr_size ~= prev_size)
                     status = gams.transfer.utils.Status(sprintf("Records value column '%s' must have same size as other value columns.", label));
                     return
@@ -100,10 +129,45 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Abstract
                 prev_size = curr_size;
             end
 
-            status = gams.transfer.utils.Status('OK');
+            status = gams.transfer.utils.Status.createOK();
         end
 
-        function uels = getUniqueLabelsAt(obj, domain, ignore_unused)
+        function arg = validateDomains_(obj, name, index, arg)
+            if ~iscell(arg)
+                error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
+            end
+            for i = 1:numel(arg)
+                if ~isa(arg{i}, 'gams.transfer.symbol.domain.Domain')
+                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.symbol.domain.Domain''.', name, index, i);
+                end
+                if ~obj.isLabel(arg{i}.label)
+                    error('Argument ''%s'' (at position %d, element %d) contains domain with unknown label ''%s''.', name, index, i, arg{i}.label);
+                end
+            end
+        end
+
+        function arg = validateValues_(obj, name, index, arg)
+            if ~iscell(arg)
+                error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
+            end
+            for i = 1:numel(arg)
+                if ~isa(arg{i}, 'gams.transfer.symbol.value.Value')
+                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.symbol.value.Value''.', name, index, i);
+                end
+                if ~obj.isLabel(arg{i}.label)
+                    error('Argument ''%s'' (at position %d, element %d) contains domain with unknown label ''%s''.', name, index, i, arg{i}.label);
+                end
+            end
+        end
+
+        function subindex = ind2sub_(obj, domains, value, linindex)
+            subindex = zeros(1, numel(domains));
+            for i = 1:numel(domains)
+                subindex(i) = double(obj.records_.(domains{i}.label)(linindex));
+            end
+        end
+
+        function uels = getUniqueLabelsAt_(obj, domain, ignore_unused)
 
             switch domain.index_type.value
             case gams.transfer.symbol.domain.IndexType.CATEGORICAL
@@ -116,9 +180,11 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Abstract
                 error('Records format ''%s'' does not supported domain index type ''%s''.', ...
                     obj.name(), domain.index_type.select);
             end
+
         end
 
-        function setUniqueLabelsAt(obj, uels, domain, rename)
+        function setUniqueLabelsAt_(obj, uels, domain, rename)
+
             switch domain.index_type.value
             case gams.transfer.symbol.domain.IndexType.CATEGORICAL
 
@@ -132,9 +198,11 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Abstract
                 error('Records format ''%s'' does not supported domain index type ''%s''.', ...
                     obj.name(), domain.index_type.select);
             end
+
         end
 
-        function addUniqueLabelsAt(obj, uels, domain)
+        function addUniqueLabelsAt_(obj, uels, domain)
+
             switch domain.index_type.value
             case gams.transfer.symbol.domain.IndexType.CATEGORICAL
                 if ~isordinal(obj.records_.(domain.label))
@@ -151,9 +219,11 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Abstract
                 error('Records format ''%s'' does not supported domain index type ''%s''.', ...
                     obj.name(), domain.index_type.select);
             end
+
         end
 
-        function removeUniqueLabelsAt(obj, uels, domain)
+        function removeUniqueLabelsAt_(obj, uels, domain)
+
             switch domain.index_type.value
             case gams.transfer.symbol.domain.IndexType.CATEGORICAL
                 if isempty(uels)
@@ -165,6 +235,7 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Abstract
                 error('Records format ''%s'' does not supported domain index type ''%s''.', ...
                     obj.name(), domain.index_type.select);
             end
+
         end
 
     end
