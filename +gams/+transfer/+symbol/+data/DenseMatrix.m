@@ -44,6 +44,11 @@ classdef DenseMatrix < gams.transfer.symbol.data.Matrix
             name = 'dense_matrix';
         end
 
+        function def = copy(obj)
+            def = gams.transfer.symbol.data.DenseMatrix();
+            def.copyFrom(obj);
+        end
+
         function status = isValid(obj, def)
             status = isValid@gams.transfer.symbol.data.Matrix(obj, def);
         end

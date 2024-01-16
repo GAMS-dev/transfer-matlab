@@ -332,27 +332,22 @@ classdef Container < handle
             % 1. container (any):
             %    Other Container
 
-            eq = false;
-            % if ~isa(container, 'gams.transfer.Container')
-            %     return
-            % end
-            % eq = isequaln(obj.gams_dir_, container.gams_dir);
-            % eq = eq && obj.indexed_ == container.indexed;
-            % eq = eq && numel(fieldnames(obj.data_)) == numel(fieldnames(container.data));
-            % if ~eq
-            %     return
-            % end
+            eq = isequal(class(obj), class(container)) && ...
+                isequal(obj.gams_dir_, container.gams_dir) && ...
+                isequal(obj.indexed_, container.indexed);
+            if ~eq
+                return
+            end
 
-            % symbols1 = fieldnames(obj.data_);
-            % symbols2 = fieldnames(container.data);
-            % if numel(symbols1) ~= numel(symbols2)
-            %     eq = false;
-            %     return
-            % end
-            % for i = 1:numel(symbols1)
-            %     eq = eq && isequaln(symbols1{i}, symbols2{i});
-            %     eq = eq && obj.data_.(symbols1{i}).equals(container.data.(symbols2{i}));
-            % end
+            symbols1 = obj.getSymbols();
+            symbols2 = container.getSymbols();
+            eq = numel(symbols1) == numel(symbols2);
+            for i = 1:numel(symbols1)
+                eq = eq && symbols1{i}.equals(symbols2{i});
+                if ~eq
+                    return
+                end
+            end
         end
 
     end

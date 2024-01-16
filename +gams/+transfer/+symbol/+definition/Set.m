@@ -76,6 +76,21 @@ classdef Set < gams.transfer.symbol.definition.Definition
             obj.values_ = {gams.transfer.symbol.value.String('element_text', '')};
         end
 
+        function def = copy(obj)
+            def = gams.transfer.symbol.definition.Set();
+            def.copyFrom(obj);
+        end
+
+        function copyFrom(obj, symbol)
+            copyFrom@gams.transfer.symbol.definition.Definition(obj, symbol);
+            obj.is_singleton_ = symbol.is_singleton;
+        end
+
+        function eq = equals(obj, def)
+            eq = equals@gams.transfer.symbol.definition.Definition(obj, def) && ...
+                isequal(obj.is_singleton_, def.is_singleton);
+        end
+
     end
 
 end

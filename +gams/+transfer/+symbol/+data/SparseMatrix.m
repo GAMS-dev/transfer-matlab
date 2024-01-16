@@ -44,6 +44,11 @@ classdef SparseMatrix < gams.transfer.symbol.data.Matrix
             name = 'sparse_matrix';
         end
 
+        function def = copy(obj)
+            def = gams.transfer.symbol.data.SparseMatrix();
+            def.copyFrom(obj);
+        end
+
         function status = isValid(obj, def)
             status = isValid@gams.transfer.symbol.data.Matrix(obj, def);
         end

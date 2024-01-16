@@ -60,6 +60,11 @@ classdef Table < gams.transfer.symbol.data.Tabular
             name = 'table';
         end
 
+        function def = copy(obj)
+            def = gams.transfer.symbol.data.Table();
+            def.copyFrom(obj);
+        end
+
         function status = isValid(obj, def)
             if ~istable(obj.records_)
                 status = gams.transfer.utils.Status("Record data must be 'table'.");

@@ -199,8 +199,53 @@ classdef Set < gams.transfer.alias.Abstract
             error('not implemented');
         end
 
-        function copy(obj, varargin)
-            error('not implemented');
+        function symbol = copy(obj, varargin)
+
+            % parse input arguments
+            try
+                validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'gams.transfer.Container'}, -1));
+                destination = gams.transfer.utils.parse_argument(varargin, ...
+                    1, 'destination', validate);
+                index = 2;
+                is_pararg = false;
+                while index < nargin
+                    if ~is_pararg && index == 2
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
+                        overwrite = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'overwrite', validate);
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            % get aliased symbol in destination
+            if ~destination.hasSymbols(obj.alias_with.name)
+                error('Aliased symbol not available in destination');
+            end
+            alias_with = destination.getSymbols(obj.alias_with.name);
+            if ~obj.alias_with.equals(alias_with)
+                error('Aliased symbol differs in destination');
+            end
+
+            % create new (empty) symbol
+            if destination.hasSymbols(obj.name_)
+                if ~overwrite
+                    error('Symbol already exists in destination.');
+                end
+                symbol = destination.getSymbols(obj.name_);
+                if ~isa(symbol, class(obj))
+                    destination.removeSymbols(obj.name_);
+                    symbol = destination.addAlias(obj.name_, alias_with);
+                else
+                    symbol.alias_with = alias_with;
+                end
+            else
+                symbol = destination.addAlias(obj.name_, alias_with);
+            end
         end
 
         function setRecords(obj, varargin)

@@ -42,6 +42,15 @@ classdef Parameter < gams.transfer.symbol.definition.Definition
             obj.values_ = {gams.transfer.symbol.value.Numeric('value', 0)};
         end
 
+        function def = copy(obj)
+            def = gams.transfer.symbol.definition.Parameter();
+            def.copyFrom(obj);
+        end
+
+        function copyFrom(obj, symbol)
+            copyFrom@gams.transfer.symbol.definition.Definition(obj, symbol);
+        end
+
     end
 
 end

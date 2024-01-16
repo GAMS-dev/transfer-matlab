@@ -89,6 +89,7 @@ classdef (Abstract) Data < handle
 
     methods (Abstract)
         name = name(obj)
+        data = copy(obj)
         status = isValid(obj, def)
         nrecs = getNumberRecords(obj, def)
         nvals = getNumberValues(obj, def, varargin)
@@ -123,6 +124,23 @@ classdef (Abstract) Data < handle
     end
 
     methods
+
+        function copyFrom(obj, symbol)
+
+            % parse input arguments
+            try
+                symbol = gams.transfer.utils.validate('symbol', 1, symbol, {class(obj)}, -1);
+            catch e
+                error(e.message);
+            end
+
+            obj.records_ = symbol.records;
+            obj.last_update_ = symbol.last_update;
+        end
+
+        function eq = equals(obj, data)
+            eq = isequal(class(obj), class(data)) && isequaln(obj.records_, data.records);
+        end
 
         function flag = isLabel(obj, label)
             flag = ismember(label, obj.labels);

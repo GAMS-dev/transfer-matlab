@@ -181,8 +181,42 @@ classdef Universe < gams.transfer.alias.Abstract
             error('not implemented');
         end
 
-        function copy(obj, varargin)
-            error('not implemented');
+        function symbol = copy(obj, varargin)
+
+            % parse input arguments
+            try
+                validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'gams.transfer.Container'}, -1));
+                destination = gams.transfer.utils.parse_argument(varargin, ...
+                    1, 'destination', validate);
+                index = 2;
+                is_pararg = false;
+                while index < nargin
+                    if ~is_pararg && index == 2
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
+                        overwrite = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'overwrite', validate);
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            % create new (empty) symbol
+            if destination.hasSymbols(obj.name_)
+                if ~overwrite
+                    error('Symbol already exists in destination.');
+                end
+                symbol = destination.getSymbols(obj.name_);
+                if ~isa(symbol, class(obj))
+                    destination.removeSymbols(obj.name_);
+                    symbol = destination.addUniverseAlias(obj.name_);
+                end
+            else
+                symbol = destination.addUniverseAlias(obj.name_);
+            end
         end
 
         function flag = isValid(obj, varargin)

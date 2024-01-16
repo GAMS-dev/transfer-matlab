@@ -30,7 +30,7 @@
 %
 % Symbol Domain (internal)
 %
-classdef (Abstract) Domain < handle
+classdef (Abstract) Domain
 
     properties (Hidden, SetAccess = protected)
         label_

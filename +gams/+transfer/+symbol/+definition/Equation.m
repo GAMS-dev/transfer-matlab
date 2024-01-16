@@ -85,6 +85,21 @@ classdef Equation < gams.transfer.symbol.definition.Definition
                 gams.transfer.symbol.value.Numeric('scale', gdx_default_values(5))};
         end
 
+        function def = copy(obj)
+            def = gams.transfer.symbol.definition.Equation();
+            def.copyFrom(obj);
+        end
+
+        function copyFrom(obj, symbol)
+            copyFrom@gams.transfer.symbol.definition.Definition(obj, symbol);
+            obj.type_ = symbol.type;
+        end
+
+        function eq = equals(obj, def)
+            eq = equals@gams.transfer.symbol.definition.Definition(obj, def) && ...
+                isequal(obj.type_, def.type);
+        end
+
     end
 
 end

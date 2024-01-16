@@ -188,6 +188,70 @@ classdef Set < gams.transfer.symbol.Symbol
             end
         end
 
+        %> Copies symbol to destination container
+        %>
+        %> Symbol domains are downgraded to `relaxed` if the destination container does not have
+        %> equivalent domain sets, see also \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN.
+        %>
+        %> **Required Arguments:**
+        %> 1. destination (`Container`):
+        %>    Destination \ref gams::transfer::Container "Container"
+        %>
+        %> **Optional Arguments:**
+        %> 2. overwrite (`bool`):
+        %>    Overwrites symbol with same name in destination if `true`. Default: `false`.
+        function symbol = copy(obj, varargin)
+            % Copies symbol to destination container
+            %
+            % Symbol domains are downgraded to relaxed if the destination container does not have
+            % equivalent domain sets.
+            %
+            % Required Arguments:
+            % 1. destination (Container):
+            %    Destination container
+            %
+            % Optional Arguments:
+            % 2. overwrite (bool):
+            %    Overwrites symbol with same name in destination if true. Default: false.
+
+            % parse input arguments
+            try
+                validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'gams.transfer.Container'}, -1));
+                destination = gams.transfer.utils.parse_argument(varargin, ...
+                    1, 'destination', validate);
+                index = 2;
+                is_pararg = false;
+                while index < nargin
+                    if ~is_pararg && index == 2
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
+                        overwrite = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'overwrite', validate);
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            % create new (empty) symbol
+            if destination.hasSymbols(obj.name_)
+                if ~overwrite
+                    error('Symbol already exists in destination.');
+                end
+                symbol = destination.getSymbols(obj.name_);
+                if ~isa(symbol, class(obj))
+                    destination.removeSymbols(obj.name_);
+                    symbol = destination.addSet(obj.name_);
+                end
+            else
+                symbol = destination.addSet(obj.name_);
+            end
+
+            symbol.copyFrom(obj);
+        end
+
     end
 
     methods (Static)

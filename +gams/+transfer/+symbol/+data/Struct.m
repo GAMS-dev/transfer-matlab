@@ -60,6 +60,11 @@ classdef Struct < gams.transfer.symbol.data.Tabular
             name = 'struct';
         end
 
+        function def = copy(obj)
+            def = gams.transfer.symbol.data.Struct();
+            def.copyFrom(obj);
+        end
+
         function status = isValid(obj, def)
             if ~isstruct(obj.records_)
                 status = gams.transfer.utils.Status("Record data must be 'struct'.");

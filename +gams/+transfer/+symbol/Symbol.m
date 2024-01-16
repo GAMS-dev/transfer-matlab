@@ -374,6 +374,29 @@ classdef (Abstract) Symbol < handle
 
     end
 
+    methods (Abstract)
+        symbol = copy(obj, varargin)
+    end
+
+    methods (Hidden)
+
+        function copyFrom(obj, symbol)
+
+            % parse input arguments
+            try
+                symbol = gams.transfer.utils.validate('symbol', 1, symbol, {class(obj)}, -1);
+            catch e
+                error(e.message);
+            end
+
+            obj.description_ = symbol.description;
+            obj.def_ = symbol.def.copy();
+            obj.data_ = symbol.data.copy();
+            obj.modified_ = true;
+        end
+
+    end
+
     methods
 
         %> Checks equivalence with other symbol
@@ -394,38 +417,11 @@ classdef (Abstract) Symbol < handle
             % 1. symbol (any):
             %    Other symbol
 
-            error('todo');
-        end
-
-        %> Copies symbol to destination container
-        %>
-        %> Symbol domains are downgraded to `relaxed` if the destination container does not have
-        %> equivalent domain sets, see also \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN.
-        %>
-        %> **Required Arguments:**
-        %> 1. destination (`Container`):
-        %>    Destination \ref gams::transfer::Container "Container"
-        %>
-        %> **Optional Arguments:**
-        %> 2. overwrite (`bool`):
-        %>    Overwrites symbol with same name in destination if `true`.
-        %>    Default: `false`.
-        function copy(obj, varargin)
-            % Copies symbol to destination container
-            %
-            % Symbol domains are downgraded to relaxed if the destination container does not have
-            % equivalent domain sets.
-            %
-            % Required Arguments:
-            % 1. destination (Container):
-            %    Destination container
-            %
-            % Optional Arguments:
-            % 2. overwrite (bool):
-            %    Overwrites symbol with same name in destination if true.
-            %    Default: false.
-
-            error('todo');
+            eq = isequal(class(obj), class(symbol)) && ...
+                isequal(obj.name_, symbol.name) && ...
+                isequal(obj.description_, symbol.description) && ...
+                obj.def_.equals(symbol.def) && ...
+                obj.data_.equals(symbol.data);
         end
 
         %> setRecords

@@ -133,8 +133,8 @@ classdef Abstract < handle
     end
 
     methods (Abstract)
+        symbol = copy(obj, varargin)
         eq = equals(obj, symbol)
-        copy(obj, varargin)
         flag = isValid(obj, varargin)
         uels = getUELs(obj, varargin)
         removeUELs(obj, varargin)

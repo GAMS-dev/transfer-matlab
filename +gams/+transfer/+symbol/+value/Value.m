@@ -30,7 +30,7 @@
 %
 % Symbol Value (internal)
 %
-classdef (Abstract) Value < handle
+classdef (Abstract) Value
 
     properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.Symbol})
         label_

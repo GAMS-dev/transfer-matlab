@@ -93,7 +93,32 @@ classdef (Abstract) Definition < handle
 
     end
 
+    methods (Abstract)
+
+        def = copy(obj)
+
+    end
+
     methods
+
+        function copyFrom(obj, symbol)
+
+            % parse input arguments
+            try
+                symbol = gams.transfer.utils.validate('symbol', 1, symbol, {class(obj)}, -1);
+            catch e
+                error(e.message);
+            end
+
+            obj.domains_ = symbol.domains;
+            obj.values_ = symbol.values;
+        end
+
+        function eq = equals(obj, def)
+            eq = isequal(class(obj), class(def)) && ...
+                isequal(obj.domains_, def.domains) && ...
+                isequal(obj.values_, def.values);
+        end
 
         function dim = dimension(obj)
             dim = numel(obj.domains_);
