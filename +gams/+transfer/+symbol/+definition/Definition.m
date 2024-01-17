@@ -48,6 +48,8 @@ classdef (Abstract) Definition < handle
                     continue
                 elseif isa(arg{i}, 'gams.transfer.symbol.Set')
                     arg{i} = gams.transfer.symbol.domain.Regular(arg{i});
+                elseif isa(arg{i}, 'gams.transfer.alias.Set')
+                    arg{i} = gams.transfer.symbol.domain.Regular(arg{i}.alias_with);
                 elseif ischar(arg{i}) || isstring(arg{i})
                     arg{i} = gams.transfer.symbol.domain.Relaxed(arg{i});
                 else

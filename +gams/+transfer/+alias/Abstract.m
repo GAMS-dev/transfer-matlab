@@ -134,13 +134,21 @@ classdef Abstract < handle
 
     methods (Abstract)
         symbol = copy(obj, varargin)
-        eq = equals(obj, symbol)
         flag = isValid(obj, varargin)
         uels = getUELs(obj, varargin)
         removeUELs(obj, varargin)
         renameUELs(obj, uels)
         lowerUELs(obj)
         upperUELs(obj)
+    end
+
+    methods
+
+        function eq = equals(obj, symbol)
+            eq = isequal(class(obj), class(symbol)) && ...
+                isequal(obj.name, symbol.name);
+        end
+
     end
 
     methods (Static)

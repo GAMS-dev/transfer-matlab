@@ -196,7 +196,8 @@ classdef Set < gams.transfer.alias.Abstract
         end
 
         function eq = equals(obj, symbol)
-            error('not implemented');
+            eq = equals@gams.transfer.alias.Abstract(obj, symbol) && ...
+                obj.alias_with_.equals(symbol.alias_with);
         end
 
         function symbol = copy(obj, varargin)

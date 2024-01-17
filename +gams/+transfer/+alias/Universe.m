@@ -177,10 +177,6 @@ classdef Universe < gams.transfer.alias.Abstract
             end
         end
 
-        function eq = equals(obj, symbol)
-            error('not implemented');
-        end
-
         function symbol = copy(obj, varargin)
 
             % parse input arguments

@@ -452,7 +452,7 @@ classdef Container < handle
             format = 'table';
             records = true;
             values = {'level', 'marginal', 'lower', 'upper', 'scale'};
-            % try
+            try
                 validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, ...
                     {'string', 'char', 'gams.transfer.Container'}, -1));
                 source = gams.transfer.utils.parse_argument(varargin, ...
@@ -481,7 +481,7 @@ classdef Container < handle
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'values')
                         validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
-                        symbols = gams.transfer.utils.parse_argument(varargin, ...
+                        values = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'values', validate);
                         index = index + 2;
                         is_pararg = true;
@@ -493,9 +493,9 @@ classdef Container < handle
                         error('Invalid argument at position %d', index);
                     end
                 end
-            % catch e
-            %     error(e.message);
-            % end
+            catch e
+                error(e.message);
+            end
 
             % read from other container?
             if isa(source, 'gams.transfer.Container')
@@ -558,7 +558,7 @@ classdef Container < handle
 
                 if isfield(symbol, 'format')
                     switch symbol.format
-                    case 2
+                    case {1, 2}
                         records = gams.transfer.symbol.data.Struct(symbol.records);
                     case 3
                         records = gams.transfer.symbol.data.DenseMatrix(symbol.records);
@@ -721,7 +721,7 @@ classdef Container < handle
             if ~obj.isValid('symbols', symbols)
                 obj.reorderSymbols();
                 if ~obj.isValid('symbols', symbols)
-                    invalid_symbols = gams.transfer.Utils.list2str(...
+                    invalid_symbols = gams.transfer.utils.list2str(...
                         obj.listSymbols('is_valid', false));
                     error('Can''t write invalid container. Invalid symbols: %s.', invalid_symbols);
                 end
@@ -2056,19 +2056,16 @@ classdef Container < handle
         function reorderSymbols(obj)
             % Reestablishes a valid GDX symbol order
 
-            error('todo')
-
-            names = fieldnames(obj.data_);
+            symbols = obj.getSymbols();
 
             % get number of set/alias
             n_sets = 0;
-            for i = 1:numel(names)
-                symbol = obj.data_.(names{i});
-                if isa(symbol, 'gams.transfer.symbol.Set') || isa(symbol, 'gams.transfer.Alias')
+            for i = 1:numel(symbols)
+                if isa(symbols{i}, 'gams.transfer.symbol.Set') || isa(symbols{i}, 'gams.transfer.alias.Abstract')
                     n_sets = n_sets + 1;
                 end
             end
-            n_other = numel(names) - n_sets;
+            n_other = numel(symbols) - n_sets;
 
             sets = cell(1, n_sets);
             idx_sets = zeros(1, n_sets);
@@ -2077,12 +2074,11 @@ classdef Container < handle
             n_other = 0;
 
             % get index by type
-            for i = 1:numel(names)
-                symbol = obj.data_.(names{i});
-                if isa(symbol, 'gams.transfer.symbol.Set') || isa(symbol, 'gams.transfer.Alias')
+            for i = 1:numel(symbols)
+                if isa(symbols{i}, 'gams.transfer.symbol.Set') || isa(symbols{i}, 'gams.transfer.alias.Abstract')
                     n_sets = n_sets + 1;
                     idx_sets(n_sets) = i;
-                    sets{n_sets} = names{i};
+                    sets{n_sets} = symbols{i}.name;
                 else
                     n_other = n_other + 1;
                     idx_other(n_other) = i;
@@ -2099,10 +2095,10 @@ classdef Container < handle
                 while n_handled < n_sets
                     % check if we can add the next set
                     curr_is_next = true;
-                    current_set = obj.data_.(sets{idx(n_handled+1)});
+                    current_set = obj.getSymbols(sets{idx(n_handled+1)});
                     for i = 1:current_set.dimension
                         if (isa(current_set.domain{i}, 'gams.transfer.symbol.Set') || ...
-                            isa(current_set.domain{i}, 'gams.transfer.Alias')) && ...
+                            isa(current_set.domain{i}, 'gams.transfer.alias.Abstract')) && ...
                             ~set_handled(current_set.domain{i}.name)
                             curr_is_next = false;
                             break;
@@ -2132,7 +2128,7 @@ classdef Container < handle
             end
 
             % apply permutation
-            obj.data_ = orderfields(obj.data_, [idx_sets, idx_other]);
+            obj.data_.reorder([idx_sets, idx_other]);
 
             % force recheck of all remaining symbols in container
             obj.isValid(false, true);

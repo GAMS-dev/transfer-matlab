@@ -147,11 +147,13 @@ classdef (Abstract) Data < handle
         end
 
         function values = availableNumericValues(obj, values)
+            idx = true(size(values));
             for i = 1:numel(values)
-                if ~isa(values{i}, 'gams.transfer.symbol.value.Numeric') ||~obj.isLabel(values{i}.label)
-                    values(i) = [];
+                if ~isa(values{i}, 'gams.transfer.symbol.value.Numeric') || ~obj.isLabel(values{i}.label)
+                    idx(i) = false;
                 end
             end
+            values = values(idx);
         end
 
         function uels = getUELs(obj, varargin)
@@ -186,10 +188,11 @@ classdef (Abstract) Data < handle
             uels = {};
 
             for i = 1:numel(domains)
-                uels_i0 = obj.getUniqueLabelsAt_(domains{i}, ignore_unused);
+                uels_i = obj.getUniqueLabelsAt_(domains{i}, ignore_unused);
 
                 % filter for given codes
                 if ~isempty(codes)
+                    uels_i0 = uels_i;
                     idx = codes >= 1 & codes <= numel(uels_i0);
                     uels_i = cell(numel(codes), 1);
                     uels_i(idx) = uels_i0(codes(idx));
