@@ -210,6 +210,26 @@ classdef (Abstract) Definition < handle
             n = numel(obj.values_);
         end
 
+        function domain = getDomain(obj, label)
+            domain = [];
+            for i = 1:numel(obj.domains_)
+                if strcmp(obj.domains_{i}.label, label)
+                    domain = obj.domains_{i};
+                    return
+                end
+            end
+        end
+
+        function value = getValue(obj, label)
+            value = [];
+            for i = 1:numel(obj.values_)
+                if strcmp(obj.values_{i}.label, label)
+                    value = obj.values_{i};
+                    return
+                end
+            end
+        end
+
         % function keys = valueKeys(obj)
         %     keys = fieldnames(obj.values_);
         % end

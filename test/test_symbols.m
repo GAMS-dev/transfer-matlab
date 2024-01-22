@@ -54,17 +54,17 @@ function test_addSymbols(t, cfg)
     t.assertEquals(s1.domain{1}, '*');
     t.assert(numel(s1.domain_names) == 1);
     t.assertEquals(s1.domain_names{1}, '*');
-    t.assert(numel(s1.domain_labels) == 0);
+    t.assert(numel(s1.domain_labels) == 1);
     t.assertEquals(s1.domain_type, 'none');
     t.assert(numel(s1.size) == 1);
     t.assert(isnan(s1.size(1)));
-    t.assert(strcmp(s1.format, 'empty'));
+    t.assert(strcmp(s1.format, 'struct'));
     t.assert(s1.getNumberRecords() == 0);
     t.assert(numel(s1.getUELs(1)) == 0);
     t.assert(s1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 's1'));
-    t.assert(gdx.data.s1.id == s1.id);
+    t.assert(gdx.data.s1 == s1);
     t.assert(s1.modified);
 
     t.add('add_symbols_set_2');
@@ -75,21 +75,21 @@ function test_addSymbols(t, cfg)
     t.assert(~s2.is_singleton);
     t.assert(s2.dimension == 1);
     t.assert(numel(s2.domain) == 1);
-    t.assert(s2.domain{1}.id == s1.id);
+    t.assert(s2.domain{1} == s1);
     t.assertEquals(s2.domain{1}.name, 's1');
     t.assert(numel(s2.domain_names) == 1);
     t.assertEquals(s2.domain_names{1}, 's1');
-    t.assert(numel(s2.domain_labels) == 0);
+    t.assert(numel(s2.domain_labels) == 1);
     t.assertEquals(s2.domain_type, 'regular');
     t.assert(numel(s2.size) == 1);
     t.assert(s2.size(1) == 0);
-    t.assert(strcmp(s2.format, 'empty'));
+    t.assert(strcmp(s2.format, 'struct'));
     t.assert(s2.getNumberRecords() == 0);
     t.assert(numel(s2.getUELs(1)) == 0);
     t.assert(s2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 's2'));
-    t.assert(gdx.data.s2.id == s2.id);
+    t.assert(gdx.data.s2 == s2);
     t.assert(s2.modified);
 
     t.add('add_symbols_set_3');
@@ -100,25 +100,25 @@ function test_addSymbols(t, cfg)
     t.assert(s3.is_singleton);
     t.assert(s3.dimension == 2);
     t.assert(numel(s3.domain) == 2);
-    t.assert(s3.domain{1}.id == s1.id);
+    t.assert(s3.domain{1} == s1);
     t.assertEquals(s3.domain{1}.name, 's1');
     t.assertEquals(s3.domain{2}, '*');
     t.assert(numel(s3.domain_names) == 2);
     t.assertEquals(s3.domain_names{1}, 's1');
     t.assertEquals(s3.domain_names{2}, '*');
-    t.assert(numel(s3.domain_labels) == 0);
+    t.assert(numel(s3.domain_labels) == 2);
     t.assertEquals(s3.domain_type, 'regular');
     t.assert(numel(s3.size) == 2);
     t.assert(s3.size(1) == 0);
     t.assert(isnan(s3.size(2)));
-    t.assert(strcmp(s3.format, 'empty'));
+    t.assert(strcmp(s3.format, 'struct'));
     t.assert(s3.getNumberRecords() == 0);
     t.assert(numel(s3.getUELs(1)) == 0);
     t.assert(numel(s3.getUELs(2)) == 0);
     t.assert(s3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 's3'));
-    t.assert(gdx.data.s3.id == s3.id);
+    t.assert(gdx.data.s3 == s3);
     t.assert(s3.modified);
 
     t.add('add_symbols_set_4');
@@ -129,7 +129,7 @@ function test_addSymbols(t, cfg)
     t.assert(s4.is_singleton);
     t.assert(s4.dimension == 1);
     t.assert(numel(s4.domain) == 1);
-    t.assert(s4.domain{1}.id == s2.id);
+    t.assert(s4.domain{1} == s2);
     t.assertEquals(s4.domain{1}.name, 's2');
     t.assert(numel(s4.domain_names) == 1);
     t.assertEquals(s4.domain_names{1}, 's2');
@@ -143,7 +143,7 @@ function test_addSymbols(t, cfg)
     t.assert(s4.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 4);
     t.assert(isfield(gdx.data, 's4'));
-    t.assert(gdx.data.s4.id == s4.id);
+    t.assert(gdx.data.s4 == s4);
     t.assert(s4.modified);
 
     t.add('add_symbols_set_5');
@@ -155,7 +155,7 @@ function test_addSymbols(t, cfg)
     t.assert(s5.dimension == 2);
     t.assert(numel(s5.domain) == 2);
     t.assert(s5.domain{1} == 's1');
-    t.assert(s5.domain{2}.id == s2.id);
+    t.assert(s5.domain{2} == s2);
     t.assertEquals(s5.domain{2}.name, 's2');
     t.assert(numel(s5.domain_names) == 2);
     t.assertEquals(s5.domain_names{1}, 's1');
@@ -172,7 +172,7 @@ function test_addSymbols(t, cfg)
     t.assert(s5.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 5);
     t.assert(isfield(gdx.data, 's5'));
-    t.assert(gdx.data.s5.id == s5.id);
+    t.assert(gdx.data.s5 == s5);
     t.assert(s5.modified);
 
     t.add('add_symbols_set_6');
@@ -196,7 +196,7 @@ function test_addSymbols(t, cfg)
     t.assert(s6.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 6);
     t.assert(isfield(gdx.data, 's6'));
-    t.assert(gdx.data.s6.id == s6.id);
+    t.assert(gdx.data.s6 == s6);
     t.assert(s6.modified);
 
     t.add('add_symbols_set_fails');
@@ -283,7 +283,7 @@ function test_addSymbols(t, cfg)
     a1 = gams.transfer.Alias(gdx, 'a1', s1);
     t.testEmptySymbol(a1);
     t.assertEquals(a1.name, 'a1');
-    t.assert(a1.alias_with.id == s1.id);
+    t.assert(a1.alias_with == s1);
     t.assertEquals(a1.alias_with.name, 's1');
     t.assertEquals(a1.description, '');
     t.assert(~a1.is_singleton);
@@ -302,31 +302,31 @@ function test_addSymbols(t, cfg)
     t.assert(a1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 7);
     t.assert(isfield(gdx.data, 'a1'));
-    t.assert(gdx.data.a1.id == a1.id);
+    t.assert(gdx.data.a1 == a1);
     t.assert(a1.modified);
 
     t.add('add_symbols_alias_2');
     a2 = gams.transfer.Alias(gdx, 'a2', a1);
     t.testEmptySymbol(a2);
     t.assertEquals(a2.name, 'a2');
-    t.assert(a2.alias_with.id == s1.id);
+    t.assert(a2.alias_with == s1);
     t.assertEquals(a2.alias_with.name, 's1');
     t.assert(a2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 8);
     t.assert(isfield(gdx.data, 'a2'));
-    t.assert(gdx.data.a2.id == a2.id);
+    t.assert(gdx.data.a2 == a2);
     t.assert(a2.modified);
 
     t.add('add_symbols_alias_3');
     a3 = gams.transfer.Alias(gdx, 'a3', a2);
     t.testEmptySymbol(a3);
     t.assertEquals(a3.name, 'a3');
-    t.assert(a3.alias_with.id == s1.id);
+    t.assert(a3.alias_with == s1);
     t.assertEquals(a3.alias_with.name, 's1');
     t.assert(a3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 9);
     t.assert(isfield(gdx.data, 'a3'));
-    t.assert(gdx.data.a3.id == a3.id);
+    t.assert(gdx.data.a3 == a3);
     t.assert(a3.modified);
 
     t.add('add_symbols_parameter_1');
@@ -345,7 +345,7 @@ function test_addSymbols(t, cfg)
     t.assert(p1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 10);
     t.assert(isfield(gdx.data, 'p1'));
-    t.assert(gdx.data.p1.id == p1.id);
+    t.assert(gdx.data.p1 == p1);
     t.assert(p1.modified);
 
     t.add('add_symbols_parameter_2');
@@ -355,7 +355,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p2.description, 'descr par 2');
     t.assert(p2.dimension == 1);
     t.assert(numel(p2.domain) == 1);
-    t.assert(p2.domain{1}.id == s1.id);
+    t.assert(p2.domain{1} == s1);
     t.assertEquals(p2.domain{1}.name, 's1');
     t.assert(numel(p2.domain_names) == 1);
     t.assertEquals(p2.domain_names{1}, 's1');
@@ -369,7 +369,7 @@ function test_addSymbols(t, cfg)
     t.assert(p2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 11);
     t.assert(isfield(gdx.data, 'p2'));
-    t.assert(gdx.data.p2.id == p2.id);
+    t.assert(gdx.data.p2 == p2);
     t.assert(p2.modified);
 
     t.add('add_symbols_parameter_3');
@@ -379,7 +379,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p3.description, 'descr par 3');
     t.assert(p3.dimension == 3);
     t.assert(numel(p3.domain) == 3);
-    t.assert(p3.domain{1}.id == s1.id);
+    t.assert(p3.domain{1} == s1);
     t.assertEquals(p3.domain{1}.name, 's1');
     t.assertEquals(p3.domain{2}, '*');
     t.assert(p3.domain{3} == 's2');
@@ -401,7 +401,7 @@ function test_addSymbols(t, cfg)
     t.assert(p3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 12);
     t.assert(isfield(gdx.data, 'p3'));
-    t.assert(gdx.data.p3.id == p3.id);
+    t.assert(gdx.data.p3 == p3);
     t.assert(p3.modified);
 
     t.add('add_symbols_parameter_fails');
@@ -481,7 +481,7 @@ function test_addSymbols(t, cfg)
     t.assert(v1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 13);
     t.assert(isfield(gdx.data, 'v1'));
-    t.assert(gdx.data.v1.id == v1.id);
+    t.assert(gdx.data.v1 == v1);
     t.assert(v1.modified);
 
     t.add('add_symbols_variable_2');
@@ -501,7 +501,7 @@ function test_addSymbols(t, cfg)
     t.assert(v2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 14);
     t.assert(isfield(gdx.data, 'v2'));
-    t.assert(gdx.data.v2.id == v2.id);
+    t.assert(gdx.data.v2 == v2);
     t.assert(v2.modified);
 
     t.add('add_symbols_variable_3');
@@ -512,7 +512,7 @@ function test_addSymbols(t, cfg)
     t.assert(v3.type == 'sos1');
     t.assert(v3.dimension == 2);
     t.assert(numel(v3.domain) == 2);
-    t.assert(v3.domain{1}.id == s1.id);
+    t.assert(v3.domain{1} == s1);
     t.assertEquals(v3.domain{1}.name, 's1');
     t.assertEquals(v3.domain{2}, '*');
     t.assert(numel(v3.domain_names) == 2);
@@ -530,7 +530,7 @@ function test_addSymbols(t, cfg)
     t.assert(v3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 15);
     t.assert(isfield(gdx.data, 'v3'));
-    t.assert(gdx.data.v3.id == v3.id);
+    t.assert(gdx.data.v3 == v3);
     t.assert(v3.modified);
 
     t.add('add_symbols_variable_4');
@@ -656,7 +656,7 @@ function test_addSymbols(t, cfg)
     t.assert(e1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 34);
     t.assert(isfield(gdx.data, 'e1'));
-    t.assert(gdx.data.e1.id == e1.id);
+    t.assert(gdx.data.e1 == e1);
     t.assert(e1.modified);
 
     t.add('add_symbols_equation_2');
@@ -676,7 +676,7 @@ function test_addSymbols(t, cfg)
     t.assert(e2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 35);
     t.assert(isfield(gdx.data, 'e2'));
-    t.assert(gdx.data.e2.id == e2.id);
+    t.assert(gdx.data.e2 == e2);
     t.assert(e2.modified);
 
     t.add('add_symbols_equation_3');
@@ -687,7 +687,7 @@ function test_addSymbols(t, cfg)
     t.assert(e3.type == 'leq');
     t.assert(e3.dimension == 2);
     t.assert(numel(e3.domain) == 2);
-    t.assert(e3.domain{1}.id == s1.id);
+    t.assert(e3.domain{1} == s1);
     t.assertEquals(s3.domain{1}.name, 's1');
     t.assertEquals(e3.domain{2}, '*');
     t.assert(numel(e3.domain_names) == 2);
@@ -705,7 +705,7 @@ function test_addSymbols(t, cfg)
     t.assert(e3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 36);
     t.assert(isfield(gdx.data, 'e3'));
-    t.assert(gdx.data.e3.id == e3.id);
+    t.assert(gdx.data.e3 == e3);
     t.assert(e3.modified);
 
     t.add('add_symbols_equation_4');
@@ -1103,7 +1103,7 @@ function test_changeSymbol(t, cfg)
     gdx.modified = false;
     t.assert(x1.dimension == 1);
     t.assert(numel(x1.domain) == 1);
-    t.assertEquals(x1.domain{1}.id, i1.id);
+    t.assertEquals(x1.domain{1}, i1);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assert(~gdx.modified);
     t.assert(~i1.modified);
@@ -1114,7 +1114,7 @@ function test_changeSymbol(t, cfg)
     x1.dimension = 2;
     t.assert(x1.dimension == 2);
     t.assert(numel(x1.domain) == 2);
-    t.assertEquals(x1.domain{1}.id, i1.id);
+    t.assertEquals(x1.domain{1}, i1);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assertEquals(x1.domain{2}, '*');
     t.assert(gdx.modified);
@@ -1126,7 +1126,7 @@ function test_changeSymbol(t, cfg)
     x1.dimension = 1;
     t.assert(x1.dimension == 1);
     t.assert(numel(x1.domain) == 1);
-    t.assertEquals(x1.domain{1}.id, i1.id);
+    t.assertEquals(x1.domain{1}, i1);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assert(gdx.modified);
     t.assert(~i1.modified);
@@ -1169,7 +1169,7 @@ function test_changeSymbol(t, cfg)
     gdx.modified = false;
     t.assert(x3.dimension == 1);
     t.assert(numel(x3.domain) == 1);
-    t.assertEquals(x3.domain{1}.id, i2.id);
+    t.assertEquals(x3.domain{1}, i2);
     t.assertEquals(x3.domain{1}.name, 'i2');
     t.assert(x3.isValid());
     t.assert(~gdx.modified);
@@ -1181,7 +1181,7 @@ function test_changeSymbol(t, cfg)
     x3.dimension = 2;
     t.assert(x3.dimension == 2);
     t.assert(numel(x3.domain) == 2);
-    t.assertEquals(x3.domain{1}.id, i2.id);
+    t.assertEquals(x3.domain{1}, i2);
     t.assertEquals(x3.domain{1}.name, 'i2');
     t.assertEquals(x3.domain{2}, '*');
     t.assert(~x3.isValid());
@@ -1194,7 +1194,7 @@ function test_changeSymbol(t, cfg)
     x3.dimension = 1;
     t.assert(x3.dimension == 1);
     t.assert(numel(x3.domain) == 1);
-    t.assertEquals(x3.domain{1}.id, i2.id);
+    t.assertEquals(x3.domain{1}, i2);
     t.assertEquals(x3.domain{1}.name, 'i2');
     t.assert(x3.isValid());
     t.assert(gdx.modified);
@@ -1207,7 +1207,7 @@ function test_changeSymbol(t, cfg)
     t.add('change_symbol_domain_1');
     gdx.modified = false;
     t.assert(numel(x1.domain) == 1);
-    t.assertEquals(x1.domain{1}.id, i1.id);
+    t.assertEquals(x1.domain{1}, i1);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assert(~gdx.modified);
     t.assert(~i1.modified);
@@ -1218,8 +1218,8 @@ function test_changeSymbol(t, cfg)
     x1.domain = {i1,i1};
     t.assert(x1.dimension == 2);
     t.assert(numel(x1.domain) == 2);
-    t.assertEquals(x1.domain{1}.id, i1.id);
-    t.assertEquals(x1.domain{2}.id, i1.id);
+    t.assertEquals(x1.domain{1}, i1);
+    t.assertEquals(x1.domain{2}, i1);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assertEquals(x1.domain{2}.name, 'i1');
     t.assert(gdx.modified);
@@ -1283,7 +1283,7 @@ function test_changeSymbol(t, cfg)
     t.assert(x1.isValid());
     gdx.modified = false;
     t.assert(numel(x1.domain) == 1);
-    t.assertEquals(x1.domain{1}.id, i2.id);
+    t.assertEquals(x1.domain{1}, i2);
     t.assertEquals(x1.domain{1}.name, 'i2');
     t.assertEquals(x1.domain_labels{1}, 'i');
     t.assert(isfield(x1.records, 'i'));
@@ -1297,7 +1297,7 @@ function test_changeSymbol(t, cfg)
     x1.domain_labels = {'first'};
     t.assert(x1.dimension == 1);
     t.assert(numel(x1.domain) == 1);
-    t.assertEquals(x1.domain{1}.id, i2.id);
+    t.assertEquals(x1.domain{1}, i2);
     t.assertEquals(x1.domain{1}.name, 'i2');
     t.assertEquals(x1.domain_labels{1}, 'first');
     t.assert(isfield(x1.records, 'first'));

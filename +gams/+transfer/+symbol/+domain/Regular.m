@@ -46,6 +46,10 @@ classdef Regular < gams.transfer.symbol.domain.Domain
 
     end
 
+    properties (Constant)
+        HOLDS_UNIQUE_LABELS = false
+    end
+
     properties (Dependent)
         symbol
         name

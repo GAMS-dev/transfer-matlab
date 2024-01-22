@@ -424,9 +424,201 @@ classdef (Abstract) Symbol < handle
                 obj.data_.equals(symbol.data);
         end
 
-        %> setRecords
-        function setRecords(obj, records)
-            error('todo')
+        %> Sets symbol records in supported format
+        %>
+        %> If records are not given in any of the supported formats, e.g. struct or dense_matrix,
+        %> this function tries to convert the given data into one of them.
+        %>
+        %> Conversion is applied based on the following rules:
+        %> - `string`: Interpreted as domain entry for first dimension.
+        %> - `cellstr`: First dimension of `cellstr` must be equal to symbol dimension and second
+        %>   will be the number of records. Row `i` is interpreted to hold the domain entries for
+        %>   dimension `i`.
+        %> - `numeric vector/matrix`: Interpreted to hold the `level` values (or `value` for
+        %>   Parameter). Must satisfy the shape given by symbol size since this can only be a matrix
+        %>   format (e.g. `dense_matrix` or `sparse_matrix`), because domain entries are not given.
+        %> - `cell`: If element is the `i`-th `cellstr`, then this is considered to be the domain
+        %>   entries for the `i`-th domain. If element is the `j`-th numeric vector/matrix, it is
+        %>   interpreted as the `j`-th element of the following: `level` or `value`, `marginal`,
+        %>   `lower`, `upper`, `scale`. If symbol is a \ref gams::transfer::Set "Set", the
+        %>   `(dim+1)`-th `cellstr` is considered to be the set element texts.
+        %> - `struct`: Fields which names match domain labels, are interpreted as domain entries of
+        %>   the given domain. Other supported fields are `level`, `value`, `marginal`, `lower`,
+        %>   `upper`, `scale`, `element_text`. Unsopprted fields are ignored.
+        %> - `table`: used as is.
+        %>
+        %> @note Instead of a `cell`, it is possible to provide the elements as separate arguments
+        %> to the function.
+        %>
+        %> **Example:**
+        %> ```
+        %> c = Container();
+        %> i = Set(c, 'i', 'description', 'canning plants');
+        %> i.setRecords({'seattle', 'san-diego'});
+        %> a = Parameter(c, 'a', i, 'description', 'capacity of plant i in cases');
+        %> a.setRecords([350, 600]);
+        %> supply = Equation(c, 'supply', 'l', i, 'description', 'observe supply limit at plant i');
+        %> supply.setRecords(struct('level', [350, 550], 'marginal', [geteps(), 0], 'upper', [350, 600]));
+        %> ```
+        %>
+        %> @see \ref gams::transfer::RecordsFormat "RecordsFormat"
+        function setRecords(obj, varargin)
+            % Sets symbol records in supported format
+            %
+            % If records are not given in any of the supported formats, e.g. struct or dense_matrix,
+            % this function tries to convert the given data into one of them.
+            %
+            % Conversion is applied based on the following rules:
+            % - string: Interpreted as domain entry for first dimension.
+            % - cellstr: First dimension of cellstr must be equal to symbol dimension and second
+            %   will be the number of records. Row i is interpreted to hold the domain entries for
+            %   dimension i.
+            % - numeric vector/matrix: Interpreted to hold the level values (or values for
+            %   Parameter). Must satisfy the shape given by symbol size since this can only be a
+            %   matrix format (e.g. dense_matrix or sparse_matrix), because domain entries are not
+            %   given.
+            % - cell: If element is the i-th cellstr, then this is considered to be the domain
+            %   entries for the i-th domain. If element is the j-th numeric vector/matrix, it is
+            %   interpreted as the j-th element of the following: level or value, marginal, lower,
+            %   upper, scale. If symbol is a Set, the (dim+1)-th cellstr is considered to be the set
+            %   element texts.
+            % - struct: Fields which names match domain labels, are interpreted as domain entries of
+            %   the given domain. Other supported fields are level, value, marginal, lower, upper,
+            %   scale, element_text. Unsopprted fields are ignored.
+            % - table: used as is.
+            %
+            % Note: Instead of a cell, it is possible to provide the elements as separate arguments
+            % to the function.
+            %
+            % Example:
+            % c = Container();
+            % i = Set(c, 'i', 'description', 'canning plants');
+            % i.setRecords({'seattle', 'san-diego'});
+            % a = Parameter(c, 'a', i, 'description', 'capacity of plant i in cases');
+            % a.setRecords([350, 600]);
+            % supply = Equation(c, 'supply', 'l', i, 'description', 'observe supply limit at plant i');
+            % supply.setRecords(struct('level', [350, 550], 'marginal', [geteps(), 0], 'upper', [350, 600]));
+            %
+            % See also: gams.transfer.RecordsFormat
+
+            if nargin == 2
+                records = varargin{1};
+            else
+                records = varargin;
+            end
+
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
+                index_type = gams.transfer.symbol.domain.IndexType.Categorical();
+            else
+                index_type = gams.transfer.symbol.domain.IndexType.Integer();
+            end
+
+            if isa(records, 'gams.transfer.symbol.data.Data')
+                obj.data_ = records;
+                return
+
+            % string -> recall with cell of strings
+            elseif isstring(records) && numel(records) == 1 || ischar(records)
+                if obj.dimension ~= 1
+                    error('Single string as records only accepted if symbol dimension equals 1.');
+                end
+                domain = obj.def_.domains{1};
+                if domain.HOLDS_UNIQUE_LABELS
+                    domain.unique_labels = gams.transfer.unique_labels.Dictionary({records});
+                end
+                data = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
+                data.records.(domain.label) = domain.createIndex(index_type, {records});
+                % TODO: release unique labels if categorical
+
+            % cell of strings -> domain entries
+            elseif iscellstr(records)
+                s = size(records);
+                if s(1) ~= obj.dimension
+                    error('First dimension of cellstr must equal symbol dimension.');
+                end
+                data = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
+                for i = 1:obj.dimension
+                    domain = obj.def_.domains{i};
+                    if domain.HOLDS_UNIQUE_LABELS
+                        domain.unique_labels = gams.transfer.unique_labels.Dictionary(records(i,:));
+                    end
+                    data.records.(domain.label) = domain.createIndex(index_type, records(i,:));
+                    % TODO: release unique labels if categorical
+                end
+
+            % numeric vector -> interpret as level values in matrix format
+            elseif isnumeric(records) && numel(obj.def_.values) > 0
+                assert(isa(obj.def_.values{1}, 'gams.transfer.symbol.value.Numeric'));
+                data = gams.transfer.symbol.data.DenseMatrix.Empty(obj.def_.domains);
+                data.records.(obj.def_.values{1}.label) = records;
+
+            % cell -> cellstr elements to domains or set element texts and
+            % numeric vector to values
+            elseif iscell(records)
+                n_values = 0;
+                n_domains = 0;
+                data = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
+                for i = 1:numel(records)
+                    if isnumeric(records{i})
+                        n_values = n_values + 1;
+                        if n_values > numel(obj.def_.values)
+                            error('Too many value fields in records.');
+                        end
+                        data.records.(obj.def_.values{n_values}.label) = records{i}(:);
+                    % elseif iscellstr(records{i})
+                    %     n_domains = n_domains + 1;
+                    %     if n_dom_fields == obj.dimension_ + 1 && isa(obj, 'gams.transfer.Set')
+                    %         obj.setRecordsTextField(records{i});
+                    %         continue
+                    %     end
+                    %     if n_dom_fields > obj.dimension_
+                    %         error('More domain fields than symbol dimension.');
+                    %     end
+                    %     [~,uidx,~] = unique(records{i}, 'first');
+                    %     uels{n_dom_fields} = records{i}(sort(uidx));
+                    %     obj.setRecordsDomainField(domain_labels{n_dom_fields}, uels{n_dom_fields}, records{i});
+                    else
+                        error('Cell elements must be cellstr or numeric.');
+                    end
+                end
+
+            % struct -> check fields for domain or value fields
+            elseif isstruct(records) && numel(records) == 1
+                fields = fieldnames(records);
+                data = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
+                for i = 1:numel(fields)
+                    value = obj.def_.getValue(fields{i});
+                    if ~isempty(value)
+                        data.records.(value.label) = records.(fields{i})(:);
+                        continue;
+                    end
+
+                    domain = obj.def_.getDomain(fields{i});
+                    if ~isempty(domain)
+                        if domain.HOLDS_UNIQUE_LABELS
+                            domain.unique_labels = gams.transfer.unique_labels.Dictionary(records.(fields{i}));
+                        end
+                        data.records.(domain.label) = domain.createIndex(index_type, records.(fields{i}));
+                        % TODO: release unique labels if categorical
+                    end
+                end
+
+            % table -> just keep it
+            elseif gams.transfer.Constants.SUPPORTS_TABLE && istable(records)
+                data = gams.transfer.data.Table(records);
+
+            else
+                error('Unsupported records format.');
+            end
+
+            % check records format
+            status = data.isValid(obj.def_);
+            if status.flag ~= gams.transfer.utils.Status.OK
+                error(status.message);
+            end
+
+            obj.data_ = data;
+
         end
 
         %> Checks correctness of symbol

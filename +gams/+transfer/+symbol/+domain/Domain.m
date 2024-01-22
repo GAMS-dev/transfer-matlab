@@ -137,6 +137,26 @@ classdef (Abstract) Domain
                 isequal(obj.forwarding_, domain.forwarding);
         end
 
+        function index = createIndex(obj, index_type, labels)
+            index_type = obj.validateIndexType('index_type', 1, index_type);
+            % TODO: check labels
+
+            switch index_type.value
+            case gams.transfer.symbol.domain.IndexType.CATEGORICAL
+                index = categorical(labels, obj.getUniqueLabels(), 'Ordinal', true);
+            case gams.transfer.symbol.domain.IndexType.INTEGER
+                % TODO: use find of unique labels class
+                uels = obj.getUniqueLabels();
+                map = containers.Map(uels, 1:numel(uels));
+                index = zeros(numel(labels), 1);
+                for i = 1:numel(labels)
+                    index(i) = map(labels{i});
+                end
+            otherwise
+                error('Unknown domain index type');
+            end
+        end
+
         function obj = appendLabelIndex(obj, index)
             add = ['_', int2str(index)];
             if ~endsWith(obj.label_, add)

@@ -54,7 +54,7 @@ classdef Relaxed < gams.transfer.symbol.domain.Domain
         end
 
         function arg = validateUniqueLabels(name, index, arg)
-            if isnumeric(unique_labels) && isempty(unique_labels)
+            if isnumeric(arg) && isempty(arg)
                 arg = [];
                 return
             end
@@ -63,6 +63,10 @@ classdef Relaxed < gams.transfer.symbol.domain.Domain
             end
         end
 
+    end
+
+    properties (Constant)
+        HOLDS_UNIQUE_LABELS = true
     end
 
     properties (Dependent)

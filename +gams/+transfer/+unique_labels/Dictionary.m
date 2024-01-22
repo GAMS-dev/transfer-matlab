@@ -40,6 +40,12 @@ classdef Dictionary < gams.transfer.unique_labels.Abstract
 
     methods
 
+        function obj = Dictionary(labels)
+            if nargin == 1
+                obj.set(labels)
+            end
+        end
+
         function size = size(obj)
             size = obj.dict_.Count;
         end
@@ -66,7 +72,7 @@ classdef Dictionary < gams.transfer.unique_labels.Abstract
         end
 
         function clear(obj)
-            obj.dict_ = containers.Map('KeyType', 'char', 'ValueType', 'int64')
+            obj.dict_ = containers.Map('KeyType', 'char', 'ValueType', 'int64');
         end
 
         function add(obj, labels)

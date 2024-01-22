@@ -140,8 +140,8 @@ classdef Parameter < gams.transfer.symbol.Symbol
                         index = index + 2;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'records')
-                        obj.data_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'records', @obj.validateData);
+                        records = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'records', []);
                         has_records = true;
                         index = index + 2;
                         is_pararg = true;
@@ -156,7 +156,9 @@ classdef Parameter < gams.transfer.symbol.Symbol
             catch e
                 error(e.message);
             end
-            if ~has_records
+            if has_records
+                obj.setRecords(records)
+            else
                 obj.data_ = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
             end
         end

@@ -63,4 +63,12 @@ classdef SparseMatrix < gams.transfer.symbol.data.Matrix
 
     end
 
+    methods (Static)
+
+        function obj = Empty(domains)
+            obj = gams.transfer.symbol.data.DenseMatrix(struct());
+        end
+
+    end
+
 end
