@@ -70,8 +70,11 @@ classdef Set < gams.transfer.alias.Abstract
     methods (Hidden, Static)
 
         function arg = validateAliasWith(name, index, arg)
+            while isa(arg, 'gams.transfer.alias.Set')
+                arg = arg.alias_with;
+            end
             if ~isa(arg, 'gams.transfer.symbol.Set')
-                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Set''.', name, index);
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Set'' or ''gams.transfer.alias.Set''.', name, index);
             end
         end
 
@@ -189,7 +192,7 @@ classdef Set < gams.transfer.alias.Abstract
                 obj.name_ = gams.transfer.utils.parse_argument(varargin, ...
                     2, 'name', @obj.validateName);
                 obj.alias_with_ = gams.transfer.utils.parse_argument(varargin, ...
-                    3, 'name', @obj.validateAliasWith);
+                    3, 'alias_with', @obj.validateAliasWith);
             catch e
                 error(e.message);
             end

@@ -217,7 +217,7 @@ classdef Variable < gams.transfer.symbol.Symbol
                 error(e.message);
             end
             if ~has_records
-                obj.data_ = gams.transfer.symbol.data.Struct();
+                obj.data_ = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
             end
         end
 

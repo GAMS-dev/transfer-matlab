@@ -41,7 +41,14 @@ classdef (Abstract) Definition < handle
 
         function arg = validateDomains(name, index, arg)
             if ~iscell(arg)
-                error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
+                if isa(arg, 'gams.transfer.symbol.domain.Domain') || ...
+                    isa(arg, 'gams.transfer.symbol.Set') || ...
+                    isa(arg, 'gams.transfer.alias.Abstract') || ...
+                    ischar(arg) || isstring(arg)
+                    arg = {arg};
+                else
+                    error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
+                end
             end
             for i = 1:numel(arg)
                 if isa(arg{i}, 'gams.transfer.symbol.domain.Domain')

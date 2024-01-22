@@ -5,6 +5,7 @@ GAMS Transfer Matlab v0.9.0
 - Method `copy` of symbols and aliases now returns the new symbol.
 - TODO: set domain labels explicitly and not auto after c.data.x update.
 - TODO: read without records was empty format. no longer
+- TODO: creating a symbol without records will create a empty records struct or table (instead fof []).
 
 GAMS Transfer Matlab v0.8.0
 ==================

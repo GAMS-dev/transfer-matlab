@@ -72,6 +72,28 @@ classdef (Abstract) Data < handle
 
         end
 
+        function arg = validateDomains(name, index, arg)
+            if ~iscell(arg)
+                error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
+            end
+            for i = 1:numel(arg)
+                if ~isa(arg{i}, 'gams.transfer.symbol.domain.Domain')
+                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.symbol.domain.Domain''.', name, index, i);
+                end
+            end
+        end
+
+        function arg = validateValues(name, index, arg)
+            if ~iscell(arg)
+                error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
+            end
+            for i = 1:numel(arg)
+                if ~isa(arg{i}, 'gams.transfer.symbol.value.Value')
+                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.symbol.value.Value''.', name, index, i);
+                end
+            end
+        end
+
     end
 
     properties (Abstract, SetAccess = private)
@@ -154,6 +176,16 @@ classdef (Abstract) Data < handle
                 end
             end
             domains = domains(idx);
+        end
+
+        function values = availableValues(obj, values)
+            idx = true(size(values));
+            for i = 1:numel(values)
+                if ~isa(values{i}, 'gams.transfer.symbol.value.Value') || ~obj.isLabel(values{i}.label)
+                    idx(i) = false;
+                end
+            end
+            values = values(idx);
         end
 
         function values = availableNumericValues(obj, values)

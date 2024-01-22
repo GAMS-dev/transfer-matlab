@@ -143,7 +143,10 @@ classdef Set < gams.transfer.symbol.Symbol
 
             % parse input arguments
             has_records = false;
+            has_domains = false;
             try
+                % TODO: validate here instead of setting the values as the index in the error message will be wrong otherwise
+                % same for other symbol classes
                 obj.container_ = gams.transfer.utils.parse_argument(varargin, ...
                     1, 'container', @obj.validateContainer);
                 obj.name_ = gams.transfer.utils.parse_argument(varargin, ...
@@ -175,6 +178,7 @@ classdef Set < gams.transfer.symbol.Symbol
                     elseif ~is_pararg && index == 3
                         obj.def_.domains = gams.transfer.utils.parse_argument(varargin, ...
                             index, 'domains', []);
+                        has_domains = true;
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
@@ -183,8 +187,11 @@ classdef Set < gams.transfer.symbol.Symbol
             catch e
                 error(e.message);
             end
+            if ~has_domains
+                obj.def_.domains = {gams.transfer.symbol.domain.Relaxed(gams.transfer.Constants.UNIVERSE_NAME)};
+            end
             if ~has_records
-                obj.data_ = gams.transfer.symbol.data.Struct();
+                obj.data_ = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
             end
         end
 
