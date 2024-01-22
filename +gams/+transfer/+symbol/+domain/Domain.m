@@ -101,7 +101,7 @@ classdef (Abstract) Domain
         end
 
         function obj = set.label(obj, label)
-            obj.label_ = obj.validateLabel('label', label, true);
+            obj.label_ = obj.validateLabel('label', 1, label);
         end
 
         function index_type = get.index_type(obj)
@@ -123,13 +123,21 @@ classdef (Abstract) Domain
     end
 
     methods (Abstract)
+        status = isValid(obj)
         flag = hasUniqueLabels(obj)
         uels = getUniqueLabels(obj)
     end
 
     methods
 
-        function appendLabelIndex(obj, index)
+        function eq = equals(obj, domain)
+            eq = isequal(class(obj), class(domain)) && ...
+                isequal(obj.label_, domain.label) && ...
+                isequal(obj.index_type_, domain.index_type) && ...
+                isequal(obj.forwarding_, domain.forwarding);
+        end
+
+        function obj = appendLabelIndex(obj, index)
             add = ['_', int2str(index)];
             if ~endsWith(obj.label_, add)
                 obj.label_ = strcat(obj.label_, add);

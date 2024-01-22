@@ -37,12 +37,84 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
         function status = isValid(obj, def)
             def = obj.validateDefinition('def', 1, def);
 
-            status = obj.isValidDomains_(def.domains);
-            if status.flag == status.OK
+            % empty is valid
+            if numel(obj.labels) == 0
+                status = gams.transfer.utils.Status.createOK();
                 return
             end
 
-            status = obj.isValidValues_(def.values);
+            domains = def.domains;
+            for i = 1:numel(domains)
+                label = domains{i}.label;
+
+                if ~obj.isLabel(label)
+                    status = gams.transfer.utils.Status(sprintf("Records have no domain column '%s'.", label));
+                    return
+                end
+
+                if isempty(obj.records_.(label))
+
+                elseif iscategorical(obj.records_.(label))
+                    if any(isundefined(obj.records_.(label)))
+                        status = gams.transfer.utils.Status(sprintf("Records domain column '%s' has undefined domain entries.", label));
+                        return
+                    end
+                elseif isnumeric(obj.records_.(label))
+
+                else
+                    status = gams.transfer.utils.Status(sprintf("Records domain column '%s' must be categorical, numeric or empty.", label));
+                    return
+                end
+            end
+
+            values = def.values;
+            prev_size = [];
+            for i = 1:numel(values)
+                label = values{i}.label;
+
+                if ~obj.isLabel(label)
+                    continue
+                end
+
+                switch class(values{i})
+                case 'gams.transfer.symbol.value.Numeric'
+                    if isempty(obj.records_.(label))
+                    elseif isnumeric(obj.records_.(label))
+                    else
+                        status = gams.transfer.utils.Status(sprintf("Records value column '%s' must be numeric or empty.", label));
+                        return
+                    end
+                case 'gams.transfer.symbol.value.String'
+
+                    if isempty(obj.records_.(label))
+                    elseif (gams.transfer.Constants.SUPPORTS_CATEGORICAL && iscategorical(obj.records_.(label))) || iscellstr(obj.records_.(label))
+                    else
+                        status = gams.transfer.utils.Status(sprintf("Records value column '%s' must be categorical, cellstr or empty.", label));
+                        return
+                    end
+                otherwise
+                    error('Unknown symbol value type: %s', class(values{i}));
+                end
+
+                if issparse(obj.records_.(label))
+                    status = gams.transfer.utils.Status(sprintf("Records value column '%s' must not be sparse.", label));
+                    return
+                end
+
+                if ~isempty(obj.records_.(label)) && ~iscolumn(obj.records_.(label))
+                    status = gams.transfer.utils.Status(sprintf("Records value column '%s' must be column vector.", label));
+                    return
+                end
+
+                curr_size = size(obj.records_.(label));
+                if ~isempty(prev_size) && any(curr_size ~= prev_size)
+                    status = gams.transfer.utils.Status(sprintf("Records value column '%s' must have same size as other value columns.", label));
+                    return
+                end
+                prev_size = curr_size;
+            end
+
+            status = gams.transfer.utils.Status.createOK();
         end
 
         function nvals = getNumberValues(obj, def, varargin)
@@ -66,71 +138,6 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
     end
 
     methods (Hidden, Access = protected)
-
-        function status = isValidDomains_(obj, domains)
-            for i = 1:numel(domains)
-                label = domains{i}.label;
-
-                if ~obj.isLabel(label)
-                    status = gams.transfer.utils.Status(sprintf("Records have no domain column '%s'.", label));
-                    return
-                end
-
-                if ~iscategorical(obj.records_.(label))
-                    status = gams.transfer.utils.Status(sprintf("Records domain column '%s' must be categorical.", label));
-                    return
-                end
-            end
-
-            status = gams.transfer.utils.Status.createOK();
-        end
-
-        function status = isValidValues_(obj, values)
-
-            prev_size = [];
-            for i = 1:numel(values)
-                label = values{i}.label;
-
-                if ~obj.isLabel(label)
-                    continue
-                end
-
-                switch class(values{i})
-                case 'gams.transfer.symbol.value.Numeric'
-                    if ~isnumeric(obj.records_.(label))
-                        status = gams.transfer.utils.Status(sprintf("Records value column '%s' must be numeric.", label));
-                        return
-                    end
-                case 'gams.transfer.symbol.value.String'
-
-                    if (~gams.transfer.Constants.SUPPORTS_CATEGORICAL || ~iscategorical(obj.records_.(label))) && ~iscellstr(obj.records_.(label))
-                        status = gams.transfer.utils.Status(sprintf("Records value column '%s' must be categorical or cellstr.", label));
-                        return
-                    end
-                otherwise
-                    error('Unknown symbol value type: %s', class(values{i}));
-                end
-
-                if issparse(obj.records_.(label))
-                    status = gams.transfer.utils.Status(sprintf("Records value column '%s' must not be sparse.", label));
-                    return
-                end
-
-                if ~iscolumn(obj.records_.(label))
-                    status = gams.transfer.utils.Status(sprintf("Records value column '%s' must be column vector.", label));
-                    return
-                end
-
-                curr_size = size(obj.records_.(label));
-                if i > 1 && any(curr_size ~= prev_size)
-                    status = gams.transfer.utils.Status(sprintf("Records value column '%s' must have same size as other value columns.", label));
-                    return
-                end
-                prev_size = curr_size;
-            end
-
-            status = gams.transfer.utils.Status.createOK();
-        end
 
         function arg = validateDomains_(obj, name, index, arg)
             if ~iscell(arg)

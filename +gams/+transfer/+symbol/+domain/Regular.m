@@ -39,8 +39,8 @@ classdef Regular < gams.transfer.symbol.domain.Domain
     methods (Hidden, Static)
 
         function arg = validateSymbol(name, index, arg)
-            if ~isa(arg, 'gams.transfer.symbol.Set')
-                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Set''.', name, index);
+            if ~isa(arg, 'gams.transfer.symbol.Set') && ~isa(arg, 'gams.transfer.alias.Abstract')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Set'' or ''gams.transfer.alias.Abstract''.', name, index);
             end
         end
 
@@ -87,6 +87,27 @@ classdef Regular < gams.transfer.symbol.domain.Domain
             obj.label_ = symbol.name;
         end
 
+        function eq = equals(obj, domain)
+            eq = equals@gams.transfer.symbol.domain.Domain(obj, domain) && ...
+                obj.symbol_.equals(domain.symbol);
+        end
+
+        function status = isValid(obj)
+
+            if obj.symbol_.dimension ~= 1
+                status = gams.transfer.utils.Status(sprintf("Set '%s' cannot be used as domain since dimension is not 1.", obj.symbol_.name));
+                return
+            end
+
+            % TODO: may cycle
+            % if ~obj.symbol_.isValid()
+            %     status = gams.transfer.utils.Status(sprintf("Domain set '%s' is invalid.", obj.symbol_.name));
+            %     return
+            % end
+
+            status = gams.transfer.utils.Status.createOK();
+        end
+
         function flag = hasUniqueLabels(obj)
             flag = true;
         end
@@ -94,7 +115,7 @@ classdef Regular < gams.transfer.symbol.domain.Domain
         function uels = getUniqueLabels(obj)
             assert(obj.symbol_.dimension == 1);
             % TODO: better if getUELs would have argument 'order_by' = 'records'
-            label = obj.symbol_.def.domains{1}.label;
+            label = obj.symbol_.domain_labels{1};
             uels = obj.symbol_.getUELs(1, uint64(obj.symbol_.records.(label)));
         end
 

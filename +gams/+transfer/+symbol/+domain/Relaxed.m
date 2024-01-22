@@ -118,6 +118,15 @@ classdef Relaxed < gams.transfer.symbol.domain.Domain
             end
         end
 
+        function eq = equals(obj, domain)
+            eq = equals@gams.transfer.symbol.domain.Domain(obj, domain) && ...
+                isequal(obj.name_, domain.name);
+        end
+
+        function status = isValid(obj)
+            status = gams.transfer.utils.Status.createOK();
+        end
+
         function flag = hasUniqueLabels(obj)
             flag = ~isempty(obj.unique_labels_);
         end

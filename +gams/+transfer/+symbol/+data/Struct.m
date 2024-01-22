@@ -75,20 +75,36 @@ classdef Struct < gams.transfer.symbol.data.Tabular
         end
 
         function nrecs = getNumberRecords(obj, def)
-            if obj.isValid(def).flag ~= gams.transfer.utils.Status.OK
-                nrecs = nan;
+
+            def = obj.validateDefinition('def', 1, def);
+            domains = obj.availableDomains(def.domains);
+            values = obj.availableNumericValues(def.values);
+
+            if numel(domains) + numel(values) == 0
+                nrecs = 0;
                 return
             end
 
-            domains = def.domains;
-            values = def.values;
-            if numel(values) > 0
-                nrecs = numel(obj.records_.(values{1}.label));
-            elseif numel(domains) > 0
-                nrecs = numel(obj.records_.(domains{1}.label));
-            else
-                nrecs = 0;
+            nrecs = nan;
+            for i = 1:numel(domains)
+                nrecs_i = numel(obj.records_.(domains{i}.label));
+                if isnan(nrecs)
+                    nrecs = nrecs_i;
+                elseif ~isnan(nrecs) && nrecs ~= nrecs_i
+                    nrecs = nan;
+                    return
+                end
             end
+            for i = 1:numel(values)
+                nrecs_i = numel(obj.records_.(values{i}.label));
+                if isnan(nrecs)
+                    nrecs = nrecs_i;
+                elseif ~isnan(nrecs) && nrecs ~= nrecs_i
+                    nrecs = nan;
+                    return
+                end
+            end
+
         end
 
     end

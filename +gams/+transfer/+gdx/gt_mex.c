@@ -157,13 +157,11 @@ void gt_mex_check_argument_symbol_obj(
     size_t          arg_position    /** array index of requested element */
 )
 {
-    if (!mxIsClass(mx_arr_values[arg_position], "gams.transfer.symbol.Parameter") &&
+    if (!mxIsClass(mx_arr_values[arg_position], "gams.transfer.symbol.Set") &&
+        !mxIsClass(mx_arr_values[arg_position], "gams.transfer.alias.Set") &&
+        !mxIsClass(mx_arr_values[arg_position], "gams.transfer.symbol.Parameter") &&
         !mxIsClass(mx_arr_values[arg_position], "gams.transfer.symbol.Variable") &&
-        !mxIsClass(mx_arr_values[arg_position], "gams.transfer.Set") &&
-        !mxIsClass(mx_arr_values[arg_position], "gams.transfer.Alias") &&
-        !mxIsClass(mx_arr_values[arg_position], "gams.transfer.Parameter_") &&
-        !mxIsClass(mx_arr_values[arg_position], "gams.transfer.Variable") &&
-        !mxIsClass(mx_arr_values[arg_position], "gams.transfer.Equation"))
+        !mxIsClass(mx_arr_values[arg_position], "gams.transfer.symbol.Equation"))
         mexErrMsgIdAndTxt(ERRID"gt_mex_check_argument_symbol_obj",
             "Argument #%d must be of type Set, Alias, Parameter, Variable or Equation.", arg_position);
 }
@@ -409,9 +407,9 @@ void gt_mex_getfield_str(
     /* get field */
     if (mxIsStruct(mx_struct))
         mx_field = mxGetField(mx_struct, 0, fieldname);
-    else if (mxIsClass(mx_struct, "gams.transfer.Set") || mxIsClass(mx_struct, "gams.transfer.Alias") ||
-        mxIsClass(mx_struct, "gams.transfer.Parameter") || mxIsClass(mx_struct, "gams.transfer.Variable") ||
-        mxIsClass(mx_struct, "gams.transfer.Equation") || mxIsClass(mx_struct, "gams.transfer.UniverseAlias"))
+    else if (mxIsClass(mx_struct, "gams.transfer.symbol.Set") || mxIsClass(mx_struct, "gams.transfer.alias.Set") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Parameter") || mxIsClass(mx_struct, "gams.transfer.symbol.Variable") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Equation") || mxIsClass(mx_struct, "gams.transfer.alias.Universe"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_str", "Structure '%s' has invalid type.", structname, fieldname);
@@ -424,9 +422,9 @@ void gt_mex_getfield_str(
     }
 
     /* check field */
-    if (mxIsClass(mx_field, "gams.transfer.Set") || mxIsClass(mx_field, "gams.transfer.Alias") ||
-        mxIsClass(mx_field, "gams.transfer.Parameter") || mxIsClass(mx_field, "gams.transfer.Variable") ||
-        mxIsClass(mx_field, "gams.transfer.Equation") || mxIsClass(mx_field, "gams.transfer.UniverseAlias"))
+    if (mxIsClass(mx_field, "gams.transfer.symbol.Set") || mxIsClass(mx_field, "gams.transfer.alias.Set") ||
+        mxIsClass(mx_field, "gams.transfer.symbol.Parameter") || mxIsClass(mx_field, "gams.transfer.symbol.Variable") ||
+        mxIsClass(mx_field, "gams.transfer.symbol.Equation") || mxIsClass(mx_field, "gams.transfer.alias.Universe"))
         mxGetString(mxGetProperty(mx_field, 0, "name_"), value, strsize);
     else if (mxIsChar(mx_field))
         mxGetString(mx_field, value, strsize);
@@ -451,9 +449,9 @@ void gt_mex_getfield_cell_str(
     /* get field */
     if (mxIsStruct(mx_struct))
         mx_field = mxGetField(mx_struct, 0, fieldname);
-    else if (mxIsClass(mx_struct, "gams.transfer.Set") || mxIsClass(mx_struct, "gams.transfer.Alias") ||
-        mxIsClass(mx_struct, "gams.transfer.Parameter") || mxIsClass(mx_struct, "gams.transfer.Variable") ||
-        mxIsClass(mx_struct, "gams.transfer.Equation") || mxIsClass(mx_struct, "gams.transfer.UniverseAlias"))
+    else if (mxIsClass(mx_struct, "gams.transfer.symbol.Set") || mxIsClass(mx_struct, "gams.transfer.alias.Set") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Parameter") || mxIsClass(mx_struct, "gams.transfer.symbol.Variable") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Equation") || mxIsClass(mx_struct, "gams.transfer.alias.Universe"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_str", "Structure '%s' has invalid type.", structname, fieldname);
@@ -472,9 +470,9 @@ void gt_mex_getfield_cell_str(
     for (size_t i = 0; i < dim; i++)
     {
         mx_entry = mxGetCell(mx_field, i);
-        if (mxIsClass(mx_entry, "gams.transfer.Set") || mxIsClass(mx_entry, "gams.transfer.Alias") ||
-            mxIsClass(mx_entry, "gams.transfer.Parameter") || mxIsClass(mx_entry, "gams.transfer.Variable") ||
-            mxIsClass(mx_entry, "gams.transfer.Equation") || mxIsClass(mx_entry, "gams.transfer.UniverseAlias"))
+        if (mxIsClass(mx_entry, "gams.transfer.symbol.Set") || mxIsClass(mx_entry, "gams.transfer.alias.Set") ||
+            mxIsClass(mx_entry, "gams.transfer.symbol.Parameter") || mxIsClass(mx_entry, "gams.transfer.symbol.Variable") ||
+            mxIsClass(mx_entry, "gams.transfer.symbol.Equation") || mxIsClass(mx_entry, "gams.transfer.alias.Universe"))
             mxGetString(mxGetProperty(mx_entry, 0, "name_"), value[i], strsize);
         else if (mxIsChar(mx_entry))
             mxGetString(mx_entry, value[i], strsize);
@@ -500,9 +498,9 @@ void gt_mex_getfield_int(
     if (mxIsStruct(mx_struct))
         mx_field = mxGetField(mx_struct, 0, fieldname);
     else if (mxIsClass(mx_struct, "gams.transfer.symbol.Parameter") || mxIsClass(mx_struct, "gams.transfer.symbol.Variable") ||
-        mxIsClass(mx_struct, "gams.transfer.Set") || mxIsClass(mx_struct, "gams.transfer.Alias") ||
-        mxIsClass(mx_struct, "gams.transfer.Parameter") || mxIsClass(mx_struct, "gams.transfer.Variable") ||
-        mxIsClass(mx_struct, "gams.transfer.Equation") || mxIsClass(mx_struct, "gams.transfer.UniverseAlias"))
+        mxIsClass(mx_struct, "gams.transfer.symbol.Set") || mxIsClass(mx_struct, "gams.transfer.alias.Set") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Parameter") || mxIsClass(mx_struct, "gams.transfer.symbol.Variable") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Equation") || mxIsClass(mx_struct, "gams.transfer.alias.Universe"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_int", "Structure '%s' has invalid type.", structname, fieldname);
@@ -526,6 +524,16 @@ void gt_mex_getfield_int(
         mxInt32* mx_values = mxGetInt32s(mx_field);
 #else
         INT32_T* mx_values = (INT32_T*) mxGetData(mx_field);
+#endif
+        for (size_t i = 0; i < dim; i ++)
+            values[i] = mx_values[i];
+    }
+    else if (mxIsUint8(mx_field))
+    {
+#ifdef WITH_R2018A_OR_NEWER
+        mxUint8* mx_values = mxGetUint8s(mx_field);
+#else
+        UINT8_T* mx_values = (UINT8_T*) mxGetData(mx_field);
 #endif
         for (size_t i = 0; i < dim; i ++)
             values[i] = mx_values[i];
@@ -581,9 +589,9 @@ void gt_mex_getfield_dbl(
     /* get field */
     if (mxIsStruct(mx_struct))
         mx_field = mxGetField(mx_struct, 0, fieldname);
-    else if (mxIsClass(mx_struct, "gams.transfer.Set") || mxIsClass(mx_struct, "gams.transfer.Alias") ||
-        mxIsClass(mx_struct, "gams.transfer.Parameter") || mxIsClass(mx_struct, "gams.transfer.Variable") ||
-        mxIsClass(mx_struct, "gams.transfer.Equation") || mxIsClass(mx_struct, "gams.transfer.UniverseAlias"))
+    else if (mxIsClass(mx_struct, "gams.transfer.symbol.Set") || mxIsClass(mx_struct, "gams.transfer.alias.Set") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Parameter") || mxIsClass(mx_struct, "gams.transfer.symbol.Variable") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Equation") || mxIsClass(mx_struct, "gams.transfer.alias.Universe"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_dbl", "Structure '%s' has invalid type.", structname, fieldname);
@@ -631,9 +639,9 @@ void gt_mex_getfield_sizet(
     /* get field */
     if (mxIsStruct(mx_struct))
         mx_field = mxGetField(mx_struct, 0, fieldname);
-    else if (mxIsClass(mx_struct, "gams.transfer.Set") || mxIsClass(mx_struct, "gams.transfer.Alias") ||
-        mxIsClass(mx_struct, "gams.transfer.Parameter") || mxIsClass(mx_struct, "gams.transfer.Variable") ||
-        mxIsClass(mx_struct, "gams.transfer.Equation") || mxIsClass(mx_struct, "gams.transfer.UniverseAlias"))
+    else if (mxIsClass(mx_struct, "gams.transfer.symbol.Set") || mxIsClass(mx_struct, "gams.transfer.alias.Set") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Parameter") || mxIsClass(mx_struct, "gams.transfer.symbol.Variable") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Equation") || mxIsClass(mx_struct, "gams.transfer.alias.Universe"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_str", "Structure '%s' has invalid type.", structname, fieldname);
@@ -710,9 +718,9 @@ void gt_mex_getfield_bool(
     /* get field */
     if (mxIsStruct(mx_struct))
         mx_field = mxGetField(mx_struct, 0, fieldname);
-    else if (mxIsClass(mx_struct, "gams.transfer.Set") || mxIsClass(mx_struct, "gams.transfer.Alias") ||
-        mxIsClass(mx_struct, "gams.transfer.Parameter") || mxIsClass(mx_struct, "gams.transfer.Variable") ||
-        mxIsClass(mx_struct, "gams.transfer.Equation") || mxIsClass(mx_struct, "gams.transfer.UniverseAlias"))
+    else if (mxIsClass(mx_struct, "gams.transfer.symbol.Set") || mxIsClass(mx_struct, "gams.transfer.alias.Set") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Parameter") || mxIsClass(mx_struct, "gams.transfer.symbol.Variable") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Equation") || mxIsClass(mx_struct, "gams.transfer.alias.Universe"))
         mx_field = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_str", "Structure '%s' has invalid type.", structname, fieldname);
@@ -750,9 +758,9 @@ void gt_mex_getfield_struct(
     /* get field */
     if (mxIsStruct(mx_struct))
         *value = mxGetField(mx_struct, 0, fieldname);
-    else if (mxIsClass(mx_struct, "gams.transfer.Set") || mxIsClass(mx_struct, "gams.transfer.Alias") ||
-        mxIsClass(mx_struct, "gams.transfer.Parameter") || mxIsClass(mx_struct, "gams.transfer.Variable") ||
-        mxIsClass(mx_struct, "gams.transfer.Equation") || mxIsClass(mx_struct, "gams.transfer.UniverseAlias"))
+    else if (mxIsClass(mx_struct, "gams.transfer.symbol.Set") || mxIsClass(mx_struct, "gams.transfer.alias.Set") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Parameter") || mxIsClass(mx_struct, "gams.transfer.symbol.Variable") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Equation") || mxIsClass(mx_struct, "gams.transfer.alias.Universe"))
         *value = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_str", "Structure '%s' has invalid type.", structname, fieldname);
@@ -777,9 +785,9 @@ void gt_mex_getfield_cell(
     /* get field */
     if (mxIsStruct(mx_struct))
         *value = mxGetField(mx_struct, 0, fieldname);
-    else if (mxIsClass(mx_struct, "gams.transfer.Set") || mxIsClass(mx_struct, "gams.transfer.Alias") ||
-        mxIsClass(mx_struct, "gams.transfer.Parameter") || mxIsClass(mx_struct, "gams.transfer.Variable") ||
-        mxIsClass(mx_struct, "gams.transfer.Equation") || mxIsClass(mx_struct, "gams.transfer.UniverseAlias"))
+    else if (mxIsClass(mx_struct, "gams.transfer.symbol.Set") || mxIsClass(mx_struct, "gams.transfer.alias.Set") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Parameter") || mxIsClass(mx_struct, "gams.transfer.symbol.Variable") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Equation") || mxIsClass(mx_struct, "gams.transfer.alias.Universe"))
         *value = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_cell", "Structure '%s' has invalid type.", structname, fieldname);
@@ -810,9 +818,9 @@ void gt_mex_getfield_table2struct(
     /* get field */
     if (mxIsStruct(mx_struct))
         *value = mxGetField(mx_struct, 0, fieldname);
-    else if (mxIsClass(mx_struct, "gams.transfer.Set") || mxIsClass(mx_struct, "gams.transfer.Alias") ||
-        mxIsClass(mx_struct, "gams.transfer.Parameter") || mxIsClass(mx_struct, "gams.transfer.Variable") ||
-        mxIsClass(mx_struct, "gams.transfer.Equation") || mxIsClass(mx_struct, "gams.transfer.UniverseAlias"))
+    else if (mxIsClass(mx_struct, "gams.transfer.symbol.Set") || mxIsClass(mx_struct, "gams.transfer.alias.Set") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Parameter") || mxIsClass(mx_struct, "gams.transfer.symbol.Variable") ||
+        mxIsClass(mx_struct, "gams.transfer.symbol.Equation") || mxIsClass(mx_struct, "gams.transfer.alias.Universe"))
         *value = mxGetProperty(mx_struct, 0, fieldname);
     else
         mexErrMsgIdAndTxt(ERRID"getfield_table2struct", "Structure '%s' has invalid type.", structname, fieldname);
@@ -853,11 +861,11 @@ void gt_mex_getfield_symbol_obj(
     else if (!*value)
         return;
 
-    if (mxIsClass(*value, "gams.transfer.Set") ||
-        mxIsClass(*value, "gams.transfer.Alias") ||
-        mxIsClass(*value, "gams.transfer.Parameter") ||
-        mxIsClass(*value, "gams.transfer.Variable") ||
-        mxIsClass(*value, "gams.transfer.Equation"))
+    if (mxIsClass(*value, "gams.transfer.symbol.Set") ||
+        mxIsClass(*value, "gams.transfer.alias.Set") ||
+        mxIsClass(*value, "gams.transfer.symbol.Parameter") ||
+        mxIsClass(*value, "gams.transfer.symbol.Variable") ||
+        mxIsClass(*value, "gams.transfer.symbol.Equation"))
         return;
     mexErrMsgIdAndTxt(ERRID"getfield_symbol_obj", "Structure '%s' has invalid field '%s': not Symbol", structname, fieldname);
 }

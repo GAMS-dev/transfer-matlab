@@ -49,12 +49,9 @@ classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
         function status = isValid(obj, def)
             def = gams.transfer.utils.validate('def', 1, def, {'gams.transfer.symbol.definition.Definition'}, -1);
 
-            status = obj.isValidDomains_(def.domains);
-            if status.flag == status.OK
-                return
-            end
+            % TODO
 
-            status = obj.isValidValues_(def.values);
+            status = gams.transfer.utils.Status.createOK();
         end
 
         function nrecs = getNumberRecords(obj, def)
@@ -77,60 +74,6 @@ classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
     end
 
     methods (Hidden, Access = protected)
-
-        % function status = isValidDomains_(obj, domains)
-        %     for i = 1:numel(domains)
-        %         label = domains{i}.label;
-
-        %         if ~obj.isLabel(label)
-        %             status = gams.transfer.utils.Status(sprintf("Records have no domain column '%s'.", label));
-        %             return
-        %         end
-
-        %         if ~iscategorical(obj.records_.(label))
-        %             status = gams.transfer.utils.Status(sprintf("Records domain column '%s' must be categorical.", label));
-        %             return
-        %         end
-        %     end
-
-        %     status = gams.transfer.utils.Status('OK');
-        % end
-
-        % function status = isValidValues_(obj, value_labels)
-
-        %     prev_size = [];
-        %     for i = 1:numel(obj.value_labels)
-        %         label = value_labels{i};
-
-        %         if ~obj.isLabel(label)
-        %             continue
-        %         end
-
-        %         if ~isnumeric(obj.records_.(label))
-        %             status = gams.transfer.utils.Status(sprintf("Records value column '%s' must be numeric.", label));
-        %             return
-        %         end
-
-        %         if issparse(obj.records_.(label))
-        %             status = gams.transfer.utils.Status(sprintf("Records value column '%s' must not be sparse.", label));
-        %             return
-        %         end
-
-        %         curr_size = size(obj.records_.(label));
-        %         if numel(curr_size) ~= 2 || curr_size(1) ~= 1
-        %             status = gams.transfer.utils.Status(sprintf("Records value column '%s' must be column vector.", label));
-        %             return
-        %         end
-
-        %         if i > 1 && any(curr_size ~= prev_size)
-        %             status = gams.transfer.utils.Status(sprintf("Records value column '%s' must have same size as other value columns.", label));
-        %             return
-        %         end
-        %         prev_size = curr_size;
-        %     end
-
-        %     status = gams.transfer.utils.Status('OK');
-        % end
 
         function arg = validateDomains_(obj, name, index, arg)
             % if ~iscell(arg)

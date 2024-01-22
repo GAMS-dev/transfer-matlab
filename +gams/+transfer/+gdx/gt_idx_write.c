@@ -111,7 +111,7 @@ void mexFunction(
         mx_arr_data = mxGetFieldByNumber(prhs[2], 0, i);
         data_name = (char*) mxGetFieldNameByNumber(prhs[2], i);
 
-        if (!mxIsClass(mx_arr_data, "gams.transfer.Parameter"))
+        if (!mxIsClass(mx_arr_data, "gams.transfer.symbol.Parameter"))
             mexErrMsgIdAndTxt(ERRID"type", "Symbol '%s' has invalid type.", data_name);
 
         for (size_t j = 0; j < GLOBAL_MAX_INDEX_DIM; j++)

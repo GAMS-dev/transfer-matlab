@@ -132,38 +132,38 @@ void mexFunction(
         data_name = (char*) mxGetFieldNameByNumber(prhs[2], i);
 
         /* get symbol type */
-        if (mxIsClass(mx_arr_data, "gams.transfer.Alias"))
+        if (mxIsClass(mx_arr_data, "gams.transfer.alias.Set"))
         {
-            gt_mex_getfield_str(mx_arr_data, data_name, "name_", "", true, name, GMS_SSSIZE);
+            gt_mex_getfield_str(mx_arr_data, data_name, "name", "", true, name, GMS_SSSIZE);
             gt_mex_getfield_str(mx_arr_data, data_name, "alias_with", "", true, buf, GMS_SSSIZE);
             gt_gdx_addalias(gdx, name, buf);
             continue;
         }
-        else if (mxIsClass(mx_arr_data, "gams.transfer.UniverseAlias"))
+        else if (mxIsClass(mx_arr_data, "gams.transfer.alias.Universe"))
         {
-            gt_mex_getfield_str(mx_arr_data, data_name, "name_", "", true, name, GMS_SSSIZE);
+            gt_mex_getfield_str(mx_arr_data, data_name, "name", "", true, name, GMS_SSSIZE);
             gt_gdx_addalias(gdx, name, "*");
             continue;
         }
-        else if (mxIsClass(mx_arr_data, "gams.transfer.Set"))
+        else if (mxIsClass(mx_arr_data, "gams.transfer.symbol.Set"))
         {
             gt_mex_getfield_bool(mx_arr_data, data_name, "is_singleton", false, true, 1, &singleton);
             type = GMS_DT_SET;
             subtype = (singleton) ? GMS_SETTYPE_SINGLETON : GMS_SETTYPE_DEFAULT;
         }
-        else if (mxIsClass(mx_arr_data, "gams.transfer.Parameter"))
+        else if (mxIsClass(mx_arr_data, "gams.transfer.symbol.Parameter"))
         {
             type = GMS_DT_PAR;
             subtype = 0;
         }
-        else if (mxIsClass(mx_arr_data, "gams.transfer.Variable"))
+        else if (mxIsClass(mx_arr_data, "gams.transfer.symbol.Variable"))
         {
-            gt_mex_getfield_int(mx_arr_data, data_name, "type_", 0, true, GT_FILTER_NONE, 1, &subtype);
+            gt_mex_getfield_int(mx_arr_data, data_name, "type_int", 0, true, GT_FILTER_NONE, 1, &subtype);
             type = GMS_DT_VAR;
         }
-        else if (mxIsClass(mx_arr_data, "gams.transfer.Equation"))
+        else if (mxIsClass(mx_arr_data, "gams.transfer.symbol.Equation"))
         {
-            gt_mex_getfield_int(mx_arr_data, data_name, "type_", 0, true, GT_FILTER_NONE, 1, &subtype);
+            gt_mex_getfield_int(mx_arr_data, data_name, "type_int", 0, true, GT_FILTER_NONE, 1, &subtype);
             type = GMS_DT_EQU;
             subtype += GMS_EQU_USERINFO_BASE;
         }
@@ -177,22 +177,22 @@ void mexFunction(
             sizes[j] = 1;
 
         /* get records format (ignore unsupported formats) */
-        gt_mex_getfield_int(mx_arr_data, data_name, "format_", GT_FORMAT_UNKNOWN, false, GT_FILTER_NONE, 1, &format);
-        switch (format)
-        {
-            case GT_FORMAT_STRUCT:
-            case GT_FORMAT_DENSEMAT:
-            case GT_FORMAT_SPARSEMAT:
-            case GT_FORMAT_TABLE:
-                break;
-            default:
-                continue;
-        }
+        gt_mex_getfield_str(mx_arr_data, data_name, "format", "", true, buf, GMS_SSSIZE);
+        if (!strcmp(buf, "table"))
+            format = GT_FORMAT_TABLE;
+        else if (!strcmp(buf, "struct"))
+            format = GT_FORMAT_STRUCT;
+        else if (!strcmp(buf, "dense_matrix"))
+            format = GT_FORMAT_DENSEMAT;
+        else if (!strcmp(buf, "sparse_matrix"))
+            format = GT_FORMAT_SPARSEMAT;
+        else
+            continue;
 
         /* get fields */
-        gt_mex_getfield_str(mx_arr_data, data_name, "name_", "", true, name, GMS_SSSIZE);
-        gt_mex_getfield_sizet(mx_arr_data, data_name, "dimension_", 0, true, GT_FILTER_NONNEGATIVE, 1, &dim);
-        gt_mex_getfield_cell_str(mx_arr_data, data_name, "domain_", "", true, dim, domains_ptr, GMS_SSSIZE);
+        gt_mex_getfield_str(mx_arr_data, data_name, "name", "", true, name, GMS_SSSIZE);
+        gt_mex_getfield_sizet(mx_arr_data, data_name, "dimension", 0, true, GT_FILTER_NONNEGATIVE, 1, &dim);
+        gt_mex_getfield_cell_str(mx_arr_data, data_name, "domain", "", true, dim, domains_ptr, GMS_SSSIZE);
 
         /* get UELs */
         mx_arr_uels = mxCreateCellMatrix(1, dim);
@@ -206,8 +206,8 @@ void mexFunction(
         }
 
         /* get optional fields */
-        gt_mex_getfield_str(mx_arr_data, data_name, "description_", "", false, text, GMS_SSSIZE);
-        gt_mex_getfield_str(mx_arr_data, data_name, "domain_type_", "relaxed", false, dominfo, 10);
+        gt_mex_getfield_str(mx_arr_data, data_name, "description", "", false, text, GMS_SSSIZE);
+        gt_mex_getfield_str(mx_arr_data, data_name, "domain_type", "relaxed", false, dominfo, 10);
 
         domain_uel_size = (size_t*) mxCalloc(dim, sizeof(*domain_uel_size));
         domain_uel_ids = (int**) mxCalloc(dim, sizeof(*domain_uel_ids));
@@ -233,7 +233,7 @@ void mexFunction(
         {
             case GT_FORMAT_DENSEMAT:
             case GT_FORMAT_SPARSEMAT:
-                gt_mex_getfield_sizet(mx_arr_data, data_name, "size_", 1, true, GT_FILTER_NONNEGATIVE, dim, sizes);
+                gt_mex_getfield_sizet(mx_arr_data, data_name, "size", 1, true, GT_FILTER_NONNEGATIVE, dim, sizes);
                 break;
         }
 

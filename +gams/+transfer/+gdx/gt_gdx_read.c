@@ -326,17 +326,6 @@ void mexFunction(
             else
                 sizes[j] = mxGetNaN();
 
-        /* only go on if reading records */
-        if (!read_records)
-        {
-            gt_mex_addsymbol(plhs[0], name, text, type, subtype, GT_FORMAT_EMPTY,
-                dim, sizes, (const char**) domains_ptr, (const char**) domain_labels_ptr,
-                dom_type, nrecs, 0, NULL, NULL);
-            for (size_t j = 0; j < dim; j++)
-                mxFree(dom_uels_used[j]);
-            continue;
-        }
-
         /* get default values dependent on type */
         gt_utils_type_default_values(type, subtype, true, def_values);
 
@@ -389,6 +378,17 @@ void mexFunction(
         gt_mex_readdata_create(dim, nrecs, format, values_flag, def_values,
             mx_dom_nrecs, &nvals, col_nnz, mx_arr_dom_idx, mx_dom_idx, mx_arr_values,
             mx_values, mx_rows, mx_cols);
+
+        /* only go on if reading records */
+        if (!read_records)
+        {
+            gt_mex_addsymbol(plhs[0], name, text, type, subtype, format, dim, sizes,
+                (const char**) domains_ptr, (const char**) domain_labels_ptr, dom_type, nrecs, 0,
+                mx_arr_records, NULL);
+            for (size_t j = 0; j < dim; j++)
+                mxFree(dom_uels_used[j]);
+            continue;
+        }
 
         /* start reading records */
         if (!gdxDataReadRawStart(gdx, sym_id, &ival))

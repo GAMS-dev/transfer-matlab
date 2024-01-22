@@ -3,6 +3,8 @@ GAMS Transfer Matlab v0.9.0
 - Added subpackages `gams.transfer.symbol` and `gams.transfer.alias`.
 - Renamed subpackage `gams.transfer.cmex` to `gams.transfer.gdx`.
 - Method `copy` of symbols and aliases now returns the new symbol.
+- TODO: set domain labels explicitly and not auto after c.data.x update.
+- TODO: read without records was empty format. no longer
 
 GAMS Transfer Matlab v0.8.0
 ==================

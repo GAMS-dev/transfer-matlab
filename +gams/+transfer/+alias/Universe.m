@@ -216,7 +216,26 @@ classdef Universe < gams.transfer.alias.Abstract
         end
 
         function flag = isValid(obj, varargin)
+
+            verbose = 0;
+            if nargin > 1
+                verbose = max(0, min(2, varargin{1}));
+            end
+
+            if ~obj.container_.hasSymbols(obj.name_) || obj.container_.getSymbols(obj.name_) ~= obj
+                msg = 'Alias is not contained in its linked container.';
+                switch verbose
+                case 1
+                    warning(msg);
+                case 2
+                    error(msg);
+                end
+                flag = false;
+                return
+            end
+
             flag = true;
+
         end
 
         function uels = getUELs(obj, varargin)

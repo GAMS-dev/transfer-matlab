@@ -46,10 +46,8 @@ classdef (Abstract) Definition < handle
             for i = 1:numel(arg)
                 if isa(arg{i}, 'gams.transfer.symbol.domain.Domain')
                     continue
-                elseif isa(arg{i}, 'gams.transfer.symbol.Set')
+                elseif isa(arg{i}, 'gams.transfer.symbol.Set') || isa(arg{i}, 'gams.transfer.alias.Abstract')
                     arg{i} = gams.transfer.symbol.domain.Regular(arg{i});
-                elseif isa(arg{i}, 'gams.transfer.alias.Set')
-                    arg{i} = gams.transfer.symbol.domain.Regular(arg{i}.alias_with);
                 elseif ischar(arg{i}) || isstring(arg{i})
                     arg{i} = gams.transfer.symbol.domain.Relaxed(arg{i});
                 else
@@ -118,8 +116,30 @@ classdef (Abstract) Definition < handle
 
         function eq = equals(obj, def)
             eq = isequal(class(obj), class(def)) && ...
-                isequal(obj.domains_, def.domains) && ...
-                isequal(obj.values_, def.values);
+                isequal(obj.values_, def.values_);
+            if ~eq
+                return;
+            end
+
+            eq = numel(obj.domains_) == numel(def.domains_);
+            for i = 1:numel(obj.domains_)
+                eq = eq && obj.domains_{i}.equals(def.domains_{i});
+                if ~eq
+                    return
+                end
+            end
+        end
+
+        function status = isValid(obj)
+
+            for i = 1:numel(obj.domains_)
+                status = obj.domains_{i}.isValid();
+                if status.flag ~= gams.transfer.utils.Status.OK
+                    return
+                end
+            end
+
+            status = gams.transfer.utils.Status.createOK();
         end
 
         function dim = dimension(obj)
@@ -152,6 +172,23 @@ classdef (Abstract) Definition < handle
             for i = 1:dim
                 labels{i} = obj.domains_{i}.label;
             end
+        end
+
+        function setDomainLabels(obj, labels)
+            % TODO check labels
+
+            add_prefix = numel(unique(labels)) ~= numel(labels);
+
+            for i = 1:numel(labels)
+                if isequal(labels{i}, gams.transfer.Constants.UNIVERSE_NAME)
+                    labels{i} = gams.transfer.Constants.UNIVERSE_LABEL;
+                end
+                obj.domains_{i}.label = labels{i};
+                if add_prefix
+                    obj.domains_{i} = obj.domains_{i}.appendLabelIndex(i);
+                end
+            end
+
         end
 
         function names = domainNames(obj)

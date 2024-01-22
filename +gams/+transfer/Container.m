@@ -121,7 +121,14 @@ classdef Container < handle
             end
         end
 
-        function arg = validateGdxFile(name, index, arg)
+        function arg = validateGdxFileRead(name, index, arg)
+            arg = gams.transfer.Container.validateGdxFileWrite(name, index, arg);
+            if ~isfile(arg)
+                error('Argument ''%s'' (at position %d) must name a file that exists.', name, index);
+            end
+        end
+
+        function arg = validateGdxFileWrite(name, index, arg)
             if isstring(arg)
                 arg = char(arg);
             elseif ~ischar(arg)
@@ -131,9 +138,6 @@ classdef Container < handle
             [~, ~, ext] = fileparts(arg);
             if ~strcmpi(ext, '.gdx')
                 error('Argument ''%s'' (at position %d) must be file name with ''.gdx'' extension.', name, index);
-            end
-            if ~isfile(arg)
-                error('Argument ''%s'' (at position %d) must name a file that exists.', name, index);
             end
         end
 
@@ -367,9 +371,11 @@ classdef Container < handle
                 while index < nargin
                     if strcmpi(varargin{index}, 'symbols')
                         validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
-                        symbols = gams.transfer.utils.parse_argument(varargin, ...
+                        symbols_in = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'symbols', validate);
-                        symbols = container.getSymbols(symbols);
+                        symbols = container.listSymbols();
+                        idx = ismember(symbols, container.getSymbolNames(symbols_in));
+                        symbols = container.getSymbols(symbols(idx));
                         has_symbols = true;
                         index = index + 2;
                         is_pararg = true;
@@ -457,6 +463,9 @@ classdef Container < handle
                     {'string', 'char', 'gams.transfer.Container'}, -1));
                 source = gams.transfer.utils.parse_argument(varargin, ...
                     1, 'source', validate);
+                if ~isa(source, 'gams.transfer.Container')
+                    source = obj.validateGdxFileRead('source', 1, source);
+                end
                 index = 2;
                 is_pararg = false;
                 while index < nargin
@@ -508,7 +517,6 @@ classdef Container < handle
             end
 
             % validate input arguments
-            source = obj.validateGdxFile('source', 1, source);
             switch format
             case 'struct'
                 format = int32(2);
@@ -569,6 +577,17 @@ classdef Container < handle
                     end
                 end
 
+                % adapt domain
+                if ~obj.indexed_ && isfield(symbol, 'domain')
+                    for j = 1:numel(symbol.domain)
+                        if strcmp(symbol.domain{j}, gams.transfer.Constants.UNIVERSE_NAME) || symbol.domain_type == 2
+                            continue
+                        elseif obj.hasSymbols(symbol.domain{j}) && isfield(symbols, symbol.domain{j})
+                            symbol.domain{j} = obj.getSymbols(symbol.domain{j});
+                        end
+                    end
+                end
+
                 % handle alias differently
                 switch symbol.symbol_type
                 case {gams.transfer.gdx.SymbolType.ALIAS, 'alias'}
@@ -592,21 +611,15 @@ classdef Container < handle
                     error('Invalid symbol type');
                 end
 
+                % set properties
                 new_symbol.description = symbol.description;
-
-                % set domain and description
                 if obj.indexed_
                     new_symbol.size = symbol.size;
                 else
-                    domain = symbol.domain;
-                    for j = 1:numel(domain)
-                        if strcmp(domain{j}, gams.transfer.Constants.UNIVERSE_NAME) || symbol.domain_type == 2
-                            continue
-                        elseif obj.hasSymbols(domain{j}) && isfield(symbols, domain{j})
-                            domain{j} = obj.getSymbols(domain{j});
-                        end
-                    end
-                    new_symbol.domain = domain;
+                    new_symbol.domain = symbol.domain;
+                end
+                if isfield(symbol, 'domain_labels')
+                    new_symbol.domain_labels = symbol.domain_labels;
                 end
 
                 % set uels
@@ -701,21 +714,54 @@ classdef Container < handle
             %
             % See also: gams.transfer.Container.getDomainViolations
 
-            % input arguments
-            p = inputParser();
-            is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-                ~strcmpi(x, 'compress') && ~strcmpi(x, 'sorted');
-            addRequired(p, 'filename', is_string_char);
-            addParameter(p, 'symbols', {}, @iscellstr);
-            addParameter(p, 'compress', false, @islogical);
-            addParameter(p, 'sorted', false, @islogical);
-            addParameter(p, 'uel_priority', {}, @iscellstr);
-            parse(p, varargin{:});
+            % parse input arguments
+            has_symbols = false;
+            compress = false;
+            sorted = false;
+            uel_priority = {};
+            try
+                filename = gams.transfer.utils.parse_argument(varargin, ...
+                    1, 'filename', @obj.validateGdxFileWrite);
+                index = 2;
+                is_pararg = false;
+                while index < nargin
+                    if strcmpi(varargin{index}, 'symbols')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
+                        symbols = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'symbols', validate);
+                        has_symbols = true;
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif strcmpi(varargin{index}, 'uel_priority')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
+                        uel_priority = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'uel_priority', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif strcmpi(varargin{index}, 'compress')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
+                        compress = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'compress', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif strcmpi(varargin{index}, 'sorted')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
+                        sorted = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'sorted', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
 
-            if isempty(p.Results.symbols)
-                symbols = obj.data_.getAllKeys();
+            if has_symbols && ~isempty(symbols)
+                symbols = obj.getSymbolNames(symbols);
             else
-                symbols = obj.getSymbolNames(p.Results.symbols);
+                symbols = obj.data_.getAllKeys();
             end
 
             if ~obj.isValid('symbols', symbols)
@@ -728,7 +774,7 @@ classdef Container < handle
             end
 
             % create enable flags
-            if isempty(p.Results.symbols)
+            if ~has_symbols
                 enable = true(1, numel(symbols));
             else
                 enable = false(1, numel(symbols));
@@ -739,22 +785,18 @@ classdef Container < handle
                 end
             end
 
-            if p.Results.compress && obj.indexed_
+            if compress && obj.indexed_
                 error('Compression not supported for indexed GDX.');
             end
-
-            % get full path
-            filename = obj.validateGdxFile('filename', 1, p.Results.filename);
 
             % write data
             if obj.indexed_
                 gams.transfer.gdx.gt_idx_write(obj.gams_dir_, filename, obj.data_.entries, ...
-                    enable, p.Results.sorted, gams.transfer.Constants.SUPPORTS_TABLE);
+                    enable, sorted, gams.transfer.Constants.SUPPORTS_TABLE);
             else
                 gams.transfer.gdx.gt_gdx_write(obj.gams_dir_, filename, obj.data_.entries, ...
-                    enable, p.Results.uel_priority, p.Results.compress, p.Results.sorted, ...
-                    gams.transfer.Constants.SUPPORTS_TABLE, gams.transfer.Constants.SUPPORTS_CATEGORICAL, ...
-                    false);
+                    enable, uel_priority, compress, sorted, gams.transfer.Constants.SUPPORTS_TABLE, ...
+                    gams.transfer.Constants.SUPPORTS_CATEGORICAL, false);
             end
         end
 
@@ -1071,8 +1113,7 @@ classdef Container < handle
                     end
 
                     % check invalid
-                    if islogical(is_valid) && isa(symbols{i}, 'gams.transfer.Symbol') && ...
-                        xor(is_valid, symbols{i}.isValid())
+                    if islogical(is_valid) && xor(is_valid, symbols{i}.isValid())
                         continue
                     end
 

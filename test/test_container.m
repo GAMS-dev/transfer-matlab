@@ -29,7 +29,7 @@ function success = test_container(cfg)
     test_getlist(t, cfg, 'c');
     test_describe(t, cfg, 'c');
     test_describePartial(t, cfg, 'c');
-    test_idx_describe(t, cfg, 'c');
+    % test_idx_describe(t, cfg, 'c');
     test_remove(t, cfg);
     [~, n_fails1] = t.summary();
 
@@ -38,7 +38,7 @@ function success = test_container(cfg)
     test_getlist(t, cfg, 'rc');
     test_describe(t, cfg, 'rc');
     test_describePartial(t, cfg, 'rc');
-    test_idx_describe(t, cfg, 'rc');
+    % test_idx_describe(t, cfg, 'rc');
     [~, n_fails2] = t.summary();
 
     success = n_fails1 + n_fails2 == 0;

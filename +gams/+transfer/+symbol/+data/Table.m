@@ -39,9 +39,9 @@ classdef Table < gams.transfer.symbol.data.Tabular
     methods
 
         function labels = get.labels(obj)
-            try
+            if istable(obj.records_)
                 labels = obj.records_.Properties.VariableNames;
-            catch
+            else
                 labels = {};
             end
         end
@@ -75,11 +75,11 @@ classdef Table < gams.transfer.symbol.data.Tabular
         end
 
         function nrecs = getNumberRecords(obj, def)
-            if obj.isValid(def).flag ~= gams.transfer.utils.Status.OK
+            if istable(obj.records_)
+                nrecs = height(obj.records_);
+            else
                 nrecs = nan;
-                return
             end
-            nrecs = height(obj.records_);
         end
 
     end

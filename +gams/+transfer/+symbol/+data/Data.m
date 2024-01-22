@@ -146,6 +146,16 @@ classdef (Abstract) Data < handle
             flag = ismember(label, obj.labels);
         end
 
+        function domains = availableDomains(obj, domains)
+            idx = true(size(domains));
+            for i = 1:numel(domains)
+                if ~isa(domains{i}, 'gams.transfer.symbol.domain.Domain') || ~obj.isLabel(domains{i}.label)
+                    idx(i) = false;
+                end
+            end
+            domains = domains(idx);
+        end
+
         function values = availableNumericValues(obj, values)
             idx = true(size(values));
             for i = 1:numel(values)
@@ -212,12 +222,12 @@ classdef (Abstract) Data < handle
             rename = false;
             try
                 uels = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'uels', @obj.validateUels);
+                    1, 'uels', []); % TODO
                 domains = gams.transfer.utils.parse_argument(varargin, ...
                     2, 'domains', @obj.validateDomains_);
-                index = 2;
+                index = 3;
                 is_pararg = false;
-                while index <= nargin
+                while index < nargin
                     if strcmpi(varargin{index}, 'rename')
                         validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
                         rename = gams.transfer.utils.parse_argument(varargin, ...

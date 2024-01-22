@@ -451,7 +451,52 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.Container/isValid
 
-            flag = false;
+            % TODO: caching
+
+            verbose = 0;
+            force = false;
+            if nargin > 1
+                verbose = max(0, min(2, varargin{1}));
+            end
+            if nargin > 2 && varargin{2}
+                force = true;
+            end
+
+            if ~obj.container_.hasSymbols(obj.name_) || obj.container_.getSymbols(obj.name_) ~= obj
+                msg = 'Symbol is not contained in its linked container.';
+                switch verbose
+                case 1
+                    warning(msg);
+                case 2
+                    error(msg);
+                end
+                flag = false;
+                return
+            end
+
+            status = obj.def_.isValid();
+            if status.flag == gams.transfer.utils.Status.OK
+                status = obj.data_.isValid(obj.def_);
+            end
+
+            if status.flag ~= gams.transfer.utils.Status.OK
+                switch verbose
+                case 0
+                case 1
+                    warning(status.message);
+
+                case 2
+                    error(status.message);
+                otherwise
+                    error('Invalid verbose selection: %d', verbose);
+                end
+                flag = false;
+                return
+            end
+
+            % TODO domain forwarding
+
+            flag = true;
         end
 
         %> Get domain violations
