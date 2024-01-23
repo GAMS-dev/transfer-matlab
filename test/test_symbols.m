@@ -828,7 +828,7 @@ function test_overwriteSymbols(t, cfg)
     t.assertEquals(s.description, 'set1');
     t.assertEquals(s.getNumberRecords(), 0)
     gdx.addSet('s', 'records', {'i1', 'i2'});
-    t.assertEquals(s.description, 'set1');
+    t.assertEquals(s.description, '');
     t.assertEquals(s.getNumberRecords(), 2)
 
     t.add('overwrite_symbols_set_2');
@@ -858,7 +858,7 @@ function test_overwriteSymbols(t, cfg)
         gdx.addParameter('s');
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol ''s'' (with different definition) already exists.');
+        t.assertEquals(e.message, 'Symbol ''s'' (with different symbol type) already exists.');
     end
 
     t.add('overwrite_symbols_parameter_1');
@@ -869,7 +869,7 @@ function test_overwriteSymbols(t, cfg)
     t.assertEquals(p.description, 'par1');
     t.assertEquals(p.getNumberRecords(), 0)
     gdx.addParameter('p', 'records', 1);
-    t.assertEquals(p.description, 'par1');
+    t.assertEquals(p.description, '');
     t.assertEquals(p.getNumberRecords(), 1)
 
     t.add('overwrite_symbols_parameter_2');
@@ -882,17 +882,10 @@ function test_overwriteSymbols(t, cfg)
     end
     try
         t.assert(false);
-        gdx.addParameter('p', 'domain_forwarding', true);
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Symbol ''p'' (with different definition) already exists.');
-    end
-    try
-        t.assert(false);
         gdx.addSet('p');
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol ''p'' (with different definition) already exists.');
+        t.assertEquals(e.message, 'Symbol ''p'' (with different symbol type) already exists.');
     end
 
     t.add('overwrite_symbols_variable_1');
@@ -903,7 +896,7 @@ function test_overwriteSymbols(t, cfg)
     t.assertEquals(v.description, 'var1');
     t.assertEquals(v.getNumberRecords(), 0)
     gdx.addVariable('v', 'records', 1);
-    t.assertEquals(v.description, 'var1');
+    t.assertEquals(v.description, '');
     t.assertEquals(v.getNumberRecords(), 1)
 
     t.add('overwrite_symbols_variable_2');
@@ -923,17 +916,10 @@ function test_overwriteSymbols(t, cfg)
     end
     try
         t.assert(false);
-        gdx.addVariable('v', 'domain_forwarding', true);
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Symbol ''v'' (with different definition) already exists.');
-    end
-    try
-        t.assert(false);
         gdx.addSet('v');
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol ''v'' (with different definition) already exists.');
+        t.assertEquals(e.message, 'Symbol ''v'' (with different symbol type) already exists.');
     end
 
     t.add('overwrite_symbols_equation_1');
@@ -944,7 +930,7 @@ function test_overwriteSymbols(t, cfg)
     t.assertEquals(e.description, 'equ1');
     t.assertEquals(e.getNumberRecords(), 0)
     gdx.addEquation('e', 'l', 'records', 1);
-    t.assertEquals(e.description, 'equ1');
+    t.assertEquals(e.description, '');
     t.assertEquals(e.getNumberRecords(), 1)
 
     t.add('overwrite_symbols_equation_2');
@@ -964,17 +950,10 @@ function test_overwriteSymbols(t, cfg)
     end
     try
         t.assert(false);
-        gdx.addEquation('e', 'l', 'domain_forwarding', true);
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Symbol ''e'' (with different definition) already exists.');
-    end
-    try
-        t.assert(false);
         gdx.addSet('e');
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol ''e'' (with different definition) already exists.');
+        t.assertEquals(e.message, 'Symbol ''e'' (with different symbol type) already exists.');
     end
 
     t.add('overwrite_symbols_alias_1');
@@ -990,7 +969,7 @@ function test_overwriteSymbols(t, cfg)
         gdx.addSet('a');
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol ''a'' (with different definition) already exists.');
+        t.assertEquals(e.message, 'Symbol ''a'' (with different symbol type) already exists.');
     end
 
 end
@@ -2283,7 +2262,7 @@ function test_setRecords(t, cfg)
         s1.setRecords([1; 2; 3; 4]);
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Records size doesn''t match symbol size.');
+        t.assertEquals(e.message, 'Cannot create matrix records, because symbol size is unknown.');
     end
 
     t.add('set_records_numeric_2');
@@ -2323,7 +2302,7 @@ function test_setRecords(t, cfg)
         s3.setRecords([1; 2; 3; 4; 5]);
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Records size doesn''t match symbol size.');
+        t.assertEquals(e.message, 'Cannot create matrix records, because value size does not match symbol size.');
     end
 
     t.add('set_records_cell_1');
@@ -2442,7 +2421,7 @@ function test_setRecords(t, cfg)
         s2.setRecords({{'i1', 'i4'}, [1; 4]});
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Incorrect number of domain fields.');
+        t.assertEquals(e.message, 'Records have no domain column ''uni''.');
     end
 
     t.add('set_records_cell_6');
@@ -2451,7 +2430,7 @@ function test_setRecords(t, cfg)
         s3.setRecords({{'i1', 'i4'}, [1; 4], {'i1', 'i4'}});
     catch e
         t.reset();
-        t.assertEquals(e.message, 'More domain fields than symbol dimension.');
+        t.assertEquals(e.message, 'More cellstr values than domains and string value fields.');
     end
 
     t.add('set_records_cell_7');
@@ -2499,7 +2478,7 @@ function test_setRecords(t, cfg)
         s3.setRecords(struct('i1', {'i1', 'i4'}, 'level', [1; 4]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Non-scalar structure arrays currently not supported.');
+        t.assertEquals(e.message, 'Unsupported records format.');
     end
 
     t.add('set_records_struct_4');
@@ -2596,7 +2575,7 @@ function test_setRecords(t, cfg)
         s3.setRecords(recs);
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Fields need to match matrix format or to be of same length');
+        t.assertEquals(e.message, 'Records value column ''level'' must have same size as other columns.');
     end
 
     t.add('set_records_struct_8');
@@ -2620,7 +2599,7 @@ function test_setRecords(t, cfg)
         s3.setRecords(struct('level', [1, 2, 3]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Incorrect number of domain fields.');
+        t.assertEquals(e.message, 'Cannot create matrix records, because value size does not match symbol size.');
     end
 
     if gams.transfer.Constants.SUPPORTS_TABLE

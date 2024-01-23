@@ -544,25 +544,32 @@ classdef (Abstract) Symbol < handle
                 records = varargin;
             end
 
-            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
-                index_type = gams.transfer.symbol.domain.IndexType.Categorical();
-            else
-                index_type = gams.transfer.symbol.domain.IndexType.Integer();
+            if gams.transfer.Constants.SUPPORTS_TABLE && istable(records)
+                records = gams.transfer.symbol.data.Table(records);
+            end
+            if isa(records, 'gams.transfer.symbol.data.Data')
+                status = records.isValid(obj.def_);
+                if status.flag ~= gams.transfer.utils.Status.OK
+                    error(status.message);
+                end
+                obj.data_ = records;
+                obj.applyDomainForwarding();
+                obj.modified_ = true;
+                return
             end
 
-            if isa(records, 'gams.transfer.symbol.data.Data')
-                obj.data_ = records;
-                return
+            domains = {};
+            values = {};
+            new_records = struct();
 
             % string -> recall with cell of strings
-            elseif isstring(records) && numel(records) == 1 || ischar(records)
+            if isstring(records) && numel(records) == 1 || ischar(records)
                 if obj.dimension ~= 1
                     error('Single string as records only accepted if symbol dimension equals 1.');
                 end
                 domain = obj.def_.domains{1};
-                data = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
-                data.records.(domain.label) = domain.createIndex(index_type, {records}, true);
-                % TODO: release unique labels if categorical
+                new_records.(domain.label) = {records};
+                domains{end+1} = domain;
 
             % cell of strings -> domain entries
             elseif iscellstr(records)
@@ -570,42 +577,32 @@ classdef (Abstract) Symbol < handle
                 if s(1) ~= obj.dimension
                     error('First dimension of cellstr must equal symbol dimension.');
                 end
-                data = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
                 for i = 1:obj.dimension
                     domain = obj.def_.domains{i};
-                    if domain.HOLDS_UNIQUE_LABELS
-                        domain.unique_labels = gams.transfer.unique_labels.Dictionary(records(i,:));
-                    end
-                    data.records.(domain.label) = domain.createIndex(index_type, records(i,:), true);
-                    % TODO: release unique labels if categorical
+                    new_records.(domain.label) = records(i,:);
+                    domains{end+1} = domain;
                 end
 
             % numeric vector -> interpret as level values in matrix format
             elseif isnumeric(records) && numel(obj.def_.values) > 0
-                assert(isa(obj.def_.values{1}, 'gams.transfer.symbol.value.Numeric'));
-                if issparse(records)
-                    data = gams.transfer.symbol.data.SparseMatrix.Empty(obj.def_.domains);
-                else
-                    data = gams.transfer.symbol.data.DenseMatrix.Empty(obj.def_.domains);
-                end
-                data.records.(obj.def_.values{1}.label) = records;
+                value = obj.def_.values{1};
+                new_records.(value.label) = records;
+                values{end+1} = value;
 
             % cell -> cellstr elements to domains or set element texts and
             % numeric vector to values
             elseif iscell(records)
-                n_domains = 0;
                 values_used = false(1, numel(obj.def_.values));
-                data = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
-
+                n_domains = 0;
                 for i = 1:numel(records)
                     stored_record = false;
 
                     if isnumeric(records{i})
-                        % find numeric value
                         for j = 1:numel(obj.def_.values)
                             value = obj.def_.values{j};
                             if isa(value, 'gams.transfer.symbol.value.Numeric') && ~values_used(j)
-                                data.records.(value.label) = records{i}(:);
+                                new_records.(value.label) = records{i};
+                                values{end+1} = value;
                                 values_used(j) = true;
                                 stored_record = true;
                                 break;
@@ -622,11 +619,8 @@ classdef (Abstract) Symbol < handle
                             for j = 1:numel(obj.def_.values)
                                 value = obj.def_.values{j};
                                 if isa(value, 'gams.transfer.symbol.value.String') && ~values_used(j)
-                                    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
-                                        data.records.(value.label) = categorical(records{i}(:));
-                                    else
-                                        data.records.(value.label) = records{i}(:);
-                                    end
+                                    new_records.(value.label) = records{i};
+                                    values{end+1} = value;
                                     values_used(j) = true;
                                     stored_record = true;
                                     break;
@@ -635,15 +629,11 @@ classdef (Abstract) Symbol < handle
                             if ~stored_record
                                 error('More cellstr values than domains and string value fields.');
                             end
-                            continue
+                        else
+                            domain = obj.def_.domains{n_domains};
+                            new_records.(domain.label) = records{i};
+                            domains{end+1} = domain;
                         end
-
-                        domain = obj.def_.domains{n_domains};
-                        if domain.HOLDS_UNIQUE_LABELS
-                            domain.unique_labels = gams.transfer.unique_labels.Dictionary(records{i}(:));
-                        end
-                        data.records.(domain.label) = domain.createIndex(index_type, records{i}(:), true);
-                        % TODO: release unique labels if categorical
                     else
                         error('Cell elements must be cellstr or numeric.');
                     end
@@ -652,30 +642,88 @@ classdef (Abstract) Symbol < handle
             % struct -> check fields for domain or value fields
             elseif isstruct(records) && numel(records) == 1
                 fields = fieldnames(records);
-                data = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
                 for i = 1:numel(fields)
                     value = obj.def_.getValue(fields{i});
                     if ~isempty(value)
-                        data.records.(value.label) = records.(fields{i})(:);
+                        new_records.(value.label) = records.(fields{i});
+                        values{end+1} = value;
                         continue;
                     end
 
                     domain = obj.def_.getDomain(fields{i});
                     if ~isempty(domain)
-                        if domain.HOLDS_UNIQUE_LABELS
-                            domain.unique_labels = gams.transfer.unique_labels.Dictionary(records.(fields{i}));
-                        end
-                        data.records.(domain.label) = domain.createIndex(index_type, records.(fields{i}), true);
-                        % TODO: release unique labels if categorical
+                        new_records.(domain.label) = records.(fields{i});
+                        domains{end+1} = domain;
                     end
                 end
 
-            % table -> just keep it
-            elseif gams.transfer.Constants.SUPPORTS_TABLE && istable(records)
-                data = gams.transfer.symbol.data.Table(records);
-
             else
                 error('Unsupported records format.');
+            end
+
+            domains_values = [domains, values];
+
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
+                index_type = gams.transfer.symbol.domain.IndexType.Categorical();
+            else
+                index_type = gams.transfer.symbol.domain.IndexType.Integer();
+            end
+
+            % create proper index for domain entries
+            for i = 1:numel(domains)
+                new_records.(domains{i}.label) = domains{i}.createIndex(index_type, new_records.(domains{i}.label), true);
+            end
+
+            % create categoricals for element_text
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
+                for i = 1:numel(values)
+                    if ~isa(values{i}, 'gams.transfer.symbol.value.String')
+                        continue
+                    end
+                    new_records.(values{i}.label) = categorical(new_records.(values{i}.label));
+                end
+            end
+
+            % anything sparse or scalar?
+            is_sparse = false;
+            is_scalar = false;
+            for i = 1:numel(values)
+                is_sparse = is_sparse || issparse(new_records.(values{i}.label));
+                is_scalar = is_scalar || isscalar(new_records.(values{i}.label));
+            end
+
+            % select record format
+            if numel(domains) > 0
+                data = gams.transfer.symbol.data.Struct(new_records);
+            elseif is_sparse
+                data = gams.transfer.symbol.data.SparseMatrix(new_records);
+            elseif is_scalar
+                data = gams.transfer.symbol.data.Struct(new_records);
+            else
+                data = gams.transfer.symbol.data.DenseMatrix(new_records);
+            end
+
+            % reshape data
+            if isa(data, 'gams.transfer.symbol.data.Tabular')
+                for i = 1:numel(domains_values)
+                    data.records.(domains_values{i}.label) = data.records.(domains_values{i}.label)(:);
+                end
+            elseif isa(data, 'gams.transfer.symbol.data.Matrix')
+                symbol_size = ones(1, 2);
+                symbol_size(1:obj.dimension) = obj.size;
+                if any(isnan(symbol_size))
+                    error('Cannot create matrix records, because symbol size is unknown.');
+                end
+                for i = 1:numel(domains_values)
+                    if all(symbol_size == size(data.records.(domains_values{i}.label)))
+                        continue;
+                    end
+                    data.records.(domains_values{i}.label) = data.records.(domains_values{i}.label)';
+                    if all(symbol_size == size(data.records.(domains_values{i}.label)))
+                        continue;
+                    end
+                    error('Cannot create matrix records, because value size does not match symbol size.');
+                end
             end
 
             % check records format
@@ -687,7 +735,6 @@ classdef (Abstract) Symbol < handle
             obj.data_ = data;
             obj.applyDomainForwarding();
             obj.modified_ = true;
-
         end
 
         %> Transforms symbol records into given format

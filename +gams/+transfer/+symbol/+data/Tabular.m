@@ -43,6 +43,8 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
                 return
             end
 
+            prev_size = [];
+
             domains = def.domains;
             for i = 1:numel(domains)
                 label = domains{i}.label;
@@ -65,10 +67,16 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
                     status = gams.transfer.utils.Status(sprintf("Records domain column '%s' must be categorical, numeric or empty.", label));
                     return
                 end
+
+                curr_size = size(obj.records_.(label));
+                if ~isempty(prev_size) && any(curr_size ~= prev_size)
+                    status = gams.transfer.utils.Status(sprintf("Records domain column '%s' must have same size as other columns.", label));
+                    return
+                end
+                prev_size = curr_size;
             end
 
             values = def.values;
-            prev_size = [];
             for i = 1:numel(values)
                 label = values{i}.label;
 
@@ -108,7 +116,7 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
 
                 curr_size = size(obj.records_.(label));
                 if ~isempty(prev_size) && any(curr_size ~= prev_size)
-                    status = gams.transfer.utils.Status(sprintf("Records value column '%s' must have same size as other value columns.", label));
+                    status = gams.transfer.utils.Status(sprintf("Records value column '%s' must have same size as other columns.", label));
                     return
                 end
                 prev_size = curr_size;

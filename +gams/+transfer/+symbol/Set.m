@@ -163,6 +163,7 @@ classdef Set < gams.transfer.symbol.Symbol
                     elseif strcmpi(varargin{index}, 'domain_forwarding')
                         domain_forwarding = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'domain_forwarding', []);
+                        has_domain_forwarding = true;
                         index = index + 2;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'is_singleton')
