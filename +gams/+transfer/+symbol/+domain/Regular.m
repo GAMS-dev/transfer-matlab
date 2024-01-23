@@ -126,6 +126,13 @@ classdef Regular < gams.transfer.symbol.domain.Domain
             uels = obj.symbol_.getUELs(1, uint64(obj.symbol_.records.(label)));
         end
 
+        function domain = getRelaxed(obj)
+            domain = gams.transfer.symbol.domain.Relaxed(obj.symbol_.name);
+            domain.label = obj.label_;
+            domain.index_type = obj.index_type_;
+            domain.forwarding = obj.forwarding_;
+        end
+
     end
 
 end

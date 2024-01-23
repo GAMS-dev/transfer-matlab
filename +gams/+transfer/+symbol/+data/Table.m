@@ -60,6 +60,13 @@ classdef Table < gams.transfer.symbol.data.Tabular
             name = 'table';
         end
 
+        function renameLabels(obj, old_labels, new_labels)
+            if ~istable(obj.records_)
+                error('Cannot rename labels: Records are invalid.');
+            end
+            obj.records_ = renamevars(obj.records_, old_labels, new_labels);
+        end
+
         function def = copy(obj)
             def = gams.transfer.symbol.data.Table();
             def.copyFrom(obj);

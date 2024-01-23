@@ -187,16 +187,17 @@ classdef (Abstract) Definition < handle
             end
         end
 
-        function setDomainLabels(obj, labels)
-            % TODO check labels
+        function setDomainLabels(obj, domain_labels)
+            domain_labels = gams.transfer.utils.validate_cell('domain_labels', 1, domain_labels, ...
+                {'string', 'char'}, 1, obj.dimension);
 
-            add_prefix = numel(unique(labels)) ~= numel(labels);
+            add_prefix = numel(unique(domain_labels)) ~= numel(domain_labels);
 
-            for i = 1:numel(labels)
-                if isequal(labels{i}, gams.transfer.Constants.UNIVERSE_NAME)
-                    labels{i} = gams.transfer.Constants.UNIVERSE_LABEL;
+            for i = 1:numel(domain_labels)
+                if isequal(domain_labels{i}, gams.transfer.Constants.UNIVERSE_NAME)
+                    domain_labels{i} = gams.transfer.Constants.UNIVERSE_LABEL;
                 end
-                obj.domains_{i}.label = labels{i};
+                obj.domains_{i}.label = domain_labels{i};
                 if add_prefix
                     obj.domains_{i} = obj.domains_{i}.appendLabelIndex(i);
                 end
@@ -247,6 +248,25 @@ classdef (Abstract) Definition < handle
         %         labels{i} = obj.domainValue(i, keys{i});
         %     end
         % end
+
+        function switchContainer(obj, container)
+            container = gams.transfer.utils.validate('container', 1, container, {'gams.transfer.Container'}, -1);
+            for i = 1:numel(obj.domains_)
+                if ~isa(obj.domains_{i}, 'gams.transfer.symbol.domain.Regular')
+                    continue
+                end
+                if ~container.hasSymbols(obj.domains_{i}.name)
+                    obj.domains_{i} = obj.domains_{i}.getRelaxed();
+                    continue
+                end
+                symbol = container.getSymbols(obj.domains_{i}.name);
+                if ~symbol.equals(obj.domains_{i}.symbol)
+                    obj.domains_{i} = obj.domains_{i}.getRelaxed();
+                    continue
+                end
+                obj.domains_{i}.symbol = symbol;
+            end
+        end
 
     end
 

@@ -233,6 +233,7 @@ classdef Parameter < gams.transfer.symbol.Symbol
             end
 
             symbol.copyFrom(obj);
+            symbol.def.switchContainer(destination);
         end
 
     end
@@ -260,7 +261,7 @@ classdef Parameter < gams.transfer.symbol.Symbol
             % and some statistics.
 
             symbols = gams.transfer.utils.validate_cell('symbols', 1, symbols, ...
-                {'gams.transfer.symbol.Parameter'}, 1);
+                {'gams.transfer.symbol.Parameter'}, 1, -1);
 
             descr = struct();
             descr.name = cell(numel(symbols), 1);

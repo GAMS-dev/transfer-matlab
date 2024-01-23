@@ -45,7 +45,7 @@
 %> gams::transfer::symbol::Equation "symbol.Equation"
 classdef (Abstract) Symbol < handle
 
-    properties (Hidden, SetAccess = protected)
+    properties (Hidden, SetAccess = {?gams.transfer.Container, ?gams.transfer.symbol.Symbol})
         container_
         name_ = ''
         description_ = ''
@@ -259,8 +259,8 @@ classdef (Abstract) Symbol < handle
         end
 
         function set.name(obj, name)
-            obj.name_ = obj.validateName('name', 1, name);
-            % obj.container.renameSymbol(obj.name, name);
+            name = obj.validateName('name', 1, name);
+            obj.container.renameSymbol(obj.name, name);
             obj.modified_ = true;
         end
 
@@ -297,6 +297,7 @@ classdef (Abstract) Symbol < handle
             elseif dimension > obj.dimension
                 obj.def_.domains(obj.dimension+1:dimension) = {gams.transfer.symbol.domain.Relaxed(gams.transfer.Constants.UNIVERSE_NAME)};
             end
+            obj.modified_ = true;
         end
 
         function size = get.size(obj)
@@ -320,6 +321,7 @@ classdef (Abstract) Symbol < handle
         function obj = set.domain(obj, domain)
             obj.def_.domains = domain;
             obj.applyDomainForwarding();
+            obj.modified_ = true;
         end
 
         function domain_labels = get.domain_labels(obj)
@@ -327,7 +329,10 @@ classdef (Abstract) Symbol < handle
         end
 
         function obj = set.domain_labels(obj, domain_labels)
+            labels = obj.domain_labels;
             obj.def_.setDomainLabels(domain_labels);
+            obj.data_.renameLabels(labels, obj.domain_labels);
+            obj.modified_ = true;
         end
 
         function domain_names = get.domain_names(obj)
@@ -380,6 +385,7 @@ classdef (Abstract) Symbol < handle
                 obj.def_.domains{i}.forwarding = domain_forwarding(i);
             end
             obj.applyDomainForwarding();
+            obj.modified_ = true;
         end
 
         function records = get.records(obj)
@@ -388,6 +394,7 @@ classdef (Abstract) Symbol < handle
 
         function obj = set.records(obj, records)
             obj.data_.records = records;
+            obj.modified_ = true;
         end
 
         function format = get.format(obj)
@@ -576,7 +583,11 @@ classdef (Abstract) Symbol < handle
             % numeric vector -> interpret as level values in matrix format
             elseif isnumeric(records) && numel(obj.def_.values) > 0
                 assert(isa(obj.def_.values{1}, 'gams.transfer.symbol.value.Numeric'));
-                data = gams.transfer.symbol.data.DenseMatrix.Empty(obj.def_.domains);
+                if issparse(records)
+                    data = gams.transfer.symbol.data.SparseMatrix.Empty(obj.def_.domains);
+                else
+                    data = gams.transfer.symbol.data.DenseMatrix.Empty(obj.def_.domains);
+                end
                 data.records.(obj.def_.values{1}.label) = records;
 
             % cell -> cellstr elements to domains or set element texts and
@@ -675,6 +686,7 @@ classdef (Abstract) Symbol < handle
 
             obj.data_ = data;
             obj.applyDomainForwarding();
+            obj.modified_ = true;
 
         end
 
@@ -888,7 +900,7 @@ classdef (Abstract) Symbol < handle
                 is_pararg = false;
                 while index < nargin
                     if strcmpi(varargin{index}, 'values')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1, -1));
                         values = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'values', validate);
                         index = index + 2;

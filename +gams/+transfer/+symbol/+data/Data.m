@@ -57,7 +57,7 @@ classdef (Abstract) Data < handle
                 is_pararg = false;
                 while index <= nargin
                     if strcmpi(varargin{index}, 'values')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'gams.transfer.symbol.value.Value'}, 1));
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'gams.transfer.symbol.value.Value'}, 1, -1));
                         values = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'values', validate);
                         index = index + 2;
@@ -111,6 +111,7 @@ classdef (Abstract) Data < handle
 
     methods (Abstract)
         name = name(obj)
+        renameLabels(obj, old_labels, new_labels)
         data = copy(obj)
         status = isValid(obj, def)
         nrecs = getNumberRecords(obj, def)

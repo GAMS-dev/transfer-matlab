@@ -8,6 +8,7 @@ GAMS Transfer Matlab v0.9.0
 - TODO: creating a symbol without records will create a empty records struct or table (instead fof []).
 - TODO: setRecords with struct. Domains no longer taken by number of occurance but by domain label.
 - TODO: Resetting symbol domain resets domain properties.
+- TODO: added container property to symbols
 
 GAMS Transfer Matlab v0.8.0
 ==================

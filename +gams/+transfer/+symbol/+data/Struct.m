@@ -60,6 +60,24 @@ classdef Struct < gams.transfer.symbol.data.Tabular
             name = 'struct';
         end
 
+        function renameLabels(obj, old_labels, new_labels)
+            % TODO: check old_labels and new_labels
+            if ~isstruct(obj.records_)
+                error('Cannot rename labels: Records are invalid.');
+            end
+            records = struct();
+            labels = fieldnames(obj.records_);
+            for i = 1:numel(labels)
+                idx = find(strcmp(labels{i}, old_labels), 1, 'first');
+                if isempty(idx)
+                    records.(labels{i}) = obj.records_.(labels{i});
+                else
+                    records.(new_labels{idx}) = obj.records_.(labels{i});
+                end
+            end
+            obj.records = records;
+        end
+
         function def = copy(obj)
             def = gams.transfer.symbol.data.Struct();
             def.copyFrom(obj);

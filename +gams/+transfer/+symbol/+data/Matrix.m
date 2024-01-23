@@ -46,6 +46,24 @@ classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
 
     methods
 
+        function renameLabels(obj, old_labels, new_labels)
+            % TODO: check old_labels and new_labels
+            if ~isstruct(obj.records_)
+                error('Cannot rename labels: Records are invalid.');
+            end
+            records = struct();
+            labels = fieldnames(obj.records_);
+            for i = 1:numel(labels)
+                idx = find(strcmp(labels{i}, old_labels), 1, 'first');
+                if isempty(idx)
+                    records.(labels{i}) = obj.records_.(labels{i});
+                else
+                    records.(new_labels{idx}) = obj.records_.(labels{i});
+                end
+            end
+            obj.records = records;
+        end
+
         function status = isValid(obj, def)
             def = gams.transfer.utils.validate('def', 1, def, {'gams.transfer.symbol.definition.Definition'}, -1);
 

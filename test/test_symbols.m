@@ -1038,14 +1038,14 @@ function test_changeSymbol(t, cfg)
         x1.name = 2;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Name must be of type ''char''.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 1) must be ''string'' or ''char''.');
     end
     try
         t.assert(false);
         x1.name = NaN;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Name must be of type ''char''.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 1) must be ''string'' or ''char''.');
     end
     try
         t.assert(false);
@@ -1075,14 +1075,14 @@ function test_changeSymbol(t, cfg)
         x1.description = 2;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Description must be of type ''char''.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 1) must be ''string'' or ''char''.');
     end
     try
         t.assert(false);
         x1.description = NaN;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Description must be of type ''char''.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 1) must be ''string'' or ''char''.');
     end
 
     t.add('change_symbol_dimension_1');
@@ -1127,28 +1127,28 @@ function test_changeSymbol(t, cfg)
         x1.dimension = '2';
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Dimension must be of type ''numeric''.');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be numeric.');
     end
     try
         t.assert(false);
         x1.dimension = 2.5;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Dimension must be integer.');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be integer.');
     end
     try
         t.assert(false);
         x1.dimension = -1;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Dimension must be within [0,20].');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [1, 20].');
     end
     try
         t.assert(false);
         x1.dimension = 21;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Dimension must be within [0,20].');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [1, 20].');
     end
 
     t.add('change_symbol_dimension_3');
@@ -1236,34 +1236,19 @@ function test_changeSymbol(t, cfg)
     t.add('change_symbol_domain_2');
     try
         t.assert(false);
-        x1.domain = '*';
-    catch e
-        t.reset();
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_set_sym_domain: Domain must be of type ''cell''.');
-        else
-            t.assertEquals(e.message, 'Domain must be of type ''cell''.');
-        end
-    end
-    try
-        t.assert(false);
         x1.domain = {x2};
     catch e
         t.reset();
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_set_sym_domain: Domain entry must be of type ''gams.transfer.Set'', ''gams.transfer.Alias'', ''gams.transfer.UniverseAlias'' or ''char''.');
-        else
-            t.assertEquals(e.message, 'Domain entry must be of type ''gams.transfer.Set'', ''gams.transfer.Alias'', ''gams.transfer.UniverseAlias'' or ''char''.');
-        end
+        t.assertEquals(e.message, 'Argument ''domains'' (at position 1, element 1) must be ''gams.transfer.symbol.domain.Domain'', ''gams.transfer.symbol.Set'', ''char'' or ''string''.');
     end
 
     t.add('change_symbol_domain_labels_1');
     x1.domain = {i2};
     x1.records = struct();
     if gams.transfer.Constants.SUPPORTS_CATEGORICAL
-        x1.records.i = categorical({'i21', 'i22', 'i23'})';
+        x1.records.i2 = categorical({'i21', 'i22', 'i23'})';
     else
-        x1.records.i = [1; 2; 3];
+        x1.records.i2 = [1; 2; 3];
     end
     x1.records.level = [1; 2; 3];
     t.assert(x1.isValid());
@@ -1271,8 +1256,8 @@ function test_changeSymbol(t, cfg)
     t.assert(numel(x1.domain) == 1);
     t.assertEquals(x1.domain{1}, i2);
     t.assertEquals(x1.domain{1}.name, 'i2');
-    t.assertEquals(x1.domain_labels{1}, 'i');
-    t.assert(isfield(x1.records, 'i'));
+    t.assertEquals(x1.domain_labels{1}, 'i2');
+    t.assert(isfield(x1.records, 'i2'));
     t.assert(~isfield(x1.records, 'first'));
     t.assert(~gdx.modified);
     t.assert(~i1.modified);
@@ -1287,7 +1272,7 @@ function test_changeSymbol(t, cfg)
     t.assertEquals(x1.domain{1}.name, 'i2');
     t.assertEquals(x1.domain_labels{1}, 'first');
     t.assert(isfield(x1.records, 'first'));
-    t.assert(~isfield(x1.records, 'i'));
+    t.assert(~isfield(x1.records, 'i2'));
     t.assert(gdx.modified);
     t.assert(~i1.modified);
     t.assert(~i2.modified);
@@ -1346,21 +1331,14 @@ function test_changeSymbol(t, cfg)
         x1.domain_labels = '*';
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain labels must be of type ''cellstr''.');
+        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must be cell.');
     end
     try
         t.assert(false);
         x1.domain_labels = {'*'};
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain labels must have length equal to symbol dimension.');
-    end
-    try
-        t.assert(false);
-        x1.domain_labels = {'*', '*'};
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain labels must be unique.');
+        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must be cell with 2 elements.');
     end
 
     t.add('change_symbol_size');
@@ -1488,7 +1466,7 @@ function test_copySymbol(t, cfg)
         a.copy(gdx2);
     catch ex
         t.reset();
-        t.assertEquals(ex.message, 'Aliased symbol not available or differs in destination.');
+        t.assertEquals(ex.message, 'Aliased symbol not available in destination');
     end
 
     t.add('copy_symbol_alias_empty_2');
@@ -1534,7 +1512,7 @@ function test_copySymbol(t, cfg)
         a.copy(gdx2, false);
     catch ex
         t.reset();
-        t.assertEquals(ex.message, 'Symbol already exists in destination.');
+        t.assertEquals(ex.message, 'Aliased symbol not available in destination');
     end
 
     t.add('copy_symbol_variable_empty_1');
@@ -1553,7 +1531,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.x.domain{1}, 'i');
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
     t.assert(~gdx2.data.x.domain_forwarding(1));
-    t.assertEquals(gdx2.data.x.format, 'empty');
+    t.assertEquals(gdx2.data.x.format, 'struct');
     t.assert(~x.modified);
     t.assert(gdx2.data.x.modified);
     t.assert(~gdx.modified);
@@ -1576,7 +1554,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.data.x.domain{1} == gdx2.data.i);
     t.assertEquals(gdx2.data.x.domain_type, 'regular');
     t.assert(~gdx2.data.x.domain_forwarding(1));
-    t.assertEquals(gdx2.data.x.format, 'empty');
+    t.assertEquals(gdx2.data.x.format, 'struct');
     t.assert(~x.modified);
     t.assert(gdx2.data.x.modified);
     t.assert(~gdx.modified);
@@ -1599,7 +1577,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.x.domain{1}, 'i');
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
     t.assert(~gdx2.data.x.domain_forwarding(1));
-    t.assertEquals(gdx2.data.x.format, 'empty');
+    t.assertEquals(gdx2.data.x.format, 'struct');
     t.assert(~x.modified);
     t.assert(gdx2.data.x.modified);
     t.assert(~gdx.modified);
@@ -1645,7 +1623,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.domain_type, 'relaxed');
     t.assert(~gdx2.data.e.domain_forwarding(1));
     t.assert(~gdx2.data.e.domain_forwarding(2));
-    t.assertEquals(gdx2.data.e.format, 'empty');
+    t.assertEquals(gdx2.data.e.format, 'struct');
     t.assert(~e.modified);
     t.assert(gdx2.data.e.modified);
     t.assert(~gdx.modified);
@@ -1672,7 +1650,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.domain_type, 'regular');
     t.assert(~gdx2.data.e.domain_forwarding(1));
     t.assert(~gdx2.data.e.domain_forwarding(2));
-    t.assertEquals(gdx2.data.e.format, 'empty');
+    t.assertEquals(gdx2.data.e.format, 'struct');
     t.assert(~e.modified);
     t.assert(gdx2.data.e.modified);
     t.assert(~gdx.modified);
@@ -1698,7 +1676,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.domain_type, 'relaxed');
     t.assert(~gdx2.data.e.domain_forwarding(1));
     t.assert(~gdx2.data.e.domain_forwarding(2));
-    t.assertEquals(gdx2.data.e.format, 'empty');
+    t.assertEquals(gdx2.data.e.format, 'struct');
     t.assert(~e.modified);
     t.assert(gdx2.data.e.modified);
     t.assert(~gdx.modified);
@@ -2833,7 +2811,11 @@ function test_reorder(t, cfg)
     end
 
     s2.domain = {s1};
+    s2.records.s1 = s2.records.uni;
+    s2.records = rmfield(s2.records, 'uni');
     s3.domain = {s4};
+    s3.records.s4 = s3.records.uni;
+    s3.records = rmfield(s3.records, 'uni');
 
     t.add('reorder_2');
     t.assert(numel(fieldnames(gdx.data)) == 4);
@@ -2844,10 +2826,10 @@ function test_reorder(t, cfg)
     t.assertEquals(fields{4}, 's4');
     try
         t.assert(false);
-        s3.isValid(2);
+        gdx.isValid();
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain set ''s4'' is out of order: Try calling the Container method reorderSymbols().');
+        t.assertEquals(e.message, 'Domain ''s4'' of symbol ''s3'' is out of order. Try calling Container.reorderSymbols().');
     end
 
     gdx.modified = false;
@@ -2872,7 +2854,9 @@ function test_reorder(t, cfg)
     end
 
     s2.domain = {s3};
-    s3.domain = {s4};
+    s2.records.s3 = s2.records.s1;
+    s2.records = rmfield(s2.records, 's1');
+
     gdx.modified = false;
     gdx.reorderSymbols();
 
@@ -2914,10 +2898,10 @@ function test_reorder(t, cfg)
     t.add('reorder_6');
     try
         t.assert(false);
-        s1.isValid(2);
+        gdx.isValid();
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain set ''s1'' is out of order: Try calling the Container method reorderSymbols().');
+        t.assertEquals(e.message, 'Domain ''s1'' of symbol ''s1'' is out of order. Try calling Container.reorderSymbols().');
     end
     try
         t.assert(false);

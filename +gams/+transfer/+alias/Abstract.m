@@ -160,7 +160,7 @@ classdef Abstract < handle
         function descr = describe(symbols)
 
             symbols = gams.transfer.utils.validate_cell('symbols', 1, symbols, ...
-                {'gams.transfer.alias.Abstract'}, 1);
+                {'gams.transfer.alias.Abstract'}, 1, -1);
 
             descr = struct();
             descr.name = cell(numel(symbols), 1);

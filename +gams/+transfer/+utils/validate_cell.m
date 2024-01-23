@@ -1,6 +1,10 @@
-function arg = validate_cell(name, index, arg, classes, dim)
+function arg = validate_cell(name, index, arg, classes, dim, n_elem)
     if ~iscell(arg)
         error('Argument ''%s'' (at position %d) must be cell.', name, index);
+    end
+
+    if n_elem >= 0 && numel(arg) ~= n_elem
+        error('Argument ''%s'' (at position %d) must be cell with %d elements.', name, index, n_elem);
     end
 
     for k = 1:numel(arg)

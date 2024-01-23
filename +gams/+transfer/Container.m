@@ -370,7 +370,7 @@ classdef Container < handle
                 is_pararg = false;
                 while index < nargin
                     if strcmpi(varargin{index}, 'symbols')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1, -1));
                         symbols_in = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'symbols', validate);
                         symbols = container.listSymbols();
@@ -470,7 +470,7 @@ classdef Container < handle
                 is_pararg = false;
                 while index < nargin
                     if strcmpi(varargin{index}, 'symbols')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1, -1));
                         symbols = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'symbols', validate);
                         has_symbols = true;
@@ -489,7 +489,7 @@ classdef Container < handle
                         index = index + 2;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'values')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1, -1));
                         values = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'values', validate);
                         index = index + 2;
@@ -618,7 +618,7 @@ classdef Container < handle
                 else
                     new_symbol.domain = symbol.domain;
                 end
-                if isfield(symbol, 'domain_labels')
+                if isfield(symbol, 'domain_labels') && numel(symbol.domain_labels) == symbol.dimension
                     new_symbol.domain_labels = symbol.domain_labels;
                 end
 
@@ -726,14 +726,14 @@ classdef Container < handle
                 is_pararg = false;
                 while index < nargin
                     if strcmpi(varargin{index}, 'symbols')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1, -1));
                         symbols = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'symbols', validate);
                         has_symbols = true;
                         index = index + 2;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'uel_priority')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1));
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1, -1));
                         uel_priority = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'uel_priority', validate);
                         index = index + 2;
@@ -2005,11 +2005,18 @@ classdef Container < handle
             if strcmp(oldname, newname)
                 return
             end
+            try
+                newname = gams.transfer.symbol.Symbol.validateName('newname', 2, newname);
+            catch e
+                error(e.message);
+            end
+
             if obj.hasSymbols(newname) && ~strcmpi(newname, oldname)
                 error('Symbol ''%s'' already exists.', newname);
             end
             symbol = obj.data_.rename(oldname, newname);
-            symbol.name = newname;
+            symbol.name_ = newname;
+            symbol.modified = true;
         end
 
         %> Removes a symbol from container
@@ -2156,7 +2163,7 @@ classdef Container < handle
                     % find next available
                     next_avail = find(set_avail(idx(n_handled+1:end)), 1);
                     if isempty(next_avail)
-                        l = gams.transfer.Utils.list2str(sets(idx(n_handled+1:end)));
+                        l = gams.transfer.utils.list2str(sets(idx(n_handled+1:end)));
                         error('Circular domain set dependency in: %s.', l);
                     end
                     next_avail = next_avail + n_handled;
@@ -2170,6 +2177,7 @@ classdef Container < handle
 
             % apply permutation
             obj.data_.reorder([idx_sets, idx_other]);
+            obj.modified_ = true;
 
             % force recheck of all remaining symbols in container
             obj.isValid(false, true);
@@ -2331,6 +2339,7 @@ classdef Container < handle
             % See also: gams.transfer.Symbol/isValid
 
             % input arguments
+            % TODO: replace input parser and allow 2 for verbose and fix error to warning below (dependent of verbose)
             p = inputParser();
             addOptional(p, 'verbose', false, @islogical);
             addOptional(p, 'force', false, @islogical);
@@ -2346,6 +2355,19 @@ classdef Container < handle
 
             valid = true;
             for i = 1:numel(symbols)
+                % check correct order of symbols
+                if isa(symbols{i}, 'gams.transfer.symbol.Symbol')
+                    for j = 1:numel(symbols{i}.def.domains)
+                        domain = symbols{i}.def.domains{j};
+                        if ~isa(domain, 'gams.transfer.symbol.domain.Regular')
+                            continue
+                        end
+                        if ~gams.transfer.gdx.gt_check_sym_order(obj.data_.entries, domain.name, symbols{i}.name);
+                            error('Domain ''%s'' of symbol ''%s'' is out of order. Try calling Container.reorderSymbols().', domain.name, symbols{i}.name);
+                        end
+                    end
+                end
+
                 if symbols{i}.isValid(verbose, force)
                     continue
                 end
