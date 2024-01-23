@@ -142,6 +142,10 @@ classdef Abstract < handle
         upperUELs(obj)
     end
 
+    methods (Abstract, Hidden)
+        copyFrom(obj, symbol)
+    end
+
     methods
 
         function eq = equals(obj, symbol)

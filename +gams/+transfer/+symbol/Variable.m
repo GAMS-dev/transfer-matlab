@@ -121,11 +121,10 @@ classdef Variable < gams.transfer.symbol.Symbol
 
         function default_values = get.default_values(obj)
             default_values = struct();
-            default_values.level = obj.def_.values.level.default;
-            default_values.marginal = obj.def_.values.marginal.default;
-            default_values.lower = obj.def_.values.lower.default;
-            default_values.upper = obj.def_.values.upper.default;
-            default_values.scale = obj.def_.values.scale.default;
+            values = obj.def_.values;
+            for i = 1:numel(values)
+                default_values.(values{i}.label) = values{i}.default;
+            end
         end
 
     end
@@ -250,6 +249,7 @@ classdef Variable < gams.transfer.symbol.Symbol
             %    Overwrites symbol with same name in destination if true. Default: false.
 
             % parse input arguments
+            overwrite = false;
             try
                 validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'gams.transfer.Container'}, -1));
                 destination = gams.transfer.utils.parse_argument(varargin, ...

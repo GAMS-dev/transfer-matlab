@@ -87,6 +87,21 @@ classdef (Abstract) Symbol < handle
             end
         end
 
+        function arg = validateDimension(name, index, arg)
+            if ~isnumeric(arg)
+                error('Argument ''%s'' (at position %d) must be numeric.', name, index);
+            end
+            if ~isscalar(arg)
+                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
+            end
+            if round(arg) ~= arg
+                error('Argument ''%s'' (at position %d) must be integer.', name, index);
+            end
+            if arg < 0 || arg > gams.transfer.Constants.MAX_DIMENSION
+                error('Argument ''%s'' (at position %d) must be in [1, %d].', name, index, gams.transfer.Constants.MAX_DIMENSION);
+            end
+        end
+
         function arg = validateDef(name, index, arg)
             if ~isa(arg, 'gams.transfer.symbol.definition.Definition')
                 error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.definition.Definition''.', name, index);
@@ -130,7 +145,7 @@ classdef (Abstract) Symbol < handle
         description
     end
 
-    properties (Dependent, Hidden)
+    properties  (Dependent, Hidden)
         def
         data
     end
@@ -275,6 +290,15 @@ classdef (Abstract) Symbol < handle
             dimension = obj.def_.dimension();
         end
 
+        function set.dimension(obj, dimension)
+            dimension = obj.validateDimension('dimension', 1, dimension);
+            if dimension < obj.dimension
+                obj.def_.domains = obj.def_.domains(1:dimension);
+            elseif dimension > obj.dimension
+                obj.def_.domains(obj.dimension+1:dimension) = {gams.transfer.symbol.domain.Relaxed(gams.transfer.Constants.UNIVERSE_NAME)};
+            end
+        end
+
         function size = get.size(obj)
             size = obj.def_.size();
         end
@@ -320,19 +344,19 @@ classdef (Abstract) Symbol < handle
                 case 'gams.transfer.symbol.domain.Regular'
                     is_none = false;
                 case 'gams.transfer.symbol.domain.Relaxed'
-                    is_regular = false;
                     if ~strcmp(domains{i}.name, gams.transfer.Constants.UNIVERSE_NAME)
                         is_none = false;
+                        is_regular = false;
                     end
                 otherwise
                     error('Unknown domain type: %s', class(domains{i}));
                 end
             end
 
-            if is_regular
-                domain_type = 'regular';
-            elseif is_none
+            if is_none
                 domain_type = 'none';
+            elseif is_regular
+                domain_type = 'regular';
             else
                 domain_type = 'relaxed';
             end
@@ -340,15 +364,19 @@ classdef (Abstract) Symbol < handle
 
         function domain_forwarding = get.domain_forwarding(obj)
             dim = obj.dimension;
-            domain_forwarding = false;
+            domain_forwarding = false(1, dim);
             for i = 1:dim
-                domain_forwarding = domain_forwarding || obj.def_.domains{i}.forwarding;
+                domain_forwarding(i) = obj.def_.domains{i}.forwarding;
             end
         end
 
         function obj = set.domain_forwarding(obj, domain_forwarding)
-            for i = 1:obj.dimension
-                obj.def_.domains{i}.forwarding = domain_forwarding;
+            dim = obj.dimension;
+            if numel(domain_forwarding) == 1
+                domain_forwarding = false(1, dim) | domain_forwarding;
+            end
+            for i = 1:dim
+                obj.def_.domains{i}.forwarding = domain_forwarding(i);
             end
         end
 
@@ -565,7 +593,7 @@ classdef (Abstract) Symbol < handle
                             error('Too many value fields in records.');
                         end
                         data.records.(obj.def_.values{n_values}.label) = records{i}(:);
-                    % elseif iscellstr(records{i})
+                    elseif iscellstr(records{i})
                     %     n_domains = n_domains + 1;
                     %     if n_dom_fields == obj.dimension_ + 1 && isa(obj, 'gams.transfer.Set')
                     %         obj.setRecordsTextField(records{i});

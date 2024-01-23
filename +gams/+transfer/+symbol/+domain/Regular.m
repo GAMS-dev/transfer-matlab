@@ -42,6 +42,9 @@ classdef Regular < gams.transfer.symbol.domain.Domain
             if ~isa(arg, 'gams.transfer.symbol.Set') && ~isa(arg, 'gams.transfer.alias.Abstract')
                 error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Set'' or ''gams.transfer.alias.Abstract''.', name, index);
             end
+            if arg.dimension ~= 1
+                error('Argument ''%s'' (at position %d) must be symbol with dimension 1.', name, index);
+            end
         end
 
     end

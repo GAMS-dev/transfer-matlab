@@ -112,7 +112,7 @@ classdef Set < gams.transfer.alias.Abstract
         end
 
         function set.alias_with(obj, alias_with)
-            obj.alias_with_ = obj.validateAliasWith('alias_with', 1, alias_with)
+            obj.alias_with_ = obj.validateAliasWith('alias_with', 1, alias_with);
             obj.modified_ = true;
         end
 
@@ -251,6 +251,27 @@ classdef Set < gams.transfer.alias.Abstract
                 symbol = destination.addAlias(obj.name_, alias_with);
             end
         end
+
+    end
+
+    methods (Hidden)
+
+        function copyFrom(obj, symbol)
+
+            % parse input arguments
+            try
+                symbol = gams.transfer.utils.validate('symbol', 1, symbol, {class(obj)}, -1);
+            catch e
+                error(e.message);
+            end
+
+            obj.alias_with_ = symbol.alias_with;
+            obj.modified_ = true;
+        end
+
+    end
+
+    methods
 
         function setRecords(obj, varargin)
             obj.alias_with_.setRecords(varargin{:});

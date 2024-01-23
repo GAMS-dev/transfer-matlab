@@ -190,6 +190,7 @@ classdef Parameter < gams.transfer.symbol.Symbol
             %    Overwrites symbol with same name in destination if true. Default: false.
 
             % parse input arguments
+            overwrite = false;
             try
                 validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'gams.transfer.Container'}, -1));
                 destination = gams.transfer.utils.parse_argument(varargin, ...

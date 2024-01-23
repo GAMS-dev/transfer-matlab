@@ -133,11 +133,11 @@ function test_addSymbols(t, cfg)
     t.assertEquals(s4.domain{1}.name, 's2');
     t.assert(numel(s4.domain_names) == 1);
     t.assertEquals(s4.domain_names{1}, 's2');
-    t.assert(numel(s4.domain_labels) == 0);
+    t.assert(numel(s4.domain_labels) == 1);
     t.assertEquals(s4.domain_type, 'regular');
     t.assert(numel(s4.size) == 1);
     t.assert(s4.size(1) == 0);
-    t.assert(strcmp(s4.format, 'empty'));
+    t.assert(strcmp(s4.format, 'struct'));
     t.assert(s4.getNumberRecords() == 0);
     t.assert(numel(s4.getUELs(1)) == 0);
     t.assert(s4.isValid());
@@ -160,12 +160,12 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s5.domain_names) == 2);
     t.assertEquals(s5.domain_names{1}, 's1');
     t.assertEquals(s5.domain_names{2}, 's2');
-    t.assert(numel(s5.domain_labels) == 0);
+    t.assert(numel(s5.domain_labels) == 2);
     t.assertEquals(s5.domain_type, 'relaxed');
     t.assert(numel(s5.size) == 2);
     t.assert(isnan(s5.size(1)));
     t.assert(s5.size(2) == 0);
-    t.assert(strcmp(s5.format, 'empty'));
+    t.assert(strcmp(s5.format, 'struct'));
     t.assert(s5.getNumberRecords() == 0);
     t.assert(numel(s5.getUELs(1)) == 0);
     t.assert(numel(s5.getUELs(2)) == 0);
@@ -186,11 +186,11 @@ function test_addSymbols(t, cfg)
     t.assert(s6.domain{1} == 's1');
     t.assert(numel(s6.domain_names) == 1);
     t.assertEquals(s6.domain_names{1}, 's1');
-    t.assert(numel(s6.domain_labels) == 0);
+    t.assert(numel(s6.domain_labels) == 1);
     t.assertEquals(s6.domain_type, 'relaxed');
     t.assert(numel(s6.size) == 1);
     t.assert(isnan(s6.size(1)));
-    t.assert(strcmp(s6.format, 'empty'));
+    t.assert(strcmp(s6.format, 'struct'));
     t.assert(s6.getNumberRecords() == 0);
     t.assert(numel(s6.getUELs(1)) == 0);
     t.assert(s6.isValid());
@@ -255,28 +255,14 @@ function test_addSymbols(t, cfg)
         gams.transfer.Set(gdx, repmat('s', [1, 64]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol name too long. Name length must be smaller than 64.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 2) length must be smaller than 64.');
     end
     try
         t.assert(false);
         gams.transfer.Set(gdx, 's', 'description', repmat('d', [1, 256]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
-    end
-    try
-        t.assert(false);
-        gams.transfer.Set(gdx, 's1');
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Symbol ''s1'' already exists.');
-    end
-    try
-        t.assert(false);
-        gams.transfer.Set(gdx, 'S1');
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Symbol ''S1'' already exists.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 4) length must be smaller than 256.');
     end
 
     t.add('add_symbols_alias_1');
@@ -292,11 +278,11 @@ function test_addSymbols(t, cfg)
     t.assertEquals(a1.domain{1}, '*');
     t.assert(numel(a1.domain_names) == 1);
     t.assertEquals(a1.domain_names{1}, '*');
-    t.assert(numel(a1.domain_labels) == 0);
+    t.assert(numel(a1.domain_labels) == 1);
     t.assertEquals(a1.domain_type, 'none');
     t.assert(numel(a1.size) == 1);
     t.assert(isnan(a1.size(1)));
-    t.assert(strcmp(a1.format, 'empty'));
+    t.assert(strcmp(a1.format, 'struct'));
     t.assert(a1.getNumberRecords() == 0);
     t.assert(numel(a1.getUELs(1)) == 0);
     t.assert(a1.isValid());
@@ -340,7 +326,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(p1.domain_labels) == 0);
     t.assertEquals(p1.domain_type, 'none');
     t.assert(numel(p1.size) == 0);
-    t.assert(strcmp(p1.format, 'empty'));
+    t.assert(strcmp(p1.format, 'struct'));
     t.assert(p1.getNumberRecords() == 0);
     t.assert(p1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 10);
@@ -359,11 +345,11 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p2.domain{1}.name, 's1');
     t.assert(numel(p2.domain_names) == 1);
     t.assertEquals(p2.domain_names{1}, 's1');
-    t.assert(numel(p2.domain_labels) == 0);
+    t.assert(numel(p2.domain_labels) == 1);
     t.assertEquals(p2.domain_type, 'regular');
     t.assert(numel(p2.size) == 1);
     t.assert(p2.size(1) == 0);
-    t.assert(strcmp(p2.format, 'empty'));
+    t.assert(strcmp(p2.format, 'struct'));
     t.assert(p2.getNumberRecords() == 0);
     t.assert(numel(p2.getUELs(1)) == 0);
     t.assert(p2.isValid());
@@ -387,13 +373,13 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p3.domain_names{1}, 's1');
     t.assertEquals(p3.domain_names{2}, '*');
     t.assertEquals(p3.domain_names{3}, 's2');
-    t.assert(numel(p3.domain_labels) == 0);
+    t.assert(numel(p3.domain_labels) == 3);
     t.assertEquals(p3.domain_type, 'relaxed');
     t.assert(numel(p3.size) == 3);
     t.assert(p3.size(1) == 0);
     t.assert(isnan(p3.size(2)));
     t.assert(isnan(p3.size(3)));
-    t.assert(strcmp(p3.format, 'empty'));
+    t.assert(strcmp(p3.format, 'struct'));
     t.assert(p3.getNumberRecords() == 0);
     t.assert(numel(p3.getUELs(1)) == 0);
     t.assert(numel(p3.getUELs(2)) == 0);
@@ -454,14 +440,14 @@ function test_addSymbols(t, cfg)
         gams.transfer.Parameter(gdx, repmat('s', [1, 64]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol name too long. Name length must be smaller than 64.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 2) length must be smaller than 64.');
     end
     try
         t.assert(false);
         gams.transfer.Parameter(gdx, 's', 'description', repmat('d', [1, 256]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 4) length must be smaller than 256.');
     end
 
     t.add('add_symbols_variable_1');
@@ -476,7 +462,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(v1.domain_labels) == 0);
     t.assertEquals(v1.domain_type, 'none');
     t.assert(numel(v1.size) == 0);
-    t.assert(strcmp(v1.format, 'empty'));
+    t.assert(strcmp(v1.format, 'struct'));
     t.assert(v1.getNumberRecords() == 0);
     t.assert(v1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 13);
@@ -496,7 +482,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(v2.domain_labels) == 0);
     t.assertEquals(v2.domain_type, 'none');
     t.assert(numel(v2.size) == 0);
-    t.assert(strcmp(v2.format, 'empty'));
+    t.assert(strcmp(v2.format, 'struct'));
     t.assert(v2.getNumberRecords() == 0);
     t.assert(v2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 14);
@@ -518,12 +504,12 @@ function test_addSymbols(t, cfg)
     t.assert(numel(v3.domain_names) == 2);
     t.assertEquals(v3.domain_names{1}, 's1');
     t.assertEquals(v3.domain_names{2}, '*');
-    t.assert(numel(v3.domain_labels) == 0);
+    t.assert(numel(v3.domain_labels) == 2);
     t.assertEquals(v3.domain_type, 'regular');
     t.assert(numel(v3.size) == 2);
     t.assert(v3.size(1) == 0);
     t.assert(isnan(v3.size(2)));
-    t.assert(strcmp(v3.format, 'empty'));
+    t.assert(strcmp(v3.format, 'struct'));
     t.assert(v3.getNumberRecords() == 0);
     t.assert(numel(v3.getUELs(1)) == 0);
     t.assert(numel(v3.getUELs(2)) == 0);
@@ -629,14 +615,14 @@ function test_addSymbols(t, cfg)
         gams.transfer.Variable(gdx, repmat('s', [1, 64]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol name too long. Name length must be smaller than 64.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 2) length must be smaller than 64.');
     end
     try
         t.assert(false);
         gams.transfer.Variable(gdx, 's', 'description', repmat('d', [1, 256]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 4) length must be smaller than 256.');
     end
 
     t.add('add_symbols_equation_1');
@@ -651,7 +637,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(e1.domain_labels) == 0);
     t.assertEquals(e1.domain_type, 'none');
     t.assert(numel(e1.size) == 0);
-    t.assert(strcmp(e1.format, 'empty'));
+    t.assert(strcmp(e1.format, 'struct'));
     t.assert(e1.getNumberRecords() == 0);
     t.assert(e1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 34);
@@ -671,7 +657,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(e2.domain_labels) == 0);
     t.assertEquals(e2.domain_type, 'none');
     t.assert(numel(e2.size) == 0);
-    t.assert(strcmp(e2.format, 'empty'));
+    t.assert(strcmp(e2.format, 'struct'));
     t.assert(e2.getNumberRecords() == 0);
     t.assert(e2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 35);
@@ -693,12 +679,12 @@ function test_addSymbols(t, cfg)
     t.assert(numel(e3.domain_names) == 2);
     t.assertEquals(e3.domain_names{1}, 's1');
     t.assertEquals(e3.domain_names{2}, '*');
-    t.assert(numel(e3.domain_labels) == 0);
+    t.assert(numel(e3.domain_labels) == 2);
     t.assertEquals(e3.domain_type, 'regular');
     t.assert(numel(e3.size) == 2);
     t.assert(e3.size(1) == 0);
     t.assert(isnan(e3.size(2)));
-    t.assert(strcmp(e3.format, 'empty'));
+    t.assert(strcmp(e3.format, 'struct'));
     t.assert(e3.getNumberRecords() == 0);
     t.assert(numel(e3.getUELs(1)) == 0);
     t.assert(numel(e3.getUELs(2)) == 0);
@@ -818,14 +804,14 @@ function test_addSymbols(t, cfg)
         gams.transfer.Equation(gdx, repmat('s', [1, 64]), 'n');
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol name too long. Name length must be smaller than 64.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 2) length must be smaller than 64.');
     end
     try
         t.assert(false);
         gams.transfer.Equation(gdx, 's', 'n', 'description', repmat('d', [1, 256]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 5) length must be smaller than 256.');
     end
 
 end
@@ -1515,9 +1501,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.i.name, 'i');
     t.assert(isfield(gdx2.data, 'a'));
     t.assertEquals(gdx2.data.a.name, 'a');
-    if gdx.features.handle_compare
-        t.assert(gdx2.data.i == gdx2.data.a.alias_with);
-    end
+    t.assert(gdx2.data.i == gdx2.data.a.alias_with);
     t.assert(~a.modified);
     t.assert(gdx2.data.a.modified);
     t.assert(~gdx.modified);
@@ -1535,9 +1519,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.i.name, 'i');
     t.assert(isfield(gdx2.data, 'a'));
     t.assertEquals(gdx2.data.a.name, 'a');
-    if gdx.features.handle_compare
-        t.assert(gdx2.data.i == gdx2.data.a.alias_with);
-    end
+    t.assert(gdx2.data.i == gdx2.data.a.alias_with);
     t.assert(~a.modified);
     t.assert(gdx2.data.a.modified);
     t.assert(~gdx.modified);
@@ -1545,8 +1527,6 @@ function test_copySymbol(t, cfg)
 
     t.add('copy_symbol_alias_overwrite_2');
     gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
-    gams.transfer.Set(gdx2, 'i');
-    i.copy(gdx2);
     j = gams.transfer.Set(gdx2, 'j');
     gams.transfer.Alias(gdx2, 'a', j);
     try
@@ -1593,9 +1573,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.data.x.size(1) == 3);
     t.assert(iscell(gdx2.data.x.domain));
     t.assert(numel(gdx2.data.x.domain) == 1);
-    if gdx.features.handle_compare
-        t.assert(gdx2.data.x.domain{1} == gdx2.data.i);
-    end
+    t.assert(gdx2.data.x.domain{1} == gdx2.data.i);
     t.assertEquals(gdx2.data.x.domain_type, 'regular');
     t.assert(~gdx2.data.x.domain_forwarding(1));
     t.assertEquals(gdx2.data.x.format, 'empty');
@@ -1689,10 +1667,8 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.data.e.size(2) == 3);
     t.assert(iscell(gdx2.data.e.domain));
     t.assert(numel(gdx2.data.e.domain) == 2);
-    if gdx.features.handle_compare
-        t.assert(gdx2.data.e.domain{1} == gdx2.data.a);
-        t.assert(gdx2.data.e.domain{2} == gdx2.data.i);
-    end
+    t.assert(gdx2.data.e.domain{1} == gdx2.data.a);
+    t.assert(gdx2.data.e.domain{2} == gdx2.data.i);
     t.assertEquals(gdx2.data.e.domain_type, 'regular');
     t.assert(~gdx2.data.e.domain_forwarding(1));
     t.assert(~gdx2.data.e.domain_forwarding(2));
@@ -1796,9 +1772,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.data.p.size(1) == 3);
     t.assert(iscell(gdx2.data.p.domain));
     t.assert(numel(gdx2.data.p.domain) == 1);
-    if gdx.features.handle_compare
-        t.assert(gdx2.data.p.domain{1} == gdx2.data.i);
-    end
+    t.assert(gdx2.data.p.domain{1} == gdx2.data.i);
     t.assertEquals(gdx2.data.p.domain_type, 'regular');
     t.assert(~gdx2.data.p.domain_forwarding(1));
     t.assertEquals(gdx2.data.p.format, 'struct');

@@ -215,6 +215,24 @@ classdef Universe < gams.transfer.alias.Abstract
             end
         end
 
+    end
+
+    methods (Hidden)
+
+        function copyFrom(obj, symbol)
+
+            % parse input arguments
+            try
+                symbol = gams.transfer.utils.validate('symbol', 1, symbol, {class(obj)}, -1);
+            catch e
+                error(e.message);
+            end
+        end
+
+    end
+
+    methods
+
         function flag = isValid(obj, varargin)
 
             verbose = 0;
