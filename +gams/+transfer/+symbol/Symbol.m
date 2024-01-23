@@ -319,6 +319,7 @@ classdef (Abstract) Symbol < handle
 
         function obj = set.domain(obj, domain)
             obj.def_.domains = domain;
+            obj.applyDomainForwarding();
         end
 
         function domain_labels = get.domain_labels(obj)
@@ -378,6 +379,7 @@ classdef (Abstract) Symbol < handle
             for i = 1:dim
                 obj.def_.domains{i}.forwarding = domain_forwarding(i);
             end
+            obj.applyDomainForwarding();
         end
 
         function records = get.records(obj)
@@ -551,11 +553,8 @@ classdef (Abstract) Symbol < handle
                     error('Single string as records only accepted if symbol dimension equals 1.');
                 end
                 domain = obj.def_.domains{1};
-                if domain.HOLDS_UNIQUE_LABELS
-                    domain.unique_labels = gams.transfer.unique_labels.Dictionary({records});
-                end
                 data = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
-                data.records.(domain.label) = domain.createIndex(index_type, {records});
+                data.records.(domain.label) = domain.createIndex(index_type, {records}, true);
                 % TODO: release unique labels if categorical
 
             % cell of strings -> domain entries
@@ -570,7 +569,7 @@ classdef (Abstract) Symbol < handle
                     if domain.HOLDS_UNIQUE_LABELS
                         domain.unique_labels = gams.transfer.unique_labels.Dictionary(records(i,:));
                     end
-                    data.records.(domain.label) = domain.createIndex(index_type, records(i,:));
+                    data.records.(domain.label) = domain.createIndex(index_type, records(i,:), true);
                     % TODO: release unique labels if categorical
                 end
 
@@ -583,28 +582,57 @@ classdef (Abstract) Symbol < handle
             % cell -> cellstr elements to domains or set element texts and
             % numeric vector to values
             elseif iscell(records)
-                n_values = 0;
                 n_domains = 0;
+                values_used = false(1, numel(obj.def_.values));
                 data = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
+
                 for i = 1:numel(records)
+                    stored_record = false;
+
                     if isnumeric(records{i})
-                        n_values = n_values + 1;
-                        if n_values > numel(obj.def_.values)
+                        % find numeric value
+                        for j = 1:numel(obj.def_.values)
+                            value = obj.def_.values{j};
+                            if isa(value, 'gams.transfer.symbol.value.Numeric') && ~values_used(j)
+                                data.records.(value.label) = records{i}(:);
+                                values_used(j) = true;
+                                stored_record = true;
+                                break;
+                            end
+                        end
+                        if ~stored_record
                             error('Too many value fields in records.');
                         end
-                        data.records.(obj.def_.values{n_values}.label) = records{i}(:);
                     elseif iscellstr(records{i})
-                    %     n_domains = n_domains + 1;
-                    %     if n_dom_fields == obj.dimension_ + 1 && isa(obj, 'gams.transfer.Set')
-                    %         obj.setRecordsTextField(records{i});
-                    %         continue
-                    %     end
-                    %     if n_dom_fields > obj.dimension_
-                    %         error('More domain fields than symbol dimension.');
-                    %     end
-                    %     [~,uidx,~] = unique(records{i}, 'first');
-                    %     uels{n_dom_fields} = records{i}(sort(uidx));
-                    %     obj.setRecordsDomainField(domain_labels{n_dom_fields}, uels{n_dom_fields}, records{i});
+                        n_domains = n_domains + 1;
+
+                        % used all domains -> look for string values
+                        if n_domains > obj.dimension
+                            for j = 1:numel(obj.def_.values)
+                                value = obj.def_.values{j};
+                                if isa(value, 'gams.transfer.symbol.value.String') && ~values_used(j)
+                                    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
+                                        data.records.(value.label) = categorical(records{i}(:));
+                                    else
+                                        data.records.(value.label) = records{i}(:);
+                                    end
+                                    values_used(j) = true;
+                                    stored_record = true;
+                                    break;
+                                end
+                            end
+                            if ~stored_record
+                                error('More cellstr values than domains and string value fields.');
+                            end
+                            continue
+                        end
+
+                        domain = obj.def_.domains{n_domains};
+                        if domain.HOLDS_UNIQUE_LABELS
+                            domain.unique_labels = gams.transfer.unique_labels.Dictionary(records{i}(:));
+                        end
+                        data.records.(domain.label) = domain.createIndex(index_type, records{i}(:), true);
+                        % TODO: release unique labels if categorical
                     else
                         error('Cell elements must be cellstr or numeric.');
                     end
@@ -626,14 +654,14 @@ classdef (Abstract) Symbol < handle
                         if domain.HOLDS_UNIQUE_LABELS
                             domain.unique_labels = gams.transfer.unique_labels.Dictionary(records.(fields{i}));
                         end
-                        data.records.(domain.label) = domain.createIndex(index_type, records.(fields{i}));
+                        data.records.(domain.label) = domain.createIndex(index_type, records.(fields{i}), true);
                         % TODO: release unique labels if categorical
                     end
                 end
 
             % table -> just keep it
             elseif gams.transfer.Constants.SUPPORTS_TABLE && istable(records)
-                data = gams.transfer.data.Table(records);
+                data = gams.transfer.symbol.data.Table(records);
 
             else
                 error('Unsupported records format.');
@@ -646,6 +674,17 @@ classdef (Abstract) Symbol < handle
             end
 
             obj.data_ = data;
+            obj.applyDomainForwarding();
+
+        end
+
+        %> Transforms symbol records into given format
+        %>
+        %> @see \ref gams::transfer::RecordsFormat "RecordsFormat"
+        function transformRecords(obj, target_format)
+            % Transforms symbol records into given format
+            %
+            % See also: gams.transfer.RecordsFormat
 
         end
 
@@ -714,7 +753,7 @@ classdef (Abstract) Symbol < handle
                 return
             end
 
-            % TODO domain forwarding
+            obj.applyDomainForwarding();
 
             flag = true;
         end
@@ -730,28 +769,58 @@ classdef (Abstract) Symbol < handle
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
         %>
-        %> - `dom_violations = getDomainViolations` returns a list of domain violations for all
+        %> - `domain_violations = getDomainViolations` returns a list of domain violations for all
         %>   dimensions.
-        %> - `dom_violations = getDomainViolations(d)` returns a list of domain violations for
+        %> - `domain_violations = getDomainViolations(d)` returns a list of domain violations for
         %>   dimension(s) `d`.
         %>
         %> @see \ref gams::transfer::symbol::Symbol::resolveDomainViolations
         %> "symbol.Symbol.resolveDomainViolations", \ref gams::transfer::Container::getDomainViolations
         %> "Container.getDomainViolations", \ref gams::transfer::DomainViolation "DomainViolation"
-        function getDomainViolations(obj)
+        function domain_violations = getDomainViolations(obj, varargin)
             % Get domain violations
             %
             % Domain violations occur when this symbol uses other Set(s) as domain(s) and a domain
             % entry in its records that is not present in the corresponding set. Such a domain
             % violation will lead to a GDX error when writing the data.
             %
-            % dom_violations = getDomainViolations returns a list of domain violations for all
+            % domain_violations = getDomainViolations returns a list of domain violations for all
             % dimension.
-            % dom_violations = getDomainViolations(d) returns a list of domain violations for
+            % domain_violations = getDomainViolations(d) returns a list of domain violations for
             % dimension(s) d.
             %
             % See also: gams.transfer.symbol.Symbol.resolveDomainViolations,
             % gams.transfer.Container.getDomainViolations, gams.transfer.DomainViolation
+
+            if nargin >= 2 && isnumeric(varargin{1})
+                try
+                    dimensions = varargin{1};
+                    domains = obj.validateDimensionToDomain('dimension', 1, dimensions);
+                catch e
+                    error(e.message);
+                end
+            else
+                dimensions = 1:obj.dimension;
+                domains = obj.def_.domains;
+            end
+
+            domain_violations = {};
+            for i = 1:numel(domains)
+                % TODO: should also work for relaxed domains
+                if ~isa(domains{i}, 'gams.transfer.symbol.domain.Regular')
+                    continue
+                end
+
+                data_uels = obj.data_.getUELs({domains{i}}, 'ignore_unused', true);
+                domain_uels = domains{i}.getUniqueLabels();
+                [~, ia] = setdiff(lower(data_uels), lower(domain_uels));
+                added_uels = data_uels(ia);
+
+                if numel(added_uels) > 0
+                    domain_violations{end+1} = gams.transfer.DomainViolation(obj, ...
+                        dimensions(i), domains{i}.symbol, added_uels);
+                end
+            end
 
         end
 
@@ -775,7 +844,7 @@ classdef (Abstract) Symbol < handle
         %> "symbol.Symbol.getDomainViolations", \ref
         %> gams::transfer::Container::resolveDomainViolations "Container.resolveDomainViolations",
         %> \ref gams::transfer::DomainViolation "DomainViolation"
-        function resolveDomainViolations(obj)
+        function resolveDomainViolations(obj, varargin)
             % Extends domain sets in order to resolve domain violations
             %
             % Domain violations occur when this symbol uses other Set(s) as domain(s) and a domain
@@ -790,6 +859,10 @@ classdef (Abstract) Symbol < handle
             % See also: gams.transfer.symbol.Symbol.getDomainViolations,
             % gams.transfer.Container.resolveDomainViolations, gams.transfer.DomainViolation
 
+            domain_violations = obj.getDomainViolations(varargin{:});
+            for i = 1:numel(domain_violations)
+                domain_violations{i}.resolve();
+            end
         end
 
         %> Returns the sparsity of symbol records
@@ -1211,6 +1284,10 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+
             if nargin >= 2 && isnumeric(varargin{1})
                 try
                     varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
@@ -1251,6 +1328,10 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+
             if nargin >= 3 && isnumeric(varargin{2})
                 try
                     varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
@@ -1280,6 +1361,10 @@ classdef (Abstract) Symbol < handle
             %   appended.
             %
             % See also: gams.transfer.symbol.Symbol.setUELs
+
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
 
             if nargin >= 3 && isnumeric(varargin{2})
                 try
@@ -1313,6 +1398,10 @@ classdef (Abstract) Symbol < handle
             % the indexed mode.
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
+
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
 
             if nargin >= 3 && isnumeric(varargin{2})
                 try
@@ -1350,6 +1439,10 @@ classdef (Abstract) Symbol < handle
             % the indexed mode.
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
+
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
 
             if nargin >= 3 && isnumeric(varargin{2})
                 try
@@ -1400,6 +1493,10 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+
             if nargin >= 3 && isnumeric(varargin{2})
                 try
                     varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
@@ -1435,6 +1532,10 @@ classdef (Abstract) Symbol < handle
             % the indexed mode.
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
+
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
 
             if nargin >= 2 && isnumeric(varargin{1})
                 try
@@ -1472,6 +1573,10 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
+            if ~obj.isValid()
+                error('Symbol must be valid in order to manage UELs.');
+            end
+
             if nargin >= 2 && isnumeric(varargin{1})
                 try
                     varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
@@ -1480,6 +1585,18 @@ classdef (Abstract) Symbol < handle
                 end
             end
             obj.data_.upperUELs(varargin{:});
+        end
+
+    end
+
+    methods (Hidden, Access = private)
+
+        function applyDomainForwarding(obj)
+            for i = 1:obj.dimension
+                if obj.def_.domains{i}.forwarding
+                    obj.resolveDomainViolations(i);
+                end
+            end
         end
 
     end

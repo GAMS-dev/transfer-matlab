@@ -92,6 +92,12 @@ classdef (Abstract) Definition < handle
 
         function obj = set.domains(obj, domains)
             obj.domains_ = obj.validateDomains('domains', 1, domains);
+            if numel(obj.domains) == numel(unique(obj.domainLabels()))
+                return
+            end
+            for i = 1:numel(obj.domains_)
+                obj.domains_{i} = obj.domains_{i}.appendLabelIndex(i);
+            end
         end
 
         function values = get.values(obj)

@@ -88,6 +88,43 @@ classdef DomainViolation
 
     end
 
+    methods (Hidden, Static)
+
+        function arg = validateSymbol(name, index, arg)
+            if ~isa(arg, 'gams.transfer.symbol.Symbol')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Symbol''.', name, index);
+            end
+        end
+
+        function arg = validateDimension(name, index, arg)
+            if ~isnumeric(arg)
+                error('Argument ''%s'' (at position %d) must be numeric.', name, index);
+            end
+            if ~isscalar(arg)
+                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
+            end
+            if round(arg) ~= arg
+                error('Argument ''%s'' (at position %d) must be integer.', name, index);
+            end
+            if arg < 0 || arg > gams.transfer.Constants.MAX_DIMENSION
+                error('Argument ''%s'' (at position %d) must be in [1, %d].', name, index, gams.transfer.Constants.MAX_DIMENSION);
+            end
+        end
+
+        function arg = validateDomain(name, index, arg)
+            if ~isa(arg, 'gams.transfer.symbol.Set')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Set''.', name, index);
+            end
+        end
+
+        function arg = validateViolations(name, index, arg)
+            if ~iscellstr(arg)
+                error('Argument ''%s'' (at position %d) must be ''cellstr''.', name, index);
+            end
+        end
+
+    end
+
     methods
 
         %> Constructs a domain violation, see class help
@@ -106,25 +143,10 @@ classdef DomainViolation
         function obj = DomainViolation(symbol, dimension, domain, violations)
             % Constructs a domain violation, see class help
 
-            if ~isa(symbol, 'gams.transfer.Symbol');
-                error('Argument ''symbol'' must be of type ''gams.transfer.Symbol''.');
-            end
-            if ~isnumeric(dimension) || dimension ~= round(dimension) || dimension < 1 || ...
-                dimension > symbol.dimension
-                error('Argument ''dimension'' must be integer in [1,%d].', symbol.dimension);
-            end
-            if ~isa(domain, 'gams.transfer.symbol.Set') || ...
-                ~isa(symbol.domain{dimension}, 'gams.transfer.symbol.Set') || ...
-                ~strcmp(domain.name, symbol.domain{dimension}.name)
-                error('Argument ''domain'' must be of type ''gams.transfer.symbol.Set''.');
-            end
-            if ~iscellstr(violations)
-                error('Argument ''violations'' must be of type ''cellstr''.');
-            end
-            obj.symbol = symbol;
-            obj.dimension = dimension;
-            obj.domain = domain;
-            obj.violations = violations;
+            obj.symbol = obj.validateSymbol('symbol', 1, symbol);
+            obj.dimension = obj.validateDimension('dimension', 1, dimension);
+            obj.domain = obj.validateDomain('domain', 1, domain);
+            obj.violations = obj.validateViolations('violations', 1, violations);
         end
 
         %> Resolve the domain violation by adding the missing elements into
@@ -133,14 +155,10 @@ classdef DomainViolation
             % Resolve the domain violation by adding the missing elements into
             % the domain set.
 
-            if ~obj.domain.isValidAsDomain()
-                error('Domain is not a valid domain set.');
-            end
-
             % in case the domain set is has itself a domain different to the universe,
             % the domain violation is likely to exist there as well. We therefore
             % apply the same resolving the parent domain.
-            if ~strcmp(obj.domain.domain{1}, '*')
+            if ~strcmp(obj.domain.domain{1}, gams.transfer.Constants.UNIVERSE_NAME)
                 dv = gams.transfer.DomainViolation(obj.domain, 1, obj.domain.domain{1}, obj.violations);
                 dv.resolve();
             end

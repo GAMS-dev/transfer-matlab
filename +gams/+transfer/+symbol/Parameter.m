@@ -121,6 +121,7 @@ classdef Parameter < gams.transfer.symbol.Symbol
 
             % parse input arguments
             has_records = false;
+            has_domain_forwarding = false;
             try
                 obj.container_ = gams.transfer.utils.parse_argument(varargin, ...
                     1, 'container', @obj.validateContainer);
@@ -135,8 +136,9 @@ classdef Parameter < gams.transfer.symbol.Symbol
                         index = index + 2;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'domain_forwarding')
-                        obj.domain_forwarding = gams.transfer.utils.parse_argument(varargin, ...
+                        domain_forwarding = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'domain_forwarding', []);
+                        has_domain_forwarding = true;
                         index = index + 2;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'records')
@@ -155,6 +157,11 @@ classdef Parameter < gams.transfer.symbol.Symbol
                 end
             catch e
                 error(e.message);
+            end
+            if has_domain_forwarding
+                for i = 1:numel(obj.def_.domains)
+                    obj.def_.domains{i}.forwarding = domain_forwarding;
+                end
             end
             if has_records
                 obj.setRecords(records)

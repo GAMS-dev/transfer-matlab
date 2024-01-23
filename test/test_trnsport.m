@@ -253,7 +253,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(a.description, 'capacity of plant i in cases');
         t.assert(a.dimension == 1);
         t.assert(numel(a.domain) == 1);
-        t.assertEquals(a.domain{1}.id, i.id);
+        t.assertEquals(a.domain{1}, i);
         t.assertEquals(a.domain{1}.name, 'i');
         t.assert(numel(a.domain_labels) == 0);
         t.assertEquals(a.domain_type, 'regular');
@@ -280,7 +280,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(b.description, 'demand at market j in cases');
         t.assert(b.dimension == 1);
         t.assert(numel(b.domain) == 1);
-        t.assertEquals(b.domain{1}.id, j.id);
+        t.assertEquals(b.domain{1}, j);
         t.assertEquals(b.domain{1}.name, 'j');
         t.assert(numel(b.domain_labels) == 0);
         t.assertEquals(b.domain_type, 'regular');
@@ -309,8 +309,8 @@ function success = test_trnsport(cfg)
         t.assertEquals(d.description, 'distance in thousands of miles');
         t.assert(d.dimension == 2);
         t.assert(numel(d.domain) == 2);
-        t.assertEquals(d.domain{1}.id, i.id);
-        t.assertEquals(d.domain{2}.id, j.id);
+        t.assertEquals(d.domain{1}, i);
+        t.assertEquals(d.domain{2}, j);
         t.assertEquals(d.domain{1}.name, 'i');
         t.assertEquals(d.domain{2}.name, 'j');
         t.assert(numel(d.domain_labels) == 0);
@@ -366,8 +366,8 @@ function success = test_trnsport(cfg)
         t.assertEquals(c.description, 'transport cost in thousands of dollars per case');
         t.assert(c.dimension == 2);
         t.assert(numel(c.domain) == 2);
-        t.assertEquals(c.domain{1}.id, i.id);
-        t.assertEquals(c.domain{2}.id, j.id);
+        t.assertEquals(c.domain{1}, i);
+        t.assertEquals(c.domain{2}, j);
         t.assertEquals(c.domain{1}.name, 'i');
         t.assertEquals(c.domain{2}.name, 'j');
         t.assert(numel(c.domain_labels) == 0);
@@ -404,8 +404,8 @@ function success = test_trnsport(cfg)
         t.assertEquals(x.description, 'shipment quantities in cases');
         t.assert(x.dimension == 2);
         t.assert(numel(x.domain) == 2);
-        t.assertEquals(x.domain{1}.id, i.id);
-        t.assertEquals(x.domain{2}.id, j.id);
+        t.assertEquals(x.domain{1}, i);
+        t.assertEquals(x.domain{2}, j);
         t.assertEquals(x.domain{1}.name, 'i');
         t.assertEquals(x.domain{2}.name, 'j');
         t.assert(numel(x.domain_labels) == 0);
@@ -497,7 +497,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(supply.description, 'observe supply limit at plant i');
         t.assert(supply.dimension == 1);
         t.assert(numel(supply.domain) == 1);
-        t.assertEquals(supply.domain{1}.id, i.id);
+        t.assertEquals(supply.domain{1}, i);
         t.assertEquals(supply.domain{1}.name, 'i');
         t.assert(numel(supply.domain_labels) == 0);
         t.assertEquals(supply.domain_type, 'regular');
@@ -532,7 +532,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(demand.description, 'satisfy demand at market j');
         t.assert(demand.dimension == 1);
         t.assert(numel(demand.domain) == 1);
-        t.assertEquals(demand.domain{1}.id, j.id);
+        t.assertEquals(demand.domain{1}, j);
         t.assertEquals(demand.domain{1}.name, 'j');
         t.assert(numel(demand.domain_labels) == 0);
         t.assertEquals(demand.domain_type, 'regular');

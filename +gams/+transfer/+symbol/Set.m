@@ -144,6 +144,7 @@ classdef Set < gams.transfer.symbol.Symbol
             % parse input arguments
             has_records = false;
             has_domains = false;
+            has_domain_forwarding = false;
             try
                 % TODO: validate here instead of setting the values as the index in the error message will be wrong otherwise
                 % same for other symbol classes
@@ -160,7 +161,7 @@ classdef Set < gams.transfer.symbol.Symbol
                         index = index + 2;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'domain_forwarding')
-                        obj.domain_forwarding = gams.transfer.utils.parse_argument(varargin, ...
+                        domain_forwarding = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'domain_forwarding', []);
                         index = index + 2;
                         is_pararg = true;
@@ -189,6 +190,11 @@ classdef Set < gams.transfer.symbol.Symbol
             end
             if ~has_domains
                 obj.def_.domains = {gams.transfer.symbol.domain.Relaxed(gams.transfer.Constants.UNIVERSE_NAME)};
+            end
+            if has_domain_forwarding
+                for i = 1:numel(obj.def_.domains)
+                    obj.def_.domains{i}.forwarding = domain_forwarding;
+                end
             end
             if has_records
                 obj.setRecords(records);

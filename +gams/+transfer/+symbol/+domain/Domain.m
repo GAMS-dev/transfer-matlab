@@ -137,16 +137,22 @@ classdef (Abstract) Domain
                 isequal(obj.forwarding_, domain.forwarding);
         end
 
-        function index = createIndex(obj, index_type, labels)
+        function index = createIndex(obj, index_type, labels, uels_from_labels)
             index_type = obj.validateIndexType('index_type', 1, index_type);
             % TODO: check labels
+            % TODO: check uels_from_labels
+
+            if uels_from_labels
+                uels = gams.transfer.utils.unique(labels);
+            else
+                uels = obj.getUniqueLabels();
+            end
 
             switch index_type.value
             case gams.transfer.symbol.domain.IndexType.CATEGORICAL
-                index = categorical(labels, obj.getUniqueLabels(), 'Ordinal', true);
+                index = categorical(labels, uels, 'Ordinal', true);
             case gams.transfer.symbol.domain.IndexType.INTEGER
                 % TODO: use find of unique labels class
-                uels = obj.getUniqueLabels();
                 map = containers.Map(uels, 1:numel(uels));
                 index = zeros(numel(labels), 1);
                 for i = 1:numel(labels)
