@@ -125,14 +125,13 @@ classdef (Abstract) Symbol < handle
 
     end
 
-    properties (Dependent, SetAccess = protected)
+    properties (Dependent)
         %> Container the symbol is stored in
 
         % container Container the symbol is stored in
         container
-    end
 
-    properties (Dependent)
+
         %> Symbol name
 
         % name Symbol name
@@ -218,9 +217,8 @@ classdef (Abstract) Symbol < handle
 
         % records Storage of symbol records
         records
-    end
 
-    properties (Dependent, SetAccess = private)
+
         %> Format in which records are stored in
         %>
         %> If records are changed, this gets reset to 'unknown'. Calling \ref
@@ -252,6 +250,15 @@ classdef (Abstract) Symbol < handle
 
         function container = get.container(obj)
             container = obj.container_;
+        end
+
+        function obj = set.container(obj, container)
+            if ~isempty(container)
+                container = gams.transfer.utils.validate('container', 1, container, {'gams.transfer.Container', 'empty'}, -1);
+            end
+            obj.container_ = container;
+            obj.def_.switchContainer(container);
+            obj.modified_ = true;
         end
 
         function name = get.name(obj)
@@ -399,6 +406,21 @@ classdef (Abstract) Symbol < handle
 
         function format = get.format(obj)
             format = obj.data_.name();
+        end
+
+        function obj = set.format(obj, format)
+            switch lower(format)
+            case 'table'
+                obj.data_ = gams.transfer.symbol.data.Table(obj.records);
+            case 'struct'
+                obj.data_ = gams.transfer.symbol.data.Struct(obj.records);
+            case 'dense_matrix'
+                obj.data_ = gams.transfer.symbol.data.DenseMatrix(obj.records);
+            case 'sparse_matrix'
+                obj.data_ = gams.transfer.symbol.data.SparseMatrix(obj.records);
+            otherwise
+                error('Unknown format');
+            end
         end
 
         function modified = get.modified(obj)
@@ -780,7 +802,8 @@ classdef (Abstract) Symbol < handle
                 force = true;
             end
 
-            if ~obj.container_.hasSymbols(obj.name_) || obj.container_.getSymbols(obj.name_) ~= obj
+            if ~isa(obj.container_, 'gams.transfer.Container') || ...
+                ~obj.container_.hasSymbols(obj.name_) || obj.container_.getSymbols(obj.name_) ~= obj
                 msg = 'Symbol is not contained in its linked container.';
                 switch verbose
                 case 1

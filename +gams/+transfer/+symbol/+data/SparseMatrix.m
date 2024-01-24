@@ -55,6 +55,7 @@ classdef SparseMatrix < gams.transfer.symbol.data.Matrix
 
         function nvals = getNumberValues(obj, def, varargin)
             [~, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            values = obj.availableNumericValues(values);
             nvals = 0;
             for i = 1:numel(values)
                 nvals = nvals + nnz(obj.records_.(values{i}.label));

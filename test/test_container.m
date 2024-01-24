@@ -1767,7 +1767,7 @@ function test_remove(t, cfg)
     t.assert(~i1.isValid());
     t.assert(~a1.isValid());
     t.assert(x1.isValid());
-    t.assertEquals(x1.domain{1}, '*');
+    t.assertEquals(x1.domain{1}, 'i1');
     t.assert(gdx.modified);
     t.assert(i1.modified);
     t.assert(a1.modified);
@@ -1808,7 +1808,7 @@ function test_remove(t, cfg)
     t.assert(~i1.isValid());
     t.assert(~a1.isValid());
     t.assert(x1.isValid());
-    t.assertEquals(x1.domain{1}, '*');
+    t.assertEquals(x1.domain{1}, 'i1');
     t.assert(gdx.modified);
     t.assert(i1.modified);
     t.assert(a1.modified);

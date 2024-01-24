@@ -600,13 +600,13 @@ classdef Container < handle
                     end
                     continue
                 case {gams.transfer.gdx.SymbolType.SET, 'set'}
-                    new_symbol = obj.addSet(symbol.name, 'is_singleton', symbol.is_singleton, 'records', records);
+                    new_symbol = obj.addSet(symbol.name, 'is_singleton', symbol.is_singleton);
                 case {gams.transfer.gdx.SymbolType.PARAMETER, 'parameter'}
-                    new_symbol = obj.addParameter(symbol.name, 'records', records);
+                    new_symbol = obj.addParameter(symbol.name);
                 case {gams.transfer.gdx.SymbolType.VARIABLE, 'variable'}
-                    new_symbol = obj.addVariable(symbol.name, symbol.type, 'records', records);
+                    new_symbol = obj.addVariable(symbol.name, symbol.type);
                 case {gams.transfer.gdx.SymbolType.EQUATION, 'equation'}
-                    new_symbol = obj.addEquation(symbol.name, symbol.type, 'records', records);
+                    new_symbol = obj.addEquation(symbol.name, symbol.type);
                 otherwise
                     error('Invalid symbol type');
                 end
@@ -621,6 +621,7 @@ classdef Container < handle
                 if isfield(symbol, 'domain_labels') && numel(symbol.domain_labels) == symbol.dimension
                     new_symbol.domain_labels = symbol.domain_labels;
                 end
+                new_symbol.data = records;
 
                 % set uels
                 if isfield(symbol, 'uels') && ~gams.transfer.Constants.SUPPORTS_CATEGORICAL
@@ -2054,7 +2055,10 @@ classdef Container < handle
                 % alias, domain or in the user's program)
                 for i = 1:numel(removed_symbols)
                     removed_symbols{i}.isValid(false, true);
+                    removed_symbols{i}.container = [];
                 end
+
+                obj.modified_ = true;
                 return
             end
 
@@ -2078,6 +2082,7 @@ classdef Container < handle
                 % force recheck of deleted symbol (it may still live within an
                 % alias, domain or in the user's program)
                 removed_symbols{j}.isValid(false, true);
+                removed_symbols{j}.container = [];
             end
             removed_symbols = removed_symbols(1:j);
 
@@ -2085,19 +2090,27 @@ classdef Container < handle
             symbols = obj.data_.getAllEntries();
             remove_aliases = {};
             for i = 1:numel(symbols)
-                if ~isa(symbols{i}, 'gams.transfer.alias.Set')
-                    continue
-                end
-                for j = 1:numel(removed_symbols)
-                    if symbols{i}.alias_with.name == removed_symbols{j}.name
+                if isa(symbols{i}, 'gams.transfer.alias.Set')
+                    if isempty(symbols{i}.alias_with.container)
                         remove_aliases{end+1} = symbols{i}.name;
-                        break;
+                    end
+                elseif isa(symbols{i}, 'gams.transfer.symbol.Symbol')
+                    for j = 1:numel(symbols{i}.def.domains)
+                        domain = symbols{i}.def.domains{j};
+                        if ~isa(domain, 'gams.transfer.symbol.domain.Regular')
+                            continue
+                        end
+                        if isempty(domain.symbol.container)
+                            symbols{i}.def.domains{j} = domain.getRelaxed();
+                        end
                     end
                 end
             end
             if numel(remove_aliases) > 0
                 obj.removeSymbols(remove_aliases);
             end
+
+            obj.modified_ = true;
         end
 
         %> Reestablishes a valid GDX symbol order

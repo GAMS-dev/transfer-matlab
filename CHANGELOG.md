@@ -9,6 +9,8 @@ GAMS Transfer Matlab v0.9.0
 - TODO: setRecords with struct. Domains no longer taken by number of occurance but by domain label.
 - TODO: Resetting symbol domain resets domain properties.
 - TODO: added container property to symbols
+- TODO: removing symbol -> domain gets relaxed and not set to universe anymore
+- TODO: allow to set symbol format
 
 GAMS Transfer Matlab v0.8.0
 ==================

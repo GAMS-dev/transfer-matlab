@@ -250,9 +250,15 @@ classdef (Abstract) Definition < handle
         % end
 
         function switchContainer(obj, container)
-            container = gams.transfer.utils.validate('container', 1, container, {'gams.transfer.Container'}, -1);
+            if ~isempty(container)
+                container = gams.transfer.utils.validate('container', 1, container, {'gams.transfer.Container'}, -1);
+            end
             for i = 1:numel(obj.domains_)
                 if ~isa(obj.domains_{i}, 'gams.transfer.symbol.domain.Regular')
+                    continue
+                end
+                if isempty(container)
+                    obj.domains_{i} = obj.domains_{i}.getRelaxed();
                     continue
                 end
                 if ~container.hasSymbols(obj.domains_{i}.name)

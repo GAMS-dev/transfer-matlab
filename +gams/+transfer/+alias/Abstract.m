@@ -70,11 +70,8 @@ classdef Abstract < handle
 
     end
 
-    properties (Dependent, SetAccess = protected)
-        container
-    end
-
     properties (Dependent)
+        container
         name
     end
 
@@ -110,6 +107,14 @@ classdef Abstract < handle
 
         function container = get.container(obj)
             container = obj.container_;
+        end
+
+        function obj = set.container(obj, container)
+            if ~isempty(container)
+                container = gams.transfer.utils.validate('container', 1, container, {'gams.transfer.Container', 'empty'}, -1);
+            end
+            obj.container_ = container;
+            obj.modified_ = true;
         end
 
         function name = get.name(obj)

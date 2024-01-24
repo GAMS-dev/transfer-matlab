@@ -288,7 +288,8 @@ classdef Set < gams.transfer.alias.Abstract
                 verbose = max(0, min(2, varargin{1}));
             end
 
-            if ~obj.container_.hasSymbols(obj.name_) || obj.container_.getSymbols(obj.name_) ~= obj
+            if ~isa(obj.container_, 'gams.transfer.Container') || ...
+                ~obj.container_.hasSymbols(obj.name_) || obj.container_.getSymbols(obj.name_) ~= obj
                 msg = 'Alias is not contained in its linked container.';
                 switch verbose
                 case 1
