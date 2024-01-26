@@ -767,6 +767,7 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.RecordsFormat
 
+            obj.data_ = obj.data_.transform(obj.def_, target_format);
         end
 
         %> Checks correctness of symbol

@@ -144,6 +144,63 @@ classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
             error('Records format ''%s'' does not support setting UELs. Modify domain instead.', obj.name());
         end
 
+        function data = transformToTabular(obj, def, format)
+            def = obj.validateDefinition('def', 1, def);
+            format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
+            values = obj.availableNumericValues(def.values);
+
+            % create data
+            switch format
+            case 'table'
+                data = gams.transfer.symbol.data.Table(table());
+            case 'struct'
+                data = gams.transfer.symbol.data.Struct.Empty(def.domains);
+            otherwise
+                error('Unknown records format: %s', format);
+            end
+
+            % get size
+            size_ = ones(1, max(2, def.dimension));
+            size_(1:def.dimension) = def.size;
+
+            % get all possible indices (sorted by column)
+            indices_ = cell(1, def.dimension);
+            [indices_{:}] = ind2sub(size_, 1:prod(size_));
+            indices = zeros(prod(size_), def.dimension);
+            for i = 1:def.dimension
+                indices(:, i) = indices_{i};
+            end
+            [indices, indices_perm] = sortrows(indices, 1:def.dimension);
+
+            % get sparse indices
+            keep_indices = false(1, prod(size_));
+            for i = 1:numel(values)
+                [row, col, val] = find(obj.records_.(values{i}.label));
+                idx = sub2ind(size(obj.records_.(values{i}.label)), row, col);
+                keep_indices(idx(val ~= values{i}.default)) = true;
+            end
+            keep_indices = keep_indices(indices_perm);
+            indices(~keep_indices, :) = [];
+            indices_perm(~keep_indices) = [];
+
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
+                index_type = gams.transfer.symbol.domain.IndexType.Categorical();
+            else
+                index_type = gams.transfer.symbol.domain.IndexType.Integer();
+            end
+
+            % domain columns
+            for i = 1:numel(def.domains)
+                data.records.(def.domains{i}.label) = def.domains{i}.createIndexFromIntegers(index_type, indices(:, i));
+            end
+            data.removeUELs({}, def.domains);
+
+            % values columns
+            for i = 1:numel(values)
+                data.records.(values{i}.label) = full(obj.records_.(values{i}.label)(indices_perm));
+            end
+        end
+
     end
 
 end

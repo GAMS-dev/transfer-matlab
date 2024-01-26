@@ -81,6 +81,22 @@ classdef Table < gams.transfer.symbol.data.Tabular
             status = isValid@gams.transfer.symbol.data.Tabular(obj, def);
         end
 
+        function data = transform(obj, def, format)
+            def = obj.validateDefinition('def', 1, def);
+            format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
+
+            switch format
+            case 'table'
+                data = gams.transfer.symbol.data.Table(obj.records_);
+            case 'struct'
+                data = gams.transfer.symbol.data.Struct(table2struct(obj.records_, 'ToScalar', true));
+            case {'dense_matrix', 'sparse_matrix'}
+                data = obj.transformToMatrix(def, format);
+            otherwise
+                error('Unknown records format: %s', format);
+            end
+        end
+
         function nrecs = getNumberRecords(obj, def)
             if istable(obj.records_)
                 nrecs = height(obj.records_);

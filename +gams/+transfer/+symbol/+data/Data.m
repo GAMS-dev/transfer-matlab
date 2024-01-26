@@ -114,6 +114,7 @@ classdef (Abstract) Data < handle
         renameLabels(obj, old_labels, new_labels)
         data = copy(obj)
         status = isValid(obj, def)
+        data = transform(obj, format)
         nrecs = getNumberRecords(obj, def)
         nvals = getNumberValues(obj, def, varargin)
         value = getMeanValue(obj, def, varargin)
@@ -341,7 +342,7 @@ classdef (Abstract) Data < handle
             % parse input arguments
             try
                 uels = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'uels', @obj.validateUels);
+                    1, 'uels', []); % TODO
                 domains = gams.transfer.utils.parse_argument(varargin, ...
                     2, 'domains', @obj.validateDomains_);
             catch e

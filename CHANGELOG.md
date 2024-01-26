@@ -11,6 +11,7 @@ GAMS Transfer Matlab v0.9.0
 - TODO: added container property to symbols
 - TODO: removing symbol -> domain gets relaxed and not set to universe anymore
 - TODO: allow to set symbol format
+- TODO: read scalar: densematrix was changed to struct. not anymore
 
 GAMS Transfer Matlab v0.8.0
 ==================

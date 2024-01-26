@@ -217,10 +217,6 @@ void mexFunction(
                 strcat(domain_labels_ptr[j], buf);
             }
 
-        /* prefer struct instead of dense_matrix for scalars */
-        if (format == GT_FORMAT_DENSEMAT && dim == 0)
-            format = GT_FORMAT_STRUCT;
-
         /* check format: sets can be read as table and struct only */
         switch (format)
         {

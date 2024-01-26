@@ -253,6 +253,72 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
 
         end
 
+        function data = transformToMatrix(obj, def, format)
+            def = obj.validateDefinition('def', 1, def);
+            format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
+            values = obj.availableNumericValues(def.values);
+            if numel(values) == 0
+                error('At least one numeric value column is required to transform to a matrix format.');
+            end
+
+            % create data
+            switch format
+            case 'dense_matrix'
+                data = gams.transfer.symbol.data.DenseMatrix.Empty();
+            case 'sparse_matrix'
+                if def.dimension > 2
+                    error('Sparse matrix does not support dimension larger than 2.');
+                end
+                data = gams.transfer.symbol.data.SparseMatrix.Empty();
+            otherwise
+                error('Unknown records format: %s', format);
+            end
+
+            % get matrix size
+            size_ = ones(1, max(2, def.dimension));
+            size_(1:def.dimension) = def.size;
+            if any(isnan(size_) | isinf(size_))
+                error('Matrix sizes not available. Can''t transform to a matrix format.');
+            end
+
+            % convert indices to matrix (linear) indices
+            if def.dimension == 0
+                idx = 1;
+            else
+                idx = cell(1, def.dimension);
+                for i = 1:def.dimension
+                    domain = def.domains{i};
+                    [~, uel_map] = ismember(obj.getUniqueLabelsAt_(domain, false), domain.getUniqueLabels());
+                    if any(uel_map == 0)
+                        error('Found domain violation.');
+                    end
+                    idx{i} = uel_map(obj.records_.(domain.label));
+                end
+                idx = sub2ind(size_, idx{:});
+            end
+
+            % init matrix records
+            switch format
+            case 'dense_matrix'
+                for i = 1:numel(values)
+                    data.records.(values{i}.label) = values{i}.default * ones(size_);
+                end
+            case 'sparse_matrix'
+                for i = 1:numel(values)
+                    if values{i}.default == 0
+                        data.records.(values{i}.label) = sparse(size_(1), size_(2));
+                    else
+                        data.records.(values{i}.label) = sparse(values{i}.default * ones(size_));
+                    end
+                end
+            end
+
+            % copy records to matrices
+            for i = 1:numel(values)
+                data.records.(values{i}.label)(idx) = obj.records_.(values{i}.label);
+            end
+        end
+
     end
 
 end

@@ -53,6 +53,26 @@ classdef DenseMatrix < gams.transfer.symbol.data.Matrix
             status = isValid@gams.transfer.symbol.data.Matrix(obj, def);
         end
 
+        function data = transform(obj, def, format)
+            def = obj.validateDefinition('def', 1, def);
+            format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
+
+            switch format
+            case {'table', 'struct'}
+                data = obj.transformToTabular(def, format);
+            case 'dense_matrix'
+                data = gams.transfer.symbol.data.DenseMatrix(obj.records_);
+            case 'sparse_matrix'
+                data = gams.transfer.symbol.data.SparseMatrix(obj.records_);
+                values = obj.availableNumericValues(def.values);
+                for i = 1:numel(values)
+                    data.records.(values{i}.label) = sparse(data.records.(values{i}.label));
+                end
+            otherwise
+                error('Unknown records format: %s', format);
+            end
+        end
+
         function nvals = getNumberValues(obj, def, varargin)
             [~, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
             values = obj.availableNumericValues(values);

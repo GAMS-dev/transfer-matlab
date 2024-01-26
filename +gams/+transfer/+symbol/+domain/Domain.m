@@ -163,6 +163,23 @@ classdef (Abstract) Domain
             end
         end
 
+        function index = createIndexFromIntegers(obj, index_type, index)
+            index_type = obj.validateIndexType('index_type', 1, index_type);
+            % TODO: check index
+
+            switch index_type.value
+            case gams.transfer.symbol.domain.IndexType.CATEGORICAL
+                uels = obj.getUniqueLabels();
+                index = categorical(index, 1:numel(uels), uels, 'Ordinal', true);
+            case gams.transfer.symbol.domain.IndexType.INTEGER
+                n_uels = numel(obj.getUniqueLabels());
+                index(index < 1) = 0;
+                index(index > n_uels) = 0;
+            otherwise
+                error('Unknown domain index type');
+            end
+        end
+
         function obj = appendLabelIndex(obj, index)
             add = ['_', int2str(index)];
             if ~endsWith(obj.label_, add)
