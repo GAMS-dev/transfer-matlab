@@ -98,7 +98,7 @@ classdef (Abstract) Symbol < handle
                 error('Argument ''%s'' (at position %d) must be integer.', name, index);
             end
             if arg < 0 || arg > gams.transfer.Constants.MAX_DIMENSION
-                error('Argument ''%s'' (at position %d) must be in [1, %d].', name, index, gams.transfer.Constants.MAX_DIMENSION);
+                error('Argument ''%s'' (at position %d) must be in [0, %d].', name, index, gams.transfer.Constants.MAX_DIMENSION);
             end
         end
 
@@ -309,6 +309,13 @@ classdef (Abstract) Symbol < handle
 
         function size = get.size(obj)
             size = obj.axes().size();
+        end
+
+        function set.size(obj, size)
+            size = gams.transfer.utils.validate('size', 1, size, {'numeric'}, 1);
+            obj.def_.domains = size;
+            obj.applyDomainForwarding();
+            obj.modified_ = true;
         end
 
         function domain = get.domain(obj)
@@ -687,6 +694,9 @@ classdef (Abstract) Symbol < handle
 
             % create proper index for domain entries
             for i = 1:numel(domains)
+                if isnumeric(new_records.(domains{i}.label))
+                    continue
+                end
                 unique_labels = gams.transfer.utils.unique(new_records.(domains{i}.label));
                 new_records.(domains{i}.label) = gams.transfer.symbol.data.Data.createUniqueLabelsIndex(...
                     new_records.(domains{i}.label), unique_labels);

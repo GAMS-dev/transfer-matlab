@@ -35,18 +35,6 @@
 % Container is the main object that holds different symbols and allows to read
 % and write those to GDX.
 %
-% Indexed Mode:
-%
-% There are two different modes GAMS Transfer can be used in: indexed or default.
-% - In default mode the main characteristic of a symbol is its domain that
-%   defines the symbol dimension and its dependencies. A size of symbol is here
-%   given by the number of records of the domain sets of each dimension. In
-%   default mode all GAMS symbol types can be used.
-% - In indexed mode, there are no domain sets, but sizes (the shape of a symbol)
-%   can be set explicitly. Furthermore, there are no UELs and only GAMS
-%   Parameters are allowed to be used in indexed mode.
-% The mode is defined when creating a container and can't be changed thereafter.
-%
 % Optional Arguments:
 % 1. source (string or Container):
 %    Path to GDX file or a Container object to be read
@@ -55,13 +43,11 @@
 % - gams_dir (string):
 %   Path to GAMS system directory. Default is determined from PATH environment
 %   variable
-% - indexed (logical):
-%   Specifies if container is used in indexed of default mode, see above.
 %
 % Example:
 % c = Container();
 % c = Container('path/to/file.gdx');
-% c = Container('indexed', true, 'gams_dir', 'C:\GAMS');
+% c = Container('gams_dir', 'C:\GAMS');
 %
 % See also: gams.transfer.Set, gams.transfer.Alias, gams.transfer.Parameter,
 % gams.transfer.Variable, gams.transfer.Equation
@@ -75,25 +61,11 @@
 %> and write those to GDX. See \ref GAMS_TRANSFER_MATLAB_CONTAINER for more
 %> information.
 %>
-%> **Indexed Mode:**
-%>
-%> There are two different modes GAMS Transfer can be used in: indexed or default.
-%> - In default mode the main characteristic of a symbol is its domain that
-%>   defines the symbol dimension and its dependencies. A size of symbol is here
-%>   given by the number of records of the domain sets of each dimension. In
-%>   default mode all GAMS symbol types can be used.
-%> - In indexed mode, there are no domain sets, but sizes (the shape of a symbol)
-%>   can be set explicitly. Furthermore, there are no UELs and only GAMS
-%>   Parameters are allowed to be used in indexed mode.
-%>
-%> The mode is defined when creating a container and can't be changed thereafter.
-%> See \ref GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED for more information.
-%>
 %> **Example:**
 %> ```
 %> c = Container();
 %> c = Container('path/to/file.gdx');
-%> c = Container('indexed', true, 'gams_dir', 'C:\GAMS');
+%> c = Container('gams_dir', 'C:\GAMS');
 %> ```
 %>
 %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Alias "Alias", \ref
@@ -103,7 +75,6 @@ classdef Container < handle
 
     properties (Hidden, SetAccess = protected)
         gams_dir_ = ''
-        indexed_ = false
         modified_ = true
         data_
     end
@@ -141,15 +112,6 @@ classdef Container < handle
             end
         end
 
-        function arg = validateIndexed(name, index, arg)
-            if ~islogical(arg)
-                error('Argument ''%s'' (at position %d) must be ''logical''.', name, index);
-            end
-            if ~isscalar(arg)
-                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
-            end
-        end
-
         function arg = validateModified(name, index, arg)
             if ~islogical(arg)
                 error('Argument ''%s'' (at position %d) must be ''logical''.', name, index);
@@ -179,12 +141,6 @@ classdef Container < handle
         gams_dir
 
 
-        %> Flag for indexed mode
-
-        % indexed Flag for indexed mode
-        indexed
-
-
         %> GAMS (GDX) symbols
 
         % data GAMS (GDX) symbols
@@ -212,10 +168,6 @@ classdef Container < handle
 
         function gams_dir = get.gams_dir(obj)
             gams_dir = obj.gams_dir_;
-        end
-
-        function indexed = get.indexed(obj)
-            indexed = obj.indexed_;
         end
 
         function data = get.data(obj)
@@ -260,14 +212,12 @@ classdef Container < handle
         %> - gams_dir (`string`):
         %>   Path to GAMS system directory. Default is determined from PATH environment
         %>   variable
-        %> - indexed (`logical`):
-        %>   Specifies if container is used in indexed of default mode, see above.
         %>
         %> **Example:**
         %> ```
         %> c = Container();
         %> c = Container('path/to/file.gdx');
-        %> c = Container('indexed', true, 'gams_dir', 'C:\GAMS');
+        %> c = Container('gams_dir', 'C:\GAMS');
         %> ```
         %>
         %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Alias "Alias", \ref
@@ -293,8 +243,7 @@ classdef Container < handle
                         index = index + 2;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'indexed')
-                        obj.indexed_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'indexed', @obj.validateIndexed);
+                        warning('Setting argument ''indexed'' for the Container has no effect anymore. Use it in the ''read'' and/or ''write'' method.');
                         index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 1
@@ -337,8 +286,7 @@ classdef Container < handle
             %    Other Container
 
             eq = isequal(class(obj), class(container)) && ...
-                isequal(obj.gams_dir_, container.gams_dir) && ...
-                isequal(obj.indexed_, container.indexed);
+                isequal(obj.gams_dir_, container.gams_dir);
             if ~eq
                 return
             end
@@ -419,6 +367,8 @@ classdef Container < handle
         %> - values (`cell`):
         %>   Subset of `{"level", "marginal", "lower", "upper", "scale"}` that
         %>   defines what value fields should be read. Default is all.
+        %> - indexed (`logical`):
+        %>   Specifies if indexed GDX should be read. Default is `false`.
         %>
         %> **Example:**
         %> ```
@@ -445,6 +395,8 @@ classdef Container < handle
             % - values (cell):
             %   Subset of {'level', 'marginal', 'lower', 'upper', 'scale'} that
             %   defines what value fields should be read. Default is all.
+            % - indexed (logical):
+            %   Specifies if indexed GDX should be read. Default is false.
             %
             % Example:
             % c = Container();
@@ -458,6 +410,7 @@ classdef Container < handle
             format = 'table';
             records = true;
             values = {'level', 'marginal', 'lower', 'upper', 'scale'};
+            indexed= false;
             try
                 validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, ...
                     {'string', 'char', 'gams.transfer.Container'}, -1));
@@ -492,6 +445,12 @@ classdef Container < handle
                         validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1, -1));
                         values = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'values', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif strcmpi(varargin{index}, 'indexed')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
+                        indexed = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'indexed', validate);
                         index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 4
@@ -552,7 +511,7 @@ classdef Container < handle
             values = values_bool;
 
             % read records
-            if obj.indexed_
+            if indexed
                 symbols = gams.transfer.gdx.gt_idx_read(obj.gams_dir_, source, symbols, format, records);
             else
                 symbols = gams.transfer.gdx.gt_gdx_read(obj.gams_dir_, source, symbols, format, records, ...
@@ -578,7 +537,7 @@ classdef Container < handle
                 end
 
                 % adapt domain
-                if ~obj.indexed_ && isfield(symbol, 'domain')
+                if ~indexed && isfield(symbol, 'domain')
                     for j = 1:numel(symbol.domain)
                         if strcmp(symbol.domain{j}, gams.transfer.Constants.UNIVERSE_NAME) || symbol.domain_type == 2
                             continue
@@ -613,7 +572,7 @@ classdef Container < handle
 
                 % set properties
                 new_symbol.description = symbol.description;
-                if obj.indexed_
+                if indexed
                     new_symbol.size = symbol.size;
                 else
                     new_symbol.domain = symbol.domain;
@@ -652,6 +611,8 @@ classdef Container < handle
         %>   is `false`.
         %> - uel_priority (`cellstr`):
         %>   UELs to be registered first before any symbol UELs. Default: `{}`.
+        %> - indexed (`logical`):
+        %>   Specifies if indexed GDX should be written. Default is `false`.
         %>
         %> **Example:**
         %> ```
@@ -692,6 +653,8 @@ classdef Container < handle
             %   is false.
             % - uel_priority (cellstr):
             %   UELs to be registered first before any symbol UELs. Default: {}.
+            % - indexed (logical):
+            %   Specifies if indexed GDX should be written. Default is false.
             %
             % Example:
             % c.write('path/to/file.gdx');
@@ -704,6 +667,7 @@ classdef Container < handle
             compress = false;
             sorted = false;
             uel_priority = {};
+            indexed = false;
             try
                 filename = gams.transfer.utils.parse_argument(varargin, ...
                     1, 'filename', @obj.validateGdxFileWrite);
@@ -733,6 +697,12 @@ classdef Container < handle
                         validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
                         sorted = gams.transfer.utils.parse_argument(varargin, ...
                             index + 1, 'sorted', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif strcmpi(varargin{index}, 'indexed')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
+                        indexed = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'indexed', validate);
                         index = index + 2;
                         is_pararg = true;
                     else
@@ -770,12 +740,37 @@ classdef Container < handle
                 end
             end
 
-            if compress && obj.indexed_
+            % check indexed symbols
+            if indexed
+                disabled_symbols = {};
+                for i = 1:numel(symbols)
+                    if ~enable(i)
+                        continue
+                    end
+                    sym = obj.getSymbols(symbols{i});
+                    for j = 1:sym.dimension
+                        unique_labels = sym.axis(j).unique_labels;
+                        if ~isa(unique_labels, 'gams.transfer.unique_labels.Range') || ...
+                            unique_labels.first ~=1 || unique_labels.step ~= 1 || ...
+                            ~isequal(unique_labels.prefix, '')
+                            enable(i) = false;
+                            disabled_symbols{end+1} = symbols{i};
+                            break
+                        end
+                    end
+                end
+                if numel(disabled_symbols) > 0
+                    warning('The following symbols have been disbaled because they are not indexed: %s', ...
+                        gams.transfer.utils.list2str(disabled_symbols));
+                end
+            end
+
+            if compress && indexed
                 error('Compression not supported for indexed GDX.');
             end
 
             % write data
-            if obj.indexed_
+            if indexed
                 gams.transfer.gdx.gt_idx_write(obj.gams_dir_, filename, obj.data_.entries, ...
                     enable, sorted, gams.transfer.Constants.SUPPORTS_TABLE);
             else
@@ -1565,10 +1560,6 @@ classdef Container < handle
             %
             % See also: gams.transfer.symbol.Set, gams.transfer.Set
 
-            if obj.indexed_
-                error('Set not supported in indexed mode.');
-            end
-
             new_symbol = gams.transfer.symbol.Set(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
@@ -1752,10 +1743,6 @@ classdef Container < handle
             % See also: gams.transfer.symbol.Variable, gams.transfer.Variable,
             % gams.transfer.VariableType
 
-            if obj.indexed_
-                error('Variable not supported in indexed mode.');
-            end
-
             new_symbol = gams.transfer.symbol.Variable(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
@@ -1851,10 +1838,6 @@ classdef Container < handle
             % See also: gams.transfer.symbol.Equation, gams.transfer.Equation,
             % gams.transfer.EquationType
 
-            if obj.indexed_
-                error('Equation not supported in indexed mode.');
-            end
-
             new_symbol = gams.transfer.symbol.Equation(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
@@ -1906,10 +1889,6 @@ classdef Container < handle
             %
             % See also: gams.transfer.alias.Set, gams.transfer.Alias, gams.transfer.symbol.Set
 
-            if obj.indexed_
-                error('Alias not supported in indexed mode.');
-            end
-
             new_symbol = gams.transfer.alias.Set(obj, name, alias_with);
 
             if ~obj.hasSymbols(name)
@@ -1953,10 +1932,6 @@ classdef Container < handle
             %
             % See also: gams.transfer.alias.Universe, gams.transfer.UniverseAlias,
             % gams.transfer.symbol.Set
-
-            if obj.indexed_
-                error('UniverseAlias not supported in indexed mode.');
-            end
 
             new_symbol = gams.transfer.alias.Universe(obj, name);
 
@@ -2388,12 +2363,9 @@ classdef Container < handle
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
-        %> @note This can only be used if the container is valid. UELs are not
-        %> available when using the indexed mode, see \ref
-        %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
+        %> @note This can only be used if the container is valid.
         %>
-        %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::Container::isValid "Container.isValid"
+        %> @see \ref gams::transfer::Container::isValid "Container.isValid"
         function uels = getUELs(obj, varargin)
             % Get UELs from all symbols
             %
@@ -2402,10 +2374,9 @@ classdef Container < handle
             % u = getUELs(_, "ignore_unused", true) returns only those UELs
             % that are actually used in the records.
             %
-            % Note: This can only be used if the container is valid. UELs are not
-            % available when using the indexed mode.
+            % Note: This can only be used if the container is valid.
             %
-            % See also: gams.transfer.Container.indexed, gams.transfer.Container.isValid
+            % See also: gams.transfer.Container.isValid
 
             % input arguments
             p = inputParser();
@@ -2435,12 +2406,9 @@ classdef Container < handle
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
-        %> @note This can only be used if the container is valid. UELs are not
-        %> available when using the indexed mode, see \ref
-        %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
+        %> @note This can only be used if the container is valid.
         %>
-        %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::Container::isValid "Container.isValid"
+        %> @see \ref gams::transfer::Container::isValid "Container.isValid"
         function removeUELs(obj, varargin)
             % Removes UELs from all symbol
             %
@@ -2448,10 +2416,9 @@ classdef Container < handle
             % removeUELs(u) removes the UELs u for all symbols.
             % removeUELs(_, 'symbols', s) removes UELs for symbols s.
             %
-            % Note: This can only be used if the container is valid. UELs are not
-            % available when using the indexed mode.
+            % Note: This can only be used if the container is valid.
             %
-            % See also: gams.transfer.Container.indexed, gams.transfer.Container.isValid
+            % See also: gams.transfer.Container.isValid
 
             is_parname = @(x) strcmpi(x, 'symbols');
 
@@ -2514,12 +2481,9 @@ classdef Container < handle
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
-        %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode, see \ref
-        %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
+        %> @note This can only be used if the symbol is valid.
         %>
-        %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
+        %> @see \ref gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
         function renameUELs(obj, uels, varargin)
             % Renames UELs in all symbol
             %
@@ -2532,10 +2496,9 @@ classdef Container < handle
             % renameUELs(_, 'allow_merge', true) enables support of merging one
             % UEL into another one (renaming a UEL to an already existing one).
             %
-            % Note: This can only be used if the symbol is valid. UELs are not
-            % available when using the indexed mode.
+            % Note: This can only be used if the symbol is valid.
             %
-            % See also: gams.transfer.Container.indexed, gams.transfer.Symbol.isValid
+            % See also: gams.transfer.Symbol.isValid
 
             % input arguments
             p = inputParser();
@@ -2560,22 +2523,18 @@ classdef Container < handle
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
-        %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode, see \ref
-        %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
+        %> @note This can only be used if the symbol is valid.
         %>
-        %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
+        %> @see \ref gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
         function lowerUELs(obj, varargin)
             % Converts UELs to lower case
             %
             % lowerUELs() converts all UELs to lower case.
             % lowerUELs('symbols', s) converts all UELs to lower case for symbols s.
             %
-            % Note: This can only be used if the symbol is valid. UELs are not
-            % available when using the indexed mode.
+            % Note: This can only be used if the symbol is valid.
             %
-            % See also: gams.transfer.Container.indexed, gams.transfer.Symbol.isValid
+            % See also: gams.transfer.Symbol.isValid
 
             % input arguments
             p = inputParser();
@@ -2600,22 +2559,18 @@ classdef Container < handle
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
         %>
-        %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode, see \ref
-        %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
+        %> @note This can only be used if the symbol is valid.
         %>
-        %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
+        %> @see \ref gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
         function upperUELs(obj, varargin)
             % Converts UELs to upper case
             %
             % upperUELs() converts all UELs to upper case.
             % upperUELs('symbols', s) converts all UELs to upper case for symbols s.
             %
-            % Note: This can only be used if the symbol is valid. UELs are not
-            % available when using the indexed mode.
+            % Note: This can only be used if the symbol is valid.
             %
-            % See also: gams.transfer.Container.indexed, gams.transfer.Symbol.isValid
+            % See also: gams.transfer.Symbol.isValid
 
             % input arguments
             p = inputParser();

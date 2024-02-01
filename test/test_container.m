@@ -1238,12 +1238,12 @@ function test_idx_describe(t, cfg, container_type)
         case 1
             switch container_type
             case 'c'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
-                gdx.read(cfg.filenames{4}, 'format', 'struct');
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+                gdx.read(cfg.filenames{4}, 'format', 'struct', 'indexed', true);
             case 'rc'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
-                gdx.read(cfg.filenames{4}, 'format', 'struct');
-                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+                gdx.read(cfg.filenames{4}, 'format', 'struct', 'indexed', true);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
             end
             test_name_describe_parameters = 'idx_describe_parameters_struct';
         case 2
@@ -1252,34 +1252,34 @@ function test_idx_describe(t, cfg, container_type)
             end
             switch container_type
             case 'c'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
-                gdx.read(cfg.filenames{4}, 'format', 'table');
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+                gdx.read(cfg.filenames{4}, 'format', 'table', 'indexed', true);
             case 'rc'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
-                gdx.read(cfg.filenames{4}, 'format', 'table');
-                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+                gdx.read(cfg.filenames{4}, 'format', 'table', 'indexed', true);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
             end
             test_name_describe_parameters = 'idx_describe_parameters_table';
         case 3
             switch container_type
             case 'c'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
-                gdx.read(cfg.filenames{4}, 'format', 'dense_matrix');
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+                gdx.read(cfg.filenames{4}, 'format', 'dense_matrix', 'indexed', true);
             case 'rc'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
-                gdx.read(cfg.filenames{4}, 'format', 'dense_matrix');
-                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+                gdx.read(cfg.filenames{4}, 'format', 'dense_matrix', 'indexed', true);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
             end
             test_name_describe_parameters = 'idx_describe_parameters_dense_matrix';
         case 4
             switch container_type
             case 'c'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
-                gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix');
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+                gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix', 'indexed', true);
             case 'rc'
-                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
-                gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix');
-                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'indexed', true);
+                gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+                gdx.read(cfg.filenames{4}, 'format', 'sparse_matrix', 'indexed', true);
+                gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
             end
             test_name_describe_parameters = 'idx_describe_parameters_sparse_matrix';
         end

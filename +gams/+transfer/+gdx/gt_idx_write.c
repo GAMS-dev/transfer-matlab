@@ -118,25 +118,25 @@ void mexFunction(
             sizes[j] = 1;
 
         /* get records format (ignore unsupported formats) */
-        gt_mex_getfield_int(mx_arr_data, data_name, "format_", GT_FORMAT_UNKNOWN, false, GT_FILTER_NONE, 1, &format);
-        switch (format)
-        {
-            case GT_FORMAT_STRUCT:
-            case GT_FORMAT_DENSEMAT:
-            case GT_FORMAT_SPARSEMAT:
-            case GT_FORMAT_TABLE:
-                break;
-            default:
-                continue;
-        }
+        gt_mex_getfield_str(mx_arr_data, data_name, "format", "", true, buf, GMS_SSSIZE);
+        if (!strcmp(buf, "table"))
+            format = GT_FORMAT_TABLE;
+        else if (!strcmp(buf, "struct"))
+            format = GT_FORMAT_STRUCT;
+        else if (!strcmp(buf, "dense_matrix"))
+            format = GT_FORMAT_DENSEMAT;
+        else if (!strcmp(buf, "sparse_matrix"))
+            format = GT_FORMAT_SPARSEMAT;
+        else
+            continue;
 
         /* get fields */
-        gt_mex_getfield_str(mx_arr_data, data_name, "name_", "", true, name, GMS_SSSIZE);
-        gt_mex_getfield_sizet(mx_arr_data, data_name, "dimension_", 0, true, GT_FILTER_NONNEGATIVE, 1, &dim);
-        gt_mex_getfield_sizet(mx_arr_data, data_name, "size_", 1, true, GT_FILTER_NONNEGATIVE, dim, sizes);
+        gt_mex_getfield_str(mx_arr_data, data_name, "name", "", true, name, GMS_SSSIZE);
+        gt_mex_getfield_sizet(mx_arr_data, data_name, "dimension", 0, true, GT_FILTER_NONNEGATIVE, 1, &dim);
+        gt_mex_getfield_sizet(mx_arr_data, data_name, "size", 1, true, GT_FILTER_NONNEGATIVE, dim, sizes);
 
         /* get optional fields */
-        gt_mex_getfield_str(mx_arr_data, data_name, "description_", "", false, text, GMS_SSSIZE);
+        gt_mex_getfield_str(mx_arr_data, data_name, "description", "", false, text, GMS_SSSIZE);
 
         mx_arr_domains = (mxArray**) mxCalloc(dim, sizeof(*mx_arr_domains));
 #ifdef WITH_R2018A_OR_NEWER

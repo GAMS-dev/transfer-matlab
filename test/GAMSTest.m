@@ -111,11 +111,6 @@ classdef GAMSTest < handle
                 obj.assert(numel(symbol.size) == symbol.dimension);
                 obj.assert(symbol.getNumberRecords() >= 0);
                 obj.assert(symbol.getNumberValues() == 0 || isnan(symbol.getNumberValues()));
-                if ~symbol.container.indexed
-                    for i = 1:symbol.dimension
-                        obj.assert(strcmp(symbol.format, 'not_read') || iscell(symbol.getUELs(i)) && isempty(symbol.getUELs(i)));
-                    end
-                end
                 obj.assert(islogical(symbol.isValid()));
                 obj.assert(ischar(symbol.format));
             case 'gams.transfer.alias.Set'

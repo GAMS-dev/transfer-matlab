@@ -157,10 +157,6 @@ void mexFunction(
         for (size_t j = 0; j < dim; j++)
             sizes[j] = sizes_int[j];
 
-        /* prefer struct instead of dense_matrix for scalars */
-        if (format == GT_FORMAT_DENSEMAT && dim == 0)
-            format = GT_FORMAT_STRUCT;
-
         /* modify value fields based on type */
         values_flag[GMS_VAL_LEVEL] = true;
         values_flag[GMS_VAL_MARGINAL] = false;

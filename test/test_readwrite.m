@@ -66,7 +66,6 @@ function test_read(t, cfg, container_type)
 
     t.add('read_basic_info');
     t.assertEquals(gdx.gams_dir, cfg.gams_dir);
-    t.assert(~gdx.indexed);
     t.assert(numel(fieldnames(gdx.data)) == 5);
 
     t.add('read_set_basic');
@@ -1078,7 +1077,6 @@ function test_readPartial(t, cfg, container_type)
 
     t.add('read_partial_basic_info_1');
     t.assertEquals(gdx.gams_dir, cfg.gams_dir);
-    t.assert(~gdx.indexed);
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'i'));
     t.assert(isfield(gdx.data, 'j'));
@@ -1200,7 +1198,6 @@ function test_readPartial(t, cfg, container_type)
 
     t.add('read_partial_basic_info_2');
     t.assertEquals(gdx.gams_dir, cfg.gams_dir);
-    t.assert(~gdx.indexed);
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'x'));
 
@@ -1242,7 +1239,6 @@ function test_readPartial(t, cfg, container_type)
 
     t.add('read_partial_diffcase_basic_info');
     t.assertEquals(gdx.gams_dir, cfg.gams_dir);
-    t.assert(~gdx.indexed);
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'i'));
     t.assert(isfield(gdx.data, 'j'));

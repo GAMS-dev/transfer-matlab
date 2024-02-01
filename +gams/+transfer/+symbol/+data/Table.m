@@ -113,7 +113,7 @@ classdef Table < gams.transfer.symbol.data.Tabular
             domains = gams.transfer.symbol.data.Data.validateDomains('domains', 1, domains);
             obj = gams.transfer.symbol.data.Table(table());
             for i = 1:numel(domains)
-                obj.records_.(domains{i}.label) = obj.createUniqueLabelsIndex([], {});
+                obj.records_.(domains{i}.label) = obj.createUniqueLabelsIntegerIndex([], {});
             end
         end
 

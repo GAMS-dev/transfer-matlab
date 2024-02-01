@@ -1428,16 +1428,6 @@ function test_copySymbol(t, cfg)
         t.assertEquals(ex.message, 'Symbol already exists in destination.');
     end
 
-    t.add('copy_symbol_set_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
-    try
-        t.assert(false);
-        i.copy(gdx2);
-    catch ex
-        t.reset();
-        t.assertEquals(ex.message, 'Set not allowed in indexed mode.');
-    end
-
     t.add('copy_symbol_alias_empty_1');
     gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     try
@@ -1573,16 +1563,6 @@ function test_copySymbol(t, cfg)
         t.assertEquals(ex.message, 'Symbol already exists in destination.');
     end
 
-    t.add('copy_symbol_variable_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
-    try
-        t.assert(false);
-        x.copy(gdx2);
-    catch ex
-        t.reset();
-        t.assertEquals(ex.message, 'Variable not allowed in indexed mode.');
-    end
-
     t.add('copy_symbol_equation_empty_1');
     gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
@@ -1670,16 +1650,6 @@ function test_copySymbol(t, cfg)
     catch ex
         t.reset();
         t.assertEquals(ex.message, 'Symbol already exists in destination.');
-    end
-
-    t.add('copy_symbol_variable_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
-    try
-        t.assert(false);
-        e.copy(gdx2);
-    catch ex
-        t.reset();
-        t.assertEquals(ex.message, 'Equation not allowed in indexed mode.');
     end
 
     t.add('copy_symbol_parameter_empty_1');
@@ -1795,16 +1765,6 @@ function test_copySymbol(t, cfg)
     catch ex
         t.reset();
         t.assertEquals(ex.message, 'Symbol already exists in destination.');
-    end
-
-    t.add('copy_symbol_parameter_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true);
-    try
-        t.assert(false);
-        p.copy(gdx2);
-    catch ex
-        t.reset();
-        t.assertEquals(ex.message, 'Destination container must not be indexed.');
     end
 
 end
