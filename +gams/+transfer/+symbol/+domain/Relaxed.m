@@ -47,7 +47,7 @@ classdef Relaxed < gams.transfer.symbol.domain.Domain
             if numel(arg) <= 0
                 error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
             end
-            if ~strcmp(arg, '*') && ~isvarname(arg)
+            if ~strcmp(arg, gams.transfer.Constants.UNIVERSE_NAME) && ~isvarname(arg)
                 error('Argument ''%s'' (at position %d) must start with letter and must only consist of letters, digits and underscores.', name, index)
             end
         end

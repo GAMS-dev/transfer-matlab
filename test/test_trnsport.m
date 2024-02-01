@@ -199,7 +199,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(i.domain_labels{1}, 'uni');
         t.assertEquals(i.domain_type, 'none');
         t.assert(numel(i.size) == 1);
-        t.assert(isnan(i.size));
+        t.assert(i.size == 2);
         t.assert(i.isValid());
         t.assertEquals(i.format, 'struct');
         t.assert(i.getNumberRecords() == 2);
@@ -231,7 +231,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(j.domain_labels{1}, 'uni');
         t.assertEquals(j.domain_type, 'none');
         t.assert(numel(j.size) == 1);
-        t.assert(isnan(j.size));
+        t.assert(j.size == 3);
         t.assert(j.isValid());
         t.assertEquals(j.format, 'struct');
         t.assert(j.getNumberRecords() == 3);

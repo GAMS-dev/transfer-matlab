@@ -57,7 +57,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s1.domain_labels) == 1);
     t.assertEquals(s1.domain_type, 'none');
     t.assert(numel(s1.size) == 1);
-    t.assert(isnan(s1.size(1)));
+    t.assert(s1.size(1) == 0);
     t.assert(strcmp(s1.format, 'struct'));
     t.assert(s1.getNumberRecords() == 0);
     t.assert(numel(s1.getUELs(1)) == 0);
@@ -110,7 +110,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(s3.domain_type, 'regular');
     t.assert(numel(s3.size) == 2);
     t.assert(s3.size(1) == 0);
-    t.assert(isnan(s3.size(2)));
+    t.assert(s3.size(2) == 0);
     t.assert(strcmp(s3.format, 'struct'));
     t.assert(s3.getNumberRecords() == 0);
     t.assert(numel(s3.getUELs(1)) == 0);
@@ -163,7 +163,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s5.domain_labels) == 2);
     t.assertEquals(s5.domain_type, 'relaxed');
     t.assert(numel(s5.size) == 2);
-    t.assert(isnan(s5.size(1)));
+    t.assert(s5.size(1) == 0);
     t.assert(s5.size(2) == 0);
     t.assert(strcmp(s5.format, 'struct'));
     t.assert(s5.getNumberRecords() == 0);
@@ -189,7 +189,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(s6.domain_labels) == 1);
     t.assertEquals(s6.domain_type, 'relaxed');
     t.assert(numel(s6.size) == 1);
-    t.assert(isnan(s6.size(1)));
+    t.assert(s6.size(1) == 0);
     t.assert(strcmp(s6.format, 'struct'));
     t.assert(s6.getNumberRecords() == 0);
     t.assert(numel(s6.getUELs(1)) == 0);
@@ -209,12 +209,6 @@ function test_addSymbols(t, cfg)
     try
         t.assert(false);
         gams.transfer.Set(gdx, s1);
-    catch
-        t.reset();
-    end
-    try
-        t.assert(false);
-        gams.transfer.Set(gdx, 's', 2);
     catch
         t.reset();
     end
@@ -281,7 +275,7 @@ function test_addSymbols(t, cfg)
     t.assert(numel(a1.domain_labels) == 1);
     t.assertEquals(a1.domain_type, 'none');
     t.assert(numel(a1.size) == 1);
-    t.assert(isnan(a1.size(1)));
+    t.assert(a1.size(1) == 0);
     t.assert(strcmp(a1.format, 'struct'));
     t.assert(a1.getNumberRecords() == 0);
     t.assert(numel(a1.getUELs(1)) == 0);
@@ -377,8 +371,8 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p3.domain_type, 'relaxed');
     t.assert(numel(p3.size) == 3);
     t.assert(p3.size(1) == 0);
-    t.assert(isnan(p3.size(2)));
-    t.assert(isnan(p3.size(3)));
+    t.assert(p3.size(2) == 0);
+    t.assert(p3.size(3) == 0);
     t.assert(strcmp(p3.format, 'struct'));
     t.assert(p3.getNumberRecords() == 0);
     t.assert(numel(p3.getUELs(1)) == 0);
@@ -400,12 +394,6 @@ function test_addSymbols(t, cfg)
     try
         t.assert(false);
         gams.transfer.Parameter(gdx, s1);
-    catch
-        t.reset();
-    end
-    try
-        t.assert(false);
-        gams.transfer.Parameter(gdx, 's', 2);
     catch
         t.reset();
     end
@@ -508,7 +496,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(v3.domain_type, 'regular');
     t.assert(numel(v3.size) == 2);
     t.assert(v3.size(1) == 0);
-    t.assert(isnan(v3.size(2)));
+    t.assert(v3.size(2) == 0);
     t.assert(strcmp(v3.format, 'struct'));
     t.assert(v3.getNumberRecords() == 0);
     t.assert(numel(v3.getUELs(1)) == 0);
@@ -575,12 +563,6 @@ function test_addSymbols(t, cfg)
     try
         t.assert(false);
         gams.transfer.Variable(gdx, s1, 'stupid');
-    catch
-        t.reset();
-    end
-    try
-        t.assert(false);
-        gams.transfer.Variable(gdx, 's', 'free', 2);
     catch
         t.reset();
     end
@@ -683,7 +665,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(e3.domain_type, 'regular');
     t.assert(numel(e3.size) == 2);
     t.assert(e3.size(1) == 0);
-    t.assert(isnan(e3.size(2)));
+    t.assert(e3.size(2) == 0);
     t.assert(strcmp(e3.format, 'struct'));
     t.assert(e3.getNumberRecords() == 0);
     t.assert(numel(e3.getUELs(1)) == 0);
@@ -764,12 +746,6 @@ function test_addSymbols(t, cfg)
     try
         t.assert(false);
         gams.transfer.Equation(gdx, s1, 'stupid');
-    catch
-        t.reset();
-    end
-    try
-        t.assert(false);
-        gams.transfer.Equation(gdx, 's', 'e', 2);
     catch
         t.reset();
     end
@@ -1120,14 +1096,14 @@ function test_changeSymbol(t, cfg)
         x1.dimension = -1;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [1, 20].');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0, 20].');
     end
     try
         t.assert(false);
         x1.dimension = 21;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [1, 20].');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0, 20].');
     end
 
     t.add('change_symbol_dimension_3');
@@ -1320,28 +1296,6 @@ function test_changeSymbol(t, cfg)
         t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must be cell with 2 elements.');
     end
 
-    t.add('change_symbol_size');
-    try
-        t.assert(false);
-        x1.size = [1,2];
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Setting symbol size only allowed in indexed mode.');
-    end
-
-    t.add('change_symbol_format');
-    try
-        x1.format = 'struct';
-        t.assert(false);
-    catch e
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            msg_end = 'has private access and cannot be set in this context';
-            t.assertEquals(e.message(end-numel(msg_end)+1:end), msg_end);
-        else
-            t.assert(~isempty(strfind(e.message, 'read-only')));
-        end
-    end
-
 end
 
 function test_copySymbol(t, cfg)
@@ -1363,7 +1317,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.i.name, 'i');
     t.assertEquals(gdx2.data.i.description, 'set i');
     t.assert(gdx2.data.i.dimension == 1);
-    t.assert(isnan(gdx2.data.i.size(1)));
+    t.assert(gdx2.data.i.size(1) == 3);
     t.assert(iscell(gdx2.data.i.domain));
     t.assert(numel(gdx2.data.i.domain) == 1);
     t.assertEquals(gdx2.data.i.domain{1}, '*');
@@ -1395,7 +1349,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.i.name, 'i');
     t.assertEquals(gdx2.data.i.description, 'set i');
     t.assert(gdx2.data.i.dimension == 1);
-    t.assert(isnan(gdx2.data.i.size(1)));
+    t.assert(gdx2.data.i.size(1) == 3);
     t.assert(iscell(gdx2.data.i.domain));
     t.assert(numel(gdx2.data.i.domain) == 1);
     t.assertEquals(gdx2.data.i.domain{1}, '*');
@@ -1494,7 +1448,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.x.description, '');
     t.assertEquals(gdx2.data.x.type, 'binary');
     t.assert(gdx2.data.x.dimension == 1);
-    t.assert(isnan(gdx2.data.x.size(1)));
+    t.assert(gdx2.data.x.size(1) == 0);
     t.assert(iscell(gdx2.data.x.domain));
     t.assert(numel(gdx2.data.x.domain) == 1);
     t.assertEquals(gdx2.data.x.domain{1}, 'i');
@@ -1540,7 +1494,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.x.description, '');
     t.assertEquals(gdx2.data.x.type, 'binary');
     t.assert(gdx2.data.x.dimension == 1);
-    t.assert(isnan(gdx2.data.x.size(1)));
+    t.assert(gdx2.data.x.size(1) == 0);
     t.assert(iscell(gdx2.data.x.domain));
     t.assert(numel(gdx2.data.x.domain) == 1);
     t.assertEquals(gdx2.data.x.domain{1}, 'i');
@@ -1573,8 +1527,8 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.description, 'equ e');
     t.assertEquals(gdx2.data.e.type, 'leq');
     t.assert(gdx2.data.e.dimension == 2);
-    t.assert(isnan(gdx2.data.e.size(1)));
-    t.assert(isnan(gdx2.data.e.size(2)));
+    t.assert(gdx2.data.e.size(1) == 0);
+    t.assert(gdx2.data.e.size(2) == 0);
     t.assert(iscell(gdx2.data.e.domain));
     t.assert(numel(gdx2.data.e.domain) == 2);
     t.assertEquals(gdx2.data.e.domain{1}, 'a');
@@ -1626,8 +1580,8 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.description, 'equ e');
     t.assertEquals(gdx2.data.e.type, 'leq');
     t.assert(gdx2.data.e.dimension == 2);
-    t.assert(isnan(gdx2.data.e.size(1)));
-    t.assert(isnan(gdx2.data.e.size(2)));
+    t.assert(gdx2.data.e.size(1) == 0);
+    t.assert(gdx2.data.e.size(2) == 0);
     t.assert(iscell(gdx2.data.e.domain));
     t.assert(numel(gdx2.data.e.domain) == 2);
     t.assertEquals(gdx2.data.e.domain{1}, 'a');
@@ -1661,7 +1615,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.p.name, 'p');
     t.assertEquals(gdx2.data.p.description, '');
     t.assert(gdx2.data.p.dimension == 1);
-    t.assert(isnan(gdx2.data.p.size(1)));
+    t.assert(gdx2.data.p.size(1) == 2);
     t.assert(iscell(gdx2.data.p.domain));
     t.assert(numel(gdx2.data.p.domain) == 1);
     t.assertEquals(gdx2.data.p.domain{1}, 'i');
@@ -1696,7 +1650,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.p.name, 'p');
     t.assertEquals(gdx2.data.p.description, '');
     t.assert(gdx2.data.p.dimension == 1);
-    t.assert(gdx2.data.p.size(1) == 3);
+    t.assert(gdx2.data.p.size(1) == 2);
     t.assert(iscell(gdx2.data.p.domain));
     t.assert(numel(gdx2.data.p.domain) == 1);
     t.assert(gdx2.data.p.domain{1} == gdx2.data.i);
@@ -1731,7 +1685,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.p.name, 'p');
     t.assertEquals(gdx2.data.p.description, '');
     t.assert(gdx2.data.p.dimension == 1);
-    t.assert(isnan(gdx2.data.p.size(1)));
+    t.assert(gdx2.data.p.size(1) == 2);
     t.assert(iscell(gdx2.data.p.domain));
     t.assert(numel(gdx2.data.p.domain) == 1);
     t.assertEquals(gdx2.data.p.domain{1}, 'i');
@@ -2222,7 +2176,7 @@ function test_setRecords(t, cfg)
         s1.setRecords([1; 2; 3; 4]);
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Cannot create matrix records, because symbol size is unknown.');
+        t.assertEquals(e.message, 'Cannot create matrix records, because value size does not match symbol size.');
     end
 
     t.add('set_records_numeric_2');

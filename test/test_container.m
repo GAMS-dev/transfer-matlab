@@ -29,7 +29,7 @@ function success = test_container(cfg)
     test_getlist(t, cfg, 'c');
     test_describe(t, cfg, 'c');
     test_describePartial(t, cfg, 'c');
-    % test_idx_describe(t, cfg, 'c');
+    test_idx_describe(t, cfg, 'c');
     test_remove(t, cfg);
     [~, n_fails1] = t.summary();
 
@@ -38,7 +38,7 @@ function success = test_container(cfg)
     test_getlist(t, cfg, 'rc');
     test_describe(t, cfg, 'rc');
     test_describePartial(t, cfg, 'rc');
-    % test_idx_describe(t, cfg, 'rc');
+    test_idx_describe(t, cfg, 'rc');
     [~, n_fails2] = t.summary();
 
     success = n_fails1 + n_fails2 == 0;
@@ -1328,11 +1328,11 @@ function test_idx_describe(t, cfg, container_type)
             end
             t.assert(tbl{1,'dimension'} == 0);
             if gams.transfer.Constants.SUPPORTS_CATEGORICAL
-                t.assertEquals(tbl{1,'domain_type'}, 'relaxed');
+                t.assertEquals(tbl{1,'domain_type'}, 'none');
                 t.assertEquals(tbl{1,'domain'}, '[]');
                 t.assertEquals(tbl{1,'size'}, '[]');
             else
-                t.assertEquals(tbl{1,'domain_type'}{1}, 'relaxed');
+                t.assertEquals(tbl{1,'domain_type'}{1}, 'none');
                 t.assertEquals(tbl{1,'domain'}{1}, '[]');
                 t.assertEquals(tbl{1,'size'}{1}, '[]');
             end
@@ -1554,11 +1554,11 @@ function test_idx_describe(t, cfg, container_type)
             end
             t.assert(tbl.dimension(1) == 0);
             if gams.transfer.Constants.SUPPORTS_CATEGORICAL
-                t.assertEquals(tbl.domain_type(1), 'relaxed');
+                t.assertEquals(tbl.domain_type(1), 'none');
                 t.assertEquals(tbl.domain(1), '[]');
                 t.assertEquals(tbl.size(1), '[]');
             else
-                t.assertEquals(tbl.domain_type{1}, 'relaxed');
+                t.assertEquals(tbl.domain_type{1}, 'none');
                 t.assertEquals(tbl.domain{1}, '[]');
                 t.assertEquals(tbl.size{1}, '[]');
             end
