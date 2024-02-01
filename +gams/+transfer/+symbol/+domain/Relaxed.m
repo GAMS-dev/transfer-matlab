@@ -34,7 +34,6 @@ classdef Relaxed < gams.transfer.symbol.domain.Domain
 
     properties (Hidden, SetAccess = protected)
         name_
-        unique_labels_ = []
     end
 
     methods (Hidden, Static)
@@ -53,30 +52,14 @@ classdef Relaxed < gams.transfer.symbol.domain.Domain
             end
         end
 
-        function arg = validateUniqueLabels(name, index, arg)
-            if isnumeric(arg) && isempty(arg)
-                arg = [];
-                return
-            end
-            if ~isa(arg, 'gams.transfer.unique_labels.Abstract')
-                error('Argument ''%s'' (at position %d) must be empty or ''gams.transfer.unique_labels.Abstract''.', name, index);
-            end
-        end
-
-    end
-
-    properties (Constant)
-        HOLDS_UNIQUE_LABELS = true
     end
 
     properties (Dependent)
         name
-        unique_labels
     end
 
     properties (Dependent, SetAccess = private)
         base
-        size
     end
 
     methods
@@ -89,24 +72,8 @@ classdef Relaxed < gams.transfer.symbol.domain.Domain
             obj.name_ = obj.validateName('name', 1, name);
         end
 
-        function unique_labels = get.unique_labels(obj)
-            unique_labels = obj.unique_labels_;
-        end
-
-        function obj = set.unique_labels(obj, unique_labels)
-            obj.unique_labels_ = obj.validateUniqueLabels('unique_labels', 1, unique_labels);
-        end
-
         function base = get.base(obj)
             base = obj.name_;
-        end
-
-        function size = get.size(obj)
-            if isempty(obj.unique_labels_)
-                size = nan;
-            else
-                size = obj.unique_labels_.size();
-            end
         end
 
     end
@@ -129,17 +96,6 @@ classdef Relaxed < gams.transfer.symbol.domain.Domain
 
         function status = isValid(obj)
             status = gams.transfer.utils.Status.createOK();
-        end
-
-        function flag = hasUniqueLabels(obj)
-            flag = ~isempty(obj.unique_labels_);
-        end
-
-        function uels = getUniqueLabels(obj)
-            if ~obj.hasUniqueLabels()
-                error('Relaxed domain ''%s'' does not have unique labels.', obj.name_);
-            end
-            uels = obj.unique_labels_.get();
         end
 
     end

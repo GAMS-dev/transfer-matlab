@@ -69,6 +69,12 @@ classdef Constants
         UNIVERSE_LABEL = 'uni'
 
 
+        %> Label of undefined unique label
+
+        % UNDEFINED_UNIQUE_LABEL Label of undefined unique label
+        UNDEFINED_UNIQUE_LABEL = '<undefined>'
+
+
         %> True if table is supported
 
         % SUPPORTS_TABLE True if table is supported
@@ -102,6 +108,15 @@ classdef Constants
             catch
                 flag = false;
             end
+
+            env = getenv('GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE');
+            if ~isempty(env)
+                if strcmpi(env, 'true')
+                    flag = true;
+                elseif strcmpi(env, 'false')
+                    flag = false;
+                end
+            end
         end
 
         function flag = supportsCategorical()
@@ -110,6 +125,15 @@ classdef Constants
                 categorical();
             catch
                 flag = false;
+            end
+
+            env = getenv('GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL');
+            if ~isempty(env)
+                if strcmpi(env, 'true')
+                    flag = true;
+                elseif strcmpi(env, 'false')
+                    flag = false;
+                end
             end
         end
 

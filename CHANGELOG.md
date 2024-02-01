@@ -7,11 +7,14 @@ GAMS Transfer Matlab v0.9.0
 - TODO: read without records was empty format. no longer
 - TODO: creating a symbol without records will create a empty records struct or table (instead fof []).
 - TODO: setRecords with struct. Domains no longer taken by number of occurance but by domain label.
-- TODO: Resetting symbol domain resets domain properties.
+- TODO: Resetting symbol domain resets domain properties. This may include UELs that are not maintained in a categorical.
 - TODO: added container property to symbols
 - TODO: removing symbol -> domain gets relaxed and not set to universe anymore
 - TODO: allow to set symbol format
 - TODO: read scalar: densematrix was changed to struct. not anymore
+- TODO: size of symbols is dependent on number of uels per dimension and not on domain symbol anymore.
+- TODO: matrix formats can maintain uels now (need to update documentation). This also means that
+  matrices can be created smaller than before if left out rows/cols are meant to be default values.
 
 GAMS Transfer Matlab v0.8.0
 ==================

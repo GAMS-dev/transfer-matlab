@@ -115,6 +115,7 @@ classdef (Abstract) Data < handle
         data = copy(obj)
         status = isValid(obj, def)
         data = transform(obj, format)
+
         nrecs = getNumberRecords(obj, def)
         nvals = getNumberValues(obj, def, varargin)
         value = getMeanValue(obj, def, varargin)
@@ -124,10 +125,6 @@ classdef (Abstract) Data < handle
         arg = validateDomains_(obj, name, index, arg)
         arg = validateValues_(obj, name, index, arg)
         subindex = ind2sub_(obj, domains, value, linindex)
-        uels = getUniqueLabelsAt_(obj, domain, ignore_unused)
-        setUniqueLabelsAt_(obj, uels, domain, rename)
-        addUniqueLabelsAt_(obj, uels, domain)
-        removeUniqueLabelsAt_(obj, uels, domain)
     end
 
     methods
@@ -148,6 +145,102 @@ classdef (Abstract) Data < handle
     end
 
     methods
+
+        function flag = hasUniqueLabels(obj, domain)
+            % TODO check domain
+            flag = false;
+        end
+
+        function indices = usedUniqueLabels(obj, domain)
+            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+        end
+
+        function count = countUniqueLabels(obj, domain)
+            % TODO: check domain
+            count = numel(obj.getUniqueLabels());
+        end
+
+        function labels = getUniqueLabels(obj, domain)
+            if obj.hasUniqueLabels(domain)
+                error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            else
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+        end
+
+        function labels = getUniqueLabelsAt(obj, domain, indices)
+            % TODO check indices
+            labels = gams.transfer.utils.filter_unique_labels(obj.getUniqueLabels(domain), indices);
+        end
+
+        function indices = findUniqueLabels(obj, domain, labels)
+            % TODO: check labels
+            [~, indices] = ismember(labels, obj.getUniqueLabels(domain));
+        end
+
+        function clearUniqueLabels(obj, domain)
+            if obj.hasUniqueLabels(domain)
+                error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            else
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+        end
+
+        function addUniqueLabels(obj, domain, labels)
+            if obj.hasUniqueLabels(domain)
+                error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            else
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+        end
+
+        function setUniqueLabels(obj, domain, labels)
+            if obj.hasUniqueLabels(domain)
+                error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            else
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+        end
+
+        function updateUniqueLabels(obj, domain, labels)
+            if obj.hasUniqueLabels(domain)
+                error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            else
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+        end
+
+        function removeUniqueLabels(obj, domain, labels)
+            if obj.hasUniqueLabels(domain)
+                error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            else
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+        end
+
+        function removeUnusedUniqueLabels(obj, domain)
+            if obj.hasUniqueLabels(domain)
+                error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            else
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+        end
+
+        function renameUniqueLabels(obj, domain, oldlabels, newlabels)
+            if obj.hasUniqueLabels(domain)
+                error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            else
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+        end
+
+        function mergeUniqueLabels(obj, domain, oldlabels, newlabels)
+            if obj.hasUniqueLabels(domain)
+                error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            else
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+        end
 
         function copyFrom(obj, symbol)
 
@@ -198,192 +291,6 @@ classdef (Abstract) Data < handle
                 end
             end
             values = values(idx);
-        end
-
-        function uels = getUELs(obj, varargin)
-            % parse input arguments
-            codes = [];
-            ignore_unused = false;
-            try
-                domains = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'domains', @obj.validateDomains_);
-                index = 2;
-                is_pararg = false;
-                while index < nargin
-                    if strcmpi(varargin{index}, 'ignore_unused')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
-                        ignore_unused = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'ignore_unused', validate);
-                        index = index + 2;
-                        is_pararg = true;
-                    elseif ~is_pararg && index == 2
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'numeric'}, 1));
-                        codes = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'codes', validate);
-                        index = index + 1;
-                    else
-                        error('Invalid argument at position %d', index);
-                    end
-                end
-            catch e
-                error(e.message);
-            end
-
-            uels = {};
-
-            for i = 1:numel(domains)
-                uels_i = obj.getUniqueLabelsAt_(domains{i}, ignore_unused);
-
-                % filter for given codes
-                if ~isempty(codes)
-                    uels_i0 = uels_i;
-                    idx = codes >= 1 & codes <= numel(uels_i0);
-                    uels_i = cell(numel(codes), 1);
-                    uels_i(idx) = uels_i0(codes(idx));
-                    uels_i(~idx) = {'<undefined>'};
-                end
-
-                uels = [uels; reshape(uels_i, numel(uels_i), 1)];
-            end
-
-            if numel(domains) > 1
-                uels = gams.transfer.utils.unique(uels);
-            end
-        end
-
-        function setUELs(obj, varargin)
-            % parse input arguments
-            rename = false;
-            try
-                uels = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'uels', []); % TODO
-                domains = gams.transfer.utils.parse_argument(varargin, ...
-                    2, 'domains', @obj.validateDomains_);
-                index = 3;
-                is_pararg = false;
-                while index < nargin
-                    if strcmpi(varargin{index}, 'rename')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
-                        rename = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'rename', validate);
-                        index = index + 2;
-                        is_pararg = true;
-                    else
-                        error('Invalid argument at position %d', index);
-                    end
-                end
-            catch e
-                error(e.message);
-            end
-
-            for i = 1:numel(domains)
-                obj.setUniqueLabelsAt_(uels, domains{i}, rename);
-            end
-        end
-
-        function reorderUELsByData(obj, varargin)
-            % parse input arguments
-            try
-                domains = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'domains', @obj.validateDomains_);
-            catch e
-                error(e.message);
-            end
-
-            for i = 1:numel(domains)
-                uels = obj.getUniqueLabelsAt_(domains{i});
-                rec_uels_ids = gams.transfer.utils.unique(uint64(obj.records_.(domains{i}.label)));
-                rec_uels_ids = rec_uels_ids(rec_uels_ids ~= nan);
-                obj.setUniqueLabelsAt_(uels(rec_uels_ids), domains{i});
-                obj.addUniqueLabelsAt_(uels, domains{i});
-            end
-        end
-
-        function reorderUELs(obj, varargin)
-            % parse input arguments
-            try
-                uels = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'uels', @obj.validateUels);
-                domains = gams.transfer.utils.parse_argument(varargin, ...
-                    2, 'domains', @obj.validateDomains_);
-            catch e
-                error(e.message);
-            end
-
-            for i = 1:numel(domains)
-                current_uels = obj.getUniqueLabelsAt_(domains{i});
-                if numel(uels) ~= numel(current_uels)
-                    error('Number of UELs %d not equal to number of current UELs %d', numel(uels), numel(current_uels));
-                end
-                if ~all(ismember(current_uels, uels))
-                    error('Adding new UELs not supported for reordering');
-                end
-                obj.setUniqueLabelsAt_(uels, domains{i});
-            end
-        end
-
-        function addUELs(obj, varargin)
-            % parse input arguments
-            try
-                uels = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'uels', @obj.validateUels);
-                domains = gams.transfer.utils.parse_argument(varargin, ...
-                    2, 'domains', @obj.validateDomains_);
-            catch e
-                error(e.message);
-            end
-
-            for i = 1:numel(domains)
-                obj.addUniqueLabelsAt_(uels, domains{i});
-            end
-        end
-
-        function removeUELs(obj, varargin)
-            % parse input arguments
-            try
-                uels = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'uels', []); % TODO
-                domains = gams.transfer.utils.parse_argument(varargin, ...
-                    2, 'domains', @obj.validateDomains_);
-            catch e
-                error(e.message);
-            end
-
-            for i = 1:numel(domains)
-                obj.removeUniqueLabelsAt_(uels, domains{i});
-            end
-        end
-
-        function renameUELs(obj, varargin)
-            error('todo');
-        end
-
-        function lowerUELs(obj, varargin)
-            % parse input arguments
-            try
-                domains = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'domains', @obj.validateDomains_);
-            catch e
-                error(e.message);
-            end
-
-            for i = 1:numel(domains)
-                obj.renameUniqueLabelsAt(lower(obj.getUniqueLabelsAt_(domains{i})), domains{i}, true);
-            end
-        end
-
-        function upperUELs(obj, varargin)
-            % parse input arguments
-            try
-                domains = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'domains', @obj.validateDomains_);
-            catch e
-                error(e.message);
-            end
-
-            for i = 1:numel(domains)
-                obj.renameUniqueLabelsAt(upper(obj.getUniqueLabelsAt_(domains{i})), domains{i}, true);
-            end
         end
 
     end
@@ -441,10 +348,10 @@ classdef (Abstract) Data < handle
         end
 
         function sparsity = getSparsity(obj, def, varargin)
-            [~, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+            [domains, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
             values = obj.availableNumericValues(values);
 
-            n_dense = prod(def.size) * numel(values);
+            n_dense = prod(obj.axes(domains).size()) * numel(values);
             if n_dense == 0
                 sparsity = NaN;
             else
@@ -472,8 +379,7 @@ classdef (Abstract) Data < handle
             if ~isempty(idx)
                 where = cell(1, numel(domains));
                 for i = 1:numel(domains)
-                    uels = obj.getUniqueLabelsAt_(domains{i}, false);
-                    where{i} = uels{idx(i)};
+                    where{i} = obj.axis(domains{i}).labelAt(idx(i));
                 end
             end
         end
@@ -498,8 +404,7 @@ classdef (Abstract) Data < handle
             if ~isempty(idx)
                 where = cell(1, numel(domains));
                 for i = 1:numel(domains)
-                    uels = obj.getUniqueLabelsAt_(domains{i}, false);
-                    where{i} = uels{idx(i)};
+                    where{i} = obj.axis(domains{i}).labelAt(idx(i));
                 end
             end
         end
@@ -524,9 +429,61 @@ classdef (Abstract) Data < handle
             if ~isempty(idx)
                 where = cell(1, numel(domains));
                 for i = 1:numel(domains)
-                    uels = obj.getUniqueLabelsAt_(domains{i}, false);
-                    where{i} = uels{idx(i)};
+                    where{i} = obj.axis(domains{i}).labelAt(idx(i));
                 end
+            end
+        end
+
+        function axis = axis(obj, domain)
+            axis = gams.transfer.symbol.unique_labels.Axis(obj, domain);
+        end
+
+        function axes = axes(obj, domains)
+            axes = gams.transfer.symbol.unique_labels.Axes(obj, domains);
+        end
+
+    end
+
+    methods (Static)
+
+        function index = createUniqueLabelsIndex(input, unique_labels)
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
+                index = gams.transfer.symbol.data.Data.createUniqueLabelsCategoricalIndex(input, unique_labels);
+            else
+                index = gams.transfer.symbol.data.Data.createUniqueLabelsIntegerIndex(input, unique_labels);
+            end
+        end
+
+        function index = createUniqueLabelsCategoricalIndex(input, unique_labels)
+            if ~iscellstr(unique_labels)
+                error('Argument ''unique_labels'' (at position 2) must be ''cellstr''.');
+            end
+            if iscellstr(input)
+                index = categorical(input, unique_labels, 'Ordinal', true);
+            elseif isnumeric(input) && all(round(input) == input)
+                index = categorical(input, 1:numel(unique_labels), unique_labels, 'Ordinal', true);
+            else
+                error('Argument ''input'' (at position 1) must be ''cellstr'' or integer ''numeric''.');
+            end
+        end
+
+        function index = createUniqueLabelsIntegerIndex(input, unique_labels)
+            if ~iscellstr(unique_labels)
+                error('Argument ''unique_labels'' (at position 2) must be ''cellstr''.');
+            end
+            if iscellstr(input)
+                map = containers.Map(unique_labels, 1:numel(unique_labels));
+                index = zeros(size(input));
+                for i = 1:numel(input)
+                    if isKey(map, input{i})
+                        index(i) = map(input{i});
+                    end
+                end
+            elseif isnumeric(input) && all(round(input) == input)
+                index = input;
+                index(index < 1 | numel(unique_labels)) = 0;
+            else
+                error('Argument ''input'' (at position 1) must be ''cellstr'' or integer ''numeric''.');
             end
         end
 

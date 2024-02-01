@@ -308,7 +308,7 @@ classdef (Abstract) Symbol < handle
         end
 
         function size = get.size(obj)
-            size = obj.def_.size();
+            size = obj.axes().size();
         end
 
         function domain = get.domain(obj)
@@ -685,15 +685,14 @@ classdef (Abstract) Symbol < handle
 
             domains_values = [domains, values];
 
-            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
-                index_type = gams.transfer.symbol.domain.IndexType.Categorical();
-            else
-                index_type = gams.transfer.symbol.domain.IndexType.Integer();
-            end
-
             % create proper index for domain entries
             for i = 1:numel(domains)
-                new_records.(domains{i}.label) = domains{i}.createIndex(index_type, new_records.(domains{i}.label), true);
+                unique_labels = gams.transfer.utils.unique(new_records.(domains{i}.label));
+                new_records.(domains{i}.label) = gams.transfer.symbol.data.Data.createUniqueLabelsIndex(...
+                    new_records.(domains{i}.label), unique_labels);
+                if ~gams.transfer.Constants.SUPPORTS_CATEGORICAL || ~iscategorical(new_records.(domains{i}.label))
+                    domains{i}.unique_labels = gams.transfer.unique_labels.OrderedLabelSet(unique_labels);
+                end
             end
 
             % create categoricals for element_text
@@ -731,8 +730,7 @@ classdef (Abstract) Symbol < handle
                     data.records.(domains_values{i}.label) = data.records.(domains_values{i}.label)(:);
                 end
             elseif isa(data, 'gams.transfer.symbol.data.Matrix')
-                symbol_size = ones(1, 2);
-                symbol_size(1:obj.dimension) = obj.size;
+                symbol_size = obj.axes().matrixSize(true);
                 if any(isnan(symbol_size))
                     error('Cannot create matrix records, because symbol size is unknown.');
                 end
@@ -894,10 +892,12 @@ classdef (Abstract) Symbol < handle
                     continue
                 end
 
-                data_uels = obj.data_.getUELs({domains{i}}, 'ignore_unused', true);
-                domain_uels = domains{i}.getUniqueLabels();
-                [~, ia] = setdiff(lower(data_uels), lower(domain_uels));
-                added_uels = data_uels(ia);
+                % TODO computing domain violation should be moved into axis
+                axis = obj.axis(dimensions(i));
+                working_uels = axis.unique_labels.getAt(obj.data_.usedUniqueLabels(domains{i}));
+                defining_uels = axis.super_unique_labels.get();
+                [~, ia] = setdiff(lower(working_uels), lower(defining_uels));
+                added_uels = working_uels(ia);
 
                 if numel(added_uels) > 0
                     domain_violations{end+1} = gams.transfer.DomainViolation(obj, ...
@@ -1313,7 +1313,7 @@ classdef (Abstract) Symbol < handle
 
     end
 
-    methods (Hidden, Access = protected)
+    methods (Hidden)
 
         function argout = validateDimensionToDomain(obj, name, index, arg)
             if ~isnumeric(arg)
@@ -1331,6 +1331,84 @@ classdef (Abstract) Symbol < handle
                     error('Argument ''%s'' (at position %d) must have values in [1, %d].', name, index, obj.dimension);
                 end
                 argout{i} = obj.def_.domains{arg(i)};
+            end
+        end
+
+        function axis = axis(obj, dimension)
+            axis = obj.def_.axis(obj.data_, dimension);
+        end
+
+        function axes = axes(obj)
+            axes = obj.def_.axes(obj.data_);
+        end
+
+        function indices = usedUniqueLabels(obj, dimension)
+            indices = obj.data_.usedUniqueLabels(obj.def_.domains{dimension});
+        end
+
+        function count = countUniqueLabels(obj, dimension)
+            count = obj.axis(dimension).unique_labels.count();
+        end
+
+        function labels = getUniqueLabels(obj, dimension)
+            labels = obj.axis(dimension).unique_labels.get();
+        end
+
+        function labels = getUniqueLabelsAt(obj, dimension, indices)
+            labels = obj.axis(dimension).unique_labels.getAt(indices);
+        end
+
+        function indices = findUniqueLabels(obj, dimension, labels)
+            indices = obj.axis(dimension).unique_labels.find(labels);
+        end
+
+        function clearUniqueLabels(obj, dimension)
+            obj.axis(dimension).unique_labels.clear();
+        end
+
+        function addUniqueLabels(obj, dimension, labels)
+            obj.axis(dimension).unique_labels.add(labels);
+        end
+
+        function setUniqueLabels(obj, dimension, labels)
+            obj.axis(dimension).unique_labels.set(labels);
+        end
+
+        function updateUniqueLabels(obj, dimension, labels)
+            unique_labels = obj.axis(dimension).unique_labels;
+            if isa(unique_labels, 'gams.transfer.unique_labels.Data')
+                assert(unique_labels.data == obj.data_);
+                obj.data_.updateUniqueLabels(obj.def_.domains{dimension}, labels);
+            else
+                % TODO
+            end
+        end
+
+        function removeUniqueLabels(obj, dimension, labels)
+            obj.axis(dimension).unique_labels.remove(labels);
+        end
+
+        function removeUnusedUniqueLabels(obj, dimension)
+            unique_labels = obj.axis(dimension).unique_labels;
+            if isa(unique_labels, 'gams.transfer.unique_labels.Data')
+                assert(unique_labels.data == obj.data_);
+                obj.data_.removeUnusedUniqueLabels(obj.def_.domains{dimension});
+            else
+                % TODO
+            end
+        end
+
+        function renameUniqueLabels(obj, dimension, oldlabels, newlabels)
+            obj.axis(dimension).unique_labels.rename(oldlabels, newlabels);
+        end
+
+        function mergeUniqueLabels(obj, dimension, oldlabels, newlabels)
+            unique_labels = obj.axis(dimension).unique_labels;
+            if isa(unique_labels, 'gams.transfer.unique_labels.Data')
+                assert(unique_labels.data == obj.data_);
+                obj.data_.mergeUniqueLabels(obj.def_.domains{dimension}, oldlabels, newlabels);
+            else
+                % TODO
             end
         end
 
@@ -1367,18 +1445,55 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
+            % parse input arguments
+            dimensions = 1:obj.dimension;
+            codes = [];
+            ignore_unused = false;
+            try
+                index = 1;
+                is_pararg = false;
+                while index < nargin
+                    if strcmpi(varargin{index}, 'ignore_unused')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
+                        ignore_unused = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'ignore_unused', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif ~is_pararg && index == 1
+                        dimensions = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'dimensions', []); % TODO
+                        index = index + 1;
+                    elseif ~is_pararg && index == 2
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'numeric'}, -1));
+                        codes = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'codes', validate);
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
             end
 
-            if nargin >= 2 && isnumeric(varargin{1})
-                try
-                    varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
-                catch e
-                    error(e.message);
+            uels = {};
+            for i = dimensions
+                if isempty(codes) && ignore_unused
+                    uels_i = obj.getUniqueLabelsAt(i, obj.usedUniqueLabels(i));
+                elseif isempty(codes)
+                    uels_i = obj.getUniqueLabels(i);
+                elseif ignore_unused
+                    uels_i = gams.transfer.utils.filter_unique_labels(...
+                        obj.getUniqueLabelsAt(i, obj.usedUniqueLabels(i)), codes);
+                else
+                    uels_i = obj.getUniqueLabelsAt(i, codes);
                 end
+                uels = [uels; reshape(uels_i, numel(uels_i), 1)];
             end
-            uels = obj.data_.getUELs(varargin{:});
+
+            if numel(dimensions) > 1
+                uels = gams.transfer.utils.unique(uels);
+            end
         end
 
         %> Sets UELs
@@ -1411,18 +1526,40 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
+            % parse input arguments
+            dimensions = 1:obj.dimension;
+            rename = false;
+            try
+                uels = gams.transfer.utils.parse_argument(varargin, ...
+                    1, 'uels', []); % TODO
+                index = 2;
+                is_pararg = false;
+                while index < nargin
+                    if strcmpi(varargin{index}, 'rename')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
+                        rename = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'rename', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif ~is_pararg && index == 2
+                        dimensions = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'dimensions', []); % TODO
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
             end
 
-            if nargin >= 3 && isnumeric(varargin{2})
-                try
-                    varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
-                catch e
-                    error(e.message);
+            for i = dimensions
+                if rename
+                    obj.setUniqueLabels(i, uels);
+                else
+                    obj.updateUniqueLabels(i, uels);
                 end
             end
-            obj.data_.setUELs(varargin{:});
         end
 
         %> Reorders UELs
@@ -1445,18 +1582,58 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.symbol.Symbol.setUELs
 
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
+            % parse input arguments
+            dimensions = 1:obj.dimension;
+            uels = {};
+            rename = false;
+            try
+                index = 1;
+                is_pararg = false;
+                while index < nargin
+                    if strcmpi(varargin{index}, 'rename')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
+                        rename = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'rename', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif ~is_pararg && index == 1
+                        uels = gams.transfer.utils.parse_argument(varargin, ...
+                            1, 'uels', []); % TODO
+                        index = index + 1;
+                    elseif ~is_pararg && index == 2
+                        dimensions = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'dimensions', []); % TODO
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
             end
 
-            if nargin >= 3 && isnumeric(varargin{2})
-                try
-                    varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
-                catch e
-                    error(e.message);
+            if isempty(uels)
+                for i = dimensions
+                    labels = obj.getUniqueLabels(i);
+                    indices = obj.usedUniqueLabels(i);
+                    used_labels = labels(indices);
+                    obj.updateUniqueLabels(i, used_labels);
+                    obj.addUniqueLabels(i, setdiff(labels, used_labels));
                 end
+                return
             end
-            obj.data_.reorderUELs(varargin{:});
+
+            for i = dimensions
+                labels = obj.getUniqueLabels(i);
+                if numel(uels) ~= numel(labels)
+                    error('Number of UELs %d not equal to number of current UELs %d', ...
+                        numel(uels), numel(labels));
+                end
+                if ~all(ismember(labels, uels))
+                    error('Adding new UELs not supported for reordering');
+                end
+                obj.updateUniqueLabels(i, uels);
+            end
         end
 
         %> Adds UELs to the symbol
@@ -1482,18 +1659,29 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
+            % parse input arguments
+            dimensions = 1:obj.dimension;
+            try
+                uels = gams.transfer.utils.parse_argument(varargin, ...
+                    1, 'uels', []); % TODO
+                index = 2;
+                is_pararg = false;
+                while index < nargin
+                    if ~is_pararg && index == 2
+                        dimensions = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'dimensions', []); % TODO
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
             end
 
-            if nargin >= 3 && isnumeric(varargin{2})
-                try
-                    varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
-                catch e
-                    error(e.message);
-                end
+            for i = dimensions
+                obj.addUniqueLabels(i, uels);
             end
-            obj.data_.addUELs(varargin{:});
         end
 
         %> Removes UELs from the symbol
@@ -1523,18 +1711,36 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
+            % parse input arguments
+            uels = {};
+            dimensions = 1:obj.dimension;
+            try
+                index = 1;
+                is_pararg = false;
+                while index < nargin
+                    if ~is_pararg && index == 1
+                        uels = gams.transfer.utils.parse_argument(varargin, ...
+                            1, 'uels', []); % TODO
+                        index = index + 1;
+                    elseif ~is_pararg && index == 2
+                        dimensions = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'dimensions', []); % TODO
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
             end
 
-            if nargin >= 3 && isnumeric(varargin{2})
-                try
-                    varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
-                catch e
-                    error(e.message);
+            for i = dimensions
+                if isempty(uels)
+                    obj.removeUnusedUniqueLabels(i);
+                else
+                    obj.removeUniqueLabels(i, uels);
                 end
             end
-            obj.data_.removeUELs(varargin{:});
         end
 
         %> Renames UELs in the symbol
@@ -1576,18 +1782,67 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
+            % parse input arguments
+            dimensions = 1:obj.dimension;
+            allow_merge = false;
+            try
+                uels = gams.transfer.utils.parse_argument(varargin, ...
+                    1, 'uels', []); % TODO
+                index = 2;
+                is_pararg = false;
+                while index < nargin
+                    if strcmpi(varargin{index}, 'allow_merge')
+                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
+                        allow_merge = gams.transfer.utils.parse_argument(varargin, ...
+                            index + 1, 'allow_merge', validate);
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif ~is_pararg && index == 2
+                        dimensions = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'dimensions', []); % TODO
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
             end
 
-            if nargin >= 3 && isnumeric(varargin{2})
-                try
-                    varargin{2} = obj.validateDimensionToDomain('dimension', 2, varargin{2});
-                catch e
-                    error(e.message);
+            if isa(uels, 'containers.Map')
+                % TODO: check data type
+                for i = dimensions
+                    if allow_merge
+                        obj.mergeUniqueLabels(i, keys(uels), values(uels));
+                    else
+                        obj.renameUniqueLabels(i, keys(uels), values(uels));
+                    end
+                end
+            elseif isstruct(uels)
+                oldlabels = fieldnames(uels);
+                newlabels = cell(1, numel(oldlabels));
+                for i = 1:numel(oldlabels)
+                    % TODO: check data type
+                    newlabels{i} = uels.(oldlabels{i});
+                end
+                for i = dimensions
+                    if allow_merge
+                        obj.mergeUniqueLabels(i, oldlabels, newlabels);
+                    else
+                        obj.renameUniqueLabels(i, oldlabels, newlabels);
+                    end
+                end
+            elseif iscellstr(uels)
+                for i = dimensions
+                    oldlabels = obj.getUniqueLabels(i);
+                    newlabels = uels;
+                    if allow_merge
+                        obj.mergeUniqueLabels(i, oldlabels, newlabels);
+                    else
+                        obj.renameUniqueLabels(i, oldlabels, newlabels);
+                    end
                 end
             end
-            obj.data_.renameUELs(varargin{:});
         end
 
         %> Converts UELs to lower case
@@ -1616,18 +1871,30 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
+            % parse input arguments
+            dimensions = 1:obj.dimension;
+            try
+                index = 1;
+                is_pararg = false;
+                while index < nargin
+                    if ~is_pararg && index == 1
+                        dimensions = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'dimensions', []); % TODO
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
             end
 
-            if nargin >= 2 && isnumeric(varargin{1})
-                try
-                    varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
-                catch e
-                    error(e.message);
-                end
+            labels = obj.getUELs(dimensions);
+            if isempty(labels)
+                return
             end
-            obj.data_.lowerUELs(varargin{:});
+            rename_map = containers.Map(labels, lower(labels));
+            obj.renameUELs(rename_map, dimensions, 'allow_merge', true);
         end
 
         %> Converts UELs to upper case
@@ -1656,18 +1923,30 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.Container.indexed, gams.transfer.symbol.Symbol.isValid
 
-            if ~obj.isValid()
-                error('Symbol must be valid in order to manage UELs.');
+            % parse input arguments
+            dimensions = 1:obj.dimension;
+            try
+                index = 1;
+                is_pararg = false;
+                while index < nargin
+                    if ~is_pararg && index == 1
+                        dimensions = gams.transfer.utils.parse_argument(varargin, ...
+                            index, 'dimensions', []); % TODO
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
             end
 
-            if nargin >= 2 && isnumeric(varargin{1})
-                try
-                    varargin{1} = obj.validateDimensionToDomain('dimension', 1, varargin{1});
-                catch e
-                    error(e.message);
-                end
+            labels = obj.getUELs(dimensions);
+            if isempty(labels)
+                return
             end
-            obj.data_.upperUELs(varargin{:});
+            rename_map = containers.Map(labels, upper(labels));
+            obj.renameUELs(rename_map, dimensions, 'allow_merge', true);
         end
 
     end

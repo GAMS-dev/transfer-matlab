@@ -149,11 +149,7 @@ classdef Struct < gams.transfer.symbol.data.Tabular
             domains = gams.transfer.symbol.data.Data.validateDomains('domains', 1, domains);
             obj = gams.transfer.symbol.data.Struct(struct());
             for i = 1:numel(domains)
-                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
-                    obj.records_.(domains{i}.label) = categorical([], [], {}, 'Ordinal', true);
-                else
-                    obj.records_.(domains{i}.label) = [];
-                end
+                obj.records_.(domains{i}.label) = obj.createUniqueLabelsIndex([], {});
             end
         end
 

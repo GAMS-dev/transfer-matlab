@@ -71,15 +71,13 @@ function run_tests(transfer_dir, varargin)
 
         % run tests
         success = success & test_general(cfg);
-
-        disp('Configuration: default');
         success = success & test_container(cfg);
-        % success = success & test_uels(cfg);
-        % success = success & test_symbols(cfg);
-        % success = success & test_readwrite(cfg);
+        success = success & test_uels(cfg);
+        success = success & test_symbols(cfg);
+        success = success & test_readwrite(cfg);
         % success = success & test_idx_symbols(cfg);
         % success = success & test_idx_readwrite(cfg);
-        % success = success & test_trnsport(cfg);
+        success = success & test_trnsport(cfg);
 
         cd(olddir);
     catch e

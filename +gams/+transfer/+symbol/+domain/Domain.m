@@ -30,11 +30,11 @@
 %
 % Symbol Domain (internal)
 %
-classdef (Abstract) Domain
+classdef (Abstract) Domain < handle
 
     properties (Hidden, SetAccess = protected)
         label_
-        index_type_ = gams.transfer.symbol.domain.IndexType()
+        unique_labels_ = []
         forwarding_ = false
     end
 
@@ -54,14 +54,13 @@ classdef (Abstract) Domain
             end
         end
 
-        function arg = validateIndexType(name, index, arg)
-            if isa(arg, 'gams.transfer.symbol.domain.IndexType')
+        function arg = validateUniqueLabels(name, index, arg)
+            if isnumeric(arg) && isempty(arg)
+                arg = [];
                 return
             end
-            try
-                arg = gams.transfer.symbol.domain.IndexType(arg);
-            catch e
-                error('Argument ''%s'' (at position %d) cannot create ''gams.transfer.symbol.domain.IndexType'': %s.', name, index, e.message);
+            if ~isa(arg, 'gams.transfer.unique_labels.Abstract')
+                error('Argument ''%s'' (at position %d) must be empty or ''gams.transfer.unique_labels.Abstract''.', name, index);
             end
         end
 
@@ -78,10 +77,7 @@ classdef (Abstract) Domain
 
     properties (Dependent)
         label
-    end
-
-    properties (Dependent)
-        index_type
+        unique_labels
         forwarding
     end
 
@@ -91,7 +87,6 @@ classdef (Abstract) Domain
 
     properties (Abstract, SetAccess = private)
         base
-        size
     end
 
     methods
@@ -100,23 +95,23 @@ classdef (Abstract) Domain
             label = obj.label_;
         end
 
-        function obj = set.label(obj, label)
+        function set.label(obj, label)
             obj.label_ = obj.validateLabel('label', 1, label);
         end
 
-        function index_type = get.index_type(obj)
-            index_type = obj.index_type_;
+        function unique_labels = get.unique_labels(obj)
+            unique_labels = obj.unique_labels_;
         end
 
-        function obj = set.index_type(obj, index_type)
-            obj.index_type_ = obj.validateIndexType('index_type', 1, index_type);
+        function obj = set.unique_labels(obj, unique_labels)
+            obj.unique_labels_ = obj.validateUniqueLabels('unique_labels', 1, unique_labels);
         end
 
         function forwarding = get.forwarding(obj)
             forwarding = obj.forwarding_;
         end
 
-        function obj = set.forwarding(obj, forwarding)
+        function set.forwarding(obj, forwarding)
             obj.forwarding_ = obj.validateForwarding('forwarding', 1, forwarding);
         end
 
@@ -124,8 +119,6 @@ classdef (Abstract) Domain
 
     methods (Abstract)
         status = isValid(obj)
-        flag = hasUniqueLabels(obj)
-        uels = getUniqueLabels(obj)
     end
 
     methods
@@ -133,58 +126,38 @@ classdef (Abstract) Domain
         function eq = equals(obj, domain)
             eq = isequal(class(obj), class(domain)) && ...
                 isequal(obj.label_, domain.label) && ...
-                isequal(obj.index_type_, domain.index_type) && ...
+                isequal(obj.unique_labels_, domain.unique_labels) && ...
                 isequal(obj.forwarding_, domain.forwarding);
         end
 
-        function index = createIndex(obj, index_type, labels, uels_from_labels)
-            index_type = obj.validateIndexType('index_type', 1, index_type);
-            % TODO: check labels
-            % TODO: check uels_from_labels
-
-            if uels_from_labels
-                uels = gams.transfer.utils.unique(labels);
-            else
-                uels = obj.getUniqueLabels();
-            end
-
-            switch index_type.value
-            case gams.transfer.symbol.domain.IndexType.CATEGORICAL
-                index = categorical(labels, uels, 'Ordinal', true);
-            case gams.transfer.symbol.domain.IndexType.INTEGER
-                % TODO: use find of unique labels class
-                map = containers.Map(uels, 1:numel(uels));
-                index = zeros(numel(labels), 1);
-                for i = 1:numel(labels)
-                    index(i) = map(labels{i});
-                end
-            otherwise
-                error('Unknown domain index type');
-            end
-        end
-
-        function index = createIndexFromIntegers(obj, index_type, index)
-            index_type = obj.validateIndexType('index_type', 1, index_type);
-            % TODO: check index
-
-            switch index_type.value
-            case gams.transfer.symbol.domain.IndexType.CATEGORICAL
-                uels = obj.getUniqueLabels();
-                index = categorical(index, 1:numel(uels), uels, 'Ordinal', true);
-            case gams.transfer.symbol.domain.IndexType.INTEGER
-                n_uels = numel(obj.getUniqueLabels());
-                index(index < 1) = 0;
-                index(index > n_uels) = 0;
-            otherwise
-                error('Unknown domain index type');
-            end
-        end
-
-        function obj = appendLabelIndex(obj, index)
+        function appendLabelIndex(obj, index)
             add = ['_', int2str(index)];
             if ~endsWith(obj.label_, add)
                 obj.label_ = strcat(obj.label_, add);
             end
+        end
+
+        function flag = hasUniqueLabels(obj)
+            flag = ~isempty(obj.unique_labels_);
+        end
+
+        function flag = hasSuperUniqueLabels(obj)
+            flag = false;
+        end
+
+        function unique_labels = getUniqueLabels(obj)
+            if ~obj.hasUniqueLabels()
+                error('Domain does not maintain working unique labels.');
+            end
+            unique_labels = obj.unique_labels_;
+        end
+
+        function axis = axis(obj, data)
+            axis = gams.transfer.symbol.unique_labels.Axis(data, obj);
+        end
+
+        function unique_labels = getSuperUniqueLabels(obj)
+            error('Domain does not maintain super unique labels.');
         end
 
     end

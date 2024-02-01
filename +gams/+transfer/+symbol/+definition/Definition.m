@@ -96,7 +96,7 @@ classdef (Abstract) Definition < handle
                 return
             end
             for i = 1:numel(obj.domains_)
-                obj.domains_{i} = obj.domains_{i}.appendLabelIndex(i);
+                obj.domains_{i}.appendLabelIndex(i);
             end
         end
 
@@ -159,12 +159,13 @@ classdef (Abstract) Definition < handle
             dim = numel(obj.domains_);
         end
 
-        function size = size(obj)
-            dim = obj.dimension();
-            size = nan(1, dim);
-            for i = 1:dim
-                size(i) = obj.domains_{i}.size;
-            end
+        function axis = axis(obj, data, dimension)
+            % TODO check dimension
+            axis = gams.transfer.symbol.unique_labels.Axis(data, obj.domains_{dimension});
+        end
+
+        function axes = axes(obj, data)
+            axes = gams.transfer.symbol.unique_labels.Axes(data, obj.domains_);
         end
 
         function n = numberDomains(obj)
@@ -199,7 +200,7 @@ classdef (Abstract) Definition < handle
                 end
                 obj.domains_{i}.label = domain_labels{i};
                 if add_prefix
-                    obj.domains_{i} = obj.domains_{i}.appendLabelIndex(i);
+                    obj.domains_{i}.appendLabelIndex(i);
                 end
             end
 

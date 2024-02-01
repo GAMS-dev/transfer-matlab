@@ -126,24 +126,6 @@ classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
             subindex = [i, j];
         end
 
-        function uels = getUniqueLabelsAt_(obj, domain, ignore_unused)
-
-            uels = domain.getUniqueLabels();
-
-        end
-
-        function setUniqueLabelsAt_(obj, uels, domain, rename)
-            error('Records format ''%s'' does not support setting UELs. Modify domain instead.', obj.name());
-        end
-
-        function addUniqueLabelsAt_(obj, uels, domain)
-            error('Records format ''%s'' does not support setting UELs. Modify domain instead.', obj.name());
-        end
-
-        function removeUniqueLabelsAt_(obj, uels, domain)
-            error('Records format ''%s'' does not support setting UELs. Modify domain instead.', obj.name());
-        end
-
         function data = transformToTabular(obj, def, format)
             def = obj.validateDefinition('def', 1, def);
             format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
@@ -160,8 +142,8 @@ classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
             end
 
             % get size
-            size_ = ones(1, max(2, def.dimension));
-            size_(1:def.dimension) = def.size;
+            axes = obj.axes(def.domains);
+            size_ = axes.matrixSize();
 
             % get all possible indices (sorted by column)
             indices_ = cell(1, def.dimension);
@@ -183,17 +165,14 @@ classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
             indices(~keep_indices, :) = [];
             indices_perm(~keep_indices) = [];
 
-            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
-                index_type = gams.transfer.symbol.domain.IndexType.Categorical();
-            else
-                index_type = gams.transfer.symbol.domain.IndexType.Integer();
-            end
-
             % domain columns
             for i = 1:numel(def.domains)
-                data.records.(def.domains{i}.label) = def.domains{i}.createIndexFromIntegers(index_type, indices(:, i));
+                domain = def.domains{i};
+                data.records.(domain.label) = obj.createUniqueLabelsIndex(indices(:, i), axes.axis(i).labels());
+                if data.hasUniqueLabels(domain)
+                    data.removeUnusedUniqueLabels(domain);
+                end
             end
-            data.removeUELs({}, def.domains);
 
             % values columns
             for i = 1:numel(values)

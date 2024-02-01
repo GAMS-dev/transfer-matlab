@@ -625,27 +625,11 @@ classdef Container < handle
 
                 % set uels
                 if isfield(symbol, 'uels') && ~gams.transfer.Constants.SUPPORTS_CATEGORICAL
-                    switch symbol.format
-                    case {3, 'dense_matrix', 4, 'sparse_matrix'}
-                    case {1, 'table', 2, 'struct'}
-                        for j = 1:numel(symbol.domain)
-                            new_symbol.setUELs(symbol.uels{j}, j, 'rename', true);
-                        end
+                    for j = 1:new_symbol.dimension
+                        new_symbol.def.domains{j}.unique_labels = gams.transfer.unique_labels.OrderedLabelSet(symbol.uels{j});
                     end
                 end
             end
-
-            % check for format of read symbols in case of partial read (done by
-            % forced call to isValid). Domains may not be read and may cause
-            % invalid symbols.
-            % TODO
-            % if is_partial_read
-            %     for j = 1:numel(symbols)
-            %         if obj.hasSymbols(symbols{i})
-            %             obj.getSymbols(symbols{i}).isValid(false, true);
-            %         end
-            %     end
-            % end
         end
 
         %> Writes symbols with symbol records to GDX file
@@ -1388,7 +1372,11 @@ classdef Container < handle
             descr = gams.transfer.symbol.Set.describe(symbols);
 
             for i = 1:numel(names)
-                descr.name(i) = names{i};
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
+                    descr.name(i) = names{i};
+                else
+                    descr.name{i} = names{i};
+                end
             end
         end
 

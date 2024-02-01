@@ -131,7 +131,6 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
         end
 
         function value = getMeanValue(obj, def, varargin)
-
             [domains, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
             values = obj.availableNumericValues(values);
 
@@ -141,6 +140,105 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
             end
 
             value = value / obj.getNumberValues(def, 'values', values);
+        end
+
+        function flag = hasUniqueLabels(obj, domain)
+            % TODO: check domain
+            flag = gams.transfer.Constants.SUPPORTS_CATEGORICAL && ...
+                obj.isLabel(domain.label) && iscategorical(obj.records_.(domain.label));
+        end
+
+        function indices = usedUniqueLabels(obj, domain)
+            % TODO: check domain
+            indices = gams.transfer.utils.unique(uint64(obj.records_.(domain.label)));
+            indices = indices(indices ~= nan);
+        end
+
+        function labels = getUniqueLabels(obj, domain)
+            if ~obj.hasUniqueLabels(domain)
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+            labels = categories(obj.records_.(domain.label));
+        end
+
+        function addUniqueLabels(obj, domain, labels)
+            if ~obj.hasUniqueLabels(domain)
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+
+            % TODO: check labels
+
+            if ~isordinal(obj.records_.(domain.label))
+                obj.records_.(domain.label) = addcats(obj.records_.(domain.label), labels);
+                return
+            end
+
+            current_labels = categories(obj.records_.(domain.label));
+            if numel(current_labels) == 0
+                obj.records_.(domain.label) = categorical(labels, 'Ordinal', true);
+            else
+                obj.records_.(domain.label) = addcats(obj.records_.(domain.label), labels, 'After', current_labels{end});
+            end
+        end
+
+        function setUniqueLabels(obj, domain, labels)
+            if ~obj.hasUniqueLabels(domain)
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+            % TODO: check labels
+            obj.records_.(domain.label) = categorical(double(obj.records_.(domain.label)), ...
+                1:numel(labels), labels, 'Ordinal', true);
+        end
+
+        function updateUniqueLabels(obj, domain, labels)
+            if ~obj.hasUniqueLabels(domain)
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+            % TODO: check labels
+            obj.records_.(domain.label) = setcats(obj.records_.(domain.label), labels);
+        end
+
+        function removeUniqueLabels(obj, domain, labels)
+            if ~obj.hasUniqueLabels(domain)
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+            % TODO: check labels
+            obj.records_.(domain.label) = removecats(obj.records_.(domain.label), labels);
+        end
+
+        function removeUnusedUniqueLabels(obj, domain)
+            if ~obj.hasUniqueLabels(domain)
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+            obj.records_.(domain.label) = removecats(obj.records_.(domain.label));
+        end
+
+        function renameUniqueLabels(obj, domain, oldlabels, newlabels)
+            if ~obj.hasUniqueLabels(domain)
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+            % TODO: check labels
+            not_avail = ~ismember(oldlabels, categories(obj.records_.(domain.label)));
+            oldlabels(not_avail) = [];
+            newlabels(not_avail) = [];
+            obj.records_.(domain.label) = renamecats(obj.records_.(domain.label), oldlabels, newlabels);
+        end
+
+        function mergeUniqueLabels(obj, domain, oldlabels, newlabels)
+            if ~obj.hasUniqueLabels(domain)
+                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
+            end
+            % TODO: check labels
+            not_avail = ~ismember(oldlabels, categories(obj.records_.(domain.label)));
+            obj.records_.(domain.label) = categorical(obj.records_.(domain.label), 'Ordinal', false);
+            not_avail = ~ismember(oldlabels, categories(obj.records_.(domain.label)));
+            oldlabels(not_avail) = [];
+            newlabels(not_avail) = [];
+            for j = 1:numel(newlabels)
+                obj.records_.(domain.label) = mergecats(obj.records_.(domain.label), ...
+                    oldlabels{j}, newlabels{j});
+            end
+            obj.records_.(domain.label) = categorical(obj.records_.(domain.label), 'Ordinal', true);
         end
 
     end
@@ -182,77 +280,6 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
             end
         end
 
-        function uels = getUniqueLabelsAt_(obj, domain, ignore_unused)
-
-            switch domain.index_type.value
-            case gams.transfer.symbol.domain.IndexType.CATEGORICAL
-                if ignore_unused
-                    uels = categories(removecats(obj.records_.(domain.label)));
-                else
-                    uels = categories(obj.records_.(domain.label));
-                end
-            otherwise
-                error('Records format ''%s'' does not supported domain index type ''%s''.', ...
-                    obj.name(), domain.index_type.select);
-            end
-
-        end
-
-        function setUniqueLabelsAt_(obj, uels, domain, rename)
-
-            switch domain.index_type.value
-            case gams.transfer.symbol.domain.IndexType.CATEGORICAL
-
-                if rename
-                    obj.records_.(domain.label) = categorical(double(obj.records_.(domain.label)), ...
-                        1:numel(uels), uels, 'Ordinal', true);
-                else
-                    obj.records_.(domain.label) = setcats(obj.records_.(domain.label), uels);
-                end
-            otherwise
-                error('Records format ''%s'' does not supported domain index type ''%s''.', ...
-                    obj.name(), domain.index_type.select);
-            end
-
-        end
-
-        function addUniqueLabelsAt_(obj, uels, domain)
-
-            switch domain.index_type.value
-            case gams.transfer.symbol.domain.IndexType.CATEGORICAL
-                if ~isordinal(obj.records_.(domain.label))
-                    obj.records_.(domain.label) = addcats(obj.records_.(domain.label), uels);
-                    return
-                end
-                cats = categories(obj.records_.(domain.label));
-                if numel(cats) == 0
-                    obj.records_.(domain.label) = categorical(uels, 'Ordinal', true);
-                else
-                    obj.records_.(domain.label) = addcats(obj.records_.(domain.label), uels, 'After', cats{end});
-                end
-            otherwise
-                error('Records format ''%s'' does not supported domain index type ''%s''.', ...
-                    obj.name(), domain.index_type.select);
-            end
-
-        end
-
-        function removeUniqueLabelsAt_(obj, uels, domain)
-
-            switch domain.index_type.value
-            case gams.transfer.symbol.domain.IndexType.CATEGORICAL
-                if isempty(uels)
-                    obj.records_.(domain.label) = removecats(obj.records_.(domain.label));
-                else
-                    obj.records_.(domain.label) = removecats(obj.records_.(domain.label), uels);
-                end
-            otherwise
-                error('Records format ''%s'' does not supported domain index type ''%s''.', ...
-                    obj.name(), domain.index_type.select);
-            end
-
-        end
-
         function data = transformToMatrix(obj, def, format)
             def = obj.validateDefinition('def', 1, def);
             format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
@@ -275,20 +302,17 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
             end
 
             % get matrix size
-            size_ = ones(1, max(2, def.dimension));
-            size_(1:def.dimension) = def.size;
-            if any(isnan(size_) | isinf(size_))
-                error('Matrix sizes not available. Can''t transform to a matrix format.');
-            end
+            axes = obj.axes(def.domains);
+            size_ = axes.matrixSize(true); % TODO: use working size
 
-            % convert indices to matrix (linear) indices
+            % convert indices to matrix (linear) indices TODO: adapt to working uels
             if def.dimension == 0
                 idx = 1;
             else
                 idx = cell(1, def.dimension);
                 for i = 1:def.dimension
                     domain = def.domains{i};
-                    [~, uel_map] = ismember(obj.getUniqueLabelsAt_(domain, false), domain.getUniqueLabels());
+                    [~, uel_map] = ismember(axes.axis(i).unique_labels.get(), axes.axis(i).super_unique_labels.get());
                     if any(uel_map == 0)
                         error('Found domain violation.');
                     end

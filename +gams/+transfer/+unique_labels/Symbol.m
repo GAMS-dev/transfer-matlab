@@ -1,4 +1,4 @@
-% Dictionary
+% Abstract UELs
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,70 +28,84 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Dictionary
+% Abstract UELs
 %
 
 %> @brief Abstract UELs
-classdef Dictionary < gams.transfer.unique_labels.Abstract
+classdef Symbol < gams.transfer.unique_labels.Abstract
 
     properties (Hidden, SetAccess = protected)
-        dict_ = containers.Map('KeyType', 'char', 'ValueType', 'int64')
+        symbol_
+    end
+
+    methods (Static, Hidden)
+
+        function arg = validateSymbol(name, index, arg)
+            if ~isa(arg, 'gams.transfer.symbol.Set') && ~isa(arg, 'gams.transfer.alias.Set')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Set'' or ''gams.transfer.alias.Set''.', name, index);
+            end
+            if arg.dimension ~= 1
+                error('Argument ''%s'' (at position %d) must be symbol with dimension 1.', name, index);
+            end
+        end
+
+    end
+
+    methods (Hidden)
+
+        function validateObjectSymbol(obj)
+            if obj.symbol_.dimension ~= 1
+                error('Symbol became invalid: must be symbol with dimension 1.');
+            end
+        end
+
+    end
+
+    properties (Dependent)
+        symbol
     end
 
     methods
 
-        function obj = Dictionary(labels)
-            if nargin == 1
-                obj.set(labels)
-            end
+        function symbol = get.symbol(obj)
+            symbol = obj.symbol_;
         end
 
-        function size = size(obj)
-            size = obj.dict_.Count;
+        function set.symbol(obj, symbol)
+            obj.symbol_ = obj.validateSymbol('symbol', 1, symbol);
+        end
+
+    end
+
+    methods
+
+        function obj = Symbol(symbol)
+            obj.symbol = symbol;
+        end
+
+        function count = count(obj)
+            count = obj.symbol_.getNumberRecords();
         end
 
         function labels = get(obj)
-            labels = keys(obj.dict_);
-        end
-
-        function labels = getAt(obj, indices)
-            alllabels = obj.get();
-            idx = indices >= 1 & indices <= obj.size();
-            labels = cell(1, numel(indices));
-            labels(idx) = alllabels(indices(idx));
-            labels(~idx) = {'<undefined>'};
-        end
-
-        function indices = find(obj, labels)
-            indices = zeros(1, numel(labels));
-            for i = 1:numel(labels)
-                if isKey(obj.dict_, labels{i})
-                    indices(i) = obj.dict_(labels{i});
-                end
-            end
-        end
-
-        function clear(obj)
-            obj.dict_ = containers.Map('KeyType', 'char', 'ValueType', 'int64');
+            obj.validateObjectSymbol();
+            labels = obj.symbol_.getUELs(1, uint64(obj.symbol_.records.(obj.symbol_.domain_labels{1})));
         end
 
         function add(obj, labels)
-            for i = 1:numel(labels)
-                obj.dict_(labels{i}) = obj.size() + 1;
-            end
+            error('todo');
         end
 
         function set(obj, labels)
-            obj.clear();
-            obj.add(labels);
+            error('todo');
         end
 
         function remove(obj, labels)
-            error('not yet implemented');
+            error('todo');
         end
 
         function rename(obj, oldlabels, newlabels)
-            error('not yet implemented');
+            error('todo');
         end
 
     end

@@ -36,15 +36,33 @@ classdef (Abstract) Abstract < handle
 
     methods (Abstract)
 
-        size = size(obj)
         labels = get(obj)
-        labels = getAt(obj, indices)
-        indices = find(obj, labels)
-        clear(obj)
         add(obj, labels)
         set(obj, labels)
         remove(obj, labels)
         rename(obj, oldlabels, newlabels)
+
+    end
+
+    methods
+
+        function count = count(obj)
+            count = numel(obj.get());
+        end
+
+        function labels = getAt(obj, indices)
+            % TODO check indices
+            labels = gams.transfer.utils.filter_unique_labels(obj.get(), indices);
+        end
+
+        function indices = find(obj, labels)
+            % TODO check labels
+            [~, indices] = ismember(labels, obj.get());
+        end
+
+        function clear(obj)
+            obj.set({});
+        end
 
     end
 

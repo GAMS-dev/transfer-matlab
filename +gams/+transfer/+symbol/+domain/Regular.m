@@ -49,10 +49,6 @@ classdef Regular < gams.transfer.symbol.domain.Domain
 
     end
 
-    properties (Constant)
-        HOLDS_UNIQUE_LABELS = false
-    end
-
     properties (Dependent)
         symbol
         name
@@ -60,7 +56,6 @@ classdef Regular < gams.transfer.symbol.domain.Domain
 
     properties (Dependent, SetAccess = private)
         base
-        size
     end
 
     methods
@@ -79,10 +74,6 @@ classdef Regular < gams.transfer.symbol.domain.Domain
 
         function base = get.base(obj)
             base = obj.symbol_;
-        end
-
-        function size = get.size(obj)
-            size = obj.symbol_.getNumberRecords();
         end
 
     end
@@ -115,21 +106,18 @@ classdef Regular < gams.transfer.symbol.domain.Domain
             status = gams.transfer.utils.Status.createOK();
         end
 
-        function flag = hasUniqueLabels(obj)
+        function flag = hasSuperUniqueLabels(obj)
             flag = true;
         end
 
-        function uels = getUniqueLabels(obj)
-            assert(obj.symbol_.dimension == 1);
-            % TODO: better if getUELs would have argument 'order_by' = 'records'
-            label = obj.symbol_.domain_labels{1};
-            uels = obj.symbol_.getUELs(1, uint64(obj.symbol_.records.(label)));
+        function unique_labels = getSuperUniqueLabels(obj)
+            unique_labels = gams.transfer.unique_labels.Symbol(obj.symbol_);
         end
 
         function domain = getRelaxed(obj)
             domain = gams.transfer.symbol.domain.Relaxed(obj.symbol_.name);
             domain.label = obj.label_;
-            domain.index_type = obj.index_type_;
+            domain.unique_labels = obj.unique_labels_;
             domain.forwarding = obj.forwarding_;
         end
 
