@@ -67,22 +67,21 @@ classdef Table < gams.transfer.symbol.data.Tabular
             obj.records_ = renamevars(obj.records_, old_labels, new_labels);
         end
 
-        function def = copy(obj)
-            def = gams.transfer.symbol.data.Table();
-            def.copyFrom(obj);
+        function data = copy(obj)
+            data = gams.transfer.symbol.data.Table();
+            data.copyFrom(obj);
         end
 
-        function status = isValid(obj, def)
+        function status = isValid(obj, axes, values)
             if ~istable(obj.records_)
                 status = gams.transfer.utils.Status("Record data must be 'table'.");
                 return
             end
 
-            status = isValid@gams.transfer.symbol.data.Tabular(obj, def);
+            status = isValid@gams.transfer.symbol.data.Tabular(obj, axes, values);
         end
 
-        function data = transform(obj, def, format)
-            def = obj.validateDefinition('def', 1, def);
+        function data = transform(obj, axes, values, format)
             format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
 
             switch format
@@ -91,13 +90,13 @@ classdef Table < gams.transfer.symbol.data.Tabular
             case 'struct'
                 data = gams.transfer.symbol.data.Struct(table2struct(obj.records_, 'ToScalar', true));
             case {'dense_matrix', 'sparse_matrix'}
-                data = obj.transformToMatrix(def, format);
+                data = obj.transformToMatrix(axes, values, format);
             otherwise
                 error('Unknown records format: %s', format);
             end
         end
 
-        function nrecs = getNumberRecords(obj, def)
+        function nrecs = getNumberRecords(obj, axes, values)
             if istable(obj.records_)
                 nrecs = height(obj.records_);
             else

@@ -585,7 +585,7 @@ classdef Container < handle
                 % set uels
                 if isfield(symbol, 'uels') && ~gams.transfer.Constants.SUPPORTS_CATEGORICAL
                     for j = 1:new_symbol.dimension
-                        new_symbol.def.domains{j}.unique_labels = gams.transfer.unique_labels.OrderedLabelSet(symbol.uels{j});
+                        new_symbol.unique_labels{j} = gams.transfer.unique_labels.OrderedLabelSet(symbol.uels{j});
                     end
                 end
             end

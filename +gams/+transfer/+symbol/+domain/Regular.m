@@ -106,18 +106,17 @@ classdef Regular < gams.transfer.symbol.domain.Domain
             status = gams.transfer.utils.Status.createOK();
         end
 
-        function flag = hasSuperUniqueLabels(obj)
+        function flag = hasUniqueLabels(obj)
             flag = true;
         end
 
-        function unique_labels = getSuperUniqueLabels(obj)
+        function unique_labels = getUniqueLabels(obj)
             unique_labels = gams.transfer.unique_labels.Symbol(obj.symbol_);
         end
 
         function domain = getRelaxed(obj)
             domain = gams.transfer.symbol.domain.Relaxed(obj.symbol_.name);
             domain.label = obj.label_;
-            domain.unique_labels = obj.unique_labels_;
             domain.forwarding = obj.forwarding_;
         end
 

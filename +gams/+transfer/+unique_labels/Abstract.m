@@ -36,6 +36,7 @@ classdef (Abstract) Abstract < handle
 
     methods (Abstract)
 
+        unique_labels = copy(obj)
         labels = get(obj)
         add(obj, labels)
         set(obj, labels)
@@ -52,7 +53,13 @@ classdef (Abstract) Abstract < handle
 
         function labels = getAt(obj, indices)
             % TODO check indices
+            if numel(indices) == 0
+                labels = {};
+            end
             labels = gams.transfer.utils.filter_unique_labels(obj.get(), indices);
+            if numel(indices) == 1
+                labels = labels{1};
+            end
         end
 
         function indices = find(obj, labels)

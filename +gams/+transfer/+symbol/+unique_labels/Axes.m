@@ -78,32 +78,20 @@ classdef Axes < handle
 
     methods
 
-        function obj = Axes(data, domains)
-            % TODO check data
-            % TODO check domains
-
-            obj.axes_ = cell(1, numel(domains));
-            for i = 1:numel(domains)
-                obj.axes_{i} = gams.transfer.symbol.unique_labels.Axis(data, domains{i});
-            end
+        function obj = Axes(axes)
+            obj.axes = axes;
         end
 
-        function size = size(obj, use_super_unique_labels)
-            if nargin == 1
-                use_super_unique_labels = false;
-            end
+        function size = size(obj)
             size = zeros(1, obj.dimension);
             for i = 1:obj.dimension
-                size(i) = obj.axes_{i}.size(use_super_unique_labels);
+                size(i) = obj.axes_{i}.size();
             end
         end
 
-        function size = matrixSize(obj, use_super_unique_labels)
-            if nargin == 1
-                use_super_unique_labels = false;
-            end
+        function size = matrixSize(obj)
             size = ones(1, max(2, obj.dimension));
-            size(1:obj.dimension) = obj.size(use_super_unique_labels);
+            size(1:obj.dimension) = obj.size();
         end
 
         function axis = axis(obj, dimension)

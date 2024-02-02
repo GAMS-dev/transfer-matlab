@@ -204,8 +204,13 @@ classdef Equation < gams.transfer.symbol.Symbol
                         index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 4
-                        obj.def_.domains = gams.transfer.utils.parse_argument(varargin, ...
+                        domains = gams.transfer.utils.parse_argument(varargin, ...
                             index, 'domains', []);
+                        if isnumeric(domains)
+                            obj.size = domains;
+                        else
+                            obj.def_.domains = domains;
+                        end
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);

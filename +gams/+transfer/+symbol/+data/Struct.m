@@ -78,22 +78,21 @@ classdef Struct < gams.transfer.symbol.data.Tabular
             obj.records = records;
         end
 
-        function def = copy(obj)
-            def = gams.transfer.symbol.data.Struct();
-            def.copyFrom(obj);
+        function data = copy(obj)
+            data = gams.transfer.symbol.data.Struct();
+            data.copyFrom(obj);
         end
 
-        function status = isValid(obj, def)
+        function status = isValid(obj, axes, values)
             if ~isstruct(obj.records_)
                 status = gams.transfer.utils.Status("Record data must be 'struct'.");
                 return
             end
 
-            status = isValid@gams.transfer.symbol.data.Tabular(obj, def);
+            status = isValid@gams.transfer.symbol.data.Tabular(obj, axes, values);
         end
 
-        function data = transform(obj, def, format)
-            def = obj.validateDefinition('def', 1, def);
+        function data = transform(obj, axes, values, format)
             format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
 
             switch format
@@ -102,26 +101,23 @@ classdef Struct < gams.transfer.symbol.data.Tabular
             case 'struct'
                 data = gams.transfer.symbol.data.Struct(obj.records_);
             case {'dense_matrix', 'sparse_matrix'}
-                data = obj.transformToMatrix(def, format);
+                data = obj.transformToMatrix(axes, values, format);
             otherwise
                 error('Unknown records format: %s', format);
             end
         end
 
-        function nrecs = getNumberRecords(obj, def)
+        function nrecs = getNumberRecords(obj, axes, values)
+            values = obj.availableNumericValues(values);
 
-            def = obj.validateDefinition('def', 1, def);
-            domains = obj.availableDomains(def.domains);
-            values = obj.availableNumericValues(def.values);
-
-            if numel(domains) + numel(values) == 0
+            if axes.dimension + numel(values) == 0
                 nrecs = 0;
                 return
             end
 
             nrecs = nan;
-            for i = 1:numel(domains)
-                nrecs_i = numel(obj.records_.(domains{i}.label));
+            for i = 1:axes.dimension
+                nrecs_i = numel(obj.records_.(axes.axis(i).label));
                 if isnan(nrecs)
                     nrecs = nrecs_i;
                 elseif ~isnan(nrecs) && nrecs ~= nrecs_i

@@ -97,6 +97,10 @@ classdef Data < gams.transfer.unique_labels.Abstract
             obj.domain = domain;
         end
 
+        function unique_labels = copy(obj)
+            unique_labels = gams.transfer.unique_labels.Data(obj.data_, obj.domain_);
+        end
+
         function labels = get(obj)
             labels = obj.data_.getUniqueLabels(obj.domain_);
         end

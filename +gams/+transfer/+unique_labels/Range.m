@@ -170,6 +170,10 @@ classdef Range < gams.transfer.unique_labels.Abstract
             obj.length = length;
         end
 
+        function unique_labels = copy(obj)
+            unique_labels = gams.transfer.unique_labels.Range(obj.prefix_, obj.first_, obj.step_, obj.length_);
+        end
+
         function count = count(obj)
             count = obj.length_;
         end
@@ -186,6 +190,9 @@ classdef Range < gams.transfer.unique_labels.Abstract
             labels = cell(1, numel(indices));
             for i = 1:numel(indices)
                 labels{i} = [obj.prefix_, int2str(obj.first_ + obj.step_ * (indices(i) - 1))];
+            end
+            if numel(indices) == 1
+                labels = labels{1};
             end
         end
 

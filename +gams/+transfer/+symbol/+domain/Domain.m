@@ -34,7 +34,6 @@ classdef (Abstract) Domain < handle
 
     properties (Hidden, SetAccess = protected)
         label_
-        unique_labels_ = []
         forwarding_ = false
     end
 
@@ -54,16 +53,6 @@ classdef (Abstract) Domain < handle
             end
         end
 
-        function arg = validateUniqueLabels(name, index, arg)
-            if isnumeric(arg) && isempty(arg)
-                arg = [];
-                return
-            end
-            if ~isa(arg, 'gams.transfer.unique_labels.Abstract')
-                error('Argument ''%s'' (at position %d) must be empty or ''gams.transfer.unique_labels.Abstract''.', name, index);
-            end
-        end
-
         function arg = validateForwarding(name, index, arg)
             if ~islogical(arg)
                 error('Argument ''%s'' (at position %d) must be ''logical''.', name, index);
@@ -77,7 +66,6 @@ classdef (Abstract) Domain < handle
 
     properties (Dependent)
         label
-        unique_labels
         forwarding
     end
 
@@ -99,14 +87,6 @@ classdef (Abstract) Domain < handle
             obj.label_ = obj.validateLabel('label', 1, label);
         end
 
-        function unique_labels = get.unique_labels(obj)
-            unique_labels = obj.unique_labels_;
-        end
-
-        function obj = set.unique_labels(obj, unique_labels)
-            obj.unique_labels_ = obj.validateUniqueLabels('unique_labels', 1, unique_labels);
-        end
-
         function forwarding = get.forwarding(obj)
             forwarding = obj.forwarding_;
         end
@@ -126,7 +106,6 @@ classdef (Abstract) Domain < handle
         function eq = equals(obj, domain)
             eq = isequal(class(obj), class(domain)) && ...
                 isequal(obj.label_, domain.label) && ...
-                isequal(obj.unique_labels_, domain.unique_labels) && ...
                 isequal(obj.forwarding_, domain.forwarding);
         end
 
@@ -138,26 +117,11 @@ classdef (Abstract) Domain < handle
         end
 
         function flag = hasUniqueLabels(obj)
-            flag = ~isempty(obj.unique_labels_);
-        end
-
-        function flag = hasSuperUniqueLabels(obj)
             flag = false;
         end
 
         function unique_labels = getUniqueLabels(obj)
-            if ~obj.hasUniqueLabels()
-                error('Domain does not maintain working unique labels.');
-            end
-            unique_labels = obj.unique_labels_;
-        end
-
-        function axis = axis(obj, data)
-            axis = gams.transfer.symbol.unique_labels.Axis(data, obj);
-        end
-
-        function unique_labels = getSuperUniqueLabels(obj)
-            error('Domain does not maintain super unique labels.');
+            unique_labels = [];
         end
 
     end

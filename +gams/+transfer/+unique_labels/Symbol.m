@@ -35,6 +35,7 @@
 classdef Symbol < gams.transfer.unique_labels.Abstract
 
     properties (Hidden, SetAccess = protected)
+        % TODO add dimension
         symbol_
     end
 
@@ -81,6 +82,10 @@ classdef Symbol < gams.transfer.unique_labels.Abstract
 
         function obj = Symbol(symbol)
             obj.symbol = symbol;
+        end
+
+        function unique_labels = copy(obj)
+            unique_labels = gams.transfer.unique_labels.Symbol(obj.symbol_);
         end
 
         function count = count(obj)

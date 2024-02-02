@@ -40,21 +40,14 @@ classdef (Abstract) Definition < handle
     methods (Hidden, Static)
 
         function arg = validateDomains(name, index, arg)
-            if isnumeric(arg)
-                arg_ = cell(1, numel(arg));
-                for i = 1:numel(arg)
-                    arg_{i} = gams.transfer.symbol.domain.Relaxed(['dim_', int2str(i)]);
-                    arg_{i}.unique_labels = gams.transfer.unique_labels.Range('', 1, 1, arg(i));
-                end
-                arg = arg_;
-            elseif ~iscell(arg)
+            if ~iscell(arg)
                 if isa(arg, 'gams.transfer.symbol.domain.Domain') || ...
                     isa(arg, 'gams.transfer.symbol.Set') || ...
                     isa(arg, 'gams.transfer.alias.Abstract') || ...
                     ischar(arg) || isstring(arg)
                     arg = {arg};
                 else
-                    error('Argument ''%s'' (at position %d) must be ''numeric'', ''cell'', ''gams.transfer.symbol.domain.Domain'', ''gams.transfer.symbol.Set'' or ''gams.transfer.alias.Abstract''.', name, index);
+                    error('Argument ''%s'' (at position %d) must be ''cell'', ''gams.transfer.symbol.domain.Domain'', ''gams.transfer.symbol.Set'' or ''gams.transfer.alias.Abstract''.', name, index);
                 end
             end
             for i = 1:numel(arg)
@@ -164,15 +157,6 @@ classdef (Abstract) Definition < handle
 
         function dim = dimension(obj)
             dim = numel(obj.domains_);
-        end
-
-        function axis = axis(obj, data, dimension)
-            % TODO check dimension
-            axis = gams.transfer.symbol.unique_labels.Axis(data, obj.domains_{dimension});
-        end
-
-        function axes = axes(obj, data)
-            axes = gams.transfer.symbol.unique_labels.Axes(data, obj.domains_);
         end
 
         function n = numberDomains(obj)

@@ -51,6 +51,7 @@ classdef (Abstract) Symbol < handle
         description_ = ''
         def_
         data_
+        unique_labels_ = {}
         modified_ = true
     end
 
@@ -125,6 +126,27 @@ classdef (Abstract) Symbol < handle
 
     end
 
+    methods (Hidden)
+
+        function arg = validateUniqueLabels(obj, name, index, arg)
+            if ~iscell(arg)
+                error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
+            end
+            if numel(arg) ~= obj.dimension
+                error('Argument ''%s'' (at position %d) must be ''cell'' with %d elements.', name, index, obj.dimension);
+            end
+            for i = 1:numel(arg)
+                if isnumeric(arg{i}) && isempty(arg{i})
+                    continue
+                end
+                if ~isa(arg{i}, 'gams.transfer.unique_labels.Abstract')
+                    error('Argument ''%s'' (at position %d, element %d) must be empty or ''gams.transfer.unique_labels.Abstract''.', name, index, i);
+                end
+            end
+        end
+
+    end
+
     properties (Dependent)
         %> Container the symbol is stored in
 
@@ -147,6 +169,7 @@ classdef (Abstract) Symbol < handle
     properties  (Dependent, Hidden)
         def
         data
+        unique_labels
     end
 
     properties (Dependent)
@@ -293,6 +316,27 @@ classdef (Abstract) Symbol < handle
             obj.modified_ = true;
         end
 
+        function unique_labels = get.unique_labels(obj)
+            dimension = numel(obj.unique_labels_);
+            if obj.dimension < dimension
+                obj.unique_labels_ = obj.unique_labels_(1:obj.dimension);
+            elseif obj.dimension > dimension
+                obj.unique_labels_(dimension+1:obj.dimension) = {[]};
+            end
+            unique_labels = obj.unique_labels_;
+        end
+
+        function set.unique_labels(obj, unique_labels)
+            dimension = numel(obj.unique_labels_);
+            if obj.dimension < dimension
+                obj.unique_labels_ = obj.unique_labels_(1:obj.dimension);
+            elseif obj.dimension > dimension
+                obj.unique_labels_(dimension+1:obj.dimension) = {[]};
+            end
+            obj.unique_labels_ = obj.validateUniqueLabels('unique_labels', 1, unique_labels);
+            obj.modified_ = true;
+        end
+
         function dimension = get.dimension(obj)
             dimension = obj.def_.dimension();
         end
@@ -313,8 +357,14 @@ classdef (Abstract) Symbol < handle
 
         function set.size(obj, size)
             size = gams.transfer.utils.validate('size', 1, size, {'numeric'}, 1);
-            obj.def_.domains = size;
-            obj.applyDomainForwarding();
+            domains = cell(1, numel(size));
+            for i = 1:numel(size)
+                domains{i} = ['dim_', int2str(i)];
+            end
+            obj.domain = domains;
+            for i = 1:numel(size)
+                obj.unique_labels{i} = gams.transfer.unique_labels.Range('', 1, 1, size(i));
+            end
             obj.modified_ = true;
         end
 
@@ -458,6 +508,14 @@ classdef (Abstract) Symbol < handle
             obj.description_ = symbol.description;
             obj.def_ = symbol.def.copy();
             obj.data_ = symbol.data.copy();
+            obj.unique_labels_ = cell(1, symbol.dimension);
+            for i = 1:symbol.dimension
+                if isempty(symbol.unique_labels{i})
+                    obj.unique_labels_{i} = [];
+                else
+                    obj.unique_labels_{i} = symbol.unique_labels{i}.copy();
+                end
+            end
             obj.modified_ = true;
         end
 
@@ -577,7 +635,7 @@ classdef (Abstract) Symbol < handle
                 records = gams.transfer.symbol.data.Table(records);
             end
             if isa(records, 'gams.transfer.symbol.data.Data')
-                status = records.isValid(obj.def_);
+                status = records.isValid(obj.axes(), obj.def_.values);
                 if status.flag ~= gams.transfer.utils.Status.OK
                     error(status.message);
                 end
@@ -701,7 +759,7 @@ classdef (Abstract) Symbol < handle
                 new_records.(domains{i}.label) = gams.transfer.symbol.data.Data.createUniqueLabelsIndex(...
                     new_records.(domains{i}.label), unique_labels);
                 if ~gams.transfer.Constants.SUPPORTS_CATEGORICAL || ~iscategorical(new_records.(domains{i}.label))
-                    domains{i}.unique_labels = gams.transfer.unique_labels.OrderedLabelSet(unique_labels);
+                    obj.unique_labels{i} = gams.transfer.unique_labels.OrderedLabelSet(unique_labels);
                 end
             end
 
@@ -740,7 +798,7 @@ classdef (Abstract) Symbol < handle
                     data.records.(domains_values{i}.label) = data.records.(domains_values{i}.label)(:);
                 end
             elseif isa(data, 'gams.transfer.symbol.data.Matrix')
-                symbol_size = obj.axes().matrixSize(true);
+                symbol_size = obj.axes(true).matrixSize();
                 if any(isnan(symbol_size))
                     error('Cannot create matrix records, because symbol size is unknown.');
                 end
@@ -757,7 +815,7 @@ classdef (Abstract) Symbol < handle
             end
 
             % check records format
-            status = data.isValid(obj.def_);
+            status = data.isValid(obj.axes(), obj.def_.values);
             if status.flag ~= gams.transfer.utils.Status.OK
                 error(status.message);
             end
@@ -775,7 +833,7 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.RecordsFormat
 
-            obj.data_ = obj.data_.transform(obj.def_, target_format);
+            obj.data_ = obj.data_.transform(obj.axes(), obj.def_.values, target_format);
         end
 
         %> Checks correctness of symbol
@@ -826,7 +884,7 @@ classdef (Abstract) Symbol < handle
 
             status = obj.def_.isValid();
             if status.flag == gams.transfer.utils.Status.OK
-                status = obj.data_.isValid(obj.def_);
+                status = obj.data_.isValid(obj.axes(), obj.def_.values);
             end
 
             if status.flag ~= gams.transfer.utils.Status.OK
@@ -903,9 +961,13 @@ classdef (Abstract) Symbol < handle
                 end
 
                 % TODO computing domain violation should be moved into axis
-                axis = obj.axis(dimensions(i));
-                working_uels = axis.unique_labels.getAt(obj.data_.usedUniqueLabels(domains{i}));
-                defining_uels = axis.super_unique_labels.get();
+                axis1 = obj.axis(dimensions(i));
+                axis2 = obj.axis(dimensions(i), true);
+                if isequal(axis1.unique_labels, axis2.unique_labels)
+                    continue
+                end
+                working_uels = axis1.unique_labels.getAt(obj.data_.usedUniqueLabels(domains{i}));
+                defining_uels = axis2.unique_labels.get();
                 [~, ia] = setdiff(lower(working_uels), lower(defining_uels));
                 added_uels = working_uels(ia);
 
@@ -966,7 +1028,7 @@ classdef (Abstract) Symbol < handle
             %
             % s = getSparsity() returns sparsity s in the symbol records.
 
-            sparsity = obj.data_.getSparsity(obj.def_);
+            sparsity = obj.data_.getSparsity(obj.axes(), obj.def_.values);
         end
 
     end
@@ -1030,16 +1092,16 @@ classdef (Abstract) Symbol < handle
             % TODO adapt documentation
 
             if nargin == 1
-                args = {};
+                values = obj.def_.values;
             else
                 try
-                    args = {'values', obj.parseValues(varargin{:})};
+                    values = obj.parseValues(varargin{:});
                 catch e
                     error(e.message);
                 end
             end
 
-            [value, where] = obj.data_.getMaxValue(obj.def_, args{:});
+            [value, where] = obj.data_.getMaxValue(obj.axes(), values);
         end
 
 
@@ -1060,16 +1122,16 @@ classdef (Abstract) Symbol < handle
             % TODO adapt documentation
 
             if nargin == 1
-                args = {};
+                values = obj.def_.values;
             else
                 try
-                    args = {'values', obj.parseValues(varargin{:})};
+                    values = obj.parseValues(varargin{:});
                 catch e
                     error(e.message);
                 end
             end
 
-            [value, where] = obj.data_.getMinValue(obj.def_, args{:});
+            [value, where] = obj.data_.getMinValue(obj.axes(), values);
         end
 
         %> Returns the mean value over all values in records
@@ -1088,16 +1150,16 @@ classdef (Abstract) Symbol < handle
             % TODO adapt documentation
 
             if nargin == 1
-                args = {};
+                values = obj.def_.values;
             else
                 try
-                    args = {'values', obj.parseValues(varargin{:})};
+                    values = obj.parseValues(varargin{:});
                 catch e
                     error(e.message);
                 end
             end
 
-            value = obj.data_.getMeanValue(obj.def_, args{:});
+            value = obj.data_.getMeanValue(obj.axes(), values);
         end
 
         %> Returns the largest absolute value in records
@@ -1117,16 +1179,16 @@ classdef (Abstract) Symbol < handle
             % TODO adapt documentation
 
             if nargin == 1
-                args = {};
+                values = obj.def_.values;
             else
                 try
-                    args = {'values', obj.parseValues(varargin{:})};
+                    values = obj.parseValues(varargin{:});
                 catch e
                     error(e.message);
                 end
             end
 
-            [value, where] = obj.data_.getMaxAbsValue(obj.def_, args{:});
+            [value, where] = obj.data_.getMaxAbsValue(obj.axes(), values);
         end
 
         %> Returns the number of GAMS NA values in records
@@ -1150,16 +1212,16 @@ classdef (Abstract) Symbol < handle
             % TODO adapt documentation
 
             if nargin == 1
-                args = {};
+                values = obj.def_.values;
             else
                 try
-                    args = {'values', obj.parseValues(varargin{:})};
+                    values = obj.parseValues(varargin{:});
                 catch e
                     error(e.message);
                 end
             end
 
-            n = obj.data_.countNA(args{:});
+            n = obj.data_.countNA(values);
         end
 
         %> Returns the number of GAMS UNDEF values in records
@@ -1178,16 +1240,16 @@ classdef (Abstract) Symbol < handle
             % TODO adapt documentation
 
             if nargin == 1
-                args = {};
+                values = obj.def_.values;
             else
                 try
-                    args = {'values', obj.parseValues(varargin{:})};
+                    values = obj.parseValues(varargin{:});
                 catch e
                     error(e.message);
                 end
             end
 
-            n = obj.data_.countUndef(args{:});
+            n = obj.data_.countUndef(values);
         end
 
         %> Returns the number of GAMS EPS values in records
@@ -1211,16 +1273,16 @@ classdef (Abstract) Symbol < handle
             % TODO adapt documentation
 
             if nargin == 1
-                args = {};
+                values = obj.def_.values;
             else
                 try
-                    args = {'values', obj.parseValues(varargin{:})};
+                    values = obj.parseValues(varargin{:});
                 catch e
                     error(e.message);
                 end
             end
 
-            n = obj.data_.countEps(args{:});
+            n = obj.data_.countEps(values);
         end
 
         %> Returns the number of GAMS PINF (positive infinity) values in
@@ -1241,16 +1303,16 @@ classdef (Abstract) Symbol < handle
             % TODO adapt documentation
 
             if nargin == 1
-                args = {};
+                values = obj.def_.values;
             else
                 try
-                    args = {'values', obj.parseValues(varargin{:})};
+                    values = obj.parseValues(varargin{:});
                 catch e
                     error(e.message);
                 end
             end
 
-            n = obj.data_.countPosInf(args{:});
+            n = obj.data_.countPosInf(values);
         end
 
         %> Returns the number of GAMS MINF (negative infinity) values in
@@ -1271,16 +1333,16 @@ classdef (Abstract) Symbol < handle
             % TODO adapt documentation
 
             if nargin == 1
-                args = {};
+                values = obj.def_.values;
             else
                 try
-                    args = {'values', obj.parseValues(varargin{:})};
+                    values = obj.parseValues(varargin{:});
                 catch e
                     error(e.message);
                 end
             end
 
-            n = obj.data_.countNegInf(args{:});
+            n = obj.data_.countNegInf(values);
         end
 
         %> Returns the number of GDX records (not available for matrix formats)
@@ -1294,7 +1356,7 @@ classdef (Abstract) Symbol < handle
             % n = getNumberRecords() returns the number of records that would be stored in a GDX
             % file if this symbol would be written to GDX. For matrix formats n is NaN.
 
-            nrecs = obj.data_.getNumberRecords(obj.def_);
+            nrecs = obj.data_.getNumberRecords(obj.axes(), obj.def_.values);
         end
 
         %> Returns the number of values stored for this symbol.
@@ -1318,7 +1380,7 @@ classdef (Abstract) Symbol < handle
             % See also: gams.transfer.symbol.Symbol.getSparsity
 
             % values = obj.validateValueKeys(varargin); % TODO
-            nvals = obj.data_.getNumberValues(obj.def_);
+            nvals = obj.data_.getNumberValues(obj.axes(), obj.def_.values);
         end
 
     end
@@ -1344,12 +1406,47 @@ classdef (Abstract) Symbol < handle
             end
         end
 
-        function axis = axis(obj, dimension)
-            axis = obj.def_.axis(obj.data_, dimension);
+        function axis = axis(obj, dimension, prioritize_super)
+            % TODO check dimension
+
+            domain = obj.def_.domains{dimension};
+            if nargin == 2 || ~prioritize_super
+                if ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain)
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, ...
+                        gams.transfer.unique_labels.Data(obj.data_, domain));
+                elseif ~isempty(obj.unique_labels{dimension})
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
+                elseif domain.hasUniqueLabels()
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, domain.getUniqueLabels());
+                else
+                    obj.unique_labels_{dimension} = gams.transfer.unique_labels.OrderedLabelSet();
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
+                end
+            else
+                if domain.hasUniqueLabels()
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, domain.getUniqueLabels());
+                elseif ~isempty(obj.unique_labels{dimension})
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
+                elseif ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain)
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, ...
+                        gams.transfer.unique_labels.Data(obj.data_, domain));
+                else
+                    obj.unique_labels_{dimension} = gams.transfer.unique_labels.OrderedLabelSet();
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
+                end
+            end
         end
 
-        function axes = axes(obj)
-            axes = obj.def_.axes(obj.data_);
+        function axes = axes(obj, prioritize_super)
+            if nargin == 1
+                prioritize_super = false;
+            end
+            dim = obj.dimension;
+            axes = cell(1, dim);
+            for i = 1:dim
+                axes{i} = obj.axis(i, prioritize_super);
+            end
+            axes = gams.transfer.symbol.unique_labels.Axes(axes);
         end
 
         function indices = usedUniqueLabels(obj, dimension)

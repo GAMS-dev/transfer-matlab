@@ -178,8 +178,13 @@ classdef Set < gams.transfer.symbol.Symbol
                         index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 3
-                        obj.def_.domains = gams.transfer.utils.parse_argument(varargin, ...
+                        domains = gams.transfer.utils.parse_argument(varargin, ...
                             index, 'domains', []);
+                        if isnumeric(domains)
+                            obj.size = domains;
+                        else
+                            obj.def_.domains = domains;
+                        end
                         has_domains = true;
                         index = index + 1;
                     else

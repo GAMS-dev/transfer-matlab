@@ -48,6 +48,10 @@ classdef OrderedLabelSet < gams.transfer.unique_labels.Abstract
             end
         end
 
+        function unique_labels = copy(obj)
+            unique_labels = gams.transfer.unique_labels.OrderedLabelSet(obj.get());
+        end
+
         function labels = get(obj)
             labels = obj.uels_id2labels_;
         end

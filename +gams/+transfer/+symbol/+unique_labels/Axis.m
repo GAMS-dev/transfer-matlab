@@ -33,119 +33,69 @@
 classdef Axis < handle
 
     properties (Hidden, SetAccess = protected)
+        label_
         unique_labels_
-        super_unique_labels_
-        diverged_ = true
     end
 
-    properties (Dependent, SetAccess = private)
+    methods (Static, Hidden)
+
+        function arg = validatelabel(name, index, arg)
+            if isstring(arg)
+                arg = char(arg);
+            elseif ~ischar(arg)
+                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
+            end
+            if numel(arg) <= 0
+                error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
+            end
+            if ~isvarname(arg)
+                error('Argument ''%s'' (at position %d) must start with letter and must only consist of letters, digits and underscores.', name, index)
+            end
+        end
+
+        function arg = validateUniqueLabels(name, index, arg)
+            if ~isa(arg, 'gams.transfer.unique_labels.Abstract')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.unique_labels.Abstract''.', name, index);
+            end
+        end
+
+    end
+
+    properties (Dependent)
+        label
         unique_labels
-        super_unique_labels
-        diverged
     end
 
     methods
+
+        function label = get.label(obj)
+            label = obj.label_;
+        end
+
+        function set.label(obj, label)
+            obj.label_ = obj.validatelabel('label', 1, label);
+        end
 
         function unique_labels = get.unique_labels(obj)
             unique_labels = obj.unique_labels_;
         end
 
-        function super_unique_labels = get.super_unique_labels(obj)
-            super_unique_labels = obj.super_unique_labels_;
-        end
-
-        function diverged = get.diverged(obj)
-            diverged = obj.diverged_;
+        function set.unique_labels(obj, unique_labels)
+            obj.unique_labels_ = obj.validateUniqueLabels('unique_labels', 1, unique_labels);
         end
 
     end
 
     methods
 
-        function obj = Axis(data, domain)
-            % TODO check data
-            % TODO check domain
-
-            count_objects = domain.hasUniqueLabels() + domain.hasSuperUniqueLabels();
-            if ~isempty(data)
-                count_objects = count_objects + data.hasUniqueLabels(domain);
-            end
-            switch count_objects
-            case 0
-                domain.unique_labels = gams.transfer.unique_labels.OrderedLabelSet();
-            case 1
-                obj.diverged_ = false;
-            case 2
-            case 3
-                warning('Symbol data and domain maintain working unique labels. Removing those from domain.');
-                domain.unique_labels = [];
-            end
-
-            if ~isempty(data) && data.hasUniqueLabels(domain)
-                obj.unique_labels_ = gams.transfer.unique_labels.Data(data, domain);
-            elseif domain.hasUniqueLabels()
-                obj.unique_labels_ = domain.getUniqueLabels();
-            else
-                assert(domain.hasSuperUniqueLabels());
-                obj.unique_labels_ = domain.getSuperUniqueLabels();
-            end
-
-            if domain.hasSuperUniqueLabels()
-                obj.super_unique_labels_ = domain.getSuperUniqueLabels();
-            elseif domain.hasUniqueLabels()
-                obj.super_unique_labels_ = domain.getUniqueLabels();
-            else
-                assert(~isempty(data) && data.hasUniqueLabels(domain));
-                obj.super_unique_labels_ = gams.transfer.unique_labels.Data(data, domain);
-            end
+        function obj = Axis(label, unique_labels)
+            obj.label = label;
+            obj.unique_labels = unique_labels;
         end
 
-        function size = size(obj, use_super_unique_labels)
-            if nargin == 1 || ~use_super_unique_labels
-                size = obj.unique_labels_.count();
-            else
-                size = obj.super_unique_labels_.count();
-            end
+        function size = size(obj)
+            size = obj.unique_labels_.count();
         end
-
-        function label = labelAt(obj, index, use_super_unique_labels)
-            % TODO check index
-            if nargin == 2 || ~use_super_unique_labels
-                label = obj.unique_labels_.getAt(index);
-            else
-                label = obj.super_unique_labels_.getAt(index);
-            end
-            label = label{1};
-        end
-
-        function labels = labels(obj, use_super_unique_labels)
-            if nargin == 1 || ~use_super_unique_labels
-                labels = obj.unique_labels_.get();
-            else
-                labels = obj.super_unique_labels_.get();
-            end
-        end
-
-        % function index = createIndex(obj, input, use_super_unique_labels)
-        %     if gams.transfer.Constants.SUPPORTS_CATEGORICAL
-        %         index = obj.createCategoricalIndex(input, use_super_unique_labels);
-        %     else
-        %         index = obj.createIntegerIndex(input, use_super_unique_labels);
-        %     end
-        % end
-
-        % function index = createCategoricalIndex(obj, input, use_super_unique_labels)
-        %     if use_super_unique_labels
-        %         unique_labels = obj.super_unique_labels_.get();
-        %     else
-        %         unique_labels =
-        %     end
-        %     index = gams.transfer.symbol.data.Data.createCategoricalIndex(input, obj.unique_labels_.get());
-        % end
-
-        % function index = createIntegerIndex(obj, input, use_super_unique_labels)
-        %     index = gams.transfer.symbol.data.Data.createIntegerIndex(input, obj.unique_labels_.get());
-        % end
 
     end
 

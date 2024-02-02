@@ -44,25 +44,24 @@ classdef SparseMatrix < gams.transfer.symbol.data.Matrix
             name = 'sparse_matrix';
         end
 
-        function def = copy(obj)
-            def = gams.transfer.symbol.data.SparseMatrix();
-            def.copyFrom(obj);
+        function data = copy(obj)
+            data = gams.transfer.symbol.data.SparseMatrix();
+            data.copyFrom(obj);
         end
 
-        function status = isValid(obj, def)
-            status = isValid@gams.transfer.symbol.data.Matrix(obj, def);
+        function status = isValid(obj, axes, values)
+            status = isValid@gams.transfer.symbol.data.Matrix(obj, axes, values);
         end
 
-        function data = transform(obj, def, format)
-            def = obj.validateDefinition('def', 1, def);
+        function data = transform(obj, axes, values, format)
             format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
 
             switch format
             case {'table', 'struct'}
-                data = obj.transformToTabular(def, format);
+                data = obj.transformToTabular(axes, values, format);
             case 'dense_matrix'
                 data = gams.transfer.symbol.data.DenseMatrix(obj.records_);
-                values = obj.availableNumericValues(def.values);
+                values = obj.availableNumericValues(values);
                 for i = 1:numel(values)
                     data.records.(values{i}.label) = full(data.records.(values{i}.label));
                 end
@@ -73,8 +72,7 @@ classdef SparseMatrix < gams.transfer.symbol.data.Matrix
             end
         end
 
-        function nvals = getNumberValues(obj, def, varargin)
-            [~, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+        function nvals = getNumberValues(obj, axes, values)
             values = obj.availableNumericValues(values);
             nvals = 0;
             for i = 1:numel(values)

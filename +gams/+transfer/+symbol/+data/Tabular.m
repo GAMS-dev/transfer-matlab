@@ -34,8 +34,9 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
 
     methods
 
-        function status = isValid(obj, def)
-            def = obj.validateDefinition('def', 1, def);
+        function status = isValid(obj, axes, values)
+            % TODO check axes
+            % TODO check values
 
             % empty is valid
             if numel(obj.labels) == 0
@@ -45,9 +46,8 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
 
             prev_size = [];
 
-            domains = def.domains;
-            for i = 1:numel(domains)
-                label = domains{i}.label;
+            for i = 1:axes.dimension
+                label = axes.axis(i).label;
 
                 if ~obj.isLabel(label)
                     status = gams.transfer.utils.Status(sprintf("Records have no domain column '%s'.", label));
@@ -76,7 +76,6 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
                 prev_size = curr_size;
             end
 
-            values = def.values;
             for i = 1:numel(values)
                 label = values{i}.label;
 
@@ -125,21 +124,17 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
             status = gams.transfer.utils.Status.createOK();
         end
 
-        function nvals = getNumberValues(obj, def, varargin)
-            [~, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
-            nvals = obj.getNumberRecords(def) * numel(obj.availableNumericValues(values));
+        function nvals = getNumberValues(obj, axes, values)
+            nvals = obj.getNumberRecords(axes, values) * numel(obj.availableNumericValues(values));
         end
 
-        function value = getMeanValue(obj, def, varargin)
-            [domains, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+        function value = getMeanValue(obj, axes, values)
             values = obj.availableNumericValues(values);
-
             value = 0;
             for i = 1:numel(values)
                 value = value + sum(obj.records_.(values{i}.label)(:));
             end
-
-            value = value / obj.getNumberValues(def, 'values', values);
+            value = value / obj.getNumberValues(axes, values);
         end
 
         function flag = hasUniqueLabels(obj, domain)
@@ -245,45 +240,17 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
 
     methods (Hidden, Access = protected)
 
-        function arg = validateDomains_(obj, name, index, arg)
-            if ~iscell(arg)
-                error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
-            end
-            for i = 1:numel(arg)
-                if ~isa(arg{i}, 'gams.transfer.symbol.domain.Domain')
-                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.symbol.domain.Domain''.', name, index, i);
-                end
-                if ~obj.isLabel(arg{i}.label)
-                    error('Argument ''%s'' (at position %d, element %d) contains domain with unknown label ''%s''.', name, index, i, arg{i}.label);
-                end
+        function subindex = ind2sub_(obj, axes, value, linindex)
+            subindex = zeros(1, axes.dimension);
+            for i = 1:axes.dimension
+                subindex(i) = double(obj.records_.(axes.axis(i).label)(linindex));
             end
         end
 
-        function arg = validateValues_(obj, name, index, arg)
-            if ~iscell(arg)
-                error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
-            end
-            for i = 1:numel(arg)
-                if ~isa(arg{i}, 'gams.transfer.symbol.value.Value')
-                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.symbol.value.Value''.', name, index, i);
-                end
-                if ~obj.isLabel(arg{i}.label)
-                    error('Argument ''%s'' (at position %d, element %d) contains domain with unknown label ''%s''.', name, index, i, arg{i}.label);
-                end
-            end
-        end
-
-        function subindex = ind2sub_(obj, domains, value, linindex)
-            subindex = zeros(1, numel(domains));
-            for i = 1:numel(domains)
-                subindex(i) = double(obj.records_.(domains{i}.label)(linindex));
-            end
-        end
-
-        function data = transformToMatrix(obj, def, format)
-            def = obj.validateDefinition('def', 1, def);
+        function data = transformToMatrix(obj, axes, values, format)
+            % TODO check axes
             format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
-            values = obj.availableNumericValues(def.values);
+            values = obj.availableNumericValues(values);
             if numel(values) == 0
                 error('At least one numeric value column is required to transform to a matrix format.');
             end
@@ -293,7 +260,7 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
             case 'dense_matrix'
                 data = gams.transfer.symbol.data.DenseMatrix.Empty();
             case 'sparse_matrix'
-                if def.dimension > 2
+                if axes.dimension > 2
                     error('Sparse matrix does not support dimension larger than 2.');
                 end
                 data = gams.transfer.symbol.data.SparseMatrix.Empty();
@@ -302,21 +269,15 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
             end
 
             % get matrix size
-            axes = obj.axes(def.domains);
-            size_ = axes.matrixSize(true); % TODO: use working size
+            size_ = axes.matrixSize();
 
             % convert indices to matrix (linear) indices TODO: adapt to working uels
-            if def.dimension == 0
+            if axes.dimension == 0
                 idx = 1;
             else
-                idx = cell(1, def.dimension);
-                for i = 1:def.dimension
-                    domain = def.domains{i};
-                    [~, uel_map] = ismember(axes.axis(i).unique_labels.get(), axes.axis(i).super_unique_labels.get());
-                    if any(uel_map == 0)
-                        error('Found domain violation.');
-                    end
-                    idx{i} = uel_map(obj.records_.(domain.label));
+                idx = cell(1, axes.dimension);
+                for i = 1:axes.dimension
+                    idx{i} = uint64(obj.records_.(axes.axis(i).label));
                 end
                 idx = sub2ind(size_, idx{:});
             end

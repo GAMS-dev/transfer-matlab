@@ -64,23 +64,18 @@ classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
             obj.records = records;
         end
 
-        function status = isValid(obj, def)
-            def = gams.transfer.utils.validate('def', 1, def, {'gams.transfer.symbol.definition.Definition'}, -1);
-
+        function status = isValid(obj, axes, values)
             % TODO
 
             status = gams.transfer.utils.Status.createOK();
         end
 
-        function nrecs = getNumberRecords(obj, def)
+        function nrecs = getNumberRecords(obj, axes, values)
             nrecs = nan;
         end
 
-        function value = getMeanValue(obj, def, varargin)
-
-            [domains, values] = obj.parseDefinitionWithValueFilter(def, varargin{:});
+        function value = getMeanValue(obj, axes, values)
             values = obj.availableNumericValues(values);
-
             value = 0;
             for i = 1:numel(values)
                 value = value + mean(obj.records_.(values{i}.label)(:));
@@ -93,66 +88,37 @@ classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
 
     methods (Hidden, Access = protected)
 
-        function arg = validateDomains_(obj, name, index, arg)
-            % if ~iscell(arg)
-            %     error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
-            % end
-            % for i = 1:numel(arg)
-            %     if ~isa(arg{i}, 'gams.transfer.symbol.domain.Domain')
-            %         error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.symbol.domain.Domain''.', name, index, i);
-            %     end
-            %     if ~obj.isLabel(arg{i}.label)
-            %         error('Argument ''%s'' (at position %d, element %d) contains domain with unknown label ''%s''.', name, index, i, arg{i}.label);
-            %     end
-            % end
-        end
-
-        function arg = validateValues_(obj, name, index, arg)
-            if ~iscell(arg)
-                error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
-            end
-            for i = 1:numel(arg)
-                if ~isa(arg{i}, 'gams.transfer.symbol.value.Value')
-                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.symbol.value.Value''.', name, index, i);
-                end
-                if ~obj.isLabel(arg{i}.label)
-                    error('Argument ''%s'' (at position %d, element %d) contains domain with unknown label ''%s''.', name, index, i, arg{i}.label);
-                end
-            end
-        end
-
-        function subindex = ind2sub_(obj, domains, value, linindex)
+        function subindex = ind2sub_(obj, axes, value, linindex)
             [i, j] = ind2sub(size(obj.records_.(value.label)), linindex);
             subindex = [i, j];
         end
 
-        function data = transformToTabular(obj, def, format)
-            def = obj.validateDefinition('def', 1, def);
+        function data = transformToTabular(obj, axes, values, format)
+            % TODO check axes
             format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
-            values = obj.availableNumericValues(def.values);
+            values = obj.availableNumericValues(values);
 
             % create data
             switch format
             case 'table'
                 data = gams.transfer.symbol.data.Table(table());
             case 'struct'
-                data = gams.transfer.symbol.data.Struct.Empty(def.domains);
+                data = gams.transfer.symbol.data.Struct(struct());
             otherwise
                 error('Unknown records format: %s', format);
             end
 
             % get size
-            axes = obj.axes(def.domains);
             size_ = axes.matrixSize();
 
             % get all possible indices (sorted by column)
-            indices_ = cell(1, def.dimension);
+            indices_ = cell(1, axes.dimension);
             [indices_{:}] = ind2sub(size_, 1:prod(size_));
-            indices = zeros(prod(size_), def.dimension);
-            for i = 1:def.dimension
+            indices = zeros(prod(size_), axes.dimension);
+            for i = 1:axes.dimension
                 indices(:, i) = indices_{i};
             end
-            [indices, indices_perm] = sortrows(indices, 1:def.dimension);
+            [indices, indices_perm] = sortrows(indices, 1:axes.dimension);
 
             % get sparse indices
             keep_indices = false(1, prod(size_));
@@ -166,12 +132,12 @@ classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
             indices_perm(~keep_indices) = [];
 
             % domain columns
-            for i = 1:numel(def.domains)
-                domain = def.domains{i};
-                data.records.(domain.label) = obj.createUniqueLabelsIndex(indices(:, i), axes.axis(i).labels());
-                if data.hasUniqueLabels(domain)
-                    data.removeUnusedUniqueLabels(domain);
-                end
+            for i = 1:axes.dimension
+                axis = axes.axis(i);
+                data.records.(axis.label) = obj.createUniqueLabelsIndex(indices(:, i), axis.unique_labels.get());
+                % if data.hasUniqueLabels(domain) TODO
+                %     data.removeUnusedUniqueLabels(domain);
+                % end
             end
 
             % values columns
