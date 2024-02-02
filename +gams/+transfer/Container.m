@@ -87,7 +87,7 @@ classdef Container < handle
             elseif ~ischar(arg)
                 error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
             end
-            if ~isfile(fullfile(arg, gams.transfer.Constants.GDX_LIB_NAME))
+            if ~isfile(fullfile(arg, gams.transfer.Constants.GDX_LIBRARY_NAME))
                 error('Argument ''%s'' (at position %d) does not contain a path to the GDX library.', name, index);
             end
         end

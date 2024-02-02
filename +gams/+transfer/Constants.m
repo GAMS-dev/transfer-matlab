@@ -78,96 +78,25 @@ classdef Constants
         %> True if table is supported
 
         % SUPPORTS_TABLE True if table is supported
-        SUPPORTS_TABLE = gams.transfer.Constants.supportsTable()
+        SUPPORTS_TABLE = gams.transfer.utils.supports_table()
 
 
         %> True if categorical is supported
 
         % SUPPORTS_CATEGORICAL True if categorical is supported
-        SUPPORTS_CATEGORICAL = gams.transfer.Constants.supportsCategorical()
+        SUPPORTS_CATEGORICAL = gams.transfer.utils.supports_categorical()
 
 
         %> Name of operating system
 
         % OPERATING_SYSTEM Name of operating system
-        OPERATING_SYSTEM = gams.transfer.Constants.operatingSystem()
+        OPERATING_SYSTEM = gams.transfer.utils.operating_system()
 
 
         %> Name of GDX library
 
-        % GDX_LIB_NAME Name of GDX library
-        GDX_LIB_NAME = gams.transfer.Constants.gdxLibName()
-    end
-
-    methods (Hidden, Static)
-
-        function flag = supportsTable()
-            flag = true;
-            try
-                table();
-            catch
-                flag = false;
-            end
-
-            env = getenv('GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE');
-            if ~isempty(env)
-                if strcmpi(env, 'true')
-                    flag = true;
-                elseif strcmpi(env, 'false')
-                    flag = false;
-                end
-            end
-        end
-
-        function flag = supportsCategorical()
-            flag = true;
-            try
-                categorical();
-            catch
-                flag = false;
-            end
-
-            env = getenv('GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL');
-            if ~isempty(env)
-                if strcmpi(env, 'true')
-                    flag = true;
-                elseif strcmpi(env, 'false')
-                    flag = false;
-                end
-            end
-        end
-
-        function os = operatingSystem()
-            os = '';
-            if ispc
-                os = 'windows';
-            elseif ismac
-                [~,result] = system('uname -v');
-                if any(strfind(result, 'ARM64'))
-                    os = 'macos_arm';
-                else
-                    os = 'macos';
-                end
-            elseif isunix
-                os = 'linux';
-            else
-                error('Unknown operating system.');
-            end
-        end
-
-        function gdxlibname = gdxLibName()
-            switch gams.transfer.Constants.OPERATING_SYSTEM
-            case 'windows'
-                gdxlibname = 'gdxcclib64.dll';
-            case 'linux'
-                gdxlibname = 'libgdxcclib64.so';
-            case {'macos', 'macos_arm'}
-                gdxlibname = 'libgdxcclib64.dylib';
-            otherwise
-                error('Unknown operating system.');
-            end
-        end
-
+        % GDX_LIBRARY_NAME Name of GDX library
+        GDX_LIBRARY_NAME = gams.transfer.utils.gdx_library_name()
     end
 
 end

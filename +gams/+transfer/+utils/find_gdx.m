@@ -40,7 +40,7 @@ function gdx_path = find_gdx()
     idx = find(paths == pathsep);
     for i = 1:numel(idx)-1
         p = paths(idx(i)+1:idx(i+1)-1);
-        if isfile(fullfile(p, gams.transfer.Constants.GDX_LIB_NAME))
+        if isfile(fullfile(p, gams.transfer.Constants.GDX_LIBRARY_NAME))
             gdx_path = p;
             break;
         end
