@@ -5,8 +5,8 @@
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright  (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -30,36 +30,17 @@
 %
 % Symbol Relaxed Domain (internal)
 %
-classdef Relaxed < gams.transfer.symbol.domain.Domain
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
 
     properties (Hidden, SetAccess = protected)
         name_
     end
 
-    methods (Hidden, Static)
-
-        function arg = validateName(name, index, arg)
-            if isstring(arg)
-                arg = char(arg);
-            elseif ~ischar(arg)
-                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
-            end
-            if numel(arg) <= 0
-                error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
-            end
-            if ~strcmp(arg, gams.transfer.Constants.UNIVERSE_NAME) && ~isvarname(arg)
-                error('Argument ''%s'' (at position %d) must start with letter and must only consist of letters, digits and underscores.', name, index)
-            end
-        end
-
-    end
-
     properties (Dependent)
         name
-    end
-
-    properties (Dependent, SetAccess = private)
-        base
     end
 
     methods
@@ -69,11 +50,11 @@ classdef Relaxed < gams.transfer.symbol.domain.Domain
         end
 
         function obj = set.name(obj, name)
-            obj.name_ = obj.validateName('name', 1, name);
-        end
-
-        function base = get.base(obj)
-            base = obj.name_;
+            valid = gams.transfer.utils.Validator('name', 1, name).string2char().type('char').nonempty();
+            if ~strcmp(name, gams.transfer.Constants.UNIVERSE_NAME)
+                valid.varname();
+            end
+            obj.name_ = valid.value;
         end
 
     end
@@ -85,12 +66,12 @@ classdef Relaxed < gams.transfer.symbol.domain.Domain
             if strcmp(obj.name_, gams.transfer.Constants.UNIVERSE_NAME)
                 obj.label_ = gams.transfer.Constants.UNIVERSE_LABEL;
             else
-                obj.label_ = name;
+                obj.label_ = obj.name_;
             end
         end
 
         function eq = equals(obj, domain)
-            eq = equals@gams.transfer.symbol.domain.Domain(obj, domain) && ...
+            eq = equals@gams.transfer.symbol.domain.Abstract(obj, domain) && ...
                 isequal(obj.name_, domain.name);
         end
 

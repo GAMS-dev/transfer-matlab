@@ -52,8 +52,8 @@ classdef Data < gams.transfer.unique_labels.Abstract
     methods (Hidden)
 
         function arg = validateDomain(obj, name, index, arg)
-            if ~isa(arg, 'gams.transfer.symbol.domain.Domain')
-                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.domain.Domain''.', name, index);
+            if ~isa(arg, 'gams.transfer.symbol.domain.Abstract')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.domain.Abstract''.', name, index);
             end
             if ~obj.data_.isLabel(arg.label)
                 error('Argument ''%s'' (at position %d) must refer to column in data.', name, index);

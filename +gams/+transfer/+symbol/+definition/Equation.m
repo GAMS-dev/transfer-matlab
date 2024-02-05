@@ -45,7 +45,7 @@ classdef (Hidden) Equation < gams.transfer.symbol.definition.Abstract
 
     methods (Hidden, Static)
 
-        function type = createType(name, input)
+        function type = createType(name, index, input)
             if isa(input, 'gams.transfer.EquationType')
                 type = input;
                 return

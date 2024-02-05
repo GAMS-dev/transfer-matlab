@@ -47,7 +47,7 @@ classdef (Hidden) Set < gams.transfer.symbol.definition.Abstract
         end
 
         function obj = set.is_singleton(obj, is_singleton)
-            gams.transfer.utils.Validator('is_singleton', 1, is_singleton).logical().scalar();
+            gams.transfer.utils.Validator('is_singleton', 1, is_singleton).type('logical').scalar();
             obj.is_singleton_ = is_singleton;
             obj.resetValues();
         end

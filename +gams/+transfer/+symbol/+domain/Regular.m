@@ -5,8 +5,8 @@
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright  (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -30,32 +30,18 @@
 %
 % Symbol Regular Domain (internal)
 %
-classdef Regular < gams.transfer.symbol.domain.Domain
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
 
     properties (Hidden, SetAccess = protected)
         symbol_
     end
 
-    methods (Hidden, Static)
-
-        function arg = validateSymbol(name, index, arg)
-            if ~isa(arg, 'gams.transfer.symbol.Set') && ~isa(arg, 'gams.transfer.alias.Abstract')
-                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Set'' or ''gams.transfer.alias.Abstract''.', name, index);
-            end
-            if arg.dimension ~= 1
-                error('Argument ''%s'' (at position %d) must be symbol with dimension 1.', name, index);
-            end
-        end
-
-    end
-
     properties (Dependent)
         symbol
         name
-    end
-
-    properties (Dependent, SetAccess = private)
-        base
     end
 
     methods
@@ -65,15 +51,12 @@ classdef Regular < gams.transfer.symbol.domain.Domain
         end
 
         function obj = set.symbol(obj, symbol)
-            obj.symbol_ = obj.validateSymbol('symbol', 1, symbol);
+            gams.transfer.utils.Validator('symbol', 1, symbol).types({'gams.transfer.symbol.Set', 'gams.transfer.alias.Abstract'});
+            obj.symbol_ = symbol;
         end
 
         function name = get.name(obj)
             name = obj.symbol_.name;
-        end
-
-        function base = get.base(obj)
-            base = obj.symbol_;
         end
 
     end
@@ -86,7 +69,7 @@ classdef Regular < gams.transfer.symbol.domain.Domain
         end
 
         function eq = equals(obj, domain)
-            eq = equals@gams.transfer.symbol.domain.Domain(obj, domain) && ...
+            eq = equals@gams.transfer.symbol.domain.Abstract(obj, domain) && ...
                 obj.symbol_.equals(domain.symbol);
         end
 

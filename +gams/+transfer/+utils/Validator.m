@@ -49,6 +49,19 @@ classdef Validator
             obj.value = value;
         end
 
+        function obj = string2char(obj)
+            if iscell(obj.value)
+                for i = 1:numel(obj.value)
+                    if isstring(obj.value{i})
+                        obj.value{i} = char(obj.value{i});
+                    end
+                end
+            end
+            if isstring(obj.value)
+                obj.value = char(obj.value);
+            end
+        end
+
         function obj = type(obj, class)
             if ~isa(obj.value, class)
                 error('Argument ''%s'' (at position %d) must be ''%s''.', obj.name, obj.index, class);
@@ -93,12 +106,6 @@ classdef Validator
             end
         end
 
-        function obj = logical(obj)
-            if ~islogical(obj.value)
-                error('Argument ''%s'' (at position %d) must be ''logical''.', obj.name, obj.index);
-            end
-        end
-
         function obj = scalar(obj)
             if ~isscalar(obj.value)
                 error('Argument ''%s'' (at position %d) must be scalar.', obj.name, obj.index);
@@ -111,9 +118,21 @@ classdef Validator
             end
         end
 
+        function obj = nonempty(obj)
+            if isempty(obj.value)
+                error('Argument ''%s'' (at position %d) must be non-empty.', obj.name, obj.index);
+            end
+        end
+
         function obj = numel(obj, n)
             if numel(obj.value) ~= n
                 error('Argument ''%s'' (at position %d) must have %d elements.', obj.name, obj.index, n);
+            end
+        end
+
+        function obj = varname(obj)
+            if ~isvarname(obj.value)
+                error('Argument ''%s'' (at position %d) must start with letter and must only consist of letters, digits and underscores.', obj.name, obj.index)
             end
         end
 

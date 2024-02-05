@@ -5,8 +5,8 @@
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright  (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -30,22 +30,13 @@
 %
 % Symbol String Value (internal)
 %
-classdef String < gams.transfer.symbol.value.Value
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Hidden) String < gams.transfer.symbol.value.Abstract
 
     properties (Hidden, SetAccess = {?gams.transfer.symbol.value.String, ?gams.transfer.symbol.Symbol})
         default_ = ''
-    end
-
-    methods (Hidden, Static)
-
-        function arg = validateDefault(name, index, arg)
-            if isstring(arg)
-                arg = char(arg);
-            elseif ~ischar(arg)
-                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
-            end
-        end
-
     end
 
     properties (Dependent, SetAccess = private)
@@ -60,7 +51,7 @@ classdef String < gams.transfer.symbol.value.Value
 
     end
 
-    methods (Hidden, Access = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.definition.Abstract})
+    methods (Hidden, Access = {?gams.transfer.symbol.value.Abstract, ?gams.transfer.symbol.definition.Abstract})
 
         function obj = String(label, default)
             obj.label_ = label;

@@ -30,20 +30,13 @@
 %
 % Symbol Numeric Value (internal)
 %
-classdef Numeric < gams.transfer.symbol.value.Value
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Hidden) Numeric < gams.transfer.symbol.value.Abstract
 
     properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Numeric, ?gams.transfer.symbol.Symbol})
         default_ = 0
-    end
-
-    methods (Hidden, Static)
-
-        function arg = validateDefault(name, index, arg)
-            if ~isnumeric(arg)
-                error('Argument ''%s'' (at position %d) must be ''numeric''.', name, index);
-            end
-        end
-
     end
 
     properties (Dependent, SetAccess = private)
@@ -58,7 +51,7 @@ classdef Numeric < gams.transfer.symbol.value.Value
 
     end
 
-    methods (Hidden, Access = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.definition.Abstract})
+    methods (Hidden, Access = {?gams.transfer.symbol.value.Abstract, ?gams.transfer.symbol.definition.Abstract})
 
         function obj = Numeric(label, default)
             obj.label_ = label;

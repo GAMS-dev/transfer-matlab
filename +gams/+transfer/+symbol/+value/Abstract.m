@@ -1,12 +1,12 @@
-% Symbol Value (internal)
+% Abstract Symbol Value (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright  (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,27 +28,15 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Symbol Value (internal)
+% Abstract Symbol Value (internal)
 %
-classdef (Abstract) Value
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Abstract, Hidden) Abstract
 
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.Symbol})
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Abstract, ?gams.transfer.symbol.Symbol})
         label_
-    end
-
-    methods (Hidden, Static)
-
-        function arg = validateLabel(name, index, arg)
-            if isstring(arg)
-                arg = char(arg);
-            elseif ~ischar(arg)
-                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
-            end
-            if numel(arg) <= 0
-                error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
-            end
-        end
-
     end
 
     properties (Dependent)
@@ -66,7 +54,7 @@ classdef (Abstract) Value
         end
 
         function obj = set.label(obj, label)
-            obj.label_ = obj.validateLabel('label', 1, label);
+            obj.label_ = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty();
         end
 
     end

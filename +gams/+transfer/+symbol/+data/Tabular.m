@@ -41,7 +41,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
 
         function status = isValid(obj, axes, values)
             axes = gams.transfer.utils.validate('axes', 1, axes, {'gams.transfer.symbol.unique_labels.Axes'}, -1);
-            values = gams.transfer.utils.validate_cell('values', 2, values, {'gams.transfer.symbol.value.Value'}, 1, -1);
+            values = gams.transfer.utils.validate_cell('values', 2, values, {'gams.transfer.symbol.value.Abstract'}, 1, -1);
 
             % empty is valid
             if numel(obj.getLabels()) == 0
