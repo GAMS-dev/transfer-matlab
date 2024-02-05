@@ -1,12 +1,12 @@
-% Sparse Matrix Records (internal)
+% Sparse Matrix Data (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,20 +28,26 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Sparse Matrix Records (internal)
+% Sparse Matrix Data (internal)
 %
-classdef SparseMatrix < gams.transfer.symbol.data.Matrix
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Hidden) SparseMatrix < gams.transfer.symbol.data.Matrix
+
+    %#ok<*INUSD,*STOUT>
+
+    properties (Constant)
+        name = 'sparse_matrix'
+    end
 
     methods
 
         function obj = SparseMatrix(records)
+            obj.records_ = struct();
             if nargin >= 1
                 obj.records = records;
             end
-        end
-
-        function name = name(obj)
-            name = 'sparse_matrix';
         end
 
         function data = copy(obj)
@@ -50,42 +56,38 @@ classdef SparseMatrix < gams.transfer.symbol.data.Matrix
         end
 
         function status = isValid(obj, axes, values)
+            values = obj.availableValues('Numeric', values);
+            for i = 1:numel(values)
+                label = values{i}.label;
+                if ~issparse(obj.records_.(label))
+                    status = gams.transfer.utils.Status(sprintf("Records '%s' must be sparse.", label));
+                    return
+                end
+            end
             status = isValid@gams.transfer.symbol.data.Matrix(obj, axes, values);
         end
 
-        function data = transform(obj, axes, values, format)
-            format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
-
-            switch format
-            case {'table', 'struct'}
-                data = obj.transformToTabular(axes, values, format);
-            case 'dense_matrix'
-                data = gams.transfer.symbol.data.DenseMatrix(obj.records_);
-                values = obj.availableNumericValues(values);
-                for i = 1:numel(values)
-                    data.records.(values{i}.label) = full(data.records.(values{i}.label));
-                end
-            case 'sparse_matrix'
-                data = gams.transfer.symbol.data.SparseMatrix(obj.records_);
-            otherwise
-                error('Unknown records format: %s', format);
-            end
-        end
-
         function nvals = getNumberValues(obj, axes, values)
-            values = obj.availableNumericValues(values);
+            values = obj.availableValues('Numeric', values);
             nvals = 0;
             for i = 1:numel(values)
                 nvals = nvals + nnz(obj.records_.(values{i}.label));
             end
         end
 
-    end
-
-    methods (Static)
-
-        function obj = Empty(domains)
-            obj = gams.transfer.symbol.data.SparseMatrix(struct());
+        function transformToMatrix(obj, axes, values, data)
+            values = obj.availableValues('Numeric', values);
+            if isa(data, 'gams.transfer.symbol.data.DenseMatrix')
+                for i = 1:numel(values)
+                    data.records.(values{i}.label) = full(obj.records_.(values{i}.label));
+                end
+            elseif isa(data, 'gams.transfer.symbol.data.SparseMatrix')
+                for i = 1:numel(values)
+                    data.records.(values{i}.label) = obj.records_.(values{i}.label);
+                end
+            else
+                error('Invalid data: %s', class(data));
+            end
         end
 
     end

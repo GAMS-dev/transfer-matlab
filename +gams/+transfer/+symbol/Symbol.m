@@ -110,8 +110,8 @@ classdef (Abstract) Symbol < handle
         end
 
         function arg = validateData(name, index, arg)
-            if ~isa(arg, 'gams.transfer.symbol.data.Data')
-                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.data.Data''.', name, index);
+            if ~isa(arg, 'gams.transfer.symbol.data.Abstract')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.data.Abstract''.', name, index);
             end
         end
 
@@ -634,7 +634,7 @@ classdef (Abstract) Symbol < handle
             if gams.transfer.Constants.SUPPORTS_TABLE && istable(records)
                 records = gams.transfer.symbol.data.Table(records);
             end
-            if isa(records, 'gams.transfer.symbol.data.Data')
+            if isa(records, 'gams.transfer.symbol.data.Abstract')
                 status = records.isValid(obj.axes(), obj.def_.values);
                 if status.flag ~= gams.transfer.utils.Status.OK
                     error(status.message);
@@ -644,6 +644,9 @@ classdef (Abstract) Symbol < handle
                 obj.modified_ = true;
                 return
             end
+
+            % reset current records in order to avoid using categoricals as unique_labels
+            obj.data_ = gams.transfer.symbol.data.Struct();
 
             domains = {};
             values = {};
@@ -756,7 +759,7 @@ classdef (Abstract) Symbol < handle
                     continue
                 end
                 unique_labels = gams.transfer.utils.unique(new_records.(domains{i}.label));
-                new_records.(domains{i}.label) = gams.transfer.symbol.data.Data.createUniqueLabelsIndex(...
+                new_records.(domains{i}.label) = gams.transfer.unique_labels.Abstract.createIndexFrom(...
                     new_records.(domains{i}.label), unique_labels);
                 if ~gams.transfer.Constants.SUPPORTS_CATEGORICAL || ~iscategorical(new_records.(domains{i}.label))
                     obj.unique_labels{i} = gams.transfer.unique_labels.OrderedLabelSet(unique_labels);
@@ -833,7 +836,21 @@ classdef (Abstract) Symbol < handle
             %
             % See also: gams.transfer.RecordsFormat
 
-            obj.data_ = obj.data_.transform(obj.axes(), obj.def_.values, target_format);
+            switch target_format
+            case 'table'
+                data = gams.transfer.symbol.data.Table();
+            case 'struct'
+                data = gams.transfer.symbol.data.Struct();
+            case 'dense_matrix'
+                data = gams.transfer.symbol.data.DenseMatrix();
+            case 'sparse_matrix'
+                data = gams.transfer.symbol.data.SparseMatrix();
+            otherwise
+                error('Unknown format');
+            end
+
+            obj.data_.transformTo(obj.axes(), obj.def_.values, data);
+            obj.data_ = data;
         end
 
         %> Checks correctness of symbol

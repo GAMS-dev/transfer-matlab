@@ -1,12 +1,12 @@
-% Table Records (internal)
+% Table Data (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,17 +28,34 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Table Records (internal)
+% Table Data (internal)
 %
-classdef Table < gams.transfer.symbol.data.Tabular
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
 
-    properties (Dependent, SetAccess = private)
-        labels
+    %#ok<*INUSD,*STOUT>
+
+    properties (Constant)
+        name = 'table'
     end
 
     methods
 
-        function labels = get.labels(obj)
+        function obj = Table(records)
+            obj.records_ = table();
+            if nargin >= 1
+                obj.records = records;
+            end
+        end
+
+        function data = copy(obj)
+            data = gams.transfer.symbol.data.Table();
+            data.copyFrom(obj);
+        end
+
+        function labels = getLabels(obj)
             if istable(obj.records_)
                 labels = obj.records_.Properties.VariableNames;
             else
@@ -46,30 +63,10 @@ classdef Table < gams.transfer.symbol.data.Tabular
             end
         end
 
-    end
-
-    methods
-
-        function obj = Table(records)
-            if nargin >= 1
-                obj.records = records;
-            end
-        end
-
-        function name = name(obj)
-            name = 'table';
-        end
-
         function renameLabels(obj, old_labels, new_labels)
-            if ~istable(obj.records_)
-                error('Cannot rename labels: Records are invalid.');
+            if istable(obj.records_)
+                obj.records_ = renamevars(obj.records_, old_labels, new_labels);
             end
-            obj.records_ = renamevars(obj.records_, old_labels, new_labels);
-        end
-
-        function data = copy(obj)
-            data = gams.transfer.symbol.data.Table();
-            data.copyFrom(obj);
         end
 
         function status = isValid(obj, axes, values)
@@ -81,21 +78,6 @@ classdef Table < gams.transfer.symbol.data.Tabular
             status = isValid@gams.transfer.symbol.data.Tabular(obj, axes, values);
         end
 
-        function data = transform(obj, axes, values, format)
-            format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
-
-            switch format
-            case 'table'
-                data = gams.transfer.symbol.data.Table(obj.records_);
-            case 'struct'
-                data = gams.transfer.symbol.data.Struct(table2struct(obj.records_, 'ToScalar', true));
-            case {'dense_matrix', 'sparse_matrix'}
-                data = obj.transformToMatrix(axes, values, format);
-            otherwise
-                error('Unknown records format: %s', format);
-            end
-        end
-
         function nrecs = getNumberRecords(obj, axes, values)
             if istable(obj.records_)
                 nrecs = height(obj.records_);
@@ -104,15 +86,13 @@ classdef Table < gams.transfer.symbol.data.Tabular
             end
         end
 
-    end
-
-    methods (Static)
-
-        function obj = Empty(domains)
-            domains = gams.transfer.symbol.data.Data.validateDomains('domains', 1, domains);
-            obj = gams.transfer.symbol.data.Table(table());
-            for i = 1:numel(domains)
-                obj.records_.(domains{i}.label) = obj.createUniqueLabelsIntegerIndex([], {});
+        function transformToTabular(obj, axes, values, data)
+            if isa(data, 'gams.transfer.symbol.data.Table')
+                data.records = obj.records_;
+            elseif isa(data, 'gams.transfer.symbol.data.Struct')
+                data.records = table2struct(obj.records_, 'ToScalar', true);
+            else
+                error('Invalid data: %s', class(data));
             end
         end
 

@@ -1,12 +1,12 @@
-% Matrix Records (internal)
+% Matrix Data (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,44 +28,65 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Matrix Records (internal)
+% Matrix Data (internal)
 %
-classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
 
-    properties (Dependent, SetAccess = private)
-        labels
-    end
+    %#ok<*INUSD,*STOUT>
 
     methods
 
-        function labels = get.labels(obj)
-            labels = fieldnames(obj.records_);
+        function labels = getLabels(obj)
+            if isstruct(obj.records_)
+                labels = fieldnames(obj.records_);
+            else
+                labels = {};
+            end
         end
 
-    end
-
-    methods
-
         function renameLabels(obj, old_labels, new_labels)
-            % TODO: check old_labels and new_labels
-            if ~isstruct(obj.records_)
-                error('Cannot rename labels: Records are invalid.');
+            if isstruct(obj.records_)
+                obj.records = gams.transfer.utils.rename_struct_fields(obj.records_, old_labels, new_labels);
             end
-            records = struct();
-            labels = fieldnames(obj.records_);
-            for i = 1:numel(labels)
-                idx = find(strcmp(labels{i}, old_labels), 1, 'first');
-                if isempty(idx)
-                    records.(labels{i}) = obj.records_.(labels{i});
-                else
-                    records.(new_labels{idx}) = obj.records_.(labels{i});
-                end
-            end
-            obj.records = records;
         end
 
         function status = isValid(obj, axes, values)
-            % TODO
+            axes = gams.transfer.utils.validate('axes', 1, axes, {'gams.transfer.symbol.unique_labels.Axes'}, -1);
+            values = obj.availableValues('Numeric', values);
+
+            size_ = axes.matrixSize();
+            for i = 1:numel(values)
+                label = values{i}.label;
+
+                switch class(values{i})
+                case 'gams.transfer.symbol.value.Numeric'
+                    if isempty(obj.records_.(label))
+                    elseif isnumeric(obj.records_.(label))
+                    else
+                        status = gams.transfer.utils.Status(sprintf("Records value '%s' must be numeric or empty.", label));
+                        return
+                    end
+                case 'gams.transfer.symbol.value.String'
+                    if ~isempty(obj.records_.(label))
+                        status = gams.transfer.utils.Status(sprintf("Records value '%s' must be empty.", label));
+                        return
+                    end
+                otherwise
+                    error('Unknown symbol value type: %s', class(values{i}));
+                end
+
+                if isempty(obj.records_.(label))
+                    continue
+                end
+
+                if any(size_ ~= size(obj.records_.(label)))
+                    status = gams.transfer.utils.Status(sprintf("Records value '%s' have incorrect size.", label));
+                    return
+                end
+            end
 
             status = gams.transfer.utils.Status.createOK();
         end
@@ -75,38 +96,18 @@ classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
         end
 
         function value = getMeanValue(obj, axes, values)
-            values = obj.availableNumericValues(values);
+            values = obj.availableValues('Numeric', values);
             value = 0;
             for i = 1:numel(values)
                 value = value + mean(obj.records_.(values{i}.label)(:));
             end
-
             value = value / numel(values);
         end
 
-    end
-
-    methods (Hidden, Access = protected)
-
-        function subindex = ind2sub_(obj, axes, value, linindex)
-            [i, j] = ind2sub(size(obj.records_.(value.label)), linindex);
-            subindex = [i, j];
-        end
-
-        function data = transformToTabular(obj, axes, values, format)
-            % TODO check axes
-            format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
-            values = obj.availableNumericValues(values);
-
-            % create data
-            switch format
-            case 'table'
-                data = gams.transfer.symbol.data.Table(table());
-            case 'struct'
-                data = gams.transfer.symbol.data.Struct(struct());
-            otherwise
-                error('Unknown records format: %s', format);
-            end
+        function transformToTabular(obj, axes, values, data)
+            axes = gams.transfer.utils.validate('axes', 1, axes, {'gams.transfer.symbol.unique_labels.Axes'}, -1);
+            values = obj.availableValues('Numeric', values);
+            data = gams.transfer.utils.validate('data', 3, data, {'gams.transfer.symbol.data.Tabular'}, -1);
 
             % get size
             size_ = axes.matrixSize();
@@ -134,8 +135,8 @@ classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
             % domain columns
             for i = 1:axes.dimension
                 axis = axes.axis(i);
-                data.records.(axis.label) = obj.createUniqueLabelsIndex(indices(:, i), axis.unique_labels.get());
-                % if data.hasUniqueLabels(domain) TODO
+                data.records.(axis.label) = axis.unique_labels.createIndex(indices(:, i));
+                % if data.hasUniqueLabels(domain) TODO: do we actually want this?
                 %     data.removeUnusedUniqueLabels(domain);
                 % end
             end
@@ -144,6 +145,15 @@ classdef (Abstract) Matrix < gams.transfer.symbol.data.Data
             for i = 1:numel(values)
                 data.records.(values{i}.label) = full(obj.records_.(values{i}.label)(indices_perm));
             end
+        end
+
+    end
+
+    methods (Hidden, Access = protected)
+
+        function subindex = ind2sub(obj, axes, value, linindex)
+            [i, j] = ind2sub(size(obj.records_.(value.label)), linindex);
+            subindex = [i, j];
         end
 
     end

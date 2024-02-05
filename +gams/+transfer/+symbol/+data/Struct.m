@@ -1,12 +1,12 @@
-% Struct Records (internal)
+% Struct Data (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,54 +28,26 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Struct Records (internal)
+% Struct Data (internal)
 %
-classdef Struct < gams.transfer.symbol.data.Tabular
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
 
-    properties (Dependent, SetAccess = private)
-        labels
-    end
+    %#ok<*INUSD,*STOUT>
 
-    methods
-
-        function labels = get.labels(obj)
-            try
-                labels = fieldnames(obj.records_);
-            catch
-                labels = {};
-            end
-        end
-
+    properties (Constant)
+        name = 'struct'
     end
 
     methods
 
         function obj = Struct(records)
+            obj.records_ = struct();
             if nargin >= 1
                 obj.records = records;
             end
-        end
-
-        function name = name(obj)
-            name = 'struct';
-        end
-
-        function renameLabels(obj, old_labels, new_labels)
-            % TODO: check old_labels and new_labels
-            if ~isstruct(obj.records_)
-                error('Cannot rename labels: Records are invalid.');
-            end
-            records = struct();
-            labels = fieldnames(obj.records_);
-            for i = 1:numel(labels)
-                idx = find(strcmp(labels{i}, old_labels), 1, 'first');
-                if isempty(idx)
-                    records.(labels{i}) = obj.records_.(labels{i});
-                else
-                    records.(new_labels{idx}) = obj.records_.(labels{i});
-                end
-            end
-            obj.records = records;
         end
 
         function data = copy(obj)
@@ -83,69 +55,61 @@ classdef Struct < gams.transfer.symbol.data.Tabular
             data.copyFrom(obj);
         end
 
+        function labels = getLabels(obj)
+            if isstruct(obj.records_)
+                labels = fieldnames(obj.records_);
+            else
+                labels = {};
+            end
+        end
+
+        function renameLabels(obj, old_labels, new_labels)
+            if isstruct(obj.records_)
+                obj.records = gams.transfer.utils.rename_struct_fields(obj.records_, old_labels, new_labels);
+            end
+        end
+
         function status = isValid(obj, axes, values)
             if ~isstruct(obj.records_)
                 status = gams.transfer.utils.Status("Record data must be 'struct'.");
                 return
             end
-
             status = isValid@gams.transfer.symbol.data.Tabular(obj, axes, values);
         end
 
-        function data = transform(obj, axes, values, format)
-            format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
-
-            switch format
-            case 'table'
-                data = gams.transfer.symbol.data.Table(struct2table(obj.records_));
-            case 'struct'
-                data = gams.transfer.symbol.data.Struct(obj.records_);
-            case {'dense_matrix', 'sparse_matrix'}
-                data = obj.transformToMatrix(axes, values, format);
-            otherwise
-                error('Unknown records format: %s', format);
-            end
-        end
-
         function nrecs = getNumberRecords(obj, axes, values)
-            values = obj.availableNumericValues(values);
+            values = obj.availableValues('Value', values);
 
-            if axes.dimension + numel(values) == 0
-                nrecs = 0;
-                return
-            end
-
-            nrecs = nan;
+            nrecs_axes = nan(1, axes.dimension);
+            nrecs_values = nan(1, numel(values));
             for i = 1:axes.dimension
-                nrecs_i = numel(obj.records_.(axes.axis(i).label));
-                if isnan(nrecs)
-                    nrecs = nrecs_i;
-                elseif ~isnan(nrecs) && nrecs ~= nrecs_i
-                    nrecs = nan;
-                    return
+                label = axes.axis(i).label;
+                if isfield(obj.records_, label)
+                    nrecs_axes(i) = numel(obj.records_.(label));
                 end
             end
             for i = 1:numel(values)
-                nrecs_i = numel(obj.records_.(values{i}.label));
-                if isnan(nrecs)
-                    nrecs = nrecs_i;
-                elseif ~isnan(nrecs) && nrecs ~= nrecs_i
-                    nrecs = nan;
-                    return
-                end
+                nrecs_values(i) = numel(obj.records_.(values{i}.label));
             end
+            nrecs = [nrecs_axes, nrecs_values];
+            nrecs = nrecs(~isnan(nrecs));
 
+            if numel(nrecs) == 0
+                nrecs = 0;
+            elseif all(nrecs(1) == nrecs)
+                nrecs = nrecs(1);
+            else
+                nrecs = nan;
+            end
         end
 
-    end
-
-    methods (Static)
-
-        function obj = Empty(domains)
-            domains = gams.transfer.symbol.data.Data.validateDomains('domains', 1, domains);
-            obj = gams.transfer.symbol.data.Struct(struct());
-            for i = 1:numel(domains)
-                obj.records_.(domains{i}.label) = obj.createUniqueLabelsIntegerIndex([], {});
+        function transformToTabular(obj, axes, values, data)
+            if isa(data, 'gams.transfer.symbol.data.Table')
+                data.records = struct2table(obj.records_);
+            elseif isa(data, 'gams.transfer.symbol.data.Struct')
+                data.records = obj.records_;
+            else
+                error('Invalid data: %s', class(data));
             end
         end
 

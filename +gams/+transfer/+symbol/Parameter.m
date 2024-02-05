@@ -171,7 +171,7 @@ classdef Parameter < gams.transfer.symbol.Symbol
             if has_records
                 obj.setRecords(records)
             else
-                obj.data_ = gams.transfer.symbol.data.Struct.Empty(obj.def_.domains);
+                obj.data_ = gams.transfer.symbol.data.Struct();
             end
         end
 

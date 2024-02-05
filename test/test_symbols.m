@@ -2704,11 +2704,7 @@ function test_reorder(t, cfg)
     end
 
     s2.domain = {s1};
-    s2.records.s1 = s2.records.uni;
-    s2.records = rmfield(s2.records, 'uni');
     s3.domain = {s4};
-    s3.records.s4 = s3.records.uni;
-    s3.records = rmfield(s3.records, 'uni');
 
     t.add('reorder_2');
     t.assert(numel(fieldnames(gdx.data)) == 4);
@@ -2747,8 +2743,6 @@ function test_reorder(t, cfg)
     end
 
     s2.domain = {s3};
-    s2.records.s3 = s2.records.s1;
-    s2.records = rmfield(s2.records, 's1');
 
     gdx.modified = false;
     gdx.reorderSymbols();

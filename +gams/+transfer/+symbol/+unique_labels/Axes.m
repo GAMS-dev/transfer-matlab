@@ -99,6 +99,17 @@ classdef Axes < handle
             axis = obj.axes_{dimension};
         end
 
+        function labels = getUniqueLabelsAt(obj, indices)
+            % TODO: check indices
+            if numel(indices) ~= 1
+                error('todo');
+            end
+            labels = cell(1, obj.dimension);
+            for i = 1:obj.dimension
+                labels{i} = obj.axes{i}.unique_labels.getAt(i);
+            end
+        end
+
     end
 
 end

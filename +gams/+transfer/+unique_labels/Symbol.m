@@ -94,7 +94,12 @@ classdef Symbol < gams.transfer.unique_labels.Abstract
 
         function labels = get(obj)
             obj.validateObjectSymbol();
-            labels = obj.symbol_.getUELs(1, uint64(obj.symbol_.records.(obj.symbol_.domain_labels{1})));
+            label = obj.symbol_.domain_labels{1};
+            if isfield(obj.symbol_.records, label)
+                labels = obj.symbol_.getUELs(1, uint64(obj.symbol_.records.(label)));
+            else
+                labels = {};
+            end
         end
 
         function add(obj, labels)

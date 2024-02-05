@@ -1,12 +1,12 @@
-% Tabular Records (internal)
+% Tabular Data (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,18 +28,23 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Tabular Records (internal)
+% Tabular Data (internal)
 %
-classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
+
+    %#ok<*INUSD,*STOUT>
 
     methods
 
         function status = isValid(obj, axes, values)
-            % TODO check axes
-            % TODO check values
+            axes = gams.transfer.utils.validate('axes', 1, axes, {'gams.transfer.symbol.unique_labels.Axes'}, -1);
+            values = gams.transfer.utils.validate_cell('values', 2, values, {'gams.transfer.symbol.value.Value'}, 1, -1);
 
             % empty is valid
-            if numel(obj.labels) == 0
+            if numel(obj.getLabels()) == 0
                 status = gams.transfer.utils.Status.createOK();
                 return
             end
@@ -47,7 +52,8 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
             prev_size = [];
 
             for i = 1:axes.dimension
-                label = axes.axis(i).label;
+                axis = axes.axis(i);
+                label = axis.label;
 
                 if ~obj.isLabel(label)
                     status = gams.transfer.utils.Status(sprintf("Records have no domain column '%s'.", label));
@@ -62,7 +68,14 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
                         return
                     end
                 elseif isnumeric(obj.records_.(label))
-
+                    if any(isnan(obj.records_.(label))) || any(isinf(obj.records_.(label)))
+                        status = gams.transfer.utils.Status(sprintf("Records domain column '%s' has nan or inf domain entries.", label));
+                        return
+                    end
+                    if min(obj.records_.(label)) < 1 || max(obj.records_.(label)) > axis.unique_labels.count()
+                        status = gams.transfer.utils.Status(sprintf("Records domain column '%s' must have values in [%d,%d].", label, 1, axis.unique_labels.count()));
+                        return
+                    end
                 else
                     status = gams.transfer.utils.Status(sprintf("Records domain column '%s' must be categorical, numeric or empty.", label));
                     return
@@ -124,19 +137,6 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
             status = gams.transfer.utils.Status.createOK();
         end
 
-        function nvals = getNumberValues(obj, axes, values)
-            nvals = obj.getNumberRecords(axes, values) * numel(obj.availableNumericValues(values));
-        end
-
-        function value = getMeanValue(obj, axes, values)
-            values = obj.availableNumericValues(values);
-            value = 0;
-            for i = 1:numel(values)
-                value = value + sum(obj.records_.(values{i}.label)(:));
-            end
-            value = value / obj.getNumberValues(axes, values);
-        end
-
         function flag = hasUniqueLabels(obj, domain)
             % TODO: check domain
             flag = gams.transfer.Constants.SUPPORTS_CATEGORICAL && ...
@@ -146,7 +146,7 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
         function indices = usedUniqueLabels(obj, domain)
             % TODO: check domain
             indices = gams.transfer.utils.unique(uint64(obj.records_.(domain.label)));
-            indices = indices(indices ~= nan);
+            indices = indices(~isnan(indices));
         end
 
         function labels = getUniqueLabels(obj, domain)
@@ -224,7 +224,6 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
                 error('Data does not maintain unique labels for domain ''%s''.', domain.label);
             end
             % TODO: check labels
-            not_avail = ~ismember(oldlabels, categories(obj.records_.(domain.label)));
             obj.records_.(domain.label) = categorical(obj.records_.(domain.label), 'Ordinal', false);
             not_avail = ~ismember(oldlabels, categories(obj.records_.(domain.label)));
             oldlabels(not_avail) = [];
@@ -236,42 +235,34 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
             obj.records_.(domain.label) = categorical(obj.records_.(domain.label), 'Ordinal', true);
         end
 
-    end
-
-    methods (Hidden, Access = protected)
-
-        function subindex = ind2sub_(obj, axes, value, linindex)
-            subindex = zeros(1, axes.dimension);
-            for i = 1:axes.dimension
-                subindex(i) = double(obj.records_.(axes.axis(i).label)(linindex));
-            end
+        function nvals = getNumberValues(obj, axes, values)
+            nvals = obj.getNumberRecords(axes, values) * numel(obj.availableValues('Numeric', values));
         end
 
-        function data = transformToMatrix(obj, axes, values, format)
-            % TODO check axes
-            format = lower(gams.transfer.utils.validate('format', 1, format, {'string', 'char'}, -1));
-            values = obj.availableNumericValues(values);
+        function value = getMeanValue(obj, axes, values)
+            values = obj.availableValues('Numeric', values);
+            value = 0;
+            for i = 1:numel(values)
+                value = value + sum(obj.records_.(values{i}.label)(:));
+            end
+            value = value / obj.getNumberRecords(axes, values) / numel(values);
+        end
+
+        function transformToMatrix(obj, axes, values, data)
+            axes = gams.transfer.utils.validate('axes', 1, axes, {'gams.transfer.symbol.unique_labels.Axes'}, -1);
+            values = obj.availableValues('Numeric', values);
             if numel(values) == 0
                 error('At least one numeric value column is required to transform to a matrix format.');
             end
-
-            % create data
-            switch format
-            case 'dense_matrix'
-                data = gams.transfer.symbol.data.DenseMatrix.Empty();
-            case 'sparse_matrix'
-                if axes.dimension > 2
-                    error('Sparse matrix does not support dimension larger than 2.');
-                end
-                data = gams.transfer.symbol.data.SparseMatrix.Empty();
-            otherwise
-                error('Unknown records format: %s', format);
+            data = gams.transfer.utils.validate('data', 3, data, {'gams.transfer.symbol.data.Matrix'}, -1);
+            if isa(data, 'gams.transfer.symbol.data.SparseMatrix') && axes.dimension > 2
+                error('Sparse matrix does not support dimension larger than 2.');
             end
 
             % get matrix size
             size_ = axes.matrixSize();
 
-            % convert indices to matrix (linear) indices TODO: adapt to working uels
+            % convert indices to matrix (linear) indices
             if axes.dimension == 0
                 idx = 1;
             else
@@ -283,12 +274,11 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
             end
 
             % init matrix records
-            switch format
-            case 'dense_matrix'
+            if isa(data, 'gams.transfer.symbol.data.DenseMatrix') && axes.dimension > 2
                 for i = 1:numel(values)
                     data.records.(values{i}.label) = values{i}.default * ones(size_);
                 end
-            case 'sparse_matrix'
+            elseif isa(data, 'gams.transfer.symbol.data.SparseMatrix') && axes.dimension > 2
                 for i = 1:numel(values)
                     if values{i}.default == 0
                         data.records.(values{i}.label) = sparse(size_(1), size_(2));
@@ -301,6 +291,17 @@ classdef (Abstract) Tabular < gams.transfer.symbol.data.Data
             % copy records to matrices
             for i = 1:numel(values)
                 data.records.(values{i}.label)(idx) = obj.records_.(values{i}.label);
+            end
+        end
+
+    end
+
+    methods (Hidden, Access = protected)
+
+        function subindex = ind2sub(obj, axes, value, linindex)
+            subindex = zeros(1, axes.dimension);
+            for i = 1:axes.dimension
+                subindex(i) = double(obj.records_.(axes.axis(i).label)(linindex));
             end
         end
 

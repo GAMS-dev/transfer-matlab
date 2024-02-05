@@ -71,6 +71,63 @@ classdef (Abstract) Abstract < handle
             obj.set({});
         end
 
+        function index = createIndex(obj, input)
+            index = obj.createIndexFrom(input, obj.get());
+        end
+
+        function index = createCategoricalIndex(obj, input)
+            index = obj.createCategoricalIndexFrom(input, obj.get());
+        end
+
+        function index = createIntegerIndex(obj, input)
+            index = obj.createIntegerIndexFrom(input, obj.get());
+        end
+
+    end
+
+    methods (Static)
+
+        function index = createIndexFrom(input, unique_labels)
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
+                index = gams.transfer.unique_labels.Abstract.createCategoricalIndexFrom(input, unique_labels);
+            else
+                index = gams.transfer.unique_labels.Abstract.createIntegerIndexFrom(input, unique_labels);
+            end
+        end
+
+        function index = createCategoricalIndexFrom(input, unique_labels)
+            if ~iscellstr(unique_labels)
+                error('Argument ''unique_labels'' (at position 2) must be ''cellstr''.');
+            end
+            if iscellstr(input)
+                index = categorical(input, unique_labels, 'Ordinal', true);
+            elseif isnumeric(input) && all(round(input) == input)
+                index = categorical(input, 1:numel(unique_labels), unique_labels, 'Ordinal', true);
+            else
+                error('Argument ''input'' (at position 1) must be ''cellstr'' or integer ''numeric''.');
+            end
+        end
+
+        function index = createIntegerIndexFrom(input, unique_labels)
+            if ~iscellstr(unique_labels)
+                error('Argument ''unique_labels'' (at position 2) must be ''cellstr''.');
+            end
+            if iscellstr(input)
+                map = containers.Map(unique_labels, 1:numel(unique_labels));
+                index = zeros(size(input));
+                for i = 1:numel(input)
+                    if isKey(map, input{i})
+                        index(i) = map(input{i});
+                    end
+                end
+            elseif isnumeric(input) && all(round(input) == input)
+                index = input;
+                index(index < 1 | numel(unique_labels)) = 0;
+            else
+                error('Argument ''input'' (at position 1) must be ''cellstr'' or integer ''numeric''.');
+            end
+        end
+
     end
 
 end
