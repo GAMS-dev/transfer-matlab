@@ -1,12 +1,12 @@
-% GAMS Variable Definition (internal)
+% Variable Definition (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,31 +28,35 @@
 %
 % ------------------------------------------------------------------------------
 %
-% GAMS Variable Definition (internal)
+% Variable Definition (internal)
 %
-classdef Variable < gams.transfer.symbol.definition.Definition
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Hidden) Variable < gams.transfer.symbol.definition.Abstract
 
     properties (Hidden, SetAccess = protected)
-        type_ = gams.transfer.VariableType.Free
-    end
-
-    methods (Hidden, Static)
-
-        function arg = validateType(name, index, arg)
-            if isa(arg, 'gams.transfer.VariableType')
-                return
-            end
-            try
-                arg = gams.transfer.VariableType(arg);
-            catch e
-                error('Argument ''%s'' (at position %d) cannot create ''gams.transfer.VariableType'': %s', name, index, e.message);
-            end
-        end
-
+        type_ = gams.transfer.VariableType.Free;
     end
 
     properties (Dependent)
         type
+    end
+
+    methods (Hidden, Static)
+
+        function type = createType(name, input)
+            if isa(input, 'gams.transfer.VariableType')
+                type = input;
+                return
+            end
+            try
+                type = gams.transfer.VariableType(input);
+            catch e
+                error('Cannot create ''gams.transfer.VariableType'' from ''%s'' (at position %d): %s', name, index, e.message);
+            end
+        end
+
     end
 
     methods
@@ -62,7 +66,7 @@ classdef Variable < gams.transfer.symbol.definition.Definition
         end
 
         function obj = set.type(obj, type)
-            obj.type_ = obj.validateType('type', 1, type);
+            obj.type_ = obj.createType('type', 1, type);
             obj.resetValues();
         end
 
@@ -74,6 +78,25 @@ classdef Variable < gams.transfer.symbol.definition.Definition
             obj.resetValues();
         end
 
+        function def = copy(obj)
+            def = gams.transfer.symbol.definition.Variable();
+            def.copyFrom(obj);
+        end
+
+        function copyFrom(obj, symbol)
+            copyFrom@gams.transfer.symbol.definition.Abstract(obj, symbol);
+            obj.type_ = symbol.type;
+        end
+
+        function eq = equals(obj, def)
+            eq = equals@gams.transfer.symbol.definition.Abstract(obj, def) && ...
+                isequal(obj.type_, def.type);
+        end
+
+    end
+
+    methods (Hidden, Access = protected)
+
         function resetValues(obj)
             gdx_default_values = gams.transfer.gdx.gt_get_defaults(...
                 int32(gams.transfer.gdx.SymbolType.VARIABLE), int32(obj.type_.value));
@@ -83,21 +106,6 @@ classdef Variable < gams.transfer.symbol.definition.Definition
                 gams.transfer.symbol.value.Numeric('lower', gdx_default_values(3)), ...
                 gams.transfer.symbol.value.Numeric('upper', gdx_default_values(4)), ...
                 gams.transfer.symbol.value.Numeric('scale', gdx_default_values(5))};
-        end
-
-        function def = copy(obj)
-            def = gams.transfer.symbol.definition.Variable();
-            def.copyFrom(obj);
-        end
-
-        function copyFrom(obj, symbol)
-            copyFrom@gams.transfer.symbol.definition.Definition(obj, symbol);
-            obj.type_ = symbol.type;
-        end
-
-        function eq = equals(obj, def)
-            eq = equals@gams.transfer.symbol.definition.Definition(obj, def) && ...
-                isequal(obj.type_, def.type);
         end
 
     end

@@ -1,12 +1,12 @@
-% GAMS Parameter Definition (internal)
+% Parameter Definition (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,18 +28,17 @@
 %
 % ------------------------------------------------------------------------------
 %
-% GAMS Parameter Definition (internal
+% Parameter Definition (internal)
 %
-classdef Parameter < gams.transfer.symbol.definition.Definition
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Hidden) Parameter < gams.transfer.symbol.definition.Abstract
 
     methods
 
         function obj = Parameter()
             obj.resetValues();
-        end
-
-        function resetValues(obj)
-            obj.values_ = {gams.transfer.symbol.value.Numeric('value', 0)};
         end
 
         function def = copy(obj)
@@ -48,7 +47,15 @@ classdef Parameter < gams.transfer.symbol.definition.Definition
         end
 
         function copyFrom(obj, symbol)
-            copyFrom@gams.transfer.symbol.definition.Definition(obj, symbol);
+            copyFrom@gams.transfer.symbol.definition.Abstract(obj, symbol);
+        end
+
+    end
+
+    methods (Hidden, Access = protected)
+
+        function resetValues(obj)
+            obj.values_ = {gams.transfer.symbol.value.Numeric('value', 0)};
         end
 
     end

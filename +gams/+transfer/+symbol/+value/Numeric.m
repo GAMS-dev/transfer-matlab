@@ -58,7 +58,7 @@ classdef Numeric < gams.transfer.symbol.value.Value
 
     end
 
-    methods (Hidden, Access = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.definition.Definition})
+    methods (Hidden, Access = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.definition.Abstract})
 
         function obj = Numeric(label, default)
             obj.label_ = label;

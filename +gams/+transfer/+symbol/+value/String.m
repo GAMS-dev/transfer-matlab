@@ -60,7 +60,7 @@ classdef String < gams.transfer.symbol.value.Value
 
     end
 
-    methods (Hidden, Access = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.definition.Definition})
+    methods (Hidden, Access = {?gams.transfer.symbol.value.Value, ?gams.transfer.symbol.definition.Abstract})
 
         function obj = String(label, default)
             obj.label_ = label;

@@ -1,12 +1,12 @@
-% GAMS Set Definition (internal)
+% Set Definition (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,25 +28,12 @@
 %
 % ------------------------------------------------------------------------------
 %
-% GAMS Set Definition (internal)
+% Set Definition (internal)
 %
-classdef Set < gams.transfer.symbol.definition.Definition
+classdef (Hidden) Set < gams.transfer.symbol.definition.Abstract
 
     properties (Hidden, SetAccess = protected)
         is_singleton_ = false
-    end
-
-    methods (Hidden, Static)
-
-        function arg = validateIsSingleton(name, index, arg)
-            if ~islogical(arg)
-                error('Argument ''%s'' (at position %d) must be ''logical''.', name, index);
-            end
-            if ~isscalar(arg)
-                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
-            end
-        end
-
     end
 
     properties (Dependent)
@@ -60,7 +47,8 @@ classdef Set < gams.transfer.symbol.definition.Definition
         end
 
         function obj = set.is_singleton(obj, is_singleton)
-            obj.is_singleton_ = obj.validateIsSingleton('is_singleton', 1, is_singleton);
+            gams.transfer.utils.Validator('is_singleton', 1, is_singleton).logical().scalar();
+            obj.is_singleton_ = is_singleton;
             obj.resetValues();
         end
 
@@ -72,23 +60,27 @@ classdef Set < gams.transfer.symbol.definition.Definition
             obj.resetValues();
         end
 
-        function resetValues(obj)
-            obj.values_ = {gams.transfer.symbol.value.String('element_text', '')};
-        end
-
         function def = copy(obj)
             def = gams.transfer.symbol.definition.Set();
             def.copyFrom(obj);
         end
 
         function copyFrom(obj, symbol)
-            copyFrom@gams.transfer.symbol.definition.Definition(obj, symbol);
+            copyFrom@gams.transfer.symbol.definition.Abstract(obj, symbol);
             obj.is_singleton_ = symbol.is_singleton;
         end
 
         function eq = equals(obj, def)
-            eq = equals@gams.transfer.symbol.definition.Definition(obj, def) && ...
+            eq = equals@gams.transfer.symbol.definition.Abstract(obj, def) && ...
                 isequal(obj.is_singleton_, def.is_singleton);
+        end
+
+    end
+
+    methods (Hidden, Access = protected)
+
+        function resetValues(obj)
+            obj.values_ = {gams.transfer.symbol.value.String('element_text', '')};
         end
 
     end

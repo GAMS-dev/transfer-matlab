@@ -453,10 +453,6 @@ classdef Container < handle
                             index + 1, 'indexed', validate);
                         index = index + 2;
                         is_pararg = true;
-                    elseif ~is_pararg && index == 4
-                        obj.def_.domains_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'domains', @gams.transfer.symbol.definition.Definition.validateDomains);
-                        index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
                     end

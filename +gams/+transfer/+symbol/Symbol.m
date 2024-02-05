@@ -104,8 +104,8 @@ classdef (Abstract) Symbol < handle
         end
 
         function arg = validateDef(name, index, arg)
-            if ~isa(arg, 'gams.transfer.symbol.definition.Definition')
-                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.definition.Definition''.', name, index);
+            if ~isa(arg, 'gams.transfer.symbol.definition.Abstract')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.definition.Abstract''.', name, index);
             end
         end
 
@@ -389,7 +389,7 @@ classdef (Abstract) Symbol < handle
         end
 
         function domain_labels = get.domain_labels(obj)
-            domain_labels = obj.def_.domainLabels();
+            domain_labels = obj.def_.getDomainLabels();
         end
 
         function obj = set.domain_labels(obj, domain_labels)
@@ -400,7 +400,11 @@ classdef (Abstract) Symbol < handle
         end
 
         function domain_names = get.domain_names(obj)
-            domain_names = obj.def_.domainNames();
+            domains = obj.def_.domains;
+            domain_names = cell(1, numel(domains));
+            for i = 1:numel(domains)
+                domain_names{i} = domains{i}.name;
+            end
         end
 
         function domain_type = get.domain_type(obj)
@@ -733,14 +737,14 @@ classdef (Abstract) Symbol < handle
             elseif isstruct(records) && numel(records) == 1
                 fields = fieldnames(records);
                 for i = 1:numel(fields)
-                    value = obj.def_.getValue(fields{i});
+                    value = obj.def_.findValue(fields{i});
                     if ~isempty(value)
                         new_records.(value.label) = records.(fields{i});
                         values{end+1} = value;
                         continue;
                     end
 
-                    domain = obj.def_.getDomain(fields{i});
+                    domain = obj.def_.findDomain(fields{i});
                     if ~isempty(domain)
                         new_records.(domain.label) = records.(fields{i});
                         domains{end+1} = domain;
