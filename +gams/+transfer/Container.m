@@ -547,13 +547,12 @@ classdef Container < handle
                 switch symbol.symbol_type
                 case {gams.transfer.gdx.SymbolType.ALIAS, 'alias'}
                     if strcmp(symbol.alias_with, gams.transfer.Constants.UNIVERSE_NAME)
-                        gams.transfer.UniverseAlias(obj, symbol.name);
+                        new_symbol = gams.transfer.alias.Universe(obj, symbol.name);
                     elseif obj.hasSymbols(symbol.alias_with)
-                        gams.transfer.Alias(obj, symbol.name, obj.getSymbols(symbol.alias_with));
+                        new_symbol = gams.transfer.alias.Set(obj, symbol.name, obj.getSymbols(symbol.alias_with));
                     else
                         error('Alias reference for symbol ''%s'' not found: %s.', symbol.name, symbol.alias_with);
                     end
-                    continue
                 case {gams.transfer.gdx.SymbolType.SET, 'set'}
                     new_symbol = gams.transfer.symbol.Set(obj, symbol.name, symbol.is_singleton, false, false);
                 case {gams.transfer.gdx.SymbolType.PARAMETER, 'parameter'}
@@ -566,6 +565,9 @@ classdef Container < handle
                     error('Invalid symbol type');
                 end
                 obj.data_.add(symbol.name, new_symbol);
+                if isa(new_symbol, 'gams.transfer.alias.Abstract')
+                    continue
+                end
 
                 % set properties
                 new_symbol.description_ = symbol.description;
@@ -1886,7 +1888,7 @@ classdef Container < handle
             %
             % See also: gams.transfer.alias.Set, gams.transfer.Alias, gams.transfer.symbol.Set
 
-            new_symbol = gams.transfer.alias.Set(obj, name, alias_with);
+            new_symbol = gams.transfer.alias.Set.construct(obj, name, alias_with);
 
             if ~obj.hasSymbols(name)
                 obj.data_.add(name, new_symbol);
@@ -1930,7 +1932,7 @@ classdef Container < handle
             % See also: gams.transfer.alias.Universe, gams.transfer.UniverseAlias,
             % gams.transfer.symbol.Set
 
-            new_symbol = gams.transfer.alias.Universe(obj, name);
+            new_symbol = gams.transfer.alias.Universe.construct(obj, name);
 
             if ~obj.hasSymbols(name)
                 obj.data_.add(name, new_symbol);

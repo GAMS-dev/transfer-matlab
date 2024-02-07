@@ -405,11 +405,40 @@ classdef (Abstract) Abstract < handle
 
     end
 
-    methods (Hidden)
+    methods
 
+        %> (Abstract) Copies symbol to destination container
+        %>
+        %> Symbol domains are downgraded to `relaxed` if the destination container does not have
+        %> equivalent domain sets, see also \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN.
+        %>
+        %> **Required Arguments:**
+        %> 1. destination (`Container`):
+        %>    Destination \ref gams::transfer::Container "Container"
+        %>
+        %> **Optional Arguments:**
+        %> 2. overwrite (`bool`):
+        %>    Overwrites symbol with same name in destination if `true`. Default: `false`.
         function symbol = copy(obj, varargin)
+            % (Abstract) Copies symbol to destination container
+            %
+            % Symbol domains are downgraded to relaxed if the destination container does not have
+            % equivalent domain sets.
+            %
+            % Required Arguments:
+            % 1. destination (Container):
+            %    Destination container
+            %
+            % Optional Arguments:
+            % 2. overwrite (bool):
+            %    Overwrites symbol with same name in destination if true. Default: false.
+
             error('Abstract method. Call method of subclass ''%s''.', class(obj));
         end
+
+    end
+
+    methods (Hidden)
 
         function copyFrom(obj, symbol)
             gams.transfer.utils.Validator('symbol', 1, symbol).type(class(obj));
@@ -1601,7 +1630,7 @@ classdef (Abstract) Abstract < handle
                 if ~all(ismember(labels, uels))
                     error('Adding new UELs not supported for reordering');
                 end
-                obj.updateUniqueLabels(i, uels, 'rename', rename);
+                obj.setUELs(uels, i, 'rename', rename);
             end
         end
 
