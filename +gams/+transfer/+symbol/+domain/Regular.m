@@ -35,6 +35,8 @@
 %
 classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
 
+    %#ok<*INUSD,*STOUT>
+
     properties (Hidden, SetAccess = protected)
         symbol_
     end
@@ -61,12 +63,25 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
 
     end
 
-    methods
+    methods (Hidden, Access = {?gams.transfer.symbol.domain.Abstract, ?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract})
 
         function obj = Regular(symbol)
-            obj.symbol = symbol;
+            obj.symbol_ = symbol;
             obj.label_ = symbol.name;
         end
+
+    end
+
+    methods (Static)
+
+        function obj = construct(symbol)
+            gams.transfer.utils.Validator('symbol', 1, symbol).types({'gams.transfer.symbol.Set', 'gams.transfer.alias.Abstract'});
+            obj = gams.transfer.symbol.domain.Regular(symbol);
+        end
+
+    end
+
+    methods
 
         function eq = equals(obj, domain)
             eq = equals@gams.transfer.symbol.domain.Abstract(obj, domain) && ...
@@ -89,7 +104,7 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
             status = gams.transfer.utils.Status.createOK();
         end
 
-        function flag = hasUniqueLabels(obj)
+        function flag = hasUniqueLabels(obj) %#ok<MANU>
             flag = true;
         end
 

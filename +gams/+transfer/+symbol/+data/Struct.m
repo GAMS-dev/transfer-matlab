@@ -41,7 +41,7 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
         name = 'struct'
     end
 
-    methods
+    methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.Container, ?gams.transfer.symbol.Abstract})
 
         function obj = Struct(records)
             obj.records_ = struct();
@@ -49,6 +49,18 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
                 obj.records = records;
             end
         end
+
+    end
+
+    methods (Static)
+
+        function obj = construct(records)
+            obj = gams.transfer.symbol.data.Struct(records);
+        end
+
+    end
+
+    methods
 
         function data = copy(obj)
             data = gams.transfer.symbol.data.Struct();

@@ -555,19 +555,21 @@ classdef Container < handle
                     end
                     continue
                 case {gams.transfer.gdx.SymbolType.SET, 'set'}
-                    new_symbol = obj.addSet(symbol.name, 'is_singleton', symbol.is_singleton);
+                    new_symbol = gams.transfer.symbol.Set(obj, symbol.name, symbol.is_singleton, false, false);
                 case {gams.transfer.gdx.SymbolType.PARAMETER, 'parameter'}
-                    new_symbol = obj.addParameter(symbol.name);
+                    new_symbol = gams.transfer.symbol.Parameter(obj, symbol.name, false, false);
                 case {gams.transfer.gdx.SymbolType.VARIABLE, 'variable'}
-                    new_symbol = obj.addVariable(symbol.name, symbol.type);
+                    new_symbol = gams.transfer.symbol.Variable(obj, symbol.name, symbol.type, false, false);
                 case {gams.transfer.gdx.SymbolType.EQUATION, 'equation'}
-                    new_symbol = obj.addEquation(symbol.name, symbol.type);
+                    new_symbol = gams.transfer.symbol.Equation(obj, symbol.name, symbol.type, false, false);
                 otherwise
                     error('Invalid symbol type');
                 end
+                obj.data_.add(symbol.name, new_symbol);
 
                 % set properties
-                new_symbol.description = symbol.description;
+                new_symbol.description_ = symbol.description;
+                new_symbol.data_ = records;
                 if indexed
                     new_symbol.size = symbol.size;
                 else
@@ -576,7 +578,6 @@ classdef Container < handle
                 if isfield(symbol, 'domain_labels') && numel(symbol.domain_labels) == symbol.dimension
                     new_symbol.domain_labels = symbol.domain_labels;
                 end
-                new_symbol.data = records;
 
                 % set uels
                 if isfield(symbol, 'uels') && ~gams.transfer.Constants.SUPPORTS_CATEGORICAL
@@ -1556,7 +1557,7 @@ classdef Container < handle
             %
             % See also: gams.transfer.symbol.Set, gams.transfer.Set
 
-            new_symbol = gams.transfer.symbol.Set(obj, name, varargin{:});
+            new_symbol = gams.transfer.symbol.Set.construct(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
                 obj.data_.add(name, new_symbol);
@@ -1642,7 +1643,7 @@ classdef Container < handle
             %
             % See also: gams.transfer.symbol.Parameter, gams.transfer.Parameter
 
-            new_symbol = gams.transfer.symbol.Parameter(obj, name, varargin{:});
+            new_symbol = gams.transfer.symbol.Parameter.construct(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
                 obj.data_.add(name, new_symbol);
@@ -1739,7 +1740,7 @@ classdef Container < handle
             % See also: gams.transfer.symbol.Variable, gams.transfer.Variable,
             % gams.transfer.VariableType
 
-            new_symbol = gams.transfer.symbol.Variable(obj, name, varargin{:});
+            new_symbol = gams.transfer.symbol.Variable.construct(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
                 obj.data_.add(name, new_symbol);
@@ -1834,7 +1835,7 @@ classdef Container < handle
             % See also: gams.transfer.symbol.Equation, gams.transfer.Equation,
             % gams.transfer.EquationType
 
-            new_symbol = gams.transfer.symbol.Equation(obj, name, varargin{:});
+            new_symbol = gams.transfer.symbol.Equation.construct(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
                 obj.data_.add(name, new_symbol);
@@ -1966,7 +1967,7 @@ classdef Container < handle
                 return
             end
             try
-                newname = gams.transfer.symbol.Symbol.validateName('newname', 2, newname);
+                newname = gams.transfer.utils.Validator('newname', 2, newname).symbolName().value;
             catch e
                 error(e.message);
             end
@@ -2053,7 +2054,7 @@ classdef Container < handle
                     if isempty(symbols{i}.alias_with.container)
                         remove_aliases{end+1} = symbols{i}.name;
                     end
-                elseif isa(symbols{i}, 'gams.transfer.symbol.Symbol')
+                elseif isa(symbols{i}, 'gams.transfer.symbol.Abstract')
                     for j = 1:numel(symbols{i}.def.domains)
                         domain = symbols{i}.def.domains{j};
                         if ~isa(domain, 'gams.transfer.symbol.domain.Regular')
@@ -2328,7 +2329,7 @@ classdef Container < handle
             valid = true;
             for i = 1:numel(symbols)
                 % check correct order of symbols
-                if isa(symbols{i}, 'gams.transfer.symbol.Symbol')
+                if isa(symbols{i}, 'gams.transfer.symbol.Abstract')
                     for j = 1:numel(symbols{i}.def.domains)
                         domain = symbols{i}.def.domains{j};
                         if ~isa(domain, 'gams.transfer.symbol.domain.Regular')

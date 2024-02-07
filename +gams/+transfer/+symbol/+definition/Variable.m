@@ -35,8 +35,10 @@
 %
 classdef (Hidden) Variable < gams.transfer.symbol.definition.Abstract
 
-    properties (Hidden, SetAccess = protected)
-        type_ = gams.transfer.VariableType.Free;
+    %#ok<*INUSD,*STOUT>
+
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
+        type_
     end
 
     properties (Dependent)
@@ -72,20 +74,28 @@ classdef (Hidden) Variable < gams.transfer.symbol.definition.Abstract
 
     end
 
+    methods (Hidden, Access = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract})
+
+        function obj = Variable(type)
+            obj.type_ = type;
+        end
+
+    end
+
+    methods (Static)
+
+        function obj = construct(type)
+            type = gams.transfer.symbol.definition.Variable.createType('type', 1, type);
+            obj = gams.transfer.symbol.definition.Variable(type);
+        end
+
+    end
+
     methods
 
-        function obj = Variable()
-            obj.resetValues();
-        end
-
         function def = copy(obj)
-            def = gams.transfer.symbol.definition.Variable();
+            def = gams.transfer.symbol.definition.Variable(obj.type_);
             def.copyFrom(obj);
-        end
-
-        function copyFrom(obj, symbol)
-            copyFrom@gams.transfer.symbol.definition.Abstract(obj, symbol);
-            obj.type_ = symbol.type;
         end
 
         function eq = equals(obj, def)

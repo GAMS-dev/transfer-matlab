@@ -1,12 +1,12 @@
-% Symbol Domain (internal)
+% Symbol Axis (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright  (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,37 +28,18 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Symbol Domain (internal)
+% Symbol Axis (internal)
 %
-classdef Axis < handle
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Hidden) Axis < handle
+
+    %#ok<*INUSD,*STOUT>
 
     properties (Hidden, SetAccess = protected)
         label_
         unique_labels_
-    end
-
-    methods (Static, Hidden)
-
-        function arg = validatelabel(name, index, arg)
-            if isstring(arg)
-                arg = char(arg);
-            elseif ~ischar(arg)
-                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
-            end
-            if numel(arg) <= 0
-                error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
-            end
-            if ~isvarname(arg)
-                error('Argument ''%s'' (at position %d) must start with letter and must only consist of letters, digits and underscores.', name, index)
-            end
-        end
-
-        function arg = validateUniqueLabels(name, index, arg)
-            if ~isa(arg, 'gams.transfer.unique_labels.Abstract')
-                error('Argument ''%s'' (at position %d) must be ''gams.transfer.unique_labels.Abstract''.', name, index);
-            end
-        end
-
     end
 
     properties (Dependent)
@@ -73,7 +54,7 @@ classdef Axis < handle
         end
 
         function set.label(obj, label)
-            obj.label_ = obj.validatelabel('label', 1, label);
+            obj.label_ = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname().value;
         end
 
         function unique_labels = get.unique_labels(obj)
@@ -81,17 +62,32 @@ classdef Axis < handle
         end
 
         function set.unique_labels(obj, unique_labels)
-            obj.unique_labels_ = obj.validateUniqueLabels('unique_labels', 1, unique_labels);
+            gams.transfer.utils.Validator('unique_labels', 1, unique_labels).type('gams.transfer.unique_labels.Abstract');
+            obj.unique_labels_ = unique_labels;
+        end
+
+    end
+
+    methods (Hidden, Access = {?gams.transfer.symbol.unique_labels.Axis, ?gams.transfer.symbol.Abstract})
+
+        function obj = Axis(label, unique_labels)
+            obj.label_ = label;
+            obj.unique_labels_ = unique_labels;
+        end
+
+    end
+
+    methods (Static)
+
+        function obj = construct(label, unique_labels)
+            label = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname().value;
+            gams.transfer.utils.Validator('unique_labels', 1, unique_labels).type('gams.transfer.unique_labels.Abstract');
+            obj = gams.transfer.symbol.unique_labels.Axis(label, unique_labels);
         end
 
     end
 
     methods
-
-        function obj = Axis(label, unique_labels)
-            obj.label = label;
-            obj.unique_labels = unique_labels;
-        end
 
         function size = size(obj)
             size = obj.unique_labels_.count();

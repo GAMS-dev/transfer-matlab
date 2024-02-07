@@ -35,19 +35,28 @@
 %
 classdef (Hidden) Parameter < gams.transfer.symbol.definition.Abstract
 
-    methods
+    %#ok<*INUSD,*STOUT>
+
+    methods (Hidden, Access = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract})
 
         function obj = Parameter()
-            obj.resetValues();
         end
+
+    end
+
+    methods (Static)
+
+        function obj = construct()
+            obj = gams.transfer.symbol.definition.Parameter();
+        end
+
+    end
+
+    methods
 
         function def = copy(obj)
             def = gams.transfer.symbol.definition.Parameter();
             def.copyFrom(obj);
-        end
-
-        function copyFrom(obj, symbol)
-            copyFrom@gams.transfer.symbol.definition.Abstract(obj, symbol);
         end
 
     end

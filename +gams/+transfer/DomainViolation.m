@@ -91,8 +91,8 @@ classdef DomainViolation
     methods (Hidden, Static)
 
         function arg = validateSymbol(name, index, arg)
-            if ~isa(arg, 'gams.transfer.symbol.Symbol')
-                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Symbol''.', name, index);
+            if ~isa(arg, 'gams.transfer.symbol.Abstract')
+                error('Argument ''%s'' (at position %d) must be ''gams.transfer.symbol.Abstract''.', name, index);
             end
         end
 

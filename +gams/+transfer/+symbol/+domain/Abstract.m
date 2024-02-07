@@ -35,6 +35,8 @@
 %
 classdef (Abstract, Hidden) Abstract < handle
 
+    %#ok<*INUSD,*STOUT>
+
     properties (Hidden, SetAccess = protected)
         label_
         forwarding_ = false
@@ -88,11 +90,11 @@ classdef (Abstract, Hidden) Abstract < handle
             end
         end
 
-        function flag = hasUniqueLabels(obj)
+        function flag = hasUniqueLabels(obj) %#ok<MANU>
             flag = false;
         end
 
-        function unique_labels = getUniqueLabels(obj)
+        function unique_labels = getUniqueLabels(obj) %#ok<MANU>
             unique_labels = [];
         end
 

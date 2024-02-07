@@ -35,7 +35,9 @@
 %
 classdef (Hidden) String < gams.transfer.symbol.value.Abstract
 
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.String, ?gams.transfer.symbol.Symbol})
+    %#ok<*INUSD,*STOUT>
+
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.String, ?gams.transfer.symbol.Abstract})
         default_ = ''
     end
 
@@ -56,6 +58,16 @@ classdef (Hidden) String < gams.transfer.symbol.value.Abstract
         function obj = String(label, default)
             obj.label_ = label;
             obj.default_ = default;
+        end
+
+    end
+
+    methods (Static)
+
+        function obj = construct(label, default)
+            label = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname().value;
+            default = gams.transfer.utils.Validator('default', 2, default).string2char().type('char').nonempty().value;
+            obj = gams.transfer.symbol.value.String(label, default);
         end
 
     end

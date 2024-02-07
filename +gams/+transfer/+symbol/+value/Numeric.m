@@ -5,8 +5,8 @@
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright  (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -35,7 +35,9 @@
 %
 classdef (Hidden) Numeric < gams.transfer.symbol.value.Abstract
 
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Numeric, ?gams.transfer.symbol.Symbol})
+    %#ok<*INUSD,*STOUT>
+
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Numeric, ?gams.transfer.symbol.Abstract})
         default_ = 0
     end
 
@@ -56,6 +58,16 @@ classdef (Hidden) Numeric < gams.transfer.symbol.value.Abstract
         function obj = Numeric(label, default)
             obj.label_ = label;
             obj.default_ = default;
+        end
+
+    end
+
+    methods (Static)
+
+        function obj = construct(label, default)
+            label = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname().value;
+            gams.transfer.utils.Validator('default', 2, default).numeric().scalar();
+            obj = gams.transfer.symbol.value.Numeric(label, default);
         end
 
     end

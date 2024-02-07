@@ -5,8 +5,8 @@
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -57,9 +57,9 @@
 %
 % Example:
 % c = Container();
-% s1 = symbol.Set(c, 's1');
-% s2 = symbol.Set(c, 's2', {s1, '*', '*'});
-% s3 = symbol.Set(c, 's3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
+% s1 = symbol.Set.construct(c, 's1');
+% s2 = symbol.Set.construct(c, 's2', {s1, '*', '*'});
+% s3 = symbol.Set.construct(c, 's3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
 %
 % See also: gams.transfer.Set, gams.transfer.Container.addSet
 
@@ -70,14 +70,16 @@
 %> **Example:**
 %> ```
 %> c = Container();
-%> s1 = symbol.Set(c, 's1');
-%> s2 = symbol.Set(c, 's2', {s1, '*', '*'});
-%> s3 = symbol.Set(c, 's3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
+%> s1 = symbol.Set.construct(c, 's1');
+%> s2 = symbol.Set.construct(c, 's2', {s1, '*', '*'});
+%> s3 = symbol.Set.construct(c, 's3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
 %> ```
 %>
 %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Container::addSet
 %> "Container.addSet"
-classdef Set < gams.transfer.symbol.Symbol
+classdef Set < gams.transfer.symbol.Abstract
+
+    %#ok<*INUSD,*STOUT>
 
     properties (Dependent)
         %> indicator if Set is is_singleton
@@ -98,7 +100,23 @@ classdef Set < gams.transfer.symbol.Symbol
 
     end
 
-    methods
+    methods (Hidden, Access = {?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
+
+        function obj = Set(container, name, is_singleton, init_domains, init_records)
+            obj.container_ = container;
+            obj.name_ = name;
+            obj.def_ = gams.transfer.symbol.definition.Set(is_singleton);
+            if init_domains
+                obj.def_.domains_ = {gams.transfer.symbol.domain.Relaxed(gams.transfer.Constants.UNIVERSE_NAME)};
+            end
+            if init_records
+                obj.data_ = gams.transfer.symbol.data.Struct();
+            end
+        end
+
+    end
+
+    methods (Static)
 
         %> @brief Constructs a GAMS Set
         %>
@@ -129,63 +147,72 @@ classdef Set < gams.transfer.symbol.Symbol
         %> **Example:**
         %> ```
         %> c = Container();
-        %> s1 = symbol.Set(c, 's1');
-        %> s2 = symbol.Set(c, 's2', {s1, '*', '*'});
-        %> s3 = symbol.Set(c, 's3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
+        %> s1 = symbol.Set.construct(c, 's1');
+        %> s2 = symbol.Set.construct(c, 's2', {s1, '*', '*'});
+        %> s3 = symbol.Set.construct(c, 's3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
         %> ```
         %>
         %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Container::addSet
         %> "Container.addSet"
-        function obj = Set(varargin)
+        function obj = construct(varargin)
             % Constructs a GAMS Set, see class help
 
-            obj.def_ = gams.transfer.symbol.definition.Set();
-
             % parse input arguments
+            has_description = false;
+            is_singleton = false;
             has_records = false;
+            has_size = false;
             has_domains = false;
             has_domain_forwarding = false;
             try
-                % TODO: validate here instead of setting the values as the index in the error message will be wrong otherwise
-                % same for other symbol classes
-                obj.container_ = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'container', @obj.validateContainer);
-                obj.name_ = gams.transfer.utils.parse_argument(varargin, ...
-                    2, 'name', @obj.validateName);
+                gams.transfer.utils.Validator.minargin(nargin, 2);
+                container = gams.transfer.utils.Validator('container', 1, varargin{1}) ...
+                    .type('gams.transfer.Container', true).value;
+                name = gams.transfer.utils.Validator('name', 2, varargin{2}).symbolName().value;
                 index = 3;
                 is_pararg = false;
                 while index <= nargin
                     if strcmpi(varargin{index}, 'description')
-                        obj.description_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'description', @obj.validateDescription);
-                        index = index + 2;
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(nargin, index);
+                        description = gams.transfer.utils.Validator('name', index, varargin{index}) ...
+                            .symbolDescription().value;
+                        has_description = true;
+                        index = index + 1;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'domain_forwarding')
-                        domain_forwarding = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'domain_forwarding', []);
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(nargin, index);
+                        domain_forwarding = gams.transfer.utils.Validator('domain_forwarding', ...
+                            index, varargin{index}).type('logical').scalar().value;
                         has_domain_forwarding = true;
-                        index = index + 2;
+                        index = index + 1;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'is_singleton')
-                        obj.def_.is_singleton = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'is_singleton', []);
-                        index = index + 2;
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(nargin, index);
+                        is_singleton = gams.transfer.utils.Validator('is_singleton', ...
+                            index, varargin{index}).type('logical').scalar().value;
+                        index = index + 1;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'records')
-                        records = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'records', []);
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(nargin, index);
+                        records = varargin{index};
                         has_records = true;
-                        index = index + 2;
+                        index = index + 1;
                         is_pararg = true;
                     elseif ~is_pararg && index == 3
-                        domains = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'domains', []);
-                        if isnumeric(domains)
-                            obj.size = domains;
+                        if isempty(varargin{index})
+                            domains = {};
+                            has_domains = true;
+                        elseif isnumeric(varargin{index})
+                            size = gams.transfer.utils.Validator('domains', index, varargin{index}).vector().integer().value;
+                            has_size = true;
                         else
-                            obj.def_.domains = domains;
+                            domains = varargin{index};
+                            has_domains = true;
                         end
-                        has_domains = true;
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
@@ -194,8 +221,16 @@ classdef Set < gams.transfer.symbol.Symbol
             catch e
                 error(e.message);
             end
-            if ~has_domains
-                obj.def_.domains = {gams.transfer.symbol.domain.Relaxed(gams.transfer.Constants.UNIVERSE_NAME)};
+
+            obj = gams.transfer.symbol.Set(container, name, is_singleton, ~has_domains && ~has_size, ~has_records);
+            if has_description
+                obj.description_ = description;
+            end
+            if has_domains
+                obj.def_.domains = domains;
+            end
+            if has_size
+                obj.size = size;
             end
             if has_domain_forwarding
                 for i = 1:numel(obj.def_.domains)
@@ -204,10 +239,12 @@ classdef Set < gams.transfer.symbol.Symbol
             end
             if has_records
                 obj.setRecords(records);
-            else
-                obj.data_ = gams.transfer.symbol.data.Struct();
             end
         end
+
+    end
+
+    methods
 
         %> Copies symbol to destination container
         %>
@@ -238,16 +275,15 @@ classdef Set < gams.transfer.symbol.Symbol
             % parse input arguments
             overwrite = false;
             try
-                validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'gams.transfer.Container'}, -1));
-                destination = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'destination', validate);
+                gams.transfer.utils.Validator.minargin(numel(varargin), 1);
+                destination = gams.transfer.utils.Validator('destination', 1, varargin{1})...
+                    .type('gams.transfer.Container').value;
                 index = 2;
                 is_pararg = false;
                 while index < nargin
                     if ~is_pararg && index == 2
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
-                        overwrite = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'overwrite', validate);
+                        overwrite = gams.transfer.utils.Validator('overwrite', index, varargin{index}) ...
+                            .type('logical').scalar().value;
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
@@ -267,12 +303,12 @@ classdef Set < gams.transfer.symbol.Symbol
                     destination.removeSymbols(obj.name_);
                     symbol = destination.addSet(obj.name_);
                 end
+                symbol.copyFrom(obj);
+                symbol.def.switchContainer(destination);
             else
                 symbol = destination.addSet(obj.name_);
+                symbol.copyFrom(obj);
             end
-
-            symbol.copyFrom(obj);
-            symbol.def.switchContainer(destination);
         end
 
     end
@@ -299,8 +335,7 @@ classdef Set < gams.transfer.symbol.Symbol
             % The overview is in form of a table listing for each symbol its main characteristics
             % and some statistics.
 
-            symbols = gams.transfer.utils.validate_cell('symbols', 1, symbols, ...
-                {'gams.transfer.symbol.Set'}, 1, -1);
+            gams.transfer.utils.Validator('symbols', 1, symbols).cellof('gams.transfer.symbol.Set');
 
             descr = struct();
             descr.name = cell(numel(symbols), 1);

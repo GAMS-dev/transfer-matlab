@@ -1,12 +1,12 @@
-% Symbol Domain (internal)
+% Symbol Axes (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright  (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,37 +28,22 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Symbol Domain (internal)
+% Symbol Axes (internal)
 %
-classdef Axes < handle
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Hidden) Axes < handle
+
+    %#ok<*INUSD,*STOUT>
 
     properties (Hidden, SetAccess = protected)
         axes_ = {}
     end
 
-    methods (Static, Hidden)
-
-        function arg = validateAxes(name, index, arg)
-            if ~iscell(arg)
-                error('Argument ''%s'' (at position %d) must be ''cell''.', name, index);
-            end
-            for i = 1:numel(arg)
-                if ~isa(arg{i}, 'gams.transfer.symbol.unique_labels.Axis')
-                    error('Argument ''%s'' (at position %d, element %d) must be ''gams.transfer.symbol.unique_labels.Axis''.', name, index, i);
-                end
-            end
-        end
-
-    end
-
     properties (Dependent)
         axes
     end
-
-    properties (Dependent, SetAccess = private)
-        dimension
-    end
-
 
     methods
 
@@ -67,19 +52,33 @@ classdef Axes < handle
         end
 
         function set.axes(obj, axes)
-            obj.axes_ = obj.validateAxes('axes', 1, axes);
+            gams.transfer.utils.Validator('axes', 1, axes).cellof('gams.transfer.symbol.unique_labels.Axis');
+            obj.axes_ = axes;
         end
 
-        function dimension = get.dimension(obj)
-            dimension = numel(obj.axes_);
+    end
+
+    methods (Hidden, Access = {?gams.transfer.symbol.unique_labels.Axis, ?gams.transfer.symbol.Abstract})
+
+        function obj = Axes(axes)
+            obj.axes_ = axes;
+        end
+
+    end
+
+    methods (Static)
+
+        function obj = construct(axes)
+            gams.transfer.utils.Validator('axes', 1, axes).cellof('gams.transfer.symbol.unique_labels.Axis');
+            obj = gams.transfer.symbol.unique_labels.Axes(axes);
         end
 
     end
 
     methods
 
-        function obj = Axes(axes)
-            obj.axes = axes;
+        function dimension = dimension(obj)
+            dimension = numel(obj.axes_);
         end
 
         function size = size(obj)
@@ -95,18 +94,21 @@ classdef Axes < handle
         end
 
         function axis = axis(obj, dimension)
-            % TODO check dimension
             axis = obj.axes_{dimension};
         end
 
         function labels = getUniqueLabelsAt(obj, indices)
-            % TODO: check indices
-            if numel(indices) ~= 1
-                error('todo');
+            gams.transfer.utils.Validator('indices', 1, indices).type('cell');
+            labels = cell(size(indices));
+            for i = 1:numel(labels)
+                gams.transfer.utils.Validator(sprintf('indices{%d}', i), 1, indices{i}).numeric().integer().minnumel(obj.dimension);
+                labels{i} = cell(1, obj.dimension);
+                for j = 1:obj.dimension
+                    labels{i}{j} = obj.axes{j}.unique_labels.getAt(indices{i}(j));
+                end
             end
-            labels = cell(1, obj.dimension);
-            for i = 1:obj.dimension
-                labels{i} = obj.axes{i}.unique_labels.getAt(i);
+            if numel(indices) == 1
+                labels = labels{1};
             end
         end
 

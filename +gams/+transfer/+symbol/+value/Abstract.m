@@ -35,7 +35,9 @@
 %
 classdef (Abstract, Hidden) Abstract
 
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Abstract, ?gams.transfer.symbol.Symbol})
+    %#ok<*INUSD,*STOUT>
+
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Abstract, ?gams.transfer.symbol.Abstract})
         label_
     end
 
@@ -54,7 +56,7 @@ classdef (Abstract, Hidden) Abstract
         end
 
         function obj = set.label(obj, label)
-            obj.label_ = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty();
+            obj.label_ = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname();
         end
 
     end

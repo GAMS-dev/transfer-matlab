@@ -35,7 +35,9 @@
 %
 classdef (Abstract, Hidden) Abstract < handle
 
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Symbol})
+    %#ok<*INUSD,*STOUT>
+
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
         domains_ = {}
         values_ = []
     end
@@ -87,7 +89,7 @@ classdef (Abstract, Hidden) Abstract < handle
             domains = obj.domains_;
         end
 
-        function obj = set.domains(obj, domains)
+        function set.domains(obj, domains)
             obj.domains_ = obj.createDomains('domains', 1, domains);
             if numel(obj.domains_) ~= numel(unique(obj.getDomainLabels()))
                 for i = 1:numel(obj.domains_)
@@ -119,10 +121,10 @@ classdef (Abstract, Hidden) Abstract < handle
 
         function eq = equals(obj, def)
             eq = false;
-            if ~isequal(class(obj), class(def)) || ~isequal(obj.values_, def.values_)
+            if ~isequal(class(obj), class(def)) || ~isequal(obj.values, def.values)
                 return
             end
-            if numel(obj.domains_) ~= numel(def.domains_);
+            if numel(obj.domains_) ~= numel(def.domains_)
                 return
             end
             for i = 1:numel(obj.domains_)
@@ -171,9 +173,10 @@ classdef (Abstract, Hidden) Abstract < handle
 
         function domain = findDomain(obj, label)
             domain = [];
-            for i = 1:numel(obj.domains_)
-                if strcmp(obj.domains_{i}.label, label)
-                    domain = obj.domains_{i};
+            domains = obj.domains_;
+            for i = 1:numel(domains)
+                if strcmp(domains{i}.label, label)
+                    domain = domains{i};
                     return
                 end
             end
@@ -181,9 +184,10 @@ classdef (Abstract, Hidden) Abstract < handle
 
         function value = findValue(obj, label)
             value = [];
-            for i = 1:numel(obj.values_)
-                if strcmp(obj.values_{i}.label, label)
-                    value = obj.values_{i};
+            values = obj.values;
+            for i = 1:numel(values)
+                if strcmp(values{i}.label, label)
+                    value = values{i};
                     return
                 end
             end

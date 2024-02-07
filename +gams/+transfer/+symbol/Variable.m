@@ -5,8 +5,8 @@
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -59,9 +59,9 @@
 %
 % Example:
 % c = Container();
-% v1 = symbol.Variable(c, 'v1');
-% v2 = symbol.Variable(c, 'v2', 'binary', {'*', '*'});
-% v3 = symbol.Variable(c, 'v3', VariableType.BINARY, '*', 'description', 'var v3');
+% v1 = symbol.Variable.construct(c, 'v1');
+% v2 = symbol.Variable.construct(c, 'v2', 'binary', {'*', '*'});
+% v3 = symbol.Variable.construct(c, 'v3', VariableType.BINARY, '*', 'description', 'var v3');
 %
 % See also: gams.transfer.Variable, gams.transfer.Container.addVariable,
 % gams.transfer.VariableType
@@ -73,15 +73,17 @@
 %> **Example:**
 %> ```
 %> c = Container();
-%> v1 = symbol.Variable(c, 'v1');
-%> v2 = symbol.Variable(c, 'v2', 'binary', {'*', '*'});
-%> v3 = symbol.Variable(c, 'v3', VariableType.BINARY, '*', 'description', 'var v3');
+%> v1 = symbol.Variable.construct(c, 'v1');
+%> v2 = symbol.Variable.construct(c, 'v2', 'binary', {'*', '*'});
+%> v3 = symbol.Variable.construct(c, 'v3', VariableType.BINARY, '*', 'description', 'var v3');
 %> ```
 %>
 %> @see \ref gams::transfer::Variable "Variable", \ref
 %> gams::transfer::Container::addVariable "Container.addVariable", \ref
 %> gams::transfer::VariableType "VariableType"
-classdef Variable < gams.transfer.symbol.Symbol
+classdef Variable < gams.transfer.symbol.Abstract
+
+    %#ok<*INUSD,*STOUT>
 
     properties (Dependent)
         %> Variable type, e.g. 'free'
@@ -129,7 +131,20 @@ classdef Variable < gams.transfer.symbol.Symbol
 
     end
 
-    methods
+    methods (Hidden, Access = {?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
+
+        function obj = Variable(container, name, type, init_domains, init_records)
+            obj.container_ = container;
+            obj.name_ = name;
+            obj.def_ = gams.transfer.symbol.definition.Variable.construct(type);
+            if init_records
+                obj.data_ = gams.transfer.symbol.data.Struct();
+            end
+        end
+
+    end
+
+    methods (Static)
 
         %> @brief Constructs a GAMS Variable
         %>
@@ -161,58 +176,69 @@ classdef Variable < gams.transfer.symbol.Symbol
         %> **Example:**
         %> ```
         %> c = Container();
-        %> v1 = symbol.Variable(c, 'v1');
-        %> v2 = symbol.Variable(c, 'v2', 'binary', {'*', '*'});
-        %> v3 = symbol.Variable(c, 'v3', VariableType.BINARY, '*', 'description', 'var v3');
+        %> v1 = symbol.Variable.construct(c, 'v1');
+        %> v2 = symbol.Variable.construct(c, 'v2', 'binary', {'*', '*'});
+        %> v3 = symbol.Variable.construct(c, 'v3', VariableType.BINARY, '*', 'description', 'var v3');
         %> ```
         %>
         %> @see \ref gams::transfer::Variable "Variable", \ref
         %> gams::transfer::Container::addVariable "Container.addVariable", \ref
         %> gams::transfer::VariableType "VariableType"
-        function obj = Variable(varargin)
+        function obj = construct(varargin)
             % Constructs a GAMS Variable, see class help
 
-            obj.def_ = gams.transfer.symbol.definition.Variable();
-
             % parse input arguments
+            has_type = false;
+            has_description = false;
             has_records = false;
+            has_size = false;
+            has_domains = false;
             has_domain_forwarding = false;
             try
-                obj.container_ = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'container', @obj.validateContainer);
-                obj.name_ = gams.transfer.utils.parse_argument(varargin, ...
-                    2, 'name', @obj.validateName);
+                gams.transfer.utils.Validator.minargin(nargin, 2);
+                container = gams.transfer.utils.Validator('container', 1, varargin{1}) ...
+                    .type('gams.transfer.Container', true).value;
+                name = gams.transfer.utils.Validator('name', 2, varargin{2}).symbolName().value;
                 index = 3;
                 is_pararg = false;
                 while index <= nargin
                     if strcmpi(varargin{index}, 'description')
-                        obj.description_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'description', @obj.validateDescription);
-                        index = index + 2;
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(nargin, index);
+                        description = gams.transfer.utils.Validator('name', index, varargin{index}) ...
+                            .symbolDescription().value;
+                        has_description = true;
+                        index = index + 1;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'domain_forwarding')
-                        domain_forwarding = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'domain_forwarding', []);
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(nargin, index);
+                        domain_forwarding = gams.transfer.utils.Validator('domain_forwarding', ...
+                            index, varargin{index}).type('logical').scalar().value;
                         has_domain_forwarding = true;
-                        index = index + 2;
+                        index = index + 1;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'records')
-                        records = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'records', []);
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(nargin, index);
+                        records = varargin{index};
                         has_records = true;
-                        index = index + 2;
+                        index = index + 1;
                         is_pararg = true;
                     elseif ~is_pararg && index == 3
-                        obj.def_.type = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'type', []);
+                        type = gams.transfer.symbol.definition.Variable.createType('type', index, varargin{index});
+                        has_type = true;
                         index = index + 1;
                     elseif ~is_pararg && index == 4
-                        domains = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'domains', []);
-                        if isnumeric(domains)
-                            obj.size = domains;
+                        if isempty(varargin{index})
+                            domains = {};
+                            has_domains = true;
+                        elseif isnumeric(varargin{index})
+                            size = gams.transfer.utils.Validator('domains', index, varargin{index}).vector().integer().value;
+                            has_size = true;
                         else
-                            obj.def_.domains = domains;
+                            domains = varargin{index};
+                            has_domains = true;
                         end
                         index = index + 1;
                     else
@@ -222,6 +248,20 @@ classdef Variable < gams.transfer.symbol.Symbol
             catch e
                 error(e.message);
             end
+
+            if ~has_type
+                type = gams.transfer.VariableType.Free;
+            end
+            obj = gams.transfer.symbol.Variable(container, name, type, ~has_domains && ~has_size, ~has_records);
+            if has_description
+                obj.description_ = description;
+            end
+            if has_domains
+                obj.def_.domains = domains;
+            end
+            if has_size
+                obj.size = size;
+            end
             if has_domain_forwarding
                 for i = 1:numel(obj.def_.domains)
                     obj.def_.domains{i}.forwarding = domain_forwarding;
@@ -229,10 +269,12 @@ classdef Variable < gams.transfer.symbol.Symbol
             end
             if has_records
                 obj.setRecords(records);
-            else
-                obj.data_ = gams.transfer.symbol.data.Struct();
             end
         end
+
+    end
+
+    methods
 
         %> Copies symbol to destination container
         %>
@@ -263,16 +305,15 @@ classdef Variable < gams.transfer.symbol.Symbol
             % parse input arguments
             overwrite = false;
             try
-                validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'gams.transfer.Container'}, -1));
-                destination = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'destination', validate);
+                gams.transfer.utils.Validator.minargin(numel(varargin), 1);
+                destination = gams.transfer.utils.Validator('destination', 1, varargin{1})...
+                    .type('gams.transfer.Container').value;
                 index = 2;
                 is_pararg = false;
                 while index < nargin
                     if ~is_pararg && index == 2
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
-                        overwrite = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'overwrite', validate);
+                        overwrite = gams.transfer.utils.Validator('overwrite', index, varargin{index}) ...
+                            .type('logical').scalar().value;
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
@@ -292,12 +333,12 @@ classdef Variable < gams.transfer.symbol.Symbol
                     destination.removeSymbols(obj.name_);
                     symbol = destination.addVariable(obj.name_);
                 end
+                symbol.copyFrom(obj);
+                symbol.def.switchContainer(destination);
             else
                 symbol = destination.addVariable(obj.name_);
+                symbol.copyFrom(obj);
             end
-
-            symbol.copyFrom(obj);
-            symbol.def.switchContainer(destination);
         end
 
 
@@ -325,8 +366,7 @@ classdef Variable < gams.transfer.symbol.Symbol
             % The overview is in form of a table listing for each symbol its main characteristics
             % and some statistics.
 
-            symbols = gams.transfer.utils.validate_cell('symbols', 1, symbols, ...
-                {'gams.transfer.symbol.Variable'}, 1, -1);
+            gams.transfer.utils.Validator('symbols', 1, symbols).cellof('gams.transfer.symbol.Variable');
 
             descr = struct();
             descr.name = cell(numel(symbols), 1);

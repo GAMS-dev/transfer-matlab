@@ -40,14 +40,26 @@ classdef (Hidden) DenseMatrix < gams.transfer.symbol.data.Matrix
         name = 'dense_matrix'
     end
 
-    methods
+    methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.Container, ?gams.transfer.symbol.Abstract})
 
         function obj = DenseMatrix(records)
             obj.records_ = struct();
             if nargin >= 1
-                obj.records = records;
+                obj.records_ = records;
             end
         end
+
+    end
+
+    methods (Static)
+
+        function obj = construct(records)
+            obj = gams.transfer.symbol.data.DenseMatrix(records);
+        end
+
+    end
+
+    methods
 
         function data = copy(obj)
             data = gams.transfer.symbol.data.DenseMatrix();

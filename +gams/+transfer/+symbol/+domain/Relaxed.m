@@ -35,6 +35,8 @@
 %
 classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
 
+    %#ok<*INUSD,*STOUT>
+
     properties (Hidden, SetAccess = protected)
         name_
     end
@@ -59,10 +61,10 @@ classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
 
     end
 
-    methods
+    methods (Hidden, Access = {?gams.transfer.symbol.domain.Abstract, ?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract})
 
         function obj = Relaxed(name)
-            obj.name = name;
+            obj.name_ = name;
             if strcmp(obj.name_, gams.transfer.Constants.UNIVERSE_NAME)
                 obj.label_ = gams.transfer.Constants.UNIVERSE_LABEL;
             else
@@ -70,12 +72,28 @@ classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
             end
         end
 
+    end
+
+    methods (Static)
+
+        function obj = construct(name)
+            valid = gams.transfer.utils.Validator('name', 1, name).string2char().type('char').nonempty();
+            if ~strcmp(name, gams.transfer.Constants.UNIVERSE_NAME)
+                valid.varname();
+            end
+            obj = gams.transfer.symbol.domain.Regular(valid.value);
+        end
+
+    end
+
+    methods
+
         function eq = equals(obj, domain)
             eq = equals@gams.transfer.symbol.domain.Abstract(obj, domain) && ...
                 isequal(obj.name_, domain.name);
         end
 
-        function status = isValid(obj)
+        function status = isValid(obj) %#ok<MANU>
             status = gams.transfer.utils.Status.createOK();
         end
 

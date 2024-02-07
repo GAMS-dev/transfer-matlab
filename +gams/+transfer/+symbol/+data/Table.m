@@ -41,7 +41,7 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
         name = 'table'
     end
 
-    methods
+    methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.Container, ?gams.transfer.symbol.Abstract})
 
         function obj = Table(records)
             obj.records_ = table();
@@ -49,6 +49,18 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
                 obj.records = records;
             end
         end
+
+    end
+
+    methods (Static)
+
+        function obj = construct(records)
+            obj = gams.transfer.symbol.data.Table(records);
+        end
+
+    end
+
+    methods
 
         function data = copy(obj)
             data = gams.transfer.symbol.data.Table();
