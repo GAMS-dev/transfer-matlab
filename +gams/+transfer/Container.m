@@ -77,8 +77,9 @@ classdef Container < handle
 
     properties (Hidden, SetAccess = protected)
         gams_dir_ = ''
-        modified_ = true
         data_
+        last_update_ = now()
+        last_update_reset_ = []
     end
 
     properties (Dependent, SetAccess = protected)
@@ -92,6 +93,10 @@ classdef Container < handle
 
         % data GAMS (GDX) symbols
         data
+    end
+
+    properties (Hidden, SetAccess = private)
+        last_update
     end
 
     properties (Dependent)
@@ -121,27 +126,39 @@ classdef Container < handle
             data = obj.data_.entries_;
         end
 
+        function last_update = get.last_update(obj)
+            last_update = obj.last_update_;
+            symbols = obj.data_.entries();
+            for i = 1:numel(symbols)
+                last_update = max(last_update, symbols{i}.last_update);
+            end
+        end
+
         function modified = get.modified(obj)
-            modified = obj.modified_;
-            if modified
+            modified = true;
+            if isempty(obj.last_update_reset_) || obj.last_update_reset_ <= obj.last_update
                 return
             end
             symbols = obj.data_.entries();
             for i = 1:numel(symbols)
-                if modified
+                if symbols{i}.modified
                     return
                 end
-                modified = modified || symbols{i}.modified;
             end
+            modified = false;
         end
 
         function set.modified(obj, modified)
             gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
+            if modified
+                obj.last_update_reset_ = [];
+            else
+                obj.last_update_reset_ = now();
+            end
             symbols = obj.data_.entries();
             for i = 1:numel(symbols)
                 symbols{i}.modified = modified;
             end
-            obj.modified_ = modified;
         end
 
     end
@@ -1936,7 +1953,7 @@ classdef Container < handle
                     removed_symbols{i}.container = [];
                 end
 
-                obj.modified_ = true;
+                obj.last_update_ = now();
                 return
             end
 
@@ -1987,7 +2004,7 @@ classdef Container < handle
                 obj.removeSymbols(remove_aliases);
             end
 
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         %> Reestablishes a valid GDX symbol order
@@ -2067,7 +2084,7 @@ classdef Container < handle
 
             % apply permutation
             obj.data_.reorder([idx_sets, idx_other]);
-            obj.modified_ = true;
+            obj.last_update_ = now();
 
             % force recheck of all remaining symbols in container
             obj.isValid(false, true);

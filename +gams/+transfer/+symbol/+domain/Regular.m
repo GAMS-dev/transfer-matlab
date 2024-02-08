@@ -46,6 +46,10 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
         name
     end
 
+    properties (Dependent, SetAccess = private)
+        last_update
+    end
+
     methods
 
         function symbol = get.symbol(obj)
@@ -55,10 +59,15 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
         function obj = set.symbol(obj, symbol)
             gams.transfer.utils.Validator('symbol', 1, symbol).types({'gams.transfer.symbol.Set', 'gams.transfer.alias.Abstract'});
             obj.symbol_ = symbol;
+            obj.last_update_ = now();
         end
 
         function name = get.name(obj)
             name = obj.symbol_.name;
+        end
+
+        function last_update = get.last_update(obj)
+            last_update = max(obj.last_update_, obj.symbol_.last_update);
         end
 
     end

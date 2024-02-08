@@ -145,6 +145,10 @@ classdef Set < gams.transfer.alias.Abstract
 
     end
 
+    properties (Dependent, Hidden, SetAccess = private)
+        last_update
+    end
+
     properties (Dependent, SetAccess = private)
 
         %> Records format of aliased Set records
@@ -167,7 +171,7 @@ classdef Set < gams.transfer.alias.Abstract
                 alias_with = alias_with.alias_with;
             end
             obj.alias_with_ = alias_with;
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function description = get.description(obj)
@@ -228,6 +232,10 @@ classdef Set < gams.transfer.alias.Abstract
 
         function set.records(obj, records)
             obj.alias_with_.records = records;
+        end
+
+        function last_update = get.last_update(obj)
+            last_update = max(obj.last_update_, obj.alias_with.last_update);
         end
 
         function format_ = get.format(obj)
@@ -387,7 +395,7 @@ classdef Set < gams.transfer.alias.Abstract
         function copyFrom(obj, symbol)
             gams.transfer.utils.Validator('symbol', 1, symbol).type(class(obj));
             obj.alias_with_ = symbol.alias_with;
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
     end

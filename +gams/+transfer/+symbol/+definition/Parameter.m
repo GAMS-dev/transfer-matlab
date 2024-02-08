@@ -65,6 +65,7 @@ classdef (Hidden) Parameter < gams.transfer.symbol.definition.Abstract
 
         function resetValues(obj)
             obj.values_ = {gams.transfer.symbol.value.Numeric('value', 0)};
+            obj.last_update_ = now();
         end
 
     end

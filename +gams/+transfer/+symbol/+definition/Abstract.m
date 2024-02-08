@@ -40,6 +40,7 @@ classdef (Abstract, Hidden) Abstract < handle
     properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
         domains_ = {}
         values_ = []
+        last_update_ = now()
     end
 
     properties (Dependent)
@@ -48,6 +49,7 @@ classdef (Abstract, Hidden) Abstract < handle
 
     properties (Dependent, SetAccess = private)
         values
+        last_update
     end
 
     methods (Hidden, Static)
@@ -96,6 +98,7 @@ classdef (Abstract, Hidden) Abstract < handle
                     obj.domains_{i}.appendLabelIndex(i);
                 end
             end
+            obj.last_update_ = now();
         end
 
         function values = get.values(obj)
@@ -103,6 +106,16 @@ classdef (Abstract, Hidden) Abstract < handle
                 obj.resetValues()
             end
             values = obj.values_;
+        end
+
+        function last_update = get.last_update(obj)
+            last_update = obj.last_update_;
+            for i = 1:numel(obj.domains_)
+                last_update = max(last_update, obj.domains_{i}.last_update);
+            end
+            for i = 1:numel(obj.values_)
+                last_update = max(last_update, obj.values_{i}.last_update);
+            end
         end
 
     end
@@ -117,6 +130,7 @@ classdef (Abstract, Hidden) Abstract < handle
             gams.transfer.utils.Validator('symbol', 1, symbol).type(class(obj));
             obj.domains_ = symbol.domains;
             obj.values_ = symbol.values;
+            obj.last_update_ = now();
         end
 
         function eq = equals(obj, def)
@@ -169,6 +183,7 @@ classdef (Abstract, Hidden) Abstract < handle
                     obj.domains_{i}.appendLabelIndex(i);
                 end
             end
+            obj.last_update_ = now();
         end
 
         function domain = findDomain(obj, label)
@@ -212,6 +227,7 @@ classdef (Abstract, Hidden) Abstract < handle
                 end
                 obj.domains_{i}.symbol = symbol;
             end
+            obj.last_update_ = now();
         end
 
     end

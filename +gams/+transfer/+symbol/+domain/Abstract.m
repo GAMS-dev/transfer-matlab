@@ -40,11 +40,16 @@ classdef (Abstract, Hidden) Abstract < handle
     properties (Hidden, SetAccess = protected)
         label_
         forwarding_ = false
+        last_update_ = now();
     end
 
     properties (Dependent)
         label
         forwarding
+    end
+
+    properties (Abstract, SetAccess = private)
+        last_update
     end
 
     properties (Abstract)
@@ -59,6 +64,7 @@ classdef (Abstract, Hidden) Abstract < handle
 
         function set.label(obj, label)
             obj.label_ = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname().value;
+            obj.last_update_ = now();
         end
 
         function forwarding = get.forwarding(obj)
@@ -67,6 +73,7 @@ classdef (Abstract, Hidden) Abstract < handle
 
         function set.forwarding(obj, forwarding)
             obj.forwarding_ = gams.transfer.utils.Validator('forwarding', 1, forwarding).type('logical').scalar().value;
+            obj.last_update_ = now();
         end
 
     end
@@ -88,6 +95,7 @@ classdef (Abstract, Hidden) Abstract < handle
             if ~endsWith(obj.label_, add)
                 obj.label_ = strcat(obj.label_, add);
             end
+            obj.last_update_ = now();
         end
 
         function flag = hasUniqueLabels(obj) %#ok<MANU>

@@ -48,7 +48,8 @@ classdef (Abstract) Abstract < handle
     properties (Hidden, SetAccess = protected)
         container_
         name_ = ''
-        modified_ = true
+        last_update_ = now()
+        last_update_reset_ = []
     end
 
     properties (Dependent)
@@ -150,6 +151,10 @@ classdef (Abstract) Abstract < handle
 
     end
 
+    properties (Abstract, Hidden, SetAccess = private)
+        last_update
+    end
+
     properties (Dependent)
 
         %> Flag to indicate modification
@@ -177,7 +182,7 @@ classdef (Abstract) Abstract < handle
             if isa(obj.alias_with, 'gams.transfer.symbol.Abstract')
                 obj.alias_with.container = container;
             end
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function name = get.name(obj)
@@ -187,16 +192,20 @@ classdef (Abstract) Abstract < handle
         function set.name(obj, name)
             name = gams.transfer.utils.Validator('name', 1, name).symbolName().value;
             obj.container.renameSymbol(obj.name, name);
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function modified = get.modified(obj)
-            modified = obj.modified_;
+            modified = isempty(obj.last_update_reset_) || obj.last_update_reset_ <= obj.last_update;
         end
 
         function set.modified(obj, modified)
             gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
-            obj.modified_ = modified;
+            if modified
+                obj.last_update_reset_ = [];
+            else
+                obj.last_update_reset_ = now();
+            end
         end
 
     end

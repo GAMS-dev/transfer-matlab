@@ -91,6 +91,7 @@ classdef (Hidden) Set < gams.transfer.symbol.definition.Abstract
 
         function resetValues(obj)
             obj.values_ = {gams.transfer.symbol.value.String('element_text', '')};
+            obj.last_update_ = now();
         end
 
     end

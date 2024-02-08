@@ -162,6 +162,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             end
             % TODO: check labels
             obj.records_.(domain.label) = setcats(obj.records_.(domain.label), labels);
+            obj.last_update_ = now();
         end
 
         function removeUnusedUniqueLabels(obj, domain)
@@ -169,6 +170,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
                 error('Data does not maintain unique labels for domain ''%s''.', domain.label);
             end
             obj.records_.(domain.label) = removecats(obj.records_.(domain.label));
+            obj.last_update_ = now();
         end
 
         function mergeUniqueLabels(obj, domain, oldlabels, newlabels)
@@ -185,6 +187,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
                     oldlabels{j}, newlabels{j});
             end
             obj.records_.(domain.label) = categorical(obj.records_.(domain.label), 'Ordinal', true);
+            obj.last_update_ = now();
         end
 
         function nvals = getNumberValues(obj, axes, values)
@@ -244,6 +247,8 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             for i = 1:numel(values)
                 data.records.(values{i}.label)(idx) = obj.records_.(values{i}.label);
             end
+
+            data.last_update_ = now();
         end
 
         function removeRows(obj, indices)

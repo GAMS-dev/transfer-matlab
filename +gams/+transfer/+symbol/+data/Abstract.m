@@ -81,10 +81,11 @@ classdef (Abstract, Hidden) Abstract < handle
             gams.transfer.utils.Validator('symbol', 1, symbol).type(class(obj));
             obj.records_ = symbol.records_;
             obj.last_update_ = symbol.last_update_;
+            obj.last_update_ = now();
         end
 
         function eq = equals(obj, data)
-            eq = isequaln(obj, data);
+            eq = isequaln(obj.records_, data.records_);
         end
 
         function flag = isLabel(obj, label)

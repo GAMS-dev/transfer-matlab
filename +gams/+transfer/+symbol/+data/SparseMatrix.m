@@ -95,15 +95,16 @@ classdef (Hidden) SparseMatrix < gams.transfer.symbol.data.Matrix
             values = obj.availableValues('Numeric', values);
             if isa(data, 'gams.transfer.symbol.data.DenseMatrix')
                 for i = 1:numel(values)
-                    data.records.(values{i}.label) = full(obj.records_.(values{i}.label));
+                    data.records_.(values{i}.label) = full(obj.records_.(values{i}.label));
                 end
             elseif isa(data, 'gams.transfer.symbol.data.SparseMatrix')
                 for i = 1:numel(values)
-                    data.records.(values{i}.label) = obj.records_.(values{i}.label);
+                    data.records_.(values{i}.label) = obj.records_.(values{i}.label);
                 end
             else
                 error('Invalid data: %s', class(data));
             end
+            data.last_update_ = now();
         end
 
     end

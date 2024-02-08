@@ -54,7 +54,8 @@ classdef (Abstract) Abstract < handle
         def_
         data_
         unique_labels_ = {}
-        modified_ = true
+        last_update_ = now()
+        last_update_reset_ = []
     end
 
     properties (Dependent)
@@ -80,6 +81,7 @@ classdef (Abstract) Abstract < handle
         def
         data
         unique_labels
+        last_update
     end
 
     properties (Dependent)
@@ -189,7 +191,7 @@ classdef (Abstract) Abstract < handle
             gams.transfer.utils.Validator('container', 1, container).type('gams.transfer.Container', true);
             obj.container_ = container;
             obj.def_.switchContainer(container);
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function name = get.name(obj)
@@ -199,7 +201,7 @@ classdef (Abstract) Abstract < handle
         function set.name(obj, name)
             name = gams.transfer.utils.Validator('name', 1, name).symbolName().value;
             obj.container.renameSymbol(obj.name, name);
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function description = get.description(obj)
@@ -208,7 +210,7 @@ classdef (Abstract) Abstract < handle
 
         function set.description(obj, description)
             obj.description_ = gams.transfer.utils.Validator('description', 1, description).symbolDescription().value;
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function def = get.def(obj)
@@ -222,7 +224,11 @@ classdef (Abstract) Abstract < handle
         function set.data(obj, data)
             gams.transfer.utils.Validator('data', 1, data).type('gams.transfer.symbol.data.Abstract');
             obj.data_ = data;
-            obj.modified_ = true;
+            obj.last_update_ = now();
+        end
+
+        function last_update = get.last_update(obj)
+            last_update = max([obj.last_update_, obj.data_.last_update, obj.def_.last_update]);
         end
 
         function unique_labels = get.unique_labels(obj)
@@ -245,7 +251,7 @@ classdef (Abstract) Abstract < handle
             gams.transfer.utils.Validator('unique_labels', 1, unique_labels)...
                 .cellof('gams.transfer.unique_labels.Abstract', true).numel(obj.dimension);
             obj.unique_labels_ = unique_labels;
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function dimension = get.dimension(obj)
@@ -261,7 +267,7 @@ classdef (Abstract) Abstract < handle
                 obj.def_.domains(obj.dimension+1:dimension) = ...
                     {gams.transfer.symbol.domain.Relaxed(gams.transfer.Constants.UNIVERSE_NAME)};
             end
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function size = get.size(obj)
@@ -278,7 +284,7 @@ classdef (Abstract) Abstract < handle
             for i = 1:numel(size)
                 obj.unique_labels{i} = gams.transfer.unique_labels.Range('', 1, 1, size(i));
             end
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function domain = get.domain(obj)
@@ -298,7 +304,7 @@ classdef (Abstract) Abstract < handle
         function set.domain(obj, domain)
             obj.def_.domains = domain;
             obj.applyDomainForwarding();
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function domain_labels = get.domain_labels(obj)
@@ -309,7 +315,7 @@ classdef (Abstract) Abstract < handle
             labels = obj.domain_labels;
             obj.def_.setDomainLabels(domain_labels);
             obj.data_.renameLabels(labels, obj.domain_labels);
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function domain_names = get.domain_names(obj)
@@ -363,7 +369,7 @@ classdef (Abstract) Abstract < handle
                 obj.def_.domains{i}.forwarding = domain_forwarding(i);
             end
             obj.applyDomainForwarding();
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function records = get.records(obj)
@@ -372,7 +378,7 @@ classdef (Abstract) Abstract < handle
 
         function set.records(obj, records)
             obj.data_.records = records;
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function format = get.format(obj)
@@ -395,12 +401,16 @@ classdef (Abstract) Abstract < handle
         end
 
         function modified = get.modified(obj)
-            modified = obj.modified_;
+            modified = isempty(obj.last_update_reset_) || obj.last_update_reset_ <= obj.last_update;
         end
 
         function set.modified(obj, modified)
             gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
-            obj.modified_ = modified;
+            if modified
+                obj.last_update_reset_ = [];
+            else
+                obj.last_update_reset_ = now();
+            end
         end
 
     end
@@ -453,7 +463,7 @@ classdef (Abstract) Abstract < handle
                     obj.unique_labels_{i} = symbol.unique_labels{i}.copy();
                 end
             end
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         function flag = supportsIndexed(obj)
@@ -582,7 +592,7 @@ classdef (Abstract) Abstract < handle
                 end
                 obj.data_ = records;
                 obj.applyDomainForwarding();
-                obj.modified_ = true;
+                obj.last_update_ = now();
                 return
             end
 
@@ -766,7 +776,7 @@ classdef (Abstract) Abstract < handle
 
             obj.data_ = data;
             obj.applyDomainForwarding();
-            obj.modified_ = true;
+            obj.last_update_ = now();
         end
 
         %> Transforms symbol records into given format

@@ -116,6 +116,7 @@ classdef (Hidden) Variable < gams.transfer.symbol.definition.Abstract
                 gams.transfer.symbol.value.Numeric('lower', gdx_default_values(3)), ...
                 gams.transfer.symbol.value.Numeric('upper', gdx_default_values(4)), ...
                 gams.transfer.symbol.value.Numeric('scale', gdx_default_values(5))};
+            obj.last_update_ = now();
         end
 
     end

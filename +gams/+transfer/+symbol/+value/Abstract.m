@@ -39,10 +39,15 @@ classdef (Abstract, Hidden) Abstract
 
     properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Abstract, ?gams.transfer.symbol.Abstract})
         label_
+        last_update_ = now()
     end
 
     properties (Dependent)
         label
+    end
+
+    properties (Dependent, SetAccess = private)
+        last_update
     end
 
     properties (Abstract, Dependent, SetAccess = private)
@@ -57,6 +62,11 @@ classdef (Abstract, Hidden) Abstract
 
         function obj = set.label(obj, label)
             obj.label_ = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname();
+            obj.last_update_ = now();
+        end
+
+        function last_update = get.last_update(obj)
+            last_update = obj.last_update_;
         end
 
     end

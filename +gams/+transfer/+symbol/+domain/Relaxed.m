@@ -45,6 +45,10 @@ classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
         name
     end
 
+    properties (Dependent, SetAccess = private)
+        last_update
+    end
+
     methods
 
         function name = get.name(obj)
@@ -57,6 +61,11 @@ classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
                 valid.varname();
             end
             obj.name_ = valid.value;
+            obj.last_update_ = now();
+        end
+
+        function last_update = get.last_update(obj)
+            last_update = obj.last_update_;
         end
 
     end

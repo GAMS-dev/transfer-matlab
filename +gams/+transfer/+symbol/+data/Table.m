@@ -104,12 +104,13 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
 
         function transformToTabular(obj, axes, values, data)
             if isa(data, 'gams.transfer.symbol.data.Table')
-                data.records = obj.records_;
+                data.records_ = obj.records_;
             elseif isa(data, 'gams.transfer.symbol.data.Struct')
-                data.records = table2struct(obj.records_, 'ToScalar', true);
+                data.records_ = table2struct(obj.records_, 'ToScalar', true);
             else
                 error('Invalid data: %s', class(data));
             end
+            data.last_update_ = now();
         end
 
         function removeRows(obj, indices)
@@ -117,6 +118,7 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
             if istable(obj.records_)
                 obj.records_(indices, :) = [];
             end
+            obj.last_update_ = now();
         end
 
     end

@@ -145,6 +145,8 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             for i = 1:numel(values)
                 data.records.(values{i}.label) = full(obj.records_.(values{i}.label)(indices_perm));
             end
+
+            data.last_update_ = now();
         end
 
     end
