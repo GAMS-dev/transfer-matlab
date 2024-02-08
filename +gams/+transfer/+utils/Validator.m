@@ -62,6 +62,20 @@ classdef Validator
             end
         end
 
+        function obj = fileExtension(obj, ext)
+            [~, ~, ext_] = fileparts(obj.value);
+            if ~strcmpi(ext_, ext)
+                error('Argument ''%s'' (at position %d) must be file name with ''%s'' extension.', name, index, ext);
+            end
+        end
+
+        function obj = fileExists(obj)
+            obj.value = gams.transfer.utils.absolute_path(obj.value);
+            if ~isfile(obj.value)
+                error('Argument ''%s'' (at position %d) must name a file that exists.', name, index);
+            end
+        end
+
         function obj = type(obj, class, allow_none)
             if nargin >= 3 && allow_none && isnumeric(obj.value) && isempty(obj.value)
                 return

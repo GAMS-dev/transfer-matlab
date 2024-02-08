@@ -5,8 +5,8 @@
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -73,65 +73,12 @@
 %> \ref gams::transfer::Equation "Equation"
 classdef Container < handle
 
+    %#ok<*INUSD,*STOUT>
+
     properties (Hidden, SetAccess = protected)
         gams_dir_ = ''
         modified_ = true
         data_
-    end
-
-    methods (Hidden, Static)
-
-        function arg = validateGamsDir(name, index, arg)
-            if isstring(arg)
-                arg = char(arg);
-            elseif ~ischar(arg)
-                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
-            end
-            if ~isfile(fullfile(arg, gams.transfer.Constants.GDX_LIBRARY_NAME))
-                error('Argument ''%s'' (at position %d) does not contain a path to the GDX library.', name, index);
-            end
-        end
-
-        function arg = validateGdxFileRead(name, index, arg)
-            arg = gams.transfer.Container.validateGdxFileWrite(name, index, arg);
-            if ~isfile(arg)
-                error('Argument ''%s'' (at position %d) must name a file that exists.', name, index);
-            end
-        end
-
-        function arg = validateGdxFileWrite(name, index, arg)
-            if isstring(arg)
-                arg = char(arg);
-            elseif ~ischar(arg)
-                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
-            end
-            arg = gams.transfer.utils.absolute_path(arg);
-            [~, ~, ext] = fileparts(arg);
-            if ~strcmpi(ext, '.gdx')
-                error('Argument ''%s'' (at position %d) must be file name with ''.gdx'' extension.', name, index);
-            end
-        end
-
-        function arg = validateModified(name, index, arg)
-            if ~islogical(arg)
-                error('Argument ''%s'' (at position %d) must be ''logical''.', name, index);
-            end
-            if ~isscalar(arg)
-                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
-            end
-        end
-
-        function arg = validateReadSource(name, index, arg)
-            if isa(arg, 'gams.transfer.Container')
-                return
-            end
-            if isstring(arg)
-                arg = char(arg);
-            elseif ~ischar(arg)
-                error('Argument ''%s'' (at position %d) must be ''string'', ''char'' or ''gams.transfer.Container''.', name, index);
-            end
-        end
-
     end
 
     properties (Dependent, SetAccess = protected)
@@ -188,8 +135,8 @@ classdef Container < handle
             end
         end
 
-        function obj = set.modified(obj, modified)
-            modified = obj.validateModified('modified', 1, modified);
+        function set.modified(obj, modified)
+            gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
             symbols = obj.data_.getAllEntries();
             for i = 1:numel(symbols)
                 symbols{i}.modified = modified;
@@ -231,24 +178,30 @@ classdef Container < handle
 
             % parse input arguments
             has_gams_dir = false;
-            source = '';
+            has_source = false;
             try
                 index = 1;
                 is_pararg = false;
-                while index <= nargin
+                while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'gams_dir')
-                        obj.gams_dir_ = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'gams_dir', @obj.validateGamsDir);
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        gams_dir = gams.transfer.utils.Validator('gams_dir', index, varargin{index})...
+                            .string2char().type('char').value;
+                        if ~isfile(fullfile(gams_dir, gams.transfer.Constants.GDX_LIBRARY_NAME))
+                            error('Argument ''gams_dir'' (at position %d) does not contain a path to the GDX library.', index);
+                        end
                         has_gams_dir = true;
-                        index = index + 2;
+                        index = index + 1;
                         is_pararg = true;
                     elseif strcmpi(varargin{index}, 'indexed')
                         warning('Setting argument ''indexed'' for the Container has no effect anymore. Use it in the ''read'' and/or ''write'' method.');
                         index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 1
-                        source = gams.transfer.utils.parse_argument(varargin, ...
-                            index, 'source', @obj.validateReadSource);
+                        source = gams.transfer.utils.Validator('source', index, varargin{index}) ...
+                            .types({'gams.transfer.Container', 'string', 'char'}).value;
+                        has_source = true;
                         index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
@@ -264,7 +217,7 @@ classdef Container < handle
             end
 
             % read GDX file
-            if ~strcmp(source, '')
+            if has_source
                 obj.read(source);
             end
         end
@@ -285,48 +238,43 @@ classdef Container < handle
             % 1. container (any):
             %    Other Container
 
-            eq = isequal(class(obj), class(container)) && ...
-                isequal(obj.gams_dir_, container.gams_dir);
-            if ~eq
+            eq = false;
+            if ~isequal(class(obj), class(container)) || ...
+                ~isequal(obj.gams_dir_, container.gams_dir)
                 return
             end
-
             symbols1 = obj.getSymbols();
             symbols2 = container.getSymbols();
-            eq = numel(symbols1) == numel(symbols2);
+            if numel(symbols1) ~= numel(symbols2)
+                return
+            end
             for i = 1:numel(symbols1)
-                eq = eq && symbols1{i}.equals(symbols2{i});
-                if ~eq
+                if ~symbols1{i}.equals(symbols2{i})
                     return
                 end
             end
+            eq = true;
         end
 
     end
 
     methods (Hidden)
 
-        function copyFrom(obj, varargin)
+        function copyFrom(obj, container, varargin)
 
             % parse input arguments
             has_symbols = false;
             try
-                validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'gams.transfer.Container'}, 0));
-                container = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'container', validate);
-                index = 2;
-                is_pararg = false;
-                while index < nargin
+                gams.transfer.utils.Validator('container', 1, container).type('gams.transfer.Container');
+                index = 1;
+                while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'symbols')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1, -1));
-                        symbols_in = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'symbols', validate);
-                        symbols = container.listSymbols();
-                        idx = ismember(symbols, container.getSymbolNames(symbols_in));
-                        symbols = container.getSymbols(symbols(idx));
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .cellstr().value;
                         has_symbols = true;
-                        index = index + 2;
-                        is_pararg = true;
+                        index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
                     end
@@ -334,7 +282,12 @@ classdef Container < handle
             catch e
                 error(e.message);
             end
-            if ~has_symbols
+
+            if has_symbols
+                all_symbols = container.listSymbols();
+                idx = ismember(all_symbols, container.getSymbolNames(symbols));
+                symbols = container.getSymbols(all_symbols(idx));
+            else
                 symbols = container.getSymbols();
             end
 
@@ -377,7 +330,7 @@ classdef Container < handle
         %> c.read('path/to/file.gdx', 'format', 'dense_matrix');
         %> c.read('path/to/file.gdx', 'symbols', {'x', 'z'}, 'format', 'struct', 'values', {'level'});
         %> ```
-        function read(obj, varargin)
+        function read(obj, source, varargin)
             % Reads symbols from GDX file
             %
             % Required Arguments:
@@ -410,49 +363,46 @@ classdef Container < handle
             format = 'table';
             records = true;
             values = {'level', 'marginal', 'lower', 'upper', 'scale'};
-            indexed= false;
+            indexed = false;
             try
-                validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, ...
-                    {'string', 'char', 'gams.transfer.Container'}, -1));
-                source = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'source', validate);
+                valid = gams.transfer.utils.Validator('source', 1, source) ...
+                    .types({'gams.transfer.Container', 'string', 'char'});
                 if ~isa(source, 'gams.transfer.Container')
-                    source = obj.validateGdxFileRead('source', 1, source);
+                    valid.string2char().fileExtension('.gdx').fileExists();
                 end
-                index = 2;
-                is_pararg = false;
-                while index < nargin
+                index = 1;
+                while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'symbols')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1, -1));
-                        symbols = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'symbols', validate);
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().vector().value;
                         has_symbols = true;
-                        index = index + 2;
-                        is_pararg = true;
+                        index = index + 1;
                     elseif strcmpi(varargin{index}, 'format')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'string', 'char'}, -1));
-                        format = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'format', validate);
-                        index = index + 2;
-                        is_pararg = true;
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        format = gams.transfer.utils.Validator('format', index, varargin{index}) ...
+                            .string2char().type('char').vector().value;
+                        index = index + 1;
                     elseif strcmpi(varargin{index}, 'records')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
-                        records = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'records', validate);
-                        index = index + 2;
-                        is_pararg = true;
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        records = gams.transfer.utils.Validator('records', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
                     elseif strcmpi(varargin{index}, 'values')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1, -1));
-                        values = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'values', validate);
-                        index = index + 2;
-                        is_pararg = true;
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        values = gams.transfer.utils.Validator('values', index, varargin{index}) ...
+                            .string2char().cellstr().vector().value;
+                        index = index + 1;
                     elseif strcmpi(varargin{index}, 'indexed')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
-                        indexed = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'indexed', validate);
-                        index = index + 2;
-                        is_pararg = true;
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        indexed = gams.transfer.utils.Validator('indexed', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
                     end
@@ -519,31 +469,7 @@ classdef Container < handle
             for i = 1:numel(symbol_names)
                 symbol = symbols.(symbol_names{i});
 
-                if isfield(symbol, 'format')
-                    switch symbol.format
-                    case {1, 2}
-                        records = gams.transfer.symbol.data.Struct(symbol.records);
-                    case 3
-                        records = gams.transfer.symbol.data.DenseMatrix(symbol.records);
-                    case 4
-                        records = gams.transfer.symbol.data.SparseMatrix(symbol.records);
-                    case 5
-                        records = gams.transfer.symbol.data.Table(symbol.records);
-                    end
-                end
-
-                % adapt domain
-                if ~indexed && isfield(symbol, 'domain')
-                    for j = 1:numel(symbol.domain)
-                        if strcmp(symbol.domain{j}, gams.transfer.Constants.UNIVERSE_NAME) || symbol.domain_type == 2
-                            continue
-                        elseif obj.hasSymbols(symbol.domain{j}) && isfield(symbols, symbol.domain{j})
-                            symbol.domain{j} = obj.getSymbols(symbol.domain{j});
-                        end
-                    end
-                end
-
-                % handle alias differently
+                % create symbol object
                 switch symbol.symbol_type
                 case {gams.transfer.gdx.SymbolType.ALIAS, 'alias'}
                     if strcmp(symbol.alias_with, gams.transfer.Constants.UNIVERSE_NAME)
@@ -569,16 +495,32 @@ classdef Container < handle
                     continue
                 end
 
-                % set properties
-                new_symbol.description_ = symbol.description;
-                new_symbol.data_ = records;
+                % set domain
                 if indexed
                     new_symbol.size = symbol.size;
                 else
+                    for j = 1:numel(symbol.domain)
+                        if ~strcmp(symbol.domain{j}, gams.transfer.Constants.UNIVERSE_NAME) && ...
+                            symbol.domain_type ~= 2 && obj.hasSymbols(symbol.domain{j}) && ...
+                            isfield(symbols, symbol.domain{j})
+                            symbol.domain{j} = obj.getSymbols(symbol.domain{j});
+                        end
+                    end
                     new_symbol.domain = symbol.domain;
                 end
-                if isfield(symbol, 'domain_labels') && numel(symbol.domain_labels) == symbol.dimension
-                    new_symbol.domain_labels = symbol.domain_labels;
+
+                % set data
+                if isfield(symbol, 'format')
+                    switch symbol.format
+                    case {1, 2}
+                        new_symbol.data_ = gams.transfer.symbol.data.Struct(symbol.records);
+                    case 3
+                        new_symbol.data_ = gams.transfer.symbol.data.DenseMatrix(symbol.records);
+                    case 4
+                        new_symbol.data_ = gams.transfer.symbol.data.SparseMatrix(symbol.records);
+                    case 5
+                        new_symbol.data_ = gams.transfer.symbol.data.Table(symbol.records);
+                    end
                 end
 
                 % set uels
@@ -586,6 +528,12 @@ classdef Container < handle
                     for j = 1:new_symbol.dimension
                         new_symbol.unique_labels{j} = gams.transfer.unique_labels.OrderedLabelSet(symbol.uels{j});
                     end
+                end
+
+                % set other properties
+                new_symbol.description_ = symbol.description;
+                if isfield(symbol, 'domain_labels') && numel(symbol.domain_labels) == symbol.dimension
+                    new_symbol.domain_labels = symbol.domain_labels;
                 end
             end
         end
@@ -621,7 +569,7 @@ classdef Container < handle
         %>
         %> @see \ref gams::transfer::Container::getDomainViolations
         %> "Container.getDomainViolations"
-        function write(obj, varargin)
+        function write(obj, filename, varargin)
             % Writes symbols with symbol records to GDX file
             %
             % There are different issues that can occur when writing to GDX:
@@ -668,42 +616,41 @@ classdef Container < handle
             uel_priority = {};
             indexed = false;
             try
-                filename = gams.transfer.utils.parse_argument(varargin, ...
-                    1, 'filename', @obj.validateGdxFileWrite);
-                index = 2;
-                is_pararg = false;
-                while index < nargin
+                filename = gams.transfer.utils.absolute_path(gams.transfer.utils.Validator(...
+                    'filename', 1, filename).string2char().type('char').fileExtension('.gdx').value);
+                index = 1;
+                while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'symbols')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1, -1));
-                        symbols = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'symbols', validate);
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
                         has_symbols = true;
-                        index = index + 2;
-                        is_pararg = true;
+                        index = index + 1;
                     elseif strcmpi(varargin{index}, 'uel_priority')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate_cell(x1, x2, x3, {'string', 'char'}, 1, -1));
-                        uel_priority = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'uel_priority', validate);
-                        index = index + 2;
-                        is_pararg = true;
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        uel_priority = gams.transfer.utils.Validator('uel_priority', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        index = index + 1;
                     elseif strcmpi(varargin{index}, 'compress')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
-                        compress = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'compress', validate);
-                        index = index + 2;
-                        is_pararg = true;
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        compress = gams.transfer.utils.Validator('compress', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
                     elseif strcmpi(varargin{index}, 'sorted')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
-                        sorted = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'sorted', validate);
-                        index = index + 2;
-                        is_pararg = true;
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        sorted = gams.transfer.utils.Validator('sorted', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
                     elseif strcmpi(varargin{index}, 'indexed')
-                        validate = @(x1, x2, x3) (gams.transfer.utils.validate(x1, x2, x3, {'logical'}, 0));
-                        indexed = gams.transfer.utils.parse_argument(varargin, ...
-                            index + 1, 'indexed', validate);
-                        index = index + 2;
-                        is_pararg = true;
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        indexed = gams.transfer.utils.Validator('indexed', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
                     else
                         error('Invalid argument at position %d', index);
                     end
@@ -719,43 +666,24 @@ classdef Container < handle
             end
 
             if ~obj.isValid('symbols', symbols)
-                obj.reorderSymbols();
-                if ~obj.isValid('symbols', symbols)
-                    invalid_symbols = gams.transfer.utils.list2str(...
-                        obj.listSymbols('is_valid', false));
-                    error('Can''t write invalid container. Invalid symbols: %s.', invalid_symbols);
-                end
+                invalid_symbols = gams.transfer.utils.list2str(obj.listSymbols('is_valid', false));
+                error('Can''t write invalid container. Invalid symbols: %s.', invalid_symbols);
             end
 
             % create enable flags
-            if ~has_symbols
-                enable = true(1, numel(symbols));
+            if has_symbols
+                enable = ismember(obj.data_.getAllKeys(), symbols);
             else
-                enable = false(1, numel(symbols));
-                allsymbols = obj.data_.getAllKeys();
-                allsymbols = containers.Map(allsymbols, 1:numel(allsymbols));
-                for i = 1:numel(symbols)
-                    enable(allsymbols(symbols{i})) = true;
-                end
+                enable = true(1, obj.data_.count());
             end
 
             % check indexed symbols
             if indexed
                 disabled_symbols = {};
                 for i = 1:numel(symbols)
-                    if ~enable(i)
-                        continue
-                    end
-                    sym = obj.getSymbols(symbols{i});
-                    for j = 1:sym.dimension
-                        unique_labels = sym.axis(j).unique_labels;
-                        if ~isa(unique_labels, 'gams.transfer.unique_labels.Range') || ...
-                            unique_labels.first ~=1 || unique_labels.step ~= 1 || ...
-                            ~isequal(unique_labels.prefix, '')
-                            enable(i) = false;
-                            disabled_symbols{end+1} = symbols{i};
-                            break
-                        end
+                    if enable(i) && ~obj.getSymbols(symbols{i}).supportsIndexed()
+                        enable(i) = false;
+                        disabled_symbols{end+1} = symbols{i};
                     end
                 end
                 if numel(disabled_symbols) > 0
@@ -775,7 +703,7 @@ classdef Container < handle
             else
                 gams.transfer.gdx.gt_gdx_write(obj.gams_dir_, filename, obj.data_.entries, ...
                     enable, uel_priority, compress, sorted, gams.transfer.Constants.SUPPORTS_TABLE, ...
-                    gams.transfer.Constants.SUPPORTS_CATEGORICAL, false);
+                    gams.transfer.Constants.SUPPORTS_CATEGORICAL);
             end
         end
 
@@ -807,12 +735,10 @@ classdef Container < handle
             % v1 = c.getSymbols('v1');
             % vars = c.getSymbols(c.listVariables());
 
-            if nargin == 1
-                symbols = obj.data_.getAllEntries();
-                return
-            end
             try
-                if iscell(names)
+                if nargin == 1
+                    symbols = obj.data_.getAllEntries();
+                elseif iscell(names)
                     symbols = obj.data_.getEntries(names);
                 else
                     symbols = obj.data_.getEntry(names);
@@ -927,7 +853,7 @@ classdef Container < handle
             %
             % See also: gams.transfer.Container.listEquations, gams.transfer.Container.getSymbols
 
-            symbols = obj.getSymbols(obj.listEquations(varargin));
+            symbols = obj.getSymbols(obj.listEquations(varargin{:}));
         end
 
         %> Gets all Alias objects
@@ -1014,18 +940,17 @@ classdef Container < handle
             is_valid = nan;
             types = {};
             index = 1;
-            is_pararg = false;
-            while index < numel(args)
+            while index <= numel(args)
                 if strcmpi(args{index}, 'is_valid')
-                    is_valid = gams.transfer.utils.parse_argument(args, ...
-                        index + 1, 'is_valid', []);
-                    index = index + 2;
-                    is_pararg = true;
+                    index = index + 1;
+                    gams.transfer.utils.Validator.minargin(numel(args), index);
+                    is_valid = args{index};
+                    index = index + 1;
                 elseif has_types && strcmpi(args{index}, 'types')
-                    types = gams.transfer.utils.parse_argument(args, ...
-                        index + 1, 'types', []);
-                    index = index + 2;
-                    is_pararg = true;
+                    index = index + 1;
+                    gams.transfer.utils.Validator.minargin(numel(args), index);
+                    types = args{index};
+                    index = index + 1;
                 else
                     error('Invalid argument at position %d', index);
                 end
@@ -1965,10 +1890,11 @@ classdef Container < handle
             % Example:
             % c.renameSymbol('x', 'xx');
 
-            if strcmp(oldname, newname)
+            if isequal(oldname, newname)
                 return
             end
             try
+                oldname = gams.transfer.utils.Validator('oldname', 1, oldname).symbolName().value;
                 newname = gams.transfer.utils.Validator('newname', 2, newname).symbolName().value;
             catch e
                 error(e.message);
@@ -2046,7 +1972,6 @@ classdef Container < handle
                 removed_symbols{j}.isValid(false, true);
                 removed_symbols{j}.container = [];
             end
-            removed_symbols = removed_symbols(1:j);
 
             % remove aliases to removed sets
             symbols = obj.data_.getAllEntries();
@@ -2203,23 +2128,37 @@ classdef Container < handle
             % gams.transfer.Symbol.getDomainViolations,
             % gams.transfer.DomainViolation
 
-            dom_violations = {};
-
-            % input arguments
-            p = inputParser();
-            addParameter(p, 'symbols', {}, @iscellstr);
-            parse(p, varargin{:});
-            if isempty(p.Results.symbols)
-                symbols = obj.data_.getAllEntries();
-            else
-                symbols = obj.getSymbols(p.Results.symbols);
+            % parse input arguments
+            has_symbols = false;
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
             end
 
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
+            else
+                symbols = obj.data_.getAllEntries();
+            end
+
+            dom_violations = {};
             for i = 1:numel(symbols)
-                if isa(symbols{i}, 'gams.transfer.Alias')
+                if isa(symbols{i}, 'gams.transfer.alias.Abstract')
                     continue
                 end
-
                 dom_violations_sym = symbols{i}.getDomainViolations();
                 dom_violations(end+1:end+numel(dom_violations_sym)) = dom_violations_sym;
             end
@@ -2270,12 +2209,7 @@ classdef Container < handle
             % gams.transfer.Symbol.resolveDomainViolations,
             % gams.transfer.DomainViolation
 
-            % input arguments
-            p = inputParser();
-            addParameter(p, 'symbols', {}, @iscellstr);
-            parse(p, varargin{:});
-
-            dom_violations = obj.getDomainViolations('symbols', p.Results.symbols);
+            dom_violations = obj.getDomainViolations(varargin{:});
             for i = 1:numel(dom_violations)
                 dom_violations{i}.resolve();
             end
@@ -2313,36 +2247,73 @@ classdef Container < handle
             %
             % See also: gams.transfer.Symbol/isValid
 
-            % input arguments
-            % TODO: replace input parser and allow 2 for verbose and fix error to warning below (dependent of verbose)
-            p = inputParser();
-            addOptional(p, 'verbose', false, @islogical);
-            addOptional(p, 'force', false, @islogical);
-            addParameter(p, 'symbols', {}, @iscellstr);
-            parse(p, varargin{:});
-            if isempty(p.Results.symbols)
-                symbols = obj.data_.getAllEntries();
-            else
-                symbols = obj.getSymbols(p.Results.symbols);
-            end
-            verbose = p.Results.verbose;
-            force = p.Results.force;
+            % parse input arguments
+            has_symbols = false;
+            verbose = false;
+            force = false;
+            try
+                index = 1;
+                is_pararg = false;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                        is_pararg = true;
+                    elseif ~is_pararg && index == 1
+                        verbose = gams.transfer.utils.Validator('verbose', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
+                    elseif ~is_pararg && index == 2
+                        force = gams.transfer.utils.Validator('force', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
 
-            valid = true;
-            for i = 1:numel(symbols)
-                % check correct order of symbols
-                if isa(symbols{i}, 'gams.transfer.symbol.Abstract')
-                    for j = 1:numel(symbols{i}.def.domains)
-                        domain = symbols{i}.def.domains{j};
-                        if ~isa(domain, 'gams.transfer.symbol.domain.Regular')
-                            continue
-                        end
-                        if ~gams.transfer.gdx.gt_check_sym_order(obj.data_.entries, domain.name, symbols{i}.name);
-                            error('Domain ''%s'' of symbol ''%s'' is out of order. Try calling Container.reorderSymbols().', domain.name, symbols{i}.name);
-                        end
+                    else
+                        error('Invalid argument at position %d', index);
                     end
                 end
+            catch e
+                error(e.message);
+            end
 
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
+            else
+                symbols = obj.data_.getAllEntries();
+            end
+
+            % check for correct order of symbols
+            correct_order = true;
+            for i = 1:numel(symbols)
+                if ~isa(symbols{i}, 'gams.transfer.symbol.Abstract')
+                    continue
+                end
+                for j = 1:numel(symbols{i}.def.domains)
+                    domain = symbols{i}.def.domains{j};
+                    if ~isa(domain, 'gams.transfer.symbol.domain.Regular')
+                        continue
+                    end
+                    correct_order = gams.transfer.gdx.gt_check_sym_order(obj.data_.entries, ...
+                        domain.name, symbols{i}.name);
+                    if ~correct_order
+                        break;
+                    end
+                end
+                if ~correct_order
+                    break;
+                end
+            end
+            if ~correct_order
+                obj.reorderSymbols();
+            end
+
+            % check symbols
+            valid = true;
+            for i = 1:numel(symbols)
                 if symbols{i}.isValid(verbose, force)
                     continue
                 end
@@ -2377,23 +2348,45 @@ classdef Container < handle
             %
             % See also: gams.transfer.Container.isValid
 
-            % input arguments
-            p = inputParser();
-            addParameter(p, 'symbols', {}, @iscellstr);
-            addParameter(p, 'ignore_unused', false, @islogical);
-            parse(p, varargin{:});
-            if isempty(p.Results.symbols)
-                symbols = obj.data_.getAllEntries();
+            % parse input arguments
+            has_symbols = false;
+            ignore_unused = false;
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'ignore_unused')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        ignore_unused = gams.transfer.utils.Validator('ignore_unused', index, ...
+                            varargin{index}).type('logical').scalar().value;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.getSymbols(p.Results.symbols);
+                symbols = obj.data_.getAllEntries();
             end
 
             uels = {};
             for i = 1:numel(symbols)
-                if isa(symbols{i}, 'gams.transfer.UniverseAlias')
+                if isa(symbols{i}, 'gams.transfer.alias.Abstract')
                     continue
                 end
-                uels = gams.transfer.utils.unique([uels; symbols{i}.getUELs('ignore_unused', p.Results.ignore_unused)]);
+                uels = gams.transfer.utils.unique([uels; symbols{i}.getUELs('ignore_unused', ignore_unused)]);
             end
         end
 
@@ -2419,47 +2412,41 @@ classdef Container < handle
             %
             % See also: gams.transfer.Container.isValid
 
-            is_parname = @(x) strcmpi(x, 'symbols');
-
-            % check optional arguments
-            i = 1;
+            % parse input arguments
+            has_symbols = false;
             uels = {};
-            while true
-                term = true;
-                if i == 1 && nargin > 1
-                    if ((isstring(uels) && numel(uels) == 1) || ischar(uels) || iscellstr(uels)) && ~is_parname(varargin{i})
-                        uels = varargin{i};
-                        i = i + 1;
-                        term = false;
-                    elseif ~is_parname(varargin{i})
-                        error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            try
+                index = 1;
+                is_pararg = false;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                        is_pararg = true;
+                    elseif ~is_pararg && index == 1
+                        if iscell(varargin{index})
+                            uels = gams.transfer.utils.Validator('uels', index, varargin{index}).cellstr().value;
+                        else
+                            uels = gams.transfer.utils.Validator('uels', index, varargin{index}).types({'string', 'char'}).value;
+                        end
+                        index = index + 1;
+
+                    else
+                        error('Invalid argument at position %d', index);
                     end
                 end
-                if term || i > 1
-                    break;
-                end
+            catch e
+                error(e.message);
             end
 
-            % check parameter arguments
-            symbols = {};
-            while i < nargin - 1
-                if strcmpi(varargin{i}, 'symbols')
-                    symbols = varargin{i+1};
-                else
-                    error('Unknown argument name.');
-                end
-                i = i + 2;
-            end
-
-            % check number of arguments
-            if i <= nargin - 1
-                error('Invalid number of arguments');
-            end
-
-            if isempty(symbols)
-                symbols = obj.data_.getAllEntries();
-            else
+            if has_symbols
                 symbols = obj.getSymbols(symbols);
+            else
+                symbols = obj.data_.getAllEntries();
             end
 
             for i = 1:numel(symbols)
@@ -2499,19 +2486,41 @@ classdef Container < handle
             %
             % See also: gams.transfer.Symbol.isValid
 
-            % input arguments
-            p = inputParser();
-            addParameter(p, 'symbols', {}, @iscellstr);
-            addParameter(p, 'allow_merge', false, @islogical);
-            parse(p, varargin{:});
-            if isempty(p.Results.symbols)
-                symbols = obj.data_.getAllEntries();
+            % parse input arguments
+            has_symbols = false;
+            allow_merge = false;
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'allow_merge')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        allow_merge = gams.transfer.utils.Validator('allow_merge', index, ...
+                            varargin{index}).type('logical').scalar().value;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.getSymbols(p.Results.symbols);
+                symbols = obj.data_.getAllEntries();
             end
 
             for i = 1:numel(symbols)
-                symbols{i}.renameUELs(uels, 'allow_merge', p.Results.allow_merge);
+                symbols{i}.renameUELs(uels, 'allow_merge', allow_merge);
             end
         end
 
@@ -2535,15 +2544,30 @@ classdef Container < handle
             %
             % See also: gams.transfer.Symbol.isValid
 
-            % input arguments
-            p = inputParser();
-            addParameter(p, 'symbols', {}, @iscellstr);
-            parse(p, varargin{:});
+            % parse input arguments
+            has_symbols = false;
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
 
-            if isempty(p.Results.symbols)
-                symbols = obj.data_.getAllEntries();
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.getSymbols(p.Results.symbols);
+                symbols = obj.data_.getAllEntries();
             end
 
             for i = 1:numel(symbols)
@@ -2571,14 +2595,30 @@ classdef Container < handle
             %
             % See also: gams.transfer.Symbol.isValid
 
-            % input arguments
-            p = inputParser();
-            addParameter(p, 'symbols', {}, @iscellstr);
-            parse(p, varargin{:});
-            if isempty(p.Results.symbols)
-                symbols = obj.data_.getAllEntries();
+            % parse input arguments
+            has_symbols = false;
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.getSymbols(p.Results.symbols);
+                symbols = obj.data_.getAllEntries();
             end
 
             for i = 1:numel(symbols)

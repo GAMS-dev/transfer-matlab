@@ -31,6 +31,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 
 #define ERRID "gams:transfer:cmex:gt_idx_write:"

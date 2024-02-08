@@ -456,6 +456,10 @@ classdef (Abstract) Abstract < handle
             obj.modified_ = true;
         end
 
+        function flag = supportsIndexed(obj)
+            flag = false;
+        end
+
     end
 
     methods
@@ -630,7 +634,7 @@ classdef (Abstract) Abstract < handle
                             value = obj.def_.values{j};
                             if isa(value, 'gams.transfer.symbol.value.Numeric') && ~values_used(j)
                                 new_records.(value.label) = records{i};
-                                values{end+1} = value; %#ok<AGROW>
+                                values{end+1} = value;
                                 values_used(j) = true;
                                 stored_record = true;
                                 break;
@@ -648,7 +652,7 @@ classdef (Abstract) Abstract < handle
                                 value = obj.def_.values{j};
                                 if isa(value, 'gams.transfer.symbol.value.String') && ~values_used(j)
                                     new_records.(value.label) = records{i};
-                                    values{end+1} = value; %#ok<AGROW>
+                                    values{end+1} = value;
                                     values_used(j) = true;
                                     stored_record = true;
                                     break;
@@ -660,7 +664,7 @@ classdef (Abstract) Abstract < handle
                         else
                             domain = obj.def_.domains{n_domains};
                             new_records.(domain.label) = records{i};
-                            domains{end+1} = domain; %#ok<AGROW>
+                            domains{end+1} = domain;
                         end
                     else
                         error('Cell elements must be cellstr or numeric.');
@@ -674,14 +678,14 @@ classdef (Abstract) Abstract < handle
                     value = obj.def_.findValue(fields{i});
                     if ~isempty(value)
                         new_records.(value.label) = records.(fields{i});
-                        values{end+1} = value; %#ok<AGROW>
+                        values{end+1} = value;
                         continue;
                     end
 
                     domain = obj.def_.findDomain(fields{i});
                     if ~isempty(domain)
                         new_records.(domain.label) = records.(fields{i});
-                        domains{end+1} = domain; %#ok<AGROW>
+                        domains{end+1} = domain;
                     end
                 end
 
@@ -923,7 +927,7 @@ classdef (Abstract) Abstract < handle
                 added_uels = working_uels(ia);
 
                 if numel(added_uels) > 0
-                    domain_violations{end+1} = gams.transfer.DomainViolation(obj, i, domain.symbol, added_uels); %#ok<AGROW>
+                    domain_violations{end+1} = gams.transfer.DomainViolation(obj, i, domain.symbol, added_uels);
                 end
             end
 
@@ -1478,7 +1482,7 @@ classdef (Abstract) Abstract < handle
                 else
                     uels_i = obj.getUniqueLabelsAt(i, codes);
                 end
-                uels = [uels; reshape(uels_i, numel(uels_i), 1)]; %#ok<AGROW>
+                uels = [uels; reshape(uels_i, numel(uels_i), 1)];
             end
 
             if numel(dimensions) > 1

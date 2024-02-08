@@ -40,8 +40,8 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
     methods
 
         function status = isValid(obj, axes, values)
-            axes = gams.transfer.utils.validate('axes', 1, axes, {'gams.transfer.symbol.unique_labels.Axes'}, -1);
-            values = gams.transfer.utils.validate_cell('values', 2, values, {'gams.transfer.symbol.value.Abstract'}, 1, -1);
+            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
+            values = obj.availableValues('Numeric', values);
 
             % empty is valid
             if numel(obj.getLabels()) == 0
@@ -91,10 +91,6 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
 
             for i = 1:numel(values)
                 label = values{i}.label;
-
-                if ~obj.isLabel(label)
-                    continue
-                end
 
                 switch class(values{i})
                 case 'gams.transfer.symbol.value.Numeric'
@@ -249,12 +245,12 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
         end
 
         function transformToMatrix(obj, axes, values, data)
-            axes = gams.transfer.utils.validate('axes', 1, axes, {'gams.transfer.symbol.unique_labels.Axes'}, -1);
+            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
             values = obj.availableValues('Numeric', values);
             if numel(values) == 0
                 error('At least one numeric value column is required to transform to a matrix format.');
             end
-            data = gams.transfer.utils.validate('data', 3, data, {'gams.transfer.symbol.data.Matrix'}, -1);
+            gams.transfer.utils.Validator('data', 3, data).type('gams.transfer.symbol.data.Matrix');
             if isa(data, 'gams.transfer.symbol.data.SparseMatrix') && axes.dimension > 2
                 error('Sparse matrix does not support dimension larger than 2.');
             end

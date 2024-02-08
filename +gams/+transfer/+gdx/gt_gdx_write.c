@@ -48,7 +48,7 @@ void mexFunction(
     char text[GMS_SSSIZE], dominfo[10], sysdir[GMS_SSSIZE];
     double def_values[GMS_VAL_MAX];
     bool was_table, support_table, support_categorical, compress, issorted, singleton;
-    bool have_nrecs, support_setget, can_skip_default_recs;
+    bool have_nrecs, can_skip_default_recs;
     char* data_name = NULL;
     gdxHandle_t gdx = NULL;
     gdxStrIndexPtrs_t domains_ptr;
@@ -83,7 +83,7 @@ void mexFunction(
     GDXSTRINDEXPTRS_INIT(domains, domains_ptr);
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(0, nlhs, 10, nrhs);
+    gt_mex_check_arguments_num(0, nlhs, 9, nrhs);
     gt_mex_check_argument_str(prhs, 0, sysdir);
     gt_mex_check_argument_str(prhs, 1, gdx_filename);
     gt_mex_check_argument_struct(prhs, 2);
@@ -92,7 +92,6 @@ void mexFunction(
     gt_mex_check_argument_bool(prhs, 6, 1, &issorted);
     gt_mex_check_argument_bool(prhs, 7, 1, &support_table);
     gt_mex_check_argument_bool(prhs, 8, 1, &support_categorical);
-    gt_mex_check_argument_bool(prhs, 9, 1, &support_setget);
 
     /* create output data */
     plhs = NULL;

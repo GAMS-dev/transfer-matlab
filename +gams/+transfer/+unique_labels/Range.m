@@ -226,4 +226,12 @@ classdef Range < gams.transfer.unique_labels.Abstract
 
     end
 
+    methods (Hidden)
+
+        function flag = supportsIndexed(obj)
+            flag = obj.first_ == 1 && obj.step_ == 1 && strcmp(obj.prefix_, '');
+        end
+
+    end
+
 end

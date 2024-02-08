@@ -54,7 +54,7 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
         end
 
         function status = isValid(obj, axes, values)
-            axes = gams.transfer.utils.validate('axes', 1, axes, {'gams.transfer.symbol.unique_labels.Axes'}, -1);
+            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
             values = obj.availableValues('Numeric', values);
 
             size_ = axes.matrixSize();
@@ -105,9 +105,9 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
         end
 
         function transformToTabular(obj, axes, values, data)
-            axes = gams.transfer.utils.validate('axes', 1, axes, {'gams.transfer.symbol.unique_labels.Axes'}, -1);
+            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
             values = obj.availableValues('Numeric', values);
-            data = gams.transfer.utils.validate('data', 3, data, {'gams.transfer.symbol.data.Tabular'}, -1);
+            gams.transfer.utils.Validator('data', 3, data).type('gams.transfer.symbol.data.Tabular');
 
             % get size
             size_ = axes.matrixSize();

@@ -1,12 +1,12 @@
-% Find GDX library from PATH
+% Find GDX library from PATH (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,10 +28,14 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Find GDX library from PATH
+% Find GDX library from PATH (internal)
 %
 % sysdir = find_gdx() returns the path to the GAMS system directory if it is
 % part of the PATH environment variable and an empty string otherwise.
+%
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
 function gdx_path = find_gdx()
     gdx_path = '';
 

@@ -85,6 +85,14 @@ classdef (Abstract) Abstract < handle
 
     end
 
+    methods (Hidden)
+
+        function flag = supportsIndexed(obj)
+            flag = false;
+        end
+
+    end
+
     methods (Static)
 
         function index = createIndexFrom(input, unique_labels)

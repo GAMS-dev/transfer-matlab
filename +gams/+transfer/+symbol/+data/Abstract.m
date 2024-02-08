@@ -78,7 +78,7 @@ classdef (Abstract, Hidden) Abstract < handle
         end
 
         function copyFrom(obj, symbol)
-            symbol = gams.transfer.utils.validate('symbol', 1, symbol, {class(obj)}, -1);
+            gams.transfer.utils.Validator('symbol', 1, symbol).type(class(obj));
             obj.records_ = symbol.records_;
             obj.last_update_ = symbol.last_update_;
         end
@@ -128,7 +128,7 @@ classdef (Abstract, Hidden) Abstract < handle
         end
 
         function sparsity = getSparsity(obj, axes, values)
-            axes = gams.transfer.utils.validate('axes', 1, axes, {'gams.transfer.symbol.unique_labels.Axes'}, -1);
+            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
             values = obj.availableValues('Numeric', values);
             n_dense = prod(axes.size()) * numel(values);
             if n_dense == 0

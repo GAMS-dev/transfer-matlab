@@ -43,7 +43,7 @@ classdef CaseInsensitiveStruct < gams.transfer.ordered_dict.Abstract
         end
 
         function flags = hasKeys(obj, keys)
-            keys = gams.transfer.utils.validate('keys', 1, keys, {'cell'}, -1);
+            % keys = gams.transfer.utils.validate('keys', 1, keys, {'cell'}, -1);
             flags = true(size(keys));
             for i = 1:numel(keys)
                 flags(i) = obj.hasKey(keys{i});
@@ -59,7 +59,7 @@ classdef CaseInsensitiveStruct < gams.transfer.ordered_dict.Abstract
         end
 
         function keys = getKeys(obj, keys)
-            keys = gams.transfer.utils.validate('keys', 1, keys, {'cell'}, -1);
+            % keys = gams.transfer.utils.validate('keys', 1, keys, {'cell'}, -1);
             for i = 1:numel(keys)
                 keys{i} = obj.getKey(keys{i});
             end
@@ -83,7 +83,7 @@ classdef CaseInsensitiveStruct < gams.transfer.ordered_dict.Abstract
         end
 
         function indices = findKeys(obj, keys)
-            keys = gams.transfer.utils.validate('keys', 1, keys, {'cell'}, -1);
+            % keys = gams.transfer.utils.validate('keys', 1, keys, {'cell'}, -1);
             indices = zeros(size(keys));
             for i = 1:numel(keys)
                 indices(i) = obj.findKey(keys{i});

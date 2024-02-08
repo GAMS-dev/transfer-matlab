@@ -211,6 +211,20 @@ classdef Parameter < gams.transfer.symbol.Abstract
 
     end
 
+    methods (Hidden)
+
+        function flag = supportsIndexed(obj)
+            flag = false;
+            for i = 1:obj.dimension
+                if ~obj.axis(i).unique_labels.supportsIndexed()
+                    return
+                end
+            end
+            flag = true;
+        end
+
+    end
+
     methods
 
         %> Copies symbol to destination container
