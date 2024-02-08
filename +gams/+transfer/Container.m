@@ -126,7 +126,7 @@ classdef Container < handle
             if modified
                 return
             end
-            symbols = obj.data_.getAllEntries();
+            symbols = obj.data_.entries();
             for i = 1:numel(symbols)
                 if modified
                     return
@@ -137,7 +137,7 @@ classdef Container < handle
 
         function set.modified(obj, modified)
             gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
-            symbols = obj.data_.getAllEntries();
+            symbols = obj.data_.entries();
             for i = 1:numel(symbols)
                 symbols{i}.modified = modified;
             end
@@ -174,7 +174,7 @@ classdef Container < handle
         function obj = Container(varargin)
             % Constructs a GAMS Transfer Container, see class help
 
-            obj.data_ = gams.transfer.ordered_dict.CaseInsensitiveStruct();
+            obj.data_ = gams.transfer.incase_ordered_dict.Struct();
 
             % parse input arguments
             has_gams_dir = false;
@@ -662,7 +662,7 @@ classdef Container < handle
             if has_symbols && ~isempty(symbols)
                 symbols = obj.getSymbolNames(symbols);
             else
-                symbols = obj.data_.getAllKeys();
+                symbols = obj.data_.keys();
             end
 
             if ~obj.isValid('symbols', symbols)
@@ -672,7 +672,7 @@ classdef Container < handle
 
             % create enable flags
             if has_symbols
-                enable = ismember(obj.data_.getAllKeys(), symbols);
+                enable = ismember(obj.data_.keys(), symbols);
             else
                 enable = true(1, obj.data_.count());
             end
@@ -698,10 +698,10 @@ classdef Container < handle
 
             % write data
             if indexed
-                gams.transfer.gdx.gt_idx_write(obj.gams_dir_, filename, obj.data_.entries, ...
+                gams.transfer.gdx.gt_idx_write(obj.gams_dir_, filename, obj.data_.entries_, ...
                     enable, sorted, gams.transfer.Constants.SUPPORTS_TABLE);
             else
-                gams.transfer.gdx.gt_gdx_write(obj.gams_dir_, filename, obj.data_.entries, ...
+                gams.transfer.gdx.gt_gdx_write(obj.gams_dir_, filename, obj.data_.entries_, ...
                     enable, uel_priority, compress, sorted, gams.transfer.Constants.SUPPORTS_TABLE, ...
                     gams.transfer.Constants.SUPPORTS_CATEGORICAL);
             end
@@ -737,11 +737,9 @@ classdef Container < handle
 
             try
                 if nargin == 1
-                    symbols = obj.data_.getAllEntries();
-                elseif iscell(names)
-                    symbols = obj.data_.getEntries(names);
+                    symbols = obj.data_.entries();
                 else
-                    symbols = obj.data_.getEntry(names);
+                    symbols = obj.data_.entries(names);
                 end
             catch e
                 error('Cannot get symbols: %s', e.message);
@@ -896,11 +894,7 @@ classdef Container < handle
             % true if GAMS symbol named b{i} (case does not matter) exists.
             % false otherwise.
 
-            if iscell(names)
-                bool = obj.data_.hasKeys(names);
-            else
-                bool = obj.data_.hasKey(names);
-            end
+            bool = obj.data_.exists(names);
         end
 
         %> Get symbol names by names (case insensitive)
@@ -925,11 +919,7 @@ classdef Container < handle
             % Example:
             % v1 = c.getSymbolNames('v1'); % equals c.getSymbolNames('V1');
 
-            if iscell(names)
-                symbols = obj.data_.getKeys(names);
-            else
-                symbols = obj.data_.getKey(names);
-            end
+            symbols = obj.data_.keys(names);
         end
 
     end
@@ -994,12 +984,12 @@ classdef Container < handle
             end
 
             if isempty(types) && ~islogical(is_valid)
-                list = obj.data_.getAllKeys();
+                list = obj.data_.keys();
                 return
             end
 
             % count matched symbols
-            symbols = obj.data_.getAllEntries();
+            symbols = obj.data_.entries();
             for k = 1:2
                 n = 0;
                 for i = 1:numel(symbols)
@@ -1151,7 +1141,7 @@ classdef Container < handle
             if numel(types) > 0
                 filter = false(size(list));
                 for i = 1:numel(list)
-                    symbol = obj.data_.getEntry(list{i});
+                    symbol = obj.data_.entries(list{i});
                     filter(i) = sum(types == gams.transfer.VariableType(symbol.type).value) > 0;
                 end
                 list = list(filter);
@@ -1208,7 +1198,7 @@ classdef Container < handle
             if numel(types) > 0
                 filter = false(size(list));
                 for i = 1:numel(list)
-                    symbol = obj.data_.getEntry(list{i});
+                    symbol = obj.data_.entries(list{i});
                     filter(i) = sum(types == gams.transfer.EquationType(symbol.type).value) > 0;
                 end
                 list = list(filter);
@@ -1974,7 +1964,7 @@ classdef Container < handle
             end
 
             % remove aliases to removed sets
-            symbols = obj.data_.getAllEntries();
+            symbols = obj.data_.entries();
             remove_aliases = {};
             for i = 1:numel(symbols)
                 if isa(symbols{i}, 'gams.transfer.alias.Set')
@@ -2151,7 +2141,7 @@ classdef Container < handle
             if has_symbols
                 symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.data_.getAllEntries();
+                symbols = obj.data_.entries();
             end
 
             dom_violations = {};
@@ -2283,7 +2273,7 @@ classdef Container < handle
             if has_symbols
                 symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.data_.getAllEntries();
+                symbols = obj.data_.entries();
             end
 
             % check for correct order of symbols
@@ -2297,7 +2287,7 @@ classdef Container < handle
                     if ~isa(domain, 'gams.transfer.symbol.domain.Regular')
                         continue
                     end
-                    correct_order = gams.transfer.gdx.gt_check_sym_order(obj.data_.entries, ...
+                    correct_order = gams.transfer.gdx.gt_check_symbol_order(obj.data_.entries_, ...
                         domain.name, symbols{i}.name);
                     if ~correct_order
                         break;
@@ -2378,7 +2368,7 @@ classdef Container < handle
             if has_symbols
                 symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.data_.getAllEntries();
+                symbols = obj.data_.entries();
             end
 
             uels = {};
@@ -2446,7 +2436,7 @@ classdef Container < handle
             if has_symbols
                 symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.data_.getAllEntries();
+                symbols = obj.data_.entries();
             end
 
             for i = 1:numel(symbols)
@@ -2516,7 +2506,7 @@ classdef Container < handle
             if has_symbols
                 symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.data_.getAllEntries();
+                symbols = obj.data_.entries();
             end
 
             for i = 1:numel(symbols)
@@ -2567,7 +2557,7 @@ classdef Container < handle
             if has_symbols
                 symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.data_.getAllEntries();
+                symbols = obj.data_.entries();
             end
 
             for i = 1:numel(symbols)
@@ -2618,7 +2608,7 @@ classdef Container < handle
             if has_symbols
                 symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.data_.getAllEntries();
+                symbols = obj.data_.entries();
             end
 
             for i = 1:numel(symbols)

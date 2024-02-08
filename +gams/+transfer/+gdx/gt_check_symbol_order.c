@@ -1,8 +1,8 @@
 /*
  * GAMS - General Algebraic Modeling System Matlab API
  *
- * Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@
 #include "mex.h"
 #include "gt_mex.h"
 
-#define ERRID "gams:transfer:cmex:gt_check_sym_order:"
+#define ERRID "gams:transfer:cmex:gt_check_symbol_order:"
 
 void mexFunction(
     int             nlhs,
