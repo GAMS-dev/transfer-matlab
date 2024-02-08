@@ -59,6 +59,7 @@ classdef (Hidden) Set < gams.transfer.symbol.definition.Abstract
     methods (Hidden, Access = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract})
 
         function obj = Set(is_singleton)
+            obj.domains_ = {gams.transfer.symbol.domain.Relaxed(gams.transfer.Constants.UNIVERSE_NAME)};
             obj.is_singleton_ = is_singleton;
         end
 
@@ -89,9 +90,8 @@ classdef (Hidden) Set < gams.transfer.symbol.definition.Abstract
 
     methods (Hidden, Access = protected)
 
-        function resetValues(obj)
+        function initValues(obj)
             obj.values_ = {gams.transfer.symbol.value.String('element_text', '')};
-            obj.last_update_ = now();
         end
 
     end

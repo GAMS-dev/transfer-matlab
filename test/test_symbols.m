@@ -1096,14 +1096,14 @@ function test_changeSymbol(t, cfg)
         x1.dimension = -1;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0, 20].');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0,20].');
     end
     try
         t.assert(false);
         x1.dimension = 21;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0, 20].');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0,20].');
     end
 
     t.add('change_symbol_dimension_3');
@@ -1194,7 +1194,7 @@ function test_changeSymbol(t, cfg)
         x1.domain = {x2};
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Argument ''domains'' (at position 1, element 1) must be ''gams.transfer.symbol.domain.Domain'', ''gams.transfer.symbol.Set'', ''char'' or ''string''.');
+        t.assertEquals(e.message, 'Cannot create domains from ''domains'' (at position 1): Element 1 must be ''gams.transfer.symbol.domain.Abstract'', ''gams.transfer.symbol.Set'', ''char'' or ''string''.');
     end
 
     t.add('change_symbol_domain_labels_1');
@@ -1286,14 +1286,14 @@ function test_changeSymbol(t, cfg)
         x1.domain_labels = '*';
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must be cell.');
+        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must be ''cell''.');
     end
     try
         t.assert(false);
         x1.domain_labels = {'*'};
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must be cell with 2 elements.');
+        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must have 2 elements.');
     end
 
 end
@@ -2707,30 +2707,19 @@ function test_reorder(t, cfg)
     s3.domain = {s4};
 
     t.add('reorder_2');
+    gdx.modified = false;
     t.assert(numel(fieldnames(gdx.data)) == 4);
     fields = fieldnames(gdx.data);
     t.assertEquals(fields{1}, 's1');
     t.assertEquals(fields{2}, 's2');
     t.assertEquals(fields{3}, 's3');
     t.assertEquals(fields{4}, 's4');
-    try
-        t.assert(false);
-        gdx.isValid();
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain ''s4'' of symbol ''s3'' is out of order. Try calling Container.reorderSymbols().');
-    end
-
-    gdx.modified = false;
-    gdx.reorderSymbols();
-
-    t.add('reorder_3');
+    gdx.isValid();
     t.assert(gdx.modified);
     t.assert(~s1.modified);
     t.assert(~s2.modified);
     t.assert(~s3.modified);
     t.assert(~s4.modified);
-    t.assert(numel(fieldnames(gdx.data)) == 4);
     fields = fieldnames(gdx.data);
     t.assertEquals(fields{1}, 's1');
     t.assertEquals(fields{2}, 's2');
@@ -2747,7 +2736,7 @@ function test_reorder(t, cfg)
     gdx.modified = false;
     gdx.reorderSymbols();
 
-    t.add('reorder_4');
+    t.add('reorder_3');
     t.assert(gdx.modified);
     t.assert(~s1.modified);
     t.assert(~s2.modified);
@@ -2768,7 +2757,7 @@ function test_reorder(t, cfg)
     s2.domain = {s3};
     s3.domain = {s2};
 
-    t.add('reorder_5');
+    t.add('reorder_4');
     try
         t.assert(false);
         gdx.reorderSymbols();
@@ -2782,14 +2771,7 @@ function test_reorder(t, cfg)
     s1 = gams.transfer.Set(gdx, 's1', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
     s1.domain = {s1};
 
-    t.add('reorder_6');
-    try
-        t.assert(false);
-        gdx.isValid();
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain ''s1'' of symbol ''s1'' is out of order. Try calling Container.reorderSymbols().');
-    end
+    t.add('reorder_5');
     try
         t.assert(false);
         gdx.reorderSymbols();

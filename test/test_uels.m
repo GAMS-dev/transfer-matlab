@@ -586,10 +586,10 @@ function test_symbol_uels(t, cfg)
     uels = x.getUELs(2, 'ignore_unused', true);
     t.assert(numel(uels) == 5);
     t.assertEquals(uels{1}, 'j2');
-    t.assertEquals(uels{2}, 'j5');
-    t.assertEquals(uels{3}, 'j7');
-    t.assertEquals(uels{4}, 'j8');
-    t.assertEquals(uels{5}, 'j9');
+    t.assertEquals(uels{2}, 'j8');
+    t.assertEquals(uels{3}, 'j9');
+    t.assertEquals(uels{4}, 'j5');
+    t.assertEquals(uels{5}, 'j7');
 
     t.add('symbol_uels_set_1');
     c.modified = false;

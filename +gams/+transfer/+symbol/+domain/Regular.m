@@ -77,6 +77,9 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
         function obj = Regular(symbol)
             obj.symbol_ = symbol;
             obj.label_ = symbol.name;
+            if obj.symbol_.dimension ~= 1
+                error('Set ''%s'' cannot be used as domain since dimension is not 1.', obj.symbol_.name);
+            end
         end
 
     end
@@ -91,6 +94,16 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
     end
 
     methods
+
+        function domain = copy(obj)
+            domain = gams.transfer.symbol.domain.Regular(obj.symbol_);
+            domain.copyFrom(obj);
+        end
+
+        function copyFrom(obj, domain)
+            copyFrom@gams.transfer.symbol.domain.Abstract(obj, domain);
+            obj.symbol_ = domain.symbol;
+        end
 
         function eq = equals(obj, domain)
             eq = equals@gams.transfer.symbol.domain.Abstract(obj, domain) && ...

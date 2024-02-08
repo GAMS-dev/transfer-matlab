@@ -246,14 +246,14 @@ function test_idx_changeSymbol(t, cfg)
         p1.dimension = -1;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0, 20].');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0,20].');
     end
     try
         t.assert(false);
         p1.dimension = 21;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0, 20].');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0,20].');
     end
 
     t.add('idx_change_symbol_size_1');
@@ -282,35 +282,35 @@ function test_idx_changeSymbol(t, cfg)
         p1.size = '2';
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Argument ''size'' (at position 1) must be ''numeric''.');
+        t.assertEquals(e.message, 'Argument ''size'' (at position 1) must be numeric.');
     end
     try
         t.assert(false);
         p1.size = 2.5;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Size must be integer.');
+        t.assertEquals(e.message, 'Argument ''size'' (at position 1) must be integer.');
     end
     try
         t.assert(false);
         p1.size = nan;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Size must not be inf or nan.');
+        t.assertEquals(e.message, 'Argument ''size'' (at position 1) must be integer.');
     end
     try
         t.assert(false);
         p1.size = inf;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Size must not be inf or nan.');
+        t.assertEquals(e.message, 'Argument ''size'' (at position 1) must not be inf.');
     end
     try
         t.assert(false);
         p1.size = -1;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Size must be non-negative.');
+        t.assertEquals(e.message, 'Argument ''size'' (at position 1) must be equal to or larger than 0.');
     end
 
     t.add('idx_change_symbol_domain_labels_1');
@@ -349,14 +349,14 @@ function test_idx_changeSymbol(t, cfg)
         p1.domain_labels = '*';
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must be cell.');
+        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must be ''cell''.');
     end
     try
         t.assert(false);
         p1.domain_labels = {'*'};
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must be cell with 2 elements.');
+        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must have 2 elements.');
     end
 end
 

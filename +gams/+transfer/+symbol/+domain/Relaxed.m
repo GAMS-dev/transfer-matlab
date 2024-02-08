@@ -97,6 +97,16 @@ classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
 
     methods
 
+        function domain = copy(obj)
+            domain = gams.transfer.symbol.domain.Relaxed(obj.name_);
+            domain.copyFrom(obj);
+        end
+
+        function copyFrom(obj, domain)
+            copyFrom@gams.transfer.symbol.domain.Abstract(obj, domain);
+            obj.name_ = domain.name;
+        end
+
         function eq = equals(obj, domain)
             eq = equals@gams.transfer.symbol.domain.Abstract(obj, domain) && ...
                 isequal(obj.name_, domain.name);

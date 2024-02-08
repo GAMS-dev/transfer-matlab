@@ -63,8 +63,8 @@ classdef (Abstract, Hidden) Abstract < handle
                     input = {input};
                 else
                     error(['Cannot create domains from ''%s'' (at position %d): Must be ''cell'', ', ...
-                        'gams.transfer.symbol.domain.Abstract'', ''gams.transfer.symbol.Set'' or ', ...
-                        'gams.transfer.alias.Abstract''.'], name, index);
+                        '''gams.transfer.symbol.domain.Abstract'', ''gams.transfer.symbol.Set'' or ', ...
+                        '''gams.transfer.alias.Abstract''.'], name, index);
                 end
             end
             domains = cell(size(input));
@@ -77,8 +77,8 @@ classdef (Abstract, Hidden) Abstract < handle
                     domains{i} = gams.transfer.symbol.domain.Relaxed(input{i});
                 else
                     error(['Cannot create domains from ''%s'' (at position %d): Element %d must be ', ...
-                        'gams.transfer.symbol.domain.Abstract'', ''gams.transfer.symbol.Set'', ', ...
-                        'char'' or ''string''.'], name, index, i);
+                        '''gams.transfer.symbol.domain.Abstract'', ''gams.transfer.symbol.Set'', ', ...
+                        '''char'' or ''string''.'], name, index, i);
                 end
             end
         end
@@ -103,7 +103,7 @@ classdef (Abstract, Hidden) Abstract < handle
 
         function values = get.values(obj)
             if isnumeric(obj.values_) && isempty(obj.values_)
-                obj.resetValues()
+                obj.initValues()
             end
             values = obj.values_;
         end
@@ -126,10 +126,13 @@ classdef (Abstract, Hidden) Abstract < handle
             error('Abstract method. Call method of subclass ''%s''.', class(obj));
         end
 
-        function copyFrom(obj, symbol)
-            gams.transfer.utils.Validator('symbol', 1, symbol).type(class(obj));
-            obj.domains_ = symbol.domains;
-            obj.values_ = symbol.values;
+        function copyFrom(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type(class(obj));
+            obj.domains_ = cell(size(def.domains));
+            for i = 1:numel(obj.domains_)
+                obj.domains_{i} = def.domains{i}.copy();
+            end
+            obj.values_ = def.values;
             obj.last_update_ = now();
         end
 
@@ -234,8 +237,13 @@ classdef (Abstract, Hidden) Abstract < handle
 
     methods (Hidden, Access = protected)
 
-        function resetValues(obj)
+        function initValues(obj)
             error('Abstract method. Call method of subclass ''%s''.', class(obj));
+        end
+
+        function resetValues(obj)
+            obj.initValues();
+            obj.last_update_ = now();
         end
 
     end

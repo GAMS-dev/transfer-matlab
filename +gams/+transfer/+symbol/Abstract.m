@@ -275,7 +275,7 @@ classdef (Abstract) Abstract < handle
         end
 
         function set.size(obj, size)
-            gams.transfer.utils.Validator('size', 1, size).integer();
+            gams.transfer.utils.Validator('size', 1, size).integer().noNanInf().min(0);
             domains = cell(1, numel(size));
             for i = 1:numel(size)
                 domains{i} = ['dim_', int2str(i)];
@@ -401,7 +401,7 @@ classdef (Abstract) Abstract < handle
         end
 
         function modified = get.modified(obj)
-            modified = isempty(obj.last_update_reset_) || obj.last_update_reset_ <= obj.last_update;
+            modified = isempty(obj.last_update_reset_) || obj.last_update_reset_ < obj.last_update;
         end
 
         function set.modified(obj, modified)

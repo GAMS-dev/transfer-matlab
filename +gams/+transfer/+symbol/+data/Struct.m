@@ -94,7 +94,7 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
         end
 
         function nrecs = getNumberRecords(obj, axes, values)
-            values = obj.availableValues('Value', values);
+            values = obj.availableValues('Abstract', values);
 
             nrecs_axes = nan(1, axes.dimension);
             nrecs_values = nan(1, numel(values));

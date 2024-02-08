@@ -80,6 +80,17 @@ classdef (Abstract, Hidden) Abstract < handle
 
     methods
 
+        function domain = copy(obj)
+            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+        end
+
+        function copyFrom(obj, domain)
+            gams.transfer.utils.Validator('domain', 1, domain).type(class(obj));
+            obj.label_ = domain.label;
+            obj.forwarding_ = domain.forwarding;
+            obj.last_update_ = now();
+        end
+
         function eq = equals(obj, domain)
             eq = isequal(class(obj), class(domain)) && ...
                 isequal(obj.label_, domain.label) && ...

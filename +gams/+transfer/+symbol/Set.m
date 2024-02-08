@@ -102,13 +102,10 @@ classdef Set < gams.transfer.symbol.Abstract
 
     methods (Hidden, Access = {?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
 
-        function obj = Set(container, name, is_singleton, init_domains, init_records)
+        function obj = Set(container, name, is_singleton, init_records)
             obj.container_ = container;
             obj.name_ = name;
             obj.def_ = gams.transfer.symbol.definition.Set(is_singleton);
-            if init_domains
-                obj.def_.domains_ = {gams.transfer.symbol.domain.Relaxed(gams.transfer.Constants.UNIVERSE_NAME)};
-            end
             if init_records
                 obj.data_ = gams.transfer.symbol.data.Struct();
             end
@@ -175,7 +172,7 @@ classdef Set < gams.transfer.symbol.Abstract
                     if strcmpi(varargin{index}, 'description')
                         index = index + 1;
                         gams.transfer.utils.Validator.minargin(nargin, index);
-                        description = gams.transfer.utils.Validator('name', index, varargin{index}) ...
+                        description = gams.transfer.utils.Validator('description', index, varargin{index}) ...
                             .symbolDescription().value;
                         has_description = true;
                         index = index + 1;
@@ -222,7 +219,7 @@ classdef Set < gams.transfer.symbol.Abstract
                 error(e.message);
             end
 
-            obj = gams.transfer.symbol.Set(container, name, is_singleton, ~has_domains && ~has_size, ~has_records);
+            obj = gams.transfer.symbol.Set(container, name, is_singleton, ~has_records);
             if has_description
                 obj.description_ = description;
             end
@@ -303,12 +300,12 @@ classdef Set < gams.transfer.symbol.Abstract
                     destination.removeSymbols(obj.name_);
                     symbol = destination.addSet(obj.name_);
                 end
-                symbol.copyFrom(obj);
-                symbol.def.switchContainer(destination);
             else
                 symbol = destination.addSet(obj.name_);
-                symbol.copyFrom(obj);
             end
+
+            symbol.copyFrom(obj);
+            symbol.def.switchContainer(destination);
         end
 
     end

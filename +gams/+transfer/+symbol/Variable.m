@@ -133,7 +133,7 @@ classdef Variable < gams.transfer.symbol.Abstract
 
     methods (Hidden, Access = {?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
 
-        function obj = Variable(container, name, type, init_domains, init_records)
+        function obj = Variable(container, name, type, init_records)
             obj.container_ = container;
             obj.name_ = name;
             obj.def_ = gams.transfer.symbol.definition.Variable.construct(type);
@@ -205,7 +205,7 @@ classdef Variable < gams.transfer.symbol.Abstract
                     if strcmpi(varargin{index}, 'description')
                         index = index + 1;
                         gams.transfer.utils.Validator.minargin(nargin, index);
-                        description = gams.transfer.utils.Validator('name', index, varargin{index}) ...
+                        description = gams.transfer.utils.Validator('description', index, varargin{index}) ...
                             .symbolDescription().value;
                         has_description = true;
                         index = index + 1;
@@ -252,7 +252,7 @@ classdef Variable < gams.transfer.symbol.Abstract
             if ~has_type
                 type = gams.transfer.VariableType.Free;
             end
-            obj = gams.transfer.symbol.Variable(container, name, type, ~has_domains && ~has_size, ~has_records);
+            obj = gams.transfer.symbol.Variable(container, name, type, ~has_records);
             if has_description
                 obj.description_ = description;
             end
@@ -333,12 +333,12 @@ classdef Variable < gams.transfer.symbol.Abstract
                     destination.removeSymbols(obj.name_);
                     symbol = destination.addVariable(obj.name_);
                 end
-                symbol.copyFrom(obj);
-                symbol.def.switchContainer(destination);
             else
                 symbol = destination.addVariable(obj.name_);
-                symbol.copyFrom(obj);
             end
+
+            symbol.copyFrom(obj);
+            symbol.def.switchContainer(destination);
         end
 
 

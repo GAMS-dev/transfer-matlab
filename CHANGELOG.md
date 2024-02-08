@@ -19,6 +19,7 @@ GAMS Transfer Matlab v0.9.0
   indexed mode when passing a size array instead of a domain. Within a container indexed and
   non-indexed symbols can be mixed. Writing to normal GDX file is always possible, for writing
   indexed, special criteria has to be met by the written symbols.
+- TODO: Container isValid calls reorder symbols silently
 
 GAMS Transfer Matlab v0.8.0
 ==================

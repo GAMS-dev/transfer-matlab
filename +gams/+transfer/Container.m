@@ -136,7 +136,7 @@ classdef Container < handle
 
         function modified = get.modified(obj)
             modified = true;
-            if isempty(obj.last_update_reset_) || obj.last_update_reset_ <= obj.last_update
+            if isempty(obj.last_update_reset_) || obj.last_update_reset_ < obj.last_update
                 return
             end
             symbols = obj.data_.entries();
@@ -229,7 +229,9 @@ classdef Container < handle
             end
 
             % find GDX directory from PATH if not given
-            if ~has_gams_dir
+            if has_gams_dir
+                obj.gams_dir_ = gams_dir;
+            else
                 obj.gams_dir_ = gams.transfer.utils.find_gdx();
             end
 
@@ -497,13 +499,13 @@ classdef Container < handle
                         error('Alias reference for symbol ''%s'' not found: %s.', symbol.name, symbol.alias_with);
                     end
                 case {gams.transfer.gdx.SymbolType.SET, 'set'}
-                    new_symbol = gams.transfer.symbol.Set(obj, symbol.name, symbol.is_singleton, false, false);
+                    new_symbol = gams.transfer.symbol.Set(obj, symbol.name, symbol.is_singleton, false);
                 case {gams.transfer.gdx.SymbolType.PARAMETER, 'parameter'}
-                    new_symbol = gams.transfer.symbol.Parameter(obj, symbol.name, false, false);
+                    new_symbol = gams.transfer.symbol.Parameter(obj, symbol.name, false);
                 case {gams.transfer.gdx.SymbolType.VARIABLE, 'variable'}
-                    new_symbol = gams.transfer.symbol.Variable(obj, symbol.name, symbol.type, false, false);
+                    new_symbol = gams.transfer.symbol.Variable(obj, symbol.name, symbol.type, false);
                 case {gams.transfer.gdx.SymbolType.EQUATION, 'equation'}
-                    new_symbol = gams.transfer.symbol.Equation(obj, symbol.name, symbol.type, false, false);
+                    new_symbol = gams.transfer.symbol.Equation(obj, symbol.name, symbol.type, false);
                 otherwise
                     error('Invalid symbol type');
                 end
@@ -519,7 +521,7 @@ classdef Container < handle
                     for j = 1:numel(symbol.domain)
                         if ~strcmp(symbol.domain{j}, gams.transfer.Constants.UNIVERSE_NAME) && ...
                             symbol.domain_type ~= 2 && obj.hasSymbols(symbol.domain{j}) && ...
-                            isfield(symbols, symbol.domain{j})
+                            isfield(symbols, symbol.domain{j}) && ~strcmpi(symbol.name, symbol.domain{j})
                             symbol.domain{j} = obj.getSymbols(symbol.domain{j});
                         end
                     end

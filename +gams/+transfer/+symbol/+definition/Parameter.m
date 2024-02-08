@@ -63,9 +63,8 @@ classdef (Hidden) Parameter < gams.transfer.symbol.definition.Abstract
 
     methods (Hidden, Access = protected)
 
-        function resetValues(obj)
+        function initValues(obj)
             obj.values_ = {gams.transfer.symbol.value.Numeric('value', 0)};
-            obj.last_update_ = now();
         end
 
     end

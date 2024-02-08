@@ -107,7 +107,7 @@ classdef (Hidden) Equation < gams.transfer.symbol.definition.Abstract
 
     methods (Hidden, Access = protected)
 
-        function resetValues(obj)
+        function initValues(obj)
             gdx_default_values = gams.transfer.gdx.gt_get_defaults(...
                 int32(gams.transfer.gdx.SymbolType.EQUATION), int32(obj.type_.value));
             obj.values_ = {...
@@ -116,7 +116,6 @@ classdef (Hidden) Equation < gams.transfer.symbol.definition.Abstract
                 gams.transfer.symbol.value.Numeric('lower', gdx_default_values(3)), ...
                 gams.transfer.symbol.value.Numeric('upper', gdx_default_values(4)), ...
                 gams.transfer.symbol.value.Numeric('scale', gdx_default_values(5))};
-            obj.last_update_ = now();
         end
 
     end

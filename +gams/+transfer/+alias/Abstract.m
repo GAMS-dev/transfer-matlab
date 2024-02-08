@@ -196,7 +196,7 @@ classdef (Abstract) Abstract < handle
         end
 
         function modified = get.modified(obj)
-            modified = isempty(obj.last_update_reset_) || obj.last_update_reset_ <= obj.last_update;
+            modified = isempty(obj.last_update_reset_) || obj.last_update_reset_ < obj.last_update;
         end
 
         function set.modified(obj, modified)
