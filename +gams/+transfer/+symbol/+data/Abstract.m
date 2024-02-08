@@ -99,6 +99,16 @@ classdef (Abstract, Hidden) Abstract < handle
             error('Abstract method. Call method of subclass ''%s''.', class(obj));
         end
 
+        function values = availableValues(obj, class, values)
+            idx = true(size(values));
+            for i = 1:numel(values)
+                if ~isa(values{i}, ['gams.transfer.symbol.value.', class]) || ~obj.isLabel(values{i}.label)
+                    idx(i) = false;
+                end
+            end
+            values = values(idx);
+        end
+
         function status = isValid(obj, axes, values)
             error('Abstract method. Call method of subclass ''%s''.', class(obj));
         end
@@ -195,16 +205,6 @@ classdef (Abstract, Hidden) Abstract < handle
 
         function subindex = ind2sub(obj, axes, value, linindex)
             error('Abstract method. Call method of subclass ''%s''.', class(obj));
-        end
-
-        function values = availableValues(obj, class, values)
-            idx = true(size(values));
-            for i = 1:numel(values)
-                if ~isa(values{i}, ['gams.transfer.symbol.value.', class]) || ~obj.isLabel(values{i}.label)
-                    idx(i) = false;
-                end
-            end
-            values = values(idx);
         end
 
         function [value, where] = getFunValue(obj, fun, axes, values)

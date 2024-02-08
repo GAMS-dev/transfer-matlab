@@ -55,7 +55,11 @@ classdef (Hidden) SparseMatrix < gams.transfer.symbol.data.Matrix
     methods (Static)
 
         function obj = construct(records)
-            obj = gams.transfer.symbol.data.SparseMatrix(records);
+            if nargin == 0
+                obj = gams.transfer.symbol.data.SparseMatrix();
+            else
+                obj = gams.transfer.symbol.data.SparseMatrix(records);
+            end
         end
 
     end

@@ -1,12 +1,12 @@
-% Dictionary
+% Ordered Label Set based Unique Labels (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,11 +28,12 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Dictionary
+% Ordered Label Set based Unique Labels (internal)
 %
-
-%> @brief Abstract UELs
-classdef OrderedLabelSet < gams.transfer.unique_labels.Abstract
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
 
     properties (Hidden, SetAccess = private)
         uels_label2ids_
@@ -48,6 +49,22 @@ classdef OrderedLabelSet < gams.transfer.unique_labels.Abstract
             end
         end
 
+    end
+
+    methods (Static)
+
+        function obj = construct(labels)
+            if nargin == 1
+                obj = gams.transfer.unique_labels.OrderedLabelSet(labels);
+            else
+                obj = gams.transfer.unique_labels.OrderedLabelSet();
+            end
+        end
+
+    end
+
+    methods
+
         function unique_labels = copy(obj)
             unique_labels = gams.transfer.unique_labels.OrderedLabelSet(obj.get());
         end
@@ -62,7 +79,7 @@ classdef OrderedLabelSet < gams.transfer.unique_labels.Abstract
         end
 
         function add(obj, labels)
-            % TODO check labels
+            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr().value;
             if ischar(labels) || isstring(labels)
                 labels = {labels};
             end
@@ -82,7 +99,7 @@ classdef OrderedLabelSet < gams.transfer.unique_labels.Abstract
         end
 
         function remove(obj, labels)
-            % TODO check labels
+            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr().value;
             if ischar(labels) || isstring(labels)
                 labels = {labels};
             end
@@ -99,7 +116,7 @@ classdef OrderedLabelSet < gams.transfer.unique_labels.Abstract
         end
 
         function rename(obj, oldlabels, newlabels)
-
+            % TODO
         end
 
     end

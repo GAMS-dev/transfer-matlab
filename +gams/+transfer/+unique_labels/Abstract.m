@@ -1,12 +1,12 @@
-% Abstract UELs
+% Abstract Unique Labels (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,31 +28,29 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Abstract UELs
+% Abstract Unique Labels (internal)
 %
-
-%> @brief Abstract UELs
-classdef (Abstract) Abstract < handle
-
-    methods (Abstract)
-
-        unique_labels = copy(obj)
-        labels = get(obj)
-        add(obj, labels)
-        set(obj, labels)
-        remove(obj, labels)
-        rename(obj, oldlabels, newlabels)
-
-    end
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Abstract, Hidden) Abstract < handle
 
     methods
+
+        function unique_labels = copy(obj)
+            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+        end
 
         function count = count(obj)
             count = numel(obj.get());
         end
 
+        function labels = get(obj)
+            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+        end
+
         function labels = getAt(obj, indices)
-            % TODO check indices
+            gams.transfer.utils.Validator('indices', 1, indices).integer();
             if numel(indices) == 0
                 labels = {};
             end
@@ -63,12 +61,28 @@ classdef (Abstract) Abstract < handle
         end
 
         function indices = find(obj, labels)
-            % TODO check labels
+            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr().value;
             [~, indices] = ismember(labels, obj.get());
         end
 
         function clear(obj)
-            obj.set({});
+            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+        end
+
+        function add(obj, labels)
+            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+        end
+
+        function set(obj, labels)
+            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+        end
+
+        function remove(obj, labels)
+            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+        end
+
+        function rename(obj, oldlabels, newlabels)
+            error('Abstract method. Call method of subclass ''%s''.', class(obj));
         end
 
         function index = createIndex(obj, input)
@@ -104,23 +118,22 @@ classdef (Abstract) Abstract < handle
         end
 
         function index = createCategoricalIndexFrom(input, unique_labels)
-            if ~iscellstr(unique_labels)
-                error('Argument ''unique_labels'' (at position 2) must be ''cellstr''.');
-            end
-            if iscellstr(input)
+            unique_labels = gams.transfer.utils.Validator('unique_labels', 2, unique_labels) ...
+                .string2char().cellstr().value;
+            if iscell(input)
+                input = gams.transfer.utils.Validator('input', 1, input).string2char().cellstr().value;
                 index = categorical(input, unique_labels, 'Ordinal', true);
-            elseif isnumeric(input) && all(round(input) == input)
-                index = categorical(input, 1:numel(unique_labels), unique_labels, 'Ordinal', true);
             else
-                error('Argument ''input'' (at position 1) must be ''cellstr'' or integer ''numeric''.');
+                gams.transfer.utils.Validator('input', 1, input).integer();
+                index = categorical(input, 1:numel(unique_labels), unique_labels, 'Ordinal', true);
             end
         end
 
         function index = createIntegerIndexFrom(input, unique_labels)
-            if ~iscellstr(unique_labels)
-                error('Argument ''unique_labels'' (at position 2) must be ''cellstr''.');
-            end
-            if iscellstr(input)
+            unique_labels = gams.transfer.utils.Validator('unique_labels', 2, unique_labels) ...
+                .string2char().cellstr().value;
+            if iscell(input)
+                input = gams.transfer.utils.Validator('input', 1, input).string2char().cellstr().value;
                 map = containers.Map(unique_labels, 1:numel(unique_labels));
                 index = zeros(size(input));
                 for i = 1:numel(input)
@@ -128,11 +141,10 @@ classdef (Abstract) Abstract < handle
                         index(i) = map(input{i});
                     end
                 end
-            elseif isnumeric(input) && all(round(input) == input)
+            else
+                gams.transfer.utils.Validator('input', 1, input).integer();
                 index = input;
                 index(index < 1 | numel(unique_labels)) = 0;
-            else
-                error('Argument ''input'' (at position 1) must be ''cellstr'' or integer ''numeric''.');
             end
         end
 

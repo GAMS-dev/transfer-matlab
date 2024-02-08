@@ -196,6 +196,15 @@ classdef Validator
             end
         end
 
+        function obj = noNanInf(obj)
+            if isnan(obj.value)
+                error('Argument ''%s'' (at position %d) must not be nan.', obj.name, obj.index);
+            end
+            if isinf(obj.value)
+                error('Argument ''%s'' (at position %d) must not be inf.', obj.name, obj.index);
+            end
+        end
+
         function obj = scalar(obj)
             if ~isscalar(obj.value)
                 error('Argument ''%s'' (at position %d) must be scalar.', obj.name, obj.index);

@@ -55,7 +55,11 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
     methods (Static)
 
         function obj = construct(records)
-            obj = gams.transfer.symbol.data.Table(records);
+            if nargin == 0
+                obj = gams.transfer.symbol.data.Table();
+            else
+                obj = gams.transfer.symbol.data.Table(records);
+            end
         end
 
     end
@@ -105,6 +109,13 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
                 data.records = table2struct(obj.records_, 'ToScalar', true);
             else
                 error('Invalid data: %s', class(data));
+            end
+        end
+
+        function removeRows(obj, indices)
+            gams.transfer.utils.Validator('indices', 1, indices).integer().vector().min(1);
+            if istable(obj.records_)
+                obj.records_(indices, :) = [];
             end
         end
 

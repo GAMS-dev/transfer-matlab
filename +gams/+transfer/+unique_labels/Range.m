@@ -1,12 +1,12 @@
-% Abstract UELs
+% Range based Unique Labels (internal)
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,11 +28,12 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Abstract UELs
+% Range based Unique Labels (internal)
 %
-
-%> @brief Abstract UELs
-classdef Range < gams.transfer.unique_labels.Abstract
+% Attention: Internal classes or functions have limited documentation and its properties, methods
+% and method or function signatures can change without notice.
+%
+classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
 
     properties (Hidden, SetAccess = protected)
 
@@ -40,81 +41,6 @@ classdef Range < gams.transfer.unique_labels.Abstract
         first_ = 1
         step_ = 1
         length_ = 0
-
-    end
-
-    methods (Static, Hidden)
-
-        function arg = validatePrefix(name, index, arg)
-            if isstring(arg)
-                arg = char(arg);
-            elseif ~ischar(arg)
-                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
-            end
-        end
-
-        function arg = validateFirst(name, index, arg)
-            if ~isnumeric(arg)
-                error('Argument ''%s'' (at position %d) must be numeric.', name, index);
-            end
-            if ~isscalar(arg)
-                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
-            end
-            if round(arg) ~= arg
-                error('Argument ''%s'' (at position %d) must be integer.', name, index);
-            end
-            if arg < 0
-                error('Argument ''%s'' (at position %d) must be non-negative.', name, index);
-            end
-            if isnan(arg)
-                error('Argument ''%s'' (at position %d) must not be nan.', name, index);
-            end
-            if isinf(arg)
-                error('Argument ''%s'' (at position %d) must not be inf.', name, index);
-            end
-        end
-
-        function arg = validateStep(name, index, arg)
-            if ~isnumeric(arg)
-                error('Argument ''%s'' (at position %d) must be numeric.', name, index);
-            end
-            if ~isscalar(arg)
-                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
-            end
-            if round(arg) ~= arg
-                error('Argument ''%s'' (at position %d) must be integer.', name, index);
-            end
-            if arg < 1
-                error('Argument ''%s'' (at position %d) must be positive.', name, index);
-            end
-            if isnan(arg)
-                error('Argument ''%s'' (at position %d) must not be nan.', name, index);
-            end
-            if isinf(arg)
-                error('Argument ''%s'' (at position %d) must not be inf.', name, index);
-            end
-        end
-
-        function arg = validateLength(name, index, arg)
-            if ~isnumeric(arg)
-                error('Argument ''%s'' (at position %d) must be numeric.', name, index);
-            end
-            if ~isscalar(arg)
-                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
-            end
-            if round(arg) ~= arg
-                error('Argument ''%s'' (at position %d) must be integer.', name, index);
-            end
-            if arg < 0
-                error('Argument ''%s'' (at position %d) must be non-negative.', name, index);
-            end
-            if isnan(arg)
-                error('Argument ''%s'' (at position %d) must not be nan.', name, index);
-            end
-            if isinf(arg)
-                error('Argument ''%s'' (at position %d) must not be inf.', name, index);
-            end
-        end
 
     end
 
@@ -132,7 +58,7 @@ classdef Range < gams.transfer.unique_labels.Abstract
         end
 
         function set.prefix(obj, prefix)
-            obj.prefix_ = obj.validatePrefix('prefix', 1, prefix);
+            obj.prefix_ = gams.transfer.utils.Validator('prefix', 1, prefix).string2char().type('char').value;
         end
 
         function first = get.first(obj)
@@ -140,7 +66,8 @@ classdef Range < gams.transfer.unique_labels.Abstract
         end
 
         function set.first(obj, first)
-            obj.first_ = obj.validateFirst('first', 1, first);
+            gams.transfer.utils.Validator('first', 1, first).integer().scalar().min(0).noNanInf();
+            obj.first_ = first;
         end
 
         function step = get.step(obj)
@@ -148,7 +75,8 @@ classdef Range < gams.transfer.unique_labels.Abstract
         end
 
         function set.step(obj, step)
-            obj.step_ = obj.validateStep('step', 1, step);
+            gams.transfer.utils.Validator('step', 1, step).integer().scalar().min(1).noNanInf();
+            obj.step_ = step;
         end
 
         function length = get.length(obj)
@@ -156,19 +84,36 @@ classdef Range < gams.transfer.unique_labels.Abstract
         end
 
         function set.length(obj, length)
-            obj.length_ = obj.validateLength('length', 1, length);
+            gams.transfer.utils.Validator('length', 1, length).integer().scalar().min(0).noNanInf();
+            obj.length_ = length;
+        end
+
+    end
+
+    methods (Hidden, Access = {?gams.transfer.unique_labels.Abstract, ?gams.transfer.symbol.Abstract})
+
+        function obj = Range(prefix, first, step, length)
+            obj.prefix_ = prefix;
+            obj.first_ = first;
+            obj.step_ = step;
+            obj.length_ = length;
+        end
+
+    end
+
+    methods (Static)
+
+        function obj = construct(prefix, first, step, length)
+            prefix = gams.transfer.utils.Validator('prefix', 1, prefix).string2char().type('char').value;
+            gams.transfer.utils.Validator('first', 2, first).integer().scalar().min(0).noNanInf();
+            gams.transfer.utils.Validator('step', 3, step).integer().scalar().min(1).noNanInf();
+            gams.transfer.utils.Validator('length', 4, length).integer().scalar().min(0).noNanInf();
+            obj = gams.transfer.unique_labels.Range(prefix, first, step, length);
         end
 
     end
 
     methods
-
-        function obj = Range(prefix, first, step, length)
-            obj.prefix = prefix;
-            obj.first = first;
-            obj.step = step;
-            obj.length = length;
-        end
 
         function unique_labels = copy(obj)
             unique_labels = gams.transfer.unique_labels.Range(obj.prefix_, obj.first_, obj.step_, obj.length_);
@@ -186,7 +131,7 @@ classdef Range < gams.transfer.unique_labels.Abstract
         end
 
         function labels = getAt(obj, indices)
-            % TODO check indices
+            gams.transfer.utils.Validator('indices', 1, indices).integer();
             labels = cell(1, numel(indices));
             for i = 1:numel(indices)
                 labels{i} = [obj.prefix_, int2str(obj.first_ + obj.step_ * (indices(i) - 1))];
@@ -194,11 +139,6 @@ classdef Range < gams.transfer.unique_labels.Abstract
             if numel(indices) == 1
                 labels = labels{1};
             end
-        end
-
-        function indices = find(obj, labels)
-            % TODO check labels
-            error('todo');
         end
 
         function clear(obj)

@@ -54,7 +54,11 @@ classdef (Hidden) DenseMatrix < gams.transfer.symbol.data.Matrix
     methods (Static)
 
         function obj = construct(records)
-            obj = gams.transfer.symbol.data.DenseMatrix(records);
+            if nargin == 0
+                obj = gams.transfer.symbol.data.DenseMatrix();
+            else
+                obj = gams.transfer.symbol.data.DenseMatrix(records);
+            end
         end
 
     end

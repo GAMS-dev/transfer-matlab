@@ -921,7 +921,7 @@ classdef (Abstract) Abstract < handle
                 if isequal(axis1.unique_labels, axis2.unique_labels)
                     continue
                 end
-                working_uels = axis1.unique_labels.getAt(obj.data_.usedUniqueLabels(domain));
+                working_uels = axis1.unique_labels.getAt(obj.usedUniqueLabels(i));
                 defining_uels = axis2.unique_labels.get();
                 [~, ia] = setdiff(lower(working_uels), lower(defining_uels));
                 added_uels = working_uels(ia);
@@ -1297,9 +1297,8 @@ classdef (Abstract) Abstract < handle
         function axis = axis(obj, dimension, prioritize_super)
             domain = obj.def_.domains{dimension};
             if nargin == 2 || ~prioritize_super
-                if ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain)
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, ...
-                        gams.transfer.unique_labels.Data(obj.data_, domain));
+                if ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain.label)
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.data_.getUniqueLabels(domain.label));
                 elseif ~isempty(obj.unique_labels{dimension})
                     axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
                 elseif domain.hasUniqueLabels()
@@ -1313,9 +1312,8 @@ classdef (Abstract) Abstract < handle
                     axis = gams.transfer.symbol.unique_labels.Axis(domain.label, domain.getUniqueLabels());
                 elseif ~isempty(obj.unique_labels{dimension})
                     axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
-                elseif ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain)
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, ...
-                        gams.transfer.unique_labels.Data(obj.data_, domain));
+                elseif ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain.label)
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.data_.getUniqueLabels(domain.label));
                 else
                     obj.unique_labels_{dimension} = gams.transfer.unique_labels.OrderedLabelSet();
                     axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
@@ -1336,7 +1334,7 @@ classdef (Abstract) Abstract < handle
         end
 
         function indices = usedUniqueLabels(obj, dimension)
-            indices = obj.data_.usedUniqueLabels(obj.def_.domains{dimension});
+            indices = obj.data_.usedUniqueLabels(obj.def_.domains{dimension}.label);
         end
 
         function count = countUniqueLabels(obj, dimension)
@@ -1360,16 +1358,25 @@ classdef (Abstract) Abstract < handle
         end
 
         function addUniqueLabels(obj, dimension, labels)
+            if ~iscell(labels)
+                labels = {labels};
+            end
             obj.axis(dimension).unique_labels.add(labels);
         end
 
         function setUniqueLabels(obj, dimension, labels)
+            if ~iscell(labels)
+                labels = {labels};
+            end
             obj.axis(dimension).unique_labels.set(labels);
         end
 
         function updateUniqueLabels(obj, dimension, labels)
+            if ~iscell(labels)
+                labels = {labels};
+            end
             unique_labels = obj.axis(dimension).unique_labels;
-            if isa(unique_labels, 'gams.transfer.unique_labels.Data')
+            if isa(unique_labels, 'gams.transfer.unique_labels.CategoricalColumn')
                 assert(unique_labels.data == obj.data_);
                 obj.data_.updateUniqueLabels(obj.def_.domains{dimension}, labels);
             else
@@ -1378,12 +1385,15 @@ classdef (Abstract) Abstract < handle
         end
 
         function removeUniqueLabels(obj, dimension, labels)
+            if ~iscell(labels)
+                labels = {labels};
+            end
             obj.axis(dimension).unique_labels.remove(labels);
         end
 
         function removeUnusedUniqueLabels(obj, dimension)
             unique_labels = obj.axis(dimension).unique_labels;
-            if isa(unique_labels, 'gams.transfer.unique_labels.Data')
+            if isa(unique_labels, 'gams.transfer.unique_labels.CategoricalColumn')
                 assert(unique_labels.data == obj.data_);
                 obj.data_.removeUnusedUniqueLabels(obj.def_.domains{dimension});
             else
@@ -1392,12 +1402,24 @@ classdef (Abstract) Abstract < handle
         end
 
         function renameUniqueLabels(obj, dimension, oldlabels, newlabels)
+            if ~iscell(oldlabels)
+                oldlabels = {oldlabels};
+            end
+            if ~iscell(newlabels)
+                newlabels = {newlabels};
+            end
             obj.axis(dimension).unique_labels.rename(oldlabels, newlabels);
         end
 
         function mergeUniqueLabels(obj, dimension, oldlabels, newlabels)
+            if ~iscell(oldlabels)
+                oldlabels = {oldlabels};
+            end
+            if ~iscell(newlabels)
+                newlabels = {newlabels};
+            end
             unique_labels = obj.axis(dimension).unique_labels;
-            if isa(unique_labels, 'gams.transfer.unique_labels.Data')
+            if isa(unique_labels, 'gams.transfer.unique_labels.CategoricalColumn')
                 assert(unique_labels.data == obj.data_);
                 obj.data_.mergeUniqueLabels(obj.def_.domains{dimension}, oldlabels, newlabels);
             else

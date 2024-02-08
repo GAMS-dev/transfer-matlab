@@ -109,7 +109,7 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
         end
 
         function unique_labels = getUniqueLabels(obj)
-            unique_labels = gams.transfer.unique_labels.Symbol(obj.symbol_);
+            unique_labels = gams.transfer.unique_labels.DomainSet(obj.symbol_);
         end
 
         function domain = getRelaxed(obj)
