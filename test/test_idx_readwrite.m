@@ -561,9 +561,6 @@ function test_idx_readWritePartial(t, cfg)
     gdx.write(write_filename, 'symbols', {}, 'indexed', true);
     gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx.read(write_filename, 'indexed', true);
-    t.assert(numel(fieldnames(gdx.data)) == 3);
-    t.assert(isfield(gdx.data, 'a'));
-    t.assert(isfield(gdx.data, 'b'));
-    t.assert(isfield(gdx.data, 'c'));
+    t.assert(numel(fieldnames(gdx.data)) == 0);
     t.assert(gdx.isValid());
 end

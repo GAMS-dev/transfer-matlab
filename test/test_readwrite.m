@@ -1577,12 +1577,7 @@ function test_readWritePartial(t, cfg)
     t.add('read_write_partial_5');
     gdx.write(write_filename, 'symbols', {});
     gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
-    t.assert(numel(fieldnames(gdx.data)) == 5);
-    t.assert(isfield(gdx.data, 'i'));
-    t.assert(isfield(gdx.data, 'j'));
-    t.assert(isfield(gdx.data, 'a'));
-    t.assert(isfield(gdx.data, 'b'));
-    t.assert(isfield(gdx.data, 'x'));
+    t.assert(numel(fieldnames(gdx.data)) == 0);
     t.assert(gdx.isValid());
 
 end

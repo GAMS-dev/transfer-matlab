@@ -567,14 +567,11 @@ classdef Container < handle
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be written. All if empty. Case doesn't matter.
-        %>   Default is `{}`.
+        %>   List of symbols to be written. Case doesn't matter. Default is `{}`.
         %> - compress (`logical`):
-        %>   Flag to compress GDX file (`true`) or not (`false`). Default is
-        %>   `false`.
+        %>   Flag to compress GDX file (`true`) or not (`false`). Default is `false`.
         %> - sorted (`logical`):
-        %>   Flag to define records as sorted (`true`) or not (`false`). Default
-        %>   is `false`.
+        %>   Flag to define records as sorted (`true`) or not (`false`). Default is `false`.
         %> - uel_priority (`cellstr`):
         %>   UELs to be registered first before any symbol UELs. Default: `{}`.
         %> - indexed (`logical`):
@@ -591,17 +588,15 @@ classdef Container < handle
         function write(obj, filename, varargin)
             % Writes symbols with symbol records to GDX file
             %
-            % There are different issues that can occur when writing to GDX:
-            % e.g. domain violations and unsorted data. For domain violations,
-            % see gams.transfer.Container.getDomainViolations. Domain labels are
-            % stored as UELs in GDX that are an (code,label) pair. The code is a
-            % number with an ascending order based on the write occurence. Data
-            % records must be sorted by these codes in ascending order (dimension
-            % 1 first, then dimension 2, ...). If one knows that the data is
-            % sorted, one can set the flag 'sorted' to true to improve
-            % performance. Otherwise GAMS Transfer will sort the values
-            % internally. Note, that the case of 'sorted' being true and the
-            % data not being sorted will lead to an error.
+            % There are different issues that can occur when writing to GDX: e.g. domain violations
+            % and unsorted data. For domain violations, see
+            % gams.transfer.Container.getDomainViolations. Domain labels are stored as UELs in GDX
+            % that are an (code,label) pair. The code is a number with an ascending order based on
+            % the write occurence. Data records must be sorted by these codes in ascending order
+            % (dimension 1 first, then dimension 2, ...). If one knows that the data is sorted, one
+            % can set the flag 'sorted' to true to improve performance. Otherwise GAMS Transfer will
+            % sort the values internally. Note, that the case of 'sorted' being true and the data
+            % not being sorted will lead to an error.
             %
             % Required Arguments:
             % 1. filename (string):
@@ -609,14 +604,11 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be written. All if empty. Case doesn't
-            %   matter. Default is {}.
+            %   List of symbols to be written. Case doesn't matter. Default is {}.
             % - compress (logical):
-            %   Flag to compress GDX file (true) or not (false). Default is
-            %   false.
+            %   Flag to compress GDX file (true) or not (false). Default is false.
             % - sorted (logical):
-            %   Flag to define records as sorted (true) or not (false). Default
-            %   is false.
+            %   Flag to define records as sorted (true) or not (false). Default is false.
             % - uel_priority (cellstr):
             %   UELs to be registered first before any symbol UELs. Default: {}.
             % - indexed (logical):
@@ -678,7 +670,7 @@ classdef Container < handle
                 error(e.message);
             end
 
-            if has_symbols && ~isempty(symbols)
+            if has_symbols
                 symbols = obj.getSymbolNames(symbols);
             else
                 symbols = obj.data_.keys();

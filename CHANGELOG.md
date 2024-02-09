@@ -20,6 +20,7 @@ GAMS Transfer Matlab v0.9.0
   non-indexed symbols can be mixed. Writing to normal GDX file is always possible, for writing
   indexed, special criteria has to be met by the written symbols.
 - TODO: Container isValid calls reorder symbols silently
+- TODO: write empty symbols list does not mean all symbols anymore.
 
 GAMS Transfer Matlab v0.8.0
 ==================
