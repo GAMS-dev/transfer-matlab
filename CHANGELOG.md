@@ -1,26 +1,68 @@
 GAMS Transfer Matlab v0.9.0
 ==================
-- Added subpackages `gams.transfer.symbol` and `gams.transfer.alias`.
-- Renamed subpackage `gams.transfer.cmex` to `gams.transfer.gdx`.
-- Method `copy` of symbols and aliases now returns the new symbol.
-- TODO: set domain labels explicitly and not auto after c.data.x update.
-- TODO: read without records was empty format. no longer
-- TODO: creating a symbol without records will create a empty records struct or table (instead fof []).
-- TODO: setRecords with struct. Domains no longer taken by number of occurance but by domain label.
-- TODO: Resetting symbol domain (or size) resets domain properties.
-- TODO: added container property to symbols
-- TODO: removing symbol -> domain gets relaxed and not set to universe anymore
-- TODO: allow to set symbol format
-- TODO: read scalar: densematrix was changed to struct. not anymore
+- Removed property `Container.indexed`. A container may now store indexed or standard symbols
+  together. To read or write an indexed GDX file, pass the argument `indexed, true` to
+  `Container.read` or `Container.write`. When writing an indexed GDX file, non-indexed symbols are
+  ignored. Writing a standard GDX file is always possible for all symbols (however, the meaning of
+  indexed symbols may be different). An indexed symbol can be created by passing the size array
+  instead of a domain cell for the domain (as before) or by setting `size` property of the symbol.
+- Restructured symbol classes:
+  - Added subpackages `gams.transfer.symbol` and `gams.transfer.alias` (as well as internal
+    subpackages `gams.transfer.incase_ordered_dict`, `gams.transfer.unique_labels`,
+    `gams.transfer.symbol.data`, `gams.transfer.symbol.definition`, `gams.transfer.symbol.domain`,
+    `gams.transfer.symbol.value` and `gams.transfer.symbol.unique_labels`). Note that internal and/
+    or hidden classes and packages may alter its API without notice, so use at own risk. Referring
+    to subpackages without `gams.transfer` in the following.
+  - Changed symbol and alias classes to `symbol.Set`, `symbol.Parameter`, `symbol.Variable`,
+    `symbol.Equation`, `alias.Set` and `alias.Universe`. The previous (constructors of) classes
+    `Set`, `Parameter`, `Variable`, `Equation`, `Alias` and `UniverseAlias` are now factory methods
+    that forward the call to `Container.addSet`, `Container.addParameter`, `Container.addVariable`,
+    `Container.addEquation`, `Container.addAlias` or `Container.addUniverseAlias`, respectively.
+    Therefore, the factory methods now benefit from the overwrite feature of the `Container.add*`
+    methods.
+  - Changed abstract symbol class `Symbol` to `symbol.Abstract` and added abstract alias class
+    `alias.Abstract`.
+- Changed behaviour of `symbol.Abstract.format` (previously `Symbol.format`):
+  - Changed selection of `symbol.Abstract.format`: This was previously detected automatically from
+    `symbol.Abstract.records`. It is now chosen explicitly to be one of the four supported formats
+    `table`, `struct`, `dense_matrix` or `sparse_matrix` by setting `symbol.Abstract.format`.
+    `symbol.Abstract.isValid` will check the records towards the chosen format. Changing the format
+    by setting `symbol.Abstract.format` does not change `symbol.Abstract.records`.
+  - Changed `symbol.Abstract.format` when reading or creating symbol without records: Previously
+    this was `empty` and `symbol.Abstract.records` was `[]`. Now, the format is always one of the
+    four supported formats `table`, `struct`, `dense_matrix` or `sparse_matrix` (but without any
+    records).
+  - Changed `symbol.Abstract.format` when reading a scalar. In this case the formats `struct` and
+    `dense_matrix` are identical and `Container.read` preferred `struct`, i.e., `dense_matrix` was
+    changed to `struct`. This is not the case anymore.
+- Changed handling of `symbol.Abstract.domain_labels`: Previously, if not set explicitly, these were
+  extracted from the records. This is not the case anymore. They default to
+  `symbol.Abstract.domain_names` (with possible unique added IDs). Changing the fields / columns in
+  the records may require to update `symbol.Abstract.domain_labels` accordingly. However, updating
+  `symbol.Abstract.domain_labels` will also update the corresponding fields / columns if available.
+- Changed `symbol.Abstract.setRecords` when passing a `struct`. The domain fields are no longer
+  taken by number of occurance, but by `symbol.Abstract.domain_labels`.
+- Changed behaviour when resetting `symbol.Abstact.domain` or `symbol.Abstract.size`: This may now
+  reset all domain related properties such as `symbol.Abstract.domain_labels` or
+  `symbol.Abstract.domain_forwarding`.
+- Changed behaviour when removing a symbol or alias that is used as domain in another symbol:
+  Previously, the domain was set to the universe `*`. It is now relaxed keeping the symbol name such
+  that `symbol.Abstract.domain_names` stay the same.
+- Changed behaviour when passing `symbols, {}` to `Container.write`: Previously this wrote all
+  symbols, now it is none. To write all symbols, use all symbols in the `symbols` argument (see also
+  `Container.list*`) or don't specify the `symbols` argument in the call.
+- Changed name of subpackage `gams.transfer.cmex` to `gams.transfer.gdx` (internal).
+- Added (or unhided) property `symbol.Abstract.container` and `alias.Abstract.container` referring
+  to the `Container` the symbol or alias is stored in.
+- Added return of new symbol to `symbol.Abstract.copy` and `alias.Abstract.copy`.
+- Added a silent call to `Container.reorderSymbols` in `Container.isValid` if symbols are out of
+  order (symbols that use other symbols in the domain must appear after the domain symbols). Even
+  though having unordered symbols is rather unlikely, this now makes it unnecessary to manually call
+  `Container.reorderSymbols`.
 - TODO: size of symbols is dependent on number of uels per dimension and not on domain symbol anymore.
 - TODO: matrix formats can maintain uels now (need to update documentation). This also means that
   matrices can be created smaller than before if left out rows/cols are meant to be default values.
-- TODO: removed container.indexed, added argument indexed to read/write. Symbols are created in
-  indexed mode when passing a size array instead of a domain. Within a container indexed and
-  non-indexed symbols can be mixed. Writing to normal GDX file is always possible, for writing
-  indexed, special criteria has to be met by the written symbols.
-- TODO: Container isValid calls reorder symbols silently
-- TODO: write empty symbols list does not mean all symbols anymore.
+  (need test for this)
 
 GAMS Transfer Matlab v0.8.0
 ==================
