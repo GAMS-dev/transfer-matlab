@@ -1004,7 +1004,7 @@ classdef (Abstract) Abstract < handle
             % parse input arguments
             has_values = false;
             index = 1;
-            while index < nargin
+            while index <= numel(varargin)
                 if strcmpi(varargin{index}, 'values')
                     index = index + 1;
                     gams.transfer.utils.Validator.minargin(numel(varargin), index);
@@ -1477,7 +1477,7 @@ classdef (Abstract) Abstract < handle
             try
                 index = 1;
                 is_pararg = false;
-                while index < nargin
+                while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'ignore_unused')
                         index = index + 1;
                         gams.transfer.utils.Validator.minargin(numel(varargin), index);
@@ -1564,7 +1564,7 @@ classdef (Abstract) Abstract < handle
                 end
                 index = 2;
                 is_pararg = false;
-                while index < nargin
+                while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'rename')
                         index = index + 1;
                         gams.transfer.utils.Validator.minargin(numel(varargin), index);
@@ -1621,7 +1621,7 @@ classdef (Abstract) Abstract < handle
             try
                 index = 1;
                 is_pararg = false;
-                while index < nargin
+                while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'rename')
                         index = index + 1;
                         gams.transfer.utils.Validator.minargin(numel(varargin), index);
@@ -1704,7 +1704,7 @@ classdef (Abstract) Abstract < handle
                 end
                 index = 2;
                 is_pararg = false;
-                while index < nargin
+                while index <= numel(varargin)
                     if ~is_pararg && index == 2
                         dimensions = gams.transfer.utils.Validator('dimensions', index, ...
                             varargin{index}).integer().vector().maxnumel(obj.dimension)...
@@ -1756,7 +1756,7 @@ classdef (Abstract) Abstract < handle
             try
                 index = 1;
                 is_pararg = false;
-                while index < nargin
+                while index <= numel(varargin)
                     if ~is_pararg && index == 1
                         if iscell(varargin{index})
                             uels = gams.transfer.utils.Validator('uels', index, varargin{index}).cellstr().value;
@@ -1833,7 +1833,7 @@ classdef (Abstract) Abstract < handle
                 uels = gams.transfer.utils.Validator('uels', 1, varargin{1}).types({'cell', 'struct', 'containers.Map'}).value;
                 index = 2;
                 is_pararg = false;
-                while index < nargin
+                while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'allow_merge')
                         index = index + 1;
                         gams.transfer.utils.Validator.minargin(numel(varargin), index);
@@ -1921,7 +1921,7 @@ classdef (Abstract) Abstract < handle
             try
                 index = 1;
                 is_pararg = false;
-                while index < nargin
+                while index < numel(varargin)
                     if ~is_pararg && index == 1
                         dimensions = gams.transfer.utils.Validator('dimensions', index, ...
                             varargin{index}).integer().vector().maxnumel(obj.dimension)...
@@ -1976,7 +1976,7 @@ classdef (Abstract) Abstract < handle
             try
                 index = 1;
                 is_pararg = false;
-                while index < nargin
+                while index <= numel(varargin)
                     if ~is_pararg && index == 1
                         dimensions = gams.transfer.utils.Validator('dimensions', index, ...
                             varargin{index}).integer().vector().maxnumel(obj.dimension)...

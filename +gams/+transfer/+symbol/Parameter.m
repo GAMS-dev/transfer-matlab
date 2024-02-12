@@ -145,7 +145,7 @@ classdef Parameter < gams.transfer.symbol.Abstract
                 name = gams.transfer.utils.Validator('name', 2, varargin{2}).symbolName().value;
                 index = 3;
                 is_pararg = false;
-                while index <= nargin
+                while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'description')
                         index = index + 1;
                         gams.transfer.utils.Validator.minargin(nargin, index);
@@ -261,7 +261,7 @@ classdef Parameter < gams.transfer.symbol.Abstract
                     .type('gams.transfer.Container').value;
                 index = 2;
                 is_pararg = false;
-                while index < nargin
+                while index <= numel(varargin)
                     if ~is_pararg && index == 2
                         overwrite = gams.transfer.utils.Validator('overwrite', index, varargin{index}) ...
                             .type('logical').scalar().value;

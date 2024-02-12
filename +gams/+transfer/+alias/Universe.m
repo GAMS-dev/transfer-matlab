@@ -290,7 +290,7 @@ classdef Universe < gams.transfer.alias.Abstract
                     .type('gams.transfer.Container').value;
                 index = 2;
                 is_pararg = false;
-                while index < nargin
+                while index <= numel(varargin)
                     if ~is_pararg && index == 2
                         overwrite = gams.transfer.utils.Validator('overwrite', index, varargin{index}) ...
                             .type('logical').scalar().value;

@@ -279,13 +279,14 @@ classdef Container < handle
 
     methods (Hidden)
 
-        function copyFrom(obj, container, varargin)
+        function copyFrom(obj, varargin)
 
             % parse input arguments
             has_symbols = false;
             try
-                gams.transfer.utils.Validator('container', 1, container).type('gams.transfer.Container');
-                index = 1;
+                gams.transfer.utils.Validator.minargin(numel(varargin), 1);
+                container = gams.transfer.utils.Validator('container', 1, varargin{1}).type('gams.transfer.Container').value;
+                index = 2;
                 while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'symbols')
                         index = index + 1;
@@ -349,7 +350,7 @@ classdef Container < handle
         %> c.read('path/to/file.gdx', 'format', 'dense_matrix');
         %> c.read('path/to/file.gdx', 'symbols', {'x', 'z'}, 'format', 'struct', 'values', {'level'});
         %> ```
-        function read(obj, source, varargin)
+        function read(obj, varargin)
             % Reads symbols from GDX file
             %
             % Required Arguments:
@@ -384,12 +385,14 @@ classdef Container < handle
             values = {'level', 'marginal', 'lower', 'upper', 'scale'};
             indexed = false;
             try
-                valid = gams.transfer.utils.Validator('source', 1, source) ...
+                gams.transfer.utils.Validator.minargin(numel(varargin), 1);
+                valid = gams.transfer.utils.Validator('source', 1, varargin{1}) ...
                     .types({'gams.transfer.Container', 'string', 'char'});
-                if ~isa(source, 'gams.transfer.Container')
+                if ~isa(valid.value, 'gams.transfer.Container')
                     valid.string2char().fileExtension('.gdx').fileExists();
                 end
-                index = 1;
+                source = valid.value;
+                index = 2;
                 while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'symbols')
                         index = index + 1;
@@ -585,7 +588,7 @@ classdef Container < handle
         %>
         %> @see \ref gams::transfer::Container::getDomainViolations
         %> "Container.getDomainViolations"
-        function write(obj, filename, varargin)
+        function write(obj, varargin)
             % Writes symbols with symbol records to GDX file
             %
             % There are different issues that can occur when writing to GDX: e.g. domain violations
@@ -627,9 +630,10 @@ classdef Container < handle
             uel_priority = {};
             indexed = false;
             try
+                gams.transfer.utils.Validator.minargin(numel(varargin), 1);
                 filename = gams.transfer.utils.absolute_path(gams.transfer.utils.Validator(...
-                    'filename', 1, filename).string2char().type('char').fileExtension('.gdx').value);
-                index = 1;
+                    'filename', 1, varargin{1}).string2char().type('char').fileExtension('.gdx').value);
+                index = 2;
                 while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'symbols')
                         index = index + 1;
@@ -2471,7 +2475,7 @@ classdef Container < handle
         %> @note This can only be used if the symbol is valid.
         %>
         %> @see \ref gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
-        function renameUELs(obj, uels, varargin)
+        function renameUELs(obj, varargin)
             % Renames UELs in all symbol
             %
             % renameUELs(u) renames the UELs u for all symbols. u can be a
@@ -2491,7 +2495,9 @@ classdef Container < handle
             has_symbols = false;
             allow_merge = false;
             try
-                index = 1;
+                gams.transfer.utils.Validator.minargin(numel(varargin), 1);
+                uels = varargin{1}; % check in renameUELs later
+                index = 2;
                 while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'symbols')
                         index = index + 1;
