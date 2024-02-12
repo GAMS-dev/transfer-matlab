@@ -109,6 +109,7 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
 
             % extend domain uels
             symbol_labels = obj.get();
+            symbol_labels = reshape(symbol_labels, 1, numel(symbol_labels));
             n = numel(symbol_labels);
             symbol_labels(n+1:n+numel(labels)) = labels;
             if numel(unique(symbol_labels)) ~= numel(symbol_labels)

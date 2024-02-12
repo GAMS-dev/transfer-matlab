@@ -134,6 +134,20 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
             unique_labels = gams.transfer.unique_labels.DomainSet(obj.symbol_);
         end
 
+        function resolveViolations(obj, labels)
+            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr().value;
+            % in case the domain set is has itself a domain different to the universe,
+            % the domain violation is likely to exist there as well. We therefore
+            % apply the same resolving the parent domain.
+            if obj.symbol_.dimension > 0
+                domain = obj.symbol_.def.domains{1};
+                if domain.hasUniqueLabels()
+                    domain.resolveViolations(labels);
+                end
+            end
+            obj.getUniqueLabels().add(labels);
+        end
+
         function domain = getRelaxed(obj)
             domain = gams.transfer.symbol.domain.Relaxed(obj.symbol_.name);
             domain.label = obj.label_;

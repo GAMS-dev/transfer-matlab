@@ -51,6 +51,8 @@ GAMS Transfer Matlab v0.9.0
 - Changed behaviour when passing `symbols, {}` to `Container.write`: Previously this wrote all
   symbols, now it is none. To write all symbols, use all symbols in the `symbols` argument (see also
   `Container.list*`) or don't specify the `symbols` argument in the call.
+- Changed class `DomainViolation`: Moved to `symbol.domain.Violation`, hid constructor and removed
+  property `domain`.
 - Changed name of subpackage `gams.transfer.cmex` to `gams.transfer.gdx` (internal).
 - Added (or unhided) property `symbol.Abstract.container` and `alias.Abstract.container` referring
   to the `Container` the symbol or alias is stored in.

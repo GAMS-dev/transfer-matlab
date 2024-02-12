@@ -117,6 +117,10 @@ classdef (Abstract, Hidden) Abstract < handle
             unique_labels = [];
         end
 
+        function resolveViolations(obj, labels)
+            error('Domain does not maintain unique labels');
+        end
+
     end
 
 end

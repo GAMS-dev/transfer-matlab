@@ -937,7 +937,7 @@ classdef (Abstract) Abstract < handle
                 added_uels = working_uels(ia);
 
                 if numel(added_uels) > 0
-                    domain_violations{end+1} = gams.transfer.DomainViolation(obj, i, domain.symbol, added_uels);
+                    domain_violations{end+1} = gams.transfer.symbol.domain.Violation(obj, i, domain, added_uels);
                 end
             end
 
