@@ -101,7 +101,11 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             for i = 1:numel(values)
                 value = value + mean(obj.records_.(values{i}.label)(:));
             end
-            value = value / numel(values);
+            if numel(values) == 0
+                value = nan;
+            else
+                value = value / numel(values);
+            end
         end
 
         function transformToTabular(obj, axes, values, data)

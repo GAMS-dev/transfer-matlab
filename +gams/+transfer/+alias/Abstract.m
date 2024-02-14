@@ -41,7 +41,7 @@
 %>
 %> @see \ref gams::transfer::alias::Set "alias.Set", \ref gams::transfer::alias::Universe
 %> "alias.Universe"
-classdef (Abstract) Abstract < handle
+classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
     %#ok<*INUSD,*STOUT>
 

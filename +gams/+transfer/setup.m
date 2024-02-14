@@ -110,7 +110,7 @@ function setup(varargin)
         target_file = fullfile(target_path, filename);
 
         % check octave / matlab version
-        if exist('OCTAVE_VERSION', 'builtin') <= 0
+        if ~gams.transfer.Constants.IS_OCTAVE
             % Matlab version flags
             v_release = regexp(version(), 'R[0-9]{4}[ab]', 'match');
             if ~isempty(v_release)

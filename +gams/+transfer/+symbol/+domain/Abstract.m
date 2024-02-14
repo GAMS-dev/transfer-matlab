@@ -33,7 +33,7 @@
 % Attention: Internal classes or functions have limited documentation and its properties, methods
 % and method or function signatures can change without notice.
 %
-classdef (Abstract, Hidden) Abstract < handle
+classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
     %#ok<*INUSD,*STOUT>
 
@@ -103,7 +103,7 @@ classdef (Abstract, Hidden) Abstract < handle
 
         function appendLabelIndex(obj, index)
             add = ['_', int2str(index)];
-            if ~endsWith(obj.label_, add)
+            if numel(obj.label_) <= numel(add) || ~strcmp(obj.label_(end-numel(add)+1:end), add)
                 obj.label_ = strcat(obj.label_, add);
             end
             obj.last_update_ = now();

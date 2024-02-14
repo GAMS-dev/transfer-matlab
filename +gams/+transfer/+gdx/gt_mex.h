@@ -247,15 +247,6 @@ void gt_mex_getfield_table2struct(
     bool*           was_table       /** true if field was table before conversion */
 );
 
-/** returns the value of structrure field with symbol class type */
-void gt_mex_getfield_symbol_obj(
-    const mxArray*  mx_struct,      /** mex structure */
-    const char*     structname,     /** structure name */
-    const char*     fieldname,      /** field name to be read */
-    bool            required,       /** true: field is required */
-    mxArray**       value           /** value of field */
-);
-
 #ifdef WITH_R2018A_OR_NEWER
 void gt_mex_get_records(
     const char*     name,           /** name of symbol */

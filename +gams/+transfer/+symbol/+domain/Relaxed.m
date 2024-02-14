@@ -90,7 +90,7 @@ classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
             if ~strcmp(name, gams.transfer.Constants.UNIVERSE_NAME)
                 valid.varname();
             end
-            obj = gams.transfer.symbol.domain.Regular(valid.value);
+            obj = gams.transfer.symbol.domain.Relaxed(valid.value);
         end
 
     end

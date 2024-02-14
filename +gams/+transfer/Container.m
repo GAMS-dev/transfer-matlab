@@ -71,7 +71,7 @@
 %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Alias "Alias", \ref
 %> gams::transfer::Parameter "Parameter", \ref gams::transfer::Variable "Variable",
 %> \ref gams::transfer::Equation "Equation"
-classdef Container < handle
+classdef Container < gams.transfer.utils.Handle
 
     %#ok<*INUSD,*STOUT>
 

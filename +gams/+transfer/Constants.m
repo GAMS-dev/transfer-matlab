@@ -97,6 +97,12 @@ classdef Constants
 
         % GDX_LIBRARY_NAME Name of GDX library
         GDX_LIBRARY_NAME = gams.transfer.utils.gdx_library_name()
+
+
+        %> True if environment is Octave
+
+        % IS_OCTAVE True if environment is Octave
+        IS_OCTAVE = exist('OCTAVE_VERSION', 'builtin') ~= 0
     end
 
 end

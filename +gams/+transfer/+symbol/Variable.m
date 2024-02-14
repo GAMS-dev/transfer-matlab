@@ -92,10 +92,6 @@ classdef Variable < gams.transfer.symbol.Abstract
         type
     end
 
-    properties (Hidden, Dependent)
-        type_int
-    end
-
     properties (Dependent, SetAccess = private)
         %> Variable default values
 
@@ -111,14 +107,6 @@ classdef Variable < gams.transfer.symbol.Abstract
 
         function obj = set.type(obj, type)
             obj.def_.type = type;
-        end
-
-        function type_int = get.type_int(obj)
-            type_int = obj.def_.type.value;
-        end
-
-        function obj = set.type_int(obj, type_int)
-            obj.def_.type = type_int;
         end
 
         function default_values = get.default_values(obj)

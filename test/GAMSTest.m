@@ -51,7 +51,11 @@ classdef GAMSTest < handle
         end
 
         function assertEquals(obj, val1, val2)
-            obj.assert(isequaln(val1, val2));
+            if isa(val1, 'handle') && isa(val2, 'handle')
+                obj.assert(val1 == val2);
+            else
+                obj.assert(isequaln(val1, val2));
+            end
         end
 
         function reset(obj)

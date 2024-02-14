@@ -218,7 +218,7 @@ function test_addSymbols(t, cfg)
     catch
         t.reset();
     end
-    if exist('OCTAVE_VERSION', 'builtin') <= 0
+    if ~gams.transfer.Constants.IS_OCTAVE
         try
             t.assert(false);
             gams.transfer.Set(gdx, 's', ["s1", "s2"]);
@@ -403,7 +403,7 @@ function test_addSymbols(t, cfg)
     catch
         t.reset();
     end
-    if exist('OCTAVE_VERSION', 'builtin') <= 0
+    if ~gams.transfer.Constants.IS_OCTAVE
         try
             t.assert(false);
             gams.transfer.Parameter(gdx, 's', ["s1", "s2"]);
@@ -572,7 +572,7 @@ function test_addSymbols(t, cfg)
     catch
         t.reset();
     end
-    if exist('OCTAVE_VERSION', 'builtin') <= 0
+    if ~gams.transfer.Constants.IS_OCTAVE
         try
             t.assert(false);
             gams.transfer.Variable(gdx, 's', 'free', ["s1", "s2"]);
@@ -755,7 +755,7 @@ function test_addSymbols(t, cfg)
     catch
         t.reset();
     end
-    if exist('OCTAVE_VERSION', 'builtin') <= 0
+    if ~gams.transfer.Constants.IS_OCTAVE
         try
             t.assert(false);
             gams.transfer.Equation(gdx, 's', 'e', ["s1", "s2"]);
@@ -1247,7 +1247,7 @@ function test_changeSymbol(t, cfg)
         x1.records.j = [1; 2; 3];
     end
     x1.records.level = [1; 2; 3];
-    t.assert(x1.isValid());
+    t.assert(x1.isValid(false));
     gdx.modified = false;
     t.assert(x1.dimension == 2);
     t.assertEquals(x1.domain, {'i', 'j'});
@@ -1880,7 +1880,7 @@ function test_domainViolation(t, cfg);
         gdx.write(write_filename);
     catch e
         t.reset();
-        if exist('OCTAVE_VERSION', 'builtin') > 0
+        if gams.transfer.Constants.IS_OCTAVE
             t.assertEquals(e.message, 'gt_gdx_write: GDX error for a1: Domain violation');
         else
             t.assertEquals(e.message, 'GDX error for a1: Domain violation');
@@ -2638,7 +2638,7 @@ function test_writeUnordered(t, cfg)
         gdx.write(write_filename, 'sorted', true);
     catch e
         t.reset();
-        if exist('OCTAVE_VERSION', 'builtin') > 0
+        if gams.transfer.Constants.IS_OCTAVE
             t.assertEquals(e.message, 'gt_gdx_write: GDX error in record c(i3,j1): Data not sorted when writing raw');
         else
             t.assertEquals(e.message, 'GDX error in record c(i3,j1): Data not sorted when writing raw');
@@ -2660,7 +2660,7 @@ function test_writeUnordered(t, cfg)
         gdx.write(write_filename, 'sorted', true);
     catch e
         t.reset();
-        if exist('OCTAVE_VERSION', 'builtin') > 0
+        if gams.transfer.Constants.IS_OCTAVE
             t.assertEquals(e.message, 'gt_gdx_write: GDX error in record c(i2,j1): Data not sorted when writing raw');
         else
             t.assertEquals(e.message, 'GDX error in record c(i2,j1): Data not sorted when writing raw');

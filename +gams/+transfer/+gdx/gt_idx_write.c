@@ -69,10 +69,14 @@ void mexFunction(
     double* mx_values[GMS_VAL_MAX] = {NULL};
 #endif
     mxLogical* mx_enable = NULL;
-    mxArray* mx_arr_data = NULL;
+    mxArray* mx_arr_symbol = NULL;
+    mxArray* mx_arr_symbol_data = NULL;
+    mxArray* mx_arr_symbol_def = NULL;
     mxArray* mx_arr_records = NULL;
     mxArray* mx_arr_values[GMS_VAL_MAX] = {NULL};
     mxArray** mx_arr_domains = NULL;
+    mxArray* call_plhs[1] = {NULL};
+    mxArray* call_prhs[2] = {NULL};
 
     /* check input / outputs */
     gt_mex_check_arguments_num(0, nlhs, 6, nrhs);
@@ -109,35 +113,42 @@ void mexFunction(
         }
 
         /* get data field */
-        mx_arr_data = mxGetFieldByNumber(prhs[2], 0, i);
+        mx_arr_symbol = mxGetFieldByNumber(prhs[2], 0, i);
         data_name = (char*) mxGetFieldNameByNumber(prhs[2], i);
 
-        if (!mxIsClass(mx_arr_data, "gams.transfer.symbol.Parameter"))
+        if (!mxIsClass(mx_arr_symbol, "gams.transfer.symbol.Parameter"))
             mexErrMsgIdAndTxt(ERRID"type", "Symbol '%s' has invalid type.", data_name);
+        mx_arr_symbol_def = mxGetProperty(mx_arr_symbol, 0, "def_");
+        mx_arr_symbol_data = mxGetProperty(mx_arr_symbol, 0, "data_");
 
         for (size_t j = 0; j < GLOBAL_MAX_INDEX_DIM; j++)
             sizes[j] = 1;
 
         /* get records format (ignore unsupported formats) */
-        gt_mex_getfield_str(mx_arr_data, data_name, "format", "", true, buf, GMS_SSSIZE);
-        if (!strcmp(buf, "table"))
+        if (mxIsClass(mx_arr_symbol_data, "gams.transfer.symbol.data.Table"))
             format = GT_FORMAT_TABLE;
-        else if (!strcmp(buf, "struct"))
+        else if (mxIsClass(mx_arr_symbol_data, "gams.transfer.symbol.data.Struct"))
             format = GT_FORMAT_STRUCT;
-        else if (!strcmp(buf, "dense_matrix"))
+        else if (mxIsClass(mx_arr_symbol_data, "gams.transfer.symbol.data.DenseMatrix"))
             format = GT_FORMAT_DENSEMAT;
-        else if (!strcmp(buf, "sparse_matrix"))
+        else if (mxIsClass(mx_arr_symbol_data, "gams.transfer.symbol.data.SparseMatrix"))
             format = GT_FORMAT_SPARSEMAT;
         else
             continue;
 
         /* get fields */
-        gt_mex_getfield_str(mx_arr_data, data_name, "name", "", true, name, GMS_SSSIZE);
-        gt_mex_getfield_sizet(mx_arr_data, data_name, "dimension", 0, true, GT_FILTER_NONNEGATIVE, 1, &dim);
-        gt_mex_getfield_sizet(mx_arr_data, data_name, "size", 1, true, GT_FILTER_NONNEGATIVE, dim, sizes);
+        gt_mex_getfield_str(mx_arr_symbol, data_name, "name_", "", true, name, GMS_SSSIZE);
+        gt_mex_getfield_str(mx_arr_symbol, data_name, "description_", "", false, text, GMS_SSSIZE);
 
-        /* get optional fields */
-        gt_mex_getfield_str(mx_arr_data, data_name, "description", "", false, text, GMS_SSSIZE);
+        dim = mxGetNumberOfElements(mxGetProperty(mx_arr_symbol_def, 0, "domains_"));
+        for (size_t j = 0; j < dim; j++)
+        {
+            call_prhs[0] = mx_arr_symbol;
+            call_prhs[1] = mxCreateDoubleScalar(j+1);
+            if (mexCallMATLAB(1, call_plhs, 2, call_prhs, "countUniqueLabels"))
+                mexErrMsgIdAndTxt(ERRID"number_records", "Calling 'countUniqueLabels' failed.");
+            sizes[j] = mxGetScalar(call_plhs[0]);
+        }
 
         mx_arr_domains = (mxArray**) mxCalloc(dim, sizeof(*mx_arr_domains));
 #ifdef WITH_R2018A_OR_NEWER
@@ -150,10 +161,10 @@ void mexFunction(
         if (format != GT_FORMAT_EMPTY)
         {
             if (support_table)
-                gt_mex_getfield_table2struct(mx_arr_data, data_name, "records", false, &mx_arr_records, &was_table);
+                gt_mex_getfield_table2struct(mx_arr_symbol_data, data_name, "records_", false, &mx_arr_records, &was_table);
             else
             {
-                gt_mex_getfield_struct(mx_arr_data, data_name, "records", false, &mx_arr_records);
+                gt_mex_getfield_struct(mx_arr_symbol_data, data_name, "records_", false, &mx_arr_records);
                 was_table = false;
             }
         }

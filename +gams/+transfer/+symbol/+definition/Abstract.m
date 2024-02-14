@@ -33,7 +33,7 @@
 % Attention: Internal classes or functions have limited documentation and its properties, methods
 % and method or function signatures can change without notice.
 %
-classdef (Abstract, Hidden) Abstract < handle
+classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
     %#ok<*INUSD,*STOUT>
 

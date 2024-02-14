@@ -62,7 +62,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
 
                 if isempty(obj.records_.(label))
 
-                elseif iscategorical(obj.records_.(label))
+                elseif gams.transfer.Constants.SUPPORTS_CATEGORICAL && iscategorical(obj.records_.(label))
                     if any(isundefined(obj.records_.(label)))
                         status = gams.transfer.utils.Status(sprintf("Records domain column '%s' has undefined domain entries.", label));
                         return
@@ -148,12 +148,12 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
         end
 
         function indices = usedUniqueLabels(obj, domain_label)
-            if ~obj.hasUniqueLabels(domain_label)
+            if ~obj.isLabel(domain_label)
                 indices = [];
                 return
             end
             indices = gams.transfer.utils.unique(uint64(obj.records_.(domain_label)));
-            indices = indices(~isnan(indices));
+            indices = indices(~isnan(indices) & indices ~= 0);
         end
 
         function updateUniqueLabels(obj, domain, labels)
@@ -200,7 +200,12 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             for i = 1:numel(values)
                 value = value + sum(obj.records_.(values{i}.label)(:));
             end
-            value = value / obj.getNumberRecords(axes, values) / numel(values);
+            n_values = obj.getNumberRecords(axes, values) * numel(values);
+            if n_values == 0
+                value = nan;
+            else
+                value = value / n_values;
+            end
         end
 
         function transformToMatrix(obj, axes, values, data)

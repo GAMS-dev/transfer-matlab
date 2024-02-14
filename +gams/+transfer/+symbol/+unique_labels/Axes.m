@@ -33,7 +33,7 @@
 % Attention: Internal classes or functions have limited documentation and its properties, methods
 % and method or function signatures can change without notice.
 %
-classdef (Hidden) Axes < handle
+classdef (Hidden) Axes < gams.transfer.utils.Handle
 
     %#ok<*INUSD,*STOUT>
 

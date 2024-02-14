@@ -43,7 +43,7 @@
 %> @see \ref gams::transfer::symbol::Set "symbol.Set", \ref gams::transfer::symbol::Parameter
 %> "symbol.Parameter", \ref gams::transfer::symbol::Variable "symbol.Variable", \ref
 %> gams::transfer::symbol::Equation "symbol.Equation"
-classdef (Abstract) Abstract < handle
+classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
     %#ok<*INUSD,*STOUT,*PROP,*PROPLC,*CPROPLC>
 
