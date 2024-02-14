@@ -37,12 +37,16 @@ classdef (Hidden) CategoricalColumn < gams.transfer.unique_labels.Abstract
 
     properties (Hidden, SetAccess = protected)
         data_
-        label_
+        domain_
     end
 
     properties (Dependent)
         data
-        label
+        domain
+    end
+
+    properties (Dependent, SetAccess = private)
+        last_update
     end
 
     methods
@@ -56,33 +60,36 @@ classdef (Hidden) CategoricalColumn < gams.transfer.unique_labels.Abstract
             obj.data_ = data;
         end
 
-        function label = get.label(obj)
-            label = obj.label_;
+        function domain = get.domain(obj)
+            domain = obj.domain_;
         end
 
-        function set.label(obj, label)
-            obj.label_ = gams.transfer.utils.Validator('label', 1, label).string2char() ...
-                .type('char').nonempty().varname().value;
+        function set.domain(obj, domain)
+            gams.transfer.utils.Validator('domain', 1, domain).type('gams.transfer.symbol.domain.Abstract');
+            obj.domain_ = domain;
+        end
+
+        function last_update = get.last_update(obj)
+            last_update = max(obj.data_.last_update, obj.domain_.last_update);
         end
 
     end
 
     methods (Hidden, Access = {?gams.transfer.unique_labels.Abstract, ?gams.transfer.symbol.data.Tabular})
 
-        function obj = CategoricalColumn(data, label)
+        function obj = CategoricalColumn(data, domain)
             obj.data_ = data;
-            obj.label_ = label;
+            obj.domain_ = domain;
         end
 
     end
 
     methods (Static)
 
-        function obj = construct(data, label)
+        function obj = construct(data, domain)
             gams.transfer.utils.Validator('data', 1, data).type('gams.transfer.symbol.data.Tabular');
-            label = gams.transfer.utils.Validator('label', 1, label).string2char() ...
-                .type('char').nonempty().varname().value;
-            obj = gams.transfer.unique_labels.CategoricalColumn(data, label);
+            gams.transfer.utils.Validator('domain', 2, domain).type('gams.transfer.symbol.domain.Abstract');
+            obj = gams.transfer.unique_labels.CategoricalColumn(data, domain);
         end
 
     end
@@ -90,58 +97,58 @@ classdef (Hidden) CategoricalColumn < gams.transfer.unique_labels.Abstract
     methods
 
         function unique_labels = copy(obj)
-            unique_labels = gams.transfer.unique_labels.CategoricalColumn(obj.data_, obj.label_);
+            unique_labels = gams.transfer.unique_labels.CategoricalColumn(obj.data_, obj.domain_);
         end
 
         function labels = get(obj)
-            assert(iscategorical(obj.data_.records.(obj.label_)));
-            labels = categories(obj.data_.records.(obj.label_));
+            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
+            labels = categories(obj.data_.records.(obj.domain_.label));
         end
 
         function add(obj, labels)
             labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr().value;
-            assert(iscategorical(obj.data_.records.(obj.label_)));
+            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
 
-            if ~isordinal(obj.data_.records.(obj.label_))
-                obj.data_.records.(obj.label_) = addcats(obj.data_.records.(obj.label_), labels);
+            if ~isordinal(obj.data_.records.(obj.domain_.label))
+                obj.data_.records.(obj.domain_.label) = addcats(obj.data_.records.(obj.domain_.label), labels);
                 return
             end
 
-            current_labels = categories(obj.data_.records.(obj.label_));
+            current_labels = categories(obj.data_.records.(obj.domain_.label));
             if numel(current_labels) == 0
-                obj.data_.records.(obj.label_) = categorical(labels, 'Ordinal', true);
+                obj.data_.records.(obj.domain_.label) = categorical(labels, 'Ordinal', true);
             else
-                obj.data_.records.(obj.label_) = addcats(obj.data_.records.(obj.label_), labels, 'After', current_labels{end});
+                obj.data_.records.(obj.domain_.label) = addcats(obj.data_.records.(obj.domain_.label), labels, 'After', current_labels{end});
             end
         end
 
         function clear(obj)
-            assert(iscategorical(obj.data_.records.(obj.label_)));
-            obj.data_.records.(obj.label_) = categorical([], [], {}, 'Ordinal', true);
+            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
+            obj.data_.records.(obj.domain_.label) = categorical([], [], {}, 'Ordinal', true);
         end
 
         function set(obj, labels)
             labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr().value;
-            assert(iscategorical(obj.data_.records.(obj.label_)));
-            obj.data_.records.(obj.label_) = categorical(double(obj.data_.records.(obj.label_)), ...
+            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
+            obj.data_.records.(obj.domain_.label) = categorical(double(obj.data_.records.(obj.domain_.label)), ...
                 1:numel(labels), labels, 'Ordinal', true);
         end
 
         function remove(obj, labels)
             labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr().value;
-            assert(iscategorical(obj.data_.records.(obj.label_)));
-            obj.data_.records.(obj.label_) = removecats(obj.data_.records.(obj.label_), labels);
+            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
+            obj.data_.records.(obj.domain_.label) = removecats(obj.data_.records.(obj.domain_.label), labels);
         end
 
         function rename(obj, oldlabels, newlabels)
             oldlabels = gams.transfer.utils.Validator('oldlabels', 1, oldlabels).string2char().cellstr().value;
             newlabels = gams.transfer.utils.Validator('newlabels', 2, newlabels).string2char() ...
                 .cellstr().numel(numel(oldlabels)).value;
-            assert(iscategorical(obj.data_.records.(obj.label_)));
-            not_avail = ~ismember(oldlabels, categories(obj.data_.records.(obj.label_)));
+            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
+            not_avail = ~ismember(oldlabels, categories(obj.data_.records.(obj.domain_.label)));
             oldlabels(not_avail) = [];
             newlabels(not_avail) = [];
-            obj.data_.records.(obj.label_) = renamecats(obj.data_.records.(obj.label_), oldlabels, newlabels);
+            obj.data_.records.(obj.domain_.label) = renamecats(obj.data_.records.(obj.domain_.label), oldlabels, newlabels);
         end
 
     end

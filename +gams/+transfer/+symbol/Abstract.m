@@ -229,6 +229,11 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
         function last_update = get.last_update(obj)
             last_update = max([obj.last_update_, obj.data_.last_update, obj.def_.last_update]);
+            for i = 1:obj.dimension
+                if ~isempty(obj.unique_labels{i})
+                    last_update = max(last_update, obj.unique_labels{i}.last_update);
+                end
+            end
         end
 
         function unique_labels = get.unique_labels(obj)
@@ -769,8 +774,10 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             end
 
             % check records format
+            old_unique_labels = obj.unique_labels_;
             status = data.isValid(obj.axes(), obj.def_.values);
             if status.flag ~= gams.transfer.utils.Status.OK
+                obj.unique_labels_ = old_unique_labels;
                 error(status.message);
             end
 

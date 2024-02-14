@@ -43,6 +43,10 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
         symbol
     end
 
+    properties (Dependent, SetAccess = private)
+        last_update
+    end
+
     methods
 
         function symbol = get.symbol(obj)
@@ -53,6 +57,10 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
             gams.transfer.utils.Validator('symbol', 1, symbol).types({'gams.transfer.symbol.Set', 'gams.transfer.alias.Set'});
             gams.transfer.utils.Validator('symbol.dimension', 1, symbol.dimension).inInterval(1, 1);
             obj.symbol_ = symbol;
+        end
+
+        function last_update = get.last_update(obj)
+            last_update = obj.symbol_.last_update;
         end
 
     end
@@ -109,7 +117,6 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
 
             % extend domain uels
             symbol_labels = obj.get();
-            symbol_labels = reshape(symbol_labels, 1, numel(symbol_labels));
             n = numel(symbol_labels);
             symbol_labels(n+1:n+numel(labels)) = labels;
             if numel(unique(symbol_labels)) ~= numel(symbol_labels)
@@ -132,6 +139,7 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
             end
 
             format = obj.symbol_.format;
+            symbol_labels = reshape(symbol_labels, 1, numel(symbol_labels));
             obj.symbol_.setRecords(symbol_labels, values{:});
             obj.symbol_.transformRecords(format);
         end
@@ -139,7 +147,9 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
         function set(obj, labels)
             obj.clear();
             format = obj.symbol_.format;
-            obj.symbol_.setRecords(gams.transfer.utils.unique(labels));
+            labels = gams.transfer.utils.unique(labels);
+            labels = reshape(labels, 1, numel(labels));
+            obj.symbol_.setRecords(labels);
             obj.symbol_.transformRecords(format);
         end
 

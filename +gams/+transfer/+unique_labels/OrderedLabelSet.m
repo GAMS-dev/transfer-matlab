@@ -38,6 +38,19 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
     properties (Hidden, SetAccess = private)
         uels_label2ids_
         uels_id2labels_
+        last_update_ = now()
+    end
+
+    properties (Dependent, SetAccess = private)
+        last_update
+    end
+
+    methods
+
+        function last_update = get.last_update(obj)
+            last_update = obj.last_update_;
+        end
+
     end
 
     methods
@@ -76,6 +89,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
         function clear(obj)
             obj.uels_label2ids_ = javaObject("java.util.LinkedHashMap");
             obj.uels_id2labels_ = {};
+            obj.last_update_ = now();
         end
 
         function add(obj, labels)
@@ -91,6 +105,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
             if numel(labels) > 0
                 obj.updateId2Label();
             end
+            obj.last_update_ = now();
         end
 
         function set(obj, labels)
@@ -113,6 +128,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
             for i = 1:numel(obj.uels_id2labels_)
                 obj.uels_label2ids_.put(obj.uels_id2labels_{i}, i);
             end
+            obj.last_update_ = now();
         end
 
         function rename(obj, oldlabels, newlabels)

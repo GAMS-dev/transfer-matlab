@@ -35,6 +35,10 @@
 %
 classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
+    properties (Abstract, SetAccess = private)
+        last_update
+    end
+
     methods
 
         function unique_labels = copy(obj)
