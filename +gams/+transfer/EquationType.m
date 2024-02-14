@@ -5,8 +5,8 @@
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,19 +28,62 @@
 %
 % ------------------------------------------------------------------------------
 %
-% GAMS Equation Type
+% GAMS Equation Types
+%
+% This class holds the possible GAMS equation types similar to an enumeration class. Note that it is
+% not an enumeration class due to compatibility (e.g. for Octave).
+%
+% See also: gams.transfer.symbol.Equation
 %
 
-%> @brief Equation Type
+%> @brief GAMS Equation Type
+%>
+%> This class holds the possible GAMS equation types similar to an enumeration class. Note that it
+%> is not an enumeration class due to compatibility (e.g. for Octave).
+%>
+%> @see \ref gams::transfer::symbol::Equation "symbol.Equation"
 classdef EquationType
 
     properties (Constant)
+        %> identifier for equality equation
+
+        % EQ identifier for equality equation
         EQ = uint8(0)
+
+
+        %> identifier for greater-than inequality equation
+
+        % GEQ identifier for greater-than inequality equation
         GEQ = uint8(1)
+
+
+        %> identifier for less-than inequality equation
+
+        % LEQ identifier for less-than inequality equation
         LEQ = uint8(2)
+
+
+        %> identifier for nonbinding equation
+
+        % NONBINDING identifier for nonbinding equation
         NONBINDING = uint8(3)
+
+
+        %> identifier for external equation
+
+        % EXTERNAL identifier for external equation
         EXTERNAL = uint8(4)
+
+
+        %> identifier for cone equation
+
+        % CONE identifier for cone equation
         CONE = uint8(5)
+
+
+        %> identifier for boolean equation
+
+        % BOOLEAN identifier for boolean equation
         BOOLEAN = uint8(6)
     end
 
@@ -48,59 +91,16 @@ classdef EquationType
         value_ = uint8(3)
     end
 
-    methods (Hidden, Static)
-
-        function arg = validateValue(name, index, arg)
-            if ~isnumeric(arg)
-                error('Argument ''%s'' (at position %d) must be numeric.', name, index);
-            end
-            if ~isscalar(arg)
-                error('Argument ''%s'' (at position %d) must be scalar.', name, index);
-            end
-            if round(arg) ~= arg
-                error('Argument ''%s'' (at position %d) must be integer.', name, index);
-            end
-            if arg < 0 || arg > 6
-                error('Argument ''%s'' (at position %d) must be in [0, 6].', name, index);
-            end
-            arg = uint8(arg);
-        end
-
-        function arg = validateSelect(name, index, arg)
-            if isstring(arg)
-                arg = char(arg);
-            elseif ~ischar(arg)
-                error('Argument ''%s'' (at position %d) must be ''string'' or ''char''.', name, index);
-            end
-            if numel(arg) <= 0
-                error('Argument ''%s'' (at position %d) length must be greater than 0.', name, index);
-            end
-            switch upper(arg)
-            case {'EQ', 'E'}
-                arg = gams.transfer.EquationType.EQ;
-            case {'GEQ', 'G'}
-                arg = gams.transfer.EquationType.GEQ;
-            case {'LEQ', 'L'}
-                arg = gams.transfer.EquationType.LEQ;
-            case {'NONBINDING', 'N'}
-                arg = gams.transfer.EquationType.NONBINDING;
-            case {'EXTERNAL', 'X'}
-                arg = gams.transfer.EquationType.EXTERNAL;
-            case {'CONE', 'C'}
-                arg = gams.transfer.EquationType.CONE;
-            case {'BOOLEAN', 'B'}
-                arg = gams.transfer.EquationType.BOOLEAN;
-            otherwise
-                error('Argument ''%s'' (at position %d) is invalid selection: %s.', name, index, arg);
-            end
-        end
-
-    end
-
     properties (Dependent)
-        % Selection of enum option
+        %> Selection of enum option
+
+        % select Selection of enum option
         select
-        % Value of enum option
+
+
+        %> Value of enum option
+
+        % value Value of enum option
         value
     end
 
@@ -128,7 +128,25 @@ classdef EquationType
         end
 
         function obj = set.select(obj, select)
-            obj.value_ = obj.validateSelect('select', 1, select);
+            select = gams.transfer.utils.Validator('select', 1, select).string2char().type('char').nonempty().value;
+            switch upper(select)
+            case {'EQ', 'E'}
+                obj.value_ = gams.transfer.EquationType.EQ;
+            case {'GEQ', 'G'}
+                obj.value_ = gams.transfer.EquationType.GEQ;
+            case {'LEQ', 'L'}
+                obj.value_ = gams.transfer.EquationType.LEQ;
+            case {'NONBINDING', 'N'}
+                obj.value_ = gams.transfer.EquationType.NONBINDING;
+            case {'EXTERNAL', 'X'}
+                obj.value_ = gams.transfer.EquationType.EXTERNAL;
+            case {'CONE', 'C'}
+                obj.value_ = gams.transfer.EquationType.CONE;
+            case {'BOOLEAN', 'B'}
+                obj.value_ = gams.transfer.EquationType.BOOLEAN;
+            otherwise
+                error('Invalid equation type selection: %s', select);
+            end
         end
 
         function value = get.value(obj)
@@ -136,14 +154,26 @@ classdef EquationType
         end
 
         function obj = set.value(obj, value)
-            obj.value_ = obj.validateValue('value', 1, value);
+            gams.transfer.utils.Validator('value', 1, value).integer().scalar().inInterval(0, 6);
+            obj.value_ = uint8(value);
         end
 
     end
 
     methods
 
+        %> Constructs a Equation Type
+        %>
+        %> **Optional Arguments:**
+        %> 1. value (`numeric` or `string`)
+        %>    Enumeration value or label. Default: 3 (NONBINDING).
         function obj = EquationType(value)
+            % Constructs a Equation Type
+            %
+            % Optional Arguments:
+            % 1. value (numeric or string)
+            %    Enumeration value or label. Default: 3 (NONBINDING).
+
             if nargin == 0
                 return
             end
@@ -160,41 +190,73 @@ classdef EquationType
 
     methods (Static)
 
+        %> Constructs a Equation Type as EQ
         function obj = Eq()
+            % Constructs a Equation Type as EQ
+
             obj = gams.transfer.EquationType();
             obj.value_ = gams.transfer.EquationType.EQ;
         end
 
+        %> Constructs a Equation Type as LEQ
         function obj = Leq()
+            % Constructs a Equation Type as LEQ
+
             obj = gams.transfer.EquationType();
             obj.value_ = gams.transfer.EquationType.LEQ;
         end
 
+        %> Constructs a Equation Type as GEQ
         function obj = Geq()
+            % Constructs a Equation Type as GEQ
+
             obj = gams.transfer.EquationType();
             obj.value_ = gams.transfer.EquationType.GEQ;
         end
 
+        %> Constructs a Equation Type as NONBINDING
         function obj = NonBinding()
+            % Constructs a Equation Type as NONBINDING
+
             obj = gams.transfer.EquationType();
         end
 
+        %> Constructs a Equation Type as EXTERNAL
         function obj = External()
+            % Constructs a Equation Type as EXTERNAL
+
             obj = gams.transfer.EquationType();
             obj.value_ = gams.transfer.EquationType.EXTERNAL;
         end
 
+        %> Constructs a Equation Type as CONE
         function obj = Cone()
+            % Constructs a Equation Type as Cone
+
             obj = gams.transfer.EquationType();
             obj.value_ = gams.transfer.EquationType.CONE;
         end
 
+        %> Constructs a Equation Type as BOOLEAN
         function obj = Boolean()
+            % Constructs a Equation Type as BOOLEAN
+
             obj = gams.transfer.EquationType();
             obj.value_ = gams.transfer.EquationType.BOOLEAN;
         end
 
+        %> Converts input to Equation Type enumeration values
+        %>
+        %> **Required Arguments:**
+        %> 1. input (`numeric`, `cell` or `string`)
+        %>    Enumeration values or labels.
         function values = values(input)
+            % Converts input to Equation Type enumeration values
+            %
+            % Required Arguments:
+            % 1. input (numeric, cell or string)
+            %    Enumeration values or labels.
+
             if isnumeric(input)
                 values = zeros(size(input));
                 for i = 1:numel(input)
@@ -214,7 +276,18 @@ classdef EquationType
             end
         end
 
+        %> Converts input to Equation Type enumeration labels (selections)
+        %>
+        %> **Required Arguments:**
+        %> 1. input (`numeric`, `cell` or `string`)
+        %>    Enumeration values or labels.
         function selects = selects(input)
+            % Converts input to Equation Type enumeration labels (selections)
+            %
+            % Required Arguments:
+            % 1. input (numeric, cell or string)
+            %    Enumeration values or labels.
+
             if isnumeric(input)
                 selects = cell(size(input));
                 for i = 1:numel(input)

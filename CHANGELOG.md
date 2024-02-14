@@ -35,6 +35,18 @@ GAMS Transfer Matlab v0.9.0
   - Changed `symbol.Abstract.format` when reading a scalar. In this case the formats `struct` and
     `dense_matrix` are identical and `Container.read` preferred `struct`, i.e., `dense_matrix` was
     changed to `struct`. This is not the case anymore.
+- Changed enumeration-like classes `VariableType` and `EquationType`:
+  - Changed type of enumeration constants from `double` to `uint8`.
+  - Added state (property `value` and `select`) to enumeration-like classes `VariableType` and
+    `EquationType`.
+  - Added methods `Binary`, `Integer`, `Positive`, `Negative`, `Free`, `Sos1`, `Sos2`, `SemiCont`,
+    `SemiInt` to `VariableType` to create enumeration with corresponding value.
+  - Added methods `Eq`, `Leq`, `Geq`, `NonBinding`, `External`, `Cone`, `Boolean` to `EquationType`
+    to create enumeration with corresponding value.
+  - Added methods `values` and `selects` to `VariableType` and `EquationType` to convert input to
+    (multiple) enumeration values or selections at once.
+  - Removed methods `int2str`, `str2int` and `isValid`. Just use the constructor to create an
+    enumeration and then use the properties `value` or `select` instead.
 - Changed handling of `symbol.Abstract.domain_labels`: Previously, if not set explicitly, these were
   extracted from the records. This is not the case anymore. They default to
   `symbol.Abstract.domain_names` (with possible unique added IDs). Changing the fields / columns in
