@@ -927,8 +927,6 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             domain_violations = {};
             for i = dimensions
                 domain = obj.def_.domains{i};
-
-                % TODO: should also work for relaxed domains
                 if ~isa(domain, 'gams.transfer.symbol.domain.Regular')
                     continue
                 end
@@ -1041,18 +1039,22 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         %> Returns the largest value in records
         %>
         %> - `[v, w] = getMaxValue(varargin)` returns the largest value in records `v` and where it
-        %>   is `w`. `varargin` can include a list of value fields that should be considered:
-        %>   `"level"`, `"value"`, `"lower"`, `"upper"`, `"scale"`. If none is given all available
-        %>   for the symbol are considered.
+        %>   is `w`.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
         function [value, where] = getMaxValue(obj, varargin)
             % Returns the largest value in records
             %
-            % [v, w] = getMaxValue(varargin) returns the largest value in records v and where it is
-            % w. varargin can include a list of value fields that should be considered: level,
-            % value, lower, upper, scale. If none is given all available for the symbol are
-            % considered.
-
-            % TODO adapt documentation
+            % - [v, w] = getMaxValue(varargin) returns the largest value in records v and where it
+            %   is w.
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
 
             try
                 values = obj.parseValues(varargin{:});
@@ -1062,22 +1064,25 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             [value, where] = obj.data_.getMaxValue(obj.axes(), values);
         end
 
-
         %> Returns the smallest value in records
         %>
         %> - `[v, w] = getMinValue(varargin)` returns the smallest value in records `v` and where it
-        %>   is `w`. `varargin` can include a list of value fields that should be considered:
-        %>   `"level"`, `"value"`, `"lower"`, `"upper"`, `"scale"`. If none is given all available
-        %>   for the symbol are considered.
+        %>   is `w`.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
         function [value, where] = getMinValue(obj, varargin)
             % Returns the smallest value in records
             %
-            % [v, w] = getMinValue(varargin) returns the smallest value in records v and where it is
-            % w. varargin can include a list of value fields that should be considered: level,
-            % value, lower, upper, scale. If none is given all available for the symbol are
-            % considered.
-
-            % TODO adapt documentation
+            % - [v, w] = getMinValue(varargin) returns the smallest value in records v and where it
+            %   is w.
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
 
             try
                 values = obj.parseValues(varargin{:});
@@ -1089,18 +1094,23 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
         %> Returns the mean value over all values in records
         %>
-        %> - `v = getMeanValue(varargin)` returns the mean value over all values in records `v`.
-        %>   `varargin` can include a list of value fields that should be considered: `"level"`,
-        %>   `"value"`, `"lower"`, `"upper"`, `"scale"`. If none is given all available for the
-        %>   symbol are considered.
+        %> - `[v, w] = getMeanValue(varargin)` returns the mean value over all values in records `v`
+        %>   and where it is `w`.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
         function value = getMeanValue(obj, varargin)
             % Returns the mean value over all values in records
             %
-            % v = getMeanValue(varargin) returns the mean value over all values in records v.
-            % varargin can include a list of value fields that should be considered: level, value,
-            % lower, upper, scale. If none is given all available for the symbol are considered.
-
-            % TODO adapt documentation
+            % - [v, w] = getMeanValue(varargin) returns the mean value over all values in records
+            %   v and where it is w.
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
 
             try
                 values = obj.parseValues(varargin{:});
@@ -1113,18 +1123,22 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         %> Returns the largest absolute value in records
         %>
         %> - `[v, w] = getMaxAbsValue(varargin)` returns the largest absolute value in records `v`
-        %>   and where it is `w`. `varargin` can include a list of value fields that should be
-        %>   considered: `"level"`, `"value"`, `"lower"`, `"upper"`, `"scale"`. If none is given all
-        %>   available for the symbol are considered.
+        %>   and where it is `w`.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
         function [value, where] = getMaxAbsValue(obj, varargin)
             % Returns the largest absolute value in records
             %
-            % [v, w] = getMaxAbsValue(varargin) returns the largest absolute value in records v and
-            % where it is w. varargin can include a list of value fields that should be considered:
-            % level, value, lower, upper, scale. If none is given all available for the symbol are
-            % considered.
-
-            % TODO adapt documentation
+            % - [v, w] = getMaxAbsValue(varargin) returns the largest absolute value in records v
+            %   and where it is w.
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
 
             try
                 values = obj.parseValues(varargin{:});
@@ -1136,23 +1150,26 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
         %> Returns the number of GAMS NA values in records
         %>
-        %> - `n = countNA(varargin)` returns the number of GAMS NA values `n` in records. `varargin`
-        %>   can include a list of value fields that should be considered: `"level"`, `"value"`,
-        %>   `"lower"`, `"upper"`, `"scale"`. If none is given all available for the symbol are
-        %>   considered.
+        %> - `n = countNA(varargin)` returns the number of GAMS NA values `n` in records.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
         %>
         %> @see \ref gams::transfer::SpecialValues::NA "SpecialValues.NA", \ref
         %> gams::transfer::SpecialValues::isNA "SpecialValues.isNA"
         function n = countNA(obj, varargin)
             % Returns the number of GAMS NA values in records
             %
-            % n = countNA(varargin) returns the number of GAMS NA values n in records. varargin can
-            % include a list of value fields that should be considered: level, value, lower, upper,
-            % scale. If none is given all available for the symbol are considered.
+            % n = countNA(varargin) returns the number of GAMS NA values n in records.
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
             %
             % See also: gams.transfer.SpecialValues.NA, gams.transfer.SpecialValues.isna
-
-            % TODO adapt documentation
 
             try
                 values = obj.parseValues(varargin{:});
@@ -1165,17 +1182,20 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         %> Returns the number of GAMS UNDEF values in records
         %>
         %> - `n = countUndef(varargin)` returns the number of GAMS UNDEF values `n` in records.
-        %>   `varargin` can include a list of value fields that should be considered: `"level"`,
-        %>   `"value"`, `"lower"`, `"upper"`, `"scale"`. If none is given all available for the
-        %>   symbol are considered.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
         function n = countUndef(obj, varargin)
             % Returns the number of GAMS UNDEF values in records
             %
             % n = countUndef(varargin) returns the number of GAMS UNDEF values n in records.
-            % varargin can include a list of value fields that should be considered: level, value,
-            % lower, upper, scale. If none is given all available for the symbol are considered.
-
-            % TODO adapt documentation
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
 
             try
                 values = obj.parseValues(varargin{:});
@@ -1188,22 +1208,25 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         %> Returns the number of GAMS EPS values in records
         %>
         %> - `n = countEps(varargin)` returns the number of GAMS EPS values `n` in records.
-        %>   `varargin` can include a list of value fields that should be considered: `"level"`,
-        %>   `"value"`, `"lower"`, `"upper"`, `"scale"`. If none is given all available for the
-        %>   symbol are considered.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
         %>
         %> @see \ref gams::transfer::SpecialValues::EPS "SpecialValues.EPS", \ref
         %> gams::transfer::SpecialValues::isEps "SpecialValues.isEps"
         function n = countEps(obj, varargin)
             % Returns the number of GAMS EPS values in records
             %
-            % n = countEps(varargin) returns the number of GAMS EPS values n in records. varargin
-            % can include a list of value fields that should be considered: level, value, lower,
-            % upper, scale. If none is given all available for the symbol are considered.
+            % n = countEps(varargin) returns the number of GAMS EPS values n in records.
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
             %
             % See also: gams.transfer.SpecialValues.EPS, gams.transfer.SpecialValues.isEps
-
-            % TODO adapt documentation
 
             try
                 values = obj.parseValues(varargin{:});
@@ -1217,18 +1240,21 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         %> records
         %>
         %> - `n = countPosInf(varargin)` returns the number of GAMS PINF values `n` in records.
-        %>   `varargin` can include a list of value fields that should be considered: `"level"`,
-        %>   `"value"`, `"lower"`, `"upper"`, `"scale"`. If none is given all available for the
-        %>   symbol are considered.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
         function n = countPosInf(obj, varargin)
             % Returns the number of GAMS PINF (positive infinity) values in
             % records
             %
             % n = countPosInf(varargin) returns the number of GAMS PINF values n in records.
-            % varargin can include a list of value fields that should be considered: level, value,
-            % lower, upper, scale. If none is given all available for the symbol are considered.
-
-            % TODO adapt documentation
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
 
             try
                 values = obj.parseValues(varargin{:});
@@ -1242,18 +1268,21 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         %> records
         %>
         %> - `n = countNegInf(varargin)` returns the number of GAMS MINF values `n` in records.
-        %>   `varargin` can include a list of value fields that should be considered: `"level"`,
-        %>   `"value"`, `"lower"`, `"upper"`, `"scale"`. If none is given all available for the
-        %>   symbol are considered.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
         function n = countNegInf(obj, varargin)
             % Returns the number of GAMS MINF (negative infinity) values in
             % records
             %
             % n = countNegInf(varargin) returns the number of GAMS MINF values n in records.
-            % varargin can include a list of value fields that should be considered: level, value,
-            % lower, upper, scale. If none is given all available for the symbol are considered.
-
-            % TODO adapt documentation
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
 
             try
                 values = obj.parseValues(varargin{:});
@@ -1281,9 +1310,12 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         %>
         %> - `n = getNumberValues(varargin)` is the sum of values stored of the following fields:
         %>   `"level"`, `"value"`, `"marginal"`, `"lower"`, `"upper"`, `"scale"`. The number of
-        %>   values is the basis for the sparsity computation. `varargin` can include a list of
-        %>   value fields that should be considered: `"level"`, `"value"`, `"lower"`, `"upper"`,
-        %>   `"scale"`. If none is given all available for the symbol are considered.
+        %>   values is the basis for the sparsity computation.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
         %>
         %> @see \ref gams::transfer::symbol::Symbol::getSparsity "symbol.Symbol.getSparsity"
         function nvals = getNumberValues(obj, varargin)
@@ -1291,13 +1323,14 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             %
             % n = getNumberValues(varargin) is the sum of values stored of the following fields:
             % level, value, marginal, lower, upper, scale. The number of values is the basis for the
-            % sparsity computation. varargin can include a list of value fields that should be
-            % considered: level, value, lower, upper, scale. If none is given all available for the
-            % symbol are considered.
+            % sparsity computation.
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
             %
             % See also: gams.transfer.symbol.Abstract.getSparsity
-
-            % TODO adapt documentation
 
             try
                 values = obj.parseValues(varargin{:});
@@ -1397,7 +1430,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 assert(unique_labels.data == obj.data_);
                 obj.data_.updateUniqueLabels(obj.def_.domains{dimension}, labels);
             else
-                % TODO
+                warning('todo')
             end
         end
 
@@ -1414,7 +1447,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 assert(unique_labels.data == obj.data_);
                 obj.data_.removeUnusedUniqueLabels(obj.def_.domains{dimension});
             else
-                % TODO
+                warning('todo')
             end
         end
 
@@ -1440,7 +1473,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 assert(unique_labels.data == obj.data_);
                 obj.data_.mergeUniqueLabels(obj.def_.domains{dimension}, oldlabels, newlabels);
             else
-                % TODO
+                warning('todo')
             end
         end
 
