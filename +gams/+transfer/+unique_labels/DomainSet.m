@@ -77,8 +77,8 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
 
         function obj = construct(symbol)
             gams.transfer.utils.Validator('symbol', 1, symbol).types({'gams.transfer.symbol.Set', 'gams.transfer.alias.Set'});
-            gams.transfer.utils.Validator('symbol.dimension', 1, symbol.dimension).inInterval(1, 1);
             obj = gams.transfer.unique_labels.DomainSet(symbol);
+            obj.checkSymbol();
         end
 
     end
@@ -90,18 +90,17 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
         end
 
         function count = count(obj)
+            obj.checkSymbol();
             count = obj.symbol_.getNumberRecords();
         end
 
         function labels = get(obj)
-            assert(obj.symbol_.dimension == 1);
+            obj.checkSymbol();
             labels = obj.symbol_.getUELs(1, 'ignore_unused', true);
-            if numel(unique(labels)) ~= numel(labels) % TODO somehow cache check
-                error('Symbol ''%s'' records are used as domain but are not unique.', obj.symbol_.name);
-            end
         end
 
         function clear(obj)
+            obj.checkSymbol();
             switch lower(obj.symbol_.format)
             case 'table'
                 obj.symbol_.data = gams.transfer.symbol.data.Table.construct();
@@ -162,7 +161,19 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
         end
 
         function rename(obj, oldlabels, newlabels)
+            obj.checkSymbol();
             obj.symbol_.renameUELs(containers.Map(oldlabels, newlabels), 1);
+        end
+
+    end
+
+    methods (Hidden, Access = protected)
+
+        function checkSymbol(obj)
+            status = obj.symbol_.isValidDomain();
+            if status.flag ~= gams.transfer.utils.Status.OK
+                error('Domain set ''%s''cannot be used as domain: %s', obj.symbol_.name, status.message);
+            end
         end
 
     end

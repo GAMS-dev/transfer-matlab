@@ -159,7 +159,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                     return
                 end
             end
-            status = gams.transfer.utils.Status.createOK();
+            status = gams.transfer.utils.Status.ok();
         end
 
         function dim = dimension(obj)

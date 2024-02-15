@@ -97,19 +97,15 @@ classdef Status
             flag = obj.flag() == obj.OK;
         end
 
-        function setUnknown(obj)
-            obj.message_ = '';
-        end
-
-        function setOK(obj)
-            obj.message_ = 'OK';
-        end
-
     end
 
     methods (Static)
 
-        function obj = createOK()
+        function obj = unknown()
+            obj = gams.transfer.utils.Status();
+        end
+
+        function obj = ok()
             obj = gams.transfer.utils.Status('OK');
         end
 

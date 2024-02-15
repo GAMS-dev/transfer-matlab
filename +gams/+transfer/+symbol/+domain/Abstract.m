@@ -118,7 +118,6 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         end
 
         function resolveViolations(obj, labels)
-            error('Domain does not maintain unique labels');
         end
 
     end

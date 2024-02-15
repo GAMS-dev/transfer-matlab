@@ -88,7 +88,7 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
                 end
             end
 
-            status = gams.transfer.utils.Status.createOK();
+            status = gams.transfer.utils.Status.ok();
         end
 
         function nrecs = getNumberRecords(obj, axes, values)

@@ -707,4 +707,12 @@ classdef Set < gams.transfer.alias.Abstract
 
     end
 
+    methods (Hidden)
+
+        function status = isValidDomain(obj)
+            status = obj.alias_with_.isValidDomain();
+        end
+
+    end
+
 end

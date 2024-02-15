@@ -113,7 +113,7 @@ classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
         end
 
         function status = isValid(obj) %#ok<MANU>
-            status = gams.transfer.utils.Status.createOK();
+            status = gams.transfer.utils.Status.ok();
         end
 
     end

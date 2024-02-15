@@ -45,7 +45,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
 
             % empty is valid
             if numel(obj.getLabels()) == 0
-                status = gams.transfer.utils.Status.createOK();
+                status = gams.transfer.utils.Status.ok();
                 return
             end
 
@@ -130,7 +130,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
                 prev_size = curr_size;
             end
 
-            status = gams.transfer.utils.Status.createOK();
+            status = gams.transfer.utils.Status.ok();
         end
 
         function flag = hasUniqueLabels(obj, domain)

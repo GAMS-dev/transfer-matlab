@@ -56,6 +56,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         unique_labels_ = {}
         last_update_ = now()
         last_update_reset_ = []
+        is_valid_status_ = gams.transfer.utils.Status();
+        is_valid_time_ = 0
     end
 
     properties (Dependent)
@@ -833,8 +835,6 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             %
             % See also: gams.transfer.Container/isValid
 
-            % TODO: caching
-
             verbose = 0;
             force = false;
             if nargin > 1
@@ -844,42 +844,43 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 force = true;
             end
 
-            if ~isa(obj.container_, 'gams.transfer.Container') || ...
-                ~obj.container_.hasSymbols(obj.name_) || obj.container_.getSymbols(obj.name_) ~= obj
-                msg = 'Symbol is not contained in its linked container.';
-                switch verbose
-                case 1
-                    warning(msg);
-                case 2
-                    error(msg);
+            if force || obj.last_update >= obj.is_valid_time_
+                obj.is_valid_status_ = gams.transfer.utils.Status.unknown();
+            end
+
+            if obj.is_valid_status_.flag == gams.transfer.utils.Status.UNKNOWN
+                obj.is_valid_status_ = gams.transfer.utils.Status.ok();
+                obj.applyDomainForwarding();
+                if ~isa(obj.container_, 'gams.transfer.Container') || ...
+                    ~obj.container_.hasSymbols(obj.name_) || obj.container_.getSymbols(obj.name_) ~= obj
+                    obj.is_valid_status_ = gams.transfer.utils.Status('Symbol is not contained in its linked container.');
                 end
-                flag = false;
-                return
+                if obj.is_valid_status_.flag == gams.transfer.utils.Status.OK
+                    obj.is_valid_status_ = obj.def_.isValid();
+                end
+                if obj.is_valid_status_.flag == gams.transfer.utils.Status.OK
+                    obj.is_valid_status_ = obj.data_.isValid(obj.axes(), obj.def_.values);
+                end
             end
+            obj.is_valid_time_ = now();
 
-            status = obj.def_.isValid();
-            if status.flag == gams.transfer.utils.Status.OK
-                status = obj.data_.isValid(obj.axes(), obj.def_.values);
-            end
-
-            if status.flag ~= gams.transfer.utils.Status.OK
+            switch obj.is_valid_status_.flag
+            case gams.transfer.utils.Status.FAIL
                 switch verbose
                 case 0
                 case 1
-                    warning(status.message);
-
+                    warning(obj.is_valid_status_.message);
                 case 2
-                    error(status.message);
+                    error(obj.is_valid_status_.message);
                 otherwise
                     error('Invalid verbose selection: %d', verbose);
                 end
                 flag = false;
-                return
+            case gams.transfer.utils.Status.OK
+                flag = true;
+            case gams.transfer.utils.Status.UNKNOWN
+                error('Internal error');
             end
-
-            obj.applyDomainForwarding();
-
-            flag = true;
         end
 
         %> Get domain violations

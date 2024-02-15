@@ -89,6 +89,10 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
         function obj = construct(symbol)
             gams.transfer.utils.Validator('symbol', 1, symbol).types({'gams.transfer.symbol.Set', 'gams.transfer.alias.Abstract'});
             obj = gams.transfer.symbol.domain.Regular(symbol);
+            status = symbol.isValidDomain();
+            if status ~= gams.transfer.utils.Status.OK
+                error(status.message);
+            end
         end
 
     end
@@ -111,19 +115,7 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
         end
 
         function status = isValid(obj)
-
-            if obj.symbol_.dimension ~= 1
-                status = gams.transfer.utils.Status(sprintf("Set '%s' cannot be used as domain since dimension is not 1.", obj.symbol_.name));
-                return
-            end
-
-            % TODO: may cycle
-            % if ~obj.symbol_.isValid()
-            %     status = gams.transfer.utils.Status(sprintf("Domain set '%s' is invalid.", obj.symbol_.name));
-            %     return
-            % end
-
-            status = gams.transfer.utils.Status.createOK();
+            status = obj.symbol_.isValidDomain();
         end
 
         function flag = hasUniqueLabels(obj) %#ok<MANU>
@@ -140,10 +132,7 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
             % the domain violation is likely to exist there as well. We therefore
             % apply the same resolving the parent domain.
             if obj.symbol_.dimension > 0
-                domain = obj.symbol_.def.domains{1};
-                if domain.hasUniqueLabels()
-                    domain.resolveViolations(labels);
-                end
+                obj.symbol_.def.domains{1}.resolveViolations(labels);
             end
             obj.getUniqueLabels().add(labels);
         end
