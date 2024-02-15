@@ -93,10 +93,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
         end
 
         function add(obj, labels)
-            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr().value;
-            if ischar(labels) || isstring(labels)
-                labels = {labels};
-            end
+            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().toCell().cellstr().value;
             for i = 1:numel(labels)
                 if ~obj.uels_label2ids_.containsKey(labels{i})
                     obj.uels_label2ids_.put(labels{i}, obj.uels_label2ids_.size() + 1);
@@ -114,10 +111,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
         end
 
         function remove(obj, labels)
-            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr().value;
-            if ischar(labels) || isstring(labels)
-                labels = {labels};
-            end
+            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().toCell().cellstr().value;
             if obj.uels_label2ids_.size() == 0 || numel(labels) == 0
                 return
             end
@@ -132,7 +126,26 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
         end
 
         function rename(obj, oldlabels, newlabels)
-            % TODO
+            oldlabels = gams.transfer.utils.Validator('oldlabels', 1, oldlabels).string2char() ...
+                .toCell().cellstr().value;
+            newlabels = gams.transfer.utils.Validator('newlabels', 2, newlabels).string2char() ...
+                .toCell().cellstr().numel(numel(oldlabels)).value;
+
+            if numel(oldlabels) == 0
+                return
+            end
+
+            labels = obj.uels_id2labels_;
+            for i = 1:numel(oldlabels)
+                if strcmp(oldlabels{i}, newlabels{i}) || ~obj.uels_label2ids_.containsKey(oldlabels{i})
+                    continue
+                end
+                if ~obj.uels_label2ids_.containsKey(newlabels{i})
+                    error('Unique label ''%s'' already exists', newlabels{i});
+                end
+                labels{obj.uels_label2ids_.get(oldlabels{i})} = newlabels{i};
+            end
+            obj.set(labels);
         end
 
     end

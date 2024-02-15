@@ -62,6 +62,12 @@ classdef Validator
             end
         end
 
+        function obj = toCell(obj)
+            if ~iscell(obj.value)
+                obj.value = {obj.value};
+            end
+        end
+
         function obj = fileExtension(obj, ext)
             [~, ~, ext_] = fileparts(obj.value);
             if ~strcmpi(ext_, ext)
