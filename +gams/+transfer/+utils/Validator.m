@@ -77,7 +77,10 @@ classdef Validator
         end
 
         function obj = type(obj, class, allow_none)
-            if nargin >= 3 && allow_none && isnumeric(obj.value) && isempty(obj.value)
+            if nargin == 2
+                allow_none = false;
+            end
+            if allow_none && isnumeric(obj.value) && isempty(obj.value)
                 return
             end
             if ~isa(obj.value, class)
@@ -164,11 +167,14 @@ classdef Validator
         end
 
         function obj = cellof(obj, class, allow_none)
+            if nargin == 2
+                allow_none = false;
+            end
             if ~iscell(obj.value)
                 error('Argument ''%s'' (at position %d) must be ''cell''.', obj.name, obj.index);
             end
             for i = 1:numel(obj.value)
-                if nargin >= 3 && allow_none && isnumeric(obj.value{i}) && isempty(obj.value{i})
+                if allow_none && isnumeric(obj.value{i}) && isempty(obj.value{i})
                     continue
                 end
                 if ~isa(obj.value{i}, class)

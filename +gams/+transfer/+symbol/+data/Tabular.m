@@ -133,31 +133,32 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             status = gams.transfer.utils.Status.createOK();
         end
 
-        function flag = hasUniqueLabels(obj, domain_label)
-            gams.transfer.utils.Validator('domain_label', 1, domain_label).types({'string', 'char'});
+        function flag = hasUniqueLabels(obj, domain)
+            gams.transfer.utils.Validator('domain', 1, domain).type('gams.transfer.symbol.domain.Abstract');
             flag = gams.transfer.Constants.SUPPORTS_CATEGORICAL && ...
-                obj.isLabel(domain_label) && iscategorical(obj.records_.(domain_label));
+                obj.isLabel(domain.label) && iscategorical(obj.records_.(domain.label));
         end
 
-        function unique_labels = getUniqueLabels(obj, domain_label)
-            if obj.hasUniqueLabels(domain_label)
-                unique_labels = gams.transfer.unique_labels.CategoricalColumn(obj, domain_label);
+        function unique_labels = getUniqueLabels(obj, domain)
+            if obj.hasUniqueLabels(domain)
+                unique_labels = gams.transfer.unique_labels.CategoricalColumn(obj, domain);
             else
                 unique_labels = [];
             end
         end
 
-        function indices = usedUniqueLabels(obj, domain_label)
-            if ~obj.isLabel(domain_label)
+        function indices = usedUniqueLabels(obj, domain)
+            gams.transfer.utils.Validator('domain', 1, domain).type('gams.transfer.symbol.domain.Abstract');
+            if ~obj.isLabel(domain.label)
                 indices = [];
                 return
             end
-            indices = gams.transfer.utils.unique(uint64(obj.records_.(domain_label)));
+            indices = gams.transfer.utils.unique(uint64(obj.records_.(domain.label)));
             indices = indices(~isnan(indices) & indices ~= 0);
         end
 
         function updateUniqueLabels(obj, domain, labels)
-            if ~obj.hasUniqueLabels(domain.label)
+            if ~obj.hasUniqueLabels(domain)
                 error('Data does not maintain unique labels for domain ''%s''.', domain.label);
             end
             % TODO: check labels
@@ -166,7 +167,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
         end
 
         function removeUnusedUniqueLabels(obj, domain)
-            if ~obj.hasUniqueLabels(domain.label)
+            if ~obj.hasUniqueLabels(domain)
                 error('Data does not maintain unique labels for domain ''%s''.', domain.label);
             end
             obj.records_.(domain.label) = removecats(obj.records_.(domain.label));
@@ -174,7 +175,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
         end
 
         function mergeUniqueLabels(obj, domain, oldlabels, newlabels)
-            if ~obj.hasUniqueLabels(domain.label)
+            if ~obj.hasUniqueLabels(domain)
                 error('Data does not maintain unique labels for domain ''%s''.', domain.label);
             end
             % TODO: check labels

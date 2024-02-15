@@ -114,15 +114,15 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             error('Abstract method. Call method of subclass ''%s''.', class(obj));
         end
 
-        function flag = hasUniqueLabels(obj, domain_label)
+        function flag = hasUniqueLabels(obj, domain)
             flag = false;
         end
 
-        function unique_labels = getUniqueLabels(obj, domain_label)
+        function unique_labels = getUniqueLabels(obj, domain)
             unique_labels = [];
         end
 
-        function indices = usedUniqueLabels(obj, domain_label)
+        function indices = usedUniqueLabels(obj, domain)
             error('Abstract method. Call method of subclass ''%s''.', class(obj));
         end
 

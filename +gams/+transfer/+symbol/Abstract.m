@@ -1347,8 +1347,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         function axis = axis(obj, dimension, prioritize_super)
             domain = obj.def_.domains{dimension};
             if nargin == 2 || ~prioritize_super
-                if ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain.label)
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.data_.getUniqueLabels(domain.label));
+                if ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain)
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.data_.getUniqueLabels(domain));
                 elseif ~isempty(obj.unique_labels{dimension})
                     axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
                 elseif domain.hasUniqueLabels()
@@ -1362,8 +1362,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                     axis = gams.transfer.symbol.unique_labels.Axis(domain.label, domain.getUniqueLabels());
                 elseif ~isempty(obj.unique_labels{dimension})
                     axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
-                elseif ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain.label)
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.data_.getUniqueLabels(domain.label));
+                elseif ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain)
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.data_.getUniqueLabels(domain));
                 else
                     obj.unique_labels_{dimension} = gams.transfer.unique_labels.OrderedLabelSet();
                     axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
@@ -1384,7 +1384,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         end
 
         function indices = usedUniqueLabels(obj, dimension)
-            indices = obj.data_.usedUniqueLabels(obj.def_.domains{dimension}.label);
+            indices = obj.data_.usedUniqueLabels(obj.def_.domains{dimension});
         end
 
         function count = countUniqueLabels(obj, dimension)

@@ -1243,11 +1243,13 @@ function test_changeSymbol(t, cfg)
         x1.records.i = categorical({'i21', 'i22', 'i23'})';
         x1.records.j = categorical({'j21', 'j22', 'j23'})';
     else
+        x1.unique_labels{1} = gams.transfer.unique_labels.Range.construct('j2', 1, 1, 3);
+        x1.unique_labels{2} = gams.transfer.unique_labels.Range.construct('j2', 1, 1, 3);
         x1.records.i = [1; 2; 3];
         x1.records.j = [1; 2; 3];
     end
     x1.records.level = [1; 2; 3];
-    t.assert(x1.isValid(false));
+    t.assert(x1.isValid());
     gdx.modified = false;
     t.assert(x1.dimension == 2);
     t.assertEquals(x1.domain, {'i', 'j'});
@@ -2348,6 +2350,8 @@ function test_setRecords(t, cfg)
         t.assertEquals(e.message, 'Too many value fields in records.');
     end
 
+    s3.unique_labels{1} = [];
+
     t.add('set_records_struct_1');
     gdx.modified = false;
     s3.setRecords(struct('level', [1; 2; 3; 4]));
@@ -2483,6 +2487,8 @@ function test_setRecords(t, cfg)
         t.reset();
         t.assertEquals(e.message, 'Records value column ''level'' must have same size as other columns.');
     end
+
+    s3.unique_labels{1} = [];
 
     t.add('set_records_struct_8');
     gdx.modified = false;
