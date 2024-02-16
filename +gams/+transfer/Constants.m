@@ -75,6 +75,12 @@ classdef Constants
         UNDEFINED_UNIQUE_LABEL = '<undefined>'
 
 
+        %> Empty unique labels object
+
+        % EMPTY_UNIQUE_LABELS Empty unique labels object
+        EMPTY_UNIQUE_LABELS = gams.transfer.unique_labels.Empty()
+
+
         %> True if table is supported
 
         % SUPPORTS_TABLE True if table is supported

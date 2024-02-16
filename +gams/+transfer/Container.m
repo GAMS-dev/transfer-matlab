@@ -136,7 +136,7 @@ classdef Container < gams.transfer.utils.Handle
 
         function modified = get.modified(obj)
             modified = true;
-            if isempty(obj.last_update_reset_) || obj.last_update_reset_ < obj.last_update
+            if isempty(obj.last_update_reset_) || obj.last_update_reset_ <= obj.last_update
                 return
             end
             symbols = obj.data_.entries();
@@ -153,7 +153,11 @@ classdef Container < gams.transfer.utils.Handle
             if modified
                 obj.last_update_reset_ = [];
             else
+                last_update = obj.last_update;
                 obj.last_update_reset_ = now();
+                while (obj.last_update_reset_ == last_update)
+                    obj.last_update_reset_ = now();
+                end
             end
             symbols = obj.data_.entries();
             for i = 1:numel(symbols)

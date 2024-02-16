@@ -140,7 +140,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
                 if strcmp(oldlabels{i}, newlabels{i}) || ~obj.uels_label2ids_.containsKey(oldlabels{i})
                     continue
                 end
-                if ~obj.uels_label2ids_.containsKey(newlabels{i})
+                if obj.uels_label2ids_.containsKey(newlabels{i})
                     error('Unique label ''%s'' already exists', newlabels{i});
                 end
                 labels{obj.uels_label2ids_.get(oldlabels{i})} = newlabels{i};

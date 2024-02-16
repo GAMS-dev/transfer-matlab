@@ -408,7 +408,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         end
 
         function modified = get.modified(obj)
-            modified = isempty(obj.last_update_reset_) || obj.last_update_reset_ < obj.last_update;
+            modified = isempty(obj.last_update_reset_) || obj.last_update_reset_ <= obj.last_update;
         end
 
         function set.modified(obj, modified)
@@ -416,7 +416,11 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             if modified
                 obj.last_update_reset_ = [];
             else
+                last_update = obj.last_update;
                 obj.last_update_reset_ = now();
+                while (obj.last_update_reset_ == last_update)
+                    obj.last_update_reset_ = now();
+                end
             end
         end
 
@@ -1355,8 +1359,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 elseif domain.hasUniqueLabels()
                     axis = gams.transfer.symbol.unique_labels.Axis(domain.label, domain.getUniqueLabels());
                 else
-                    obj.unique_labels_{dimension} = gams.transfer.unique_labels.OrderedLabelSet();
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, gams.transfer.Constants.EMPTY_UNIQUE_LABELS);
                 end
             else
                 if domain.hasUniqueLabels()
@@ -1366,8 +1369,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 elseif ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain)
                     axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.data_.getUniqueLabels(domain));
                 else
-                    obj.unique_labels_{dimension} = gams.transfer.unique_labels.OrderedLabelSet();
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
+                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, gams.transfer.Constants.EMPTY_UNIQUE_LABELS);
                 end
             end
         end
@@ -1412,14 +1414,24 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             if ~iscell(labels)
                 labels = {labels};
             end
-            obj.axis(dimension).unique_labels.add(labels);
+            unique_labels = obj.axis(dimension).unique_labels;
+            if isa(unique_labels, 'gams.transfer.unique_labels.Empty')
+                obj.unique_labels_{dimension} = gams.transfer.unique_labels.OrderedLabelSet(labels);
+            else
+                unique_labels.add(labels);
+            end
         end
 
         function setUniqueLabels(obj, dimension, labels)
             if ~iscell(labels)
                 labels = {labels};
             end
-            obj.axis(dimension).unique_labels.set(labels);
+            unique_labels = obj.axis(dimension).unique_labels;
+            if isa(unique_labels, 'gams.transfer.unique_labels.Empty')
+                obj.unique_labels_{dimension} = gams.transfer.unique_labels.OrderedLabelSet(labels);
+            else
+                unique_labels.set(labels);
+            end
         end
 
         function updateUniqueLabels(obj, dimension, labels)

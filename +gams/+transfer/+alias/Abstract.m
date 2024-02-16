@@ -196,7 +196,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         end
 
         function modified = get.modified(obj)
-            modified = isempty(obj.last_update_reset_) || obj.last_update_reset_ < obj.last_update;
+            modified = isempty(obj.last_update_reset_) || obj.last_update_reset_ <= obj.last_update;
         end
 
         function set.modified(obj, modified)
@@ -204,7 +204,11 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             if modified
                 obj.last_update_reset_ = [];
             else
+                last_update = obj.last_update;
                 obj.last_update_reset_ = now();
+                while (obj.last_update_reset_ == last_update)
+                    obj.last_update_reset_ = now();
+                end
             end
         end
 
