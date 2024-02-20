@@ -392,7 +392,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         end
 
         function format = get.format(obj)
-            format = obj.data_.name();
+            format = obj.data_.name;
         end
 
         function set.format(obj, format)
