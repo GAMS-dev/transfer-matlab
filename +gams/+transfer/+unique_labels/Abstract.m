@@ -42,7 +42,8 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
     methods
 
         function unique_labels = copy(obj)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function count = count(obj)
@@ -50,7 +51,8 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         end
 
         function labels = get(obj)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function labels = getAt(obj, indices)
@@ -64,29 +66,49 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             end
         end
 
-        function indices = find(obj, labels)
+        function [flag, indices] = find(obj, labels)
             labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr().value;
-            [~, indices] = ismember(labels, obj.get());
+            [flag, indices] = ismember(labels, obj.get());
         end
 
         function clear(obj)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function add(obj, labels)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function set(obj, labels)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function remove(obj, labels)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+        function [flag, indices] = update(obj, labels)
+            if nargout > 0
+                oldlabels = obj.get();
+            end
+            obj.set(labels);
+            if nargout > 0
+                [flag, indices] = obj.updatedIndices(oldlabels, [], []);
+            end
+        end
+
+        function [flag, indices] = remove(obj, labels)
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function rename(obj, oldlabels, newlabels)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
+        function [flag, indices] = merge(obj, oldlabels, newlabels)
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function index = createIndex(obj, input)
@@ -98,7 +120,21 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         end
 
         function index = createIntegerIndex(obj, input)
-            index = obj.createIntegerIndexFrom(input, obj.get());
+            if iscell(input)
+                unique_labels = obj.get();
+                input = gams.transfer.utils.Validator('input', 1, input).string2char().cellstr().value;
+                map = containers.Map(unique_labels, 1:numel(unique_labels));
+                index = zeros(size(input));
+                for i = 1:numel(input)
+                    if isKey(map, input{i})
+                        index(i) = map(input{i});
+                    end
+                end
+            else
+                gams.transfer.utils.Validator('input', 1, input).integer();
+                index = uint64(input);
+                index(index < 1 | index > obj.count()) = 0;
+            end
         end
 
     end
@@ -107,6 +143,21 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function flag = supportsIndexed(obj)
             flag = false;
+        end
+
+    end
+
+    methods (Hidden, Access = protected)
+
+        function [flag, indices] = updatedIndices(obj, labels_before_operation, rename_oldlabels, rename_newlabels)
+            assert(numel(rename_oldlabels) == numel(rename_newlabels));
+            labels_after_operation = obj.get();
+            [flag, indices] = ismember(labels_before_operation, labels_after_operation);
+            if numel(rename_oldlabels) == 0
+                return
+            end
+            [flag_, indices_] = ismember(rename_oldlabels, labels_before_operation);
+            [flag(indices_(flag_)), indices(indices_(flag_))] = ismember(rename_newlabels(flag_), labels_after_operation);
         end
 
     end
@@ -147,8 +198,8 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                 end
             else
                 gams.transfer.utils.Validator('input', 1, input).integer();
-                index = input;
-                index(index < 1 | numel(unique_labels)) = 0;
+                index = uint64(input);
+                index(index < 1 | index > numel(unique_labels)) = 0;
             end
         end
 

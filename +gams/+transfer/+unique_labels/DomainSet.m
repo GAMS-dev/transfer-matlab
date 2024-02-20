@@ -96,7 +96,7 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
 
         function labels = get(obj)
             obj.checkSymbol();
-            labels = obj.symbol_.getUELs(1, 'ignore_unused', true);
+            labels = reshape(obj.symbol_.getUELs(1, 'ignore_unused', true), 1, []);
         end
 
         function clear(obj)
@@ -138,7 +138,6 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
             end
 
             format = obj.symbol_.format;
-            symbol_labels = reshape(symbol_labels, 1, numel(symbol_labels));
             obj.symbol_.setRecords(symbol_labels, values{:});
             obj.symbol_.transformRecords(format);
         end
@@ -147,22 +146,37 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
             obj.clear();
             format = obj.symbol_.format;
             labels = gams.transfer.utils.unique(labels);
-            labels = reshape(labels, 1, numel(labels));
+            labels = reshape(labels, 1, []);
             obj.symbol_.setRecords(labels);
             obj.symbol_.transformRecords(format);
         end
 
-        function remove(obj, labels)
+        function [flag, indices] = remove(obj, labels)
             labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr().value;
-            [~, idx] = ismember(labels, obj.get());
+            oldlabels = obj.get();
+            [~, idx] = ismember(labels, oldlabels);
             idx(idx == 0) = [];
             obj.symbol_.data.removeRows(idx);
-            obj.symbol_.removeUELs();
+            obj.symbol_.removeUELs(labels(idx));
+            if nargout > 0
+                [flag, indices] = obj.updatedIndices(oldlabels, [], []);
+            end
         end
 
         function rename(obj, oldlabels, newlabels)
             obj.checkSymbol();
             obj.symbol_.renameUELs(containers.Map(oldlabels, newlabels), 1);
+        end
+
+        function [flag, indices] = merge(obj, oldlabels, newlabels)
+            obj.checkSymbol();
+            if nargout > 0
+                oldlabels_ = obj.get();
+            end
+            obj.symbol_.renameUELs(containers.Map(oldlabels, newlabels), 1, 'allow_merge', true);
+            if nargout > 0
+                [flag, indices] = obj.updatedIndices(oldlabels_, oldlabels, newlabels);
+            end
         end
 
     end

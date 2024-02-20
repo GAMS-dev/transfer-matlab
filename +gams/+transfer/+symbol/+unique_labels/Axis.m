@@ -38,23 +38,24 @@ classdef (Hidden) Axis < gams.transfer.utils.Handle
     %#ok<*INUSD,*STOUT>
 
     properties (Hidden, SetAccess = protected)
-        label_
+        domain_
         unique_labels_
     end
 
     properties (Dependent)
-        label
+        domain
         unique_labels
     end
 
     methods
 
-        function label = get.label(obj)
-            label = obj.label_;
+        function domain = get.domain(obj)
+            domain = obj.domain_;
         end
 
-        function set.label(obj, label)
-            obj.label_ = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname().value;
+        function set.domain(obj, domain)
+            gams.transfer.utils.Validator('domain', 1, domain).type('gams.transfer.symbol.domain.Abstract');
+            obj.domain_ = domain;
         end
 
         function unique_labels = get.unique_labels(obj)
@@ -62,7 +63,8 @@ classdef (Hidden) Axis < gams.transfer.utils.Handle
         end
 
         function set.unique_labels(obj, unique_labels)
-            gams.transfer.utils.Validator('unique_labels', 1, unique_labels).type('gams.transfer.unique_labels.Abstract');
+            gams.transfer.utils.Validator('unique_labels', 1, unique_labels) ...
+                .type('gams.transfer.unique_labels.Abstract');
             obj.unique_labels_ = unique_labels;
         end
 
@@ -70,8 +72,8 @@ classdef (Hidden) Axis < gams.transfer.utils.Handle
 
     methods (Hidden, Access = {?gams.transfer.symbol.unique_labels.Axis, ?gams.transfer.symbol.Abstract})
 
-        function obj = Axis(label, unique_labels)
-            obj.label_ = label;
+        function obj = Axis(domain, unique_labels)
+            obj.domain_ = domain;
             obj.unique_labels_ = unique_labels;
         end
 
@@ -79,10 +81,11 @@ classdef (Hidden) Axis < gams.transfer.utils.Handle
 
     methods (Static)
 
-        function obj = construct(label, unique_labels)
-            label = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname().value;
-            gams.transfer.utils.Validator('unique_labels', 1, unique_labels).type('gams.transfer.unique_labels.Abstract');
-            obj = gams.transfer.symbol.unique_labels.Axis(label, unique_labels);
+        function obj = construct(domain, working_unique_labels, unique_labels)
+            gams.transfer.utils.Validator('domain', 1, domain).type('gams.transfer.symbol.domain.Abstract');
+            gams.transfer.utils.Validator('unique_labels', 2, unique_labels) ...
+                .type('gams.transfer.unique_labels.Abstract');
+            obj = gams.transfer.symbol.unique_labels.Axis(domain, unique_labels);
         end
 
     end

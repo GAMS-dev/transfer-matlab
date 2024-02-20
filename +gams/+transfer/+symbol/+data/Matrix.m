@@ -91,6 +91,22 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             status = gams.transfer.utils.Status.ok();
         end
 
+        function indices = usedUniqueLabels(obj, axes, values, dimension)
+            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
+            gams.transfer.utils.Validator('dimension', 3, dimension).integer().scalar().inInterval(1, axes.dimension);
+            values = obj.availableValues('Numeric', values);
+            if numel(values) == 0
+                indices = [];
+            else
+                count = 0;
+                for i = 1:numel(values)
+                    size_ = size(obj.records_.(values{i}.label));
+                    count = max(count, size_(dimension));
+                end
+                indices = 1:count;
+            end
+        end
+
         function nrecs = getNumberRecords(obj, axes, values)
             nrecs = nan;
         end
@@ -139,10 +155,14 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             % domain columns
             for i = 1:axes.dimension
                 axis = axes.axis(i);
-                data.records.(axis.label) = axis.unique_labels.createIndex(indices(:, i));
-                % if data.hasUniqueLabels(domain) TODO: do we actually want this?
-                %     data.removeUnusedUniqueLabels(domain);
-                % end
+                switch axis.domain.index_type.value
+                case gams.transfer.symbol.domain.IndexType.CATEGORICAL
+                    data.records.(axis.domain.label) = axis.unique_labels.createCategoricalIndex(indices(:, i));
+                case gams.transfer.symbol.domain.IndexType.INTEGER
+                    data.records.(axis.domain.label) = axis.unique_labels.createIntegerIndex(indices(:, i));
+                otherwise
+                    error('Unsupported domain index type: %s', axis.domain.index_type.select);
+                end
             end
 
             % values columns

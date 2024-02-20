@@ -99,7 +99,7 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
             nrecs_axes = nan(1, axes.dimension);
             nrecs_values = nan(1, numel(values));
             for i = 1:axes.dimension
-                label = axes.axis(i).label;
+                label = axes.axis(i).domain.label;
                 if isfield(obj.records_, label)
                     nrecs_axes(i) = numel(obj.records_.(label));
                 end

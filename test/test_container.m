@@ -398,11 +398,11 @@ function test_describe(t, cfg, container_type)
             if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'domain_type'}, 'none');
                 t.assertEquals(tbl{1,'domain'}, '[*]');
-                t.assertEquals(tbl{1,'size'}, '[NaN]');
+                t.assertEquals(tbl{1,'size'}, '[5]');
             else
                 t.assertEquals(tbl{1,'domain_type'}{1}, 'none');
                 t.assertEquals(tbl{1,'domain'}{1}, '[*]');
-                t.assertEquals(tbl{1,'size'}{1}, '[NaN]');
+                t.assertEquals(tbl{1,'size'}{1}, '[5]');
             end
             t.assert(tbl{1,'number_records'} == 5);
             t.assert(tbl{1,'number_values'} == 0);
@@ -442,11 +442,11 @@ function test_describe(t, cfg, container_type)
             if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.domain_type(1), 'none');
                 t.assertEquals(tbl.domain(1), '[*]');
-                t.assertEquals(tbl.size(1), '[NaN]');
+                t.assertEquals(tbl.size(1), '[5]');
             else
                 t.assertEquals(tbl.domain_type{1}, 'none');
                 t.assertEquals(tbl.domain{1}, '[*]');
-                t.assertEquals(tbl.size{1}, '[NaN]');
+                t.assertEquals(tbl.size{1}, '[5]');
             end
             t.assert(tbl.number_records(1) == 5);
             t.assert(tbl.number_values(1) == 0);
@@ -477,20 +477,24 @@ function test_describe(t, cfg, container_type)
             if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'name'}, 'a');
                 switch i
-                case {1,3}
-                    t.assert(isequal(tbl{1,'format'}, 'struct') || isequal(tbl{1,'format'}, 'dense_matrix'));
+                case 1
+                    t.assertEquals(tbl{1,'format'}, 'struct');
                 case 2
                     t.assertEquals(tbl{1,'format'}, 'table');
+                case 3
+                    t.assertEquals(tbl{1,'format'}, 'dense_matrix');
                 case 4
                     t.assertEquals(tbl{1,'format'}, 'sparse_matrix');
                 end
             else
                 t.assertEquals(tbl{1,'name'}{1}, 'a');
                 switch i
-                case {1,3}
-                    t.assert(isequal(tbl{1,'format'}{1}, 'struct') || isequal(tbl{1,'format'}{1}, 'dense_matrix'));
+                case 1
+                    t.assertEquals(tbl{1,'format'}{1}, 'struct');
                 case 2
                     t.assertEquals(tbl{1,'format'}{1}, 'table');
+                case 3
+                    t.assertEquals(tbl{1,'format'}{1}, 'dense_matrix');
                 case 4
                     t.assertEquals(tbl{1,'format'}{1}, 'sparse_matrix');
                 end
@@ -506,9 +510,7 @@ function test_describe(t, cfg, container_type)
                 t.assertEquals(tbl{1,'size'}{1}, '[]');
             end
             switch i
-            case {1,3}
-                t.assert(tbl{1,'number_records'} == 1 || isnan(tbl{1,'number_records'}));
-            case 2
+            case {1,2}
                 t.assert(tbl{1,'number_records'} == 1);
             case {3,4}
                 t.assert(isnan(tbl{1,'number_records'}));
@@ -626,20 +628,24 @@ function test_describe(t, cfg, container_type)
             if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.name(1), 'a');
                 switch i
-                case {1,3}
-                    t.assert(isequal(tbl.format(1), 'struct') || isequal(tbl.format(1), 'dense_matrix'));
+                case 1
+                    t.assertEquals(tbl.format(1), 'struct');
                 case 2
                     t.assertEquals(tbl.format(1), 'table');
+                case 3
+                    t.assertEquals(tbl.format(1), 'dense_matrix');
                 case 4
                     t.assertEquals(tbl.format(1), 'sparse_matrix');
                 end
             else
                 t.assertEquals(tbl.name{1}, 'a');
                 switch i
-                case {1,3}
-                    t.assert(isequal(tbl.format{1}, 'struct') || isequal(tbl.format{1}, 'dense_matrix'));
+                case 1
+                    t.assertEquals(tbl.format{1}, 'struct');
                 case 2
                     t.assertEquals(tbl.format{1}, 'table');
+                case 3
+                    t.assertEquals(tbl.format{1}, 'dense_matrix');
                 case 4
                     t.assertEquals(tbl.format{1}, 'sparse_matrix');
                 end
@@ -1308,20 +1314,24 @@ function test_idx_describe(t, cfg, container_type)
             if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl{1,'name'}, 'a');
                 switch i
-                case {1,3}
-                    t.assert(isequal(tbl{1,'format'}, 'struct') || isequal(tbl{1,'format'}, 'dense_matrix'));
+                case 1
+                    t.assertEquals(tbl{1,'format'}, 'struct');
                 case 2
                     t.assertEquals(tbl{1,'format'}, 'table');
+                case 3
+                    t.assertEquals(tbl{1,'format'}, 'dense_matrix');
                 case 4
                     t.assertEquals(tbl{1,'format'}, 'sparse_matrix');
                 end
             else
                 t.assertEquals(tbl{1,'name'}{1}, 'a');
                 switch i
-                case {1,3}
-                    t.assert(isequal(tbl{1,'format'}{1}, 'struct') || isequal(tbl{1,'format'}{1}, 'dense_matrix'));
+                case 1
+                    t.assertEquals(tbl{1,'format'}{1}, 'struct');
                 case 2
                     t.assertEquals(tbl{1,'format'}{1}, 'table');
+                case 3
+                    t.assertEquals(tbl{1,'format'}{1}, 'dense_matrix');
                 case 4
                     t.assertEquals(tbl{1,'format'}{1}, 'sparse_matrix');
                 end
@@ -1337,11 +1347,9 @@ function test_idx_describe(t, cfg, container_type)
                 t.assertEquals(tbl{1,'size'}{1}, '[]');
             end
             switch i
-            case {1,3}
-                t.assert(tbl{1,'number_records'} == 1 || isnan(tbl{1,'number_records'}));
-            case 2
+            case {1,2}
                 t.assert(tbl{1,'number_records'} == 1);
-            case 4
+            case {3,4}
                 t.assert(isnan(tbl{1,'number_records'}));
             end
             t.assert(tbl{1,'number_values'} == 1);
@@ -1534,20 +1542,24 @@ function test_idx_describe(t, cfg, container_type)
             if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 t.assertEquals(tbl.name(1), 'a');
                 switch i
-                case {1,3}
-                    t.assert(isequal(tbl.format(1), 'struct') || isequal(tbl.format(1), 'dense_matrix'));
+                case 1
+                    t.assertEquals(tbl.format(1), 'struct');
                 case 2
                     t.assertEquals(tbl.format(1), 'table');
+                case 3
+                    t.assertEquals(tbl.format(1), 'dense_matrix');
                 case 4
                     t.assertEquals(tbl.format(1), 'sparse_matrix');
                 end
             else
                 t.assertEquals(tbl.name{1}, 'a');
                 switch i
-                case {1,3}
-                    t.assert(isequal(tbl.format{1}, 'struct') || isequal(tbl.format{1}, 'dense_matrix'));
+                case 1
+                    t.assertEquals(tbl.format{1}, 'struct');
                 case 2
                     t.assertEquals(tbl.format{1}, 'table');
+                case 3
+                    t.assertEquals(tbl.format{1}, 'dense_matrix');
                 case 4
                     t.assertEquals(tbl.format{1}, 'sparse_matrix');
                 end
@@ -1563,10 +1575,10 @@ function test_idx_describe(t, cfg, container_type)
                 t.assertEquals(tbl.size{1}, '[]');
             end
             switch i
-            case {1,2,3}
+            case {1,2}
                 t.assert(tbl.number_records(1) == 1);
-            case 4
-                t.assert(isnan(tbl.number_records(1)));
+            case {3,4}
+                tbl.number_records(1);
             end
             t.assert(tbl.number_values(1) == 1);
             t.assert(tbl.sparsity(1) == 0);

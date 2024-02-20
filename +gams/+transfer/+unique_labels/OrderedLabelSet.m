@@ -110,10 +110,10 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
             obj.add(labels);
         end
 
-        function remove(obj, labels)
+        function [flag, indices] = remove(obj, labels)
             labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().toCell().cellstr().value;
-            if obj.uels_label2ids_.size() == 0 || numel(labels) == 0
-                return
+            if nargout > 0
+                oldlabels = obj.get();
             end
             for i = 1:numel(labels)
                 obj.uels_label2ids_.remove(labels{i});
@@ -121,6 +121,9 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
             obj.updateId2Label();
             for i = 1:numel(obj.uels_id2labels_)
                 obj.uels_label2ids_.put(obj.uels_id2labels_{i}, i);
+            end
+            if nargout > 0
+                [flag, indices] = obj.updatedIndices(oldlabels, [], []);
             end
             obj.last_update_ = now();
         end
@@ -148,6 +151,38 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
             obj.set(labels);
         end
 
+        function [flag, indices] = merge(obj, oldlabels, newlabels)
+            oldlabels = gams.transfer.utils.Validator('oldlabels', 1, oldlabels).string2char() ...
+                .toCell().cellstr().value;
+            newlabels = gams.transfer.utils.Validator('newlabels', 2, newlabels).string2char() ...
+                .toCell().cellstr().numel(numel(oldlabels)).value;
+
+            if nargout > 0
+                oldlabels_ = obj.get();
+            end
+
+            for i = 1:numel(oldlabels)
+                if strcmp(oldlabels{i}, newlabels{i}) || ~obj.uels_label2ids_.containsKey(oldlabels{i})
+                    continue
+                end
+                labels = obj.uels_id2labels_;
+                if obj.uels_label2ids_.containsKey(newlabels{i})
+                    labels(obj.uels_label2ids_.get(oldlabels{i})) = [];
+                else
+                    labels{obj.uels_label2ids_.get(oldlabels{i})} = newlabels{i};
+                end
+                obj.clear();
+                for i = 1:numel(labels)
+                    obj.uels_label2ids_.put(labels{i}, obj.uels_label2ids_.size() + 1);
+                end
+                obj.updateId2Label();
+            end
+
+            if nargout > 0
+                [flag, indices] = obj.updatedIndices(oldlabels_, oldlabels, newlabels);
+            end
+        end
+
     end
 
     methods (Hidden, Access = protected)
@@ -160,6 +195,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
                 obj.uels_id2labels_{i} = char(it.next());
                 i = i + 1;
             end
+            obj.last_update_ = now();
         end
 
     end

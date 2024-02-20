@@ -216,7 +216,8 @@ classdef Parameter < gams.transfer.symbol.Abstract
         function flag = supportsIndexed(obj)
             flag = false;
             for i = 1:obj.dimension
-                if ~obj.axis(i).unique_labels.supportsIndexed()
+                if ~obj.getAxisUniqueLabels(i).supportsIndexed() || ...
+                    ~obj.getDomainAxisUniqueLabels(i).supportsIndexed()
                     return
                 end
             end

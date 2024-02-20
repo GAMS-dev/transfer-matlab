@@ -1652,7 +1652,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.p.name, 'p');
     t.assertEquals(gdx2.data.p.description, '');
     t.assert(gdx2.data.p.dimension == 1);
-    t.assert(gdx2.data.p.size(1) == 2);
+    t.assert(gdx2.data.p.size(1) == 3);
     t.assert(iscell(gdx2.data.p.domain));
     t.assert(numel(gdx2.data.p.domain) == 1);
     t.assert(gdx2.data.p.domain{1} == gdx2.data.i);

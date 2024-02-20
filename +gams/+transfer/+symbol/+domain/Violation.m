@@ -116,7 +116,10 @@ classdef Violation
             % the domain set.
 
             assert(isa(obj.domain_, 'gams.transfer.symbol.domain.Regular'));
-            obj.domain_.resolveViolations(obj.violations_);
+            if ~obj.domain_.hasUniqueLabels()
+                return
+            end
+            obj.domain_.addLabels(obj.violations_, true);
         end
 
     end

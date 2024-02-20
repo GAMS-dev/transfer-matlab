@@ -116,7 +116,7 @@ function test_read(t, cfg, container_type)
     t.assertEquals(s.domain_labels{1}, 'i');
     t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 1);
-    t.assert(s.size(1) == 3);
+    t.assert(s.size(1) == 5);
     t.assert(~isnan(s.getSparsity()));
     t.assert(s.getNumberRecords() == 3);
     t.assert(s.isValid());
@@ -139,7 +139,7 @@ function test_read(t, cfg, container_type)
     t.assertEquals(s.domain_labels{2}, 'j');
     t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 2);
-    t.assert(s.size(1) == 4);
+    t.assert(s.size(1) == 5);
     t.assert(s.size(2) == 5);
     t.assert(~isnan(s.getSparsity()));
     t.assert(s.getNumberRecords() == 6);

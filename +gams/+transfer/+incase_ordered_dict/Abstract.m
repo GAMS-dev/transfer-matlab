@@ -38,51 +38,63 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
     methods
 
         function n = count(obj)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function flag = exists(obj, keys)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function keys = keys(obj, keys)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function keys = keysAt(obj, indices)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function indices = find(obj, keys)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function entries = entries(obj, keys)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function entries = entriesAt(obj, indices)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function add(obj, key, entry)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function clear(obj)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function symbol = rename(obj, oldkey, newkey)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function remove(obj, keys)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function reorder(obj, permutation)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
     end

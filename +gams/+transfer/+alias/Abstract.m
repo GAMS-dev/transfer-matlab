@@ -217,7 +217,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
     methods (Hidden)
 
         function copyFrom(obj, symbol)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
     end
@@ -250,7 +251,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % 2. overwrite (bool):
             %    Overwrites symbol with same name in destination if true. Default: false.
 
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         %> Checks equivalence with other symbol
@@ -291,42 +293,48 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % 2. force (logical):
             %    If true, forces reevaluation of validity (resets cache)
 
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         %> (Abstract) Returns the UELs used in this symbol
         function uels = getUELs(obj, varargin)
             % (Abstract) Returns the UELs used in this symbol
 
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         %> (Abstract) Removes UELs from the symbol
         function removeUELs(obj, varargin)
             % (Abstract) Removes UELs from the symbol
 
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         %> (Abstract) Renames UELs in the symbol
         function renameUELs(obj, uels)
             % (Abstract) Renames UELs in the symbol
 
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         %> (Abstract) Converts UELs to lower case
         function lowerUELs(obj)
             % (Abstract) Converts UELs to lower case
 
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         %> (Abstract) Converts UELs to lower case
         function upperUELs(obj)
             % (Abstract) Converts UELs to upper case
 
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
     end

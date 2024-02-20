@@ -162,22 +162,6 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
             obj.last_update_ = now();
         end
 
-        function add(obj, labels)
-            error('Adding labels to a unique labels range is not supported.');
-        end
-
-        function set(obj, labels)
-            error('Setting labels to a unique labels range is not supported.');
-        end
-
-        function remove(obj, labels)
-            error('Removing labels from a unique labels range is not supported.');
-        end
-
-        function rename(obj, oldlabels, newlabels)
-            error('Renaming labels in a unique labels range is not supported.');
-        end
-
     end
 
     methods (Hidden)

@@ -74,7 +74,8 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
     methods
 
         function data = copy(obj)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function copyFrom(obj, symbol)
@@ -93,11 +94,13 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         end
 
         function labels = getLabels(obj)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function renameLabels(obj, old_labels, new_labels)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function values = availableValues(obj, class, values)
@@ -111,7 +114,8 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         end
 
         function status = isValid(obj, axes, values)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function flag = hasUniqueLabels(obj, domain)
@@ -122,20 +126,24 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             unique_labels = [];
         end
 
-        function indices = usedUniqueLabels(obj, domain)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+        function indices = usedUniqueLabels(obj, axes, values, dimension)
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function nrecs = getNumberRecords(obj, axes, values)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function nvals = getNumberValues(obj, axes, values)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function value = getMeanValue(obj, axes, values)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function sparsity = getSparsity(obj, axes, values)
@@ -193,11 +201,18 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         end
 
         function transformToTabular(obj, axes, values, data)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function transformToMatrix(obj, axes, values, data)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
+        function permuteAxis(obj, axes, values, dimension, permutation)
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
     end
@@ -205,7 +220,8 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
     methods (Hidden, Access = protected)
 
         function subindex = ind2sub(obj, axes, value, linindex)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function [value, where] = getFunValue(obj, fun, axes, values)
@@ -223,7 +239,11 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             end
             [value, idx] = fun(value);
             if found
-                where = axes.getUniqueLabelsAt({obj.ind2sub(axes, values{i}, where{idx})});
+                idx = obj.ind2sub(axes, values{i}, where{idx});
+                where = cell(1, axes.dimension);
+                for i = 1:axes.dimension
+                    where{i} = axes.axis(i).unique_labels.getAt(idx(i));
+                end
             else
                 value = nan;
                 where = {};

@@ -77,20 +77,17 @@ classdef (Hidden) Empty < gams.transfer.unique_labels.Abstract
         function clear(obj)
         end
 
-        function add(obj, labels)
-            error('Adding labels in a constant empty unique labels object is not supported.');
-        end
-
-        function set(obj, labels)
-            error('Setting labels in a constant empty unique labels object is not supported.');
-        end
-
-        function remove(obj, labels)
-            error('Removing labels in a constant empty unique labels object is not supported.');
+        function [flag, indices] = remove(obj, labels)
+            flag = [];
+            indices = [];
         end
 
         function rename(obj, oldlabels, newlabels)
-            error('Renaming labels in a constant empty unique labels object is not supported.');
+        end
+
+        function [flag, indices] = merge(obj, oldlabels, newlabels)
+            flag = [];
+            indices = [];
         end
 
     end

@@ -39,12 +39,14 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
     properties (Hidden, SetAccess = protected)
         label_
+        index_type_ = gams.transfer.symbol.domain.IndexType();
         forwarding_ = false
         last_update_ = now();
     end
 
     properties (Dependent)
         label
+        index_type
         forwarding
     end
 
@@ -67,6 +69,16 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             obj.last_update_ = now();
         end
 
+        function index_type = get.index_type(obj)
+            index_type = obj.index_type_;
+        end
+
+        function set.index_type(obj, index_type)
+            gams.transfer.utils.Validator('index_type', 1, index_type).type('gams.transfer.symbol.domain.IndexType');
+            obj.index_type_ = index_type;
+            obj.last_update_ = now();
+        end
+
         function forwarding = get.forwarding(obj)
             forwarding = obj.forwarding_;
         end
@@ -81,7 +93,8 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
     methods
 
         function domain = copy(obj)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function copyFrom(obj, domain)
@@ -98,7 +111,8 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         end
 
         function status = isValid(obj)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function appendLabelIndex(obj, index)
@@ -117,7 +131,8 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             unique_labels = [];
         end
 
-        function resolveViolations(obj, labels)
+        function addLabels(obj, labels, forwarding)
+            error('Domain ''%s'' does not define any unique labels and thus cannot add any.', obj.name);
         end
 
     end

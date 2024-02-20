@@ -97,18 +97,15 @@ classdef (Hidden) Axes < gams.transfer.utils.Handle
             axis = obj.axes_{dimension};
         end
 
-        function labels = getUniqueLabelsAt(obj, indices)
-            gams.transfer.utils.Validator('indices', 1, indices).type('cell');
-            labels = cell(size(indices));
-            for i = 1:numel(labels)
-                gams.transfer.utils.Validator(sprintf('indices{%d}', i), 1, indices{i}).numeric().integer().minnumel(obj.dimension);
-                labels{i} = cell(1, obj.dimension);
-                for j = 1:obj.dimension
-                    labels{i}{j} = obj.axes{j}.unique_labels.getAt(indices{i}(j));
+        function [axis, idx] = find(obj, domain)
+            axis = [];
+            idx = 0;
+            for i = 1:numel(obj.axes_)
+                if obj.axes_{i}.domain == domain
+                    axis = obj.axes_{i};
+                    idx = i;
+                    return
                 end
-            end
-            if numel(indices) == 1
-                labels = labels{1};
             end
         end
 

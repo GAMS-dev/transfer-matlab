@@ -278,7 +278,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         end
 
         function size = get.size(obj)
-            size = obj.axes().size();
+            size = obj.getDomainAxes().size();
         end
 
         function set.size(obj, size)
@@ -290,6 +290,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             obj.domain = domains;
             for i = 1:numel(size)
                 obj.unique_labels{i} = gams.transfer.unique_labels.Range('', 1, 1, size(i));
+                obj.getDomain(i).index_type = gams.transfer.symbol.domain.IndexType.integer();
             end
             obj.last_update_ = now();
         end
@@ -363,7 +364,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             dim = obj.dimension;
             domain_forwarding = false(1, dim);
             for i = 1:dim
-                domain_forwarding(i) = obj.def_.domains{i}.forwarding;
+                domain_forwarding(i) = obj.getDomain(i).forwarding;
             end
         end
 
@@ -373,7 +374,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 domain_forwarding = false(1, dim) | domain_forwarding;
             end
             for i = 1:dim
-                obj.def_.domains{i}.forwarding = domain_forwarding(i);
+                obj.getDomain(i).forwarding = domain_forwarding(i);
             end
             obj.applyDomainForwarding();
             obj.last_update_ = now();
@@ -454,7 +455,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % 2. overwrite (bool):
             %    Overwrites symbol with same name in destination if true. Default: false.
 
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
     end
@@ -597,7 +599,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 records = gams.transfer.symbol.data.Table(records);
             end
             if isa(records, 'gams.transfer.symbol.data.Abstract')
-                status = records.isValid(obj.axes(), obj.def_.values);
+                status = records.isValid(obj.getAxes(), obj.def_.values);
                 if status.flag ~= gams.transfer.utils.Status.OK
                     error(status.message);
                 end
@@ -619,7 +621,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 if obj.dimension ~= 1
                     error('Single string as records only accepted if symbol dimension equals 1.');
                 end
-                domain = obj.def_.domains{1};
+                domain = obj.getDomain(1);
                 new_records.(domain.label) = {records};
                 domains{end+1} = domain;
 
@@ -631,7 +633,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 end
                 domains = cell(1, obj.dimension);
                 for i = 1:obj.dimension
-                    domain = obj.def_.domains{i};
+                    domain = obj.getDomain(i);
                     new_records.(domain.label) = records(i,:);
                     domains{i} = domain;
                 end
@@ -683,7 +685,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                                 error('More cellstr values than domains and string value fields.');
                             end
                         else
-                            domain = obj.def_.domains{n_domains};
+                            domain = obj.getDomain(n_domains);
                             new_records.(domain.label) = records{i};
                             domains{end+1} = domain;
                         end
@@ -722,10 +724,18 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                     continue
                 end
                 unique_labels = gams.transfer.utils.unique(new_records.(domains{i}.label));
-                new_records.(domains{i}.label) = gams.transfer.unique_labels.Abstract.createIndexFrom(...
-                    new_records.(domains{i}.label), unique_labels);
-                if ~gams.transfer.Constants.SUPPORTS_CATEGORICAL || ~iscategorical(new_records.(domains{i}.label))
+                switch domains{i}.index_type.value
+                case gams.transfer.symbol.domain.IndexType.CATEGORICAL
+                    new_records.(domains{i}.label) = ...
+                        gams.transfer.unique_labels.Abstract.createCategoricalIndexFrom(...
+                        new_records.(domains{i}.label), unique_labels);
+                case gams.transfer.symbol.domain.IndexType.INTEGER
+                    new_records.(domains{i}.label) = ...
+                        gams.transfer.unique_labels.Abstract.createIntegerIndexFrom(...
+                        new_records.(domains{i}.label), unique_labels);
                     obj.unique_labels{i} = gams.transfer.unique_labels.OrderedLabelSet(unique_labels);
+                otherwise
+                    error('Unsupported domain index type: %s', axis.domain.index_type.select);
                 end
             end
 
@@ -763,7 +773,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                     data.records.(domains_values{i}.label) = data.records.(domains_values{i}.label)(:);
                 end
             elseif isa(data, 'gams.transfer.symbol.data.Matrix')
-                symbol_size = obj.axes(true).matrixSize();
+                symbol_size = obj.getAxes().matrixSize();
                 if any(isnan(symbol_size))
                     error('Cannot create matrix records, because symbol size is unknown.');
                 end
@@ -781,7 +791,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
             % check records format
             old_unique_labels = obj.unique_labels_;
-            status = data.isValid(obj.axes(), obj.def_.values);
+            status = data.isValid(obj.getAxes(), obj.def_.values);
             if status.flag ~= gams.transfer.utils.Status.OK
                 obj.unique_labels_ = old_unique_labels;
                 error(status.message);
@@ -794,9 +804,31 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
         %> Transforms symbol records into given format
         %>
+        %> **Required Arguments:**
+        %> 1. target_format (`string`):
+        %>    Name of format to transform data to (table, struct, dense_matrix or sparse_matrix).
+        %>
+        %> If the target format is a matrix format, the UELs will be updated to the ones from the
+        %> domain plus the added ones. Thus, if there are no domain violations, the matrix size
+        %> will equal the size defined by the symbol domain.
+        %>
+        %> After the transformation UELs will be trimmed which means that unused UELs will be
+        %> removed if possible.
+        %>
         %> @see \ref gams::transfer::RecordsFormat "RecordsFormat"
         function transformRecords(obj, target_format)
             % Transforms symbol records into given format
+            %
+            % Required Arguments:
+            % 1. target_format (string):
+            %    Name of format to transform data to (table, struct, dense_matrix or sparse_matrix).
+            %
+            % If the target format is a matrix format, the UELs will be updated to the ones from the
+            % domain plus the added ones. Thus, if there are no domain violations, the matrix size
+            % will equal the size defined by the symbol domain.
+            %
+            % After the transformation UELs will be trimmed which means that unused UELs will be
+            % removed if possible.
             %
             % See also: gams.transfer.RecordsFormat
 
@@ -813,8 +845,20 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 error('Unknown format');
             end
 
-            obj.data_.transformTo(obj.axes(), obj.def_.values, data);
+            % update axes to domain axes
+            if isa(obj.data_, 'gams.transfer.symbol.data.Tabular') && ...
+                isa(data, 'gams.transfer.symbol.data.Matrix');
+                for i = 1:obj.dimension
+                    obj.updateAxisLabelsFromDomain(i);
+                end
+            end
+
+            obj.data_.transformTo(obj.getAxes(), obj.def_.values, data);
             obj.data_ = data;
+
+            for i = 1:obj.dimension
+                obj.trimAxisLabels(i);
+            end
         end
 
         %> Checks correctness of symbol
@@ -863,7 +907,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                     obj.is_valid_status_ = obj.def_.isValid();
                 end
                 if obj.is_valid_status_.flag == gams.transfer.utils.Status.OK
-                    obj.is_valid_status_ = obj.data_.isValid(obj.axes(), obj.def_.values);
+                    obj.is_valid_status_ = obj.data_.isValid(obj.getAxes(), obj.def_.values);
                 end
             end
             obj.is_valid_time_ = now();
@@ -931,23 +975,18 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
             domain_violations = {};
             for i = dimensions
-                domain = obj.def_.domains{i};
-                if ~isa(domain, 'gams.transfer.symbol.domain.Regular')
+                if ~obj.hasDomainAxis(i)
                     continue
                 end
 
-                axis1 = obj.axis(i);
-                axis2 = obj.axis(i, true);
-                if isequal(axis1.unique_labels, axis2.unique_labels)
-                    continue
-                end
-                working_uels = axis1.unique_labels.getAt(obj.usedUniqueLabels(i));
-                defining_uels = axis2.unique_labels.get();
-                [~, ia] = setdiff(lower(working_uels), lower(defining_uels));
-                added_uels = working_uels(ia);
+                labels = obj.getUsedAxisLabels(i);
+                domain_labels = obj.getDomainAxisLabels(i);
+                [~, ia] = setdiff(lower(labels), lower(domain_labels));
+                added_labels = labels(ia);
 
-                if numel(added_uels) > 0
-                    domain_violations{end+1} = gams.transfer.symbol.domain.Violation(obj, i, domain, added_uels);
+                if numel(added_labels) > 0
+                    domain_violations{end+1} = gams.transfer.symbol.domain.Violation(obj, i, ...
+                        obj.getDomain(i), added_labels);
                 end
             end
 
@@ -1002,7 +1041,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             %
             % s = getSparsity() returns sparsity s in the symbol records.
 
-            sparsity = obj.data_.getSparsity(obj.axes(), obj.def_.values);
+            sparsity = obj.data_.getSparsity(obj.getDomainAxes(), obj.def_.values);
         end
 
     end
@@ -1066,7 +1105,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             catch e
                 error(e.message);
             end
-            [value, where] = obj.data_.getMaxValue(obj.axes(), values);
+            [value, where] = obj.data_.getMaxValue(obj.getAxes(), values);
         end
 
         %> Returns the smallest value in records
@@ -1094,7 +1133,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             catch e
                 error(e.message);
             end
-            [value, where] = obj.data_.getMinValue(obj.axes(), values);
+            [value, where] = obj.data_.getMinValue(obj.getAxes(), values);
         end
 
         %> Returns the mean value over all values in records
@@ -1122,7 +1161,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             catch e
                 error(e.message);
             end
-            value = obj.data_.getMeanValue(obj.axes(), values);
+            value = obj.data_.getMeanValue(obj.getAxes(), values);
         end
 
         %> Returns the largest absolute value in records
@@ -1150,7 +1189,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             catch e
                 error(e.message);
             end
-            [value, where] = obj.data_.getMaxAbsValue(obj.axes(), values);
+            [value, where] = obj.data_.getMaxAbsValue(obj.getAxes(), values);
         end
 
         %> Returns the number of GAMS NA values in records
@@ -1308,7 +1347,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % n = getNumberRecords() returns the number of records that would be stored in a GDX
             % file if this symbol would be written to GDX. For matrix formats n is NaN.
 
-            nrecs = obj.data_.getNumberRecords(obj.axes(), obj.def_.values);
+            nrecs = obj.data_.getNumberRecords(obj.getAxes(), obj.def_.values);
         end
 
         %> Returns the number of values stored for this symbol.
@@ -1342,152 +1381,240 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             catch e
                 error(e.message);
             end
-            nvals = obj.data_.getNumberValues(obj.axes(), values);
+            nvals = obj.data_.getNumberValues(obj.getAxes(), values);
         end
 
     end
 
     methods (Hidden)
 
-        function axis = axis(obj, dimension, prioritize_super)
+        function domain = getDomain(obj, dimension)
             domain = obj.def_.domains{dimension};
-            if nargin == 2 || ~prioritize_super
-                if ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain)
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.data_.getUniqueLabels(domain));
-                elseif ~isempty(obj.unique_labels{dimension})
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
-                elseif domain.hasUniqueLabels()
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, domain.getUniqueLabels());
-                else
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, gams.transfer.Constants.EMPTY_UNIQUE_LABELS);
-                end
+        end
+
+        function [flag, domain_flag] = isDomainAxis(obj, dimension)
+            domain = obj.getDomain(dimension);
+            domain_flag = domain.hasUniqueLabels();
+            if ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain) || ...
+                ~isempty(obj.unique_labels{dimension})
+                flag = false;
             else
-                if domain.hasUniqueLabels()
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, domain.getUniqueLabels());
-                elseif ~isempty(obj.unique_labels{dimension})
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.unique_labels{dimension});
-                elseif ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain)
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, obj.data_.getUniqueLabels(domain));
-                else
-                    axis = gams.transfer.symbol.unique_labels.Axis(domain.label, gams.transfer.Constants.EMPTY_UNIQUE_LABELS);
-                end
+                flag = domain_flag;
             end
         end
 
-        function axes = axes(obj, prioritize_super)
-            if nargin == 1
-                prioritize_super = false;
+        function flag = hasDomainAxis(obj, dimension)
+            flag = obj.getDomain(dimension).hasUniqueLabels();
+        end
+
+        function [unique_labels, is_domain_axis] = getDomainAxisUniqueLabels(obj, dimension)
+            domain = obj.getDomain(dimension);
+            if domain.hasUniqueLabels();
+                unique_labels = domain.getUniqueLabels();
+                is_domain_axis = true;
+            else
+                unique_labels = obj.getAxisUniqueLabels(dimension);
+                is_domain_axis = false;
             end
+        end
+
+        function [axis, is_domain_axis] = getDomainAxis(obj, dimension)
+            domain = obj.getDomain(dimension);
+            if domain.hasUniqueLabels();
+                axis = gams.transfer.symbol.unique_labels.Axis(domain, domain.getUniqueLabels());
+                is_domain_axis = true;
+            else
+                axis = obj.getAxis(dimension);
+                is_domain_axis = false;
+            end
+        end
+
+        function [axes, is_domain_axis] = getDomainAxes(obj)
             dim = obj.dimension;
             axes = cell(1, dim);
+            is_domain_axis = false(1, dim);
             for i = 1:dim
-                axes{i} = obj.axis(i, prioritize_super);
+                [axes{i}, is_domain_axis(i)] = obj.getDomainAxis(i);
             end
             axes = gams.transfer.symbol.unique_labels.Axes(axes);
         end
 
-        function indices = usedUniqueLabels(obj, dimension)
-            indices = obj.data_.usedUniqueLabels(obj.def_.domains{dimension});
+        function labels = getDomainAxisLabels(obj, dimension)
+            labels = obj.getDomainAxisUniqueLabels(dimension).get();
         end
 
-        function count = countUniqueLabels(obj, dimension)
-            count = obj.axis(dimension).unique_labels.count();
-        end
-
-        function labels = getUniqueLabels(obj, dimension)
-            labels = obj.axis(dimension).unique_labels.get();
-        end
-
-        function labels = getUniqueLabelsAt(obj, dimension, indices)
-            labels = obj.axis(dimension).unique_labels.getAt(indices);
-        end
-
-        function indices = findUniqueLabels(obj, dimension, labels)
-            indices = obj.axis(dimension).unique_labels.find(labels);
-        end
-
-        function clearUniqueLabels(obj, dimension)
-            obj.axis(dimension).unique_labels.clear();
-        end
-
-        function addUniqueLabels(obj, dimension, labels)
-            if ~iscell(labels)
-                labels = {labels};
+        function [unique_labels, is_domain_axis] = getAxisUniqueLabels(obj, dimension)
+            domain = obj.getDomain(dimension);
+            is_domain_axis = false;
+            if ~isempty(obj.data_) && obj.data_.hasUniqueLabels(domain)
+                unique_labels = obj.data_.getUniqueLabels(domain);
+            elseif ~isempty(obj.unique_labels{dimension})
+                unique_labels = obj.unique_labels{dimension};
+            elseif domain.hasUniqueLabels()
+                unique_labels = domain.getUniqueLabels();
+                is_domain_axis = true;
+            else
+                unique_labels = gams.transfer.Constants.EMPTY_UNIQUE_LABELS;
             end
-            unique_labels = obj.axis(dimension).unique_labels;
+        end
+
+        function unique_labels = getAxisUniqueLabels_(obj, dimension)
+            [unique_labels, is_domain_axis] = obj.getAxisUniqueLabels(dimension);
+            if is_domain_axis
+                obj.unique_labels{dimension} = gams.transfer.unique_labels.OrderedLabelSet(unique_labels.get());
+                unique_labels = obj.unique_labels{dimension};
+            end
+        end
+
+        function [axis, is_domain_axis] = getAxis(obj, dimension)
+            domain = obj.getDomain(dimension);
+            [unique_labels, is_domain_axis] = obj.getAxisUniqueLabels(dimension);
+            axis = gams.transfer.symbol.unique_labels.Axis(domain, unique_labels);
+        end
+
+        function [axes, is_domain_axis] = getAxes(obj)
+            dim = obj.dimension;
+            axes = cell(1, dim);
+            is_domain_axis = false(1, dim);
+            for i = 1:dim
+                [axes{i}, is_domain_axis(i)] = obj.getAxis(i);
+            end
+            axes = gams.transfer.symbol.unique_labels.Axes(axes);
+        end
+
+        function labels = getAxisLabels(obj, dimension)
+            labels = obj.getAxisUniqueLabels(dimension).get();
+        end
+
+        function indices = getUsedAxisIndices(obj, dimension)
+            indices = obj.data_.usedUniqueLabels(obj.getAxes(), obj.def_.values, dimension);
+        end
+
+        function labels = getUsedAxisLabels(obj, dimension)
+            labels = obj.getAxisUniqueLabels(dimension).getAt(obj.getUsedAxisIndices(dimension));
+        end
+
+        function labels = getAxisLabelsAt(obj, dimension, indices)
+            labels = obj.getAxisUniqueLabels(dimension).getAt(indices);
+        end
+
+        function [flag, indices] = findAxisLabels(obj, dimension, labels)
+            [flag, indices] = obj.getAxisUniqueLabels(dimension).find(labels);
+        end
+
+        function clearAxisLabels(obj, dimension)
+            unique_labels = obj.getAxisUniqueLabels_(dimension);
+            unique_labels.clear();
+        end
+
+        function addAxisLabels(obj, dimension, labels)
+            unique_labels = obj.getAxisUniqueLabels_(dimension);
             if isa(unique_labels, 'gams.transfer.unique_labels.Empty')
-                obj.unique_labels_{dimension} = gams.transfer.unique_labels.OrderedLabelSet(labels);
-            else
-                unique_labels.add(labels);
+                obj.unique_labels{dimension} = gams.transfer.unique_labels.OrderedLabelSet(labels);
+                return
             end
+            unique_labels.add(labels);
         end
 
-        function setUniqueLabels(obj, dimension, labels)
-            if ~iscell(labels)
-                labels = {labels};
-            end
-            unique_labels = obj.axis(dimension).unique_labels;
+        function setAxisLabels(obj, dimension, labels)
+            unique_labels = obj.getAxisUniqueLabels_(dimension);
             if isa(unique_labels, 'gams.transfer.unique_labels.Empty')
-                obj.unique_labels_{dimension} = gams.transfer.unique_labels.OrderedLabelSet(labels);
-            else
-                unique_labels.set(labels);
+                obj.unique_labels{dimension} = gams.transfer.unique_labels.OrderedLabelSet(labels);
+                return
             end
+            unique_labels.set(labels);
         end
 
-        function updateUniqueLabels(obj, dimension, labels)
-            if ~iscell(labels)
-                labels = {labels};
+        function updateAxisLabels(obj, dimension, labels)
+            unique_labels = obj.getAxisUniqueLabels_(dimension);
+            if isa(unique_labels, 'gams.transfer.unique_labels.Empty')
+                obj.unique_labels{dimension} = gams.transfer.unique_labels.OrderedLabelSet(labels);
+                return
             end
-            unique_labels = obj.axis(dimension).unique_labels;
             if isa(unique_labels, 'gams.transfer.unique_labels.CategoricalColumn')
                 assert(unique_labels.data == obj.data_);
-                obj.data_.updateUniqueLabels(obj.def_.domains{dimension}, labels);
-            else
-                warning('todo')
+                assert(unique_labels.domain == obj.getDomain(dimension));
+                unique_labels.update(labels);
+                return
             end
+            [~, indices] = unique_labels.update(labels);
+            obj.data_.permuteAxis(obj.getAxes(), obj.def_.values, dimension, indices);
         end
 
-        function removeUniqueLabels(obj, dimension, labels)
-            if ~iscell(labels)
-                labels = {labels};
+        function updateAxisLabelsFromDomain(obj, dimension)
+            [axis_flag, domain_axis_flag] = obj.isDomainAxis(dimension);
+            if axis_flag || ~domain_axis_flag
+                return
             end
-            obj.axis(dimension).unique_labels.remove(labels);
+            domain_labels = obj.getDomainAxisLabels(dimension);
+            labels = obj.getAxisLabels(dimension);
+            [added_flag, added_indices] = obj.findAxisLabels(dimension, domain_labels);
+            labels(added_indices(added_flag)) = [];
+            obj.updateAxisLabels(dimension, horzcat(domain_labels, labels));
         end
 
-        function removeUnusedUniqueLabels(obj, dimension)
-            unique_labels = obj.axis(dimension).unique_labels;
+        function reorderAxisLabelsByUsage(obj, dimension)
+            labels = obj.getAxisLabels(dimension);
+            used_indices = obj.getUsedAxisIndices(dimension);
+            unused_flag = true(size(labels));
+            unused_flag(used_indices) = false;
+            obj.updateAxisLabels(dimension, horzcat(labels(used_indices), labels(unused_flag)));
+        end
+
+        function removeAxisLabels(obj, dimension, labels)
+            unique_labels = obj.getAxisUniqueLabels_(dimension);
             if isa(unique_labels, 'gams.transfer.unique_labels.CategoricalColumn')
                 assert(unique_labels.data == obj.data_);
-                obj.data_.removeUnusedUniqueLabels(obj.def_.domains{dimension});
-            else
-                warning('todo')
+                assert(unique_labels.domain == obj.getDomain(dimension));
+                unique_labels.remove(labels);
+                return
             end
+            [~, indices] = unique_labels.remove(labels);
+            obj.data_.permuteAxis(obj.getAxes(), obj.def_.values, dimension, indices);
         end
 
-        function renameUniqueLabels(obj, dimension, oldlabels, newlabels)
-            if ~iscell(oldlabels)
-                oldlabels = {oldlabels};
-            end
-            if ~iscell(newlabels)
-                newlabels = {newlabels};
-            end
-            obj.axis(dimension).unique_labels.rename(oldlabels, newlabels);
-        end
-
-        function mergeUniqueLabels(obj, dimension, oldlabels, newlabels)
-            if ~iscell(oldlabels)
-                oldlabels = {oldlabels};
-            end
-            if ~iscell(newlabels)
-                newlabels = {newlabels};
-            end
-            unique_labels = obj.axis(dimension).unique_labels;
+        function removeUnusedAxisLabels(obj, dimension)
+            axes = obj.getAxes();
+            used_labels = @() (obj.data_.usedUniqueLabels(axes, obj.def_.values, dimension));
+            unique_labels = obj.getAxisUniqueLabels_(dimension);
             if isa(unique_labels, 'gams.transfer.unique_labels.CategoricalColumn')
                 assert(unique_labels.data == obj.data_);
-                obj.data_.mergeUniqueLabels(obj.def_.domains{dimension}, oldlabels, newlabels);
-            else
-                warning('todo')
+                assert(unique_labels.domain == obj.getDomain(dimension));
+                unique_labels.removeUnused(used_labels);
+                return
             end
+            unused = 1:obj.getAxisUniqueLabels(dimension).count();
+            unused(obj.getUsedAxisIndices(dimension)) = [];
+            obj.removeAxisLabels(dimension, obj.getAxisLabelsAt(dimension, unused));
+        end
+
+        function trimAxisLabels(obj, dimension)
+            unique_labels = obj.getAxisUniqueLabels_(dimension);
+            try
+                obj.removeUnusedAxisLabels(dimension);
+            catch e
+                if isempty(strfind(e.message, 'not supported'))
+                    rethrow(e)
+                end
+            end
+        end
+
+        function renameAxisLabels(obj, dimension, oldlabels, newlabels)
+            unique_labels = obj.getAxisUniqueLabels_(dimension);
+            unique_labels.rename(oldlabels, newlabels);
+        end
+
+        function mergeAxisLabels(obj, dimension, oldlabels, newlabels)
+            [unique_labels, is_domain_axis] = obj.getAxisUniqueLabels(dimension);
+            unique_labels = obj.getAxisUniqueLabels_(dimension);
+            if isa(unique_labels, 'gams.transfer.unique_labels.CategoricalColumn')
+                assert(unique_labels.data == obj.data_);
+                assert(unique_labels.domain == obj.getDomain(dimension));
+                unique_labels.merge(oldlabels, newlabels);
+                return
+            end
+            [~, indices] = unique_labels.merge(oldlabels, newlabels);
+            obj.data_.permuteAxis(obj.getAxes(), obj.def_.values, dimension, indices);
         end
 
     end
@@ -1557,17 +1684,17 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
             uels = {};
             for i = dimensions
+
                 if isempty(codes) && ignore_unused
-                    uels_i = obj.getUniqueLabelsAt(i, obj.usedUniqueLabels(i));
+                    uels_i = obj.getUsedAxisLabels(i);
                 elseif isempty(codes)
-                    uels_i = obj.getUniqueLabels(i);
+                    uels_i = obj.getAxisLabels(i);
                 elseif ignore_unused
-                    uels_i = gams.transfer.utils.filter_unique_labels(...
-                        obj.getUniqueLabelsAt(i, obj.usedUniqueLabels(i)), codes);
+                    uels_i = gams.transfer.utils.filter_unique_labels(obj.getUsedAxisLabels(i), codes);
                 else
-                    uels_i = obj.getUniqueLabelsAt(i, codes);
+                    uels_i = obj.getAxisLabelsAt(i, codes);
                 end
-                uels = [uels; reshape(uels_i, numel(uels_i), 1)];
+                uels = [uels; reshape(uels_i, [], 1)];
             end
 
             if numel(dimensions) > 1
@@ -1640,9 +1767,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
             for i = dimensions
                 if rename
-                    obj.setUniqueLabels(i, uels);
+                    obj.setAxisLabels(i, uels);
                 else
-                    obj.updateUniqueLabels(i, uels);
+                    obj.updateAxisLabels(i, uels);
                 end
             end
         end
@@ -1701,17 +1828,13 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
             if isempty(uels)
                 for i = dimensions
-                    labels = obj.getUniqueLabels(i);
-                    indices = obj.usedUniqueLabels(i);
-                    used_labels = labels(indices);
-                    obj.updateUniqueLabels(i, used_labels);
-                    obj.addUniqueLabels(i, setdiff(labels, used_labels));
+                    obj.reorderAxisLabelsByUsage(i);
                 end
                 return
             end
 
             for i = dimensions
-                labels = obj.getUniqueLabels(i);
+                labels = obj.getAxisLabels(i);
                 if numel(uels) ~= numel(labels)
                     error('Number of UELs %d not equal to number of current UELs %d', ...
                         numel(uels), numel(labels));
@@ -1719,7 +1842,11 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 if ~all(ismember(labels, uels))
                     error('Adding new UELs not supported for reordering');
                 end
-                obj.setUELs(uels, i, 'rename', rename);
+                if rename
+                    obj.setAxisLabels(i, uels);
+                else
+                    obj.updateAxisLabels(i, uels);
+                end
             end
         end
 
@@ -1772,7 +1899,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             end
 
             for i = dimensions
-                obj.addUniqueLabels(i, uels);
+                obj.addAxisLabels(i, uels);
             end
         end
 
@@ -1832,9 +1959,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
             for i = dimensions
                 if isempty(uels)
-                    obj.removeUnusedUniqueLabels(i);
+                    obj.removeUnusedAxisLabels(i);
                 else
-                    obj.removeUniqueLabels(i, uels);
+                    obj.removeAxisLabels(i, uels);
                 end
             end
         end
@@ -1911,9 +2038,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 oldlabels = gams.transfer.utils.Validator('keys(uels)', 1, keys(uels)).cellstr().value;
                 for i = dimensions
                     if allow_merge
-                        obj.mergeUniqueLabels(i, oldlabels, values(uels));
+                        obj.mergeAxisLabels(i, oldlabels, values(uels));
                     else
-                        obj.renameUniqueLabels(i, oldlabels, values(uels));
+                        obj.renameAxisLabels(i, oldlabels, values(uels));
                     end
                 end
             elseif isstruct(uels)
@@ -1924,20 +2051,18 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 end
                 for i = dimensions
                     if allow_merge
-                        obj.mergeUniqueLabels(i, oldlabels, newlabels);
+                        obj.mergeAxisLabels(i, oldlabels, newlabels);
                     else
-                        obj.renameUniqueLabels(i, oldlabels, newlabels);
+                        obj.renameAxisLabels(i, oldlabels, newlabels);
                     end
                 end
             elseif iscell(uels)
-                gams.transfer.utils.Validator('uels', 1, uels).cellstr();
+                uels = gams.transfer.utils.Validator('uels', 1, uels).string2char().cellstr().value;
                 for i = dimensions
-                    oldlabels = obj.getUniqueLabels(i);
-                    newlabels = uels;
                     if allow_merge
-                        obj.mergeUniqueLabels(i, oldlabels, newlabels);
+                        obj.mergeAxisLabels(i, obj.getAxisLabels(i), uels);
                     else
-                        obj.renameUniqueLabels(i, oldlabels, newlabels);
+                        obj.renameAxisLabels(i, obj.getAxisLabels(i), uels);
                     end
                 end
             end
@@ -1989,12 +2114,11 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             end
 
             for i = dimensions
-                labels = obj.getUniqueLabels(i);
+                labels = obj.getAxisLabels(i);
                 if isempty(labels)
                     continue
                 end
-                rename_map = containers.Map(labels, lower(labels));
-                obj.renameUELs(rename_map, i, 'allow_merge', true);
+                obj.mergeAxisLabels(i, labels, lower(labels));
             end
         end
 
@@ -2044,12 +2168,11 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             end
 
             for i = dimensions
-                labels = obj.getUniqueLabels(i);
+                labels = obj.getAxisLabels(i);
                 if isempty(labels)
                     continue
                 end
-                rename_map = containers.Map(labels, upper(labels));
-                obj.renameUELs(rename_map, i, 'allow_merge', true);
+                obj.mergeAxisLabels(i, labels, upper(labels));
             end
         end
 
@@ -2059,7 +2182,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
         function applyDomainForwarding(obj)
             for i = 1:obj.dimension
-                if obj.def_.domains{i}.forwarding
+                if obj.getDomain(i).forwarding
                     obj.resolveDomainViolations(i);
                 end
             end

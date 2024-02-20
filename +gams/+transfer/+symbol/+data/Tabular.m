@@ -53,7 +53,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
 
             for i = 1:axes.dimension
                 axis = axes.axis(i);
-                label = axis.label;
+                label = axis.domain.label;
 
                 if ~obj.isLabel(label)
                     status = gams.transfer.utils.Status(sprintf("Records have no domain column '%s'.", label));
@@ -147,48 +147,16 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             end
         end
 
-        function indices = usedUniqueLabels(obj, domain)
-            gams.transfer.utils.Validator('domain', 1, domain).type('gams.transfer.symbol.domain.Abstract');
+        function indices = usedUniqueLabels(obj, axes, values, dimension)
+            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
+            gams.transfer.utils.Validator('dimension', 3, dimension).integer().scalar().inInterval(1, axes.dimension);
+            domain = axes.axis(dimension).domain;
             if ~obj.isLabel(domain.label)
                 indices = [];
                 return
             end
             indices = gams.transfer.utils.unique(uint64(obj.records_.(domain.label)));
             indices = indices(~isnan(indices) & indices ~= 0);
-        end
-
-        function updateUniqueLabels(obj, domain, labels)
-            if ~obj.hasUniqueLabels(domain)
-                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
-            end
-            % TODO: check labels
-            obj.records_.(domain.label) = setcats(obj.records_.(domain.label), labels);
-            obj.last_update_ = now();
-        end
-
-        function removeUnusedUniqueLabels(obj, domain)
-            if ~obj.hasUniqueLabels(domain)
-                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
-            end
-            obj.records_.(domain.label) = removecats(obj.records_.(domain.label));
-            obj.last_update_ = now();
-        end
-
-        function mergeUniqueLabels(obj, domain, oldlabels, newlabels)
-            if ~obj.hasUniqueLabels(domain)
-                error('Data does not maintain unique labels for domain ''%s''.', domain.label);
-            end
-            % TODO: check labels
-            obj.records_.(domain.label) = categorical(obj.records_.(domain.label), 'Ordinal', false);
-            not_avail = ~ismember(oldlabels, categories(obj.records_.(domain.label)));
-            oldlabels(not_avail) = [];
-            newlabels(not_avail) = [];
-            for j = 1:numel(newlabels)
-                obj.records_.(domain.label) = mergecats(obj.records_.(domain.label), ...
-                    oldlabels{j}, newlabels{j});
-            end
-            obj.records_.(domain.label) = categorical(obj.records_.(domain.label), 'Ordinal', true);
-            obj.last_update_ = now();
         end
 
         function nvals = getNumberValues(obj, axes, values)
@@ -229,17 +197,17 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             else
                 idx = cell(1, axes.dimension);
                 for i = 1:axes.dimension
-                    idx{i} = uint64(obj.records_.(axes.axis(i).label));
+                    idx{i} = uint64(obj.records_.(axes.axis(i).domain.label));
                 end
                 idx = sub2ind(size_, idx{:});
             end
 
             % init matrix records
-            if isa(data, 'gams.transfer.symbol.data.DenseMatrix') && axes.dimension > 2
+            if isa(data, 'gams.transfer.symbol.data.DenseMatrix')
                 for i = 1:numel(values)
                     data.records.(values{i}.label) = values{i}.default * ones(size_);
                 end
-            elseif isa(data, 'gams.transfer.symbol.data.SparseMatrix') && axes.dimension > 2
+            elseif isa(data, 'gams.transfer.symbol.data.SparseMatrix')
                 for i = 1:numel(values)
                     if values{i}.default == 0
                         data.records.(values{i}.label) = sparse(size_(1), size_(2));
@@ -258,7 +226,25 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
         end
 
         function removeRows(obj, indices)
-            error('Abstract method. Call method of subclass ''%s''.', class(obj));
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
+        function permuteAxis(obj, axes, values, dimension, permutation)
+            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
+            gams.transfer.utils.Validator('dimension', 3, dimension).integer().scalar().inInterval(1, axes.dimension);
+            gams.transfer.utils.Validator('permutation', 4, permutation).integer().vector();
+
+            domain = axes.axis(dimension).domain;
+            if ~obj.isLabel(domain.label)
+                return
+            end
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL && iscategorical(obj.records_.(domain.label));
+                unique_labels = obj.getUniqueLabels(domain);
+                unique_labels.set(unique_labels.getAt(permutation));
+            else
+                obj.records_.(domain.label) = reshape(uint64(permutation(obj.records_.(domain.label))), [], 1);
+            end
         end
 
     end
@@ -268,7 +254,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
         function subindex = ind2sub(obj, axes, value, linindex)
             subindex = zeros(1, axes.dimension);
             for i = 1:axes.dimension
-                subindex(i) = double(obj.records_.(axes.axis(i).label)(linindex));
+                subindex(i) = double(obj.records_.(axes.axis(i).domain.label)(linindex));
             end
         end
 
