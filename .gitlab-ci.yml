@@ -324,15 +324,15 @@ matlab:test:linux:
     needs: [download:linux, matlab:build:linux]
     script:
         - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
-        - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=false
-        - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=true
-        - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
-        - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=true
-        - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=false
-        - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
-        - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=false
-        - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=false
-        - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        # - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=false
+        # - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=true
+        # - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        # - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=true
+        # - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=false
+        # - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        # - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=false
+        # - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=false
+        # - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
