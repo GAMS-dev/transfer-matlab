@@ -74,15 +74,21 @@ GAMS Transfer Matlab v0.9.0
 - Changed name of subpackage `gams.transfer.cmex` to `gams.transfer.gdx` (internal).
 - Added (or unhided) property `symbol.Abstract.container` and `alias.Abstract.container` referring
   to the `Container` the symbol or alias is stored in.
+- Added possibility for matrix formats `dense_matrix` and `sparse_matrix` to maintain UELs.
+  Previously UELs were used directly from the domain set for these formats and it was not allowed to
+  change the UELs through the `symbol.Abstract.*UELs` methods. Now, if a symbol has a regular
+  domain, UELs are initialized with the domain set as UELs. But it is further possible to edit those
+  UELs per symbol without modifying the domain set. The size of the matrices in
+  `symbol.Abstract.records` is defined by the number of UELs per dimension (`symbol.Abstract.size`
+  stays the size defined mainly by the domain). This new feature therefore allows to use matrix
+  formats when the symbol domain is relaxed and/or smaller matrices than actually defined by the
+  regular domain. Note that the previous behaviour for regular symbols with matrix formats does not
+  change.
 - Added return of new symbol to `symbol.Abstract.copy` and `alias.Abstract.copy`.
 - Added a silent call to `Container.reorderSymbols` in `Container.isValid` if symbols are out of
   order (symbols that use other symbols in the domain must appear after the domain symbols). Even
   though having unordered symbols is rather unlikely, this now makes it unnecessary to manually call
   `Container.reorderSymbols`.
-- TODO: size of symbols is dependent on number of uels per dimension and not on domain symbol anymore.
-- TODO: matrix formats can maintain uels now (need to update documentation). This also means that
-  matrices can be created smaller than before if left out rows/cols are meant to be default values.
-  (need test for this)
 
 GAMS Transfer Matlab v0.8.0
 ==================
