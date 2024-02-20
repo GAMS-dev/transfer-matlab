@@ -346,6 +346,7 @@ void mexFunction(
                         have_nrecs = true;
                         break;
                     }
+                have_nrecs = true; // number of records: 0
                 break;
         }
         if (have_nrecs && nrecs == 0)

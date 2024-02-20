@@ -290,7 +290,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             obj.domain = domains;
             for i = 1:numel(size)
                 obj.unique_labels{i} = gams.transfer.unique_labels.Range('', 1, 1, size(i));
-                obj.getDomain(i).index_type = gams.transfer.symbol.domain.IndexType.integer();
+                domain = obj.getDomain(i);
+                domain.index_type = gams.transfer.symbol.domain.IndexType.integer();
             end
             obj.last_update_ = now();
         end
@@ -374,7 +375,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 domain_forwarding = false(1, dim) | domain_forwarding;
             end
             for i = 1:dim
-                obj.getDomain(i).forwarding = domain_forwarding(i);
+                domain = obj.getDomain(i);
+                domain.forwarding = domain_forwarding(i);
             end
             obj.applyDomainForwarding();
             obj.last_update_ = now();
