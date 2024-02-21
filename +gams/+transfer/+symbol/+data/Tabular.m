@@ -37,12 +37,10 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
 
     %#ok<*INUSD,*STOUT>
 
-    methods
+    methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
+        ?gams.transfer.unique_labels.DomainSet})
 
-        function status = isValid(obj, axes, values)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues('Numeric', values);
-
+        function status = isValid_(obj, axes, values)
             % empty is valid
             if numel(obj.getLabels()) == 0
                 status = gams.transfer.utils.Status.ok();
@@ -55,7 +53,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
                 axis = axes.axis(i);
                 label = axis.domain.label;
 
-                if ~obj.isLabel(label)
+                if ~obj.isLabel_(label)
                     status = gams.transfer.utils.Status(sprintf("Records have no domain column '%s'.", label));
                     return
                 end
@@ -133,25 +131,22 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             status = gams.transfer.utils.Status.ok();
         end
 
-        function flag = hasUniqueLabels(obj, domain)
-            gams.transfer.utils.Validator('domain', 1, domain).type('gams.transfer.symbol.domain.Abstract');
+        function flag = hasUniqueLabels_(obj, domain)
             flag = gams.transfer.Constants.SUPPORTS_CATEGORICAL && ...
-                obj.isLabel(domain.label) && iscategorical(obj.records_.(domain.label));
+                obj.isLabel_(domain.label) && iscategorical(obj.records_.(domain.label));
         end
 
-        function unique_labels = getUniqueLabels(obj, domain)
-            if obj.hasUniqueLabels(domain)
+        function unique_labels = getUniqueLabels_(obj, domain)
+            if obj.hasUniqueLabels_(domain)
                 unique_labels = gams.transfer.unique_labels.CategoricalColumn(obj, domain);
             else
                 unique_labels = [];
             end
         end
 
-        function indices = usedUniqueLabels(obj, axes, values, dimension)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            gams.transfer.utils.Validator('dimension', 3, dimension).integer().scalar().inInterval(1, axes.dimension);
+        function indices = usedUniqueLabels_(obj, axes, values, dimension)
             domain = axes.axis(dimension).domain;
-            if ~obj.isLabel(domain.label)
+            if ~obj.isLabel_(domain.label)
                 indices = [];
                 return
             end
@@ -159,17 +154,16 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             indices = indices(~isnan(indices) & indices ~= 0);
         end
 
-        function nvals = getNumberValues(obj, axes, values)
-            nvals = obj.getNumberRecords(axes, values) * numel(obj.availableValues('Numeric', values));
+        function nvals = getNumberValues_(obj, axes, values)
+            nvals = obj.getNumberRecords_(axes, values) * numel(values);
         end
 
-        function value = getMeanValue(obj, axes, values)
-            values = obj.availableValues('Numeric', values);
+        function value = getMeanValue_(obj, axes, values)
             value = 0;
             for i = 1:numel(values)
                 value = value + sum(obj.records_.(values{i}.label)(:));
             end
-            n_values = obj.getNumberRecords(axes, values) * numel(values);
+            n_values = obj.getNumberRecords_(axes, values) * numel(values);
             if n_values == 0
                 value = nan;
             else
@@ -177,14 +171,20 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             end
         end
 
-        function transformToMatrix(obj, axes, values, data)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues('Numeric', values);
+        function subindex = ind2sub_(obj, axes, value, linindex)
+            dim = axes.dimension;
+            subindex = zeros(1, dim);
+            for i = 1:dim
+                subindex(i) = double(obj.records_.(axes.axis(i).domain.label)(linindex));
+            end
+        end
+
+        function transformToMatrix_(obj, axes, values, data)
             if numel(values) == 0
                 error('At least one numeric value column is required to transform to a matrix format.');
             end
-            gams.transfer.utils.Validator('data', 3, data).type('gams.transfer.symbol.data.Matrix');
-            if isa(data, 'gams.transfer.symbol.data.SparseMatrix') && axes.dimension > 2
+            dim = axes.dimension;
+            if isa(data, 'gams.transfer.symbol.data.SparseMatrix') && dim > 2
                 error('Sparse matrix does not support dimension larger than 2.');
             end
 
@@ -192,11 +192,11 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             size_ = axes.matrixSize();
 
             % convert indices to matrix (linear) indices
-            if axes.dimension == 0
+            if dim == 0
                 idx = 1;
             else
-                idx = cell(1, axes.dimension);
-                for i = 1:axes.dimension
+                idx = cell(1, dim);
+                for i = 1:dim
                     idx{i} = uint64(obj.records_.(axes.axis(i).domain.label));
                 end
                 idx = sub2ind(size_, idx{:});
@@ -225,37 +225,31 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             data.last_update_ = now();
         end
 
-        function removeRows(obj, indices)
-            st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
-        end
-
-        function permuteAxis(obj, axes, values, dimension, permutation)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            gams.transfer.utils.Validator('dimension', 3, dimension).integer().scalar().inInterval(1, axes.dimension);
-            gams.transfer.utils.Validator('permutation', 4, permutation).integer().vector();
-
+        function permuteAxis_(obj, axes, values, dimension, permutation)
             domain = axes.axis(dimension).domain;
             if ~obj.isLabel(domain.label)
                 return
             end
             if gams.transfer.Constants.SUPPORTS_CATEGORICAL && iscategorical(obj.records_.(domain.label));
-                unique_labels = obj.getUniqueLabels(domain);
+                unique_labels = obj.getUniqueLabels_(domain);
                 unique_labels.set(unique_labels.getAt(permutation));
             else
                 obj.records_.(domain.label) = reshape(uint64(permutation(obj.records_.(domain.label))), [], 1);
             end
         end
 
+        function removeRows_(obj, indices)
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
     end
 
-    methods (Hidden, Access = protected)
+    methods
 
-        function subindex = ind2sub(obj, axes, value, linindex)
-            subindex = zeros(1, axes.dimension);
-            for i = 1:axes.dimension
-                subindex(i) = double(obj.records_.(axes.axis(i).domain.label)(linindex));
-            end
+        function removeRows(obj, indices)
+            gams.transfer.utils.Validator('indices', 1, indices).integer().vector().min(1);
+            obj.removeRows_(indices);
         end
 
     end

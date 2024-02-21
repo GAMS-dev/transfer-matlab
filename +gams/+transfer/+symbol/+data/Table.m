@@ -68,7 +68,7 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
 
         function data = copy(obj)
             data = gams.transfer.symbol.data.Table();
-            data.copyFrom(obj);
+            data.copyFrom_(obj);
         end
 
         function labels = getLabels(obj)
@@ -79,22 +79,30 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
             end
         end
 
-        function renameLabels(obj, old_labels, new_labels)
+    end
+
+    methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
+        ?gams.transfer.unique_labels.DomainSet})
+
+        function flag = isLabel_(obj, label)
+            flag = istable(obj.records_) && ismember(label, obj.records_.Properties.VariableNames);
+        end
+
+        function renameLabels_(obj, oldlabels, newlabels)
             if istable(obj.records_)
-                obj.records_ = renamevars(obj.records_, old_labels, new_labels);
+                obj.records_ = renamevars(obj.records_, oldlabels, newlabels);
             end
         end
 
-        function status = isValid(obj, axes, values)
+        function status = isValid_(obj, axes, values)
             if ~istable(obj.records_)
                 status = gams.transfer.utils.Status("Record data must be 'table'.");
                 return
             end
-
-            status = isValid@gams.transfer.symbol.data.Tabular(obj, axes, values);
+            status = isValid_@gams.transfer.symbol.data.Tabular(obj, axes, values);
         end
 
-        function nrecs = getNumberRecords(obj, axes, values)
+        function nrecs = getNumberRecords_(obj, axes, values)
             if istable(obj.records_)
                 nrecs = height(obj.records_);
             else
@@ -102,7 +110,7 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
             end
         end
 
-        function transformToTabular(obj, axes, values, data)
+        function transformToTabular_(obj, axes, values, data)
             if isa(data, 'gams.transfer.symbol.data.Table')
                 data.records_ = obj.records_;
             elseif isa(data, 'gams.transfer.symbol.data.Struct')
@@ -113,8 +121,7 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
             data.last_update_ = now();
         end
 
-        function removeRows(obj, indices)
-            gams.transfer.utils.Validator('indices', 1, indices).integer().vector().min(1);
+        function removeRows_(obj, indices)
             if istable(obj.records_)
                 obj.records_(indices, :) = [];
             end

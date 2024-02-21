@@ -309,7 +309,7 @@ classdef Set < gams.transfer.symbol.Abstract
                 symbol = destination.addSet(obj.name_);
             end
 
-            symbol.copyFrom(obj);
+            symbol.copyFrom_(obj);
             symbol.def.switchContainer(destination);
         end
 
@@ -318,24 +318,21 @@ classdef Set < gams.transfer.symbol.Abstract
     methods (Hidden)
 
         function status = isValidDomain(obj)
-
-            if obj.last_update < obj.is_valid_time_ && obj.is_valid_domain_status_.flag ~= gams.transfer.utils.Status.UNKNOWN
-                status = obj.is_valid_domain_status_;
-                return
+            if obj.is_valid_domain_status_.flag == gams.transfer.utils.Status.UNKNOWN || ...
+                obj.last_update_ >= obj.is_valid_time_ || obj.last_update >= obj.is_valid_time_
+                if obj.dimension ~= 1
+                    obj.is_valid_domain_status_ = gams.transfer.utils.Status(sprintf('Domain set ''%s'' dimension must be 1.', obj.name_));
+                elseif ~obj.isValid()
+                    obj.is_valid_domain_status_ = gams.transfer.utils.Status(sprintf('Domain set ''%s'' is invalid.', obj.name_));
+                elseif isfield(obj.records, obj.def_.domains{1}.label) && ...
+                    numel(unique(obj.records.(obj.def_.domains{1}.label))) ~= numel(obj.records.(obj.def_.domains{1}.label))
+                    obj.is_valid_domain_status_ = gams.transfer.utils.Status(sprintf('Domain set ''%s'' must not have duplicate records.', obj.name_));
+                else
+                    obj.is_valid_domain_status_ = gams.transfer.utils.Status.ok();
+                end
+                obj.is_valid_domain_time_ = now();
             end
-
-            if obj.dimension ~= 1
-                status = gams.transfer.utils.Status(sprintf('Domain set ''%s'' dimension must be 1.', obj.name_));
-            elseif ~obj.isValid()
-                status = gams.transfer.utils.Status(sprintf('Domain set ''%s'' is invalid.', obj.name_));
-            elseif isfield(obj.records, obj.def_.domains{1}.label) && ...
-                numel(unique(obj.records.(obj.def_.domains{1}.label))) ~= numel(obj.records.(obj.def_.domains{1}.label))
-                status = gams.transfer.utils.Status(sprintf('Domain set ''%s'' must not have duplicate records.', obj.name_));
-            else
-                status = gams.transfer.utils.Status.ok();
-            end
-            obj.is_valid_domain_status_ = status;
-            obj.is_valid_domain_time_ = now();
+            status = obj.is_valid_domain_status_;
         end
 
     end

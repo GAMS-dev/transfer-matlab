@@ -158,6 +158,10 @@ classdef Set < gams.transfer.alias.Abstract
 
     end
 
+    properties (Dependent, Hidden, SetAccess = private)
+        data
+    end
+
     methods
 
         function alias_with = get.alias_with(obj)
@@ -240,6 +244,10 @@ classdef Set < gams.transfer.alias.Abstract
 
         function format_ = get.format(obj)
             format_ = obj.alias_with_.format;
+        end
+
+        function data = get.data(obj)
+            data = obj.alias_with_.data;
         end
 
     end
@@ -390,12 +398,24 @@ classdef Set < gams.transfer.alias.Abstract
 
     end
 
-    methods (Hidden)
+    methods (Hidden, Access = {?gams.transfer.alias.Abstract, ?gams.transfer.Container})
 
-        function copyFrom(obj, symbol)
+        function copyFrom_(obj, symbol)
             gams.transfer.utils.Validator('symbol', 1, symbol).type(class(obj));
             obj.alias_with_ = symbol.alias_with;
             obj.last_update_ = now();
+        end
+
+        function flag = modifiedAfter_(obj, time)
+            flag = true;
+            if time <= obj.last_update_
+                return
+            end
+            if obj.alias_with_.modifiedAfter_(time)
+                obj.last_update_ = max(obj.last_update_, obj.alias_with.last_update_);
+                return
+            end
+            flag = false;
         end
 
     end
@@ -703,6 +723,131 @@ classdef Set < gams.transfer.alias.Abstract
             % See also: gams.transfer.Symbol.upperUELs
 
             obj.alias_with_.upperUELs(varargin{:});
+        end
+
+    end
+
+    methods (Hidden, Access = {?gams.transfer.symbol.Abstract, ?gams.transfer.Container, ...
+        ?gams.transfer.unique_labels.DomainSet})
+
+        function domain = getDomain_(obj, dimension)
+            domain = obj.alias_with_.getDomain_(dimension);
+        end
+
+        function domains = getDomains_(obj)
+            domains = obj.alias_with_.getDomains_();
+        end
+
+        function values = getValues_(obj)
+            values = obj.alias_with_.getValues_();
+        end
+
+        function values = getNumericValues_(obj)
+            values = obj.alias_with_.getNumericValues_();
+        end
+
+        function [flag, domain_flag] = isDomainAxis_(obj, dimension)
+            [flag, domain_flag] = obj.alias_with_.isDomainAxis_(dimension);
+        end
+
+        function flag = hasDomainAxis_(obj, dimension)
+            flag = obj.alias_with_.hasDomainAxis_(dimension);
+        end
+
+        function [unique_labels, is_domain_axis] = getDomainAxisUniqueLabels_(obj, dimension)
+            [unique_labels, is_domain_axis] = obj.alias_with_.getDomainAxisUniqueLabels_(dimension);
+        end
+
+        function [axis, is_domain_axis] = getDomainAxis_(obj, dimension)
+            [axes, is_domain_axis] = obj.alias_with_.getDomainAxis_(dimension);
+        end
+
+        function [axes, is_domain_axis] = getDomainAxes_(obj)
+            [axes, is_domain_axis] = obj.alias_with_.getDomainAxes_();
+        end
+
+        function labels = getDomainAxisLabels_(obj, dimension)
+            labels = obj.alias_with_.getDomainAxisLabels_(dimension);
+        end
+
+        function [unique_labels, is_domain_axis] = getAxisUniqueLabels_(obj, dimension)
+            [unique_labels, is_domain_axis] = obj.alias_with_.getAxisUniqueLabels_(dimension);
+        end
+
+        function unique_labels = getInitAxisUniqueLabels_(obj, dimension)
+            unique_labelsobj.alias_with_.getInitAxisUniqueLabels_(dimension);
+        end
+
+        function [axis, is_domain_axis] = getAxis_(obj, dimension)
+            [axes, is_domain_axis] = obj.alias_with_.getAxis_(dimension);
+        end
+
+        function [axes, is_domain_axis] = getAxes_(obj)
+            [axes, is_domain_axis] = obj.alias_with_.getAxes_();
+        end
+
+        function labels = getAxisLabels_(obj, dimension)
+            labels = obj.alias_with_.getAxisLabels_(dimension);
+        end
+
+        function indices = getUsedAxisIndices_(obj, dimension)
+            indices = obj.alias_with_.getUsedAxisIndices_(dimension);
+        end
+
+        function labels = getUsedAxisLabels_(obj, dimension)
+            labels = obj.alias_with_.getUsedAxisLabels_(dimension);
+        end
+
+        function labels = getAxisLabelsAt_(obj, dimension, indices)
+            labels = obj.alias_with_.getAxisLabelsAt_(dimension, indices);
+        end
+
+        function [flag, indices] = findAxisLabels_(obj, dimension, labels)
+            [flag, indices] = obj.alias_with_.findAxisLabels_(dimension, labels);
+        end
+
+        function clearAxisLabels_(obj, dimension)
+            obj.alias_with_.clearAxisLabels_(dimension);
+        end
+
+        function addAxisLabels_(obj, dimension, labels)
+            obj.alias_with_.addAxisLabels_(dimension, labels);
+        end
+
+        function setAxisLabels_(obj, dimension, labels)
+            obj.alias_with_.setAxisLabels_(dimension, label);
+        end
+
+        function updateAxisLabels_(obj, dimension, labels)
+            obj.alias_with_.updateAxisLabels_(dimension, labels);
+        end
+
+        function updateAxisLabelsFromDomain_(obj, dimension)
+            obj.alias_with_.updateAxisLabelsFromDomain_(dimension);
+        end
+
+        function reorderAxisLabelsByUsage_(obj, dimension)
+            obj.alias_with_.reorderAxisLabelsByUsage_(dimension);
+        end
+
+        function removeAxisLabels_(obj, dimension, labels)
+            obj.alias_with_.removeAxisLabels_(dimension, labels);
+        end
+
+        function removeUnusedAxisLabels_(obj, dimension)
+            obj.alias_with_.removeUnusedAxisLabels_(dimension);
+        end
+
+        function trimAxisLabels_(obj, dimension)
+            obj.alias_with_.trimAxisLabels_(dimension);
+        end
+
+        function renameAxisLabels_(obj, dimension, oldlabels, newlabels)
+            obj.alias_with_.renameAxisLabels_(dimension, oldlabels, newlabels);
+        end
+
+        function mergeAxisLabels_(obj, dimension, oldlabels, newlabels)
+            obj.alias_with_.mergeAxisLabels_(dimension, oldlabels, newlabels);
         end
 
     end

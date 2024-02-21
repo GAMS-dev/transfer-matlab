@@ -320,9 +320,13 @@ classdef Universe < gams.transfer.alias.Abstract
 
     end
 
-    methods (Hidden)
+    methods (Hidden, Access = {?gams.transfer.alias.Abstract, ?gams.transfer.Container})
 
-        function copyFrom(obj, symbol)
+        function copyFrom_(obj, symbol)
+        end
+
+        function flag = modifiedAfter_(obj, time)
+            flag = time <= obj.last_update_;
         end
 
     end

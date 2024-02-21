@@ -69,23 +69,29 @@ classdef (Hidden) Empty < gams.transfer.unique_labels.Abstract
             labels = {};
         end
 
-        function labels = getAt(obj, indices)
+        function clear(obj)
+        end
+
+    end
+
+    methods (Hidden, Access = {?gams.transfer.unique_labels.Abstract, ...
+        ?gams.transfer.symbol.Abstract, ?gams.transfer.symbol.data.Abstract, ...
+        ?gams.transfer.symbol.domain.Abstract})
+
+        function labels = getAt_(obj, indices)
             labels = cell(size(indices));
             labels(:) = {gams.transfer.Constants.UNDEFINED_UNIQUE_LABEL};
         end
 
-        function clear(obj)
-        end
-
-        function [flag, indices] = remove(obj, labels)
+        function [flag, indices] = remove_(obj, labels)
             flag = [];
             indices = [];
         end
 
-        function rename(obj, oldlabels, newlabels)
+        function rename_(obj, oldlabels, newlabels)
         end
 
-        function [flag, indices] = merge(obj, oldlabels, newlabels)
+        function [flag, indices] = merge_(obj, oldlabels, newlabels)
             flag = [];
             indices = [];
         end

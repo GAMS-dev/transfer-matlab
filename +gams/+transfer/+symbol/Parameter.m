@@ -216,8 +216,8 @@ classdef Parameter < gams.transfer.symbol.Abstract
         function flag = supportsIndexed(obj)
             flag = false;
             for i = 1:obj.dimension
-                if ~obj.getAxisUniqueLabels(i).supportsIndexed() || ...
-                    ~obj.getDomainAxisUniqueLabels(i).supportsIndexed()
+                if ~obj.getAxisUniqueLabels_(i).supportsIndexed() || ...
+                    ~obj.getDomainAxisUniqueLabels_(i).supportsIndexed()
                     return
                 end
             end
@@ -289,7 +289,7 @@ classdef Parameter < gams.transfer.symbol.Abstract
                 symbol = destination.addParameter(obj.name_);
             end
 
-            symbol.copyFrom(obj);
+            symbol.copyFrom_(obj);
             symbol.def.switchContainer(destination);
         end
 

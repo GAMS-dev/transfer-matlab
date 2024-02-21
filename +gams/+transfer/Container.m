@@ -135,17 +135,7 @@ classdef Container < gams.transfer.utils.Handle
         end
 
         function modified = get.modified(obj)
-            modified = true;
-            if isempty(obj.last_update_reset_) || obj.last_update_reset_ <= obj.last_update
-                return
-            end
-            symbols = obj.data_.entries();
-            for i = 1:numel(symbols)
-                if symbols{i}.modified
-                    return
-                end
-            end
-            modified = false;
+            modified = isempty(obj.last_update_reset_) || obj.modifiedAfter_(obj.last_update_reset_);
         end
 
         function set.modified(obj, modified)
@@ -153,15 +143,14 @@ classdef Container < gams.transfer.utils.Handle
             if modified
                 obj.last_update_reset_ = [];
             else
-                last_update = obj.last_update;
                 obj.last_update_reset_ = now();
-                while (obj.last_update_reset_ == last_update)
+                while (obj.modifiedAfter_(obj.last_update_reset_))
                     obj.last_update_reset_ = now();
                 end
             end
             symbols = obj.data_.entries();
             for i = 1:numel(symbols)
-                symbols{i}.modified = modified;
+                symbols{i}.last_update_reset_ = obj.last_update_reset_;
             end
         end
 
@@ -281,7 +270,7 @@ classdef Container < gams.transfer.utils.Handle
 
     end
 
-    methods (Hidden)
+    methods (Hidden, Access = protected)
 
         function copyFrom(obj, varargin)
 
@@ -319,6 +308,21 @@ classdef Container < gams.transfer.utils.Handle
                 symbols{i}.copy(obj);
             end
 
+        end
+
+        function flag = modifiedAfter_(obj, time)
+            flag = true;
+            if time <= obj.last_update_
+                return
+            end
+            symbols = obj.data_.entries();
+            for i = 1:numel(symbols)
+                if symbols{i}.modifiedAfter_(time)
+                    obj.last_update_ = max(obj.last_update_, symbols{i}.last_update_);
+                    return
+                end
+            end
+            flag = false;
         end
 
     end
@@ -559,7 +563,7 @@ classdef Container < gams.transfer.utils.Handle
                 % set other properties
                 new_symbol.description_ = symbol.description;
                 if isfield(symbol, 'domain_labels') && numel(symbol.domain_labels) == symbol.dimension
-                    new_symbol.domain_labels = symbol.domain_labels;
+                    new_symbol.def_.setDomainLabels(symbol.domain_labels);
                 end
             end
         end
@@ -1508,7 +1512,7 @@ classdef Container < gams.transfer.utils.Handle
             if ~symbol.def.equals(new_symbol.def)
                 error('Symbol ''%s'' (with different definition) already exists.', name);
             end
-            symbol.copyFrom(new_symbol);
+            symbol.copyFrom_(new_symbol);
         end
 
         %> Adds a parameter to the container
@@ -1594,7 +1598,7 @@ classdef Container < gams.transfer.utils.Handle
             if ~symbol.def.equals(new_symbol.def)
                 error('Symbol ''%s'' (with different definition) already exists.', name);
             end
-            symbol.copyFrom(new_symbol);
+            symbol.copyFrom_(new_symbol);
         end
 
         %> Adds a variable to the container
@@ -1691,7 +1695,7 @@ classdef Container < gams.transfer.utils.Handle
             if ~symbol.def.equals(new_symbol.def)
                 error('Symbol ''%s'' (with different definition) already exists.', name);
             end
-            symbol.copyFrom(new_symbol);
+            symbol.copyFrom_(new_symbol);
         end
 
         %> Adds an equation to the container
@@ -1786,7 +1790,7 @@ classdef Container < gams.transfer.utils.Handle
             if ~symbol.def.equals(new_symbol.def)
                 error('Symbol ''%s'' (with different definition) already exists.', name);
             end
-            symbol.copyFrom(new_symbol);
+            symbol.copyFrom_(new_symbol);
         end
 
         %> Adds an alias to the container
@@ -1834,7 +1838,7 @@ classdef Container < gams.transfer.utils.Handle
             if ~isa(symbol, 'gams.transfer.alias.Set')
                 error('Symbol ''%s'' (with different symbol type) already exists.', name);
             end
-            symbol.copyFrom(new_symbol);
+            symbol.copyFrom_(new_symbol);
         end
 
         %> Adds a universe alias to the container
@@ -1878,7 +1882,7 @@ classdef Container < gams.transfer.utils.Handle
             if ~isa(symbol, 'gams.transfer.alias.Universe')
                 error('Symbol ''%s'' (with different symbol type) already exists.', name);
             end
-            symbol.copyFrom(new_symbol);
+            symbol.copyFrom_(new_symbol);
         end
 
         %> Rename a symbol

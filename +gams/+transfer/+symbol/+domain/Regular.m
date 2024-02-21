@@ -134,7 +134,7 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
             if ~obj.hasUniqueLabels()
                 error('Domain ''%s'' does not define any unique labels and thus cannot add any.', obj.name);
             end
-            obj.getUniqueLabels().add(labels);
+            obj.getUniqueLabels().add_(labels);
 
             % in case the domain set is has itself a domain different to the universe,
             % the domain violation is likely to exist there as well. We therefore
@@ -143,7 +143,7 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
                 return
             end
             for i = 1:obj.symbol_.dimension
-                domain = obj.symbol_.getDomain(i);
+                domain = obj.symbol_.getDomain_(i);
                 if domain.hasUniqueLabels()
                     domain.addLabels(labels, true);
                 end

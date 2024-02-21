@@ -55,7 +55,10 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
 
         function set.symbol(obj, symbol)
             gams.transfer.utils.Validator('symbol', 1, symbol).types({'gams.transfer.symbol.Set', 'gams.transfer.alias.Set'});
-            gams.transfer.utils.Validator('symbol.dimension', 1, symbol.dimension).inInterval(1, 1);
+            status = symbol.isValidDomain();
+            if status.flag ~= gams.transfer.utils.Status.OK
+                error('Domain set ''%s''cannot be used as domain: %s', obj.symbol_.name, status.message);
+            end
             obj.symbol_ = symbol;
         end
 
@@ -77,8 +80,11 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
 
         function obj = construct(symbol)
             gams.transfer.utils.Validator('symbol', 1, symbol).types({'gams.transfer.symbol.Set', 'gams.transfer.alias.Set'});
+            status = symbol.isValidDomain();
+            if status.flag ~= gams.transfer.utils.Status.OK
+                error('Domain set ''%s''cannot be used as domain: %s', obj.symbol_.name, status.message);
+            end
             obj = gams.transfer.unique_labels.DomainSet(symbol);
-            obj.checkSymbol();
         end
 
     end
@@ -90,17 +96,14 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
         end
 
         function count = count(obj)
-            obj.checkSymbol();
-            count = obj.symbol_.getNumberRecords();
+            count = obj.symbol_.data.getNumberRecords_(obj.symbol_.getAxes_(), obj.symbol_.getValues_());
         end
 
         function labels = get(obj)
-            obj.checkSymbol();
-            labels = reshape(obj.symbol_.getUELs(1, 'ignore_unused', true), 1, []);
+            labels = reshape(obj.symbol_.getUsedAxisLabels_(1), 1, []);
         end
 
         function clear(obj)
-            obj.checkSymbol();
             switch lower(obj.symbol_.format)
             case 'table'
                 obj.symbol_.data = gams.transfer.symbol.data.Table.construct();
@@ -111,9 +114,13 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
             end
         end
 
-        function add(obj, labels)
-            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr().value;
+    end
 
+    methods (Hidden, Access = {?gams.transfer.unique_labels.Abstract, ...
+        ?gams.transfer.symbol.Abstract, ?gams.transfer.symbol.data.Abstract, ...
+        ?gams.transfer.symbol.domain.Abstract})
+
+        function add_(obj, labels)
             % extend domain uels
             symbol_labels = obj.get();
             n = numel(symbol_labels);
@@ -123,7 +130,7 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
             end
 
             % check for other values
-            values = obj.symbol_.data.availableValues('Abstract', obj.symbol_.def.values);
+            values = obj.symbol_.getValues_();
             for i = 1:numel(values)
                 default = values{i}.default;
                 values{i} = obj.symbol_.records.(values{i}.label);
@@ -142,7 +149,7 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
             obj.symbol_.transformRecords(format);
         end
 
-        function set(obj, labels)
+        function set_(obj, labels)
             obj.clear();
             format = obj.symbol_.format;
             labels = gams.transfer.utils.unique(labels);
@@ -151,42 +158,28 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
             obj.symbol_.transformRecords(format);
         end
 
-        function [flag, indices] = remove(obj, labels)
-            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr().value;
+        function [flag, indices] = remove_(obj, labels)
             oldlabels = obj.get();
             [~, idx] = ismember(labels, oldlabels);
             idx(idx == 0) = [];
             obj.symbol_.data.removeRows(idx);
-            obj.symbol_.removeUELs(labels(idx));
+            obj.symbol_.removeAxisLabels_(1, labels(idx));
             if nargout > 0
-                [flag, indices] = obj.updatedIndices(oldlabels, [], []);
+                [flag, indices] = obj.updatedIndices_(oldlabels, [], []);
             end
         end
 
-        function rename(obj, oldlabels, newlabels)
-            obj.checkSymbol();
-            obj.symbol_.renameUELs(containers.Map(oldlabels, newlabels), 1);
+        function rename_(obj, oldlabels, newlabels)
+            obj.symbol_.renameAxisLabels_(oldlabels, newlabels);
         end
 
-        function [flag, indices] = merge(obj, oldlabels, newlabels)
-            obj.checkSymbol();
+        function [flag, indices] = merge_(obj, oldlabels, newlabels)
             if nargout > 0
                 oldlabels_ = obj.get();
             end
-            obj.symbol_.renameUELs(containers.Map(oldlabels, newlabels), 1, 'allow_merge', true);
+            obj.symbol_.mergeAxisLabels_(oldlabels, newlabels);
             if nargout > 0
-                [flag, indices] = obj.updatedIndices(oldlabels_, oldlabels, newlabels);
-            end
-        end
-
-    end
-
-    methods (Hidden, Access = protected)
-
-        function checkSymbol(obj)
-            status = obj.symbol_.isValidDomain();
-            if status.flag ~= gams.transfer.utils.Status.OK
-                error('Domain set ''%s''cannot be used as domain: %s', obj.symbol_.name, status.message);
+                [flag, indices] = obj.updatedIndices_(oldlabels_, oldlabels, newlabels);
             end
         end
 

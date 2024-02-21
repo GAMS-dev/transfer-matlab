@@ -82,15 +82,17 @@ classdef (Hidden) Axes < gams.transfer.utils.Handle
         end
 
         function size = size(obj)
-            size = zeros(1, obj.dimension);
-            for i = 1:obj.dimension
+            dim = obj.dimension;
+            size = zeros(1, dim);
+            for i = 1:dim
                 size(i) = obj.axes_{i}.size();
             end
         end
 
         function size = matrixSize(obj)
-            size = ones(1, max(2, obj.dimension));
-            size(1:obj.dimension) = obj.size();
+            dim = obj.dimension;
+            size = ones(1, max(2, dim));
+            size(1:dim) = obj.size();
         end
 
         function axis = axis(obj, dimension)

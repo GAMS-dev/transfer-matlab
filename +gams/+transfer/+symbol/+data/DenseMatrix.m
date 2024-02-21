@@ -67,11 +67,15 @@ classdef (Hidden) DenseMatrix < gams.transfer.symbol.data.Matrix
 
         function data = copy(obj)
             data = gams.transfer.symbol.data.DenseMatrix();
-            data.copyFrom(obj);
+            data.copyFrom_(obj);
         end
 
-        function status = isValid(obj, axes, values)
-            values = obj.availableValues('Numeric', values);
+    end
+
+    methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
+        ?gams.transfer.unique_labels.DomainSet})
+
+        function status = isValid_(obj, axes, values)
             for i = 1:numel(values)
                 label = values{i}.label;
                 if issparse(obj.records_.(label))
@@ -79,19 +83,17 @@ classdef (Hidden) DenseMatrix < gams.transfer.symbol.data.Matrix
                     return
                 end
             end
-            status = isValid@gams.transfer.symbol.data.Matrix(obj, axes, values);
+            status = isValid_@gams.transfer.symbol.data.Matrix(obj, axes, values);
         end
 
-        function nvals = getNumberValues(obj, axes, values)
-            values = obj.availableValues('Numeric', values);
+        function nvals = getNumberValues_(obj, axes, values)
             nvals = 0;
             for i = 1:numel(values)
                 nvals = nvals + numel(obj.records_.(values{i}.label));
             end
         end
 
-        function transformToMatrix(obj, axes, values, data)
-            values = obj.availableValues('Numeric', values);
+        function transformToMatrix_(obj, axes, values, data)
             if isa(data, 'gams.transfer.symbol.data.DenseMatrix')
                 for i = 1:numel(values)
                     data.records_.(values{i}.label) = obj.records_.(values{i}.label);

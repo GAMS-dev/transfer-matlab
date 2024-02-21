@@ -45,7 +45,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
     %#ok<*INUSD,*STOUT>
 
-    properties (Hidden, SetAccess = protected)
+    properties (Hidden, SetAccess = {?gams.transfer.alias.Abstract, ?gams.transfer.Container})
         container_
         name_ = ''
         last_update_ = now()
@@ -196,7 +196,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         end
 
         function modified = get.modified(obj)
-            modified = isempty(obj.last_update_reset_) || obj.last_update_reset_ <= obj.last_update;
+            modified = isempty(obj.last_update_reset_) || obj.modifiedAfter_(obj.last_update_reset_);
         end
 
         function set.modified(obj, modified)
@@ -204,9 +204,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             if modified
                 obj.last_update_reset_ = [];
             else
-                last_update = obj.last_update;
                 obj.last_update_reset_ = now();
-                while (obj.last_update_reset_ == last_update)
+                while (obj.modifiedAfter_(obj.last_update_reset_))
                     obj.last_update_reset_ = now();
                 end
             end
@@ -214,9 +213,14 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
     end
 
-    methods (Hidden)
+    methods (Hidden, Access = {?gams.transfer.alias.Abstract, ?gams.transfer.Container})
 
-        function copyFrom(obj, symbol)
+        function copyFrom_(obj, symbol)
+            st = dbstack;
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
+        function flag = modifiedAfter_(obj, time)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end

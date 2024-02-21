@@ -101,19 +101,34 @@ classdef (Hidden) CategoricalColumn < gams.transfer.unique_labels.Abstract
         end
 
         function labels = get(obj)
-            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
             labels = categories(obj.data_.records.(obj.domain_.label))';
         end
 
-        function add(obj, labels)
-            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().toCell().cellstr().value;
-            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
+        function clear(obj)
+            obj.data_.records.(obj.domain_.label) = categorical([], [], {}, 'Ordinal', true);
+        end
 
+        function [flag, indices] = removeUnused(obj)
+            if nargout > 0
+                oldlabels = obj.get();
+            end
+            obj.data_.records.(obj.domain_.label) = removecats(obj.data_.records.(obj.domain_.label));
+            if nargout > 0
+                [flag, indices] = obj.updatedIndices_(oldlabels, [], []);
+            end
+        end
+
+    end
+
+    methods (Hidden, Access = {?gams.transfer.unique_labels.Abstract, ...
+        ?gams.transfer.symbol.Abstract, ?gams.transfer.symbol.data.Abstract, ...
+        ?gams.transfer.symbol.domain.Abstract})
+
+        function add_(obj, labels)
             if ~isordinal(obj.data_.records.(obj.domain_.label))
                 obj.data_.records.(obj.domain_.label) = addcats(obj.data_.records.(obj.domain_.label), labels);
                 return
             end
-
             current_labels = categories(obj.data_.records.(obj.domain_.label));
             if numel(current_labels) == 0
                 obj.data_.records.(obj.domain_.label) = categorical(labels, 'Ordinal', true);
@@ -122,71 +137,39 @@ classdef (Hidden) CategoricalColumn < gams.transfer.unique_labels.Abstract
             end
         end
 
-        function clear(obj)
-            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
-            obj.data_.records.(obj.domain_.label) = categorical([], [], {}, 'Ordinal', true);
-        end
-
-        function set(obj, labels)
-            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().toCell().cellstr().value;
-            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
+        function set_(obj, labels)
             obj.data_.records.(obj.domain_.label) = categorical(double(obj.data_.records.(obj.domain_.label)), ...
                 1:numel(labels), labels, 'Ordinal', true);
         end
 
-        function [flag, indices] = update(obj, labels)
-            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().toCell().cellstr().value;
-            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
+        function [flag, indices] = update_(obj, labels)
             if nargout > 0
                 oldlabels = obj.get();
             end
             obj.data_.records.(obj.domain_.label) = setcats(obj.data_.records.(obj.domain_.label), labels);
             if nargout > 0
-                [flag, indices] = obj.updatedIndices(oldlabels, [], []);
+                [flag, indices] = obj.updatedIndices_(oldlabels, [], []);
             end
         end
 
-        function [flag, indices] = remove(obj, labels)
-            labels = gams.transfer.utils.Validator('labels', 1, labels).string2char().toCell().cellstr().value;
-            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
+        function [flag, indices] = remove_(obj, labels)
             if nargout > 0
                 oldlabels = obj.get();
             end
             obj.data_.records.(obj.domain_.label) = removecats(obj.data_.records.(obj.domain_.label), labels);
             if nargout > 0
-                [flag, indices] = obj.updatedIndices(oldlabels, [], []);
+                [flag, indices] = obj.updatedIndices_(oldlabels, [], []);
             end
         end
 
-        function [flag, indices] = removeUnused(obj, used_indices_callback)
-            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
-            if nargout > 0
-                oldlabels = obj.get();
-            end
-            obj.data_.records.(obj.domain_.label) = removecats(obj.data_.records.(obj.domain_.label));
-            if nargout > 0
-                [flag, indices] = obj.updatedIndices(oldlabels, [], []);
-            end
-        end
-
-        function rename(obj, oldlabels, newlabels)
-            oldlabels = gams.transfer.utils.Validator('oldlabels', 1, oldlabels).string2char() ...
-                .toCell().cellstr().value;
-            newlabels = gams.transfer.utils.Validator('newlabels', 2, newlabels).string2char() ...
-                .toCell().cellstr().numel(numel(oldlabels)).value;
-            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
+        function rename_(obj, oldlabels, newlabels)
             not_avail = ~ismember(oldlabels, categories(obj.data_.records.(obj.domain_.label)));
             oldlabels(not_avail) = [];
             newlabels(not_avail) = [];
             obj.data_.records.(obj.domain_.label) = renamecats(obj.data_.records.(obj.domain_.label), oldlabels, newlabels);
         end
 
-        function [flag, indices] = merge(obj, oldlabels, newlabels)
-            oldlabels = gams.transfer.utils.Validator('oldlabels', 1, oldlabels).string2char() ...
-                .toCell().cellstr().value;
-            newlabels = gams.transfer.utils.Validator('newlabels', 2, newlabels).string2char() ...
-                .toCell().cellstr().numel(numel(oldlabels)).value;
-            assert(iscategorical(obj.data_.records.(obj.domain_.label)));
+        function [flag, indices] = merge_(obj, oldlabels, newlabels)
             if nargout > 0
                 oldlabels_ = obj.get();
             end
@@ -200,7 +183,7 @@ classdef (Hidden) CategoricalColumn < gams.transfer.unique_labels.Abstract
             end
             obj.data_.records.(obj.domain_.label) = categorical(obj.data_.records.(obj.domain_.label), 'Ordinal', true);
             if nargout > 0
-                [flag, indices] = obj.updatedIndices(oldlabels_, oldlabels, newlabels);
+                [flag, indices] = obj.updatedIndices_(oldlabels_, oldlabels, newlabels);
             end
         end
 

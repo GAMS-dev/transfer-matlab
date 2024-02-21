@@ -68,7 +68,7 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
 
         function data = copy(obj)
             data = gams.transfer.symbol.data.Struct();
-            data.copyFrom(obj);
+            data.copyFrom_(obj);
         end
 
         function labels = getLabels(obj)
@@ -79,26 +79,34 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
             end
         end
 
-        function renameLabels(obj, old_labels, new_labels)
+    end
+
+    methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
+        ?gams.transfer.unique_labels.DomainSet})
+
+        function flag = isLabel_(obj, label)
+            flag = isfield(obj.records_, label);
+        end
+
+        function renameLabels_(obj, oldlabels, newlabels)
             if isstruct(obj.records_)
-                obj.records = gams.transfer.utils.rename_struct_fields(obj.records_, old_labels, new_labels);
+                obj.records = gams.transfer.utils.rename_struct_fields(obj.records_, oldlabels, newlabels);
             end
         end
 
-        function status = isValid(obj, axes, values)
+        function status = isValid_(obj, axes, values)
             if ~isstruct(obj.records_)
                 status = gams.transfer.utils.Status("Record data must be 'struct'.");
                 return
             end
-            status = isValid@gams.transfer.symbol.data.Tabular(obj, axes, values);
+            status = isValid_@gams.transfer.symbol.data.Tabular(obj, axes, values);
         end
 
-        function nrecs = getNumberRecords(obj, axes, values)
-            values = obj.availableValues('Abstract', values);
-
-            nrecs_axes = nan(1, axes.dimension);
+        function nrecs = getNumberRecords_(obj, axes, values)
+            dim = axes.dimension;
+            nrecs_axes = nan(1, dim);
             nrecs_values = nan(1, numel(values));
-            for i = 1:axes.dimension
+            for i = 1:dim
                 label = axes.axis(i).domain.label;
                 if isfield(obj.records_, label)
                     nrecs_axes(i) = numel(obj.records_.(label));
@@ -119,7 +127,7 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
             end
         end
 
-        function transformToTabular(obj, axes, values, data)
+        function transformToTabular_(obj, axes, values, data)
             if isa(data, 'gams.transfer.symbol.data.Table')
                 data.records_ = struct2table(obj.records_);
             elseif isa(data, 'gams.transfer.symbol.data.Struct')
@@ -130,8 +138,7 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
             data.last_update_ = now();
         end
 
-        function removeRows(obj, indices)
-            gams.transfer.utils.Validator('indices', 1, indices).integer().vector().min(1);
+        function removeRows_(obj, indices)
             labels = obj.getLabels();
             for i = 1:numel(labels)
                 disable = false(1, numel(obj.records_.(labels{i})));

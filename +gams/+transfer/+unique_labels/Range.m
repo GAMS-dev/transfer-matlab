@@ -143,23 +143,25 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
             end
         end
 
-        function labels = getAt(obj, indices)
-            gams.transfer.utils.Validator('indices', 1, indices).integer();
-            labels = cell(1, numel(indices));
-            for i = 1:numel(indices)
-                labels{i} = [obj.prefix_, int2str(obj.first_ + obj.step_ * (indices(i) - 1))];
-            end
-            if numel(indices) == 1
-                labels = labels{1};
-            end
-        end
-
         function clear(obj)
             obj.prefix_ = ''
             obj.first_ = 1
             obj.step_ = 1
             obj.length_ = 0
             obj.last_update_ = now();
+        end
+
+    end
+
+    methods (Hidden, Access = {?gams.transfer.unique_labels.Abstract, ...
+        ?gams.transfer.symbol.Abstract, ?gams.transfer.symbol.data.Abstract, ...
+        ?gams.transfer.symbol.domain.Abstract})
+
+        function labels = getAt_(obj, indices)
+            labels = cell(1, numel(indices));
+            for i = 1:numel(indices)
+                labels{i} = [obj.prefix_, int2str(obj.first_ + obj.step_ * (indices(i) - 1))];
+            end
         end
 
     end

@@ -47,16 +47,22 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             end
         end
 
-        function renameLabels(obj, old_labels, new_labels)
+    end
+
+    methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
+        ?gams.transfer.unique_labels.DomainSet})
+
+        function flag = isLabel_(obj, label)
+            flag = isfield(obj.records_, label);
+        end
+
+        function renameLabels_(obj, oldlabels, newlabels)
             if isstruct(obj.records_)
-                obj.records = gams.transfer.utils.rename_struct_fields(obj.records_, old_labels, new_labels);
+                obj.records = gams.transfer.utils.rename_struct_fields(obj.records_, oldlabels, newlabels);
             end
         end
 
-        function status = isValid(obj, axes, values)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues('Numeric', values);
-
+        function status = isValid_(obj, axes, values)
             size_ = axes.matrixSize();
             for i = 1:numel(values)
                 label = values{i}.label;
@@ -91,10 +97,7 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             status = gams.transfer.utils.Status.ok();
         end
 
-        function indices = usedUniqueLabels(obj, axes, values, dimension)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            gams.transfer.utils.Validator('dimension', 3, dimension).integer().scalar().inInterval(1, axes.dimension);
-            values = obj.availableValues('Numeric', values);
+        function indices = usedUniqueLabels_(obj, axes, values, dimension)
             if numel(values) == 0
                 indices = [];
             else
@@ -107,12 +110,11 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             end
         end
 
-        function nrecs = getNumberRecords(obj, axes, values)
+        function nrecs = getNumberRecords_(obj, axes, values)
             nrecs = nan;
         end
 
-        function value = getMeanValue(obj, axes, values)
-            values = obj.availableValues('Numeric', values);
+        function value = getMeanValue_(obj, axes, values)
             value = 0;
             for i = 1:numel(values)
                 value = value + mean(obj.records_.(values{i}.label)(:));
@@ -124,22 +126,24 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             end
         end
 
-        function transformToTabular(obj, axes, values, data)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues('Numeric', values);
-            gams.transfer.utils.Validator('data', 3, data).type('gams.transfer.symbol.data.Tabular');
+        function subindex = ind2sub_(obj, axes, value, linindex)
+            [i, j] = ind2sub(size(obj.records_.(value.label)), linindex);
+            subindex = [i, j];
+        end
 
+        function transformToTabular_(obj, axes, values, data)
             % get size
+            dim = axes.dimension;
             size_ = axes.matrixSize();
 
             % get all possible indices (sorted by column)
-            indices_ = cell(1, axes.dimension);
+            indices_ = cell(1, dim);
             [indices_{:}] = ind2sub(size_, 1:prod(size_));
-            indices = zeros(prod(size_), axes.dimension);
-            for i = 1:axes.dimension
+            indices = zeros(prod(size_), dim);
+            for i = 1:dim
                 indices(:, i) = indices_{i};
             end
-            [indices, indices_perm] = sortrows(indices, 1:axes.dimension);
+            [indices, indices_perm] = sortrows(indices, 1:dim);
 
             % get sparse indices
             keep_indices = false(1, prod(size_));
@@ -153,13 +157,15 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             indices_perm(~keep_indices) = [];
 
             % domain columns
-            for i = 1:axes.dimension
+            for i = 1:dim
                 axis = axes.axis(i);
                 switch axis.domain.index_type.value
                 case gams.transfer.symbol.domain.IndexType.CATEGORICAL
-                    data.records.(axis.domain.label) = axis.unique_labels.createCategoricalIndex(indices(:, i));
+                    data.records.(axis.domain.label) = ...
+                        axis.unique_labels.createCategoricalIndexFromInteger_(indices(:, i));
                 case gams.transfer.symbol.domain.IndexType.INTEGER
-                    data.records.(axis.domain.label) = axis.unique_labels.createIntegerIndex(indices(:, i));
+                    data.records.(axis.domain.label) = ...
+                        axis.unique_labels.createIntegerIndexFromInteger_(indices(:, i));
                 otherwise
                     error('Unsupported domain index type: %s', axis.domain.index_type.select);
                 end
@@ -171,15 +177,6 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             end
 
             data.last_update_ = now();
-        end
-
-    end
-
-    methods (Hidden, Access = protected)
-
-        function subindex = ind2sub(obj, axes, value, linindex)
-            [i, j] = ind2sub(size(obj.records_.(value.label)), linindex);
-            subindex = [i, j];
         end
 
     end

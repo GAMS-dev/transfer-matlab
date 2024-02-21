@@ -317,7 +317,7 @@ classdef Equation < gams.transfer.symbol.Abstract
                 symbol = destination.addEquation(obj.name_, obj.def_.type);
             end
 
-            symbol.copyFrom(obj);
+            symbol.copyFrom_(obj);
             symbol.def.switchContainer(destination);
         end
 

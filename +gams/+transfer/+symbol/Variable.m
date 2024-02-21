@@ -325,7 +325,7 @@ classdef Variable < gams.transfer.symbol.Abstract
                 symbol = destination.addVariable(obj.name_);
             end
 
-            symbol.copyFrom(obj);
+            symbol.copyFrom_(obj);
             symbol.def.switchContainer(destination);
         end
 
