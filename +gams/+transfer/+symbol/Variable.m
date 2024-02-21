@@ -238,7 +238,7 @@ classdef Variable < gams.transfer.symbol.Abstract
             end
 
             if ~has_type
-                type = gams.transfer.VariableType.Free;
+                type = gams.transfer.VariableType.free();
             end
             obj = gams.transfer.symbol.Variable(container, name, type, ~has_records);
             if has_description

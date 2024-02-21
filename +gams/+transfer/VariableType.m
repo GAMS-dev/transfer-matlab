@@ -211,7 +211,7 @@ classdef VariableType
     methods (Static)
 
         %> Constructs a Variable Type as BINARY
-        function obj = Binary()
+        function obj = binary()
             % Constructs a Variable Type as BINARY
 
             obj = gams.transfer.VariableType();
@@ -219,7 +219,7 @@ classdef VariableType
         end
 
         %> Constructs a Variable Type as INTEGER
-        function obj = Integer()
+        function obj = integer()
             % Constructs a Variable Type as INTEGER
 
             obj = gams.transfer.VariableType();
@@ -227,7 +227,7 @@ classdef VariableType
         end
 
         %> Constructs a Variable Type as POSITIVE
-        function obj = Positive()
+        function obj = positive()
             % Constructs a Variable Type as POSITIVE
 
             obj = gams.transfer.VariableType();
@@ -235,7 +235,7 @@ classdef VariableType
         end
 
         %> Constructs a Variable Type as NEGATIVE
-        function obj = Negative()
+        function obj = negative()
             % Constructs a Variable Type as NEGATIVE
 
             obj = gams.transfer.VariableType();
@@ -243,14 +243,14 @@ classdef VariableType
         end
 
         %> Constructs a Variable Type as FREE
-        function obj = Free()
+        function obj = free()
             % Constructs a Variable Type as FREE
 
             obj = gams.transfer.VariableType();
         end
 
         %> Constructs a Variable Type as SOS1
-        function obj = Sos1()
+        function obj = sos1()
             % Constructs a Variable Type as SOS1
 
             obj = gams.transfer.VariableType();
@@ -258,7 +258,7 @@ classdef VariableType
         end
 
         %> Constructs a Variable Type as SOS2
-        function obj = Sos2()
+        function obj = sos2()
             % Constructs a Variable Type as SOS2
 
             obj = gams.transfer.VariableType();
@@ -266,7 +266,7 @@ classdef VariableType
         end
 
         %> Constructs a Variable Type as SEMICONT
-        function obj = SemiCont()
+        function obj = semiCont()
             % Constructs a Variable Type as SEMICONT
 
             obj = gams.transfer.VariableType();
@@ -274,7 +274,7 @@ classdef VariableType
         end
 
         %> Constructs a Variable Type as SEMIINT
-        function obj = SemiInt()
+        function obj = semiInt()
             % Constructs a Variable Type as SEMIINT
 
             obj = gams.transfer.VariableType();

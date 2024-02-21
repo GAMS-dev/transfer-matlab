@@ -39,9 +39,9 @@ GAMS Transfer Matlab v0.9.0
   - Changed type of enumeration constants from `double` to `uint8`.
   - Added state (property `value` and `select`) to enumeration-like classes `VariableType` and
     `EquationType`.
-  - Added methods `Binary`, `Integer`, `Positive`, `Negative`, `Free`, `Sos1`, `Sos2`, `SemiCont`,
-    `SemiInt` to `VariableType` to create enumeration with corresponding value.
-  - Added methods `Eq`, `Leq`, `Geq`, `NonBinding`, `External`, `Cone`, `Boolean` to `EquationType`
+  - Added methods `binary`, `integer`, `positive`, `negative`, `free`, `sos1`, `sos2`, `semiCont`,
+    `semiInt` to `VariableType` to create enumeration with corresponding value.
+  - Added methods `eq`, `leq`, `geq`, `nonBinding`, `external`, `cone`, `boolean` to `EquationType`
     to create enumeration with corresponding value.
   - Added methods `values` and `selects` to `VariableType` and `EquationType` to convert input to
     (multiple) enumeration values or selections at once.

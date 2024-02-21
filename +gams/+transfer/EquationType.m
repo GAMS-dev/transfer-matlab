@@ -191,7 +191,7 @@ classdef EquationType
     methods (Static)
 
         %> Constructs a Equation Type as EQ
-        function obj = Eq()
+        function obj = eq()
             % Constructs a Equation Type as EQ
 
             obj = gams.transfer.EquationType();
@@ -199,7 +199,7 @@ classdef EquationType
         end
 
         %> Constructs a Equation Type as LEQ
-        function obj = Leq()
+        function obj = leq()
             % Constructs a Equation Type as LEQ
 
             obj = gams.transfer.EquationType();
@@ -207,7 +207,7 @@ classdef EquationType
         end
 
         %> Constructs a Equation Type as GEQ
-        function obj = Geq()
+        function obj = geq()
             % Constructs a Equation Type as GEQ
 
             obj = gams.transfer.EquationType();
@@ -215,14 +215,14 @@ classdef EquationType
         end
 
         %> Constructs a Equation Type as NONBINDING
-        function obj = NonBinding()
+        function obj = nonBinding()
             % Constructs a Equation Type as NONBINDING
 
             obj = gams.transfer.EquationType();
         end
 
         %> Constructs a Equation Type as EXTERNAL
-        function obj = External()
+        function obj = external()
             % Constructs a Equation Type as EXTERNAL
 
             obj = gams.transfer.EquationType();
@@ -230,7 +230,7 @@ classdef EquationType
         end
 
         %> Constructs a Equation Type as CONE
-        function obj = Cone()
+        function obj = cone()
             % Constructs a Equation Type as Cone
 
             obj = gams.transfer.EquationType();
@@ -238,7 +238,7 @@ classdef EquationType
         end
 
         %> Constructs a Equation Type as BOOLEAN
-        function obj = Boolean()
+        function obj = boolean()
             % Constructs a Equation Type as BOOLEAN
 
             obj = gams.transfer.EquationType();
