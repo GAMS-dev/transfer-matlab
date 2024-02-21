@@ -23,10 +23,14 @@
  * SOFTWARE.
  */
 
-#include "mex.h"
-#include "gt_mex.h"
+#include <string.h>
 
-#define ERRID "gams:transfer:cmex:gt_check_symbol_order:"
+#include "mex.h"
+#include "gt_utils.h"
+
+#include <time.h>
+
+#define ERRID "gams:transfer:cmex:gt_geteps:"
 
 void mexFunction(
     int             nlhs,
@@ -35,18 +39,36 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
-    int first_symbol_pos, second_symbol_pos;
-    char first_symbol[256], second_symbol[256];
+    char svname[6];
+#ifdef WITH_R2018A_OR_NEWER
+    mxDouble* mx_value = NULL;
+#else
+    double* mx_value = NULL;
+#endif
 
-    /* check input / outputs */
-    gt_mex_check_arguments_num(1, nlhs, 3, nrhs);
-    gt_mex_check_argument_struct(prhs, 0);
-    gt_mex_check_argument_str(prhs, 1, first_symbol);
-    gt_mex_check_argument_str(prhs, 2, second_symbol);
-
-    first_symbol_pos = mxGetFieldNumber(prhs[0], first_symbol);
-    second_symbol_pos = mxGetFieldNumber(prhs[0], second_symbol);
+    if (nlhs != 1 && nlhs != 0)
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of outputs (%d). 0 or 1 required.", nlhs);
+    if (nrhs != 1)
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of inputs (%d). 0 required.", nrhs);
+    if (!mxIsChar(prhs[0]))
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Argument 1 has invalid type: need char");
 
     /* create output data */
-    plhs[0] = mxCreateLogicalScalar(first_symbol_pos < second_symbol_pos);
+    plhs[0] = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
+
+    /* access data */
+#ifdef WITH_R2018A_OR_NEWER
+    mx_value = mxGetDoubles(plhs[0]);
+#else
+    mx_value = mxGetPr(plhs[0]);
+#endif
+
+    mxGetString(prhs[0], svname, 6);
+
+    if (!strcmp(svname, "eps"))
+        mx_value[0] = gt_utils_geteps();
+    else if (!strcmp(svname, "na"))
+        mx_value[0] = gt_utils_getna();
+    else
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Argument 1 must be one of the following: eps, na.");
 }

@@ -99,13 +99,13 @@ classdef SpecialValues
         %> Value not available (in Matlab: special nan value)
 
         % NA Value not available (in Matlab: special nan value)
-        NA = gams.transfer.gdx.gt_getna()
+        NA = gams.transfer.gdx.gt_get_sv('na')
 
 
         %> Explicit zero (in Matlab: negative zero)
 
         % EPS Explicit zero (in Matlab: negative zero)
-        EPS = gams.transfer.gdx.gt_geteps()
+        EPS = gams.transfer.gdx.gt_get_sv('eps')
 
 
         %> positive infinity
@@ -143,11 +143,11 @@ classdef SpecialValues
 
             if issparse(value)
                 [row, col, val] = find(value);
-                val = isnan(val) & ~gams.transfer.gdx.gt_isna(val);
+                val = isnan(val) & ~gams.transfer.gdx.gt_is_sv('na', val);
                 [m, n] = size(value);
                 bool = sparse(row, col, val, m, n);
             else
-                bool = isnan(value) & ~gams.transfer.gdx.gt_isna(value);
+                bool = isnan(value) & ~gams.transfer.gdx.gt_is_sv('na', value);
             end
         end
 
@@ -175,11 +175,11 @@ classdef SpecialValues
 
             if issparse(value)
                 [row, col, val] = find(value);
-                val = gams.transfer.gdx.gt_isna(val);
+                val = gams.transfer.gdx.gt_is_sv('na', val);
                 [m, n] = size(value);
                 bool = sparse(row, col, val, m, n);
             else
-                bool = gams.transfer.gdx.gt_isna(value);
+                bool = gams.transfer.gdx.gt_is_sv('na', value);
             end
         end
 
@@ -207,11 +207,11 @@ classdef SpecialValues
 
             if issparse(value)
                 [row, col, val] = find(value);
-                val = gams.transfer.gdx.gt_iseps(val);
+                val = gams.transfer.gdx.gt_is_sv('eps', val);
                 [m, n] = size(value);
                 bool = sparse(row, col, val, m, n);
             else
-                bool = gams.transfer.gdx.gt_iseps(value);
+                bool = gams.transfer.gdx.gt_is_sv('eps', value);
             end
         end
 

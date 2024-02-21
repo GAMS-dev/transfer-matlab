@@ -1657,8 +1657,12 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
     methods (Hidden)
 
-        function [axis, is_domain_axis] = getAxis(obj, dimension)
-            [axis, is_domain_axis] = obj.getAxis_(dimension);
+        function labels = getAxisLabels(obj, dimension)
+            labels = obj.getAxisUniqueLabels_(dimension).get();
+        end
+
+        function labels = getAxisLength(obj, dimension)
+            labels = obj.getAxisUniqueLabels_(dimension).count();
         end
 
     end

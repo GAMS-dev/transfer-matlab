@@ -23,12 +23,12 @@
  * SOFTWARE.
  */
 
+#include <string.h>
+
 #include "mex.h"
 #include "gt_utils.h"
 
-#include <time.h>
-
-#define ERRID "gams:transfer:cmex:gt_geteps:"
+#define ERRID "gams:transfer:cmex:gt_is_sv:"
 
 void mexFunction(
     int             nlhs,
@@ -37,26 +37,45 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
+    char svname[6];
+    mxLogical* mx_outputs;
 #ifdef WITH_R2018A_OR_NEWER
-    mxDouble* mx_value = NULL;
+    mxDouble* mx_inputs = NULL;
 #else
-    double* mx_value = NULL;
+    double* mx_inputs = NULL;
 #endif
 
     if (nlhs != 1 && nlhs != 0)
         mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of outputs (%d). 0 or 1 required.", nlhs);
-    if (nrhs != 0)
-        mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of inputs (%d). 0 required.", nrhs);
+    if (nrhs != 2)
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Incorrect number of inputs (%d). 1 required.", nrhs);
+    if (!mxIsChar(prhs[0]))
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Argument 1 has invalid type: need char");
+    if (!mxIsDouble(prhs[1]))
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Argument 2 has invalid type: need double");
+    if (mxIsSparse(prhs[1]))
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Argument must not be sparse");
 
     /* create output data */
-    plhs[0] = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
+    plhs[0] = mxCreateLogicalArray(mxGetNumberOfDimensions(prhs[1]), mxGetDimensions(prhs[1]));
 
     /* access data */
 #ifdef WITH_R2018A_OR_NEWER
-    mx_value = mxGetDoubles(plhs[0]);
+    mx_inputs = mxGetDoubles(prhs[1]);
+    mx_outputs = mxGetLogicals(plhs[0]);
 #else
-    mx_value = mxGetPr(plhs[0]);
+    mx_inputs = mxGetPr(prhs[1]);
+    mx_outputs = (mxLogical*) mxGetData(plhs[0]);
 #endif
 
-    mx_value[0] = gt_utils_geteps();
+    mxGetString(prhs[0], svname, 6);
+
+    if (!strcmp(svname, "eps"))
+        for (size_t i = 0; i < mxGetNumberOfElements(plhs[0]); i++)
+            mx_outputs[i] = gt_utils_iseps(mx_inputs[i]);
+    else if (!strcmp(svname, "na"))
+        for (size_t i = 0; i < mxGetNumberOfElements(plhs[0]); i++)
+            mx_outputs[i] = gt_utils_isna(mx_inputs[i]);
+    else
+        mexErrMsgIdAndTxt(ERRID"check_argument", "Argument 1 must be one of the following: eps, na.");
 }

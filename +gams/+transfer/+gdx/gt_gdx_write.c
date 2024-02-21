@@ -237,11 +237,8 @@ void mexFunction(
         {
             call_prhs[0] = mx_arr_symbol;
             call_prhs[1] = mxCreateDoubleScalar(j+1);
-            if (mexCallMATLAB(1, call_plhs, 2, call_prhs, "getAxis"))
-                mexErrMsgIdAndTxt(ERRID"number_records", "Calling 'getAxis' failed.");
-            call_prhs[0] = mxGetProperty(call_plhs[0], 0, "unique_labels_");
-            if (mexCallMATLAB(1, call_plhs, 1, call_prhs, "get"))
-                mexErrMsgIdAndTxt(ERRID"number_records", "Calling 'get' failed.");
+            if (mexCallMATLAB(1, call_plhs, 2, call_prhs, "getAxisLabels"))
+                mexErrMsgIdAndTxt(ERRID"number_records", "Calling 'getAxisLabels' failed.");
             mxSetCell(mx_arr_uels, j, call_plhs[0]);
             sizes[j] = mxGetNumberOfElements(call_plhs[0]);
         }

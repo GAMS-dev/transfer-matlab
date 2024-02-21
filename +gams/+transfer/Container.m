@@ -2301,7 +2301,9 @@ classdef Container < gams.transfer.utils.Handle
 
             % check for correct order of symbols
             correct_order = true;
+            symbol_defined = struct();
             for i = 1:numel(symbols)
+                symbol_defined.(symbols{i}.name) = true;
                 if ~isa(symbols{i}, 'gams.transfer.symbol.Abstract')
                     continue
                 end
@@ -2310,8 +2312,7 @@ classdef Container < gams.transfer.utils.Handle
                     if ~isa(domain, 'gams.transfer.symbol.domain.Regular')
                         continue
                     end
-                    correct_order = gams.transfer.gdx.gt_check_symbol_order(obj.data_.entries_, ...
-                        domain.name, symbols{i}.name);
+                    correct_order = isfield(symbol_defined, domain.name) && symbol_defined.(domain.name);
                     if ~correct_order
                         break;
                     end
