@@ -35,7 +35,7 @@
 %
 classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
-    properties (Abstract, SetAccess = private)
+    properties (Hidden, Abstract, SetAccess = private)
         last_update
     end
 
@@ -207,14 +207,6 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         function index = createIntegerIndexFromIntegerAndLabels_(input, unique_labels_count)
             index = uint64(input);
             index(index < 1 | index > unique_labels_count) = 0;
-        end
-
-    end
-
-    methods (Hidden)
-
-        function flag = supportsIndexed(obj)
-            flag = false;
         end
 
     end

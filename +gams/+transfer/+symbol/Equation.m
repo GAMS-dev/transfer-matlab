@@ -92,6 +92,12 @@ classdef Equation < gams.transfer.symbol.Abstract
 
         % default_values Equation default values
         default_values
+
+
+        %> Flag if symbol can be used in indexed mode
+
+        % indexed Flag if symbol can be used in indexed mode
+        indexed
     end
 
     methods
@@ -110,6 +116,10 @@ classdef Equation < gams.transfer.symbol.Abstract
             for i = 1:numel(values)
                 default_values.(values{i}.label) = values{i}.default;
             end
+        end
+
+        function indexed = get.indexed(obj)
+            indexed = false;
         end
 
     end

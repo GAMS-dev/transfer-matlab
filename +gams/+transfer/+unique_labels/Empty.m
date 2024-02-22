@@ -35,7 +35,7 @@
 %
 classdef (Hidden) Empty < gams.transfer.unique_labels.Abstract
 
-    properties (Dependent, SetAccess = private)
+    properties (Hidden, Dependent, SetAccess = private)
         last_update
     end
 
@@ -94,14 +94,6 @@ classdef (Hidden) Empty < gams.transfer.unique_labels.Abstract
         function [flag, indices] = merge_(obj, oldlabels, newlabels)
             flag = [];
             indices = [];
-        end
-
-    end
-
-    methods (Hidden)
-
-        function flag = supportsIndexed(obj)
-            flag = true;
         end
 
     end

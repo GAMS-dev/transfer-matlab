@@ -92,6 +92,13 @@ classdef Set < gams.transfer.symbol.Abstract
         is_singleton
     end
 
+    properties (Dependent, SetAccess = private)
+        %> Flag if symbol can be used in indexed mode
+
+        % indexed Flag if symbol can be used in indexed mode
+        indexed
+    end
+
     methods
 
         function is_singleton = get.is_singleton(obj)
@@ -100,6 +107,10 @@ classdef Set < gams.transfer.symbol.Abstract
 
         function obj = set.is_singleton(obj, is_singleton)
             obj.def_.is_singleton = singleton;
+        end
+
+        function indexed = get.indexed(obj)
+            indexed = false;
         end
 
     end

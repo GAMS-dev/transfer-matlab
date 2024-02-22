@@ -50,7 +50,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         forwarding
     end
 
-    properties (Abstract, SetAccess = private)
+    properties (Hidden, Abstract, SetAccess = private)
         last_update
     end
 

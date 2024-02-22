@@ -171,6 +171,13 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         format
     end
 
+    properties (Abstract, SetAccess = private)
+        %> (Abstract) Flag if symbol can be used in indexed mode
+
+        % indexed (Abstract) Flag if symbol can be used in indexed mode
+        indexed
+    end
+
     properties (Dependent)
         %> Flag to indicate modification
         %>
@@ -2153,14 +2160,6 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 end
                 obj.mergeAxisLabels_(i, labels, upper(labels));
             end
-        end
-
-    end
-
-    methods (Hidden)
-
-        function flag = supportsIndexed(obj)
-            flag = false;
         end
 
     end

@@ -693,7 +693,7 @@ classdef Container < gams.transfer.utils.Handle
             if indexed
                 disabled_symbols = {};
                 for i = 1:numel(symbols)
-                    if enable(i) && ~obj.getSymbols(symbols{i}).supportsIndexed()
+                    if enable(i) && ~obj.getSymbols(symbols{i}).indexed
                         enable(i) = false;
                         disabled_symbols{end+1} = symbols{i};
                     end

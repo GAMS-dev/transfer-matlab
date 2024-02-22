@@ -46,7 +46,7 @@ classdef (Abstract, Hidden) Abstract
         label
     end
 
-    properties (Dependent, SetAccess = private)
+    properties (Hidden, Dependent, SetAccess = private)
         last_update
     end
 

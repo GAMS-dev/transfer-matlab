@@ -49,6 +49,9 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
     properties (Dependent, SetAccess = private)
         values
+    end
+
+    properties (Hidden, Dependent, SetAccess = private)
         last_update
     end
 

@@ -45,7 +45,7 @@ classdef (Hidden) CategoricalColumn < gams.transfer.unique_labels.Abstract
         domain
     end
 
-    properties (Dependent, SetAccess = private)
+    properties (Hidden, Dependent, SetAccess = private)
         last_update
     end
 

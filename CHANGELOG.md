@@ -3,9 +3,11 @@ GAMS Transfer Matlab v0.9.0
 - Removed property `Container.indexed`. A container may now store indexed or standard symbols
   together. To read or write an indexed GDX file, pass the argument `indexed, true` to
   `Container.read` or `Container.write`. When writing an indexed GDX file, non-indexed symbols are
-  ignored. Writing a standard GDX file is always possible for all symbols (however, the meaning of
-  indexed symbols may be different). An indexed symbol can be created by passing the size array
-  instead of a domain cell for the domain (as before) or by setting `size` property of the symbol.
+  ignored (symbols have a new property `indexed` to show if the symbol can be used in indexed mode).
+  Writing a standard GDX file is always possible for all symbols (however, the meaning of indexed
+  symbols may be different compared to the indexed GDX file). An indexed symbol can be created by
+  passing the size array instead of a domain cell for the domain (as before) or by setting `size`
+  property of the symbol.
 - Restructured symbol classes:
   - Added subpackages `gams.transfer.symbol` and `gams.transfer.alias` (as well as internal
     subpackages `gams.transfer.incase_ordered_dict`, `gams.transfer.unique_labels`,

@@ -79,6 +79,32 @@ classdef Parameter < gams.transfer.symbol.Abstract
 
     %#ok<*INUSD,*STOUT>
 
+    properties (Dependent, SetAccess = private)
+        %> Flag if symbol can be used in indexed mode
+
+        % indexed Flag if symbol can be used in indexed mode
+        indexed
+    end
+
+    methods
+
+        function indexed = get.indexed(obj)
+            indexed = false;
+            for i = 1:obj.dimension
+                unique_labels = {obj.getAxisUniqueLabels_(i), obj.getDomainAxisUniqueLabels_(i)};
+                for j = 1:2
+                    if ~isa(unique_labels{j}, 'gams.transfer.unique_labels.Range') || ...
+                        ~strcmp(unique_labels{j}.prefix, '') || unique_labels{j}.first ~= 1 || ...
+                        unique_labels{j}.step ~= 1
+                        return
+                    end
+                end
+            end
+            indexed = true;
+        end
+
+    end
+
     methods (Hidden, Access = {?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
 
         function obj = Parameter(container, name, init_records)
@@ -207,21 +233,6 @@ classdef Parameter < gams.transfer.symbol.Abstract
             if has_records
                 obj.setRecords(records);
             end
-        end
-
-    end
-
-    methods (Hidden)
-
-        function flag = supportsIndexed(obj)
-            flag = false;
-            for i = 1:obj.dimension
-                if ~obj.getAxisUniqueLabels_(i).supportsIndexed() || ...
-                    ~obj.getDomainAxisUniqueLabels_(i).supportsIndexed()
-                    return
-                end
-            end
-            flag = true;
         end
 
     end

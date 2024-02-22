@@ -52,7 +52,7 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
         length
     end
 
-    properties (Dependent, SetAccess = private)
+    properties (Hidden, Dependent, SetAccess = private)
         last_update
     end
 
@@ -162,14 +162,6 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
             for i = 1:numel(indices)
                 labels{i} = [obj.prefix_, int2str(obj.first_ + obj.step_ * (indices(i) - 1))];
             end
-        end
-
-    end
-
-    methods (Hidden)
-
-        function flag = supportsIndexed(obj)
-            flag = obj.first_ == 1 && obj.step_ == 1 && strcmp(obj.prefix_, '');
         end
 
     end

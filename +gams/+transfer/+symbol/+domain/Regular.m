@@ -46,7 +46,7 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
         name
     end
 
-    properties (Dependent, SetAccess = private)
+    properties (Hidden, Dependent, SetAccess = private)
         last_update
     end
 

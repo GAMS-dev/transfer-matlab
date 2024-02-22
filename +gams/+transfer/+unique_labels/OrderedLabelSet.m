@@ -41,7 +41,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
         last_update_ = now()
     end
 
-    properties (Dependent, SetAccess = private)
+    properties (Hidden, Dependent, SetAccess = private)
         last_update
     end
 

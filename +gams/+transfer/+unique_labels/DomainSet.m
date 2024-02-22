@@ -43,7 +43,7 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
         symbol
     end
 
-    properties (Dependent, SetAccess = private)
+    properties (Hidden, Dependent, SetAccess = private)
         last_update
     end
 
