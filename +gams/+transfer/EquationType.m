@@ -33,7 +33,7 @@
 % This class holds the possible GAMS equation types similar to an enumeration class. Note that it is
 % not an enumeration class due to compatibility (e.g. for Octave).
 %
-% See also: gams.transfer.symbol.Equation
+% See also: gams.transfer.Equation, gams.transfer.symbol.Equation
 %
 
 %> @brief GAMS Equation Type
@@ -41,7 +41,8 @@
 %> This class holds the possible GAMS equation types similar to an enumeration class. Note that it
 %> is not an enumeration class due to compatibility (e.g. for Octave).
 %>
-%> @see \ref gams::transfer::symbol::Equation "symbol.Equation"
+%> @see \ref gams::transfer::Equation "Equation", \ref gams::transfer::symbol::Equation
+%> "symbol.Equation"
 classdef EquationType
 
     properties (Constant)

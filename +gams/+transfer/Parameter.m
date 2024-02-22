@@ -40,8 +40,8 @@
 %
 % Optional Arguments:
 % 3. domain (cellstr or Set):
-%    List of domains given either as string or as reference to a
-%    gams.transfer.symbol.Set object. Default is {} (for scalar).
+%    List of domains given either as string or as reference to a gams.transfer.symbol.Set object.
+%    Default is {} (for scalar).
 %
 % Parameter Arguments:
 % - records:
@@ -49,12 +49,12 @@
 % - description (string):
 %   Description of symbol. Default is "".
 % - domain_forwarding (logical):
-%   If true, domain entries in records will recursively be added to the domains in case
-%   they are not present in the domains already. With a logical vector domain
-%   forwarding can be enabled/disabled independently for each domain. Default: false.
+%   If true, domain entries in records will recursively be added to the domains in case they are not
+%   present in the domains already. With a logical vector domain forwarding can be enabled/disabled
+%   independently for each domain. Default: false.
 %
-% Note, this method may overwrite a parameter if its definition (domain,
-% domain_forwarding) doesn't differ.
+% Note, this method may overwrite a parameter if its definition (domain, domain_forwarding) doesn't
+% differ.
 %
 % Example:
 % c = Container();
@@ -74,8 +74,8 @@
 %>
 %> **Optional Arguments:**
 %> 3. domain (`cellstr` or `Set`):
-%>    List of domains given either as `string` or as reference to a \ref
-%>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{}` (for scalar).
+%>    List of domains given either as `string` or as reference to a \ref gams::transfer::symbol::Set
+%>    "symbol.Set" object. Default is `{}` (for scalar).
 %>
 %> **Parameter Arguments:**
 %> - records:
@@ -83,9 +83,9 @@
 %> - description (`string`):
 %>   Description of symbol. Default is `""`.
 %> - domain_forwarding (`logical`):
-%>   If `true`, domain entries in records will recursively be added to the domains in case
-%>   they are not present in the domains already. With a logical vector domain forwarding
-%>   can be enabled/disabled independently for each domain. Default: `false`.
+%>   If `true`, domain entries in records will recursively be added to the domains in case they are
+%>   not present in the domains already. With a logical vector domain forwarding can be
+%>   enabled/disabled independently for each domain. Default: `false`.
 %>
 %> Note, this method may overwrite a parameter if its definition (\ref
 %> gams::transfer::symbol::Parameter::domain "domain", \ref

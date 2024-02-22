@@ -30,24 +30,24 @@
 %
 % Symbol Domain Violation
 %
-% Domain violations occur when a symbol uses other Set(s) as domain(s) and a
-% domain entry in its records that is not present in the corresponding set.
-% Such a domain violation will lead to a GDX error when writing the data.
+% Domain violations occur when a symbol uses other Set(s) as domain(s) and a domain entry in its
+% records that is not present in the corresponding set. Such a domain violation will lead to a GDX
+% error when writing the data.
 %
-% See also: gams.transfer.symbol.Set, gams.transfer.Symbol
+% See also: gams.transfer.symbol.Set, gams.transfer.symbol.Abstract
 %
 
 %> @brief Domain Violation
 %>
-%> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set
-%> "Sets" as \ref gams::transfer::symbol::Symbol::domain "domain"(s) -- and is thus of
-%> domain type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses
-%> a domain entry in its \ref gams::transfer::symbol::Symbol::records "records" that is
-%> not present in the corresponding referenced domain set. Such a domain
-%> violation will lead to a GDX error when writing the data! See \ref
-%> GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
+%> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets" as \ref
+%> gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain type `regular`, see
+%> \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in its \ref
+%> gams::transfer::symbol::Abstract::records "records" that is not present in the corresponding
+%> referenced domain set. Such a domain violation will lead to a GDX error when writing the data!
+%> See \ref GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
 %>
-%> @see \ref gams::transfer::symbol::Set "Set", \ref gams::transfer::symbol::Symbol "Symbol"
+%> @see \ref gams::transfer::symbol::Set "symbol.Set", \ref gams::transfer::symbol::Abstract
+%> "symbol.Abstract"
 classdef Violation
 
     properties (Hidden, SetAccess = protected)
@@ -109,11 +109,9 @@ classdef Violation
 
     methods
 
-        %> Resolve the domain violation by adding the missing elements into
-        %> the domain set.
+        %> Resolve the domain violation by adding the missing elements into the domain set.
         function resolve(obj)
-            % Resolve the domain violation by adding the missing elements into
-            % the domain set.
+            % Resolve the domain violation by adding the missing elements into the domain set.
 
             assert(isa(obj.domain_, 'gams.transfer.symbol.domain.Regular'));
             if ~obj.domain_.hasUniqueLabels()

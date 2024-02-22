@@ -30,10 +30,9 @@
 %
 % GAMS Transfer Container stores (multiple) symbols
 %
-% A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
-% parameters), each holding multiple symbol records. In GAMS Transfer the
-% Container is the main object that holds different symbols and allows to read
-% and write those to GDX.
+% A GAMS GDX file is a collection of GAMS symbols (e.g. variables or parameters), each holding
+% multiple symbol records. In GAMS Transfer the Container is the main object that holds different
+% symbols and allows to read and write those to GDX.
 %
 % Optional Arguments:
 % 1. source (string or Container):
@@ -41,25 +40,23 @@
 %
 % Parameter Arguments:
 % - gams_dir (string):
-%   Path to GAMS system directory. Default is determined from PATH environment
-%   variable
+%   Path to GAMS system directory. Default is determined from PATH environment variable
 %
 % Example:
 % c = Container();
 % c = Container('path/to/file.gdx');
 % c = Container('gams_dir', 'C:\GAMS');
 %
-% See also: gams.transfer.Set, gams.transfer.Alias, gams.transfer.Parameter,
-% gams.transfer.Variable, gams.transfer.Equation
+% See also: gams.transfer.Set, gams.transfer.Alias, gams.transfer.Parameter, gams.transfer.Variable,
+% gams.transfer.Equation
 %
 
 %> @brief GAMS Transfer Container stores (multiple) symbols
 %>
-%> A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
-%> parameters), each holding multiple symbol records. In GAMS Transfer the
-%> Container is the main object that holds different symbols and allows to read
-%> and write those to GDX. See \ref GAMS_TRANSFER_MATLAB_CONTAINER for more
-%> information.
+%> A GAMS GDX file is a collection of GAMS symbols (e.g. variables or parameters), each holding
+%> multiple symbol records. In GAMS Transfer the Container is the main object that holds different
+%> symbols and allows to read and write those to GDX. See \ref GAMS_TRANSFER_MATLAB_CONTAINER for
+%> more information.
 %>
 %> **Example:**
 %> ```
@@ -69,8 +66,8 @@
 %> ```
 %>
 %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Alias "Alias", \ref
-%> gams::transfer::Parameter "Parameter", \ref gams::transfer::Variable "Variable",
-%> \ref gams::transfer::Equation "Equation"
+%> gams::transfer::Parameter "Parameter", \ref gams::transfer::Variable "Variable", \ref
+%> gams::transfer::Equation "Equation"
 classdef Container < gams.transfer.utils.Handle
 
     %#ok<*INUSD,*STOUT>
@@ -103,15 +100,13 @@ classdef Container < gams.transfer.utils.Handle
 
         %> Flag to indicate modification
         %>
-        %> If the container or any symbol within has been modified since last
-        %> reset of flag (`false`), this flag will be `true`. Resetting will
-        %> also reset symbol flag.
+        %> If the container or any symbol within has been modified since last reset of flag
+        %> (`false`), this flag will be `true`. Resetting will also reset symbol flag.
 
         % Flag to indicate modification
         %
-        % If the container or any symbol within has been modified since last
-        % reset of flag (`false`), this flag will be `true`. Resetting will
-        % also reset symbol flag.
+        % If the container or any symbol within has been modified since last reset of flag
+        % (`false`), this flag will be `true`. Resetting will also reset symbol flag.
         modified
 
     end
@@ -162,13 +157,11 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Optional Arguments:**
         %> 1. source (`string` or `Container`):
-        %>    Path to GDX file or a \ref gams::transfer::Container "Container"
-        %>    object to be read
+        %>    Path to GDX file or a \ref gams::transfer::Container "Container" object to be read
         %>
         %> **Parameter Arguments:**
         %> - gams_dir (`string`):
-        %>   Path to GAMS system directory. Default is determined from PATH environment
-        %>   variable
+        %>   Path to GAMS system directory. Default is determined from PATH environment variable
         %>
         %> **Example:**
         %> ```
@@ -178,9 +171,8 @@ classdef Container < gams.transfer.utils.Handle
         %> ```
         %>
         %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Alias "Alias", \ref
-        %> gams::transfer::Parameter "Parameter", \ref gams::transfer::Variable "Variable",
-        %> \ref gams::transfer::Equation "Equation", \ref gams::transfer::Container
-        %> "Container"
+        %> gams::transfer::Parameter "Parameter", \ref gams::transfer::Variable "Variable", \ref
+        %> gams::transfer::Equation "Equation"
         function obj = Container(varargin)
             % Constructs a GAMS Transfer Container, see class help
 
@@ -339,15 +331,14 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be read. All if empty. Case doesn't matter.
-        %>   Default is `{}`.
+        %>   List of symbols to be read. All if empty. Case doesn't matter. Default is `{}`.
         %> - format (`string`):
         %>   Records format symbols should be stored in. Default is `table`.
         %> - records (`logical`):
         %>   Enables reading of records. Default is `true`.
         %> - values (`cell`):
-        %>   Subset of `{"level", "marginal", "lower", "upper", "scale"}` that
-        %>   defines what value fields should be read. Default is all.
+        %>   Subset of `{"level", "marginal", "lower", "upper", "scale"}` that defines what value
+        %>   fields should be read. Default is all.
         %> - indexed (`logical`):
         %>   Specifies if indexed GDX should be read. Default is `false`.
         %>
@@ -367,15 +358,14 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be read. All if empty. Case doesn't matter.
-            %   Default is {}.
+            %   List of symbols to be read. All if empty. Case doesn't matter. Default is {}.
             % - format (string):
             %   Records format symbols should be stored in. Default is table.
             % - records (logical):
             %   Enables reading of records. Default is true.
             % - values (cell):
-            %   Subset of {'level', 'marginal', 'lower', 'upper', 'scale'} that
-            %   defines what value fields should be read. Default is all.
+            %   Subset of {'level', 'marginal', 'lower', 'upper', 'scale'} that defines what value
+            %   fields should be read. Default is all.
             % - indexed (logical):
             %   Specifies if indexed GDX should be read. Default is false.
             %
@@ -594,8 +584,7 @@ classdef Container < gams.transfer.utils.Handle
         %> c.write('path/to/file.gdx', 'compress', true, 'sorted', true);
         %> ```
         %>
-        %> @see \ref gams::transfer::Container::getDomainViolations
-        %> "Container.getDomainViolations"
+        %> @see \ref gams::transfer::Container::getDomainViolations "Container.getDomainViolations"
         function write(obj, varargin)
             % Writes symbols with symbol records to GDX file
             %
@@ -773,9 +762,8 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %>
         %> @see \ref gams::transfer::Container::listSets "Container.listSets", \ref
         %> gams::transfer::Container::getSymbols "Container.getSymbols"
@@ -784,9 +772,8 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listSets, gams.transfer.Container.getSymbols
 
@@ -797,9 +784,8 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %>
         %> @see \ref gams::transfer::Container::listParameters "Container.listParameters", \ref
         %> gams::transfer::Container::getSymbols "Container.getSymbols"
@@ -808,9 +794,8 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listParameters, gams.transfer.Container.getSymbols
 
@@ -821,12 +806,11 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %> - types (`any`):
-        %>   Enable filter for variable type, e.g. `type = {"binary",
-        %>   "integer"}`. Default: not applied.
+        %>   Enable filter for variable type, e.g. `type = {"binary", "integer"}`. Default: not
+        %>   applied.
         %>
         %> @see \ref gams::transfer::Container::listVariables "Container.listVariables", \ref
         %> gams::transfer::Container::getSymbols "Container.getSymbols"
@@ -835,12 +819,11 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             % - types (any):
-            %   Enable filter for variable type, e.g. type = {'binary',
-            %   'integer'}. Default: not applied.
+            %   Enable filter for variable type, e.g. type = {'binary', 'integer'}. Default: not
+            %   applied.
             %
             % See also: gams.transfer.Container.listVariables, gams.transfer.Container.getSymbols
 
@@ -851,12 +834,10 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %> - types (`any`):
-        %>   Enable filter for equation type, e.g. `type = {"g", "l"}`. Default:
-        %>   not applied.
+        %>   Enable filter for equation type, e.g. `type = {"g", "l"}`. Default: not applied.
         %>
         %> @see \ref gams::transfer::Container::listEquations "Container.listEquations", \ref
         %> gams::transfer::Container::getSymbols "Container.getSymbols"
@@ -865,12 +846,10 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not applied.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not applied.
             % - types (any):
-            %   Enable filter for equation type, e.g. type = {'g', 'l'}.
-            %   Default: not applied.
+            %   Enable filter for equation type, e.g. type = {'g', 'l'}. Default: not applied.
             %
             % See also: gams.transfer.Container.listEquations, gams.transfer.Container.getSymbols
 
@@ -881,9 +860,8 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %>
         %> @see \ref gams::transfer::Container::listAliases "Container.listAliases", \ref
         %> gams::transfer::Container::getSymbols "Container.getSymbols"
@@ -892,9 +870,8 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - is_valid: logical or any
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listAliases, gams.transfer.Container.getSymbols
 
@@ -903,29 +880,27 @@ classdef Container < gams.transfer.utils.Handle
 
         %> Checks if symbol exists in container (case insensitive)
         %>
-        %> - `s = c.hasSymbols(a)` returns `true` if GAMS symbol named `a` (case
-        %>   does not matter) exists. `false` otherwise.
-        %> - `s = c.hasSymbols(b)` returns a list of bools where an entry `s{i}`
-        %>   is `true` if GAMS symbol named `b{i}` (case does not matter)
+        %> - `s = c.hasSymbols(a)` returns `true` if GAMS symbol named `a` (case does not matter)
         %>   exists. `false` otherwise.
+        %> - `s = c.hasSymbols(b)` returns a list of bools where an entry `s{i}` is `true` if GAMS
+        %>   symbol named `b{i}` (case does not matter) exists. `false` otherwise.
         function bool = hasSymbols(obj, names)
             % Checks if symbol exists in container (case insensitive)
             %
-            % s = c.hasSymbols(a) returns true if GAMS symbol named a (case does
-            % not matter) exists. false otherwise.
-            % s = c.hasSymbols(b) returns a list of bools where an entry s{i} is
-            % true if GAMS symbol named b{i} (case does not matter) exists.
+            % s = c.hasSymbols(a) returns true if GAMS symbol named a (case does not matter) exists.
             % false otherwise.
+            % s = c.hasSymbols(b) returns a list of bools where an entry s{i} is true if GAMS symbol
+            % named b{i} (case does not matter) exists. false otherwise.
 
             bool = obj.data_.exists(names);
         end
 
         %> Get symbol names by names (case insensitive)
         %>
-        %> - `s = c.getSymbolNames(a)` returns GAMS symbol names named `a` where
-        %>   `a` may have different casing.
-        %> - `s = c.getSymbolNames(b)` returns a list GAMS symbol names
-        %>   where names equal `b` case insensitively.
+        %> - `s = c.getSymbolNames(a)` returns GAMS symbol names named `a` where `a` may have
+        %>   different casing.
+        %> - `s = c.getSymbolNames(b)` returns a list GAMS symbol names where names equal `b` case
+        %>   insensitively.
         %>
         %> **Example:**
         %> ```
@@ -934,10 +909,10 @@ classdef Container < gams.transfer.utils.Handle
         function symbols = getSymbolNames(obj, names)
             % Get symbol names by names (case insensitive)
             %
-            % s = c.getSymbolNames(a) returns GAMS symbol names named a where a
-            % may have different casing.
-            % s = c.getSymbolNames(b) returns a list GAMS symbol names where
-            % names equal b case insensitively.
+            % s = c.getSymbolNames(a) returns GAMS symbol names named a where a may have different
+            % casing.
+            % s = c.getSymbolNames(b) returns a list GAMS symbol names where names equal b case
+            % insensitively.
             %
             % Example:
             % v1 = c.getSymbolNames('v1'); % equals c.getSymbolNames('V1');
@@ -978,9 +953,8 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %>
         %> @see \ref gams::transfer::Container::listSets "Container.listSets", \ref
         %> gams::transfer::Container::listParameters "Container.listParameters", \ref
@@ -992,9 +966,8 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listSets, gams.transfer.Container.listParameters,
             % gams.transfer.Container.listVariables, gams.transfer.Container.listEquations,
@@ -1064,9 +1037,8 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listSymbols, gams.transfer.Container.listParameters,
             % gams.transfer.Container.listVariables, gams.transfer.Container.listEquations,
@@ -1084,9 +1056,8 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %>
         %> @see \ref gams::transfer::Container::listSymbols "Container.listSymbols", \ref
         %> gams::transfer::Container::listSets "Container.listSets", \ref
@@ -1098,9 +1069,8 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listSymbols, gams.transfer.Container.listSets,
             % gams.transfer.Container.listVariables, gams.transfer.Container.listEquations,
@@ -1118,12 +1088,11 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %> - types (`any`):
-        %>   Enable filter for variable type, e.g. `type = {"binary",
-        %>   "integer"}`. Default: not applied.
+        %>   Enable filter for variable type, e.g. `type = {"binary", "integer"}`. Default: not
+        %>   applied.
         %>
         %> @see \ref gams::transfer::Container::listSymbols "Container.listSymbols", \ref
         %> gams::transfer::Container::listSets "Container.listSets", \ref
@@ -1135,12 +1104,11 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             % - types (any):
-            %   Enable filter for variable type, e.g. type = {'binary',
-            %   'integer'}. Default: not applied.
+            %   Enable filter for variable type, e.g. type = {'binary', 'integer'}. Default: not
+            %   applied.
             %
             % See also: gams.transfer.Container.listSymbols, gams.transfer.Container.listSets,
             % gams.transfer.Container.listParameters, gams.transfer.Container.listEquations,
@@ -1175,12 +1143,10 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %> - types (`any`):
-        %>   Enable filter for equation type, e.g. `type = {"g", "l"}`. Default:
-        %>   not applied.
+        %>   Enable filter for equation type, e.g. `type = {"g", "l"}`. Default: not applied.
         %>
         %> @see \ref gams::transfer::Container::listSymbols "Container.listSymbols", \ref
         %> gams::transfer::Container::listSets "Container.listSets", \ref
@@ -1192,12 +1158,10 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not applied.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not applied.
             % - types (any):
-            %   Enable filter for equation type, e.g. type = {'g', 'l'}.
-            %   Default: not applied.
+            %   Enable filter for equation type, e.g. type = {'g', 'l'}. Default: not applied.
             %
             % See also: gams.transfer.Container.listSymbols, gams.transfer.Container.listSets,
             % gams.transfer.Container.listParameters, gams.transfer.Container.listVariables,
@@ -1232,9 +1196,8 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %>
         %> @see \ref gams::transfer::Container::listSymbols "Container.listSymbols", \ref
         %> gams::transfer::Container::listSets "Container.listSets", \ref
@@ -1246,9 +1209,8 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - is_valid: logical or any
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listSymbols, gams.transfer.Container.listSets,
             % gams.transfer.Container.listParameters, gams.transfer.Container.listVariables,
@@ -1272,8 +1234,8 @@ classdef Container < gams.transfer.utils.Handle
         %> 1. symbols (`cellstr`):
         %>    List of symbols to include. Default: `listSets()`.
         %>
-        %> The overview is in form of a table listing for each symbol its
-        %> main characteristics and some statistics.
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describeSets(obj, varargin)
             % Returns an overview over all sets in container
             %
@@ -1283,8 +1245,8 @@ classdef Container < gams.transfer.utils.Handle
             % 1. symbols (cellstr):
             %    List of symbols to include. Default: listSets().
             %
-            % The overview is in form of a table listing for each symbol its
-            % main characteristics and some statistics.
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             if nargin == 2
                 symbols = obj.getSymbols(varargin{1});
@@ -1320,8 +1282,8 @@ classdef Container < gams.transfer.utils.Handle
         %> 1. symbols (`cellstr`):
         %>    List of symbols to include. Default: `listParameters()`.
         %>
-        %> The overview is in form of a table listing for each symbol its
-        %> main characteristics and some statistics.
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describeParameters(obj, varargin)
             % Returns an overview over all parameters in container
             %
@@ -1329,8 +1291,8 @@ classdef Container < gams.transfer.utils.Handle
             % 1. symbols (cellstr):
             %    List of symbols to include. Default: listParameters().
             %
-            % The overview is in form of a table listing for each symbol its
-            % main characteristics and some statistics.
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             if nargin == 2
                 symbols = obj.getSymbols(varargin{1});
@@ -1348,8 +1310,8 @@ classdef Container < gams.transfer.utils.Handle
         %> 1. symbols (`cellstr`):
         %>    List of symbols to include. Default: `listVariables()`.
         %>
-        %> The overview is in form of a table listing for each symbol its
-        %> main characteristics and some statistics.
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describeVariables(obj, varargin)
             % Returns an overview over all variables in container
             %
@@ -1357,8 +1319,8 @@ classdef Container < gams.transfer.utils.Handle
             % 1. symbols: cellstr
             %    List of symbols to include. Default: listVariables().
             %
-            % The overview is in form of a table listing for each symbol its
-            % main characteristics and some statistics.
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             if nargin == 2
                 symbols = obj.getSymbols(varargin{1});
@@ -1376,8 +1338,8 @@ classdef Container < gams.transfer.utils.Handle
         %> 1. symbols (`cellstr`):
         %>    List of symbols to include. Default: `listEquations()`.
         %>
-        %> The overview is in form of a table listing for each symbol its
-        %> main characteristics and some statistics.
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describeEquations(obj, varargin)
             % Returns an overview over all equations in container
             %
@@ -1385,8 +1347,8 @@ classdef Container < gams.transfer.utils.Handle
             % 1. symbols (cellstr):
             %    List of symbols to include. Default: listEquations().
             %
-            % The overview is in form of a table listing for each symbol its
-            % main characteristics and some statistics.
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             if nargin == 2
                 symbols = obj.getSymbols(varargin{1});
@@ -1404,8 +1366,8 @@ classdef Container < gams.transfer.utils.Handle
         %> 1. symbols (`cellstr`):
         %>    List of symbols to include. Default: `listAliases()`.
         %>
-        %> The overview is in form of a table listing for each symbol its
-        %> main characteristics and some statistics.
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describeAliases(obj, varargin)
             % Returns an overview over all aliases in container
             %
@@ -1413,8 +1375,8 @@ classdef Container < gams.transfer.utils.Handle
             % 1. symbols (cellstr):
             %    List of symbols to include. Default: listAliases().
             %
-            % The overview is in form of a table listing for each symbol its
-            % main characteristics and some statistics.
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             if nargin == 2
                 symbols = obj.getSymbols(varargin{1});
@@ -1640,8 +1602,7 @@ classdef Container < gams.transfer.utils.Handle
         %> ```
         %>
         %> @see \ref gams::transfer::symbol::Variable "symbol.Variable", \ref
-        %> gams::transfer::Variable "Variable", \ref gams::transfer::VariableType
-        %> "VariableType"
+        %> gams::transfer::Variable "Variable", \ref gams::transfer::VariableType "VariableType"
         function symbol = addVariable(obj, name, varargin)
             % Adds a variable to the container
             %
@@ -1736,8 +1697,7 @@ classdef Container < gams.transfer.utils.Handle
         %> ```
         %>
         %> @see \ref gams::transfer::symbol::Equation "symbol.Equation", \ref
-        %> gams::transfer::Equation "Equation", \ref gams::transfer::EquationType
-        %> "EquationType"
+        %> gams::transfer::Equation "Equation", \ref gams::transfer::EquationType "EquationType"
         function symbol = addEquation(obj, name, varargin)
             % Adds an equation to the container
             %
@@ -1854,8 +1814,7 @@ classdef Container < gams.transfer.utils.Handle
         %> ```
         %>
         %> @see \ref gams::transfer::alias::Universe "alias.Universe", \ref
-        %> gams::transfer::UniverseAlias "UniverseAlias", \ref gams::transfer::symbol::Set
-        %> "symbol.Set"
+        %> gams::transfer::UniverseAlias "UniverseAlias"
         function symbol = addUniverseAlias(obj, name)
             % Adds a universe alias to the container
             %
@@ -1867,8 +1826,7 @@ classdef Container < gams.transfer.utils.Handle
             % c = Container();
             % u = c.addUniverseAlias('u');
             %
-            % See also: gams.transfer.alias.Universe, gams.transfer.UniverseAlias,
-            % gams.transfer.symbol.Set
+            % See also: gams.transfer.alias.Universe, gams.transfer.UniverseAlias
 
             new_symbol = gams.transfer.alias.Universe.construct(obj, name);
 
@@ -2098,48 +2056,42 @@ classdef Container < gams.transfer.utils.Handle
 
         %> Get domain violations for all symbols
         %>
-        %> Domain violations occur when a symbol uses other \ref
-        %> gams::transfer::symbol::Set "Sets" as \ref gams::transfer::symbol::Symbol::domain
-        %> "domain"(s) -- and is thus of domain type `regular`, see \ref
-        %> GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in its
-        %> \ref gams::transfer::symbol::Symbol::records "records" that is not present in
-        %> the corresponding referenced domain set. Such a domain violation will
-        %> lead to a GDX error when writing the data!
+        %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
+        %> as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain
+        %> type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
+        %> its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+        %> corresponding referenced domain set. Such a domain violation will lead to a GDX error
+        %> when writing the data!
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
         %>
-        %> - `dom_violations = getDomainViolations` returns a list of domain
-        %>   violations.
+        %> - `dom_violations = getDomainViolations` returns a list of domain violations.
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be considered. All if empty. Case doesn't
-        %>   matter. Default is `{}`.
+        %>   List of symbols to be considered. All if empty. Case doesn't matter. Default is `{}`.
         %>
         %> @see \ref gams::transfer::Container::resolveDomainViolations
         %> "Container.resolveDomainViolations", \ref
-        %> gams::transfer::symbol::Symbol::getDomainViolations
-        %> "Symbol.getDomainViolations", \ref gams::transfer::DomainViolation
-        %> "DomainViolation"
+        %> gams::transfer::symbol::Abstract::getDomainViolations
+        %> "symbol.Abstract.getDomainViolations", \ref gams::transfer::symbol::domain::Violation
+        %> "symbol.domain.Violation"
         function dom_violations = getDomainViolations(obj, varargin)
             % Get domain violations for all symbols
             %
-            % Domain violations occur when a symbol uses other Set(s) as
-            % domain(s) and a domain entry in its records that is not present in
-            % the corresponding set. Such a domain violation will lead to a GDX
-            % error when writing the data.
+            % Domain violations occur when a symbol uses other Set(s) as domain(s) and a domain
+            % entry in its records that is not present in the corresponding set. Such a domain
+            % violation will lead to a GDX error when writing the data.
             %
-            % dom_violations = getDomainViolations returns a list of domain
-            % violations.
+            % dom_violations = getDomainViolations returns a list of domain violations.
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be considered. All if empty. Case doesn't
-            %   matter. Default is {}.
+            %   List of symbols to be considered. All if empty. Case doesn't matter. Default is {}.
             %
             % See also: gams.transfer.Container.resolveDomainViolations,
-            % gams.transfer.Symbol.getDomainViolations,
-            % gams.transfer.DomainViolation
+            % gams.transfer.symbol.Abstract.getDomainViolations,
+            % gams.transfer.symbol.domain.Violation
 
             % parse input arguments
             has_symbols = false;
@@ -2179,29 +2131,26 @@ classdef Container < gams.transfer.utils.Handle
 
         %> Extends domain sets in order to remove domain violations
         %>
-        %> Domain violations occur when a symbol uses other \ref
-        %> gams::transfer::symbol::Set "Sets" as \ref gams::transfer::symbol::Symbol::domain
-        %> "domain"(s) -- and is thus of domain type `regular`, see \ref
-        %> GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in its
-        %> \ref gams::transfer::symbol::Symbol::records "records" that is not present in
-        %> the corresponding referenced domain set. Such a domain violation will
-        %> lead to a GDX error when writing the data!
+        %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
+        %> as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain
+        %> type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
+        %> its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+        %> corresponding referenced domain set. Such a domain violation will lead to a GDX error
+        %> when writing the data!
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
         %>
-        %> - `resolveDomainViolations()` extends the domain sets with the
-        %>   violated domain entries. Hence, the domain violations disappear.
+        %> - `resolveDomainViolations()` extends the domain sets with the violated domain entries.
+        %>   Hence, the domain violations disappear.
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be considered. All if empty. Case doesn't
-        %>   matter. Default is `{}`.
+        %>   List of symbols to be considered. All if empty. Case doesn't matter. Default is `{}`.
         %>
-        %> @see \ref gams::transfer::Container::getDomainViolations
-        %> "Container.getDomainViolations", \ref
-        %> gams::transfer::symbol::Symbol::resolveDomainViolations
-        %> "Symbol.resolveDomainViolations", \ref gams::transfer::DomainViolation
-        %> "DomainViolation"
+        %> @see \ref gams::transfer::Container::getDomainViolations "Container.getDomainViolations",
+        %> \ref gams::transfer::symbol::Abstract::resolveDomainViolations
+        %> "symbol.Abstract.resolveDomainViolations", \ref gams::transfer::symbol::domain::Violation
+        %> "symbol.domain.Violation"
         function resolveDomainViolations(obj, varargin)
             % Extends domain sets in order to remove domain violations
             %
@@ -2219,8 +2168,8 @@ classdef Container < gams.transfer.utils.Handle
             %   matter. Default is {}.
             %
             % See also: gams.transfer.Container.getDomainViolations,
-            % gams.transfer.Symbol.resolveDomainViolations,
-            % gams.transfer.DomainViolation
+            % gams.transfer.symbol.Abstract.resolveDomainViolations,
+            % gams.transfer.symbol.domain.Violation
 
             dom_violations = obj.getDomainViolations(varargin{:});
             for i = 1:numel(dom_violations)
@@ -2240,10 +2189,9 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be considered. All if empty. Case doesn't
-        %>   matter. Default is `{}`.
+        %>   List of symbols to be considered. All if empty. Case doesn't matter. Default is `{}`.
         %>
-        %> @see \ref gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
+        %> @see \ref gams::transfer::symbol::Abstract::isValid "symbol.Abstract.isValid"
         function valid = isValid(obj, varargin)
             % Checks correctness of all symbols
             %
@@ -2255,10 +2203,9 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be considered. All if empty. Case doesn't
-            %   matter. Default is {}.
+            %   List of symbols to be considered. All if empty. Case doesn't matter. Default is {}.
             %
-            % See also: gams.transfer.Symbol/isValid
+            % See also: gams.transfer.symbol.Abstract.isValid
 
             % parse input arguments
             has_symbols = false;
@@ -2342,14 +2289,10 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> - `u = getUELs()` returns the UELs across all symbols.
         %> - `u = getUELs(_, 'symbols', s)` returns the UELs across symbols `s`.
-        %> - `u = getUELs(_, "ignore_unused", true)` returns only those UELs
-        %>   that are actually used in the records.
+        %> - `u = getUELs(_, "ignore_unused", true)` returns only those UELs that are actually used
+        %>   in the records.
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
-        %>
-        %> @note This can only be used if the container is valid.
-        %>
-        %> @see \ref gams::transfer::Container::isValid "Container.isValid"
         function uels = getUELs(obj, varargin)
             % Get UELs from all symbols
             %
@@ -2357,10 +2300,6 @@ classdef Container < gams.transfer.utils.Handle
             % u = getUELs(_, 'symbols', s) returns the UELs across symbols s.
             % u = getUELs(_, "ignore_unused", true) returns only those UELs
             % that are actually used in the records.
-            %
-            % Note: This can only be used if the container is valid.
-            %
-            % See also: gams.transfer.Container.isValid
 
             % parse input arguments
             has_symbols = false;
@@ -2411,20 +2350,12 @@ classdef Container < gams.transfer.utils.Handle
         %> - `removeUELs(_, 'symbols', s)` removes UELs for symbols `s`.
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
-        %>
-        %> @note This can only be used if the container is valid.
-        %>
-        %> @see \ref gams::transfer::Container::isValid "Container.isValid"
         function removeUELs(obj, varargin)
             % Removes UELs from all symbol
             %
             % removeUELs() removes all unused UELs for all symbols.
             % removeUELs(u) removes the UELs u for all symbols.
             % removeUELs(_, 'symbols', s) removes UELs for symbols s.
-            %
-            % Note: This can only be used if the container is valid.
-            %
-            % See also: gams.transfer.Container.isValid
 
             % parse input arguments
             has_symbols = false;
@@ -2470,35 +2401,27 @@ classdef Container < gams.transfer.utils.Handle
 
         %> Renames UELs in all symbol
         %>
-        %> - `renameUELs(u)` renames the UELs `u` for all symbols. `u` can be a
-        %>   `struct` (field names = old UELs, field values = new UELs),
-        %>   `containers.Map` (keys = old UELs, values = new UELs) or `cellstr`
-        %>   (full list of UELs, must have as many entries as current UELs). The
-        %>   codes for renamed UELs do not change.
+        %> - `renameUELs(u)` renames the UELs `u` for all symbols. `u` can be a `struct` (field
+        %>   names = old UELs, field values = new UELs), `containers.Map` (keys = old UELs, values =
+        %>   new UELs) or `cellstr` (full list of UELs, must have as many entries as current UELs).
+        %>   The codes for renamed UELs do not change.
         %> - `renameUELs(_, 'symbols', s)` renames UELs for symbols `s`.
-        %> - `renameUELs(_, 'allow_merge', true)` enables support of merging one
-        %>   UEL into another one (renaming a UEL to an already existing one).
+        %> - `renameUELs(_, 'allow_merge', true)` enables support of merging one UEL into another
+        %>   one (renaming a UEL to an already existing one).
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
-        %>
-        %> @note This can only be used if the symbol is valid.
-        %>
-        %> @see \ref gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
         function renameUELs(obj, varargin)
             % Renames UELs in all symbol
             %
-            % renameUELs(u) renames the UELs u for all symbols. u can be a
-            % struct (field names = old UELs, field values = new UELs),
-            % containers.Map (keys = old UELs, values = new UELs) or cellstr
-            % (full list of UELs, must have as many entries as current UELs).
-            % The codes for renamed UELs do not change.
+            % renameUELs(u) renames the UELs u for all symbols. u can be a struct (field names = old
+            % UELs, field values = new UELs), containers.Map (keys = old UELs, values = new UELs) or
+            % cellstr (full list of UELs, must have as many entries as current UELs). The codes for
+            % renamed UELs do not change.
             % renameUELs(_, 'symbols', s) renames UELs for symbols s.
-            % renameUELs(_, 'allow_merge', true) enables support of merging one
-            % UEL into another one (renaming a UEL to an already existing one).
+            % renameUELs(_, 'allow_merge', true) enables support of merging one UEL into another one
+            % (renaming a UEL to an already existing one).
             %
             % Note: This can only be used if the symbol is valid.
-            %
-            % See also: gams.transfer.Symbol.isValid
 
             % parse input arguments
             has_symbols = false;
@@ -2546,19 +2469,11 @@ classdef Container < gams.transfer.utils.Handle
         %> - `lowerUELs('symbols', s)` converts all UELs to lower case for symbols `s`.
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
-        %>
-        %> @note This can only be used if the symbol is valid.
-        %>
-        %> @see \ref gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
         function lowerUELs(obj, varargin)
             % Converts UELs to lower case
             %
             % lowerUELs() converts all UELs to lower case.
             % lowerUELs('symbols', s) converts all UELs to lower case for symbols s.
-            %
-            % Note: This can only be used if the symbol is valid.
-            %
-            % See also: gams.transfer.Symbol.isValid
 
             % parse input arguments
             has_symbols = false;
@@ -2597,19 +2512,11 @@ classdef Container < gams.transfer.utils.Handle
         %> - `upperUELs('symbols', s)` converts all UELs to upper case for symbols `s`.
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
-        %>
-        %> @note This can only be used if the symbol is valid.
-        %>
-        %> @see \ref gams::transfer::symbol::Symbol::isValid "Symbol.isValid"
         function upperUELs(obj, varargin)
             % Converts UELs to upper case
             %
             % upperUELs() converts all UELs to upper case.
             % upperUELs('symbols', s) converts all UELs to upper case for symbols s.
-            %
-            % Note: This can only be used if the symbol is valid.
-            %
-            % See also: gams.transfer.Symbol.isValid
 
             % parse input arguments
             has_symbols = false;

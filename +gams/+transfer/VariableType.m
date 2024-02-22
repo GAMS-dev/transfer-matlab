@@ -33,7 +33,7 @@
 % This class holds the possible GAMS variable types similar to an enumeration class. Note that it is
 % not an enumeration class due to compatibility (e.g. for Octave).
 %
-% See also: gams.transfer.symbol.Variable
+% See also: gams.transfer.Variable, gams.transfer.symbol.Variable
 %
 
 %> @brief GAMS Variable Type
@@ -41,7 +41,8 @@
 %> This class holds the possible GAMS variable types similar to an enumeration class. Note that it
 %> is not an enumeration class due to compatibility (e.g. for Octave).
 %>
-%> @see \ref gams::transfer::symbol::Variable "symbol.Variable"
+%> @see \ref gams::transfer::Variable "Variable", \ref gams::transfer::symbol::Variable
+%> "symbol.Variable"
 classdef VariableType
 
     properties (Constant)

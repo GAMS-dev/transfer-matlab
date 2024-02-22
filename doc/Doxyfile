@@ -829,7 +829,7 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = +gams doc/main.dox doc/getting_started.dox doc/container.dox doc/symbols.dox doc/records.dox
+INPUT                  = +gams doc doc/main.dox doc/getting_started.dox doc/container.dox doc/symbols.dox doc/records.dox
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

@@ -38,14 +38,13 @@
 % 2. name (string):
 %    Name of equation
 % 3. type (string, int or gams.transfer.EquationType):
-%    Specifies the variable type, either as string, as integer given by any of the
-%    constants in gams.transfer.EquationType or
-%    gams.transfer.EquationType.
+%    Specifies the variable type, either as string, as integer given by any of the constants in
+%    gams.transfer.EquationType or gams.transfer.EquationType.
 %
 % Optional Arguments:
 % 4. domain (cellstr or Set):
-%    List of domains given either as string or as reference to a
-%    gams.transfer.symbol.Set object. Default is {} (for scalar).
+%    List of domains given either as string or as reference to a gams.transfer.symbol.Set object.
+%    Default is {} (for scalar).
 %
 % Parameter Arguments:
 % - records:
@@ -53,17 +52,16 @@
 % - description (string):
 %   Description of symbol. Default is "".
 % - domain_forwarding (logical):
-%   If true, domain entries in records will recursively be added to the domains in case
-%   they are not present in the domains already. With a logical vector domain forwarding
-%   can be enabled/disabled independently for each domain. Default: false.
+%   If true, domain entries in records will recursively be added to the domains in case they are not
+%   present in the domains already. With a logical vector domain forwarding can be enabled/disabled
+%   independently for each domain. Default: false.
 %
 % Example:
 % c = Container();
 % e2 = symbol.Equation.construct(c, 'e2', 'l', {'*', '*'});
 % e3 = symbol.Equation.construct(c, 'e3', EquationType.EQ, '*', 'description', 'equ e3');
 %
-% See also: gams.transfer.Equation, gams.transfer.Container.addEquation,
-% gams.transfer.EquationType
+% See also: gams.transfer.Equation, gams.transfer.Container.addEquation, gams.transfer.EquationType
 
 %> @brief GAMS Equation
 %>
@@ -76,9 +74,8 @@
 %> e3 = symbol.Equation.construct(c, 'e3', EquationType.EQ, '*', 'description', 'equ e3');
 %> ```
 %>
-%> @see \ref gams::transfer::Equation "Equation", \ref
-%> gams::transfer::Container::addEquation "Container.addEquation", \ref
-%> gams::transfer::EquationType "EquationType"
+%> @see \ref gams::transfer::Equation "Equation", \ref gams::transfer::Container::addEquation
+%> "Container.addEquation", \ref gams::transfer::EquationType "EquationType"
 classdef Equation < gams.transfer.symbol.Abstract
 
     %#ok<*INUSD,*STOUT>
@@ -141,10 +138,10 @@ classdef Equation < gams.transfer.symbol.Abstract
         %>    \ref gams::transfer::Container "Container" object this symbol should be stored in
         %> 2. name (`string`):
         %>    Name of equation
-        %> 3. type (`string`, `int` or \ref gams::transfer::EquationType "EquationType"):
-        %>    Specifies the variable type, either as `string`, as `integer` given by any of the
-        %>    constants in \ref gams::transfer::EquationType "EquationType" or \ref
-        %>    gams::transfer::EquationType "EquationType".
+        %> 3. type (`string`, `int` or \ref gams::transfer::EquationType "EquationType"): Specifies
+        %>    the variable type, either as `string`, as `integer` given by any of the constants in
+        %>    \ref gams::transfer::EquationType "EquationType" or \ref gams::transfer::EquationType
+        %>    "EquationType".
         %>
         %> **Optional Arguments:**
         %> 4. domain (`cellstr` or `Set`):

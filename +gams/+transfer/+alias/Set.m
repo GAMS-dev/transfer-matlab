@@ -1,4 +1,4 @@
-% GAMS Set Alias
+% GAMS Set Alias to Set
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,7 +28,7 @@
 %
 % ------------------------------------------------------------------------------
 %
-% GAMS Set Alias
+% GAMS Set Alias to Set
 %
 % This class represents a GAMS Alias, which is a link to another GAMS Set.
 %
@@ -45,7 +45,7 @@
 % s = symbol.Set.construct(c, 's');
 % a = alias.Set.construct(c, 'a', s);
 %
-% See also: gams.transfer.Alias, gams.transfer.symbol.Set, gams.transfer.Container
+% See also: gams.transfer.Alias, gams.transfer.symbol.Set, gams.transfer.Container.addAlias
 
 %> @brief GAMS Alias
 %>
@@ -59,8 +59,8 @@
 %> a = alias.Set.construct(c, 'a', s);
 %> ```
 %>
-%> @see \ref gams::transfer::Alias "Alias", \ref gams::transfer::symbol::Set "Set", \ref
-%> gams::transfer::Container "Container"
+%> @see \ref gams::transfer::Alias "Alias", \ref gams::transfer::symbol::Set "symbol.Set", \ref
+%> gams::transfer::Container::addAlias "Container.addAlias"
 %>
 classdef Set < gams.transfer.alias.Abstract
 
@@ -274,7 +274,7 @@ classdef Set < gams.transfer.alias.Abstract
         %> 2. name (`string`):
         %>    name of alias
         %> 3. alias_with (`Set` or `Alias`):
-        %>    GAMS \ref gams::transfer::Set "Set" to be linked to
+        %>    GAMS \ref gams::transfer::symbol::Set "Set" to be linked to
         %>
         %> **Example:**
         %> ```
@@ -283,7 +283,8 @@ classdef Set < gams.transfer.alias.Abstract
         %> a = alias.Set.construct(c, 'a', s);
         %> ```
         %>
-        %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Container "Container"
+        %> @see \ref gams::transfer::Alias "Alias", \ref gams::transfer::symbol::Set "symbol.Set",
+        %> \ref gams::transfer::Container::addAlias "Container.addAlias"
         function obj = construct(container, name, alias_with)
             % Constructs a GAMS Alias, see class help
 
@@ -424,22 +425,22 @@ classdef Set < gams.transfer.alias.Abstract
 
         %> Sets symbol records in supported format
         %>
-        %> @see \ref gams::transfer::Symbol::setRecords "Symbol.setRecords"
+        %> @see \ref gams::transfer::symbol::Abstract::setRecords "symbol.Abstract.setRecords"
         function setRecords(obj, varargin)
             % Sets symbol records in supported format
             %
-            % See also: gams.transfer.Symbol.setRecords
+            % See also: gams.transfer.symbol.Abstract.setRecords
 
             obj.alias_with_.setRecords(varargin{:});
         end
 
         %> Transforms symbol records into given format
         %>
-        %> @see \ref gams::transfer::Symbol::transformRecords "Symbol.transformRecords"
+        %> @see \ref gams::transfer::symbol::Abstract::transformRecords "symbol.Abstract.transformRecords"
         function transformRecords(obj, target_format)
             % Transforms symbol records into given format
             %
-            % See also: gams.transfer.Symbol.transformRecords
+            % See also: gams.transfer.symbol.Abstract.transformRecords
 
             obj.alias_with_.transformRecords(target_format);
         end
@@ -495,232 +496,232 @@ classdef Set < gams.transfer.alias.Abstract
 
         %> Get domain violations
         %>
-        %> @see \ref gams::transfer::Symbol::getDomainViolations "Symbol.getDomainViolations"
+        %> @see \ref gams::transfer::symbol::Abstract::getDomainViolations "symbol.Abstract.getDomainViolations"
         function dom_violations = getDomainViolations(obj, varargin)
             % Get domain violations
             %
-            % See also: gams.transfer.Symbol.getDomainViolations
+            % See also: gams.transfer.symbol.Abstract.getDomainViolations
 
             dom_violations = obj.alias_with_.getDomainViolations(varargin{:});
         end
 
         %> Extends domain sets in order to resolve domain violations
         %>
-        %> @see \ref gams::transfer::Symbol::resolveDomainViolations
-        %> "Symbol.resolveDomainViolations"
+        %> @see \ref gams::transfer::symbol::Abstract::resolveDomainViolations
+        %> "symbol.Abstract.resolveDomainViolations"
         function resolveDomainViolations(obj, varargin)
             % Extends domain sets in order to resolve domain violations
             %
-            % See also: gams.transfer.Symbol.resolveDomainViolations
+            % See also: gams.transfer.symbol.Abstract.resolveDomainViolations
 
             obj.alias_with_.resolveDomainViolations(varargin{:});
         end
 
         %> Returns the sparsity of symbol records
         %>
-        %> @see \ref gams::transfer::Symbol::getSparsity "Symbol.getSparsity"
+        %> @see \ref gams::transfer::symbol::Abstract::getSparsity "symbol.Abstract.getSparsity"
         function sparsity = getSparsity(obj)
             % Returns the sparsity of symbol records
             %
-            % See also: gams.transfer.Symbol.getSparsity
+            % See also: gams.transfer.symbol.Abstract.getSparsity
 
             sparsity = obj.alias_with_.getSparsity();
         end
 
         %> Returns the largest value in records
         %>
-        %> @see \ref gams::transfer::Symbol::getMaxValue "Symbol.getMaxValue"
+        %> @see \ref gams::transfer::symbol::Abstract::getMaxValue "symbol.Abstract.getMaxValue"
         function [value, where] = getMaxValue(obj, varargin)
             % Returns the largest value in records
             %
-            % See also: gams.transfer.Symbol.getMaxValue
+            % See also: gams.transfer.symbol.Abstract.getMaxValue
 
             [value, where] = obj.alias_with_.getMaxValue(varargin{:});
         end
 
         %> Returns the smallest value in records
         %>
-        %> @see \ref gams::transfer::Symbol::getMinValue "Symbol.getMinValue"
+        %> @see \ref gams::transfer::symbol::Abstract::getMinValue "symbol.Abstract.getMinValue"
         function [value, where] = getMinValue(obj, varargin)
             % Returns the smallest value in records
             %
-            % See also: gams.transfer.Symbol.getMinValue
+            % See also: gams.transfer.symbol.Abstract.getMinValue
 
             [value, where] = obj.alias_with_.getMinValue(varargin{:});
         end
 
         %> Returns the mean value over all values in records
         %>
-        %> @see \ref gams::transfer::Symbol::getMeanValue "Symbol.getMeanValue"
+        %> @see \ref gams::transfer::symbol::Abstract::getMeanValue "symbol.Abstract.getMeanValue"
         function value = getMeanValue(obj, varargin)
             % Returns the mean value over all values in records
             %
-            % See also: gams.transfer.Symbol.getMeanValue
+            % See also: gams.transfer.symbol.Abstract.getMeanValue
 
             value = obj.alias_with_.getMeanValue(varargin{:});
         end
 
         %> Returns the largest absolute value in records
         %>
-        %> @see \ref gams::transfer::Symbol::getMaxAbsValue "Symbol.getMaxAbsValue"
+        %> @see \ref gams::transfer::symbol::Abstract::getMaxAbsValue "symbol.Abstract.getMaxAbsValue"
         function [value, where] = getMaxAbsValue(obj, varargin)
             % Returns the largest absolute value in records
             %
-            % See also: gams.transfer.Symbol.getMaxAbsValue
+            % See also: gams.transfer.symbol.Abstract.getMaxAbsValue
 
             [value, where] = obj.alias_with_.getMaxAbsValue(varargin{:});
         end
 
         %> Returns the number of GAMS NA values in records
         %>
-        %> @see \ref gams::transfer::Symbol::countNA "Symbol.countNA"
+        %> @see \ref gams::transfer::symbol::Abstract::countNA "symbol.Abstract.countNA"
         function n = countNA(obj, varargin)
             % Returns the number of GAMS NA values in records
             %
-            % See also: gams.transfer.Symbol.countNA
+            % See also: gams.transfer.symbol.Abstract.countNA
 
             n = obj.alias_with_.countNA(varargin{:});
         end
 
         %> Returns the number of GAMS UNDEF values in records
         %>
-        %> @see \ref gams::transfer::Symbol::countUndef "Symbol.countUndef"
+        %> @see \ref gams::transfer::symbol::Abstract::countUndef "symbol.Abstract.countUndef"
         function n = countUndef(obj, varargin)
             % Returns the number of GAMS UNDEF values in records
             %
-            % See also: gams.transfer.Symbol.countUndef
+            % See also: gams.transfer.symbol.Abstract.countUndef
 
             n = obj.alias_with_.countUndef(varargin{:});
         end
 
         %> Returns the number of GAMS EPS values in records
         %>
-        %> @see \ref gams::transfer::Symbol::countEps "Symbol.countEps"
+        %> @see \ref gams::transfer::symbol::Abstract::countEps "symbol.Abstract.countEps"
         function n = countEps(obj, varargin)
             % Returns the number of GAMS EPS values in records
             %
-            % See also: gams.transfer.Symbol.countEps
+            % See also: gams.transfer.symbol.Abstract.countEps
 
             n = obj.alias_with_.countEps(varargin{:});
         end
 
         %> Returns the number of GAMS PINF (positive infinity) values in records
         %>
-        %> @see \ref gams::transfer::Symbol::countPosInf "Symbol.countPosInf"
+        %> @see \ref gams::transfer::symbol::Abstract::countPosInf "symbol.Abstract.countPosInf"
         function n = countPosInf(obj, varargin)
             % Returns the number of GAMS PINF (positive infinity) values in records
             %
-            % See also: gams.transfer.Symbol.countPosInf
+            % See also: gams.transfer.symbol.Abstract.countPosInf
 
             n = obj.alias_with_.countPosInf(varargin{:});
         end
 
         %> Returns the number of GAMS MINF (negative infinity) values in records
         %>
-        %> @see \ref gams::transfer::Symbol::countNegInf "Symbol.countNegInf"
+        %> @see \ref gams::transfer::symbol::Abstract::countNegInf "symbol.Abstract.countNegInf"
         function n = countNegInf(obj, varargin)
             % Returns the number of GAMS MINF (negative infinity) values in records
             %
-            % See also: gams.transfer.Symbol.countNegInf
+            % See also: gams.transfer.symbol.Abstract.countNegInf
 
             n = obj.alias_with_.countNegInf(varargin{:});
         end
 
         %> Returns the number of GDX records (not available for matrix formats)
         %>
-        %> @see \ref gams::transfer::Symbol::getNumberRecords "Symbol.getNumberRecords"
+        %> @see \ref gams::transfer::symbol::Abstract::getNumberRecords "symbol.Abstract.getNumberRecords"
         function nrecs = getNumberRecords(obj)
             % Returns the number of GDX records (not available for matrix formats)
             %
-            % See also: gams.transfer.Symbol.getNumberRecords
+            % See also: gams.transfer.symbol.Abstract.getNumberRecords
 
             nrecs = obj.alias_with_.getNumberRecords();
         end
 
-        %> Returns the number of values stored for this symbol.
+        %> Returns the number of values stored for this symbol.Abstract.
         %>
-        %> @see \ref gams::transfer::Symbol::getNumberValues "Symbol.getNumberValues"
+        %> @see \ref gams::transfer::symbol::Abstract::getNumberValues "symbol.Abstract.getNumberValues"
         function nvals = getNumberValues(obj, varargin)
-            % Returns the number of values stored for this symbol.
+            % Returns the number of values stored for this symbol.Abstract.
             %
-            % See also: gams.transfer.Symbol.getNumberValues
+            % See also: gams.transfer.symbol.Abstract.getNumberValues
 
             nvals = obj.alias_with_.getNumberValues(varargin{:});
         end
 
         %> Returns the UELs used in this symbol
         %>
-        %> @see \ref gams::transfer::Symbol::getUELs "Symbol.getUELs"
+        %> @see \ref gams::transfer::symbol::Abstract::getUELs "symbol.Abstract.getUELs"
         function uels = getUELs(obj, varargin)
             % Returns the UELs used in this symbol
             %
-            % See also: gams.transfer.Symbol.getUELs
+            % See also: gams.transfer.symbol.Abstract.getUELs
 
             uels = obj.alias_with_.getUELs(varargin{:});
         end
 
         %> Sets the UELs with updating UEL codes in records
         %>
-        %> @see \ref gams::transfer::Symbol::setUELs "Symbol.setUELs"
+        %> @see \ref gams::transfer::symbol::Abstract::setUELs "symbol.Abstract.setUELs"
         function setUELs(obj, varargin)
             % Sets the UELs with updating UEL codes in records
             %
-            % See also: gams.transfer.Symbol.setUELs
+            % See also: gams.transfer.symbol.Abstract.setUELs
 
             obj.alias_with_.setUELs(varargin{:});
         end
 
         %> Adds UELs to the symbol
         %>
-        %> @see \ref gams::transfer::Symbol::addUELs "Symbol.addUELs"
+        %> @see \ref gams::transfer::symbol::Abstract::addUELs "symbol.Abstract.addUELs"
         function addUELs(obj, varargin)
             % Adds UELs to the symbol
             %
-            % See also: gams.transfer.Symbol.addUELs
+            % See also: gams.transfer.symbol.Abstract.addUELs
 
             obj.alias_with_.addUELs(varargin{:});
         end
 
         %> Removes UELs from the symbol
         %>
-        %> @see \ref gams::transfer::Symbol::removeUELs "Symbol.removeUELs"
+        %> @see \ref gams::transfer::symbol::Abstract::removeUELs "symbol.Abstract.removeUELs"
         function removeUELs(obj, varargin)
             % Removes UELs from the symbol
             %
-            % See also: gams.transfer.Symbol.removeUELs
+            % See also: gams.transfer.symbol.Abstract.removeUELs
 
             obj.alias_with_.removeUELs(varargin{:});
         end
 
         %> Renames UELs in the symbol
         %>
-        %> @see \ref gams::transfer::Symbol::renameUELs "Symbol.renameUELs"
+        %> @see \ref gams::transfer::symbol::Abstract::renameUELs "symbol.Abstract.renameUELs"
         function renameUELs(obj, varargin)
             % Renames UELs in the symbol
             %
-            % See also: gams.transfer.Symbol.renameUELs
+            % See also: gams.transfer.symbol.Abstract.renameUELs
 
             obj.alias_with_.renameUELs(varargin{:});
         end
 
         %> Converts UELs to lower case
         %>
-        %> @see \ref gams::transfer::Symbol::lowerUELs "Symbol.lowerUELs"
+        %> @see \ref gams::transfer::symbol::Abstract::lowerUELs "symbol.Abstract.lowerUELs"
         function lowerUELs(obj, varargin)
             % Converts UELs to lower case
             %
-            % See also: gams.transfer.Symbol.lowerUELs
+            % See also: gams.transfer.symbol.Abstract.lowerUELs
 
             obj.alias_with_.lowerUELs(varargin{:});
         end
 
         %> Converts UELs to lower case
         %>
-        %> @see \ref gams::transfer::Symbol::upperUELs "Symbol.upperUELs"
+        %> @see \ref gams::transfer::symbol::Abstract::upperUELs "symbol.Abstract.upperUELs"
         function upperUELs(obj, varargin)
             % Converts UELs to upper case
             %
-            % See also: gams.transfer.Symbol.upperUELs
+            % See also: gams.transfer.symbol.Abstract.upperUELs
 
             obj.alias_with_.upperUELs(varargin{:});
         end

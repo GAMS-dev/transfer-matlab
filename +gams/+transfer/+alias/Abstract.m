@@ -159,13 +159,13 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
         %> Flag to indicate modification
         %>
-        %> If the symbol has been modified since last reset of flag (`false`),
-        %> this flag will be `true`.
+        %> If the symbol has been modified since last reset of flag (`false`), this flag will be
+        %> `true`.
 
         % Flag to indicate modification
         %
-        % If the symbol has been modified since last reset of flag (`false`),
-        % this flag will be `true`.
+        % If the symbol has been modified since last reset of flag (`false`), this flag will be
+        % `true`.
         modified
 
     end

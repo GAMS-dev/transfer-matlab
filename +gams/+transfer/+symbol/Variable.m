@@ -40,12 +40,11 @@
 %
 % Optional Arguments:
 % 3. type (string, int or gams.transfer.VariableType):
-%    Specifies the variable type, either as string, as integer given by any of the
-%    constants in gams.transfer.VariableType or
-%    gams.transfer.VariableType. Default is "free".
+%    Specifies the variable type, either as string, as integer given by any of the constants in
+%    gams.transfer.VariableType or gams.transfer.VariableType. Default is "free".
 % 4. domain (cellstr or Set):
-%    List of domains given either as string or as reference to a
-%    gams.transfer.symbol.Set object. Default is {} (for scalar).
+%    List of domains given either as string or as reference to a gams.transfer.symbol.Set object.
+%    Default is {} (for scalar).
 %
 % Parameter Arguments:
 % - records:
@@ -53,9 +52,9 @@
 % - description (string):
 %   Description of symbol. Default is "".
 % - domain_forwarding (logical):
-%   If true, domain entries in records will recursively be added to the domains in case
-%   they are not present in the domains already. With a logical vector domain forwarding
-%   can be enabled/disabled independently for each domain. Default: false.
+%   If true, domain entries in records will recursively be added to the domains in case they are not
+%   present in the domains already. With a logical vector domain forwarding can be enabled/disabled
+%   independently for each domain. Default: false.
 %
 % Example:
 % c = Container();
@@ -63,8 +62,7 @@
 % v2 = symbol.Variable.construct(c, 'v2', 'binary', {'*', '*'});
 % v3 = symbol.Variable.construct(c, 'v3', VariableType.BINARY, '*', 'description', 'var v3');
 %
-% See also: gams.transfer.Variable, gams.transfer.Container.addVariable,
-% gams.transfer.VariableType
+% See also: gams.transfer.Variable, gams.transfer.Container.addVariable, gams.transfer.VariableType
 
 %> @brief GAMS Variable
 %>
@@ -78,9 +76,8 @@
 %> v3 = symbol.Variable.construct(c, 'v3', VariableType.BINARY, '*', 'description', 'var v3');
 %> ```
 %>
-%> @see \ref gams::transfer::Variable "Variable", \ref
-%> gams::transfer::Container::addVariable "Container.addVariable", \ref
-%> gams::transfer::VariableType "VariableType"
+%> @see \ref gams::transfer::Variable "Variable", \ref gams::transfer::Container::addVariable
+%> "Container.addVariable", \ref gams::transfer::VariableType "VariableType"
 classdef Variable < gams.transfer.symbol.Abstract
 
     %#ok<*INUSD,*STOUT>

@@ -42,7 +42,7 @@
 % c = Container();
 % u = alias.Universe.construct(c, 'u');
 %
-% See also: gams.transfer.symbol.Set, gams.transfer.Container, gams.transfer.Alias
+% See also: gams.transfer.UniverseAlias, gams.transfer.Container.addUniverseAlias
 
 %> @brief GAMS Alias to Universe
 %>
@@ -54,8 +54,8 @@
 %> u = alias.Universe.construct(c, 'u');
 %> ```
 %>
-%> @see \ref gams::transfer::symbol::Set "Set", \ref gams::transfer::Container "Container", \ref
-%> gams::transfer::alias::Set "Alias"
+%> @see \ref gams::transfer::UniverseAlias "UniverseAlias", \ref
+%> gams::transfer::Container::addUniverseAlias "Container.addUniverseAlias"
 %>
 classdef Universe < gams.transfer.alias.Abstract
 
@@ -235,7 +235,7 @@ classdef Universe < gams.transfer.alias.Abstract
         %> 2. name (`string`):
         %>    name of alias
         %> 3. alias_with (`Set` or `Alias`):
-        %>    GAMS \ref gams::transfer::Set "Set" to be linked to
+        %>    GAMS \ref gams::transfer::symbol::Set "Set" to be linked to
         %>
         %> **Example:**
         %> ```
@@ -243,7 +243,8 @@ classdef Universe < gams.transfer.alias.Abstract
         %> u = alias.Universe.construct(c, 'u');
         %> ```
         %>
-        %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Container "Container"
+        %> @see \ref gams::transfer::UniverseAlias "UniverseAlias", \ref
+        %> gams::transfer::Container::addUniverseAlias "Container.addUniverseAlias"
         function obj = construct(container, name)
             % Constructs a GAMS Alias, see class help
 

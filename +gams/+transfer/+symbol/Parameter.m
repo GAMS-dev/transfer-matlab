@@ -40,8 +40,8 @@
 %
 % Optional Arguments:
 % 3. domain (cellstr or Set):
-%    List of domains given either as string or as reference to a
-%    gams.transfer.symbol.Set object. Default is {} (for scalar).
+%    List of domains given either as string or as reference to a gams.transfer.symbol.Set object.
+%    Default is {} (for scalar).
 %
 % Parameter Arguments:
 % - records:
@@ -49,9 +49,9 @@
 % - description (string):
 %   Description of symbol. Default is "".
 % - domain_forwarding (logical):
-%   If true, domain entries in records will recursively be added to the domains in case
-%   they are not present in the domains already. With a logical vector domain
-%   forwarding can be enabled/disabled independently for each domain. Default: false.
+%   If true, domain entries in records will recursively be added to the domains in case they are not
+%   present in the domains already. With a logical vector domain forwarding can be enabled/disabled
+%   independently for each domain. Default: false.
 %
 % Example:
 % c = Container();
@@ -73,8 +73,8 @@
 %> p3 = symbol.Parameter.construct(c, 'p3', '*', 'description', 'par p3');
 %> ```
 %>
-%> @see \ref gams::transfer::Parameter "Parameter", \ref
-%> gams::transfer::Container::addParameter "Container.addParameter"
+%> @see \ref gams::transfer::Parameter "Parameter", \ref gams::transfer::Container::addParameter
+%> "Container.addParameter"
 classdef Parameter < gams.transfer.symbol.Abstract
 
     %#ok<*INUSD,*STOUT>

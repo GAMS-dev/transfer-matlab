@@ -45,7 +45,7 @@
 % s = Set(c, 's');
 % a = Alias(c, 'a', s);
 %
-% See also: gams.transfer.alias.Set, gams.transfer.Container.addAlias, gams.transfer.symbol.Set
+% See also: gams.transfer.alias.Set, gams.transfer.Container.addAlias, gams.transfer.Set
 
 %> @brief GAMS Alias Creator
 %>
@@ -67,7 +67,7 @@
 %> ```
 %>
 %> @see \ref gams::transfer::alias::Set "alias.Set", \ref gams::transfer::Container::addAlias
-%> "Container.addAlias", \ref gams::transfer::symbol::Set "symbol.Set"
+%> "Container.addAlias", \ref gams::transfer::Set "Set"
 function alias = Alias(container, varargin)
     alias = container.addAlias(varargin{:});
 end

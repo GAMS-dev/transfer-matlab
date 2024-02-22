@@ -40,8 +40,8 @@
 %
 % Optional Arguments:
 % 3. domain (cellstr or Set):
-%    List of domains given either as string or as reference to a
-%    gams.transfer.symbol.Set object. Default is {"*"} (for 1-dim with universe domain).
+%    List of domains given either as string or as reference to a gams.transfer.symbol.Set object.
+%    Default is {"*"} (for 1-dim with universe domain).
 %
 % Parameter Arguments:
 % - records:
@@ -75,8 +75,7 @@
 %> s3 = symbol.Set.construct(c, 's3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
 %> ```
 %>
-%> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Container::addSet
-%> "Container.addSet"
+%> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Container::addSet "Container.addSet"
 classdef Set < gams.transfer.symbol.Abstract
 
     %#ok<*INUSD,*STOUT>
