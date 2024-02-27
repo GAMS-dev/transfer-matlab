@@ -93,9 +93,6 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
 
         %> Shape of symbol (length == dimension)
-        %>
-        %> See \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN and \ref
-        %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED for more information.
 
         % size Shape of symbol (length == dimension)
         size

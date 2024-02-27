@@ -4,9 +4,7 @@
 
 A GAMS Transfer Matlab container stores a collection of \ref GAMS_TRANSFER_MATLAB_SYMBOLS "symbols"
 and is therefore comparable to a GDX file. It is indeed a fundamental feature of containers to read
-from or write to GDX files. GDX files can be operated in two different modes, `default` and
-`indexed`, which are also supported by GAMS Transfer Matlab containers, see \ref
-GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED for more info.
+from or write to GDX files.
 
 \section GAMS_TRANSFER_MATLAB_CONTAINER_CREATE Creating a Container
 
@@ -74,19 +72,26 @@ c.read(source, 'format', 'dense_matrix');
 
 - \par Reading a Subset of Symbol Values:
 \parblock
-Finally note that GDX files store multiple values per symbol. \ref gams::transfer::symbol::Set
-"Sets" have `element_text`, \ref gams::transfer::symbol::Parameter "Parameters" have `value` and
-\ref gams::transfer::symbol::Equation "Equations" and \ref gams::transfer::symbol::Variable
-"Variables" have `level`, `marginal`, `lower`, `upper`, `scale`, see \ref
-GAMS_TRANSFER_MATLAB_RECORDS for more information. On default, all values are read, but you can
-select a subset by
+GDX files store multiple values per symbol. \ref gams::transfer::symbol::Set "Sets" have
+`element_text`, \ref gams::transfer::symbol::Parameter "Parameters" have `value` and \ref
+gams::transfer::symbol::Equation "Equations" and \ref gams::transfer::symbol::Variable "Variables"
+have `level`, `marginal`, `lower`, `upper`, `scale`, see \ref GAMS_TRANSFER_MATLAB_RECORDS for more
+information. On default, all values are read, but you can select a subset by
 ```
 c.read(source, 'values', {'level', 'marginal'});
 ```
-Note that here, `level` also enables `element_text` and `value`. Moreover, `marginal` has no
-influence on \ref gams::transfer::symbol::Set "Sets" and \ref gams::transfer::symbol::Parameter
-"Parameters". It is even possible to specify no values in order to read none GDX records. This would
-then only read the symbol meta data like name or description.
+Note that here, `level` also enables `element_text` and `value`. Moreover, `marginal`, `lower`,
+`upper`, `scale` have no influence on \ref gams::transfer::symbol::Set "Sets" and \ref
+gams::transfer::symbol::Parameter "Parameters". It is even possible to specify no values in order to
+read none GDX records. This would then only read the symbol meta data like name or description.
+\endparblock
+
+- \par Reading an Indexed GDX File:
+\parblock
+Besides standard GDX files there exist so called Indexed GDX files. Read such a file by
+```
+c.read(source, 'indexed', true);
+```
 \endparblock
 
 - \par ...and of course it is possible to mix and match all the above.
@@ -126,6 +131,23 @@ c.write('path/to/file.gdx', 'compress', true);
 ```
 \endparblock
 
+- \par Writing an Indexed GDX File:
+\parblock
+Set the parameter `indexed` to `true` to write an Indexed GDX file:
+```
+c.write('path/to/file.gdx', 'indexed', true);
+```
+This will only write symbols to the file that support indexed, see also \ref
+gams::transfer::symbol::Abstract::indexed "symbol.Abstract.indexed". A symbol is indexed if (1) it
+is a \ref gams::transfer::symbol::Parameter "Parameter", (2) its \ref
+GAMS_TRANSFER_MATLAB_RECORDS_UELS "UELs" are ranges from 1 to \ref
+gams::transfer::symbol::Abstract::size "size(i)" and (3) its \ref
+gams::transfer::symbol::Abstract::records "records" are indexed by integers and not `categorical` in
+table-like formats. It is also possible to write indexed symbols to a standard GDX file, but the
+meaning may be different.
+\endparblock
+
+
 \note It is not possible to write the container if any of the symbols to write is not valid (see
 also \ref GAMS_TRANSFER_MATLAB_RECORDS_VALIDATE). Further note that a symbol can be considered valid
 but still has domain violations, which would lead to an error when writing, see also \ref
@@ -154,7 +176,7 @@ only on request and is not very efficient.
 
 GAMS Transfer follows the GDX convention for naming symbols. That means, symbol names can consist of
 alpha-numeric characters and `_` (but not at the beginning). Name length must be shorter than 64.
-Symbol names are considered case insensitive, i.e. adding a symbol named `X` after adding `x` is not
+Symbol names are considered case insensitive, i.e. adding a symbol named `X1` after adding `x1` is not
 allowed because the names are considered equal. Methods that accept symbol names as input, accept
 symbol names in any case.
 
@@ -182,18 +204,18 @@ fieldnames equal to the symbol names. For \ref GAMS_TRANSFER_MATLAB_GETSTARTED_E
 >> m.data
 ans =
   struct with fields:
-         i: [1×1 gams.transfer.Set]
-         j: [1×1 gams.transfer.Set]
-         a: [1×1 gams.transfer.Parameter]
-         b: [1×1 gams.transfer.Parameter]
-         d: [1×1 gams.transfer.Parameter]
-         f: [1×1 gams.transfer.Parameter]
-         c: [1×1 gams.transfer.Parameter]
-         x: [1×1 gams.transfer.Variable]
-         z: [1×1 gams.transfer.Variable]
-      cost: [1×1 gams.transfer.Equation]
-    supply: [1×1 gams.transfer.Equation]
-    demand: [1×1 gams.transfer.Equation]
+         i: [1×1 gams.transfer.symbol.Set]
+         j: [1×1 gams.transfer.symbol.Set]
+         a: [1×1 gams.transfer.symbol.Parameter]
+         b: [1×1 gams.transfer.symbol.Parameter]
+         d: [1×1 gams.transfer.symbol.Parameter]
+         f: [1×1 gams.transfer.symbol.Parameter]
+         c: [1×1 gams.transfer.symbol.Parameter]
+         x: [1×1 gams.transfer.symbol.Variable]
+         z: [1×1 gams.transfer.symbol.Variable]
+      cost: [1×1 gams.transfer.symbol.Equation]
+    supply: [1×1 gams.transfer.symbol.Equation]
+    demand: [1×1 gams.transfer.symbol.Equation]
 ```
 
 In addition to accessing \ref gams::transfer::Container::data "Container.data" directly, symbol
@@ -204,7 +226,7 @@ gams::transfer::Container::getEquations "Container.getEquations", \ref
 gams::transfer::Container::getAliases "Container.getAliases" or via \ref
 gams::transfer::Container::getSymbols "Container.getSymbols" given a list of symbol names.
 ```
->> vars = transpose(m.getSymbols({'x', 'z'}))
+>> vars = m.getSymbols({'x', 'z'})'
 vars =
   1×2 cell array
     {1×1 gams.transfer.Variable}    {1×1 gams.transfer.Variable}
@@ -246,18 +268,8 @@ m.removeSymbols('x');
 m.removeSymbols({'a', 'b'});
 ```
 
-\attention If a \ref gams::transfer::symbol::Set "Set" is removed from the \ref
-gams::transfer::Container "Container", a handle to that \ref gams::transfer::symbol::Set "Set" can
-still exist as a domain of another symbol or be linked to by an alias. This will make these other
-symbols invalid, see \ref gams::transfer::symbol::Abstract::isValid "isValid".
-
-\section GAMS_TRANSFER_MATLAB_CONTAINER_REORDER Reordering Symbols
-
-The GDX file requires the symbols to be sorted such that, for example, a \ref
-gams::transfer::symbol::Set "Set" used as domain of another symbol appears before that symbol. The
-\ref gams::transfer::Container "Container" will try to establish a valid ordering when writing the
-data to GDX. However, this operation can also be invoked manually by calling the method \ref
-gams::transfer::Container::reorderSymbols "Container.reorderSymbols".
+\note Removing a \ref gams::transfer::symbol::Set "Set" that is used in a domain of another symbol will
+relax those symbol domains.
 
 \section GAMS_TRANSFER_MATLAB_CONTAINER_OVERVIEW Symbol Overview
 
@@ -321,38 +333,5 @@ ans =
        0              0           150          300       [seattle,chicago]
        0         153.68        153.68       153.68       []
 ```
-
-\section GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED Indexed GDX
-
-GDX files can be operated in two different modes, `default` and `indexed` (also called IDX), which
-are also supported by GAMS Transfer Matlab containers:
-- `default`: Symbol \ref gams::transfer::symbol::Abstract::dimension "dimension" and shape
-  are defined by \ref gams::transfer::symbol::Abstract::domain "domain". Symbol \ref
-  gams::transfer::symbol::Abstract::records "records" are identified by \ref
-  GAMS_TRANSFER_MATLAB_RECORDS_UELS "UELs".
-- `indexed`: Symbol \ref gams::transfer::symbol::Abstract::dimension "dimension" and shape
-  are defined by \ref gams::transfer::symbol::Abstract::size "size". \ref
-  GAMS_TRANSFER_MATLAB_RECORDS_UELS "UELs" do not exist. Symbol \ref
-  gams::transfer::symbol::Abstract::records "records" are identified by numerical indices.
-
-The mode -- `default` or `indexed` -- can be specified when creating a \ref
-gams::transfer::Container "Container" and cannot be changed thereafter:
-```
-c = Container('indexed', true);
-```
-
-In indexed mode, pass the shape of the symbol instead of the domain to the symbol constructor. For
-example, to create a `2x3` matrix parameter, do:
-```
-d = Parameter(m, 'd', [2, 3], 'description', 'distance in thousands of miles');
-```
-
-\note The only supported symbols in indexed mode are \ref gams::transfer::symbol::Parameter
-"Parameters".
-\note In indexed mode it is not possible to set the property \ref
-gams::transfer::symbol::Abstract::domain "domain" or using the UEL related methods (e.g. \ref
-gams::transfer::symbol::Abstract::getUELs "getUELs" or \ref
-gams::transfer::symbol::Abstract::setUELs "setUELs"), while in default mode the property \ref
-gams::transfer::symbol::Abstract::size "size" cannot be set and is inferred from by the domain.
 
 */
