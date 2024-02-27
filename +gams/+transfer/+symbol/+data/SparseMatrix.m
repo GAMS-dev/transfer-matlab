@@ -74,7 +74,7 @@ classdef (Hidden) SparseMatrix < gams.transfer.symbol.data.Matrix
     end
 
     methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
-        ?gams.transfer.unique_labels.DomainSet})
+        ?gams.transfer.unique_labels.Abstract})
 
         function status = isValid_(obj, axes, values)
             for i = 1:numel(values)
@@ -106,7 +106,7 @@ classdef (Hidden) SparseMatrix < gams.transfer.symbol.data.Matrix
             else
                 error('Invalid data: %s', class(data));
             end
-            data.last_update_ = now();
+            data.time_.reset();
         end
 
     end

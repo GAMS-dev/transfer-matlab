@@ -45,10 +45,6 @@ classdef (Hidden) CategoricalColumn < gams.transfer.unique_labels.Abstract
         domain
     end
 
-    properties (Hidden, Dependent, SetAccess = private)
-        last_update
-    end
-
     methods
 
         function data = get.data(obj)
@@ -67,10 +63,6 @@ classdef (Hidden) CategoricalColumn < gams.transfer.unique_labels.Abstract
         function set.domain(obj, domain)
             gams.transfer.utils.Validator('domain', 1, domain).type('gams.transfer.symbol.domain.Abstract');
             obj.domain_ = domain;
-        end
-
-        function last_update = get.last_update(obj)
-            last_update = max(obj.data_.last_update, obj.domain_.last_update);
         end
 
     end
@@ -123,6 +115,21 @@ classdef (Hidden) CategoricalColumn < gams.transfer.unique_labels.Abstract
     methods (Hidden, Access = {?gams.transfer.unique_labels.Abstract, ...
         ?gams.transfer.symbol.Abstract, ?gams.transfer.symbol.data.Abstract, ...
         ?gams.transfer.symbol.domain.Abstract})
+
+        function [flag, time] = updatedAfter_(obj, time)
+            flag = true;
+            [flag_, time_] = obj.data_.updatedAfter_(time);
+            if flag_
+                time = time_;
+                return
+            end
+            [flag_, time_] = obj.domain_.updatedAfter_(time);
+            if flag_
+                time = time_;
+                return
+            end
+            flag = false;
+        end
 
         function add_(obj, labels)
             if ~isordinal(obj.data_.records.(obj.domain_.label))

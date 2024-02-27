@@ -1,4 +1,4 @@
-% Abstract Symbol Value (internal)
+% Checks if datetime is supported (internal)
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,60 +28,25 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Abstract Symbol Value (internal)
+% Checks if datetime is supported (internal)
 %
 % Attention: Internal classes or functions have limited documentation and its properties, methods
 % and method or function signatures can change without notice.
 %
-classdef (Abstract, Hidden) Abstract
-
-    %#ok<*INUSD,*STOUT>
-
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Abstract, ?gams.transfer.symbol.Abstract})
-        label_
-        time_
+function flag = supports_datetime()
+    flag = true;
+    try
+        datetime()
+    catch
+        flag = false;
     end
 
-    properties (Dependent)
-        label
+    env = getenv('GAMS_TRANSFER_MATLAB_SUPPORTS_DATETIME');
+    if ~isempty(env)
+        if strcmpi(env, 'true')
+            flag = true;
+        elseif strcmpi(env, 'false')
+            flag = false;
+        end
     end
-
-    properties (Abstract, Dependent, SetAccess = private)
-        default
-    end
-
-    methods
-
-        function label = get.label(obj)
-            label = obj.label_;
-        end
-
-        function obj = set.label(obj, label)
-            obj.label_ = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname();
-            obj.time_.reset();
-        end
-
-    end
-
-    methods
-
-        function obj = Abstract()
-            obj.time_ = gams.transfer.utils.Time();
-        end
-
-        function eq = equals(obj, value)
-            eq = isequal(class(obj), class(value)) && ...
-                isequal(obj.label, value.label) && ...
-                isequaln(obj.default, value.default);
-        end
-
-        function [flag, time] = updatedAfter_(obj, time)
-            flag = time <= obj.time_;
-            if flag
-                time = obj.time_;
-            end
-        end
-
-    end
-
 end

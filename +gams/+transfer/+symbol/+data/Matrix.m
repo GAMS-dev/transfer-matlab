@@ -50,7 +50,7 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
     end
 
     methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
-        ?gams.transfer.unique_labels.DomainSet})
+        ?gams.transfer.unique_labels.Abstract})
 
         function flag = isLabel_(obj, label)
             flag = isfield(obj.records_, label);
@@ -176,7 +176,7 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
                 data.records.(values{i}.label) = full(obj.records_.(values{i}.label)(indices_perm));
             end
 
-            data.last_update_ = now();
+            data.time_.reset();
         end
 
     end

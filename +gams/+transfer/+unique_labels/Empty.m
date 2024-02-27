@@ -35,18 +35,6 @@
 %
 classdef (Hidden) Empty < gams.transfer.unique_labels.Abstract
 
-    properties (Hidden, Dependent, SetAccess = private)
-        last_update
-    end
-
-    methods
-
-        function last_update = get.last_update(obj)
-            last_update = 0;
-        end
-
-    end
-
     methods (Static)
 
         function obj = construct()
@@ -77,6 +65,13 @@ classdef (Hidden) Empty < gams.transfer.unique_labels.Abstract
     methods (Hidden, Access = {?gams.transfer.unique_labels.Abstract, ...
         ?gams.transfer.symbol.Abstract, ?gams.transfer.symbol.data.Abstract, ...
         ?gams.transfer.symbol.domain.Abstract})
+
+        function [flag, time] = updatedAfter_(obj, time)
+            flag = time <= obj.time_;
+            if flag
+                time = obj.time_;
+            end
+        end
 
         function labels = getAt_(obj, indices)
             labels = cell(size(indices));

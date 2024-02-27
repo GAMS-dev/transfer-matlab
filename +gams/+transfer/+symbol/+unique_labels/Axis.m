@@ -33,7 +33,7 @@
 % Attention: Internal classes or functions have limited documentation and its properties, methods
 % and method or function signatures can change without notice.
 %
-classdef (Hidden) Axis < gams.transfer.utils.Handle
+classdef (Hidden) Axis
 
     %#ok<*INUSD,*STOUT>
 
@@ -53,7 +53,7 @@ classdef (Hidden) Axis < gams.transfer.utils.Handle
             domain = obj.domain_;
         end
 
-        function set.domain(obj, domain)
+        function obj = set.domain(obj, domain)
             gams.transfer.utils.Validator('domain', 1, domain).type('gams.transfer.symbol.domain.Abstract');
             obj.domain_ = domain;
         end
@@ -62,7 +62,7 @@ classdef (Hidden) Axis < gams.transfer.utils.Handle
             unique_labels = obj.unique_labels_;
         end
 
-        function set.unique_labels(obj, unique_labels)
+        function obj = set.unique_labels(obj, unique_labels)
             gams.transfer.utils.Validator('unique_labels', 1, unique_labels) ...
                 .type('gams.transfer.unique_labels.Abstract');
             obj.unique_labels_ = unique_labels;

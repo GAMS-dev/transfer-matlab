@@ -1,4 +1,4 @@
-% Symbol Axes (internal)
+% Cache (internal)
 %
 % ------------------------------------------------------------------------------
 %
@@ -28,87 +28,55 @@
 %
 % ------------------------------------------------------------------------------
 %
-% Symbol Axes (internal)
+% Cache (internal)
 %
 % Attention: Internal classes or functions have limited documentation and its properties, methods
 % and method or function signatures can change without notice.
 %
-classdef (Hidden) Axes
-
-    %#ok<*INUSD,*STOUT>
+classdef (Hidden) Cache < handle
 
     properties (Hidden, SetAccess = protected)
-        axes_ = {}
+        value_
+        time_
     end
 
     properties (Dependent)
-        axes
+        value
+    end
+
+    properties (Dependent, SetAccess = private)
+        time
     end
 
     methods
 
-        function axes = get.axes(obj)
-            axes = obj.axes_;
+        function value = get.value(obj)
+            value = obj.value_;
         end
 
-        function obj = set.axes(obj, axes)
-            gams.transfer.utils.Validator('axes', 1, axes).cellof('gams.transfer.symbol.unique_labels.Axis');
-            obj.axes_ = axes;
+        function set.value(obj, value)
+            obj.value_ = value;
+            obj.time_.reset();
         end
 
-    end
-
-    methods (Hidden, Access = {?gams.transfer.symbol.unique_labels.Axis, ?gams.transfer.symbol.Abstract})
-
-        function obj = Axes(axes)
-            obj.axes_ = axes;
-        end
-
-    end
-
-    methods (Static)
-
-        function obj = construct(axes)
-            gams.transfer.utils.Validator('axes', 1, axes).cellof('gams.transfer.symbol.unique_labels.Axis');
-            obj = gams.transfer.symbol.unique_labels.Axes(axes);
+        function time = get.time(obj)
+            time = obj.time_;
         end
 
     end
 
     methods
 
-        function dimension = dimension(obj)
-            dimension = numel(obj.axes_);
+        function obj = Cache()
+            obj.time_= gams.transfer.utils.Time();
         end
 
-        function size = size(obj)
-            dim = obj.dimension;
-            size = zeros(1, dim);
-            for i = 1:dim
-                size(i) = obj.axes_{i}.size();
-            end
+        function flag = holdsValue(obj)
+            flag = ~isempty(obj.value_);
         end
 
-        function size = matrixSize(obj)
-            dim = obj.dimension;
-            size = ones(1, max(2, dim));
-            size(1:dim) = obj.size();
-        end
-
-        function axis = axis(obj, dimension)
-            axis = obj.axes_{dimension};
-        end
-
-        function [axis, idx] = find(obj, domain)
-            axis = [];
-            idx = 0;
-            for i = 1:numel(obj.axes_)
-                if obj.axes_{i}.domain == domain
-                    axis = obj.axes_{i};
-                    idx = i;
-                    return
-                end
-            end
+        function reset(obj)
+            obj.value_ = [];
         end
 
     end

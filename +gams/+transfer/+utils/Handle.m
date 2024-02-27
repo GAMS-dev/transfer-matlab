@@ -35,8 +35,16 @@
 %
 classdef (Abstract, Hidden) Handle < handle
 
-    properties (Hidden, Access = private)
-        id_ = int32(randi(intmax('int32')))
+    properties (Hidden, GetAccess = protected, SetAccess = private)
+        id_
+    end
+
+    methods (Access = protected)
+
+        function obj = Handle()
+            obj.id_ = int32(randi(intmax('int32')));
+        end
+
     end
 
     methods

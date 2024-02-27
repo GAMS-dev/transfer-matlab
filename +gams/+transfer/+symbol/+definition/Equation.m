@@ -116,6 +116,9 @@ classdef (Hidden) Equation < gams.transfer.symbol.definition.Abstract
                 gams.transfer.symbol.value.Numeric('lower', gdx_default_values(3)), ...
                 gams.transfer.symbol.value.Numeric('upper', gdx_default_values(4)), ...
                 gams.transfer.symbol.value.Numeric('scale', gdx_default_values(5))};
+            for i = 1:numel(obj.values_)
+                obj.values_{i}.time_.set(obj.time_);
+            end
         end
 
     end

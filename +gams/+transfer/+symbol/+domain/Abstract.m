@@ -41,17 +41,13 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         label_
         index_type_ = gams.transfer.symbol.domain.IndexType();
         forwarding_ = false
-        last_update_ = now();
+        time_
     end
 
     properties (Dependent)
         label
         index_type
         forwarding
-    end
-
-    properties (Hidden, Abstract, SetAccess = private)
-        last_update
     end
 
     properties (Abstract)
@@ -66,7 +62,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function set.label(obj, label)
             obj.label_ = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname().value;
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function index_type = get.index_type(obj)
@@ -76,7 +72,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         function set.index_type(obj, index_type)
             gams.transfer.utils.Validator('index_type', 1, index_type).type('gams.transfer.symbol.domain.IndexType');
             obj.index_type_ = index_type;
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function forwarding = get.forwarding(obj)
@@ -85,7 +81,15 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function set.forwarding(obj, forwarding)
             obj.forwarding_ = gams.transfer.utils.Validator('forwarding', 1, forwarding).type('logical').scalar().value;
-            obj.last_update_ = now();
+            obj.time_.reset();
+        end
+
+    end
+
+    methods (Hidden, Access = protected)
+
+        function obj = Abstract()
+            obj.time_ = gams.transfer.utils.Time();
         end
 
     end
@@ -101,13 +105,13 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             gams.transfer.utils.Validator('domain', 1, domain).type(class(obj));
             obj.label_ = domain.label;
             obj.forwarding_ = domain.forwarding;
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function eq = equals(obj, domain)
             eq = isequal(class(obj), class(domain)) && ...
-                isequal(obj.label_, domain.label) && ...
-                isequal(obj.forwarding_, domain.forwarding);
+                isequal(obj.label_, domain.label_) && ...
+                isequal(obj.forwarding_, domain.forwarding_);
         end
 
         function status = isValid(obj)
@@ -120,7 +124,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             if numel(obj.label_) <= numel(add) || ~strcmp(obj.label_(end-numel(add)+1:end), add)
                 obj.label_ = strcat(obj.label_, add);
             end
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function flag = hasUniqueLabels(obj) %#ok<MANU>
@@ -133,6 +137,13 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function addLabels(obj, labels, forwarding)
             error('Domain ''%s'' does not define any unique labels and thus cannot add any.', obj.name);
+        end
+
+        function [flag, time] = updatedAfter_(obj, time)
+            flag = time <= obj.time_;
+            if flag
+                time = obj.time_;
+            end
         end
 
     end

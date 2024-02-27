@@ -136,10 +136,6 @@ classdef Universe < gams.transfer.alias.Abstract
 
     end
 
-    properties (Dependent, Hidden, SetAccess = private)
-        last_update
-    end
-
     properties (Dependent, SetAccess = private)
 
         %> Records format of aliased Set records
@@ -198,10 +194,6 @@ classdef Universe < gams.transfer.alias.Abstract
             if gams.transfer.Constants.SUPPORTS_TABLE
                 records = struct2table(records);
             end
-        end
-
-        function last_update = get.last_update(obj)
-            last_update = obj.last_update_;
         end
 
         function format_ = get.format(obj) %#ok<MANU>
@@ -321,13 +313,10 @@ classdef Universe < gams.transfer.alias.Abstract
 
     end
 
-    methods (Hidden, Access = {?gams.transfer.alias.Abstract, ?gams.transfer.Container})
+    methods (Hidden, Access = {?gams.transfer.alias.Abstract, ?gams.transfer.Container, ...
+        ?gams.transfer.symbol.domain.Abstract})
 
         function copyFrom_(obj, symbol)
-        end
-
-        function flag = modifiedAfter_(obj, time)
-            flag = time <= obj.last_update_;
         end
 
     end

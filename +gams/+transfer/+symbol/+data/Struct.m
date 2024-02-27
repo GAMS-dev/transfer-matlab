@@ -82,7 +82,7 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
     end
 
     methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
-        ?gams.transfer.unique_labels.DomainSet})
+        ?gams.transfer.unique_labels.Abstract})
 
         function flag = isLabel_(obj, label)
             flag = isfield(obj.records_, label);
@@ -135,7 +135,7 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
             else
                 error('Invalid data: %s', class(data));
             end
-            data.last_update_ = now();
+            data.time_.reset();
         end
 
         function removeRows_(obj, indices)
@@ -145,7 +145,7 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
                 disable(indices) = true;
                 obj.records_.(labels{i}) = obj.records_.(labels{i})(~disable);
             end
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
     end

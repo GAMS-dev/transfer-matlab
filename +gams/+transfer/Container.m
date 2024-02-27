@@ -75,8 +75,8 @@ classdef Container < gams.transfer.utils.Handle
     properties (Hidden, SetAccess = protected)
         gams_dir_ = ''
         data_
-        last_update_ = now()
-        last_update_reset_ = []
+        time_
+        time_reset_
     end
 
     properties (Dependent, SetAccess = protected)
@@ -90,10 +90,6 @@ classdef Container < gams.transfer.utils.Handle
 
         % data GAMS (GDX) symbols
         data
-    end
-
-    properties (Hidden, SetAccess = private)
-        last_update
     end
 
     properties (Dependent)
@@ -121,31 +117,23 @@ classdef Container < gams.transfer.utils.Handle
             data = obj.data_.entries_;
         end
 
-        function last_update = get.last_update(obj)
-            last_update = obj.last_update_;
-            symbols = obj.data_.entries();
-            for i = 1:numel(symbols)
-                last_update = max(last_update, symbols{i}.last_update);
-            end
-        end
-
         function modified = get.modified(obj)
-            modified = isempty(obj.last_update_reset_) || obj.modifiedAfter_(obj.last_update_reset_);
+            modified = isempty(obj.time_reset_) || obj.updatedAfter_(obj.time_reset_);
         end
 
         function set.modified(obj, modified)
             gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
             if modified
-                obj.last_update_reset_ = [];
+                obj.time_reset_ = [];
             else
-                obj.last_update_reset_ = now();
-                while (obj.modifiedAfter_(obj.last_update_reset_))
-                    obj.last_update_reset_ = now();
+                obj.time_reset_ = gams.transfer.utils.Time();
+                while (obj.updatedAfter_(obj.time_reset_))
+                    obj.time_reset_.reset();
                 end
             end
             symbols = obj.data_.entries();
             for i = 1:numel(symbols)
-                symbols{i}.last_update_reset_ = obj.last_update_reset_;
+                symbols{i}.modified = modified;
             end
         end
 
@@ -177,6 +165,7 @@ classdef Container < gams.transfer.utils.Handle
             % Constructs a GAMS Transfer Container, see class help
 
             obj.data_ = gams.transfer.incase_ordered_dict.Struct();
+            obj.time_ = gams.transfer.utils.Time();
 
             % parse input arguments
             has_gams_dir = false;
@@ -302,15 +291,18 @@ classdef Container < gams.transfer.utils.Handle
 
         end
 
-        function flag = modifiedAfter_(obj, time)
+        function [flag, time] = updatedAfter_(obj, time)
             flag = true;
-            if time <= obj.last_update_
+            if time <= obj.time_
+                time = obj.time_;
                 return
             end
             symbols = obj.data_.entries();
             for i = 1:numel(symbols)
-                if symbols{i}.modifiedAfter_(time)
-                    obj.last_update_ = max(obj.last_update_, symbols{i}.last_update_);
+                [flag_, time_] = symbols{i}.updatedAfter_(time);
+                if flag_
+                    obj.time_.set(time_);
+                    time = time_;
                     return
                 end
             end
@@ -1917,7 +1909,7 @@ classdef Container < gams.transfer.utils.Handle
                     removed_symbols{i}.container = [];
                 end
 
-                obj.last_update_ = now();
+                obj.time_.reset();
                 return
             end
 
@@ -1968,7 +1960,7 @@ classdef Container < gams.transfer.utils.Handle
                 obj.removeSymbols(remove_aliases);
             end
 
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         %> Reestablishes a valid GDX symbol order
@@ -2048,7 +2040,7 @@ classdef Container < gams.transfer.utils.Handle
 
             % apply permutation
             obj.data_.reorder([idx_sets, idx_other]);
-            obj.last_update_ = now();
+            obj.time_.reset();
 
             % force recheck of all remaining symbols in container
             obj.isValid(false, true);

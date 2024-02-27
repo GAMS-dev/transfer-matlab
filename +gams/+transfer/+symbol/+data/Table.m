@@ -82,7 +82,7 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
     end
 
     methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
-        ?gams.transfer.unique_labels.DomainSet})
+        ?gams.transfer.unique_labels.Abstract})
 
         function flag = isLabel_(obj, label)
             flag = istable(obj.records_) && ismember(label, obj.records_.Properties.VariableNames);
@@ -118,14 +118,14 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
             else
                 error('Invalid data: %s', class(data));
             end
-            data.last_update_ = now();
+            data.time_.reset();
         end
 
         function removeRows_(obj, indices)
             if istable(obj.records_)
                 obj.records_(indices, :) = [];
             end
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
     end

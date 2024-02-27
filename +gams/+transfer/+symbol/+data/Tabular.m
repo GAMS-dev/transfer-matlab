@@ -38,7 +38,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
     %#ok<*INUSD,*STOUT>
 
     methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
-        ?gams.transfer.unique_labels.DomainSet})
+        ?gams.transfer.unique_labels.Abstract})
 
         function status = isValid_(obj, axes, values)
             % empty is valid
@@ -222,7 +222,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
                 data.records.(values{i}.label)(idx) = obj.records_.(values{i}.label);
             end
 
-            data.last_update_ = now();
+            data.time_.reset();
         end
 
         function permuteAxis_(obj, axes, values, dimension, permutation)

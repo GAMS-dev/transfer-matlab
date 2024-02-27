@@ -48,8 +48,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
     properties (Hidden, SetAccess = {?gams.transfer.alias.Abstract, ?gams.transfer.Container})
         container_
         name_ = ''
-        last_update_ = now()
-        last_update_reset_ = []
+        time_
+        time_reset_
     end
 
     properties (Dependent)
@@ -151,10 +151,6 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
     end
 
-    properties (Abstract, Hidden, SetAccess = private)
-        last_update
-    end
-
     properties (Dependent)
 
         %> Flag to indicate modification
@@ -182,7 +178,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             if isa(obj.alias_with, 'gams.transfer.symbol.Abstract')
                 obj.alias_with.container = container;
             end
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function name = get.name(obj)
@@ -192,37 +188,48 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         function set.name(obj, name)
             name = gams.transfer.utils.Validator('name', 1, name).symbolName().value;
             obj.container.renameSymbol(obj.name, name);
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function modified = get.modified(obj)
-            modified = isempty(obj.last_update_reset_) || obj.modifiedAfter_(obj.last_update_reset_);
+            modified = isempty(obj.time_reset_) || obj.updatedAfter_(obj.time_reset_);
         end
 
         function set.modified(obj, modified)
             gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
             if modified
-                obj.last_update_reset_ = [];
+                obj.time_reset_ = [];
             else
-                obj.last_update_reset_ = now();
-                while (obj.modifiedAfter_(obj.last_update_reset_))
-                    obj.last_update_reset_ = now();
+                obj.time_reset_ = gams.transfer.utils.Time();
+                while (obj.updatedAfter_(obj.time_reset_))
+                    obj.time_reset_.reset();
                 end
             end
         end
 
     end
 
-    methods (Hidden, Access = {?gams.transfer.alias.Abstract, ?gams.transfer.Container})
+    methods (Hidden, Access = protected)
+
+        function obj = Abstract()
+            obj.time_ = gams.transfer.utils.Time();
+        end
+
+    end
+
+    methods (Hidden, Access = {?gams.transfer.alias.Abstract, ?gams.transfer.Container, ...
+        ?gams.transfer.symbol.domain.Abstract})
 
         function copyFrom_(obj, symbol)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function flag = modifiedAfter_(obj, time)
-            st = dbstack;
-            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        function [flag, time] = updatedAfter_(obj, time)
+            flag = time <= obj.time_;
+            if flag
+                time = obj.time_;
+            end
         end
 
     end

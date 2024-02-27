@@ -81,8 +81,7 @@ classdef Set < gams.transfer.symbol.Abstract
     %#ok<*INUSD,*STOUT>
 
     properties (Hidden, SetAccess = protected)
-        is_valid_domain_status_ = gams.transfer.utils.Status();
-        is_valid_domain_time_ = 0
+        cache_is_valid_domain_
     end
 
     properties (Dependent)
@@ -124,6 +123,7 @@ classdef Set < gams.transfer.symbol.Abstract
             if init_records
                 obj.data_ = gams.transfer.symbol.data.Struct();
             end
+            obj.cache_is_valid_domain_ = gams.transfer.utils.Cache();
         end
 
     end
@@ -328,21 +328,21 @@ classdef Set < gams.transfer.symbol.Abstract
     methods (Hidden)
 
         function status = isValidDomain(obj)
-            if obj.is_valid_domain_status_.flag == gams.transfer.utils.Status.UNKNOWN || ...
-                obj.last_update_ >= obj.is_valid_time_ || obj.last_update >= obj.is_valid_time_
+            if ~obj.cache_is_valid_domain_.holdsValue() || obj.updatedAfter_(obj.cache_is_valid_domain_.time)
                 if obj.dimension ~= 1
-                    obj.is_valid_domain_status_ = gams.transfer.utils.Status(sprintf('Domain set ''%s'' dimension must be 1.', obj.name_));
+                    status = gams.transfer.utils.Status(sprintf('Domain set ''%s'' dimension must be 1.', obj.name_));
                 elseif ~obj.isValid()
-                    obj.is_valid_domain_status_ = gams.transfer.utils.Status(sprintf('Domain set ''%s'' is invalid.', obj.name_));
+                    status = gams.transfer.utils.Status(sprintf('Domain set ''%s'' is invalid.', obj.name_));
                 elseif isfield(obj.records, obj.def_.domains{1}.label) && ...
                     numel(unique(obj.records.(obj.def_.domains{1}.label))) ~= numel(obj.records.(obj.def_.domains{1}.label))
-                    obj.is_valid_domain_status_ = gams.transfer.utils.Status(sprintf('Domain set ''%s'' must not have duplicate records.', obj.name_));
+                    status = gams.transfer.utils.Status(sprintf('Domain set ''%s'' must not have duplicate records.', obj.name_));
                 else
-                    obj.is_valid_domain_status_ = gams.transfer.utils.Status.ok();
+                    status = gams.transfer.utils.Status.ok();
                 end
-                obj.is_valid_domain_time_ = now();
+                obj.cache_is_valid_domain_.value = status;
+            else
+                status = obj.cache_is_valid_domain_.value;
             end
-            status = obj.is_valid_domain_status_;
         end
 
     end

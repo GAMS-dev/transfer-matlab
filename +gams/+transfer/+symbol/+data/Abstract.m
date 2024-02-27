@@ -39,7 +39,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
     properties (Hidden, SetAccess = protected)
         records_ = []
-        last_update_ = now()
+        time_
     end
 
     properties (Abstract, Constant)
@@ -50,10 +50,6 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         records
     end
 
-    properties (Hidden, Dependent, SetAccess = private)
-        last_update
-    end
-
     methods
 
         function records = get.records(obj)
@@ -62,11 +58,17 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function set.records(obj, records)
             obj.records_ = records;
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
-        function last_update = get.last_update(obj)
-            last_update = obj.last_update_;
+    end
+
+
+
+    methods (Hidden, Access = protected)
+
+        function obj = Abstract()
+            obj.time_ = gams.transfer.utils.Time();
         end
 
     end
@@ -90,12 +92,18 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
     end
 
     methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
-        ?gams.transfer.unique_labels.DomainSet})
+        ?gams.transfer.unique_labels.Abstract})
+
+        function [flag, time] = updatedAfter_(obj, time)
+            flag = time <= obj.time_;
+            if flag
+                time = obj.time_;
+            end
+        end
 
         function copyFrom_(obj, symbol)
             obj.records_ = symbol.records_;
-            obj.last_update_ = symbol.last_update_;
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function isLabel_(obj, label)
@@ -161,16 +169,28 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         end
 
         function [value, where] = getMinValue_(obj, axes, values)
-            [value, where] = obj.getFunValue_(@min, axes, values);
+            if nargout >= 2
+                [value, where] = obj.getFunValue_(@min, axes, values);
+            else
+                value = obj.getFunValue_(@min, axes, values);
+            end
         end
 
         function [value, where] = getMaxValue_(obj, axes, values)
-            [value, where] = obj.getFunValue_(@max, axes, values);
+            if nargout >= 2
+                [value, where] = obj.getFunValue_(@max, axes, values);
+            else
+                value = obj.getFunValue_(@max, axes, values);
+            end
         end
 
         function [value, where] = getMaxAbsValue_(obj, axes, values)
             fun = @(x) (max(abs(x)));
-            [value, where] = obj.getFunValue_(fun, axes, values);
+            if nargout >= 2
+                [value, where] = obj.getFunValue_(fun, axes, values);
+            else
+                value = obj.getFunValue_(fun, axes, values);
+            end
         end
 
         function n = countNA_(obj, values)
@@ -293,20 +313,32 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         function [value, where] = getMinValue(obj, axes, values)
             gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
             values = obj.availableValues_('Numeric', values);
-            [value, where] = obj.getFunValue_(@min, axes, values);
+            if nargout >= 2
+                [value, where] = obj.getFunValue_(@min, axes, values);
+            else
+                value = obj.getFunValue_(@min, axes, values);
+            end
         end
 
         function [value, where] = getMaxValue(obj, axes, values)
             gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
             values = obj.availableValues_('Numeric', values);
-            [value, where] = obj.getFunValue_(@max, axes, values);
+            if nargout >= 2
+                [value, where] = obj.getFunValue_(@max, axes, values);
+            else
+                value = obj.getFunValue_(@max, axes, values);
+            end
         end
 
         function [value, where] = getMaxAbsValue(obj, axes, values)
             gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
             values = obj.availableValues_('Numeric', values);
             fun = @(x) (max(abs(x)));
-            [value, where] = obj.getFunValue_(fun, axes, values);
+            if nargout >= 2
+                [value, where] = obj.getFunValue_(fun, axes, values);
+            else
+                value = obj.getFunValue_(fun, axes, values);
+            end
         end
 
         function n = countNA(obj, values)
@@ -379,13 +411,15 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                     found = true;
                 end
             end
-            [value, idx] = fun(value);
             if found
-                idx = obj.ind2sub_(axes, values{i}, where{idx});
-                where = cell(1, axes.dimension);
-                for i = 1:axes.dimension
-                    where{i} = axes.axis(i).unique_labels.getAt_(idx(i));
-                    where{i} = where{i}{1};
+                [value, idx] = fun(value);
+                if nargout >= 2
+                    idx = obj.ind2sub_(axes, values{i}, where{idx});
+                    where = cell(1, axes.dimension);
+                    for i = 1:axes.dimension
+                        where{i} = axes.axis(i).unique_labels.getAt_(idx(i));
+                        where{i} = where{i}{1};
+                    end
                 end
             else
                 value = nan;

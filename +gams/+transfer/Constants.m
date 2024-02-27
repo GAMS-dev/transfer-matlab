@@ -93,6 +93,12 @@ classdef Constants
         SUPPORTS_CATEGORICAL = gams.transfer.utils.supports_categorical()
 
 
+        %> True if datetime is supported
+
+        % SUPPORTS_DATETIME True if datetime is supported
+        SUPPORTS_DATETIME = gams.transfer.utils.supports_datetime()
+
+
         %> Name of operating system
 
         % OPERATING_SYSTEM Name of operating system

@@ -43,10 +43,6 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
         symbol
     end
 
-    properties (Hidden, Dependent, SetAccess = private)
-        last_update
-    end
-
     methods
 
         function symbol = get.symbol(obj)
@@ -60,10 +56,6 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
                 error('Domain set ''%s''cannot be used as domain: %s', obj.symbol_.name, status.message);
             end
             obj.symbol_ = symbol;
-        end
-
-        function last_update = get.last_update(obj)
-            last_update = obj.symbol_.last_update;
         end
 
     end
@@ -119,6 +111,16 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
     methods (Hidden, Access = {?gams.transfer.unique_labels.Abstract, ...
         ?gams.transfer.symbol.Abstract, ?gams.transfer.symbol.data.Abstract, ...
         ?gams.transfer.symbol.domain.Abstract})
+
+        function [flag, time] = updatedAfter_(obj, time)
+            flag = true;
+            [flag_, time_] = obj.symbol_.updatedAfter_(time);
+            if flag_
+                time = time_;
+                return
+            end
+            flag = false;
+        end
 
         function add_(obj, labels)
             % extend domain uels

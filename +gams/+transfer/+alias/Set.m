@@ -145,10 +145,6 @@ classdef Set < gams.transfer.alias.Abstract
 
     end
 
-    properties (Dependent, Hidden, SetAccess = private)
-        last_update
-    end
-
     properties (Dependent, SetAccess = private)
 
         %> Records format of aliased Set records
@@ -175,7 +171,7 @@ classdef Set < gams.transfer.alias.Abstract
                 alias_with = alias_with.alias_with;
             end
             obj.alias_with_ = alias_with;
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function description = get.description(obj)
@@ -236,10 +232,6 @@ classdef Set < gams.transfer.alias.Abstract
 
         function set.records(obj, records)
             obj.alias_with_.records = records;
-        end
-
-        function last_update = get.last_update(obj)
-            last_update = max(obj.last_update_, obj.alias_with.last_update);
         end
 
         function format_ = get.format(obj)
@@ -399,21 +391,25 @@ classdef Set < gams.transfer.alias.Abstract
 
     end
 
-    methods (Hidden, Access = {?gams.transfer.alias.Abstract, ?gams.transfer.Container})
+    methods (Hidden, Access = {?gams.transfer.alias.Abstract, ?gams.transfer.Container, ...
+        ?gams.transfer.symbol.domain.Abstract})
 
         function copyFrom_(obj, symbol)
             gams.transfer.utils.Validator('symbol', 1, symbol).type(class(obj));
             obj.alias_with_ = symbol.alias_with;
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
-        function flag = modifiedAfter_(obj, time)
+        function [flag, time] = updatedAfter_(obj, time)
             flag = true;
-            if time <= obj.last_update_
+            if time <= obj.time_
+                time = obj.time_;
                 return
             end
-            if obj.alias_with_.modifiedAfter_(time)
-                obj.last_update_ = max(obj.last_update_, obj.alias_with.last_update_);
+            [flag_, time_] = obj.alias_with_.updatedAfter_(time);
+            if flag_
+                obj.time_.set(time_);
+                time = time_;
                 return
             end
             flag = false;
@@ -755,36 +751,36 @@ classdef Set < gams.transfer.alias.Abstract
             flag = obj.alias_with_.hasDomainAxis_(dimension);
         end
 
-        function [unique_labels, is_domain_axis] = getDomainAxisUniqueLabels_(obj, dimension)
-            [unique_labels, is_domain_axis] = obj.alias_with_.getDomainAxisUniqueLabels_(dimension);
+        function unique_labels = getDomainAxisUniqueLabels_(obj, dimension)
+            unique_labels = obj.alias_with_.getDomainAxisUniqueLabels_(dimension);
         end
 
-        function [axis, is_domain_axis] = getDomainAxis_(obj, dimension)
-            [axes, is_domain_axis] = obj.alias_with_.getDomainAxis_(dimension);
+        function axis = getDomainAxis_(obj, dimension)
+            axis = obj.alias_with_.getDomainAxis_(dimension);
         end
 
-        function [axes, is_domain_axis] = getDomainAxes_(obj)
-            [axes, is_domain_axis] = obj.alias_with_.getDomainAxes_();
+        function axes = getDomainAxes_(obj)
+            axes = obj.alias_with_.getDomainAxes_();
         end
 
         function labels = getDomainAxisLabels_(obj, dimension)
             labels = obj.alias_with_.getDomainAxisLabels_(dimension);
         end
 
-        function [unique_labels, is_domain_axis] = getAxisUniqueLabels_(obj, dimension)
-            [unique_labels, is_domain_axis] = obj.alias_with_.getAxisUniqueLabels_(dimension);
+        function unique_labels = getAxisUniqueLabels_(obj, dimension)
+            unique_labels = obj.alias_with_.getAxisUniqueLabels_(dimension);
         end
 
         function unique_labels = getInitAxisUniqueLabels_(obj, dimension)
             unique_labelsobj.alias_with_.getInitAxisUniqueLabels_(dimension);
         end
 
-        function [axis, is_domain_axis] = getAxis_(obj, dimension)
-            [axes, is_domain_axis] = obj.alias_with_.getAxis_(dimension);
+        function axis = getAxis_(obj, dimension)
+            axis = obj.alias_with_.getAxis_(dimension);
         end
 
-        function [axes, is_domain_axis] = getAxes_(obj)
-            [axes, is_domain_axis] = obj.alias_with_.getAxes_();
+        function axes = getAxes_(obj)
+            axes = obj.alias_with_.getAxes_();
         end
 
         function labels = getAxisLabels_(obj, dimension)

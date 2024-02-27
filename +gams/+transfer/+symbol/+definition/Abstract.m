@@ -40,7 +40,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
     properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
         domains_ = {}
         values_ = []
-        last_update_ = now()
+        time_
     end
 
     properties (Dependent)
@@ -49,10 +49,6 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
     properties (Dependent, SetAccess = private)
         values
-    end
-
-    properties (Hidden, Dependent, SetAccess = private)
-        last_update
     end
 
     methods (Hidden, Static)
@@ -101,7 +97,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                     obj.domains_{i}.appendLabelIndex(i);
                 end
             end
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function values = get.values(obj)
@@ -111,14 +107,12 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             values = obj.values_;
         end
 
-        function last_update = get.last_update(obj)
-            last_update = obj.last_update_;
-            for i = 1:numel(obj.domains_)
-                last_update = max(last_update, obj.domains_{i}.last_update);
-            end
-            for i = 1:numel(obj.values_)
-                last_update = max(last_update, obj.values_{i}.last_update);
-            end
+    end
+
+    methods (Hidden, Access = protected)
+
+        function obj = Abstract()
+            obj.time_ = gams.transfer.utils.Time();
         end
 
     end
@@ -137,12 +131,12 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                 obj.domains_{i} = def.domains{i}.copy();
             end
             obj.values_ = def.values;
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function eq = equals(obj, def)
             eq = false;
-            if ~isequal(class(obj), class(def)) || ~isequal(obj.values, def.values)
+            if ~isequal(class(obj), class(def))
                 return
             end
             if numel(obj.domains_) ~= numel(def.domains_)
@@ -150,6 +144,14 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             end
             for i = 1:numel(obj.domains_)
                 if ~obj.domains_{i}.equals(def.domains_{i})
+                    return
+                end
+            end
+            if numel(obj.values) ~= numel(def.values)
+                return
+            end
+            for i = 1:numel(obj.values_)
+                if ~obj.values_{i}.equals(def.values_{i})
                     return
                 end
             end
@@ -190,7 +192,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                     obj.domains_{i}.appendLabelIndex(i);
                 end
             end
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function domain = findDomain(obj, label)
@@ -234,7 +236,32 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                 end
                 obj.domains_{i}.symbol = symbol;
             end
-            obj.last_update_ = now();
+            obj.time_.reset();
+        end
+
+        function [flag, time] = updatedAfter_(obj, time)
+            flag = true;
+            if time <= obj.time_
+                time = obj.time_;
+                return
+            end
+            for i = 1:numel(obj.domains_)
+                [flag_, time_] = obj.domains_{i}.updatedAfter_(time);
+                if flag_
+                    obj.time_.set(time_);
+                    time = time_;
+                    return
+                end
+            end
+            for i = 1:numel(obj.values_)
+                [flag_, time_] = obj.values_{i}.updatedAfter_(time);
+                if flag_
+                    obj.time_.set(time_);
+                    time = time_;
+                    return
+                end
+            end
+            flag = false;
         end
 
     end
@@ -248,7 +275,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function resetValues(obj)
             obj.initValues();
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
     end

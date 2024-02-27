@@ -46,10 +46,6 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
         name
     end
 
-    properties (Hidden, Dependent, SetAccess = private)
-        last_update
-    end
-
     methods
 
         function symbol = get.symbol(obj)
@@ -59,15 +55,11 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
         function obj = set.symbol(obj, symbol)
             gams.transfer.utils.Validator('symbol', 1, symbol).types({'gams.transfer.symbol.Set', 'gams.transfer.alias.Abstract'});
             obj.symbol_ = symbol;
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function name = get.name(obj)
             name = obj.symbol_.name;
-        end
-
-        function last_update = get.last_update(obj)
-            last_update = max(obj.last_update_, obj.symbol_.last_update);
         end
 
     end
@@ -154,6 +146,21 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
             domain = gams.transfer.symbol.domain.Relaxed(obj.symbol_.name);
             domain.label = obj.label_;
             domain.forwarding = obj.forwarding_;
+        end
+
+        function [flag, time] = updatedAfter_(obj, time)
+            flag = true;
+            if time <= obj.time_
+                time = obj.time_;
+                return
+            end
+            [flag_, time_] = obj.symbol_.updatedAfter_(time);
+            if flag_
+                obj.time_.set(time_);
+                time = time_;
+                return
+            end
+            flag = false;
         end
 
     end

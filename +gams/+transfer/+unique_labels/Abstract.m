@@ -35,10 +35,6 @@
 %
 classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
-    properties (Hidden, Abstract, SetAccess = private)
-        last_update
-    end
-
     methods
 
         function unique_labels = copy(obj)
@@ -65,6 +61,11 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
     methods (Hidden, Access = {?gams.transfer.unique_labels.Abstract, ...
         ?gams.transfer.symbol.Abstract, ?gams.transfer.symbol.data.Abstract, ...
         ?gams.transfer.symbol.domain.Abstract})
+
+        function [flag, time] = updatedAfter_(obj, time)
+            st = dbstack;
+			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
 
         function labels = getAt_(obj, indices)
             if numel(indices) == 0

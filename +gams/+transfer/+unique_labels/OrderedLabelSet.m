@@ -38,19 +38,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
     properties (Hidden, SetAccess = private)
         uels_label2ids_
         uels_id2labels_
-        last_update_ = now()
-    end
-
-    properties (Hidden, Dependent, SetAccess = private)
-        last_update
-    end
-
-    methods
-
-        function last_update = get.last_update(obj)
-            last_update = obj.last_update_;
-        end
-
+        time_
     end
 
     methods
@@ -60,6 +48,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
             if nargin >= 1
                 obj.add(labels);
             end
+            obj.time_ = gams.transfer.utils.Time();
         end
 
     end
@@ -89,7 +78,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
         function clear(obj)
             obj.uels_label2ids_ = javaObject("java.util.LinkedHashMap");
             obj.uels_id2labels_ = {};
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
     end
@@ -97,6 +86,13 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
     methods (Hidden, Access = {?gams.transfer.unique_labels.Abstract, ...
         ?gams.transfer.symbol.Abstract, ?gams.transfer.symbol.data.Abstract, ...
         ?gams.transfer.symbol.domain.Abstract})
+
+        function [flag, time] = updatedAfter_(obj, time)
+            flag = time <= obj.time_;
+            if flag
+                time = obj.time_;
+            end
+        end
 
         function add_(obj, labels)
             for i = 1:numel(labels)
@@ -107,7 +103,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
             if numel(labels) > 0
                 obj.updateId2Label_();
             end
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function set_(obj, labels)
@@ -129,7 +125,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
             if nargout > 0
                 [flag, indices] = obj.updatedIndices_(oldlabels, [], []);
             end
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
         function rename_(obj, oldlabels, newlabels)
@@ -189,7 +185,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
                 obj.uels_id2labels_{i} = char(it.next());
                 i = i + 1;
             end
-            obj.last_update_ = now();
+            obj.time_.reset();
         end
 
     end
