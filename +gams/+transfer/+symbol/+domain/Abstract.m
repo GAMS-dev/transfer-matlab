@@ -86,7 +86,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
     end
 
-    methods (Hidden, Access = protected)
+    methods (Hidden)
 
         function obj = Abstract()
             obj.time_ = gams.transfer.utils.Time();

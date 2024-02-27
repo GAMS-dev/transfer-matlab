@@ -71,14 +71,14 @@ classdef Validator
         function obj = fileExtension(obj, ext)
             [~, ~, ext_] = fileparts(obj.value);
             if ~strcmpi(ext_, ext)
-                error('Argument ''%s'' (at position %d) must be file name with ''%s'' extension.', name, index, ext);
+                error('Argument ''%s'' (at position %d) must be file name with ''%s'' extension.', obj.name, obj.index, ext);
             end
         end
 
         function obj = fileExists(obj)
             obj.value = gams.transfer.utils.absolute_path(obj.value);
             if ~isfile(obj.value)
-                error('Argument ''%s'' (at position %d) must name a file that exists.', name, index);
+                error('Argument ''%s'' (at position %d) must name a file that exists.', obj.name, obj.index);
             end
         end
 
@@ -92,7 +92,7 @@ classdef Validator
             if ~isa(obj.value, class)
                 none_class = '';
                 if allow_none
-                    none_class = '[] or '
+                    none_class = '[] or ';
                 end
                 error('Argument ''%s'' (at position %d) must be %s''%s''.', obj.name, obj.index, none_class, class);
             end
@@ -186,7 +186,7 @@ classdef Validator
                 if ~isa(obj.value{i}, class)
                     none_class = '';
                     if allow_none
-                        none_class = '[] or '
+                        none_class = '[] or ';
                     end
                     error('Argument ''%s{%d}'' (at position %d) must be %s''%s''.', obj.name, i, obj.index, none_class, class);
                 end

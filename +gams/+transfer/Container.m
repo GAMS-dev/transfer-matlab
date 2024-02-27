@@ -70,7 +70,7 @@
 %> gams::transfer::Equation "Equation"
 classdef Container < gams.transfer.utils.Handle
 
-    %#ok<*INUSD,*STOUT>
+    %#ok<*INUSD,*STOUT,*PROPLC>
 
     properties (Hidden, SetAccess = protected)
         gams_dir_ = ''

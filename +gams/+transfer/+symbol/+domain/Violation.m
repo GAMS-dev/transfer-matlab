@@ -50,6 +50,8 @@
 %> "symbol.Abstract"
 classdef Violation
 
+    %#ok<*INUSD,*STOUT>
+
     properties (Hidden, SetAccess = protected)
 
         symbol_

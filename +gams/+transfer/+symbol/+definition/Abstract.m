@@ -35,7 +35,7 @@
 %
 classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
-    %#ok<*INUSD,*STOUT>
+    %#ok<*INUSD,*STOUT,*PROPLC>
 
     properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
         domains_ = {}
@@ -109,7 +109,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
     end
 
-    methods (Hidden, Access = protected)
+    methods (Hidden)
 
         function obj = Abstract()
             obj.time_ = gams.transfer.utils.Time();

@@ -35,6 +35,8 @@
 %
 classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
+    %#ok<*INUSD,*STOUT>
+
     methods
 
         function n = count(obj)

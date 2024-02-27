@@ -65,7 +65,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
 
 
-    methods (Hidden, Access = protected)
+    methods (Hidden)
 
         function obj = Abstract()
             obj.time_ = gams.transfer.utils.Time();
@@ -106,7 +106,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             obj.time_.reset();
         end
 
-        function isLabel_(obj, label)
+        function flag = isLabel_(obj, label)
             flag = ismember(label, obj.getLabels());
         end
 

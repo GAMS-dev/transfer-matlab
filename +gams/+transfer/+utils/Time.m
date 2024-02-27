@@ -58,11 +58,11 @@ classdef (Hidden) Time < handle
     methods
 
         function obj = Time()
-            obj.time_ = now();
+            obj.time_ = now(); %#ok<TNOW1>
         end
 
         function reset(obj)
-            obj.time_ = now();
+            obj.time_ = now(); %#ok<TNOW1>
         end
 
         function set(obj, time)

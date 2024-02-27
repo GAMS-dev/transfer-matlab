@@ -230,7 +230,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             if ~obj.isLabel(domain.label)
                 return
             end
-            if gams.transfer.Constants.SUPPORTS_CATEGORICAL && iscategorical(obj.records_.(domain.label));
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL && iscategorical(obj.records_.(domain.label))
                 unique_labels = obj.getUniqueLabels_(domain);
                 unique_labels.set(unique_labels.getAt(permutation));
             else

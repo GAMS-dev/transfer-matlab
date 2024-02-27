@@ -35,6 +35,8 @@
 %
 classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
+    %#ok<*INUSD,*STOUT>
+
     methods
 
         function unique_labels = copy(obj)
@@ -70,6 +72,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         function labels = getAt_(obj, indices)
             if numel(indices) == 0
                 labels = {};
+                return
             end
             labels = gams.transfer.utils.filter_unique_labels(obj.get(), indices);
         end

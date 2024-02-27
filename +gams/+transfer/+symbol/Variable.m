@@ -120,7 +120,7 @@ classdef Variable < gams.transfer.symbol.Abstract
             end
         end
 
-        function indexed = get.indexed(obj)
+        function indexed = get.indexed(obj) %#ok<MANU>
             indexed = false;
         end
 

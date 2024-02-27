@@ -34,7 +34,6 @@
 % and method or function signatures can change without notice.
 %
 function os = operating_system()
-    os = '';
     if ispc
         os = 'windows';
     elseif ismac

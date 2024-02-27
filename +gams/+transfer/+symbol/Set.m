@@ -108,7 +108,7 @@ classdef Set < gams.transfer.symbol.Abstract
             obj.def_.is_singleton = singleton;
         end
 
-        function indexed = get.indexed(obj)
+        function indexed = get.indexed(obj) %#ok<MANU>
             indexed = false;
         end
 

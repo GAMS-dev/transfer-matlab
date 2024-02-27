@@ -39,7 +39,7 @@ classdef (Abstract, Hidden) Handle < handle
         id_
     end
 
-    methods (Access = protected)
+    methods (Hidden)
 
         function obj = Handle()
             obj.id_ = int32(randi(intmax('int32')));

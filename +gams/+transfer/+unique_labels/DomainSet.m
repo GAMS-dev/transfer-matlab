@@ -35,6 +35,8 @@
 %
 classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
 
+    %#ok<*INUSD,*STOUT>
+
     properties (Hidden, SetAccess = protected)
         symbol_
     end
@@ -74,7 +76,7 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
             gams.transfer.utils.Validator('symbol', 1, symbol).types({'gams.transfer.symbol.Set', 'gams.transfer.alias.Set'});
             status = symbol.isValidDomain();
             if status.flag ~= gams.transfer.utils.Status.OK
-                error('Domain set ''%s''cannot be used as domain: %s', obj.symbol_.name, status.message);
+                error('Domain set ''%s''cannot be used as domain: %s', symbol.name, status.message);
             end
             obj = gams.transfer.unique_labels.DomainSet(symbol);
         end

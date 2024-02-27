@@ -63,11 +63,15 @@ classdef (Abstract, Hidden) Abstract
 
     end
 
-    methods
+    methods (Hidden)
 
         function obj = Abstract()
             obj.time_ = gams.transfer.utils.Time();
         end
+
+    end
+
+    methods
 
         function eq = equals(obj, value)
             eq = isequal(class(obj), class(value)) && ...

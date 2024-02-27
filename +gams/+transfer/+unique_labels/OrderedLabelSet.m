@@ -35,6 +35,8 @@
 %
 classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
 
+    %#ok<*INUSD,*STOUT>
+
     properties (Hidden, SetAccess = private)
         uels_label2ids_
         uels_id2labels_
@@ -162,8 +164,8 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
                     labels{obj.uels_label2ids_.get(oldlabels{i})} = newlabels{i};
                 end
                 obj.clear();
-                for i = 1:numel(labels)
-                    obj.uels_label2ids_.put(labels{i}, obj.uels_label2ids_.size() + 1);
+                for j = 1:numel(labels)
+                    obj.uels_label2ids_.put(labels{j}, obj.uels_label2ids_.size() + 1);
                 end
                 obj.updateId2Label_();
             end

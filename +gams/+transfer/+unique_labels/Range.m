@@ -35,6 +35,8 @@
 %
 classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
 
+    %#ok<*INUSD,*STOUT>
+
     properties (Hidden, SetAccess = protected)
 
         prefix_ = ''
@@ -137,10 +139,10 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
         end
 
         function clear(obj)
-            obj.prefix_ = ''
-            obj.first_ = 1
-            obj.step_ = 1
-            obj.length_ = 0
+            obj.prefix_ = '';
+            obj.first_ = 1;
+            obj.step_ = 1;
+            obj.length_ = 0;
             obj.time_.reset();
         end
 

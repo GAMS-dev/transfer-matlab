@@ -445,7 +445,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
     end
 
-    methods (Hidden, Access = protected)
+    methods (Hidden)
 
         function obj = Abstract()
             obj.time_ = gams.transfer.utils.Time();
@@ -858,7 +858,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
             % update axes to domain axes
             if isa(obj.data_, 'gams.transfer.symbol.data.Tabular') && ...
-                isa(data, 'gams.transfer.symbol.data.Matrix');
+                isa(data, 'gams.transfer.symbol.data.Matrix')
                 for i = 1:obj.dimension
                     obj.updateAxisLabelsFromDomain_(i);
                 end
@@ -1693,7 +1693,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         end
 
         function trimAxisLabels_(obj, dimension)
-            if obj.isDomainAxis_(dimension);
+            if obj.isDomainAxis_(dimension)
                 return
             end
             try

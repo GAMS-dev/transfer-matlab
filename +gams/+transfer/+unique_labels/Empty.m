@@ -35,6 +35,8 @@
 %
 classdef (Hidden) Empty < gams.transfer.unique_labels.Abstract
 
+    %#ok<*INUSD,*STOUT>
+
     methods (Static)
 
         function obj = construct()
@@ -45,19 +47,19 @@ classdef (Hidden) Empty < gams.transfer.unique_labels.Abstract
 
     methods
 
-        function unique_labels = copy(obj)
+        function unique_labels = copy(obj) %#ok<MANU>
             unique_labels = gams.transfer.unique_labels.Empty();
         end
 
-        function count = count(obj)
+        function count = count(obj) %#ok<MANU>
             count = 0;
         end
 
-        function labels = get(obj)
+        function labels = get(obj) %#ok<MANU>
             labels = {};
         end
 
-        function clear(obj)
+        function clear(obj) %#ok<MANU>
         end
 
     end

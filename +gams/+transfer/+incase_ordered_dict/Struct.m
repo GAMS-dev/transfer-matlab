@@ -35,6 +35,8 @@
 %
 classdef (Hidden) Struct < gams.transfer.incase_ordered_dict.Abstract
 
+    %#ok<*INUSD,*STOUT>
+
     properties (Hidden, SetAccess = protected)
         count_ = 0
         keys_ = struct()

@@ -1,9 +1,8 @@
-% Checks if datetime is supported (internal)
+% Lists code issues
 %
-% ------------------------------------------------------------------------------
+
 %
-% GAMS - General Algebraic Modeling System
-% GAMS Transfer Matlab
+% GAMS - General Algebraic Modeling System Matlab API
 %
 % Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
 % Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
@@ -26,27 +25,17 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 % SOFTWARE.
 %
-% ------------------------------------------------------------------------------
-%
-% Checks if datetime is supported (internal)
-%
-% Attention: Internal classes or functions have limited documentation and its properties, methods
-% and method or function signatures can change without notice.
-%
-function flag = supports_datetime()
-    flag = true;
-    try
-        datetime();
-    catch
-        flag = false;
+
+function code_issues(varargin)
+
+    p = inputParser();
+    addParameter(p, 'exit_on_fail', false, @islogical);
+    parse(p, varargin{:});
+
+    issues = codeIssues(fullfile(fileparts(mfilename('fullpath')), '..', '+gams'));
+    disp(issues.Issues);
+    if p.Results.exit_on_fail && height(issues.Issues) > 0
+        exit(1);
     end
 
-    env = getenv('GAMS_TRANSFER_MATLAB_SUPPORTS_DATETIME');
-    if ~isempty(env)
-        if strcmpi(env, 'true')
-            flag = true;
-        elseif strcmpi(env, 'false')
-            flag = false;
-        end
-    end
 end

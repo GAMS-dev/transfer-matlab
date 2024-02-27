@@ -35,6 +35,8 @@
 %
 classdef (Hidden) CategoricalColumn < gams.transfer.unique_labels.Abstract
 
+    %#ok<*INUSD,*STOUT>
+
     properties (Hidden, SetAccess = protected)
         data_
         domain_

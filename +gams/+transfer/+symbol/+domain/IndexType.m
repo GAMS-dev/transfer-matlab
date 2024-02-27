@@ -35,6 +35,8 @@
 %
 classdef IndexType
 
+    %#ok<*INUSD,*STOUT>
+
     properties (Constant)
         CATEGORICAL = uint8(1)
         INTEGER = uint8(2)
