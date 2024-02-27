@@ -46,11 +46,11 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
     methods
 
         function obj = OrderedLabelSet(labels)
+            obj.time_ = gams.transfer.utils.Time();
             obj.clear();
             if nargin >= 1
                 obj.add(labels);
             end
-            obj.time_ = gams.transfer.utils.Time();
         end
 
     end
