@@ -56,14 +56,15 @@ classdef (Hidden) Parameter < gams.transfer.symbol.definition.Abstract
 
         function def = copy(obj)
             def = gams.transfer.symbol.definition.Parameter();
-            def.copyFrom(obj);
+            def.copyFrom_(obj);
         end
 
     end
 
-    methods (Hidden, Access = protected)
+    methods (Hidden, Access = {?gams.transfer.symbol.definition.Abstract, ...
+        ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
 
-        function initValues(obj)
+        function initValues_(obj)
             obj.values_ = {gams.transfer.symbol.value.Numeric('value', 0)};
             for i = 1:numel(obj.values_)
                 obj.values_{i}.time_.set(obj.time_);

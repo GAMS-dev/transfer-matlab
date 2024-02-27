@@ -119,7 +119,7 @@ classdef Violation
             if ~obj.domain_.hasUniqueLabels()
                 return
             end
-            obj.domain_.addLabels(obj.violations_, true);
+            obj.domain_.addLabels_(obj.violations_, true);
         end
 
     end

@@ -198,7 +198,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         function set.container(obj, container)
             gams.transfer.utils.Validator('container', 1, container).type('gams.transfer.Container', true);
             obj.container_ = container;
-            obj.def_.switchContainer(container);
+            obj.def_.switchContainer_(container);
             obj.time_.reset();
             obj.cache_is_valid_.reset();
             obj.cache_axes_.reset();
@@ -704,14 +704,14 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             elseif isstruct(records) && numel(records) == 1
                 fields = fieldnames(records);
                 for i = 1:numel(fields)
-                    value = obj.def_.findValue(fields{i});
+                    value = obj.def_.findValue_(fields{i});
                     if ~isempty(value)
                         new_records.(value.label) = records.(fields{i});
                         values{end+1} = value;
                         continue;
                     end
 
-                    domain = obj.def_.findDomain(fields{i});
+                    domain = obj.def_.findDomain_(fields{i});
                     if ~isempty(domain)
                         new_records.(domain.label) = records.(fields{i});
                         domains{end+1} = domain;
@@ -1077,7 +1077,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             end
             if has_values
                 for i = 1:numel(values)
-                    values{i} = obj.def_.findValue(values{i});
+                    values{i} = obj.def_.findValue_(values{i});
                     if isempty(values{i})
                         error('Argument ''values'' contains invalid value: %s.', values{i});
                     end

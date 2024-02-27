@@ -93,12 +93,7 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
 
         function domain = copy(obj)
             domain = gams.transfer.symbol.domain.Regular(obj.symbol_);
-            domain.copyFrom(obj);
-        end
-
-        function copyFrom(obj, domain)
-            copyFrom@gams.transfer.symbol.domain.Abstract(obj, domain);
-            obj.symbol_ = domain.symbol;
+            domain.copyFrom_(obj);
         end
 
         function eq = equals(obj, domain)
@@ -118,7 +113,39 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
             unique_labels = gams.transfer.unique_labels.DomainSet(obj.symbol_);
         end
 
-        function addLabels(obj, labels, forwarding)
+        function domain = getRelaxed(obj)
+            domain = gams.transfer.symbol.domain.Relaxed(obj.symbol_.name);
+            domain.label_ = obj.label_;
+            domain.forwarding_ = obj.forwarding_;
+            domain.index_type_ = obj.index_type_;
+        end
+
+    end
+
+    methods (Hidden, Access = {?gams.transfer.symbol.domain.Abstract, ...
+        ?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.domain.Violation})
+
+        function [flag, time] = updatedAfter_(obj, time)
+            flag = true;
+            if time <= obj.time_
+                time = obj.time_;
+                return
+            end
+            [flag_, time_] = obj.symbol_.updatedAfter_(time);
+            if flag_
+                obj.time_.set(time_);
+                time = time_;
+                return
+            end
+            flag = false;
+        end
+
+        function copyFrom_(obj, domain)
+            copyFrom_@gams.transfer.symbol.domain.Abstract(obj, domain);
+            obj.symbol_ = domain.symbol;
+        end
+
+        function addLabels_(obj, labels, forwarding)
             if nargin == 2
                 forwarding = obj.forwarding_;
             end
@@ -137,30 +164,9 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
             for i = 1:obj.symbol_.dimension
                 domain = obj.symbol_.getDomain_(i);
                 if domain.hasUniqueLabels()
-                    domain.addLabels(labels, true);
+                    domain.addLabels_(labels, true);
                 end
             end
-        end
-
-        function domain = getRelaxed(obj)
-            domain = gams.transfer.symbol.domain.Relaxed(obj.symbol_.name);
-            domain.label = obj.label_;
-            domain.forwarding = obj.forwarding_;
-        end
-
-        function [flag, time] = updatedAfter_(obj, time)
-            flag = true;
-            if time <= obj.time_
-                time = obj.time_;
-                return
-            end
-            [flag_, time_] = obj.symbol_.updatedAfter_(time);
-            if flag_
-                obj.time_.set(time_);
-                time = time_;
-                return
-            end
-            flag = false;
         end
 
     end

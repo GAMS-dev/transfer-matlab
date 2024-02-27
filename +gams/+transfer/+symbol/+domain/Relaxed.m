@@ -91,12 +91,7 @@ classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
 
         function domain = copy(obj)
             domain = gams.transfer.symbol.domain.Relaxed(obj.name_);
-            domain.copyFrom(obj);
-        end
-
-        function copyFrom(obj, domain)
-            copyFrom@gams.transfer.symbol.domain.Abstract(obj, domain);
-            obj.name_ = domain.name;
+            domain.copyFrom_(obj);
         end
 
         function eq = equals(obj, domain)
@@ -106,6 +101,16 @@ classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
 
         function status = isValid(obj) %#ok<MANU>
             status = gams.transfer.utils.Status.ok();
+        end
+
+    end
+
+    methods (Hidden, Access = {?gams.transfer.symbol.domain.Abstract, ...
+        ?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.domain.Violation})
+
+        function copyFrom_(obj, domain)
+            copyFrom_@gams.transfer.symbol.domain.Abstract(obj, domain);
+            obj.name_ = domain.name;
         end
 
     end

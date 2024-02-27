@@ -78,7 +78,7 @@ classdef (Hidden) Set < gams.transfer.symbol.definition.Abstract
 
         function def = copy(obj)
             def = gams.transfer.symbol.definition.Set(obj.is_singleton_);
-            def.copyFrom(obj);
+            def.copyFrom_(obj);
         end
 
         function eq = equals(obj, def)
@@ -88,9 +88,10 @@ classdef (Hidden) Set < gams.transfer.symbol.definition.Abstract
 
     end
 
-    methods (Hidden, Access = protected)
+    methods (Hidden, Access = {?gams.transfer.symbol.definition.Abstract, ...
+        ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
 
-        function initValues(obj)
+        function initValues_(obj)
             obj.values_ = {gams.transfer.symbol.value.String('element_text', '')};
             for i = 1:numel(obj.values_)
                 obj.values_{i}.time_.set(obj.time_);

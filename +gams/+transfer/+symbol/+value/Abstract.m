@@ -79,6 +79,10 @@ classdef (Abstract, Hidden) Abstract
                 isequaln(obj.default, value.default);
         end
 
+    end
+
+    methods (Hidden, Access = {?gams.transfer.symbol.value.Abstract, ?gams.transfer.symbol.definition.Abstract})
+
         function [flag, time] = updatedAfter_(obj, time)
             flag = time <= obj.time_;
             if flag

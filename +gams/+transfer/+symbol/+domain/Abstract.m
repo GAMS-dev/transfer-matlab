@@ -101,13 +101,6 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function copyFrom(obj, domain)
-            gams.transfer.utils.Validator('domain', 1, domain).type(class(obj));
-            obj.label_ = domain.label;
-            obj.forwarding_ = domain.forwarding;
-            obj.time_.reset();
-        end
-
         function eq = equals(obj, domain)
             eq = isequal(class(obj), class(domain)) && ...
                 isequal(obj.label_, domain.label_) && ...
@@ -119,14 +112,6 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function appendLabelIndex(obj, index)
-            add = ['_', int2str(index)];
-            if numel(obj.label_) <= numel(add) || ~strcmp(obj.label_(end-numel(add)+1:end), add)
-                obj.label_ = strcat(obj.label_, add);
-            end
-            obj.time_.reset();
-        end
-
         function flag = hasUniqueLabels(obj) %#ok<MANU>
             flag = false;
         end
@@ -135,15 +120,54 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             unique_labels = [];
         end
 
-        function addLabels(obj, labels, forwarding)
-            error('Domain ''%s'' does not define any unique labels and thus cannot add any.', obj.name);
-        end
+    end
+
+    methods (Hidden, Access = {?gams.transfer.symbol.domain.Abstract, ...
+        ?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.domain.Violation})
 
         function [flag, time] = updatedAfter_(obj, time)
             flag = time <= obj.time_;
             if flag
                 time = obj.time_;
             end
+        end
+
+        function copyFrom_(obj, domain)
+            obj.label_ = domain.label;
+            obj.forwarding_ = domain.forwarding;
+            obj.time_.reset();
+        end
+
+        function appendLabelIndex_(obj, index)
+            add = ['_', int2str(index)];
+            if numel(obj.label_) <= numel(add) || ~strcmp(obj.label_(end-numel(add)+1:end), add)
+                obj.label_ = strcat(obj.label_, add);
+            end
+            obj.time_.reset();
+        end
+
+        function addLabels_(obj, labels, forwarding)
+            error('Domain ''%s'' does not define any unique labels and thus cannot add any.', obj.name);
+        end
+
+    end
+
+    methods
+
+        function copyFrom(obj, domain)
+            gams.transfer.utils.Validator('domain', 1, domain).type(class(obj));
+            obj.copyFrom_(domain);
+        end
+
+        function appendLabelIndex(obj, index)
+            gams.transfer.utils.Validator('index', 1, index).integer().scalar().min(0);
+            obj.appendLabelIndex_(index);
+        end
+
+        function addLabels(obj, labels, forwarding)
+            gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr();
+            gams.transfer.utils.Validator('forwarding', 2, forwarding).logical().scalar();
+            obj.addLabels_(labels, forwarding);
         end
 
     end

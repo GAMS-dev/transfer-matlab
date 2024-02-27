@@ -320,7 +320,7 @@ classdef Set < gams.transfer.symbol.Abstract
             end
 
             symbol.copyFrom_(obj);
-            symbol.def.switchContainer(destination);
+            symbol.def.switchContainer_(destination);
         end
 
     end

@@ -545,7 +545,7 @@ classdef Container < gams.transfer.utils.Handle
                 % set other properties
                 new_symbol.description_ = symbol.description;
                 if isfield(symbol, 'domain_labels') && numel(symbol.domain_labels) == symbol.dimension
-                    new_symbol.def_.setDomainLabels(symbol.domain_labels);
+                    new_symbol.def_.setDomainLabels_(symbol.domain_labels);
                 end
             end
         end

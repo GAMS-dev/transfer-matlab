@@ -95,7 +95,7 @@ classdef (Hidden) Variable < gams.transfer.symbol.definition.Abstract
 
         function def = copy(obj)
             def = gams.transfer.symbol.definition.Variable(obj.type_);
-            def.copyFrom(obj);
+            def.copyFrom_(obj);
         end
 
         function eq = equals(obj, def)
@@ -105,9 +105,10 @@ classdef (Hidden) Variable < gams.transfer.symbol.definition.Abstract
 
     end
 
-    methods (Hidden, Access = protected)
+    methods (Hidden, Access = {?gams.transfer.symbol.definition.Abstract, ...
+        ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
 
-        function initValues(obj)
+        function initValues_(obj)
             gdx_default_values = gams.transfer.gdx.gt_get_defaults(...
                 int32(gams.transfer.gdx.SymbolType.VARIABLE), int32(obj.type_.value));
             obj.values_ = {...
