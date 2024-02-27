@@ -41,62 +41,62 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function n = count(obj)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function flag = exists(obj, keys)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function keys = keys(obj, keys)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function keys = keysAt(obj, indices)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function indices = find(obj, keys)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function entries = entries(obj, keys)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function entries = entriesAt(obj, indices)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function add(obj, key, entry)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function clear(obj)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function symbol = rename(obj, oldkey, newkey)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function remove(obj, keys)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function reorder(obj, permutation)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
     end

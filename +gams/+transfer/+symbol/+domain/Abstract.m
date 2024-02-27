@@ -98,7 +98,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function domain = copy(obj)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function eq = equals(obj, domain)
@@ -109,7 +109,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function status = isValid(obj)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function flag = hasUniqueLabels(obj) %#ok<MANU>

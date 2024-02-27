@@ -121,7 +121,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function def = copy(obj)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function eq = equals(obj, def)
@@ -266,7 +266,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function initValues_(obj)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function resetValues_(obj)

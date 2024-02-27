@@ -77,7 +77,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function data = copy(obj)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function eq = equals(obj, data)
@@ -86,7 +86,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function labels = getLabels(obj)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
     end
@@ -112,7 +112,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function renameLabels_(obj, oldlabels, newlabels)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function values = availableValues_(obj, class, values)
@@ -128,7 +128,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function status = isValid_(obj, axes, values)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function flag = hasUniqueLabels_(obj, domain)
@@ -141,17 +141,17 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function indices = usedUniqueLabels_(obj, axes, values, dimension)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function nrecs = getNumberRecords_(obj, axes, values)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function nvals = getNumberValues_(obj, axes, values)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function sparsity = getSparsity_(obj, axes, values)
@@ -165,7 +165,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function value = getMeanValue_(obj, axes, values)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function [value, where] = getMinValue_(obj, axes, values)
@@ -215,7 +215,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function subindex = ind2sub_(obj, axes, value, linindex)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function transformTo_(obj, axes, values, data)
@@ -230,17 +230,17 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function transformToTabular_(obj, axes, values, data)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function transformToMatrix_(obj, axes, values, data)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function permuteAxis_(obj, axes, values, dimension, permutation)
             % st = dbstack;
-			% error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            % error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
     end

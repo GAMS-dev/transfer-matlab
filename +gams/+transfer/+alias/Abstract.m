@@ -263,7 +263,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             %    Overwrites symbol with same name in destination if true. Default: false.
 
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         %> Checks equivalence with other symbol
@@ -305,7 +305,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             %    If true, forces reevaluation of validity (resets cache)
 
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         %> (Abstract) Returns the UELs used in this symbol
@@ -313,7 +313,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % (Abstract) Returns the UELs used in this symbol
 
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         %> (Abstract) Removes UELs from the symbol
@@ -321,7 +321,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % (Abstract) Removes UELs from the symbol
 
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         %> (Abstract) Renames UELs in the symbol
@@ -329,7 +329,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % (Abstract) Renames UELs in the symbol
 
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         %> (Abstract) Converts UELs to lower case
@@ -337,7 +337,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % (Abstract) Converts UELs to lower case
 
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         %> (Abstract) Converts UELs to lower case
@@ -345,7 +345,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % (Abstract) Converts UELs to upper case
 
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
     end

@@ -41,7 +41,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function unique_labels = copy(obj)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function count = count(obj)
@@ -50,12 +50,12 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function labels = get(obj)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function clear(obj)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
     end
@@ -66,7 +66,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function [flag, time] = updatedAfter_(obj, time)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function labels = getAt_(obj, indices)
@@ -83,12 +83,12 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function add_(obj, labels)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function set_(obj, labels)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function [flag, indices] = update_(obj, labels)
@@ -103,17 +103,17 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function [flag, indices] = remove_(obj, labels)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function rename_(obj, oldlabels, newlabels)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function [flag, indices] = merge_(obj, oldlabels, newlabels)
             st = dbstack;
-			error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
         function index = createCategoricalIndexFromCellstr_(obj, input)
