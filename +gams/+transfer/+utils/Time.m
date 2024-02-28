@@ -33,7 +33,7 @@
 % Attention: Internal classes or functions have limited documentation and its properties, methods
 % and method or function signatures can change without notice.
 %
-classdef (Hidden) Time < handle
+classdef (Hidden) Time
 
     properties (Hidden, SetAccess = protected)
         time_
@@ -61,13 +61,8 @@ classdef (Hidden) Time < handle
             obj.time_ = now(); %#ok<TNOW1>
         end
 
-        function reset(obj)
+        function obj = reset(obj)
             obj.time_ = now(); %#ok<TNOW1>
-        end
-
-        function set(obj, time)
-            assert(isa(time, 'gams.transfer.utils.Time'));
-            obj.time_ = time.time_;
         end
 
         function flag = lt(obj, obj2)

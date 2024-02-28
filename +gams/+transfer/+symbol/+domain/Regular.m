@@ -55,7 +55,7 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
         function obj = set.symbol(obj, symbol)
             gams.transfer.utils.Validator('symbol', 1, symbol).types({'gams.transfer.symbol.Set', 'gams.transfer.alias.Abstract'});
             obj.symbol_ = symbol;
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function name = get.name(obj)
@@ -133,7 +133,7 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
             end
             [flag_, time_] = obj.symbol_.updatedAfter_(time);
             if flag_
-                obj.time_.set(time_);
+                obj.time_ = time_;
                 time = time_;
                 return
             end

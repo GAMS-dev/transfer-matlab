@@ -39,7 +39,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
     properties (Hidden, SetAccess = protected)
         records_ = []
-        time_
+        time_ = gams.transfer.utils.Time()
     end
 
     properties (Abstract, Constant)
@@ -58,17 +58,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function set.records(obj, records)
             obj.records_ = records;
-            obj.time_.reset();
-        end
-
-    end
-
-
-
-    methods (Hidden)
-
-        function obj = Abstract()
-            obj.time_ = gams.transfer.utils.Time();
+            obj.time_ = obj.time_.reset();
         end
 
     end
@@ -103,7 +93,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function copyFrom_(obj, symbol)
             obj.records_ = symbol.records_;
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function flag = isLabel_(obj, label)

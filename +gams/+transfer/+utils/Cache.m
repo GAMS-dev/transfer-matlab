@@ -33,11 +33,11 @@
 % Attention: Internal classes or functions have limited documentation and its properties, methods
 % and method or function signatures can change without notice.
 %
-classdef (Hidden) Cache < handle
+classdef (Hidden) Cache
 
     properties (Hidden, SetAccess = protected)
         value_
-        time_
+        time_ = gams.transfer.utils.Time();
     end
 
     properties (Dependent)
@@ -54,9 +54,9 @@ classdef (Hidden) Cache < handle
             value = obj.value_;
         end
 
-        function set.value(obj, value)
+        function obj = set.value(obj, value)
             obj.value_ = value;
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function time = get.time(obj)
@@ -67,15 +67,11 @@ classdef (Hidden) Cache < handle
 
     methods
 
-        function obj = Cache()
-            obj.time_= gams.transfer.utils.Time();
-        end
-
         function flag = holdsValue(obj)
             flag = ~isempty(obj.value_);
         end
 
-        function reset(obj)
+        function obj = reset(obj)
             obj.value_ = [];
         end
 

@@ -48,7 +48,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
     properties (Hidden, SetAccess = {?gams.transfer.alias.Abstract, ?gams.transfer.Container})
         container_
         name_ = ''
-        time_
+        time_ = gams.transfer.utils.Time()
         time_reset_
     end
 
@@ -178,7 +178,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             if isa(obj.alias_with, 'gams.transfer.symbol.Abstract')
                 obj.alias_with.container = container;
             end
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function name = get.name(obj)
@@ -188,7 +188,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         function set.name(obj, name)
             name = gams.transfer.utils.Validator('name', 1, name).symbolName().value;
             obj.container.renameSymbol(obj.name, name);
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function modified = get.modified(obj)
@@ -202,17 +202,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             else
                 obj.time_reset_ = gams.transfer.utils.Time();
                 while (obj.updatedAfter_(obj.time_reset_))
-                    obj.time_reset_.reset();
+                    obj.time_reset_ = obj.time_reset_.reset();
                 end
             end
-        end
-
-    end
-
-    methods (Hidden)
-
-        function obj = Abstract()
-            obj.time_ = gams.transfer.utils.Time();
         end
 
     end

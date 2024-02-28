@@ -54,10 +54,10 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         def_
         data_
         unique_labels_ = {}
-        time_
+        time_ = gams.transfer.utils.Time()
         time_reset_
-        cache_axes_
-        cache_is_valid_
+        cache_axes_ = gams.transfer.utils.Cache()
+        cache_is_valid_ = gams.transfer.utils.Cache()
     end
 
     properties (Dependent)
@@ -196,9 +196,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             gams.transfer.utils.Validator('container', 1, container).type('gams.transfer.Container', true);
             obj.container_ = container;
             obj.def_.switchContainer_(container);
-            obj.time_.reset();
-            obj.cache_is_valid_.reset();
-            obj.cache_axes_.reset();
+            obj.time_ = obj.time_.reset();
+            obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+            obj.cache_axes_ = obj.cache_axes_.reset();
         end
 
         function name = get.name(obj)
@@ -208,7 +208,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         function set.name(obj, name)
             name = gams.transfer.utils.Validator('name', 1, name).symbolName().value;
             obj.container.renameSymbol(obj.name, name);
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function description = get.description(obj)
@@ -217,7 +217,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
         function set.description(obj, description)
             obj.description_ = gams.transfer.utils.Validator('description', 1, description).symbolDescription().value;
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function def = get.def(obj)
@@ -231,9 +231,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         function set.data(obj, data)
             gams.transfer.utils.Validator('data', 1, data).type('gams.transfer.symbol.data.Abstract');
             obj.data_ = data;
-            obj.time_.reset();
-            obj.cache_is_valid_.reset();
-            obj.cache_axes_.reset();
+            obj.time_ = obj.time_.reset();
+            obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+            obj.cache_axes_ = obj.cache_axes_.reset();
         end
 
         function unique_labels = get.unique_labels(obj)
@@ -258,9 +258,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             gams.transfer.utils.Validator('unique_labels', 1, unique_labels)...
                 .cellof('gams.transfer.unique_labels.Abstract', true).numel(symbol_dimension);
             obj.unique_labels_ = unique_labels;
-            obj.time_.reset();
-            obj.cache_is_valid_.reset();
-            obj.cache_axes_.reset();
+            obj.time_ = obj.time_.reset();
+            obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+            obj.cache_axes_ = obj.cache_axes_.reset();
         end
 
         function dimension = get.dimension(obj)
@@ -277,9 +277,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 obj.def_.domains(symbol_dimension+1:dimension) = ...
                     {gams.transfer.symbol.domain.Relaxed(gams.transfer.Constants.UNIVERSE_NAME)};
             end
-            obj.time_.reset();
-            obj.cache_is_valid_.reset();
-            obj.cache_axes_.reset();
+            obj.time_ = obj.time_.reset();
+            obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+            obj.cache_axes_ = obj.cache_axes_.reset();
         end
 
         function size = get.size(obj)
@@ -297,9 +297,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 obj.unique_labels{i} = gams.transfer.unique_labels.Range('', 1, 1, size(i));
                 obj.def_.domains{i}.index_type = gams.transfer.symbol.domain.IndexType.integer();
             end
-            obj.time_.reset();
-            obj.cache_is_valid_.reset();
-            obj.cache_axes_.reset();
+            obj.time_ = obj.time_.reset();
+            obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+            obj.cache_axes_ = obj.cache_axes_.reset();
         end
 
         function domain = get.domain(obj)
@@ -319,9 +319,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         function set.domain(obj, domain)
             obj.def_.domains = domain;
             obj.applyDomainForwarding();
-            obj.time_.reset();
-            obj.cache_is_valid_.reset();
-            obj.cache_axes_.reset();
+            obj.time_ = obj.time_.reset();
+            obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+            obj.cache_axes_ = obj.cache_axes_.reset();
         end
 
         function domain_labels = get.domain_labels(obj)
@@ -332,9 +332,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             labels = obj.domain_labels;
             obj.def_.setDomainLabels(domain_labels);
             obj.data_.renameLabels_(labels, obj.domain_labels);
-            obj.time_.reset();
-            obj.cache_is_valid_.reset();
-            obj.cache_axes_.reset();
+            obj.time_ = obj.time_.reset();
+            obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+            obj.cache_axes_ = obj.cache_axes_.reset();
         end
 
         function domain_names = get.domain_names(obj)
@@ -388,7 +388,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 obj.def_.domains{i}.forwarding = domain_forwarding(i);
             end
             obj.applyDomainForwarding();
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function records = get.records(obj)
@@ -397,9 +397,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
         function set.records(obj, records)
             obj.data_.records = records;
-            obj.time_.reset();
-            obj.cache_is_valid_.reset();
-            obj.cache_axes_.reset();
+            obj.time_ = obj.time_.reset();
+            obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+            obj.cache_axes_ = obj.cache_axes_.reset();
         end
 
         function format = get.format(obj)
@@ -419,9 +419,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             otherwise
                 error('Unknown format');
             end
-            obj.time_.reset();
-            obj.cache_is_valid_.reset();
-            obj.cache_axes_.reset();
+            obj.time_ = obj.time_.reset();
+            obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+            obj.cache_axes_ = obj.cache_axes_.reset();
         end
 
         function modified = get.modified(obj)
@@ -435,19 +435,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             else
                 obj.time_reset_ = gams.transfer.utils.Time();
                 while (obj.updatedAfter_(obj.time_reset_))
-                    obj.time_reset_.reset();
+                    obj.time_reset_ = obj.time_reset_.reset();
                 end
             end
-        end
-
-    end
-
-    methods (Hidden)
-
-        function obj = Abstract()
-            obj.time_ = gams.transfer.utils.Time();
-            obj.cache_axes_ = gams.transfer.utils.Cache();
-            obj.cache_is_valid_ = gams.transfer.utils.Cache();
         end
 
     end
@@ -605,9 +595,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
                 obj.applyDomainForwarding();
 
-                obj.time_.reset();
-                obj.cache_is_valid_.reset();
-                obj.cache_axes_.reset();
+                obj.time_ = obj.time_.reset();
+                obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+                obj.cache_axes_ = obj.cache_axes_.reset();
                 return
             end
 
@@ -796,15 +786,15 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             old_unique_labels = obj.unique_labels_;
             obj.data_ = data;
 
-            obj.cache_is_valid_.reset();
-            obj.cache_axes_.reset();
-            obj.time_.reset();
+            obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+            obj.cache_axes_ = obj.cache_axes_.reset();
+            obj.time_ = obj.time_.reset();
 
             % check records format
             status = obj.data_.isValid_(obj.getAxes_(), values);
-            obj.cache_is_valid_.reset();
-            obj.cache_axes_.reset();
-            obj.time_.reset();
+            obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+            obj.cache_axes_ = obj.cache_axes_.reset();
+            obj.time_ = obj.time_.reset();
             if status.flag ~= gams.transfer.utils.Status.OK
                 obj.unique_labels_ = old_unique_labels;
                 obj.data_ = old_data;
@@ -1435,13 +1425,13 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             end
             [flag_, time_] = obj.data_.updatedAfter_(time);
             if flag_
-                obj.time_.set(time_);
+                obj.time_ = time_;
                 time = time_;
                 return
             end
             [flag_, time_] = obj.def_.updatedAfter_(time);
             if flag_
-                obj.time_.set(time_);
+                obj.time_ = time_;
                 time = time_;
                 return
             end
@@ -1451,7 +1441,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 end
                 [flag_, time_] = obj.unique_labels{i}.updatedAfter_(time);
                 if flag_
-                    obj.time_.set(time_);
+                    obj.time_ = time_;
                     time = time_;
                     return
                 end
@@ -1471,9 +1461,9 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                     obj.unique_labels_{i} = symbol.unique_labels{i}.copy();
                 end
             end
-            obj.time_.reset();
-            obj.cache_is_valid_.reset();
-            obj.cache_axes_.reset();
+            obj.time_ = obj.time_.reset();
+            obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+            obj.cache_axes_ = obj.cache_axes_.reset();
         end
 
         function domain = getDomain_(obj, dimension)

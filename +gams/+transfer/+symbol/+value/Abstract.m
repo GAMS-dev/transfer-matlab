@@ -37,9 +37,12 @@ classdef (Abstract, Hidden) Abstract
 
     %#ok<*INUSD,*STOUT>
 
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Abstract, ?gams.transfer.symbol.Abstract})
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.value.Abstract, ...
+        ?gams.transfer.symbol.Abstract, ?gams.transfer.symbol.definition.Abstract})
+
         label_
-        time_
+        time_ = gams.transfer.utils.Time()
+
     end
 
     properties (Dependent)
@@ -58,15 +61,7 @@ classdef (Abstract, Hidden) Abstract
 
         function obj = set.label(obj, label)
             obj.label_ = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname();
-            obj.time_.reset();
-        end
-
-    end
-
-    methods (Hidden)
-
-        function obj = Abstract()
-            obj.time_ = gams.transfer.utils.Time();
+            obj.time_ = obj.time_.reset();
         end
 
     end

@@ -145,7 +145,7 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
                 disable(indices) = true;
                 obj.records_.(labels{i}) = obj.records_.(labels{i})(~disable);
             end
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
     end

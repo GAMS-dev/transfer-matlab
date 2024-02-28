@@ -43,7 +43,7 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
         first_ = 1
         step_ = 1
         length_ = 0
-        time_
+        time_ = gams.transfer.utils.Time()
 
     end
 
@@ -62,7 +62,7 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
 
         function set.prefix(obj, prefix)
             obj.prefix_ = gams.transfer.utils.Validator('prefix', 1, prefix).string2char().type('char').value;
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function first = get.first(obj)
@@ -72,7 +72,7 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
         function set.first(obj, first)
             gams.transfer.utils.Validator('first', 1, first).integer().scalar().min(0).noNanInf();
             obj.first_ = first;
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function step = get.step(obj)
@@ -82,7 +82,7 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
         function set.step(obj, step)
             gams.transfer.utils.Validator('step', 1, step).integer().scalar().min(1).noNanInf();
             obj.step_ = step;
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function length = get.length(obj)
@@ -92,7 +92,7 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
         function set.length(obj, length)
             gams.transfer.utils.Validator('length', 1, length).integer().scalar().min(0).noNanInf();
             obj.length_ = length;
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
     end
@@ -104,7 +104,6 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
             obj.first_ = first;
             obj.step_ = step;
             obj.length_ = length;
-            obj.time_ = gams.transfer.utils.Time();
         end
 
     end
@@ -143,7 +142,7 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
             obj.first_ = 1;
             obj.step_ = 1;
             obj.length_ = 0;
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
     end

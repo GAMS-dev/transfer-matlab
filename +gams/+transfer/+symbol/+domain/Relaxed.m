@@ -57,7 +57,7 @@ classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
                 valid.varname();
             end
             obj.name_ = valid.value;
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
     end

@@ -40,13 +40,12 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
     properties (Hidden, SetAccess = private)
         uels_label2ids_
         uels_id2labels_
-        time_
+        time_ = gams.transfer.utils.Time()
     end
 
     methods
 
         function obj = OrderedLabelSet(labels)
-            obj.time_ = gams.transfer.utils.Time();
             obj.clear();
             if nargin >= 1
                 obj.add(labels);
@@ -80,7 +79,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
         function clear(obj)
             obj.uels_label2ids_ = javaObject("java.util.LinkedHashMap");
             obj.uels_id2labels_ = {};
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
     end
@@ -105,7 +104,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
             if numel(labels) > 0
                 obj.updateId2Label_();
             end
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function set_(obj, labels)
@@ -127,7 +126,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
             if nargout > 0
                 [flag, indices] = obj.updatedIndices_(oldlabels, [], []);
             end
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function rename_(obj, oldlabels, newlabels)
@@ -187,7 +186,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
                 obj.uels_id2labels_{i} = char(it.next());
                 i = i + 1;
             end
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
     end

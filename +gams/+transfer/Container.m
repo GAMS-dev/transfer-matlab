@@ -75,7 +75,7 @@ classdef Container < gams.transfer.utils.Handle
     properties (Hidden, SetAccess = protected)
         gams_dir_ = ''
         data_
-        time_
+        time_ = gams.transfer.utils.Time()
         time_reset_
     end
 
@@ -128,7 +128,7 @@ classdef Container < gams.transfer.utils.Handle
             else
                 obj.time_reset_ = gams.transfer.utils.Time();
                 while (obj.updatedAfter_(obj.time_reset_))
-                    obj.time_reset_.reset();
+                    obj.time_reset_ = obj.time_reset_.reset();
                 end
             end
             symbols = obj.data_.entries();
@@ -165,7 +165,6 @@ classdef Container < gams.transfer.utils.Handle
             % Constructs a GAMS Transfer Container, see class help
 
             obj.data_ = gams.transfer.incase_ordered_dict.Struct();
-            obj.time_ = gams.transfer.utils.Time();
 
             % parse input arguments
             has_gams_dir = false;
@@ -301,7 +300,7 @@ classdef Container < gams.transfer.utils.Handle
             for i = 1:numel(symbols)
                 [flag_, time_] = symbols{i}.updatedAfter_(time);
                 if flag_
-                    obj.time_.set(time_);
+                    obj.time_ = time_;
                     time = time_;
                     return
                 end
@@ -1909,7 +1908,7 @@ classdef Container < gams.transfer.utils.Handle
                     removed_symbols{i}.container = [];
                 end
 
-                obj.time_.reset();
+                obj.time_ = obj.time_.reset();
                 return
             end
 
@@ -1960,7 +1959,7 @@ classdef Container < gams.transfer.utils.Handle
                 obj.removeSymbols(remove_aliases);
             end
 
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         %> Reestablishes a valid GDX symbol order
@@ -2040,7 +2039,7 @@ classdef Container < gams.transfer.utils.Handle
 
             % apply permutation
             obj.data_.reorder([idx_sets, idx_other]);
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
 
             % force recheck of all remaining symbols in container
             obj.isValid(false, true);

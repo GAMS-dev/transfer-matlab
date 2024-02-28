@@ -40,7 +40,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
     properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
         domains_ = {}
         values_ = []
-        time_
+        time_ = gams.transfer.utils.Time()
     end
 
     properties (Dependent)
@@ -97,7 +97,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                     obj.domains_{i}.appendLabelIndex_(i);
                 end
             end
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function values = get.values(obj)
@@ -105,14 +105,6 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                 obj.initValues_()
             end
             values = obj.values_;
-        end
-
-    end
-
-    methods (Hidden)
-
-        function obj = Abstract()
-            obj.time_ = gams.transfer.utils.Time();
         end
 
     end
@@ -184,7 +176,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             for i = 1:numel(obj.domains_)
                 [flag_, time_] = obj.domains_{i}.updatedAfter_(time);
                 if flag_
-                    obj.time_.set(time_);
+                    obj.time_ = time_;
                     time = time_;
                     return
                 end
@@ -192,7 +184,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             for i = 1:numel(obj.values_)
                 [flag_, time_] = obj.values_{i}.updatedAfter_(time);
                 if flag_
-                    obj.time_.set(time_);
+                    obj.time_ = time_;
                     time = time_;
                     return
                 end
@@ -206,7 +198,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                 obj.domains_{i} = def.domains{i}.copy();
             end
             obj.values_ = def.values;
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function setDomainLabels_(obj, domain_labels)
@@ -220,7 +212,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                     obj.domains_{i}.appendLabelIndex_(i);
                 end
             end
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function domain = findDomain_(obj, label)
@@ -261,7 +253,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                 end
                 obj.domains_{i}.symbol = symbol;
             end
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
         function initValues_(obj)
@@ -271,7 +263,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function resetValues_(obj)
             obj.initValues_();
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
     end

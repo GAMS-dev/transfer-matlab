@@ -81,7 +81,7 @@ classdef Set < gams.transfer.symbol.Abstract
     %#ok<*INUSD,*STOUT>
 
     properties (Hidden, SetAccess = protected)
-        cache_is_valid_domain_
+        cache_is_valid_domain_ = gams.transfer.utils.Cache()
     end
 
     properties (Dependent)
@@ -123,7 +123,6 @@ classdef Set < gams.transfer.symbol.Abstract
             if init_records
                 obj.data_ = gams.transfer.symbol.data.Struct();
             end
-            obj.cache_is_valid_domain_ = gams.transfer.utils.Cache();
         end
 
     end

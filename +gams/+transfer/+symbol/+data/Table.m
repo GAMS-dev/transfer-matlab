@@ -125,7 +125,7 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
             if istable(obj.records_)
                 obj.records_(indices, :) = [];
             end
-            obj.time_.reset();
+            obj.time_ = obj.time_.reset();
         end
 
     end

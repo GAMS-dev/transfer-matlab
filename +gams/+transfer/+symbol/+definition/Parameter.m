@@ -67,7 +67,7 @@ classdef (Hidden) Parameter < gams.transfer.symbol.definition.Abstract
         function initValues_(obj)
             obj.values_ = {gams.transfer.symbol.value.Numeric('value', 0)};
             for i = 1:numel(obj.values_)
-                obj.values_{i}.time_.set(obj.time_);
+                obj.values_{i}.time_ = obj.time_;
             end
         end
 
