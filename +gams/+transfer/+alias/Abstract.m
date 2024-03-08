@@ -342,6 +342,14 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
     end
 
+    methods (Hidden)
+
+        function status = isValidDomain(obj)
+            status = gams.transfer.utils.Status.ok();
+        end
+
+    end
+
     methods (Static)
 
         %> Returns an overview over all aliases given
