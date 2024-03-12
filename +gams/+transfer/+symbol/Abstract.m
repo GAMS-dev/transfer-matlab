@@ -743,10 +743,10 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
             % anything sparse or scalar?
             is_sparse = false;
-            is_scalar = false;
+            is_scalar = numel(values) > 0 && dim == 0;
             for i = 1:numel(values)
                 is_sparse = is_sparse || issparse(new_records.(values{i}.label));
-                is_scalar = is_scalar || isscalar(new_records.(values{i}.label));
+                is_scalar = is_scalar && isscalar(new_records.(values{i}.label));
             end
 
             % select record format
