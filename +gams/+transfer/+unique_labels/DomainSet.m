@@ -129,7 +129,7 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
             symbol_labels = obj.get();
             n = numel(symbol_labels);
             symbol_labels(n+1:n+numel(labels)) = labels;
-            if numel(unique(symbol_labels)) ~= numel(symbol_labels)
+            if numel(symbol_labels) > 1 && numel(unique(symbol_labels)) ~= numel(symbol_labels)
                 error('Unique labels will not be unqiue');
             end
 

@@ -98,7 +98,7 @@ classdef IndexType
                 end
                 return
             end
-            if ischar(value) || isstring(value)
+            if ischar(value) || isstring(value) && numel(value) == 1
                 obj.select = value;
             elseif isnumeric(value)
                 obj.value = value;

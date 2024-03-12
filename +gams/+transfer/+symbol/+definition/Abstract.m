@@ -58,7 +58,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                 if isa(input, 'gams.transfer.symbol.domain.Abstract') || ...
                     isa(input, 'gams.transfer.symbol.Set') || ...
                     isa(input, 'gams.transfer.alias.Abstract') || ...
-                    ischar(input) || isstring(input)
+                    ischar(input) || isstring(input) && numel(input) == 1
                     input = {input};
                 else
                     error(['Cannot create domains from ''%s'' (at position %d): Must be ''cell'', ', ...
@@ -72,7 +72,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                     domains{i} = input{i};
                 elseif isa(input{i}, 'gams.transfer.symbol.Set') || isa(input{i}, 'gams.transfer.alias.Abstract')
                     domains{i} = gams.transfer.symbol.domain.Regular(input{i});
-                elseif ischar(input{i}) || isstring(input{i})
+                elseif ischar(input{i}) || isstring(input{i}) && numel(input{i}) == 1
                     domains{i} = gams.transfer.symbol.domain.Relaxed(input{i});
                 else
                     error(['Cannot create domains from ''%s'' (at position %d): Element %d must be ', ...
@@ -92,7 +92,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function set.domains(obj, domains)
             obj.domains_ = obj.createDomains('domains', 1, domains);
-            if numel(obj.domains_) ~= numel(unique(obj.getDomainLabels()))
+            if numel(obj.domains_) > 1 && numel(obj.domains_) ~= numel(unique(obj.getDomainLabels()))
                 for i = 1:numel(obj.domains_)
                     obj.domains_{i}.appendLabelIndex_(i);
                 end

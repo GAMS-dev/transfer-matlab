@@ -332,7 +332,7 @@ classdef Set < gams.transfer.symbol.Abstract
                     status = gams.transfer.utils.Status(sprintf('Domain set ''%s'' dimension must be 1.', obj.name_));
                 elseif ~obj.isValid()
                     status = gams.transfer.utils.Status(sprintf('Domain set ''%s'' is invalid.', obj.name_));
-                elseif isfield(obj.records, obj.def_.domains{1}.label) && ...
+                elseif isfield(obj.records, obj.def_.domains{1}.label) && numel(obj.records.(obj.def_.domains{1}.label)) > 1 && ...
                     numel(unique(obj.records.(obj.def_.domains{1}.label))) ~= numel(obj.records.(obj.def_.domains{1}.label))
                     status = gams.transfer.utils.Status(sprintf('Domain set ''%s'' must not have duplicate records.', obj.name_));
                 else

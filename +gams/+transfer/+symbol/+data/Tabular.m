@@ -150,7 +150,10 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
                 indices = [];
                 return
             end
-            indices = gams.transfer.utils.unique(uint64(obj.records_.(domain.label)));
+            indices = uint64(obj.records_.(domain.label));
+            if numel(indices) > 1
+                indices = gams.transfer.utils.unique(indices);
+            end
             indices = indices(~isnan(indices) & indices ~= 0);
         end
 
