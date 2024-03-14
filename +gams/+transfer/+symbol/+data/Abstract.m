@@ -105,18 +105,25 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function values = availableValues_(obj, class, values)
-            idx = true(size(values));
-            for i = 1:numel(values)
-                if ~isa(values{i}, ['gams.transfer.symbol.value.', class]) || ...
-                    ~obj.isLabel_(values{i}.label)
-                    idx(i) = false;
-                end
+        function def = projectDefinition_(obj, def)
+            missing_domains = false(1, numel(def.domains));
+            missing_values = false(1, numel(def.values));
+            for i = 1:numel(def.domains)
+                missing_domains(i) = ~obj.isLabel_(def.domains{i}.label);
             end
-            values = values(idx);
+            for i = 1:numel(def.values)
+                missing_values(i) = ~obj.isLabel_(def.values{i}.label);
+            end
+            if any(missing_domains) || any(missing_values)
+                domains = def.domains(~missing_domains);
+                values = def.values(~missing_values);
+                def = def.copy();
+                def.domains = domains;
+                def.values = values;
+            end
         end
 
-        function status = isValid_(obj, axes, values)
+        function status = isValid_(obj, def, axes)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
@@ -129,78 +136,78 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             unique_labels = [];
         end
 
-        function indices = usedUniqueLabels_(obj, axes, values, dimension)
+        function indices = usedUniqueLabels_(obj, def, dimension)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function nrecs = getNumberRecords_(obj, axes, values)
+        function nrecs = getNumberRecords_(obj, def)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function nvals = getNumberValues_(obj, axes, values)
+        function nvals = getNumberValues_(obj, def)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function sparsity = getSparsity_(obj, axes, values)
-            n_dense = prod(axes.size()) * numel(values);
+        function sparsity = getSparsity_(obj, def, axes)
+            n_dense = prod(axes.size()) * numel(def.values);
             if n_dense == 0
                 sparsity = NaN;
             else
-                sparsity = 1 - obj.getNumberValues_(axes, values) / n_dense;
+                sparsity = 1 - obj.getNumberValues_(def) / n_dense;
             end
         end
 
-        function value = getMeanValue_(obj, axes, values)
+        function value = getMeanValue_(obj, def)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function [value, where] = getMinValue_(obj, axes, values)
+        function [value, where] = getMinValue_(obj, def, axes)
             if nargout >= 2
-                [value, where] = obj.getFunValue_(@min, axes, values);
+                [value, where] = obj.getFunValue_(@min, def, axes);
             else
-                value = obj.getFunValue_(@min, axes, values);
+                value = obj.getFunValue_(@min, def, axes);
             end
         end
 
-        function [value, where] = getMaxValue_(obj, axes, values)
+        function [value, where] = getMaxValue_(obj, def, axes)
             if nargout >= 2
-                [value, where] = obj.getFunValue_(@max, axes, values);
+                [value, where] = obj.getFunValue_(@max, def, axes);
             else
-                value = obj.getFunValue_(@max, axes, values);
+                value = obj.getFunValue_(@max, def, axes);
             end
         end
 
-        function [value, where] = getMaxAbsValue_(obj, axes, values)
+        function [value, where] = getMaxAbsValue_(obj, def, axes)
             fun = @(x) (max(abs(x)));
             if nargout >= 2
-                [value, where] = obj.getFunValue_(fun, axes, values);
+                [value, where] = obj.getFunValue_(fun, def, axes);
             else
-                value = obj.getFunValue_(fun, axes, values);
+                value = obj.getFunValue_(fun, def, axes);
             end
         end
 
-        function n = countNA_(obj, values)
-            n = obj.countFun_(@gams.transfer.SpecialValues.isNA, values);
+        function n = countNA_(obj, def)
+            n = obj.countFun_(@gams.transfer.SpecialValues.isNA, def);
         end
 
-        function n = countUndef_(obj, values)
-            n = obj.countFun_(@gams.transfer.SpecialValues.isUndef, values);
+        function n = countUndef_(obj, def)
+            n = obj.countFun_(@gams.transfer.SpecialValues.isUndef, def);
         end
 
-        function n = countEps_(obj, values)
-            n = obj.countFun_(@gams.transfer.SpecialValues.isEps, values);
+        function n = countEps_(obj, def)
+            n = obj.countFun_(@gams.transfer.SpecialValues.isEps, def);
         end
 
-        function n = countPosInf_(obj, values)
-            n = obj.countFun_(@gams.transfer.SpecialValues.isPosInf, values);
+        function n = countPosInf_(obj, def)
+            n = obj.countFun_(@gams.transfer.SpecialValues.isPosInf, def);
         end
 
-        function n = countNegInf_(obj, values)
-            n = obj.countFun_(@gams.transfer.SpecialValues.isNegInf, values);
+        function n = countNegInf_(obj, def)
+            n = obj.countFun_(@gams.transfer.SpecialValues.isNegInf, def);
         end
 
         function subindex = ind2sub_(obj, axes, value, linindex)
@@ -208,27 +215,27 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function transformTo_(obj, axes, values, data)
+        function transformTo_(obj, def, axes, data)
             if isa(data, 'gams.transfer.symbol.data.Tabular')
-                obj.transformToTabular_(axes, values, data);
+                obj.transformToTabular_(def, axes, data);
             elseif isa(data, 'gams.transfer.symbol.data.Matrix')
-                obj.transformToMatrix_(axes, values, data);
+                obj.transformToMatrix_(def, axes, data);
             else
                 error('Invalid data: %s', class(data));
             end
         end
 
-        function transformToTabular_(obj, axes, values, data)
+        function transformToTabular_(obj, def, axes, data)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function transformToMatrix_(obj, axes, values, data)
+        function transformToMatrix_(obj, def, axes, data)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function permuteAxis_(obj, axes, values, dimension, permutation)
+        function permuteAxis_(obj, def, axes, dimension, permutation)
             % st = dbstack;
             % error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
@@ -253,10 +260,10 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             obj.renameLabels_(oldlabels, newlabels);
         end
 
-        function status = isValid(obj, axes, values)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues_('Numeric', values);
-            status = obj.isValid_(axes, values);
+        function status = isValid(obj, def, axes)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
+            status = obj.isValid_(def, axes);
         end
 
         function flag = hasUniqueLabels(obj, domain)
@@ -269,132 +276,128 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             unique_labels = obj.getUniqueLabels_(domain);
         end
 
-        function indices = usedUniqueLabels(obj, axes, values, dimension)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues_('Numeric', values);
-            gams.transfer.utils.Validator('dimension', 3, dimension).integer().scalar().inInterval(1, axes.dimension);
-            indices = obj.usedUniqueLabels_(axes, values, dimension);
+        function indices = usedUniqueLabels(obj, def, dimension)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('dimension', 2, dimension).integer().scalar().inInterval(1, axes.dimension);
+            indices = obj.usedUniqueLabels_(def, dimension);
         end
 
-        function nrecs = getNumberRecords(obj, axes, values)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues_('Numeric', values);
-            nrecs = obj.getNumberRecords_(axes, values);
+        function nrecs = getNumberRecords(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            nrecs = obj.getNumberRecords_(def);
         end
 
-        function nvals = getNumberValues(obj, axes, values)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues_('Numeric', values);
-            nvals = obj.getNumberValues_(axes, values);
+        function nvals = getNumberValues(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            nvals = obj.getNumberValues_(def_);
         end
 
-        function sparsity = getSparsity(obj, axes, values)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues_('Numeric', values);
-            sparsity = obj.getSparsity_(axes, values);
+        function sparsity = getSparsity(obj, def, axes)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
+            sparsity = obj.getSparsity_(def, axes);
         end
 
-        function value = getMeanValue(obj, axes, values)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues_('Numeric', values);
-            value = obj.getMeanValue_(axes, values);
+        function value = getMeanValue(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            value = obj.getMeanValue_(def);
         end
 
-        function [value, where] = getMinValue(obj, axes, values)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues_('Numeric', values);
+        function [value, where] = getMinValue(obj, def, axes)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
             if nargout >= 2
-                [value, where] = obj.getFunValue_(@min, axes, values);
+                [value, where] = obj.getFunValue_(@min, def, axes);
             else
-                value = obj.getFunValue_(@min, axes, values);
+                value = obj.getFunValue_(@min, def, axes);
             end
         end
 
-        function [value, where] = getMaxValue(obj, axes, values)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues_('Numeric', values);
+        function [value, where] = getMaxValue(obj, def, axes)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
             if nargout >= 2
-                [value, where] = obj.getFunValue_(@max, axes, values);
+                [value, where] = obj.getFunValue_(@max, def, axes);
             else
-                value = obj.getFunValue_(@max, axes, values);
+                value = obj.getFunValue_(@max, def, axes);
             end
         end
 
-        function [value, where] = getMaxAbsValue(obj, axes, values)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues_('Numeric', values);
+        function [value, where] = getMaxAbsValue(obj, def, axes)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
             fun = @(x) (max(abs(x)));
             if nargout >= 2
-                [value, where] = obj.getFunValue_(fun, axes, values);
+                [value, where] = obj.getFunValue_(fun, def, axes);
             else
-                value = obj.getFunValue_(fun, axes, values);
+                value = obj.getFunValue_(fun, def, axes);
             end
         end
 
-        function n = countNA(obj, values)
-            values = obj.availableValues_('Numeric', values);
-            n = obj.countFun_(@gams.transfer.SpecialValues.isNA, values);
+        function n = countNA(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            n = obj.countFun_(@gams.transfer.SpecialValues.isNA, def);
         end
 
-        function n = countUndef(obj, values)
-            values = obj.availableValues_('Numeric', values);
-            n = obj.countFun_(@gams.transfer.SpecialValues.isUndef, values);
+        function n = countUndef(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            n = obj.countFun_(@gams.transfer.SpecialValues.isUndef, def);
         end
 
-        function n = countEps(obj, values)
-            values = obj.availableValues_('Numeric', values);
-            n = obj.countFun_(@gams.transfer.SpecialValues.isEps, values);
+        function n = countEps(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            n = obj.countFun_(@gams.transfer.SpecialValues.isEps, def);
         end
 
-        function n = countPosInf(obj, values)
-            values = obj.availableValues_('Numeric', values);
-            n = obj.countFun_(@gams.transfer.SpecialValues.isPosInf, values);
+        function n = countPosInf(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            n = obj.countFun_(@gams.transfer.SpecialValues.isPosInf, def);
         end
 
-        function n = countNegInf(obj, values)
-            values = obj.availableValues_('Numeric', values);
-            n = obj.countFun_(@gams.transfer.SpecialValues.isNegInf, values);
+        function n = countNegInf(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            n = obj.countFun_(@gams.transfer.SpecialValues.isNegInf, def);
         end
 
-        function transformTo(obj, axes, values, data)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues_('Numeric', values);
+        function transformTo(obj, def, axes, data)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
             gams.transfer.utils.Validator('data', 3, data).type('gams.transfer.symbol.data.Abstract');
-            obj.transformTo_(axes, values, data);
+            obj.transformTo_(def, axes, data);
         end
 
-        function transformToTabular(obj, axes, values, data)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues_('Numeric', values);
+        function transformToTabular(obj, def, axes, data)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
             gams.transfer.utils.Validator('data', 3, data).type('gams.transfer.symbol.data.Abstract');
-            obj.transformToTabular_(axes, values, data);
+            obj.transformToTabular_(def, axes, data);
         end
 
-        function transformToMatrix(obj, axes, values, data)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues_('Numeric', values);
+        function transformToMatrix(obj, def, axes, data)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
             gams.transfer.utils.Validator('data', 3, data).type('gams.transfer.symbol.data.Abstract');
-            obj.transformToMatrix_(axes, values, data);
+            obj.transformToMatrix_(def, axes, data);
         end
 
-        function permuteAxis(obj, axes, values, dimension, permutation)
-            gams.transfer.utils.Validator('axes', 1, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            values = obj.availableValues_('Numeric', values);
+        function permuteAxis(obj, def, axes, dimension, permutation)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
             gams.transfer.utils.Validator('dimension', 3, dimension).integer().scalar().inInterval(1, axes.dimension);
             gams.transfer.utils.Validator('permutation', 4, permutation).integer().vector();
-            obj.permuteAxis_(axes, values, dimension, permutation);
+            obj.permuteAxis_(def, axes, dimension, permutation);
         end
 
     end
 
     methods (Hidden, Access = private)
 
-        function [value, where] = getFunValue_(obj, fun, axes, values)
-            value = zeros(1, numel(values));
-            where = cell(1, numel(values));
+        function [value, where] = getFunValue_(obj, fun, def, axes)
+            value = zeros(1, numel(def.values));
+            where = cell(1, numel(def.values));
             found = false;
-            for i = 1:numel(values)
-                [value_, where_] = fun(obj.records_.(values{i}.label)(:));
+            for i = 1:numel(def.values)
+                [value_, where_] = fun(obj.records_.(def.values{i}.label)(:));
                 if ~isempty(value_)
                     value(i) = value_;
                     where{i} = where_;
@@ -404,7 +407,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             if found
                 [value, idx] = fun(value);
                 if nargout >= 2
-                    idx = obj.ind2sub_(axes, values{i}, where{idx});
+                    idx = obj.ind2sub_(axes, def.values{idx}, where{idx});
                     where = cell(1, axes.dimension);
                     for i = 1:axes.dimension
                         where{i} = axes.axis(i).unique_labels.getAt_(idx(i));
@@ -417,10 +420,10 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             end
         end
 
-        function n = countFun_(obj, fun, values)
+        function n = countFun_(obj, fun, def)
             n = 0;
-            for i = 1:numel(values)
-                n = n + sum(fun(obj.records_.(values{i}.label)(:)));
+            for i = 1:numel(def.values)
+                n = n + sum(fun(obj.records_.(def.values{i}.label)(:)));
             end
         end
 

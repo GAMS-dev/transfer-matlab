@@ -76,32 +76,32 @@ classdef (Hidden) SparseMatrix < gams.transfer.symbol.data.Matrix
     methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
         ?gams.transfer.unique_labels.Abstract})
 
-        function status = isValid_(obj, axes, values)
-            for i = 1:numel(values)
-                label = values{i}.label;
+        function status = isValid_(obj, def, axes)
+            for i = 1:numel(def.values)
+                label = def.values{i}.label;
                 if ~issparse(obj.records_.(label))
                     status = gams.transfer.utils.Status(sprintf("Records '%s' must be sparse.", label));
                     return
                 end
             end
-            status = isValid_@gams.transfer.symbol.data.Matrix(obj, axes, values);
+            status = isValid_@gams.transfer.symbol.data.Matrix(obj, def, axes);
         end
 
-        function nvals = getNumberValues_(obj, axes, values)
+        function nvals = getNumberValues_(obj, def)
             nvals = 0;
-            for i = 1:numel(values)
-                nvals = nvals + nnz(obj.records_.(values{i}.label));
+            for i = 1:numel(def.values)
+                nvals = nvals + nnz(obj.records_.(def.values{i}.label));
             end
         end
 
-        function transformToMatrix_(obj, axes, values, data)
+        function transformToMatrix_(obj, def, axes, data)
             if isa(data, 'gams.transfer.symbol.data.DenseMatrix')
-                for i = 1:numel(values)
-                    data.records_.(values{i}.label) = full(obj.records_.(values{i}.label));
+                for i = 1:numel(def.values)
+                    data.records_.(def.values{i}.label) = full(obj.records_.(def.values{i}.label));
                 end
             elseif isa(data, 'gams.transfer.symbol.data.SparseMatrix')
-                for i = 1:numel(values)
-                    data.records_.(values{i}.label) = obj.records_.(values{i}.label);
+                for i = 1:numel(def.values)
+                    data.records_.(def.values{i}.label) = obj.records_.(def.values{i}.label);
                 end
             else
                 error('Invalid data: %s', class(data));

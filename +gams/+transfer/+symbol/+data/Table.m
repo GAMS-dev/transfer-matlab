@@ -94,15 +94,15 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
             end
         end
 
-        function status = isValid_(obj, axes, values)
+        function status = isValid_(obj, def, axes)
             if ~istable(obj.records_)
                 status = gams.transfer.utils.Status("Record data must be 'table'.");
                 return
             end
-            status = isValid_@gams.transfer.symbol.data.Tabular(obj, axes, values);
+            status = isValid_@gams.transfer.symbol.data.Tabular(obj, def, axes);
         end
 
-        function nrecs = getNumberRecords_(obj, axes, values)
+        function nrecs = getNumberRecords_(obj, def)
             if istable(obj.records_)
                 nrecs = height(obj.records_);
             else
@@ -110,7 +110,7 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
             end
         end
 
-        function transformToTabular_(obj, axes, values, data)
+        function transformToTabular_(obj, def, axes, data)
             if isa(data, 'gams.transfer.symbol.data.Table')
                 data.records_ = obj.records_;
             elseif isa(data, 'gams.transfer.symbol.data.Struct')

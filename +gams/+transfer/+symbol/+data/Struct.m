@@ -94,28 +94,24 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
             end
         end
 
-        function status = isValid_(obj, axes, values)
+        function status = isValid_(obj, def, axes)
             if ~isstruct(obj.records_)
                 status = gams.transfer.utils.Status("Record data must be 'struct'.");
                 return
             end
-            status = isValid_@gams.transfer.symbol.data.Tabular(obj, axes, values);
+            status = isValid_@gams.transfer.symbol.data.Tabular(obj, def, axes);
         end
 
-        function nrecs = getNumberRecords_(obj, axes, values)
-            dim = axes.dimension;
-            nrecs_axes = nan(1, dim);
-            nrecs_values = nan(1, numel(values));
-            for i = 1:dim
-                label = axes.axis(i).domain.label;
-                if isfield(obj.records_, label)
-                    nrecs_axes(i) = numel(obj.records_.(label));
-                end
+        function nrecs = getNumberRecords_(obj, def)
+            nrecs_domains = nan(1, numel(def.domains));
+            nrecs_values = nan(1, numel(def.values));
+            for i = 1:numel(def.domains)
+                nrecs_domains(i) = numel(obj.records_.(def.domains{i}.label));
             end
-            for i = 1:numel(values)
-                nrecs_values(i) = numel(obj.records_.(values{i}.label));
+            for i = 1:numel(def.values)
+                nrecs_values(i) = numel(obj.records_.(def.values{i}.label));
             end
-            nrecs = [nrecs_axes, nrecs_values];
+            nrecs = [nrecs_domains, nrecs_values];
             nrecs = nrecs(~isnan(nrecs));
 
             if numel(nrecs) == 0
@@ -127,7 +123,7 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
             end
         end
 
-        function transformToTabular_(obj, axes, values, data)
+        function transformToTabular_(obj, def, axes, data)
             if isa(data, 'gams.transfer.symbol.data.Table')
                 data.records_ = struct2table(obj.records_);
             elseif isa(data, 'gams.transfer.symbol.data.Struct')

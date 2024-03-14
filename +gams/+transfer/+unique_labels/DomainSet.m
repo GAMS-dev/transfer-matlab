@@ -90,7 +90,7 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
         end
 
         function count = count(obj)
-            count = obj.symbol_.data.getNumberRecords_(obj.symbol_.getAxes_(), obj.symbol_.getValues_());
+            count = obj.symbol_.getNumberRecords();
         end
 
         function labels = get(obj)

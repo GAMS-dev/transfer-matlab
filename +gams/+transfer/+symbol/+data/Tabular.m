@@ -40,7 +40,7 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
     methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
         ?gams.transfer.unique_labels.Abstract})
 
-        function status = isValid_(obj, axes, values)
+        function status = isValid_(obj, def, axes)
             % empty is valid
             if numel(obj.getLabels()) == 0
                 status = gams.transfer.utils.Status.ok();
@@ -87,10 +87,10 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
                 prev_size = curr_size;
             end
 
-            for i = 1:numel(values)
-                label = values{i}.label;
+            for i = 1:numel(def.values)
+                label = def.values{i}.label;
 
-                switch class(values{i})
+                switch class(def.values{i})
                 case 'gams.transfer.symbol.value.Numeric'
                     if isempty(obj.records_.(label))
                     elseif isnumeric(obj.records_.(label))
@@ -144,8 +144,8 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             end
         end
 
-        function indices = usedUniqueLabels_(obj, axes, values, dimension)
-            domain = axes.axis(dimension).domain;
+        function indices = usedUniqueLabels_(obj, def, dimension)
+            domain = def.domains{dimension};
             if ~obj.isLabel_(domain.label)
                 indices = [];
                 return
@@ -157,16 +157,16 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             indices = indices(~isnan(indices) & indices ~= 0);
         end
 
-        function nvals = getNumberValues_(obj, axes, values)
-            nvals = obj.getNumberRecords_(axes, values) * numel(values);
+        function nvals = getNumberValues_(obj, def)
+            nvals = obj.getNumberRecords_(def) * numel(def.values);
         end
 
-        function value = getMeanValue_(obj, axes, values)
+        function value = getMeanValue_(obj, def)
             value = 0;
-            for i = 1:numel(values)
-                value = value + sum(obj.records_.(values{i}.label)(:));
+            for i = 1:numel(def.values)
+                value = value + sum(obj.records_.(def.values{i}.label)(:));
             end
-            n_values = obj.getNumberRecords_(axes, values) * numel(values);
+            n_values = obj.getNumberValues_(def);
             if n_values == 0
                 value = nan;
             else
@@ -182,8 +182,8 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             end
         end
 
-        function transformToMatrix_(obj, axes, values, data)
-            if numel(values) == 0
+        function transformToMatrix_(obj, def, axes, data)
+            if numel(def.values) == 0
                 error('At least one numeric value column is required to transform to a matrix format.');
             end
             dim = axes.dimension;
@@ -207,28 +207,28 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
 
             % init matrix records
             if isa(data, 'gams.transfer.symbol.data.DenseMatrix')
-                for i = 1:numel(values)
-                    data.records.(values{i}.label) = values{i}.default * ones(size_);
+                for i = 1:numel(def.values)
+                    data.records.(def.values{i}.label) = def.values{i}.default * ones(size_);
                 end
             elseif isa(data, 'gams.transfer.symbol.data.SparseMatrix')
-                for i = 1:numel(values)
-                    if values{i}.default == 0
-                        data.records.(values{i}.label) = sparse(size_(1), size_(2));
+                for i = 1:numel(def.values)
+                    if def.values{i}.default == 0
+                        data.records.(def.values{i}.label) = sparse(size_(1), size_(2));
                     else
-                        data.records.(values{i}.label) = sparse(values{i}.default * ones(size_));
+                        data.records.(def.values{i}.label) = sparse(def.values{i}.default * ones(size_));
                     end
                 end
             end
 
             % copy records to matrices
-            for i = 1:numel(values)
-                data.records.(values{i}.label)(idx) = obj.records_.(values{i}.label);
+            for i = 1:numel(def.values)
+                data.records.(def.values{i}.label)(idx) = obj.records_.(def.values{i}.label);
             end
 
             data.time_.reset();
         end
 
-        function permuteAxis_(obj, axes, values, dimension, permutation)
+        function permuteAxis_(obj, def, axes, dimension, permutation)
             domain = axes.axis(dimension).domain;
             if ~obj.isLabel(domain.label)
                 return

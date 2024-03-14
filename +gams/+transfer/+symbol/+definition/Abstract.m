@@ -45,9 +45,6 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
     properties (Dependent)
         domains
-    end
-
-    properties (Dependent, SetAccess = private)
         values
     end
 
@@ -105,6 +102,11 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                 obj.initValues_()
             end
             values = obj.values_;
+        end
+
+        function set.values(obj, values)
+            obj.values_ = gams.transfer.utils.Validator('values', 1, values) ...
+                .cellof('gams.transfer.symbol.value.Abstract').value;
         end
 
     end

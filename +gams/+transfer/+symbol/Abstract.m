@@ -586,8 +586,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 records = gams.transfer.symbol.data.Table(records);
             end
             if isa(records, 'gams.transfer.symbol.data.Abstract')
-                values = records.availableValues_('Abstract', obj.def_.values);
-                status = records.isValid_(obj.getAxes_(), values);
+                def = records.projectDefinition_(obj.def_);
+                status = records.isValid_(def, obj.getAxes_());
                 if status.flag ~= gams.transfer.utils.Status.OK
                     error(status.message);
                 end
@@ -791,13 +791,14 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             obj.time_ = obj.time_.reset();
 
             % check records format
-            status = obj.data_.isValid_(obj.getAxes_(), values);
-            obj.cache_is_valid_ = obj.cache_is_valid_.reset();
-            obj.cache_axes_ = obj.cache_axes_.reset();
-            obj.time_ = obj.time_.reset();
+            def = obj.data_.projectDefinition_(obj.def_);
+            status = obj.data_.isValid_(def, obj.getAxes_());
             if status.flag ~= gams.transfer.utils.Status.OK
                 obj.unique_labels_ = old_unique_labels;
                 obj.data_ = old_data;
+                obj.time_ = obj.time_.reset();
+                obj.cache_is_valid_ = obj.cache_is_valid_.reset();
+                obj.cache_axes_ = obj.cache_axes_.reset();
                 error(status.message);
             end
 
@@ -851,7 +852,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 end
             end
 
-            obj.data_.transformTo_(obj.getAxes_(), obj.getValues_(), data);
+            def = obj.data_.projectDefinition_(obj.def_);
+            obj.data_.transformTo_(def, obj.getAxes_(), data);
             obj.data = data;
 
             for i = 1:obj.dimension
@@ -901,7 +903,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                     status = obj.def_.isValid();
                 end
                 if status.flag == gams.transfer.utils.Status.OK
-                    status = obj.data_.isValid_(obj.getAxes_(), obj.getValues_());
+                    def = obj.data_.projectDefinition_(obj.def_);
+                    status = obj.data_.isValid_(def, obj.getAxes_());
                 end
                 obj.cache_is_valid_.value = status;
             else
@@ -1039,14 +1042,15 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             %
             % s = getSparsity() returns sparsity s in the symbol records.
 
-            sparsity = obj.data_.getSparsity_(obj.getDomainAxes_(), obj.getNumericValues_());
+            def = obj.data_.projectDefinition_(obj.def_);
+            sparsity = obj.data_.getSparsity_(def, obj.getDomainAxes_());
         end
 
     end
 
     methods (Hidden, Access = protected)
 
-        function values = parseValues(obj, varargin)
+        function def = parseValues(obj, varargin)
 
             % parse input arguments
             has_values = false;
@@ -1069,10 +1073,12 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                         error('Argument ''values'' contains invalid value: %s.', values{i});
                     end
                 end
+                def = obj.def_.copy();
+                def.values = values;
             else
-                values = obj.def_.values;
+                def = obj.def_;
             end
-            values = obj.data_.availableValues_('Numeric', values);
+            def = obj.data_.projectDefinition_(def);
         end
 
     end
@@ -1100,15 +1106,15 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             %   'upper', 'scale'}. Default: All value fields of symbol.
 
             try
-                values = obj.parseValues(varargin{:});
+                def = obj.parseValues(varargin{:});
             catch e
                 error(e.message);
             end
 
             if nargout >= 2
-                [value, where] = obj.data_.getMaxValue_(obj.getAxes_(), values);
+                [value, where] = obj.data_.getMaxValue_(def, obj.getAxes_());
             else
-                value = obj.data_.getMaxValue_(obj.getAxes_(), values);
+                value = obj.data_.getMaxValue_(def, obj.getAxes_());
             end
         end
 
@@ -1133,14 +1139,14 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             %   'upper', 'scale'}. Default: All value fields of symbol.
 
             try
-                values = obj.parseValues(varargin{:});
+                def = obj.parseValues(varargin{:});
             catch e
                 error(e.message);
             end
             if nargout >= 2
-                [value, where] = obj.data_.getMinValue_(obj.getAxes_(), values);
+                [value, where] = obj.data_.getMinValue_(def, obj.getAxes_());
             else
-                value = obj.data_.getMinValue_(obj.getAxes_(), values);
+                value = obj.data_.getMinValue_(def, obj.getAxes_());
             end
         end
 
@@ -1165,11 +1171,11 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             %   'upper', 'scale'}. Default: All value fields of symbol.
 
             try
-                values = obj.parseValues(varargin{:});
+                def = obj.parseValues(varargin{:});
             catch e
                 error(e.message);
             end
-            value = obj.data_.getMeanValue_(obj.getAxes_(), values);
+            value = obj.data_.getMeanValue_(def);
         end
 
         %> Returns the largest absolute value in records
@@ -1193,14 +1199,14 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             %   'upper', 'scale'}. Default: All value fields of symbol.
 
             try
-                values = obj.parseValues(varargin{:});
+                def = obj.parseValues(varargin{:});
             catch e
                 error(e.message);
             end
             if nargout >= 2
-                [value, where] = obj.data_.getMaxAbsValue_(obj.getAxes_(), values);
+                [value, where] = obj.data_.getMaxAbsValue_(def, obj.getAxes_());
             else
-                value = obj.data_.getMaxAbsValue_(obj.getAxes_(), values);
+                value = obj.data_.getMaxAbsValue_(def, obj.getAxes_());
             end
         end
 
@@ -1228,11 +1234,11 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % See also: gams.transfer.SpecialValues.NA, gams.transfer.SpecialValues.isNA
 
             try
-                values = obj.parseValues(varargin{:});
+                def = obj.parseValues(varargin{:});
             catch e
                 error(e.message);
             end
-            n = obj.data_.countNA_(values);
+            n = obj.data_.countNA_(def);
         end
 
         %> Returns the number of GAMS UNDEF values in records
@@ -1259,11 +1265,11 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % See also: gams.transfer.SpecialValues.UNDEF, gams.transfer.SpecialValues.isUndef
 
             try
-                values = obj.parseValues(varargin{:});
+                def = obj.parseValues(varargin{:});
             catch e
                 error(e.message);
             end
-            n = obj.data_.countUndef_(values);
+            n = obj.data_.countUndef_(def);
         end
 
         %> Returns the number of GAMS EPS values in records
@@ -1290,11 +1296,11 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % See also: gams.transfer.SpecialValues.EPS, gams.transfer.SpecialValues.isEps
 
             try
-                values = obj.parseValues(varargin{:});
+                def = obj.parseValues(varargin{:});
             catch e
                 error(e.message);
             end
-            n = obj.data_.countEps_(values);
+            n = obj.data_.countEps_(def);
         end
 
         %> Returns the number of GAMS PINF (positive infinity) values in
@@ -1323,11 +1329,11 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % See also: gams.transfer.SpecialValues.POSINF, gams.transfer.SpecialValues.isPosInf
 
             try
-                values = obj.parseValues(varargin{:});
+                def = obj.parseValues(varargin{:});
             catch e
                 error(e.message);
             end
-            n = obj.data_.countPosInf_(values);
+            n = obj.data_.countPosInf_(def);
         end
 
         %> Returns the number of GAMS MINF (negative infinity) values in
@@ -1356,11 +1362,11 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % See also: gams.transfer.SpecialValues.NEGINF, gams.transfer.SpecialValues.isNegInf
 
             try
-                values = obj.parseValues(varargin{:});
+                def = obj.parseValues(varargin{:});
             catch e
                 error(e.message);
             end
-            n = obj.data_.countNegInf_(values);
+            n = obj.data_.countNegInf_(def);
         end
 
         %> Returns the number of GDX records (not available for matrix formats)
@@ -1374,7 +1380,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % n = getNumberRecords() returns the number of records that would be stored in a GDX
             % file if this symbol would be written to GDX. For matrix formats n is NaN.
 
-            nrecs = obj.data_.getNumberRecords_(obj.getAxes_(), obj.getValues_());
+            def = obj.data_.projectDefinition_(obj.def_);
+            nrecs = obj.data_.getNumberRecords_(def);
         end
 
         %> Returns the number of values stored for this symbol.
@@ -1404,11 +1411,11 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             % See also: gams.transfer.symbol.Abstract.getSparsity
 
             try
-                values = obj.parseValues(varargin{:});
+                def = obj.parseValues(varargin{:});
             catch e
                 error(e.message);
             end
-            nvals = obj.data_.getNumberValues_(obj.getAxes_(), values);
+            nvals = obj.data_.getNumberValues_(def);
         end
 
     end
@@ -1475,11 +1482,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         end
 
         function values = getValues_(obj)
-            values = obj.data_.availableValues_('Abstract', obj.def_.values);
-        end
-
-        function values = getNumericValues_(obj)
-            values = obj.data_.availableValues_('Numeric', obj.def_.values);
+            values = obj.data_.projectDefinition_(obj.def_).values;
         end
 
         function [flag, domain_flag] = isDomainAxis_(obj, dimension)
@@ -1529,11 +1532,35 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         end
 
         function unique_labels = getAxisUniqueLabels_(obj, dimension)
-            unique_labels = obj.getAxes_().axis(dimension).unique_labels_;
+            if obj.cache_axes_.holdsValue() && ~obj.updatedAfter_(obj.cache_axes_.time)
+                unique_labels = obj.cache_axes_.value.axis(dimension).unique_labels_;
+                return
+            end
+
+            domain = obj.def_.domains{dimension};
+            if ~isempty(obj.data_)
+                data_unique_labels = obj.data_.getUniqueLabels_(domain);
+            else
+                data_unique_labels = [];
+            end
+            if isempty(data_unique_labels)
+                domain_unique_labels = domain.getUniqueLabels();
+            else
+                domain_unique_labels = [];
+            end
+            if ~isempty(data_unique_labels)
+                unique_labels = data_unique_labels;
+            elseif ~isempty(obj.unique_labels{dimension})
+                unique_labels = obj.unique_labels{dimension};
+            elseif ~isempty(domain_unique_labels)
+                unique_labels = domain_unique_labels;
+            else
+                unique_labels = gams.transfer.Constants.EMPTY_UNIQUE_LABELS;
+            end
         end
 
         function unique_labels = getInitAxisUniqueLabels_(obj, dimension)
-            unique_labels = obj.getAxes_().axis(dimension).unique_labels_;
+            unique_labels = obj.getAxisUniqueLabels_(dimension);
             if obj.isDomainAxis_(dimension)
                 obj.unique_labels{dimension} = gams.transfer.unique_labels.OrderedLabelSet(unique_labels.get());
                 unique_labels = obj.unique_labels{dimension};
@@ -1541,7 +1568,13 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         end
 
         function axis = getAxis_(obj, dimension)
-            axis = obj.getAxes_().axis(dimension);
+            if obj.cache_axes_.holdsValue() && ~obj.updatedAfter_(obj.cache_axes_.time)
+                axis = obj.cache_axes_.value.axis(dimension);
+                return
+            end
+
+            unique_labels = obj.getAxisUniqueLabels_(dimension);
+            axis = gams.transfer.symbol.unique_labels.Axis(obj.def_.domains{dimension}, unique_labels);
         end
 
         function axes = getAxes_(obj)
@@ -1553,23 +1586,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             dim = obj.dimension;
             axes = cell(1, dim);
             for i = 1:dim
-                domain = obj.def_.domains{i};
-                if ~isempty(obj.data_)
-                    data_unique_labels = obj.data_.getUniqueLabels_(domain);
-                else
-                    data_unique_labels = [];
-                end
-                domain_unique_labels = domain.getUniqueLabels();
-                if ~isempty(data_unique_labels)
-                    unique_labels = data_unique_labels;
-                elseif ~isempty(obj.unique_labels{i})
-                    unique_labels = obj.unique_labels{i};
-                elseif ~isempty(domain_unique_labels)
-                    unique_labels = domain_unique_labels;
-                else
-                    unique_labels = gams.transfer.Constants.EMPTY_UNIQUE_LABELS;
-                end
-                axes{i} = gams.transfer.symbol.unique_labels.Axis(domain, unique_labels);
+                axes{i} = obj.getAxis_(i);
             end
             axes = gams.transfer.symbol.unique_labels.Axes(axes);
             obj.cache_axes_.value = axes;
@@ -1580,7 +1597,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         end
 
         function indices = getUsedAxisIndices_(obj, dimension)
-            indices = obj.data_.usedUniqueLabels_(obj.getAxes_(), obj.getValues_(), dimension);
+            indices = obj.data_.usedUniqueLabels_(obj.def_, dimension);
         end
 
         function labels = getUsedAxisLabels_(obj, dimension)
@@ -1631,7 +1648,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 return
             end
             [~, indices] = unique_labels.update_(labels);
-            obj.data_.permuteAxis_(obj.getAxes_(), obj.getValues_(), dimension, indices);
+            def = obj.data_.projectDefinition_(obj.def_);
+            obj.data_.permuteAxis_(def, obj.getAxes_(), dimension, indices);
         end
 
         function updateAxisLabelsFromDomain_(obj, dimension)
@@ -1663,7 +1681,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 return
             end
             [~, indices] = unique_labels.remove_(labels);
-            obj.data_.permuteAxis_(obj.getAxes_(), obj.getValues_(), dimension, indices);
+            def = obj.data_.projectDefinition_(obj.def_);
+            obj.data_.permuteAxis_(def, obj.getAxes_(), dimension, indices);
         end
 
         function removeUnusedAxisLabels_(obj, dimension)
@@ -1706,7 +1725,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 return
             end
             [~, indices] = unique_labels.merge_(oldlabels, newlabels);
-            obj.data_.permuteAxis_(obj.getAxes_(), obj.getValues_(), dimension, indices);
+            def = obj.data_.projectDefinition_(obj.def_);
+            obj.data_.permuteAxis_(def, obj.getAxes_(), dimension, indices);
         end
 
     end

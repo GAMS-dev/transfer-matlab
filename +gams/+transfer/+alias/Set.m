@@ -739,10 +739,6 @@ classdef Set < gams.transfer.alias.Abstract
             values = obj.alias_with_.getValues_();
         end
 
-        function values = getNumericValues_(obj)
-            values = obj.alias_with_.getNumericValues_();
-        end
-
         function [flag, domain_flag] = isDomainAxis_(obj, dimension)
             [flag, domain_flag] = obj.alias_with_.isDomainAxis_(dimension);
         end

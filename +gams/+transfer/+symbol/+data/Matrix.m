@@ -62,12 +62,12 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             end
         end
 
-        function status = isValid_(obj, axes, values)
+        function status = isValid_(obj, def, axes)
             size_ = axes.matrixSize();
-            for i = 1:numel(values)
-                label = values{i}.label;
+            for i = 1:numel(def.values)
+                label = def.values{i}.label;
 
-                switch class(values{i})
+                switch class(def.values{i})
                 case 'gams.transfer.symbol.value.Numeric'
                     if isempty(obj.records_.(label))
                     elseif isnumeric(obj.records_.(label))
@@ -81,7 +81,7 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
                         return
                     end
                 otherwise
-                    error('Unknown symbol value type: %s', class(values{i}));
+                    error('Unknown symbol value type: %s', class(def.values{i}));
                 end
 
                 if isempty(obj.records_.(label))
@@ -97,32 +97,32 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             status = gams.transfer.utils.Status.ok();
         end
 
-        function indices = usedUniqueLabels_(obj, axes, values, dimension)
-            if numel(values) == 0
+        function indices = usedUniqueLabels_(obj, def, dimension)
+            if numel(def.values) == 0
                 indices = [];
             else
                 count = 0;
-                for i = 1:numel(values)
-                    size_ = size(obj.records_.(values{i}.label));
+                for i = 1:numel(def.values)
+                    size_ = size(obj.records_.(def.values{i}.label));
                     count = max(count, size_(dimension));
                 end
                 indices = 1:count;
             end
         end
 
-        function nrecs = getNumberRecords_(obj, axes, values)
+        function nrecs = getNumberRecords_(obj, def)
             nrecs = nan;
         end
 
-        function value = getMeanValue_(obj, axes, values)
+        function value = getMeanValue_(obj, def)
             value = 0;
-            for i = 1:numel(values)
-                value = value + mean(obj.records_.(values{i}.label)(:));
+            for i = 1:numel(def.values)
+                value = value + mean(obj.records_.(def.values{i}.label)(:));
             end
-            if numel(values) == 0
+            if numel(def.values) == 0
                 value = nan;
             else
-                value = value / numel(values);
+                value = value / numel(def.values);
             end
         end
 
@@ -131,7 +131,7 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             subindex = [i, j];
         end
 
-        function transformToTabular_(obj, axes, values, data)
+        function transformToTabular_(obj, def, axes, data)
             % get size
             dim = axes.dimension;
             size_ = axes.matrixSize();
@@ -147,10 +147,10 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
 
             % get sparse indices
             keep_indices = false(1, prod(size_));
-            for i = 1:numel(values)
-                [row, col, val] = find(obj.records_.(values{i}.label));
-                idx = sub2ind(size(obj.records_.(values{i}.label)), row, col);
-                keep_indices(idx(val ~= values{i}.default)) = true;
+            for i = 1:numel(def.values)
+                [row, col, val] = find(obj.records_.(def.values{i}.label));
+                idx = sub2ind(size(obj.records_.(def.values{i}.label)), row, col);
+                keep_indices(idx(val ~= def.values{i}.default)) = true;
             end
             keep_indices = keep_indices(indices_perm);
             indices(~keep_indices, :) = [];
@@ -172,8 +172,8 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             end
 
             % values columns
-            for i = 1:numel(values)
-                data.records.(values{i}.label) = full(obj.records_.(values{i}.label)(indices_perm));
+            for i = 1:numel(def.values)
+                data.records.(def.values{i}.label) = full(obj.records_.(def.values{i}.label)(indices_perm));
             end
 
             data.time_.reset();
