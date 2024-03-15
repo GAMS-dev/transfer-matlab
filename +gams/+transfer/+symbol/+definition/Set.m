@@ -38,7 +38,7 @@ classdef (Hidden) Set < gams.transfer.symbol.definition.Abstract
         ?gams.transfer.symbol.Abstract, ?gams.transfer.Container, ?gams.transfer.symbol.data.Abstract})
 
         is_singleton_ = false
-        values_ = {gams.transfer.symbol.value.String('element_text', '')}
+        values_
     end
 
     properties (Dependent)
@@ -71,6 +71,11 @@ classdef (Hidden) Set < gams.transfer.symbol.definition.Abstract
         function obj = Set(is_singleton)
             obj.domains_ = {gams.transfer.symbol.domain.Relaxed(gams.transfer.Constants.UNIVERSE_NAME)};
             obj.is_singleton_ = is_singleton;
+            persistent values_
+            if isempty(values_)
+                values_ = {gams.transfer.symbol.value.String('element_text', '')};
+            end
+            obj.values_ = values_;
         end
 
     end

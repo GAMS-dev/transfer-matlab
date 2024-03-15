@@ -40,7 +40,7 @@ classdef (Hidden) Parameter < gams.transfer.symbol.definition.Abstract
     properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ...
         ?gams.transfer.symbol.Abstract, ?gams.transfer.Container, ?gams.transfer.symbol.data.Abstract})
 
-        values_ = {gams.transfer.symbol.value.Numeric('value', 0)}
+        values_
     end
 
     properties (Dependent, SetAccess = private)
@@ -58,6 +58,11 @@ classdef (Hidden) Parameter < gams.transfer.symbol.definition.Abstract
     methods (Hidden, Access = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract})
 
         function obj = Parameter()
+            persistent values_
+            if isempty(values_)
+                values_ = {gams.transfer.symbol.value.Numeric('value', 0)};
+            end
+            obj.values_ = values_;
         end
 
     end

@@ -435,7 +435,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
             obj.modified_ = modified;
             for i = 1:obj.dimension
-                obj.getAxisUniqueLabels_(i).modified = modified;
+                unique_labels = obj.getAxisUniqueLabels_(i);
+                unique_labels.modified = modified;
             end
         end
 
