@@ -171,7 +171,7 @@ classdef Set < gams.transfer.alias.Abstract
                 alias_with = alias_with.alias_with;
             end
             obj.alias_with_ = alias_with;
-            obj.time_ = obj.time_.reset();
+            obj.modified_ = true;
         end
 
         function description = get.description(obj)
@@ -397,22 +397,7 @@ classdef Set < gams.transfer.alias.Abstract
         function copyFrom_(obj, symbol)
             gams.transfer.utils.Validator('symbol', 1, symbol).type(class(obj));
             obj.alias_with_ = symbol.alias_with;
-            obj.time_ = obj.time_.reset();
-        end
-
-        function [flag, time] = updatedAfter_(obj, time)
-            flag = true;
-            if time <= obj.time_
-                time = obj.time_;
-                return
-            end
-            [flag_, time_] = obj.alias_with_.updatedAfter_(time);
-            if flag_
-                obj.time_ = time_;
-                time = time_;
-                return
-            end
-            flag = false;
+            obj.modified_ = true;
         end
 
     end

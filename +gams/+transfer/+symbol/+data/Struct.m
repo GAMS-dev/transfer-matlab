@@ -66,11 +66,6 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
 
     methods
 
-        function data = copy(obj)
-            data = gams.transfer.symbol.data.Struct();
-            data.copyFrom_(obj);
-        end
-
         function labels = getLabels(obj)
             if isstruct(obj.records_)
                 labels = fieldnames(obj.records_);
@@ -88,7 +83,7 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
             flag = isfield(obj.records_, label);
         end
 
-        function renameLabels_(obj, oldlabels, newlabels)
+        function obj = renameLabels_(obj, oldlabels, newlabels)
             if isstruct(obj.records_)
                 obj.records = gams.transfer.utils.rename_struct_fields(obj.records_, oldlabels, newlabels);
             end
@@ -123,7 +118,7 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
             end
         end
 
-        function transformToTabular_(obj, def, axes, data)
+        function data = transformToTabular_(obj, def, axes, data)
             if isa(data, 'gams.transfer.symbol.data.Table')
                 data.records_ = struct2table(obj.records_);
             elseif isa(data, 'gams.transfer.symbol.data.Struct')
@@ -131,17 +126,15 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
             else
                 error('Invalid data: %s', class(data));
             end
-            data.time_.reset();
         end
 
-        function removeRows_(obj, indices)
+        function obj = removeRows_(obj, indices)
             labels = obj.getLabels();
             for i = 1:numel(labels)
                 disable = false(1, numel(obj.records_.(labels{i})));
                 disable(indices) = true;
                 obj.records_.(labels{i}) = obj.records_.(labels{i})(~disable);
             end
-            obj.time_ = obj.time_.reset();
         end
 
     end

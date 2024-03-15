@@ -83,7 +83,7 @@ function test_read(t, cfg, container_type)
     t.assertEquals(s.domain_type, 'none');
     t.assert(numel(s.size) == 1);
     t.assert(s.size(1) == 5);
-    t.assert(isnan(s.getSparsity()));
+    t.assert(s.getSparsity() == 0);
     t.assert(s.getNumberRecords() == 5);
     t.assert(s.isValid());
 

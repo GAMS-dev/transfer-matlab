@@ -48,8 +48,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
     properties (Hidden, SetAccess = {?gams.transfer.alias.Abstract, ?gams.transfer.Container})
         container_
         name_ = ''
-        time_ = gams.transfer.utils.Time()
-        time_reset_
+        modified_ = true
     end
 
     properties (Dependent)
@@ -178,7 +177,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             if isa(obj.alias_with, 'gams.transfer.symbol.Abstract')
                 obj.alias_with.container = container;
             end
-            obj.time_ = obj.time_.reset();
+            obj.modified_ = true;
         end
 
         function name = get.name(obj)
@@ -188,23 +187,16 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         function set.name(obj, name)
             name = gams.transfer.utils.Validator('name', 1, name).symbolName().value;
             obj.container.renameSymbol(obj.name, name);
-            obj.time_ = obj.time_.reset();
+            obj.modified_ = true;
         end
 
         function modified = get.modified(obj)
-            modified = isempty(obj.time_reset_) || obj.updatedAfter_(obj.time_reset_);
+            modified = obj.modified_;
         end
 
         function set.modified(obj, modified)
             gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
-            if modified
-                obj.time_reset_ = [];
-            else
-                obj.time_reset_ = gams.transfer.utils.Time();
-                while (obj.updatedAfter_(obj.time_reset_))
-                    obj.time_reset_ = obj.time_reset_.reset();
-                end
-            end
+            obj.modified_ = modified;
         end
 
     end
@@ -215,13 +207,6 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         function copyFrom_(obj, symbol)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
-        end
-
-        function [flag, time] = updatedAfter_(obj, time)
-            flag = time <= obj.time_;
-            if flag
-                time = obj.time_;
-            end
         end
 
     end

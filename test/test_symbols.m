@@ -1476,7 +1476,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.data.x.size(1) == 3);
     t.assert(iscell(gdx2.data.x.domain));
     t.assert(numel(gdx2.data.x.domain) == 1);
-    t.assert(gdx2.data.x.domain{1} == gdx2.data.i);
+    t.assert(gdx2.data.x.domain{1}.equals(gdx2.data.i));
     t.assertEquals(gdx2.data.x.domain_type, 'regular');
     t.assert(~gdx2.data.x.domain_forwarding(1));
     t.assertEquals(gdx2.data.x.format, 'struct');
@@ -1560,8 +1560,8 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.data.e.size(2) == 3);
     t.assert(iscell(gdx2.data.e.domain));
     t.assert(numel(gdx2.data.e.domain) == 2);
-    t.assert(gdx2.data.e.domain{1} == gdx2.data.a);
-    t.assert(gdx2.data.e.domain{2} == gdx2.data.i);
+    t.assert(gdx2.data.e.domain{1}.equals(gdx2.data.a));
+    t.assert(gdx2.data.e.domain{2}.equals(gdx2.data.i));
     t.assertEquals(gdx2.data.e.domain_type, 'regular');
     t.assert(~gdx2.data.e.domain_forwarding(1));
     t.assert(~gdx2.data.e.domain_forwarding(2));
@@ -1655,7 +1655,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.data.p.size(1) == 3);
     t.assert(iscell(gdx2.data.p.domain));
     t.assert(numel(gdx2.data.p.domain) == 1);
-    t.assert(gdx2.data.p.domain{1} == gdx2.data.i);
+    t.assert(gdx2.data.p.domain{1}.equals(gdx2.data.i));
     t.assertEquals(gdx2.data.p.domain_type, 'regular');
     t.assert(~gdx2.data.p.domain_forwarding(1));
     t.assertEquals(gdx2.data.p.format, 'struct');

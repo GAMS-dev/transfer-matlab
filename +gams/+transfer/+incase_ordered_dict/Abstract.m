@@ -33,7 +33,7 @@
 % Attention: Internal classes or functions have limited documentation and its properties, methods
 % and method or function signatures can change without notice.
 %
-classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
+classdef (Abstract, Hidden) Abstract
 
     %#ok<*INUSD,*STOUT>
 
@@ -74,27 +74,27 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function add(obj, key, entry)
+        function obj = add(obj, key, entry)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function clear(obj)
+        function obj = clear(obj)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function symbol = rename(obj, oldkey, newkey)
+        function [obj, symbol] = rename(obj, oldkey, newkey)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function remove(obj, keys)
+        function obj = remove(obj, keys)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function reorder(obj, permutation)
+        function obj = reorder(obj, permutation)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end

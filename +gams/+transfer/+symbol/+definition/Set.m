@@ -34,12 +34,19 @@ classdef (Hidden) Set < gams.transfer.symbol.definition.Abstract
 
     %#ok<*INUSD,*STOUT>
 
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ...
+        ?gams.transfer.symbol.Abstract, ?gams.transfer.Container, ?gams.transfer.symbol.data.Abstract})
+
         is_singleton_ = false
+        values_ = {gams.transfer.symbol.value.String('element_text', '')}
     end
 
     properties (Dependent)
         is_singleton
+    end
+
+    properties (Dependent, SetAccess = private)
+        values
     end
 
     methods
@@ -51,7 +58,10 @@ classdef (Hidden) Set < gams.transfer.symbol.definition.Abstract
         function obj = set.is_singleton(obj, is_singleton)
             gams.transfer.utils.Validator('is_singleton', 1, is_singleton).type('logical').scalar();
             obj.is_singleton_ = is_singleton;
-            obj.resetValues();
+        end
+
+        function values = get.values(obj)
+            values = obj.values_;
         end
 
     end
@@ -76,26 +86,9 @@ classdef (Hidden) Set < gams.transfer.symbol.definition.Abstract
 
     methods
 
-        function def = copy(obj)
-            def = gams.transfer.symbol.definition.Set(obj.is_singleton_);
-            def.copyFrom_(obj);
-        end
-
         function eq = equals(obj, def)
             eq = equals@gams.transfer.symbol.definition.Abstract(obj, def) && ...
                 isequal(obj.is_singleton_, def.is_singleton);
-        end
-
-    end
-
-    methods (Hidden, Access = {?gams.transfer.symbol.definition.Abstract, ...
-        ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
-
-        function initValues_(obj)
-            obj.values_ = {gams.transfer.symbol.value.String('element_text', '')};
-            for i = 1:numel(obj.values_)
-                obj.values_{i}.time_ = obj.time_;
-            end
         end
 
     end

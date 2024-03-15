@@ -57,7 +57,6 @@ classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
                 valid.varname();
             end
             obj.name_ = valid.value;
-            obj.time_ = obj.time_.reset();
         end
 
     end
@@ -89,11 +88,6 @@ classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
 
     methods
 
-        function domain = copy(obj)
-            domain = gams.transfer.symbol.domain.Relaxed(obj.name_);
-            domain.copyFrom_(obj);
-        end
-
         function eq = equals(obj, domain)
             eq = equals@gams.transfer.symbol.domain.Abstract(obj, domain) && ...
                 isequal(obj.name_, domain.name);
@@ -101,16 +95,6 @@ classdef (Hidden) Relaxed < gams.transfer.symbol.domain.Abstract
 
         function status = isValid(obj) %#ok<MANU>
             status = gams.transfer.utils.Status.ok();
-        end
-
-    end
-
-    methods (Hidden, Access = {?gams.transfer.symbol.domain.Abstract, ...
-        ?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.domain.Violation})
-
-        function copyFrom_(obj, domain)
-            copyFrom_@gams.transfer.symbol.domain.Abstract(obj, domain);
-            obj.name_ = domain.name;
         end
 
     end

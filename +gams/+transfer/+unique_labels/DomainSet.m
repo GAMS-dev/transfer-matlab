@@ -90,7 +90,7 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
         end
 
         function count = count(obj)
-            count = obj.symbol_.getNumberRecords();
+            count = numel(obj.symbol_.getUsedAxisIndices_(1));
         end
 
         function labels = get(obj)
@@ -113,16 +113,6 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
     methods (Hidden, Access = {?gams.transfer.unique_labels.Abstract, ...
         ?gams.transfer.symbol.Abstract, ?gams.transfer.symbol.data.Abstract, ...
         ?gams.transfer.symbol.domain.Abstract})
-
-        function [flag, time] = updatedAfter_(obj, time)
-            flag = true;
-            [flag_, time_] = obj.symbol_.updatedAfter_(time);
-            if flag_
-                time = time_;
-                return
-            end
-            flag = false;
-        end
 
         function add_(obj, labels)
             % extend domain uels
@@ -166,7 +156,7 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
             oldlabels = obj.get();
             [~, idx] = ismember(labels, oldlabels);
             idx(idx == 0) = [];
-            obj.symbol_.data.removeRows(idx);
+            obj.symbol_.data = obj.symbol_.data.removeRows(idx);
             obj.symbol_.removeAxisLabels_(1, labels(idx));
             if nargout > 0
                 [flag, indices] = obj.updatedIndices_(oldlabels, [], []);

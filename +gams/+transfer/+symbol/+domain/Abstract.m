@@ -33,7 +33,7 @@
 % Attention: Internal classes or functions have limited documentation and its properties, methods
 % and method or function signatures can change without notice.
 %
-classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
+classdef (Abstract, Hidden) Abstract
 
     %#ok<*INUSD,*STOUT>
 
@@ -41,7 +41,6 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         label_
         index_type_ = gams.transfer.symbol.domain.IndexType();
         forwarding_ = false
-        time_ = gams.transfer.utils.Time()
     end
 
     properties (Dependent)
@@ -60,38 +59,30 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             label = obj.label_;
         end
 
-        function set.label(obj, label)
+        function obj = set.label(obj, label)
             obj.label_ = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname().value;
-            obj.time_ = obj.time_.reset();
         end
 
         function index_type = get.index_type(obj)
             index_type = obj.index_type_;
         end
 
-        function set.index_type(obj, index_type)
+        function obj = set.index_type(obj, index_type)
             gams.transfer.utils.Validator('index_type', 1, index_type).type('gams.transfer.symbol.domain.IndexType');
             obj.index_type_ = index_type;
-            obj.time_ = obj.time_.reset();
         end
 
         function forwarding = get.forwarding(obj)
             forwarding = obj.forwarding_;
         end
 
-        function set.forwarding(obj, forwarding)
+        function obj = set.forwarding(obj, forwarding)
             obj.forwarding_ = gams.transfer.utils.Validator('forwarding', 1, forwarding).type('logical').scalar().value;
-            obj.time_ = obj.time_.reset();
         end
 
     end
 
     methods
-
-        function domain = copy(obj)
-            st = dbstack;
-            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
-        end
 
         function eq = equals(obj, domain)
             eq = isequal(class(obj), class(domain)) && ...
@@ -117,25 +108,11 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
     methods (Hidden, Access = {?gams.transfer.symbol.domain.Abstract, ...
         ?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.domain.Violation})
 
-        function [flag, time] = updatedAfter_(obj, time)
-            flag = time <= obj.time_;
-            if flag
-                time = obj.time_;
-            end
-        end
-
-        function copyFrom_(obj, domain)
-            obj.label_ = domain.label;
-            obj.forwarding_ = domain.forwarding;
-            obj.time_ = obj.time_.reset();
-        end
-
-        function appendLabelIndex_(obj, index)
+        function obj = appendLabelIndex_(obj, index)
             add = ['_', int2str(index)];
             if numel(obj.label_) <= numel(add) || ~strcmp(obj.label_(end-numel(add)+1:end), add)
                 obj.label_ = strcat(obj.label_, add);
             end
-            obj.time_ = obj.time_.reset();
         end
 
         function addLabels_(obj, labels, forwarding)
@@ -146,20 +123,15 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
     methods
 
-        function copyFrom(obj, domain)
-            gams.transfer.utils.Validator('domain', 1, domain).type(class(obj));
-            obj.copyFrom_(domain);
-        end
-
-        function appendLabelIndex(obj, index)
+        function obj = appendLabelIndex(obj, index)
             gams.transfer.utils.Validator('index', 1, index).integer().scalar().min(0);
-            obj.appendLabelIndex_(index);
+            obj = obj.appendLabelIndex_(index);
         end
 
         function addLabels(obj, labels, forwarding)
             gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr();
             gams.transfer.utils.Validator('forwarding', 2, forwarding).logical().scalar();
-            obj.addLabels_(labels, forwarding);
+            obj = obj.addLabels_(labels, forwarding);
         end
 
     end

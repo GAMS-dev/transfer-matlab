@@ -41,7 +41,6 @@ classdef (Abstract, Hidden) Abstract
         ?gams.transfer.symbol.Abstract, ?gams.transfer.symbol.definition.Abstract})
 
         label_
-        time_ = gams.transfer.utils.Time()
 
     end
 
@@ -61,7 +60,6 @@ classdef (Abstract, Hidden) Abstract
 
         function obj = set.label(obj, label)
             obj.label_ = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().varname();
-            obj.time_ = obj.time_.reset();
         end
 
     end
@@ -72,17 +70,6 @@ classdef (Abstract, Hidden) Abstract
             eq = isequal(class(obj), class(value)) && ...
                 isequal(obj.label, value.label) && ...
                 isequaln(obj.default, value.default);
-        end
-
-    end
-
-    methods (Hidden, Access = {?gams.transfer.symbol.value.Abstract, ?gams.transfer.symbol.definition.Abstract})
-
-        function [flag, time] = updatedAfter_(obj, time)
-            flag = time <= obj.time_;
-            if flag
-                time = obj.time_;
-            end
         end
 
     end

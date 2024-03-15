@@ -37,12 +37,19 @@ classdef (Hidden) Equation < gams.transfer.symbol.definition.Abstract
 
     %#ok<*INUSD,*STOUT>
 
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ...
+        ?gams.transfer.symbol.Abstract, ?gams.transfer.Container, ?gams.transfer.symbol.data.Abstract})
+
         type_
+        values_
     end
 
     properties (Dependent)
         type
+    end
+
+    properties (Dependent, SetAccess = private)
+        values
     end
 
     methods (Hidden, Static)
@@ -69,7 +76,11 @@ classdef (Hidden) Equation < gams.transfer.symbol.definition.Abstract
 
         function obj = set.type(obj, type)
             obj.type_ = obj.createType('type', 1, type);
-            obj.resetValues();
+            obj = obj.resetValues_();
+        end
+
+        function values = get.values(obj)
+            values = obj.values_;
         end
 
     end
@@ -78,6 +89,7 @@ classdef (Hidden) Equation < gams.transfer.symbol.definition.Abstract
 
         function obj = Equation(type)
             obj.type_ = type;
+            obj = obj.resetValues_();
         end
 
     end
@@ -93,11 +105,6 @@ classdef (Hidden) Equation < gams.transfer.symbol.definition.Abstract
 
     methods
 
-        function def = copy(obj)
-            def = gams.transfer.symbol.definition.Equation(obj.type_);
-            def.copyFrom_(obj);
-        end
-
         function eq = equals(obj, def)
             eq = equals@gams.transfer.symbol.definition.Abstract(obj, def) && ...
                 isequal(obj.type_, def.type);
@@ -105,10 +112,9 @@ classdef (Hidden) Equation < gams.transfer.symbol.definition.Abstract
 
     end
 
-    methods (Hidden, Access = {?gams.transfer.symbol.definition.Abstract, ...
-        ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
+    methods (Hidden, Access = private)
 
-        function initValues_(obj)
+        function obj = resetValues_(obj)
             gdx_default_values = gams.transfer.gdx.gt_get_defaults(...
                 int32(gams.transfer.gdx.SymbolType.EQUATION), int32(obj.type_.value));
             obj.values_ = {...
@@ -117,9 +123,6 @@ classdef (Hidden) Equation < gams.transfer.symbol.definition.Abstract
                 gams.transfer.symbol.value.Numeric('lower', gdx_default_values(3)), ...
                 gams.transfer.symbol.value.Numeric('upper', gdx_default_values(4)), ...
                 gams.transfer.symbol.value.Numeric('scale', gdx_default_values(5))};
-            for i = 1:numel(obj.values_)
-                obj.values_{i}.time_ = obj.time_;
-            end
         end
 
     end

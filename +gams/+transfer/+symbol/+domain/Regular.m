@@ -55,7 +55,6 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
         function obj = set.symbol(obj, symbol)
             gams.transfer.utils.Validator('symbol', 1, symbol).types({'gams.transfer.symbol.Set', 'gams.transfer.alias.Abstract'});
             obj.symbol_ = symbol;
-            obj.time_ = obj.time_.reset();
         end
 
         function name = get.name(obj)
@@ -91,11 +90,6 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
 
     methods
 
-        function domain = copy(obj)
-            domain = gams.transfer.symbol.domain.Regular(obj.symbol_);
-            domain.copyFrom_(obj);
-        end
-
         function eq = equals(obj, domain)
             eq = equals@gams.transfer.symbol.domain.Abstract(obj, domain) && ...
                 obj.symbol_.equals(domain.symbol);
@@ -124,26 +118,6 @@ classdef (Hidden) Regular < gams.transfer.symbol.domain.Abstract
 
     methods (Hidden, Access = {?gams.transfer.symbol.domain.Abstract, ...
         ?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.domain.Violation})
-
-        function [flag, time] = updatedAfter_(obj, time)
-            flag = true;
-            if time <= obj.time_
-                time = obj.time_;
-                return
-            end
-            [flag_, time_] = obj.symbol_.updatedAfter_(time);
-            if flag_
-                obj.time_ = time_;
-                time = time_;
-                return
-            end
-            flag = false;
-        end
-
-        function copyFrom_(obj, domain)
-            copyFrom_@gams.transfer.symbol.domain.Abstract(obj, domain);
-            obj.symbol_ = domain.symbol;
-        end
 
         function addLabels_(obj, labels, forwarding)
             if nargin == 2

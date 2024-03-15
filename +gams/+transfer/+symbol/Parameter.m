@@ -301,7 +301,7 @@ classdef Parameter < gams.transfer.symbol.Abstract
             end
 
             symbol.copyFrom_(obj);
-            symbol.def.switchContainer_(destination);
+            symbol.def_ = symbol.def_.switchContainer_(destination);
         end
 
     end

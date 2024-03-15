@@ -81,7 +81,7 @@ classdef Set < gams.transfer.symbol.Abstract
     %#ok<*INUSD,*STOUT>
 
     properties (Hidden, SetAccess = protected)
-        cache_is_valid_domain_ = gams.transfer.utils.Cache()
+        cache_is_valid_domain_
     end
 
     properties (Dependent)
@@ -319,7 +319,7 @@ classdef Set < gams.transfer.symbol.Abstract
             end
 
             symbol.copyFrom_(obj);
-            symbol.def.switchContainer_(destination);
+            symbol.def_ = symbol.def_.switchContainer_(destination);
         end
 
     end
@@ -327,7 +327,7 @@ classdef Set < gams.transfer.symbol.Abstract
     methods (Hidden)
 
         function status = isValidDomain(obj)
-            if ~obj.cache_is_valid_domain_.holdsValue() || obj.updatedAfter_(obj.cache_is_valid_domain_.time)
+            if isempty(obj.cache_is_valid_domain_)
                 if obj.dimension ~= 1
                     status = gams.transfer.utils.Status(sprintf('Domain set ''%s'' dimension must be 1.', obj.name_));
                 elseif ~obj.isValid()
@@ -338,10 +338,15 @@ classdef Set < gams.transfer.symbol.Abstract
                 else
                     status = gams.transfer.utils.Status.ok();
                 end
-                obj.cache_is_valid_domain_.value = status;
+                obj.cache_is_valid_domain_ = status;
             else
-                status = obj.cache_is_valid_domain_.value;
+                status = obj.cache_is_valid_domain_;
             end
+        end
+
+        function clearCache(obj)
+            clearCache@gams.transfer.symbol.Abstract(obj);
+            obj.cache_is_valid_domain_ = [];
         end
 
     end

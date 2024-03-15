@@ -68,13 +68,6 @@ classdef (Hidden) Empty < gams.transfer.unique_labels.Abstract
         ?gams.transfer.symbol.Abstract, ?gams.transfer.symbol.data.Abstract, ...
         ?gams.transfer.symbol.domain.Abstract})
 
-        function [flag, time] = updatedAfter_(obj, time)
-            flag = time <= obj.time_;
-            if flag
-                time = obj.time_;
-            end
-        end
-
         function labels = getAt_(obj, indices)
             labels = cell(size(indices));
             labels(:) = {gams.transfer.Constants.UNDEFINED_UNIQUE_LABEL};

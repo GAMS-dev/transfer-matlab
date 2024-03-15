@@ -73,6 +73,8 @@ GAMS Transfer Matlab v0.9.0
   parameter argument `values` (e.g. pass `'values', {'level', 'marginal'}`).
 - Changed class `DomainViolation`: Moved to `symbol.domain.Violation`, hid constructor and removed
   property `domain`.
+- Changed behaviour of `symbol.Set.getNumberValues`: This was constantly 0 before, now it considers
+  the `element_text` column.
 - Changed name of subpackage `gams.transfer.cmex` to `gams.transfer.gdx` (internal).
 - Added (or unhided) property `symbol.Abstract.container` and `alias.Abstract.container` referring
   to the `Container` the symbol or alias is stored in.

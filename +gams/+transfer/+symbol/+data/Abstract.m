@@ -33,13 +33,12 @@
 % Attention: Internal classes or functions have limited documentation and its properties, methods
 % and method or function signatures can change without notice.
 %
-classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
+classdef (Abstract, Hidden) Abstract
 
     %#ok<*INUSD,*STOUT>
 
     properties (Hidden, SetAccess = protected)
         records_ = []
-        time_ = gams.transfer.utils.Time()
     end
 
     properties (Abstract, Constant)
@@ -56,19 +55,13 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             records = obj.records_;
         end
 
-        function set.records(obj, records)
+        function obj = set.records(obj, records)
             obj.records_ = records;
-            obj.time_ = obj.time_.reset();
         end
 
     end
 
     methods
-
-        function data = copy(obj)
-            st = dbstack;
-            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
-        end
 
         function eq = equals(obj, data)
             eq = isequal(class(obj), class(data)) && isequaln(obj.records_, data.records_);
@@ -84,23 +77,11 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
     methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
         ?gams.transfer.unique_labels.Abstract})
 
-        function [flag, time] = updatedAfter_(obj, time)
-            flag = time <= obj.time_;
-            if flag
-                time = obj.time_;
-            end
-        end
-
-        function copyFrom_(obj, symbol)
-            obj.records_ = symbol.records_;
-            obj.time_ = obj.time_.reset();
-        end
-
         function flag = isLabel_(obj, label)
             flag = ismember(label, obj.getLabels());
         end
 
-        function renameLabels_(obj, oldlabels, newlabels)
+        function obj = renameLabels_(obj, oldlabels, newlabels)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
@@ -115,11 +96,8 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                 missing_values(i) = ~obj.isLabel_(def.values{i}.label);
             end
             if any(missing_domains) || any(missing_values)
-                domains = def.domains(~missing_domains);
-                values = def.values(~missing_values);
-                def = def.copy();
-                def.domains = domains;
-                def.values = values;
+                def.domains_ = def.domains(~missing_domains);
+                def.values_ = def.values(~missing_values);
             end
         end
 
@@ -130,10 +108,6 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
         function flag = hasUniqueLabels_(obj, domain)
             flag = false;
-        end
-
-        function unique_labels = getUniqueLabels_(obj, domain)
-            unique_labels = [];
         end
 
         function indices = usedUniqueLabels_(obj, def, dimension)
@@ -215,27 +189,27 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function transformTo_(obj, def, axes, data)
+        function data = transformTo_(obj, def, axes, data)
             if isa(data, 'gams.transfer.symbol.data.Tabular')
-                obj.transformToTabular_(def, axes, data);
+                data = obj.transformToTabular_(def, axes, data);
             elseif isa(data, 'gams.transfer.symbol.data.Matrix')
-                obj.transformToMatrix_(def, axes, data);
+                data = obj.transformToMatrix_(def, axes, data);
             else
                 error('Invalid data: %s', class(data));
             end
         end
 
-        function transformToTabular_(obj, def, axes, data)
+        function data = transformToTabular_(obj, def, axes, data)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function transformToMatrix_(obj, def, axes, data)
+        function data = transformToMatrix_(obj, def, axes, data)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
-        function permuteAxis_(obj, def, axes, dimension, permutation)
+        function obj = permuteAxis_(obj, def, axes, dimension, permutation)
             % st = dbstack;
             % error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
@@ -244,20 +218,15 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
 
     methods (Sealed = true)
 
-        function copyFrom(obj, symbol)
-            gams.transfer.utils.Validator('symbol', 1, symbol).type(class(obj));
-            obj.copyFrom_(symbol);
-        end
-
         function flag = isLabel(obj, label)
             label = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').nonempty().value;
             flag = obj.isLabel_(label);
         end
 
-        function renameLabels(obj, oldlabels, newlabels)
+        function obj = renameLabels(obj, oldlabels, newlabels)
             oldlabels = gams.transfer.utils.Validator('oldlabels', 1, oldlabels).string2char().cellstr().value;
             newlabels = gams.transfer.utils.Validator('newlabels', 2, newlabels).string2char().cellstr().value;
-            obj.renameLabels_(oldlabels, newlabels);
+            obj = obj.renameLabels_(oldlabels, newlabels);
         end
 
         function status = isValid(obj, def, axes)
@@ -269,11 +238,6 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
         function flag = hasUniqueLabels(obj, domain)
             gams.transfer.utils.Validator('domain', 1, domain).type('gams.transfer.symbol.domain.Abstract');
             flag = obj.hasUniqueLabels_(domain);
-        end
-
-        function unique_labels = getUniqueLabels(obj, domain)
-            gams.transfer.utils.Validator('domain', 1, domain).type('gams.transfer.symbol.domain.Abstract');
-            unique_labels = obj.getUniqueLabels_(domain);
         end
 
         function indices = usedUniqueLabels(obj, def, dimension)
@@ -380,12 +344,12 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             obj.transformToMatrix_(def, axes, data);
         end
 
-        function permuteAxis(obj, def, axes, dimension, permutation)
+        function obj = permuteAxis(obj, def, axes, dimension, permutation)
             gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
             gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
             gams.transfer.utils.Validator('dimension', 3, dimension).integer().scalar().inInterval(1, axes.dimension);
             gams.transfer.utils.Validator('permutation', 4, permutation).integer().vector();
-            obj.permuteAxis_(def, axes, dimension, permutation);
+            obj = obj.permuteAxis_(def, axes, dimension, permutation);
         end
 
     end

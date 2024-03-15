@@ -66,11 +66,6 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
 
     methods
 
-        function data = copy(obj)
-            data = gams.transfer.symbol.data.Table();
-            data.copyFrom_(obj);
-        end
-
         function labels = getLabels(obj)
             if istable(obj.records_)
                 labels = obj.records_.Properties.VariableNames;
@@ -88,7 +83,7 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
             flag = istable(obj.records_) && ismember(label, obj.records_.Properties.VariableNames);
         end
 
-        function renameLabels_(obj, oldlabels, newlabels)
+        function obj = renameLabels_(obj, oldlabels, newlabels)
             if istable(obj.records_)
                 obj.records_ = renamevars(obj.records_, oldlabels, newlabels);
             end
@@ -110,7 +105,7 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
             end
         end
 
-        function transformToTabular_(obj, def, axes, data)
+        function data = transformToTabular_(obj, def, axes, data)
             if isa(data, 'gams.transfer.symbol.data.Table')
                 data.records_ = obj.records_;
             elseif isa(data, 'gams.transfer.symbol.data.Struct')
@@ -118,14 +113,12 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
             else
                 error('Invalid data: %s', class(data));
             end
-            data.time_.reset();
         end
 
-        function removeRows_(obj, indices)
+        function obj = removeRows_(obj, indices)
             if istable(obj.records_)
                 obj.records_(indices, :) = [];
             end
-            obj.time_ = obj.time_.reset();
         end
 
     end

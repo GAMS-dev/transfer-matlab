@@ -75,8 +75,7 @@ classdef Container < gams.transfer.utils.Handle
     properties (Hidden, SetAccess = protected)
         gams_dir_ = ''
         data_
-        time_ = gams.transfer.utils.Time()
-        time_reset_
+        modified_ = true
     end
 
     properties (Dependent, SetAccess = protected)
@@ -118,19 +117,19 @@ classdef Container < gams.transfer.utils.Handle
         end
 
         function modified = get.modified(obj)
-            modified = isempty(obj.time_reset_) || obj.updatedAfter_(obj.time_reset_);
+            modified = obj.modified_;
+            symbols = obj.data_.entries();
+            for i = 1:numel(symbols)
+                if modified
+                    return
+                end
+                modified = modified || symbols{i}.modified;
+            end
         end
 
         function set.modified(obj, modified)
             gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
-            if modified
-                obj.time_reset_ = [];
-            else
-                obj.time_reset_ = gams.transfer.utils.Time();
-                while (obj.updatedAfter_(obj.time_reset_))
-                    obj.time_reset_ = obj.time_reset_.reset();
-                end
-            end
+            obj.modified_ = modified;
             symbols = obj.data_.entries();
             for i = 1:numel(symbols)
                 symbols{i}.modified = modified;
@@ -288,24 +287,6 @@ classdef Container < gams.transfer.utils.Handle
                 symbols{i}.copy(obj);
             end
 
-        end
-
-        function [flag, time] = updatedAfter_(obj, time)
-            flag = true;
-            if time <= obj.time_
-                time = obj.time_;
-                return
-            end
-            symbols = obj.data_.entries();
-            for i = 1:numel(symbols)
-                [flag_, time_] = symbols{i}.updatedAfter_(time);
-                if flag_
-                    obj.time_ = time_;
-                    time = time_;
-                    return
-                end
-            end
-            flag = false;
         end
 
     end
@@ -501,7 +482,7 @@ classdef Container < gams.transfer.utils.Handle
                 otherwise
                     error('Invalid symbol type');
                 end
-                obj.data_.add(symbol.name, new_symbol);
+                obj.data_ = obj.data_.add(symbol.name, new_symbol);
                 if isa(new_symbol, 'gams.transfer.alias.Abstract')
                     continue
                 end
@@ -1453,7 +1434,7 @@ classdef Container < gams.transfer.utils.Handle
             new_symbol = gams.transfer.symbol.Set.construct(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
-                obj.data_.add(name, new_symbol);
+                obj.data_ = obj.data_.add(name, new_symbol);
                 symbol = new_symbol;
                 return
             end
@@ -1539,7 +1520,7 @@ classdef Container < gams.transfer.utils.Handle
             new_symbol = gams.transfer.symbol.Parameter.construct(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
-                obj.data_.add(name, new_symbol);
+                obj.data_ = obj.data_.add(name, new_symbol);
                 symbol = new_symbol;
                 return
             end
@@ -1635,7 +1616,7 @@ classdef Container < gams.transfer.utils.Handle
             new_symbol = gams.transfer.symbol.Variable.construct(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
-                obj.data_.add(name, new_symbol);
+                obj.data_ = obj.data_.add(name, new_symbol);
                 symbol = new_symbol;
                 return
             end
@@ -1729,7 +1710,7 @@ classdef Container < gams.transfer.utils.Handle
             new_symbol = gams.transfer.symbol.Equation.construct(obj, name, varargin{:});
 
             if ~obj.hasSymbols(name)
-                obj.data_.add(name, new_symbol);
+                obj.data_ = obj.data_.add(name, new_symbol);
                 symbol = new_symbol;
                 return
             end
@@ -1780,7 +1761,7 @@ classdef Container < gams.transfer.utils.Handle
             new_symbol = gams.transfer.alias.Set.construct(obj, name, alias_with);
 
             if ~obj.hasSymbols(name)
-                obj.data_.add(name, new_symbol);
+                obj.data_ = obj.data_.add(name, new_symbol);
                 symbol = new_symbol;
                 return
             end
@@ -1822,7 +1803,7 @@ classdef Container < gams.transfer.utils.Handle
             new_symbol = gams.transfer.alias.Universe.construct(obj, name);
 
             if ~obj.hasSymbols(name)
-                obj.data_.add(name, new_symbol);
+                obj.data_ = obj.data_.add(name, new_symbol);
                 symbol = new_symbol;
                 return
             end
@@ -1865,7 +1846,7 @@ classdef Container < gams.transfer.utils.Handle
             if obj.hasSymbols(newname) && ~strcmpi(newname, oldname)
                 error('Symbol ''%s'' already exists.', newname);
             end
-            symbol = obj.data_.rename(oldname, newname);
+            [obj.data_, symbol] = obj.data_.rename(oldname, newname);
             symbol.name_ = newname;
             symbol.modified = true;
         end
@@ -1899,7 +1880,7 @@ classdef Container < gams.transfer.utils.Handle
 
             if nargin == 1
                 removed_symbols = obj.getSymbols();
-                obj.data_.clear();
+                obj.data_ = obj.data_.clear();
 
                 % force recheck of deleted symbol (it may still live within an
                 % alias, domain or in the user's program)
@@ -1908,7 +1889,7 @@ classdef Container < gams.transfer.utils.Handle
                     removed_symbols{i}.container = [];
                 end
 
-                obj.time_ = obj.time_.reset();
+                obj.modified_ = true;
                 return
             end
 
@@ -1927,7 +1908,7 @@ classdef Container < gams.transfer.utils.Handle
                 removed_symbols{j} = obj.getSymbols(names{i});
 
                 % remove symbol
-                obj.data_.remove(removed_symbols{j}.name);
+                obj.data_ = obj.data_.remove(removed_symbols{j}.name);
 
                 % force recheck of deleted symbol (it may still live within an
                 % alias, domain or in the user's program)
@@ -1959,7 +1940,7 @@ classdef Container < gams.transfer.utils.Handle
                 obj.removeSymbols(remove_aliases);
             end
 
-            obj.time_ = obj.time_.reset();
+            obj.modified_ = true;
         end
 
         %> Reestablishes a valid GDX symbol order
@@ -2038,8 +2019,8 @@ classdef Container < gams.transfer.utils.Handle
             end
 
             % apply permutation
-            obj.data_.reorder([idx_sets, idx_other]);
-            obj.time_ = obj.time_.reset();
+            obj.data_ = obj.data_.reorder([idx_sets, idx_other]);
+            obj.modified_ = true;
 
             % force recheck of all remaining symbols in container
             obj.isValid(false, true);

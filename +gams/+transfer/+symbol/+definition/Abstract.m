@@ -33,18 +33,21 @@
 % Attention: Internal classes or functions have limited documentation and its properties, methods
 % and method or function signatures can change without notice.
 %
-classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
+classdef (Abstract, Hidden) Abstract
 
     %#ok<*INUSD,*STOUT,*PROPLC>
 
-    properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ...
+        ?gams.transfer.symbol.Abstract, ?gams.transfer.Container, ?gams.transfer.symbol.data.Abstract})
+
         domains_ = {}
-        values_ = []
-        time_ = gams.transfer.utils.Time()
     end
 
     properties (Dependent)
         domains
+    end
+
+    properties (Abstract, SetAccess = private)
         values
     end
 
@@ -87,36 +90,18 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             domains = obj.domains_;
         end
 
-        function set.domains(obj, domains)
+        function obj = set.domains(obj, domains)
             obj.domains_ = obj.createDomains('domains', 1, domains);
             if numel(obj.domains_) > 1 && numel(obj.domains_) ~= numel(unique(obj.getDomainLabels()))
                 for i = 1:numel(obj.domains_)
-                    obj.domains_{i}.appendLabelIndex_(i);
+                    obj.domains_{i} = obj.domains_{i}.appendLabelIndex_(i);
                 end
             end
-            obj.time_ = obj.time_.reset();
-        end
-
-        function values = get.values(obj)
-            if isnumeric(obj.values_) && isempty(obj.values_)
-                obj.initValues_()
-            end
-            values = obj.values_;
-        end
-
-        function set.values(obj, values)
-            obj.values_ = gams.transfer.utils.Validator('values', 1, values) ...
-                .cellof('gams.transfer.symbol.value.Abstract').value;
         end
 
     end
 
     methods
-
-        function def = copy(obj)
-            st = dbstack;
-            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
-        end
 
         function eq = equals(obj, def)
             eq = false;
@@ -134,8 +119,8 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             if numel(obj.values) ~= numel(def.values)
                 return
             end
-            for i = 1:numel(obj.values_)
-                if ~obj.values_{i}.equals(def.values_{i})
+            for i = 1:numel(obj.values)
+                if ~obj.values{i}.equals(def.values{i})
                     return
                 end
             end
@@ -169,41 +154,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
     methods (Hidden, Access = {?gams.transfer.symbol.definition.Abstract, ...
         ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
 
-        function [flag, time] = updatedAfter_(obj, time)
-            flag = true;
-            if time <= obj.time_
-                time = obj.time_;
-                return
-            end
-            for i = 1:numel(obj.domains_)
-                [flag_, time_] = obj.domains_{i}.updatedAfter_(time);
-                if flag_
-                    obj.time_ = time_;
-                    time = time_;
-                    return
-                end
-            end
-            for i = 1:numel(obj.values_)
-                [flag_, time_] = obj.values_{i}.updatedAfter_(time);
-                if flag_
-                    obj.time_ = time_;
-                    time = time_;
-                    return
-                end
-            end
-            flag = false;
-        end
-
-        function copyFrom_(obj, def)
-            obj.domains_ = cell(size(def.domains));
-            for i = 1:numel(obj.domains_)
-                obj.domains_{i} = def.domains{i}.copy();
-            end
-            obj.values_ = def.values;
-            obj.time_ = obj.time_.reset();
-        end
-
-        function setDomainLabels_(obj, domain_labels)
+        function obj = setDomainLabels_(obj, domain_labels)
             add_prefix = numel(unique(domain_labels)) ~= numel(domain_labels);
             for i = 1:numel(domain_labels)
                 if isequal(domain_labels{i}, gams.transfer.Constants.UNIVERSE_NAME)
@@ -211,10 +162,9 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                 end
                 obj.domains_{i}.label = char(domain_labels{i});
                 if add_prefix
-                    obj.domains_{i}.appendLabelIndex_(i);
+                    obj.domains_{i} = obj.domains_{i}.appendLabelIndex_(i);
                 end
             end
-            obj.time_ = obj.time_.reset();
         end
 
         function domain = findDomain_(obj, label)
@@ -239,7 +189,7 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             end
         end
 
-        function switchContainer_(obj, container)
+        function obj = switchContainer_(obj, container)
             for i = 1:numel(obj.domains_)
                 if ~isa(obj.domains_{i}, 'gams.transfer.symbol.domain.Regular')
                     continue
@@ -255,27 +205,11 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
                 end
                 obj.domains_{i}.symbol = symbol;
             end
-            obj.time_ = obj.time_.reset();
-        end
-
-        function initValues_(obj)
-            st = dbstack;
-            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
-        end
-
-        function resetValues_(obj)
-            obj.initValues_();
-            obj.time_ = obj.time_.reset();
         end
 
     end
 
     methods
-
-        function copyFrom(obj, def)
-            gams.transfer.utils.Validator('def', 1, def).type(class(obj));
-            obj.copyFrom_(def);
-        end
 
         function domain = findDomain(obj, label)
             label = gams.transfer.utils.Validator('label', 1, label).string2char().type('char').value;
@@ -287,9 +221,9 @@ classdef (Abstract, Hidden) Abstract < gams.transfer.utils.Handle
             value = obj.findValue_(label);
         end
 
-        function setDomainLabels(obj, domain_labels)
+        function obj = setDomainLabels(obj, domain_labels)
             gams.transfer.utils.Validator('domain_labels', 1, domain_labels).cellstr().vector().numel(obj.dimension);
-            obj.setDomainLabels_(domain_labels);
+            obj = obj.setDomainLabels_(domain_labels);
         end
 
     end

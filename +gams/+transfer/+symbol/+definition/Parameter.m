@@ -37,6 +37,24 @@ classdef (Hidden) Parameter < gams.transfer.symbol.definition.Abstract
 
     %#ok<*INUSD,*STOUT>
 
+    properties (Hidden, SetAccess = {?gams.transfer.symbol.definition.Abstract, ...
+        ?gams.transfer.symbol.Abstract, ?gams.transfer.Container, ?gams.transfer.symbol.data.Abstract})
+
+        values_ = {gams.transfer.symbol.value.Numeric('value', 0)}
+    end
+
+    properties (Dependent, SetAccess = private)
+        values
+    end
+
+    methods
+
+        function values = get.values(obj)
+            values = obj.values_;
+        end
+
+    end
+
     methods (Hidden, Access = {?gams.transfer.symbol.definition.Abstract, ?gams.transfer.symbol.Abstract})
 
         function obj = Parameter()
@@ -48,27 +66,6 @@ classdef (Hidden) Parameter < gams.transfer.symbol.definition.Abstract
 
         function obj = construct()
             obj = gams.transfer.symbol.definition.Parameter();
-        end
-
-    end
-
-    methods
-
-        function def = copy(obj)
-            def = gams.transfer.symbol.definition.Parameter();
-            def.copyFrom_(obj);
-        end
-
-    end
-
-    methods (Hidden, Access = {?gams.transfer.symbol.definition.Abstract, ...
-        ?gams.transfer.symbol.Abstract, ?gams.transfer.Container})
-
-        function initValues_(obj)
-            obj.values_ = {gams.transfer.symbol.value.Numeric('value', 0)};
-            for i = 1:numel(obj.values_)
-                obj.values_{i}.time_ = obj.time_;
-            end
         end
 
     end

@@ -405,8 +405,8 @@ function test_describe(t, cfg, container_type)
                 t.assertEquals(tbl{1,'size'}{1}, '[5]');
             end
             t.assert(tbl{1,'number_records'} == 5);
-            t.assert(tbl{1,'number_values'} == 0);
-            t.assert(isnan(tbl{1,'sparsity'}));
+            t.assert(tbl{1,'number_values'} == 5);
+            t.assert(tbl{1,'sparsity'} == 0);
         else
             t.assert(isstruct(tbl));
             t.assert(numel(fieldnames(tbl)) == 10);
@@ -449,8 +449,8 @@ function test_describe(t, cfg, container_type)
                 t.assertEquals(tbl.size{1}, '[5]');
             end
             t.assert(tbl.number_records(1) == 5);
-            t.assert(tbl.number_values(1) == 0);
-            t.assert(isnan(tbl.sparsity(1)));
+            t.assert(tbl.number_values(1) == 5);
+            t.assert(tbl.sparsity(1) == 0);
         end
 
         tbl = gdx.describeParameters();

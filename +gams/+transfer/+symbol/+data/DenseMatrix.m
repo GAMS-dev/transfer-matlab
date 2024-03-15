@@ -63,15 +63,6 @@ classdef (Hidden) DenseMatrix < gams.transfer.symbol.data.Matrix
 
     end
 
-    methods
-
-        function data = copy(obj)
-            data = gams.transfer.symbol.data.DenseMatrix();
-            data.copyFrom_(obj);
-        end
-
-    end
-
     methods (Hidden, Access = {?gams.transfer.symbol.data.Abstract, ?gams.transfer.symbol.Abstract, ...
         ?gams.transfer.unique_labels.Abstract})
 
@@ -93,7 +84,7 @@ classdef (Hidden) DenseMatrix < gams.transfer.symbol.data.Matrix
             end
         end
 
-        function transformToMatrix_(obj, def, axes, data)
+        function data = transformToMatrix_(obj, def, axes, data)
             if isa(data, 'gams.transfer.symbol.data.DenseMatrix')
                 for i = 1:numel(def.values)
                     data.records_.(def.values{i}.label) = obj.records_.(def.values{i}.label);
@@ -105,7 +96,6 @@ classdef (Hidden) DenseMatrix < gams.transfer.symbol.data.Matrix
             else
                 error('Invalid data: %s', class(data));
             end
-            data.time_.reset();
         end
 
     end

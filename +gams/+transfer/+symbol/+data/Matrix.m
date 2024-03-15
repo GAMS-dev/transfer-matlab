@@ -56,7 +56,7 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             flag = isfield(obj.records_, label);
         end
 
-        function renameLabels_(obj, oldlabels, newlabels)
+        function obj = renameLabels_(obj, oldlabels, newlabels)
             if isstruct(obj.records_)
                 obj.records = gams.transfer.utils.rename_struct_fields(obj.records_, oldlabels, newlabels);
             end
@@ -131,7 +131,7 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             subindex = [i, j];
         end
 
-        function transformToTabular_(obj, def, axes, data)
+        function data = transformToTabular_(obj, def, axes, data)
             % get size
             dim = axes.dimension;
             size_ = axes.matrixSize();
@@ -175,8 +175,6 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             for i = 1:numel(def.values)
                 data.records.(def.values{i}.label) = full(obj.records_.(def.values{i}.label)(indices_perm));
             end
-
-            data.time_.reset();
         end
 
     end

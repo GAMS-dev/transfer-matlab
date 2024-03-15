@@ -122,7 +122,7 @@ classdef (Hidden) Struct < gams.transfer.incase_ordered_dict.Abstract
             end
         end
 
-        function add(obj, key, entry)
+        function obj = add(obj, key, entry)
             if obj.exists(key)
                 error('Entry ''%s'' already exists.', key);
             end
@@ -131,13 +131,13 @@ classdef (Hidden) Struct < gams.transfer.incase_ordered_dict.Abstract
             obj.count_ = obj.count_ + 1;
         end
 
-        function clear(obj)
+        function obj = clear(obj)
             obj.count_ = 0;
             obj.keys_ = struct();
             obj.entries_ = struct();
         end
 
-        function symbol = rename(obj, oldkey, newkey)
+        function [obj, symbol] = rename(obj, oldkey, newkey)
             index = obj.find(oldkey);
             if index < 1
                 return
@@ -153,10 +153,10 @@ classdef (Hidden) Struct < gams.transfer.incase_ordered_dict.Abstract
 
             % get old ordering
             permutation = [1:index-1, obj.count_, index:obj.count_-1];
-            obj.reorder(permutation);
+            obj = obj.reorder(permutation);
         end
 
-        function remove(obj, keys)
+        function obj = remove(obj, keys)
             if ~iscell(keys)
                 keys = {keys};
             end
@@ -170,7 +170,7 @@ classdef (Hidden) Struct < gams.transfer.incase_ordered_dict.Abstract
             end
         end
 
-        function reorder(obj, permutation)
+        function obj = reorder(obj, permutation)
             obj.entries_ = orderfields(obj.entries_, permutation);
             obj.keys_ = orderfields(obj.keys_, permutation);
         end
