@@ -41,8 +41,12 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
         symbol_
     end
 
-    properties (Dependent)
+    properties (Dependent, SetAccess = private)
         symbol
+    end
+
+    properties (Dependent)
+        modified
     end
 
     methods
@@ -51,13 +55,11 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
             symbol = obj.symbol_;
         end
 
-        function set.symbol(obj, symbol)
-            gams.transfer.utils.Validator('symbol', 1, symbol).types({'gams.transfer.symbol.Set', 'gams.transfer.alias.Set'});
-            status = symbol.isValidDomain();
-            if status.flag ~= gams.transfer.utils.Status.OK
-                error('Domain set ''%s''cannot be used as domain: %s', obj.symbol_.name, status.message);
-            end
-            obj.symbol_ = symbol;
+        function modified = get.modified(obj)
+            modified = false;
+        end
+
+        function set.modified(obj, modified)
         end
 
     end

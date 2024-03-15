@@ -42,9 +42,13 @@ classdef (Hidden) CategoricalColumn < gams.transfer.unique_labels.Abstract
         domain_
     end
 
-    properties (Dependent)
+    properties (Dependent, SetAccess = private)
         symbol
         domain
+    end
+
+    properties (Dependent)
+        modified
     end
 
     methods
@@ -53,19 +57,15 @@ classdef (Hidden) CategoricalColumn < gams.transfer.unique_labels.Abstract
             symbol = obj.symbol_;
         end
 
-        function set.symbol(obj, symbol)
-            gams.transfer.utils.Validator('symbol', 1, symbol).type('gams.transfer.symbol.Abstract');
-            gams.transfer.utils.Validator('symbol.data', 1, symbol.data).type('gams.transfer.symbol.data.Tabular');
-            obj.symbol_ = symbol;
-        end
-
         function domain = get.domain(obj)
             domain = obj.domain_;
         end
 
-        function set.domain(obj, domain)
-            gams.transfer.utils.Validator('domain', 1, domain).type('gams.transfer.symbol.domain.Abstract');
-            obj.domain_ = domain;
+        function modified = get.modified(obj)
+            modified = false;
+        end
+
+        function set.modified(obj, modified)
         end
 
     end

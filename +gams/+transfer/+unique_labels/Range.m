@@ -43,6 +43,7 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
         first_ = 1
         step_ = 1
         length_ = 0
+        modified_ = true
 
     end
 
@@ -51,6 +52,7 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
         first
         step
         length
+        modified
     end
 
     methods
@@ -88,6 +90,15 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
         function set.length(obj, length)
             gams.transfer.utils.Validator('length', 1, length).integer().scalar().min(0).noNanInf();
             obj.length_ = length;
+        end
+
+        function modified = get.modified(obj)
+            modified = obj.modified_;
+        end
+
+        function set.modified(obj, modified)
+            gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
+            obj.modified_ = modified;
         end
 
     end
@@ -137,6 +148,7 @@ classdef (Hidden) Range < gams.transfer.unique_labels.Abstract
             obj.first_ = 1;
             obj.step_ = 1;
             obj.length_ = 0;
+            obj.modified_ = true;
         end
 
     end

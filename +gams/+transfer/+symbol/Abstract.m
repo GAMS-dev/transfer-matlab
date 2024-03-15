@@ -423,11 +423,20 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
         function modified = get.modified(obj)
             modified = obj.modified_;
+            for i = 1:obj.dimension
+                if modified
+                    return
+                end
+                modified = modified || obj.getAxisUniqueLabels_(i).modified;
+            end
         end
 
         function set.modified(obj, modified)
             gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
             obj.modified_ = modified;
+            for i = 1:obj.dimension
+                obj.getAxisUniqueLabels_(i).modified = modified;
+            end
         end
 
     end

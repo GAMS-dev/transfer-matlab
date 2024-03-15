@@ -40,6 +40,24 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
     properties (Hidden, SetAccess = private)
         uels_label2ids_
         uels_id2labels_
+        modified_ = true;
+    end
+
+    properties (Dependent)
+        modified
+    end
+
+    methods
+
+        function modified = get.modified(obj)
+            modified = obj.modified_;
+        end
+
+        function set.modified(obj, modified)
+            gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
+            obj.modified_ = modified;
+        end
+
     end
 
     methods
@@ -78,6 +96,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
         function clear(obj)
             obj.uels_label2ids_ = javaObject("java.util.LinkedHashMap");
             obj.uels_id2labels_ = {};
+            obj.modified_ = true;
         end
 
     end
@@ -95,6 +114,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
             if numel(labels) > 0
                 obj.updateId2Label_();
             end
+            obj.modified_ = true;
         end
 
         function set_(obj, labels)
@@ -116,6 +136,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
             if nargout > 0
                 [flag, indices] = obj.updatedIndices_(oldlabels, [], []);
             end
+            obj.modified_ = true;
         end
 
         function rename_(obj, oldlabels, newlabels)
@@ -134,6 +155,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
                 labels{obj.uels_label2ids_.get(oldlabels{i})} = newlabels{i};
             end
             obj.set(labels);
+            obj.modified_ = true;
         end
 
         function [flag, indices] = merge_(obj, oldlabels, newlabels)
@@ -161,6 +183,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
             if nargout > 0
                 [flag, indices] = obj.updatedIndices_(oldlabels_, oldlabels, newlabels);
             end
+            obj.modified_ = true;
         end
 
     end
@@ -175,6 +198,7 @@ classdef (Hidden) OrderedLabelSet < gams.transfer.unique_labels.Abstract
                 obj.uels_id2labels_{i} = char(it.next());
                 i = i + 1;
             end
+            obj.modified_ = true;
         end
 
     end

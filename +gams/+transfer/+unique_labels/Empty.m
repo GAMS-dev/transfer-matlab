@@ -37,6 +37,21 @@ classdef (Hidden) Empty < gams.transfer.unique_labels.Abstract
 
     %#ok<*INUSD,*STOUT>
 
+    properties (Dependent)
+        modified
+    end
+
+    methods
+
+        function modified = get.modified(obj)
+            modified = false;
+        end
+
+        function set.modified(obj, modified)
+        end
+
+    end
+
     methods (Static)
 
         function obj = construct()
