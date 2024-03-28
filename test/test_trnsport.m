@@ -1,8 +1,8 @@
 %
 % GAMS - General Algebraic Modeling System Matlab API
 %
-% Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -30,8 +30,7 @@ function success = test_trnsport(cfg)
 
     for k = 1:3
         if k == 1
-            m = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-                'features', cfg.features);
+            m = gams.transfer.Container('gams_dir', cfg.gams_dir);
             i = gams.transfer.Set(m, 'i', ...
                 'records', {'seattle', 'san-diego'}, ...
                 'description', 'canning plants');
@@ -69,8 +68,7 @@ function success = test_trnsport(cfg)
                 'records', {[325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]}, ...
                 'description', 'satisfy demand at market j');
         elseif k == 2
-            m = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-                'features', cfg.features);
+            m = gams.transfer.Container('gams_dir', cfg.gams_dir);
             i = gams.transfer.Set(m, 'i', 'description', 'canning plants');
             i.setRecords({'seattle', 'san-diego'});
             j = gams.transfer.Set(m, 'j', 'description', 'markets');
@@ -96,10 +94,9 @@ function success = test_trnsport(cfg)
             demand = gams.transfer.Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
             demand.setRecords([325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]);
         elseif k == 3
-            m = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-                'features', cfg.features);
+            m = gams.transfer.Container('gams_dir', cfg.gams_dir);
             i = gams.transfer.Set(m, 'i', 'description', 'canning plants');
-            if m.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 i.records = struct('uni', categorical({'seattle'; 'san-diego'}, ...
                     {'seattle'; 'san-diego'}));
             else
@@ -107,7 +104,7 @@ function success = test_trnsport(cfg)
                 i.setUELs({'seattle'; 'san-diego'}, 1, 'rename', true);
             end
             j = gams.transfer.Set(m, 'j', 'description', 'markets');
-            if m.features.categorical
+            if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 j.records = struct('uni', categorical({'new-york'; 'chicago'; 'topeka'}, ...
                     {'new-york'; 'chicago'; 'topeka'}));
             else
@@ -116,33 +113,40 @@ function success = test_trnsport(cfg)
             end
             a = gams.transfer.Parameter(m, 'a', i, 'description', 'capacity of plant i in cases');
             a.records = struct('value', [350; 600]);
+            a.format = 'dense_matrix';
             b = gams.transfer.Parameter(m, 'b', j, 'description', 'demand at market j in cases');
             b.records = struct('value', [325; 300; 275]);
+            b.format = 'dense_matrix';
             d = gams.transfer.Parameter(m, 'd', {i,j}, 'description', 'distance in thousands of miles');
             d.records = struct('value', [2.5, 1.7, 1.8; 2.5, 1.8, 1.4]);
+            d.format = 'dense_matrix';
             f = gams.transfer.Parameter(m, 'f', 'description', 'freight in dollars per case per thousand miles');
             f.records = struct('value', 90);
             c = gams.transfer.Parameter(m, 'c', {i,j}, 'description', 'transport cost in thousands of dollars per case');
             c.records = struct('value', [0.225, 0.153, 0.162; 0.225, 0.162, 0.126]);
+            c.format = 'dense_matrix';
             x = gams.transfer.Variable(m, 'x', 'positive', {i,j}, 'description', 'shipment quantities in cases');
             x.records = struct('level', [50, 300, 0; 275, 0, 275], 'marginal', [0, 0, 0.036; 0, 0.009, 0]);
+            x.format = 'dense_matrix';
             z = gams.transfer.Variable(m, 'z', 'description', 'total transportation costs in thousands of dollars');
             z.records = struct('level', 153.675);
             cost = gams.transfer.Equation(m, 'cost', 'e', 'description', 'define objective function');
             cost.records = struct('level', 0, 'marginal', 1, 'lower', 0, 'upper', 0);
             supply = gams.transfer.Equation(m, 'supply', 'l', i, 'description', 'observe supply limit at plant i');
             supply.records = struct('level', [350; 550], 'marginal', [geps; 0], 'upper', [350; 600]);
+            supply.format = 'dense_matrix';
             demand = gams.transfer.Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
             demand.records = struct('level', [325; 300; 275], 'marginal', [0.225; 0.153; 0.126], 'lower', [325; 300; 275]);
+            demand.format = 'dense_matrix';
         elseif k == 4
             m = gams.transfer.Container(fullfile(cfg.working_dir, 'write_trnsport_1.gdx'), ...
-                'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                'gams_dir', cfg.gams_dir);
         elseif k == 5
             m = gams.transfer.Container(fullfile(cfg.working_dir, 'write_trnsport_2.gdx'), ...
-                'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                'gams_dir', cfg.gams_dir);
         elseif k == 6
             m = gams.transfer.Container(fullfile(cfg.working_dir, 'write_trnsport_3.gdx'), ...
-                'gams_dir', cfg.gams_dir, 'features', cfg.features);
+                'gams_dir', cfg.gams_dir);
         end
 
         if k == 4 || k == 5 || k == 6
@@ -184,7 +188,7 @@ function success = test_trnsport(cfg)
         t.assert(isfield(m.data, 'demand'));
 
         t.add(sprintf('test_trnsport_symbol_i_%d', k));
-        t.assert(isa(i, 'gams.transfer.Set'));
+        t.assert(isa(i, 'gams.transfer.symbol.Set'));
         t.assertEquals(i.name, 'i');
         t.assertEquals(i.description, 'canning plants');
         t.assert(~i.is_singleton);
@@ -195,7 +199,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(i.domain_labels{1}, 'uni');
         t.assertEquals(i.domain_type, 'none');
         t.assert(numel(i.size) == 1);
-        t.assert(isnan(i.size));
+        t.assert(i.size == 2);
         t.assert(i.isValid());
         t.assertEquals(i.format, 'struct');
         t.assert(i.getNumberRecords() == 2);
@@ -203,7 +207,7 @@ function success = test_trnsport(cfg)
         t.assert(numel(fieldnames(i.records)) == 1);
         t.assert(isfield(i.records, 'uni'));
         t.assert(numel(i.records.uni) == 2);
-        if m.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(i.records.uni(1), 'seattle');
             t.assertEquals(i.records.uni(2), 'san-diego');
         else
@@ -216,7 +220,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{2}, 'san-diego');
 
         t.add(sprintf('test_trnsport_symbol_j_%d', k));
-        t.assert(isa(j, 'gams.transfer.Set'));
+        t.assert(isa(j, 'gams.transfer.symbol.Set'));
         t.assertEquals(j.name, 'j');
         t.assertEquals(j.description, 'markets');
         t.assert(~j.is_singleton);
@@ -227,7 +231,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(j.domain_labels{1}, 'uni');
         t.assertEquals(j.domain_type, 'none');
         t.assert(numel(j.size) == 1);
-        t.assert(isnan(j.size));
+        t.assert(j.size == 3);
         t.assert(j.isValid());
         t.assertEquals(j.format, 'struct');
         t.assert(j.getNumberRecords() == 3);
@@ -235,7 +239,7 @@ function success = test_trnsport(cfg)
         t.assert(numel(fieldnames(j.records)) == 1);
         t.assert(isfield(j.records, 'uni'));
         t.assert(numel(j.records.uni) == 3);
-        if m.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(j.records.uni(1), 'new-york');
             t.assertEquals(j.records.uni(2), 'chicago');
             t.assertEquals(j.records.uni(3), 'topeka');
@@ -251,14 +255,14 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_a_%d', k));
-        t.assert(isa(a, 'gams.transfer.Parameter'));
+        t.assert(isa(a, 'gams.transfer.symbol.Parameter'));
         t.assertEquals(a.name, 'a');
         t.assertEquals(a.description, 'capacity of plant i in cases');
         t.assert(a.dimension == 1);
         t.assert(numel(a.domain) == 1);
-        t.assertEquals(a.domain{1}.id, i.id);
+        t.assertEquals(a.domain{1}, i);
         t.assertEquals(a.domain{1}.name, 'i');
-        t.assert(numel(a.domain_labels) == 0);
+        t.assert(numel(a.domain_labels) == 1);
         t.assertEquals(a.domain_type, 'regular');
         t.assert(numel(a.size) == 1);
         t.assert(a.size == 2);
@@ -278,14 +282,14 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{2}, 'san-diego');
 
         t.add(sprintf('test_trnsport_symbol_b_%d', k));
-        t.assert(isa(b, 'gams.transfer.Parameter'));
+        t.assert(isa(b, 'gams.transfer.symbol.Parameter'));
         t.assertEquals(b.name, 'b');
         t.assertEquals(b.description, 'demand at market j in cases');
         t.assert(b.dimension == 1);
         t.assert(numel(b.domain) == 1);
-        t.assertEquals(b.domain{1}.id, j.id);
+        t.assertEquals(b.domain{1}, j);
         t.assertEquals(b.domain{1}.name, 'j');
-        t.assert(numel(b.domain_labels) == 0);
+        t.assert(numel(b.domain_labels) == 1);
         t.assertEquals(b.domain_type, 'regular');
         t.assert(numel(b.size) == 1);
         t.assert(b.size == 3);
@@ -307,16 +311,16 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_d_%d', k));
-        t.assert(isa(d, 'gams.transfer.Parameter'));
+        t.assert(isa(d, 'gams.transfer.symbol.Parameter'));
         t.assertEquals(d.name, 'd');
         t.assertEquals(d.description, 'distance in thousands of miles');
         t.assert(d.dimension == 2);
         t.assert(numel(d.domain) == 2);
-        t.assertEquals(d.domain{1}.id, i.id);
-        t.assertEquals(d.domain{2}.id, j.id);
+        t.assertEquals(d.domain{1}, i);
+        t.assertEquals(d.domain{2}, j);
         t.assertEquals(d.domain{1}.name, 'i');
         t.assertEquals(d.domain{2}.name, 'j');
-        t.assert(numel(d.domain_labels) == 0);
+        t.assert(numel(d.domain_labels) == 2);
         t.assertEquals(d.domain_type, 'regular');
         t.assert(numel(d.size) == 2);
         t.assert(all(d.size == [2,3]));
@@ -345,7 +349,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_f_%d', k));
-        t.assert(isa(f, 'gams.transfer.Parameter'));
+        t.assert(isa(f, 'gams.transfer.symbol.Parameter'));
         t.assertEquals(f.name, 'f');
         t.assertEquals(f.description, 'freight in dollars per case per thousand miles');
         t.assert(f.dimension == 0);
@@ -364,16 +368,16 @@ function success = test_trnsport(cfg)
         t.assert(f.records.value(1) == 90);
 
         t.add(sprintf('test_trnsport_symbol_c_%d', k));
-        t.assert(isa(c, 'gams.transfer.Parameter'));
+        t.assert(isa(c, 'gams.transfer.symbol.Parameter'));
         t.assertEquals(c.name, 'c');
         t.assertEquals(c.description, 'transport cost in thousands of dollars per case');
         t.assert(c.dimension == 2);
         t.assert(numel(c.domain) == 2);
-        t.assertEquals(c.domain{1}.id, i.id);
-        t.assertEquals(c.domain{2}.id, j.id);
+        t.assertEquals(c.domain{1}, i);
+        t.assertEquals(c.domain{2}, j);
         t.assertEquals(c.domain{1}.name, 'i');
         t.assertEquals(c.domain{2}.name, 'j');
-        t.assert(numel(c.domain_labels) == 0);
+        t.assert(numel(c.domain_labels) == 2);
         t.assertEquals(c.domain_type, 'regular');
         t.assert(numel(c.size) == 2);
         t.assert(all(c.size == [2,3]));
@@ -402,16 +406,16 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_x_%d', k));
-        t.assert(isa(x, 'gams.transfer.Variable'));
+        t.assert(isa(x, 'gams.transfer.symbol.Variable'));
         t.assertEquals(x.name, 'x');
         t.assertEquals(x.description, 'shipment quantities in cases');
         t.assert(x.dimension == 2);
         t.assert(numel(x.domain) == 2);
-        t.assertEquals(x.domain{1}.id, i.id);
-        t.assertEquals(x.domain{2}.id, j.id);
+        t.assertEquals(x.domain{1}, i);
+        t.assertEquals(x.domain{2}, j);
         t.assertEquals(x.domain{1}.name, 'i');
         t.assertEquals(x.domain{2}.name, 'j');
-        t.assert(numel(x.domain_labels) == 0);
+        t.assert(numel(x.domain_labels) == 2);
         t.assertEquals(x.domain_type, 'regular');
         t.assert(numel(x.size) == 2);
         t.assert(all(x.size == [2,3]));
@@ -448,7 +452,7 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{3}, 'topeka');
 
         t.add(sprintf('test_trnsport_symbol_z_%d', k));
-        t.assert(isa(z, 'gams.transfer.Variable'));
+        t.assert(isa(z, 'gams.transfer.symbol.Variable'));
         t.assertEquals(z.name, 'z');
         t.assertEquals(z.description, 'total transportation costs in thousands of dollars');
         t.assert(z.dimension == 0);
@@ -467,7 +471,7 @@ function success = test_trnsport(cfg)
         t.assert(z.records.level(1) == 153.675);
 
         t.add(sprintf('test_trnsport_symbol_cost_%d', k));
-        t.assert(isa(cost, 'gams.transfer.Equation'));
+        t.assert(isa(cost, 'gams.transfer.symbol.Equation'));
         t.assertEquals(cost.name, 'cost');
         t.assertEquals(cost.description, 'define objective function');
         t.assert(cost.dimension == 0);
@@ -495,14 +499,14 @@ function success = test_trnsport(cfg)
         t.assert(cost.records.upper(1) == 0);
 
         t.add(sprintf('test_trnsport_symbol_supply_%d', k));
-        t.assert(isa(supply, 'gams.transfer.Equation'));
+        t.assert(isa(supply, 'gams.transfer.symbol.Equation'));
         t.assertEquals(supply.name, 'supply');
         t.assertEquals(supply.description, 'observe supply limit at plant i');
         t.assert(supply.dimension == 1);
         t.assert(numel(supply.domain) == 1);
-        t.assertEquals(supply.domain{1}.id, i.id);
+        t.assertEquals(supply.domain{1}, i);
         t.assertEquals(supply.domain{1}.name, 'i');
-        t.assert(numel(supply.domain_labels) == 0);
+        t.assert(numel(supply.domain_labels) == 1);
         t.assertEquals(supply.domain_type, 'regular');
         t.assert(numel(supply.size) == 1);
         t.assert(supply.size == 2);
@@ -530,14 +534,14 @@ function success = test_trnsport(cfg)
         t.assertEquals(uels{2}, 'san-diego');
 
         t.add(sprintf('test_trnsport_symbol_demand_%d', k));
-        t.assert(isa(demand, 'gams.transfer.Equation'));
+        t.assert(isa(demand, 'gams.transfer.symbol.Equation'));
         t.assertEquals(demand.name, 'demand');
         t.assertEquals(demand.description, 'satisfy demand at market j');
         t.assert(demand.dimension == 1);
         t.assert(numel(demand.domain) == 1);
-        t.assertEquals(demand.domain{1}.id, j.id);
+        t.assertEquals(demand.domain{1}, j);
         t.assertEquals(demand.domain{1}.name, 'j');
-        t.assert(numel(demand.domain_labels) == 0);
+        t.assert(numel(demand.domain_labels) == 1);
         t.assertEquals(demand.domain_type, 'regular');
         t.assert(numel(demand.size) == 1);
         t.assert(demand.size == 3);

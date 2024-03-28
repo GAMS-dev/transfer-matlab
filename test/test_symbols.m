@@ -1,8 +1,8 @@
 %
 % GAMS - General Algebraic Modeling System Matlab API
 %
-% Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -41,7 +41,7 @@ end
 
 function test_addSymbols(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
 
     t.add('add_symbols_set_1');
     s1 = gams.transfer.Set(gdx, 's1');
@@ -54,17 +54,17 @@ function test_addSymbols(t, cfg)
     t.assertEquals(s1.domain{1}, '*');
     t.assert(numel(s1.domain_names) == 1);
     t.assertEquals(s1.domain_names{1}, '*');
-    t.assert(numel(s1.domain_labels) == 0);
+    t.assert(numel(s1.domain_labels) == 1);
     t.assertEquals(s1.domain_type, 'none');
     t.assert(numel(s1.size) == 1);
-    t.assert(isnan(s1.size(1)));
-    t.assert(strcmp(s1.format, 'empty'));
+    t.assert(s1.size(1) == 0);
+    t.assert(strcmp(s1.format, 'struct'));
     t.assert(s1.getNumberRecords() == 0);
     t.assert(numel(s1.getUELs(1)) == 0);
     t.assert(s1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 's1'));
-    t.assert(gdx.data.s1.id == s1.id);
+    t.assert(gdx.data.s1 == s1);
     t.assert(s1.modified);
 
     t.add('add_symbols_set_2');
@@ -75,21 +75,21 @@ function test_addSymbols(t, cfg)
     t.assert(~s2.is_singleton);
     t.assert(s2.dimension == 1);
     t.assert(numel(s2.domain) == 1);
-    t.assert(s2.domain{1}.id == s1.id);
+    t.assert(s2.domain{1} == s1);
     t.assertEquals(s2.domain{1}.name, 's1');
     t.assert(numel(s2.domain_names) == 1);
     t.assertEquals(s2.domain_names{1}, 's1');
-    t.assert(numel(s2.domain_labels) == 0);
+    t.assert(numel(s2.domain_labels) == 1);
     t.assertEquals(s2.domain_type, 'regular');
     t.assert(numel(s2.size) == 1);
     t.assert(s2.size(1) == 0);
-    t.assert(strcmp(s2.format, 'empty'));
+    t.assert(strcmp(s2.format, 'struct'));
     t.assert(s2.getNumberRecords() == 0);
     t.assert(numel(s2.getUELs(1)) == 0);
     t.assert(s2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 's2'));
-    t.assert(gdx.data.s2.id == s2.id);
+    t.assert(gdx.data.s2 == s2);
     t.assert(s2.modified);
 
     t.add('add_symbols_set_3');
@@ -100,25 +100,25 @@ function test_addSymbols(t, cfg)
     t.assert(s3.is_singleton);
     t.assert(s3.dimension == 2);
     t.assert(numel(s3.domain) == 2);
-    t.assert(s3.domain{1}.id == s1.id);
+    t.assert(s3.domain{1} == s1);
     t.assertEquals(s3.domain{1}.name, 's1');
     t.assertEquals(s3.domain{2}, '*');
     t.assert(numel(s3.domain_names) == 2);
     t.assertEquals(s3.domain_names{1}, 's1');
     t.assertEquals(s3.domain_names{2}, '*');
-    t.assert(numel(s3.domain_labels) == 0);
+    t.assert(numel(s3.domain_labels) == 2);
     t.assertEquals(s3.domain_type, 'regular');
     t.assert(numel(s3.size) == 2);
     t.assert(s3.size(1) == 0);
-    t.assert(isnan(s3.size(2)));
-    t.assert(strcmp(s3.format, 'empty'));
+    t.assert(s3.size(2) == 0);
+    t.assert(strcmp(s3.format, 'struct'));
     t.assert(s3.getNumberRecords() == 0);
     t.assert(numel(s3.getUELs(1)) == 0);
     t.assert(numel(s3.getUELs(2)) == 0);
     t.assert(s3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 's3'));
-    t.assert(gdx.data.s3.id == s3.id);
+    t.assert(gdx.data.s3 == s3);
     t.assert(s3.modified);
 
     t.add('add_symbols_set_4');
@@ -129,21 +129,21 @@ function test_addSymbols(t, cfg)
     t.assert(s4.is_singleton);
     t.assert(s4.dimension == 1);
     t.assert(numel(s4.domain) == 1);
-    t.assert(s4.domain{1}.id == s2.id);
+    t.assert(s4.domain{1} == s2);
     t.assertEquals(s4.domain{1}.name, 's2');
     t.assert(numel(s4.domain_names) == 1);
     t.assertEquals(s4.domain_names{1}, 's2');
-    t.assert(numel(s4.domain_labels) == 0);
+    t.assert(numel(s4.domain_labels) == 1);
     t.assertEquals(s4.domain_type, 'regular');
     t.assert(numel(s4.size) == 1);
     t.assert(s4.size(1) == 0);
-    t.assert(strcmp(s4.format, 'empty'));
+    t.assert(strcmp(s4.format, 'struct'));
     t.assert(s4.getNumberRecords() == 0);
     t.assert(numel(s4.getUELs(1)) == 0);
     t.assert(s4.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 4);
     t.assert(isfield(gdx.data, 's4'));
-    t.assert(gdx.data.s4.id == s4.id);
+    t.assert(gdx.data.s4 == s4);
     t.assert(s4.modified);
 
     t.add('add_symbols_set_5');
@@ -155,24 +155,24 @@ function test_addSymbols(t, cfg)
     t.assert(s5.dimension == 2);
     t.assert(numel(s5.domain) == 2);
     t.assert(s5.domain{1} == 's1');
-    t.assert(s5.domain{2}.id == s2.id);
+    t.assert(s5.domain{2} == s2);
     t.assertEquals(s5.domain{2}.name, 's2');
     t.assert(numel(s5.domain_names) == 2);
     t.assertEquals(s5.domain_names{1}, 's1');
     t.assertEquals(s5.domain_names{2}, 's2');
-    t.assert(numel(s5.domain_labels) == 0);
+    t.assert(numel(s5.domain_labels) == 2);
     t.assertEquals(s5.domain_type, 'relaxed');
     t.assert(numel(s5.size) == 2);
-    t.assert(isnan(s5.size(1)));
+    t.assert(s5.size(1) == 0);
     t.assert(s5.size(2) == 0);
-    t.assert(strcmp(s5.format, 'empty'));
+    t.assert(strcmp(s5.format, 'struct'));
     t.assert(s5.getNumberRecords() == 0);
     t.assert(numel(s5.getUELs(1)) == 0);
     t.assert(numel(s5.getUELs(2)) == 0);
     t.assert(s5.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 5);
     t.assert(isfield(gdx.data, 's5'));
-    t.assert(gdx.data.s5.id == s5.id);
+    t.assert(gdx.data.s5 == s5);
     t.assert(s5.modified);
 
     t.add('add_symbols_set_6');
@@ -186,17 +186,17 @@ function test_addSymbols(t, cfg)
     t.assert(s6.domain{1} == 's1');
     t.assert(numel(s6.domain_names) == 1);
     t.assertEquals(s6.domain_names{1}, 's1');
-    t.assert(numel(s6.domain_labels) == 0);
+    t.assert(numel(s6.domain_labels) == 1);
     t.assertEquals(s6.domain_type, 'relaxed');
     t.assert(numel(s6.size) == 1);
-    t.assert(isnan(s6.size(1)));
-    t.assert(strcmp(s6.format, 'empty'));
+    t.assert(s6.size(1) == 0);
+    t.assert(strcmp(s6.format, 'struct'));
     t.assert(s6.getNumberRecords() == 0);
     t.assert(numel(s6.getUELs(1)) == 0);
     t.assert(s6.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 6);
     t.assert(isfield(gdx.data, 's6'));
-    t.assert(gdx.data.s6.id == s6.id);
+    t.assert(gdx.data.s6 == s6);
     t.assert(s6.modified);
 
     t.add('add_symbols_set_fails');
@@ -214,17 +214,11 @@ function test_addSymbols(t, cfg)
     end
     try
         t.assert(false);
-        gams.transfer.Set(gdx, 's', 2);
-    catch
-        t.reset();
-    end
-    try
-        t.assert(false);
         gams.transfer.Set(gdx, 's', {2, 3});
     catch
         t.reset();
     end
-    if exist('OCTAVE_VERSION', 'builtin') <= 0
+    if ~gams.transfer.Constants.IS_OCTAVE
         try
             t.assert(false);
             gams.transfer.Set(gdx, 's', ["s1", "s2"]);
@@ -255,35 +249,21 @@ function test_addSymbols(t, cfg)
         gams.transfer.Set(gdx, repmat('s', [1, 64]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol name too long. Name length must be smaller than 64.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 2) length must be smaller than 64.');
     end
     try
         t.assert(false);
         gams.transfer.Set(gdx, 's', 'description', repmat('d', [1, 256]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
-    end
-    try
-        t.assert(false);
-        gams.transfer.Set(gdx, 's1');
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Symbol ''s1'' already exists.');
-    end
-    try
-        t.assert(false);
-        gams.transfer.Set(gdx, 'S1');
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Symbol ''S1'' already exists.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 4) length must be smaller than 256.');
     end
 
     t.add('add_symbols_alias_1');
     a1 = gams.transfer.Alias(gdx, 'a1', s1);
     t.testEmptySymbol(a1);
     t.assertEquals(a1.name, 'a1');
-    t.assert(a1.alias_with.id == s1.id);
+    t.assert(a1.alias_with == s1);
     t.assertEquals(a1.alias_with.name, 's1');
     t.assertEquals(a1.description, '');
     t.assert(~a1.is_singleton);
@@ -292,41 +272,41 @@ function test_addSymbols(t, cfg)
     t.assertEquals(a1.domain{1}, '*');
     t.assert(numel(a1.domain_names) == 1);
     t.assertEquals(a1.domain_names{1}, '*');
-    t.assert(numel(a1.domain_labels) == 0);
+    t.assert(numel(a1.domain_labels) == 1);
     t.assertEquals(a1.domain_type, 'none');
     t.assert(numel(a1.size) == 1);
-    t.assert(isnan(a1.size(1)));
-    t.assert(strcmp(a1.format, 'empty'));
+    t.assert(a1.size(1) == 0);
+    t.assert(strcmp(a1.format, 'struct'));
     t.assert(a1.getNumberRecords() == 0);
     t.assert(numel(a1.getUELs(1)) == 0);
     t.assert(a1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 7);
     t.assert(isfield(gdx.data, 'a1'));
-    t.assert(gdx.data.a1.id == a1.id);
+    t.assert(gdx.data.a1 == a1);
     t.assert(a1.modified);
 
     t.add('add_symbols_alias_2');
     a2 = gams.transfer.Alias(gdx, 'a2', a1);
     t.testEmptySymbol(a2);
     t.assertEquals(a2.name, 'a2');
-    t.assert(a2.alias_with.id == s1.id);
+    t.assert(a2.alias_with == s1);
     t.assertEquals(a2.alias_with.name, 's1');
     t.assert(a2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 8);
     t.assert(isfield(gdx.data, 'a2'));
-    t.assert(gdx.data.a2.id == a2.id);
+    t.assert(gdx.data.a2 == a2);
     t.assert(a2.modified);
 
     t.add('add_symbols_alias_3');
     a3 = gams.transfer.Alias(gdx, 'a3', a2);
     t.testEmptySymbol(a3);
     t.assertEquals(a3.name, 'a3');
-    t.assert(a3.alias_with.id == s1.id);
+    t.assert(a3.alias_with == s1);
     t.assertEquals(a3.alias_with.name, 's1');
     t.assert(a3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 9);
     t.assert(isfield(gdx.data, 'a3'));
-    t.assert(gdx.data.a3.id == a3.id);
+    t.assert(gdx.data.a3 == a3);
     t.assert(a3.modified);
 
     t.add('add_symbols_parameter_1');
@@ -340,12 +320,12 @@ function test_addSymbols(t, cfg)
     t.assert(numel(p1.domain_labels) == 0);
     t.assertEquals(p1.domain_type, 'none');
     t.assert(numel(p1.size) == 0);
-    t.assert(strcmp(p1.format, 'empty'));
+    t.assert(strcmp(p1.format, 'struct'));
     t.assert(p1.getNumberRecords() == 0);
     t.assert(p1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 10);
     t.assert(isfield(gdx.data, 'p1'));
-    t.assert(gdx.data.p1.id == p1.id);
+    t.assert(gdx.data.p1 == p1);
     t.assert(p1.modified);
 
     t.add('add_symbols_parameter_2');
@@ -355,21 +335,21 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p2.description, 'descr par 2');
     t.assert(p2.dimension == 1);
     t.assert(numel(p2.domain) == 1);
-    t.assert(p2.domain{1}.id == s1.id);
+    t.assert(p2.domain{1} == s1);
     t.assertEquals(p2.domain{1}.name, 's1');
     t.assert(numel(p2.domain_names) == 1);
     t.assertEquals(p2.domain_names{1}, 's1');
-    t.assert(numel(p2.domain_labels) == 0);
+    t.assert(numel(p2.domain_labels) == 1);
     t.assertEquals(p2.domain_type, 'regular');
     t.assert(numel(p2.size) == 1);
     t.assert(p2.size(1) == 0);
-    t.assert(strcmp(p2.format, 'empty'));
+    t.assert(strcmp(p2.format, 'struct'));
     t.assert(p2.getNumberRecords() == 0);
     t.assert(numel(p2.getUELs(1)) == 0);
     t.assert(p2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 11);
     t.assert(isfield(gdx.data, 'p2'));
-    t.assert(gdx.data.p2.id == p2.id);
+    t.assert(gdx.data.p2 == p2);
     t.assert(p2.modified);
 
     t.add('add_symbols_parameter_3');
@@ -379,7 +359,7 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p3.description, 'descr par 3');
     t.assert(p3.dimension == 3);
     t.assert(numel(p3.domain) == 3);
-    t.assert(p3.domain{1}.id == s1.id);
+    t.assert(p3.domain{1} == s1);
     t.assertEquals(p3.domain{1}.name, 's1');
     t.assertEquals(p3.domain{2}, '*');
     t.assert(p3.domain{3} == 's2');
@@ -387,13 +367,13 @@ function test_addSymbols(t, cfg)
     t.assertEquals(p3.domain_names{1}, 's1');
     t.assertEquals(p3.domain_names{2}, '*');
     t.assertEquals(p3.domain_names{3}, 's2');
-    t.assert(numel(p3.domain_labels) == 0);
+    t.assert(numel(p3.domain_labels) == 3);
     t.assertEquals(p3.domain_type, 'relaxed');
     t.assert(numel(p3.size) == 3);
     t.assert(p3.size(1) == 0);
-    t.assert(isnan(p3.size(2)));
-    t.assert(isnan(p3.size(3)));
-    t.assert(strcmp(p3.format, 'empty'));
+    t.assert(p3.size(2) == 0);
+    t.assert(p3.size(3) == 0);
+    t.assert(strcmp(p3.format, 'struct'));
     t.assert(p3.getNumberRecords() == 0);
     t.assert(numel(p3.getUELs(1)) == 0);
     t.assert(numel(p3.getUELs(2)) == 0);
@@ -401,7 +381,7 @@ function test_addSymbols(t, cfg)
     t.assert(p3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 12);
     t.assert(isfield(gdx.data, 'p3'));
-    t.assert(gdx.data.p3.id == p3.id);
+    t.assert(gdx.data.p3 == p3);
     t.assert(p3.modified);
 
     t.add('add_symbols_parameter_fails');
@@ -419,17 +399,11 @@ function test_addSymbols(t, cfg)
     end
     try
         t.assert(false);
-        gams.transfer.Parameter(gdx, 's', 2);
-    catch
-        t.reset();
-    end
-    try
-        t.assert(false);
         gams.transfer.Parameter(gdx, 's', {2, 3});
     catch
         t.reset();
     end
-    if exist('OCTAVE_VERSION', 'builtin') <= 0
+    if ~gams.transfer.Constants.IS_OCTAVE
         try
             t.assert(false);
             gams.transfer.Parameter(gdx, 's', ["s1", "s2"]);
@@ -454,14 +428,14 @@ function test_addSymbols(t, cfg)
         gams.transfer.Parameter(gdx, repmat('s', [1, 64]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol name too long. Name length must be smaller than 64.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 2) length must be smaller than 64.');
     end
     try
         t.assert(false);
         gams.transfer.Parameter(gdx, 's', 'description', repmat('d', [1, 256]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 4) length must be smaller than 256.');
     end
 
     t.add('add_symbols_variable_1');
@@ -476,12 +450,12 @@ function test_addSymbols(t, cfg)
     t.assert(numel(v1.domain_labels) == 0);
     t.assertEquals(v1.domain_type, 'none');
     t.assert(numel(v1.size) == 0);
-    t.assert(strcmp(v1.format, 'empty'));
+    t.assert(strcmp(v1.format, 'struct'));
     t.assert(v1.getNumberRecords() == 0);
     t.assert(v1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 13);
     t.assert(isfield(gdx.data, 'v1'));
-    t.assert(gdx.data.v1.id == v1.id);
+    t.assert(gdx.data.v1 == v1);
     t.assert(v1.modified);
 
     t.add('add_symbols_variable_2');
@@ -496,12 +470,12 @@ function test_addSymbols(t, cfg)
     t.assert(numel(v2.domain_labels) == 0);
     t.assertEquals(v2.domain_type, 'none');
     t.assert(numel(v2.size) == 0);
-    t.assert(strcmp(v2.format, 'empty'));
+    t.assert(strcmp(v2.format, 'struct'));
     t.assert(v2.getNumberRecords() == 0);
     t.assert(v2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 14);
     t.assert(isfield(gdx.data, 'v2'));
-    t.assert(gdx.data.v2.id == v2.id);
+    t.assert(gdx.data.v2 == v2);
     t.assert(v2.modified);
 
     t.add('add_symbols_variable_3');
@@ -512,25 +486,25 @@ function test_addSymbols(t, cfg)
     t.assert(v3.type == 'sos1');
     t.assert(v3.dimension == 2);
     t.assert(numel(v3.domain) == 2);
-    t.assert(v3.domain{1}.id == s1.id);
+    t.assert(v3.domain{1} == s1);
     t.assertEquals(v3.domain{1}.name, 's1');
     t.assertEquals(v3.domain{2}, '*');
     t.assert(numel(v3.domain_names) == 2);
     t.assertEquals(v3.domain_names{1}, 's1');
     t.assertEquals(v3.domain_names{2}, '*');
-    t.assert(numel(v3.domain_labels) == 0);
+    t.assert(numel(v3.domain_labels) == 2);
     t.assertEquals(v3.domain_type, 'regular');
     t.assert(numel(v3.size) == 2);
     t.assert(v3.size(1) == 0);
-    t.assert(isnan(v3.size(2)));
-    t.assert(strcmp(v3.format, 'empty'));
+    t.assert(v3.size(2) == 0);
+    t.assert(strcmp(v3.format, 'struct'));
     t.assert(v3.getNumberRecords() == 0);
     t.assert(numel(v3.getUELs(1)) == 0);
     t.assert(numel(v3.getUELs(2)) == 0);
     t.assert(v3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 15);
     t.assert(isfield(gdx.data, 'v3'));
-    t.assert(gdx.data.v3.id == v3.id);
+    t.assert(gdx.data.v3 == v3);
     t.assert(v3.modified);
 
     t.add('add_symbols_variable_4');
@@ -594,17 +568,11 @@ function test_addSymbols(t, cfg)
     end
     try
         t.assert(false);
-        gams.transfer.Variable(gdx, 's', 'free', 2);
-    catch
-        t.reset();
-    end
-    try
-        t.assert(false);
         gams.transfer.Variable(gdx, 's', 'free', {2, 3});
     catch
         t.reset();
     end
-    if exist('OCTAVE_VERSION', 'builtin') <= 0
+    if ~gams.transfer.Constants.IS_OCTAVE
         try
             t.assert(false);
             gams.transfer.Variable(gdx, 's', 'free', ["s1", "s2"]);
@@ -629,14 +597,14 @@ function test_addSymbols(t, cfg)
         gams.transfer.Variable(gdx, repmat('s', [1, 64]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol name too long. Name length must be smaller than 64.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 2) length must be smaller than 64.');
     end
     try
         t.assert(false);
         gams.transfer.Variable(gdx, 's', 'description', repmat('d', [1, 256]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 4) length must be smaller than 256.');
     end
 
     t.add('add_symbols_equation_1');
@@ -651,12 +619,12 @@ function test_addSymbols(t, cfg)
     t.assert(numel(e1.domain_labels) == 0);
     t.assertEquals(e1.domain_type, 'none');
     t.assert(numel(e1.size) == 0);
-    t.assert(strcmp(e1.format, 'empty'));
+    t.assert(strcmp(e1.format, 'struct'));
     t.assert(e1.getNumberRecords() == 0);
     t.assert(e1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 34);
     t.assert(isfield(gdx.data, 'e1'));
-    t.assert(gdx.data.e1.id == e1.id);
+    t.assert(gdx.data.e1 == e1);
     t.assert(e1.modified);
 
     t.add('add_symbols_equation_2');
@@ -671,12 +639,12 @@ function test_addSymbols(t, cfg)
     t.assert(numel(e2.domain_labels) == 0);
     t.assertEquals(e2.domain_type, 'none');
     t.assert(numel(e2.size) == 0);
-    t.assert(strcmp(e2.format, 'empty'));
+    t.assert(strcmp(e2.format, 'struct'));
     t.assert(e2.getNumberRecords() == 0);
     t.assert(e2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 35);
     t.assert(isfield(gdx.data, 'e2'));
-    t.assert(gdx.data.e2.id == e2.id);
+    t.assert(gdx.data.e2 == e2);
     t.assert(e2.modified);
 
     t.add('add_symbols_equation_3');
@@ -687,25 +655,25 @@ function test_addSymbols(t, cfg)
     t.assert(e3.type == 'leq');
     t.assert(e3.dimension == 2);
     t.assert(numel(e3.domain) == 2);
-    t.assert(e3.domain{1}.id == s1.id);
+    t.assert(e3.domain{1} == s1);
     t.assertEquals(s3.domain{1}.name, 's1');
     t.assertEquals(e3.domain{2}, '*');
     t.assert(numel(e3.domain_names) == 2);
     t.assertEquals(e3.domain_names{1}, 's1');
     t.assertEquals(e3.domain_names{2}, '*');
-    t.assert(numel(e3.domain_labels) == 0);
+    t.assert(numel(e3.domain_labels) == 2);
     t.assertEquals(e3.domain_type, 'regular');
     t.assert(numel(e3.size) == 2);
     t.assert(e3.size(1) == 0);
-    t.assert(isnan(e3.size(2)));
-    t.assert(strcmp(e3.format, 'empty'));
+    t.assert(e3.size(2) == 0);
+    t.assert(strcmp(e3.format, 'struct'));
     t.assert(e3.getNumberRecords() == 0);
     t.assert(numel(e3.getUELs(1)) == 0);
     t.assert(numel(e3.getUELs(2)) == 0);
     t.assert(e3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 36);
     t.assert(isfield(gdx.data, 'e3'));
-    t.assert(gdx.data.e3.id == e3.id);
+    t.assert(gdx.data.e3 == e3);
     t.assert(e3.modified);
 
     t.add('add_symbols_equation_4');
@@ -783,17 +751,11 @@ function test_addSymbols(t, cfg)
     end
     try
         t.assert(false);
-        gams.transfer.Equation(gdx, 's', 'e', 2);
-    catch
-        t.reset();
-    end
-    try
-        t.assert(false);
         gams.transfer.Equation(gdx, 's', 'e', {2, 3});
     catch
         t.reset();
     end
-    if exist('OCTAVE_VERSION', 'builtin') <= 0
+    if ~gams.transfer.Constants.IS_OCTAVE
         try
             t.assert(false);
             gams.transfer.Equation(gdx, 's', 'e', ["s1", "s2"]);
@@ -818,21 +780,21 @@ function test_addSymbols(t, cfg)
         gams.transfer.Equation(gdx, repmat('s', [1, 64]), 'n');
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol name too long. Name length must be smaller than 64.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 2) length must be smaller than 64.');
     end
     try
         t.assert(false);
         gams.transfer.Equation(gdx, 's', 'n', 'description', repmat('d', [1, 256]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol description too long. Name length must be smaller than 256.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 5) length must be smaller than 256.');
     end
 
 end
 
 function test_overwriteSymbols(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
 
     t.add('overwrite_symbols_set_1');
     s = gdx.addSet('s');
@@ -842,7 +804,7 @@ function test_overwriteSymbols(t, cfg)
     t.assertEquals(s.description, 'set1');
     t.assertEquals(s.getNumberRecords(), 0)
     gdx.addSet('s', 'records', {'i1', 'i2'});
-    t.assertEquals(s.description, 'set1');
+    t.assertEquals(s.description, '');
     t.assertEquals(s.getNumberRecords(), 2)
 
     t.add('overwrite_symbols_set_2');
@@ -872,7 +834,7 @@ function test_overwriteSymbols(t, cfg)
         gdx.addParameter('s');
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol ''s'' (with different definition) already exists.');
+        t.assertEquals(e.message, 'Symbol ''s'' (with different symbol type) already exists.');
     end
 
     t.add('overwrite_symbols_parameter_1');
@@ -883,7 +845,7 @@ function test_overwriteSymbols(t, cfg)
     t.assertEquals(p.description, 'par1');
     t.assertEquals(p.getNumberRecords(), 0)
     gdx.addParameter('p', 'records', 1);
-    t.assertEquals(p.description, 'par1');
+    t.assertEquals(p.description, '');
     t.assertEquals(p.getNumberRecords(), 1)
 
     t.add('overwrite_symbols_parameter_2');
@@ -896,17 +858,10 @@ function test_overwriteSymbols(t, cfg)
     end
     try
         t.assert(false);
-        gdx.addParameter('p', 'domain_forwarding', true);
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Symbol ''p'' (with different definition) already exists.');
-    end
-    try
-        t.assert(false);
         gdx.addSet('p');
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol ''p'' (with different definition) already exists.');
+        t.assertEquals(e.message, 'Symbol ''p'' (with different symbol type) already exists.');
     end
 
     t.add('overwrite_symbols_variable_1');
@@ -917,7 +872,7 @@ function test_overwriteSymbols(t, cfg)
     t.assertEquals(v.description, 'var1');
     t.assertEquals(v.getNumberRecords(), 0)
     gdx.addVariable('v', 'records', 1);
-    t.assertEquals(v.description, 'var1');
+    t.assertEquals(v.description, '');
     t.assertEquals(v.getNumberRecords(), 1)
 
     t.add('overwrite_symbols_variable_2');
@@ -937,17 +892,10 @@ function test_overwriteSymbols(t, cfg)
     end
     try
         t.assert(false);
-        gdx.addVariable('v', 'domain_forwarding', true);
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Symbol ''v'' (with different definition) already exists.');
-    end
-    try
-        t.assert(false);
         gdx.addSet('v');
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol ''v'' (with different definition) already exists.');
+        t.assertEquals(e.message, 'Symbol ''v'' (with different symbol type) already exists.');
     end
 
     t.add('overwrite_symbols_equation_1');
@@ -958,7 +906,7 @@ function test_overwriteSymbols(t, cfg)
     t.assertEquals(e.description, 'equ1');
     t.assertEquals(e.getNumberRecords(), 0)
     gdx.addEquation('e', 'l', 'records', 1);
-    t.assertEquals(e.description, 'equ1');
+    t.assertEquals(e.description, '');
     t.assertEquals(e.getNumberRecords(), 1)
 
     t.add('overwrite_symbols_equation_2');
@@ -978,17 +926,10 @@ function test_overwriteSymbols(t, cfg)
     end
     try
         t.assert(false);
-        gdx.addEquation('e', 'l', 'domain_forwarding', true);
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Symbol ''e'' (with different definition) already exists.');
-    end
-    try
-        t.assert(false);
         gdx.addSet('e');
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol ''e'' (with different definition) already exists.');
+        t.assertEquals(e.message, 'Symbol ''e'' (with different symbol type) already exists.');
     end
 
     t.add('overwrite_symbols_alias_1');
@@ -1004,15 +945,14 @@ function test_overwriteSymbols(t, cfg)
         gdx.addSet('a');
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Symbol ''a'' (with different definition) already exists.');
+        t.assertEquals(e.message, 'Symbol ''a'' (with different symbol type) already exists.');
     end
 
 end
 
 function test_changeSymbol(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-        'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     i1 = gams.transfer.Set(gdx, 'i1');
     i2 = gams.transfer.Set(gdx, 'i2', 'records', {'i21', 'i22', 'i23'});
     x1 = gams.transfer.Variable(gdx, 'x1', 'free', {i1});
@@ -1053,14 +993,14 @@ function test_changeSymbol(t, cfg)
         x1.name = 2;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Name must be of type ''char''.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 1) must be ''string'' or ''char''.');
     end
     try
         t.assert(false);
         x1.name = NaN;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Name must be of type ''char''.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 1) must be ''string'' or ''char''.');
     end
     try
         t.assert(false);
@@ -1090,21 +1030,21 @@ function test_changeSymbol(t, cfg)
         x1.description = 2;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Description must be of type ''char''.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 1) must be ''string'' or ''char''.');
     end
     try
         t.assert(false);
         x1.description = NaN;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Description must be of type ''char''.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 1) must be ''string'' or ''char''.');
     end
 
     t.add('change_symbol_dimension_1');
     gdx.modified = false;
     t.assert(x1.dimension == 1);
     t.assert(numel(x1.domain) == 1);
-    t.assertEquals(x1.domain{1}.id, i1.id);
+    t.assertEquals(x1.domain{1}, i1);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assert(~gdx.modified);
     t.assert(~i1.modified);
@@ -1115,7 +1055,7 @@ function test_changeSymbol(t, cfg)
     x1.dimension = 2;
     t.assert(x1.dimension == 2);
     t.assert(numel(x1.domain) == 2);
-    t.assertEquals(x1.domain{1}.id, i1.id);
+    t.assertEquals(x1.domain{1}, i1);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assertEquals(x1.domain{2}, '*');
     t.assert(gdx.modified);
@@ -1127,7 +1067,7 @@ function test_changeSymbol(t, cfg)
     x1.dimension = 1;
     t.assert(x1.dimension == 1);
     t.assert(numel(x1.domain) == 1);
-    t.assertEquals(x1.domain{1}.id, i1.id);
+    t.assertEquals(x1.domain{1}, i1);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assert(gdx.modified);
     t.assert(~i1.modified);
@@ -1142,35 +1082,35 @@ function test_changeSymbol(t, cfg)
         x1.dimension = '2';
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Dimension must be of type ''numeric''.');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be numeric.');
     end
     try
         t.assert(false);
         x1.dimension = 2.5;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Dimension must be integer.');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be integer.');
     end
     try
         t.assert(false);
         x1.dimension = -1;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Dimension must be within [0,20].');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0,20].');
     end
     try
         t.assert(false);
         x1.dimension = 21;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Dimension must be within [0,20].');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0,20].');
     end
 
     t.add('change_symbol_dimension_3');
     gdx.modified = false;
     t.assert(x3.dimension == 1);
     t.assert(numel(x3.domain) == 1);
-    t.assertEquals(x3.domain{1}.id, i2.id);
+    t.assertEquals(x3.domain{1}, i2);
     t.assertEquals(x3.domain{1}.name, 'i2');
     t.assert(x3.isValid());
     t.assert(~gdx.modified);
@@ -1182,7 +1122,7 @@ function test_changeSymbol(t, cfg)
     x3.dimension = 2;
     t.assert(x3.dimension == 2);
     t.assert(numel(x3.domain) == 2);
-    t.assertEquals(x3.domain{1}.id, i2.id);
+    t.assertEquals(x3.domain{1}, i2);
     t.assertEquals(x3.domain{1}.name, 'i2');
     t.assertEquals(x3.domain{2}, '*');
     t.assert(~x3.isValid());
@@ -1195,7 +1135,7 @@ function test_changeSymbol(t, cfg)
     x3.dimension = 1;
     t.assert(x3.dimension == 1);
     t.assert(numel(x3.domain) == 1);
-    t.assertEquals(x3.domain{1}.id, i2.id);
+    t.assertEquals(x3.domain{1}, i2);
     t.assertEquals(x3.domain{1}.name, 'i2');
     t.assert(x3.isValid());
     t.assert(gdx.modified);
@@ -1208,7 +1148,7 @@ function test_changeSymbol(t, cfg)
     t.add('change_symbol_domain_1');
     gdx.modified = false;
     t.assert(numel(x1.domain) == 1);
-    t.assertEquals(x1.domain{1}.id, i1.id);
+    t.assertEquals(x1.domain{1}, i1);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assert(~gdx.modified);
     t.assert(~i1.modified);
@@ -1219,8 +1159,8 @@ function test_changeSymbol(t, cfg)
     x1.domain = {i1,i1};
     t.assert(x1.dimension == 2);
     t.assert(numel(x1.domain) == 2);
-    t.assertEquals(x1.domain{1}.id, i1.id);
-    t.assertEquals(x1.domain{2}.id, i1.id);
+    t.assertEquals(x1.domain{1}, i1);
+    t.assertEquals(x1.domain{2}, i1);
     t.assertEquals(x1.domain{1}.name, 'i1');
     t.assertEquals(x1.domain{2}.name, 'i1');
     t.assert(gdx.modified);
@@ -1251,43 +1191,28 @@ function test_changeSymbol(t, cfg)
     t.add('change_symbol_domain_2');
     try
         t.assert(false);
-        x1.domain = '*';
-    catch e
-        t.reset();
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_set_sym_domain: Domain must be of type ''cell''.');
-        else
-            t.assertEquals(e.message, 'Domain must be of type ''cell''.');
-        end
-    end
-    try
-        t.assert(false);
         x1.domain = {x2};
     catch e
         t.reset();
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            t.assertEquals(e.message, 'gt_set_sym_domain: Domain entry must be of type ''gams.transfer.Set'', ''gams.transfer.Alias'', ''gams.transfer.UniverseAlias'' or ''char''.');
-        else
-            t.assertEquals(e.message, 'Domain entry must be of type ''gams.transfer.Set'', ''gams.transfer.Alias'', ''gams.transfer.UniverseAlias'' or ''char''.');
-        end
+        t.assertEquals(e.message, 'Cannot create domains from ''domains'' (at position 1): Element 1 must be ''gams.transfer.symbol.domain.Abstract'', ''gams.transfer.symbol.Set'', ''char'' or ''string''.');
     end
 
     t.add('change_symbol_domain_labels_1');
     x1.domain = {i2};
     x1.records = struct();
-    if gdx.features.categorical
-        x1.records.i = categorical({'i21', 'i22', 'i23'})';
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
+        x1.records.i2 = categorical({'i21', 'i22', 'i23'})';
     else
-        x1.records.i = [1; 2; 3];
+        x1.records.i2 = [1; 2; 3];
     end
     x1.records.level = [1; 2; 3];
     t.assert(x1.isValid());
     gdx.modified = false;
     t.assert(numel(x1.domain) == 1);
-    t.assertEquals(x1.domain{1}.id, i2.id);
+    t.assertEquals(x1.domain{1}, i2);
     t.assertEquals(x1.domain{1}.name, 'i2');
-    t.assertEquals(x1.domain_labels{1}, 'i');
-    t.assert(isfield(x1.records, 'i'));
+    t.assertEquals(x1.domain_labels{1}, 'i2');
+    t.assert(isfield(x1.records, 'i2'));
     t.assert(~isfield(x1.records, 'first'));
     t.assert(~gdx.modified);
     t.assert(~i1.modified);
@@ -1298,11 +1223,11 @@ function test_changeSymbol(t, cfg)
     x1.domain_labels = {'first'};
     t.assert(x1.dimension == 1);
     t.assert(numel(x1.domain) == 1);
-    t.assertEquals(x1.domain{1}.id, i2.id);
+    t.assertEquals(x1.domain{1}, i2);
     t.assertEquals(x1.domain{1}.name, 'i2');
     t.assertEquals(x1.domain_labels{1}, 'first');
     t.assert(isfield(x1.records, 'first'));
-    t.assert(~isfield(x1.records, 'i'));
+    t.assert(~isfield(x1.records, 'i2'));
     t.assert(gdx.modified);
     t.assert(~i1.modified);
     t.assert(~i2.modified);
@@ -1314,10 +1239,12 @@ function test_changeSymbol(t, cfg)
     t.add('change_symbol_domain_labels_2');
     x1.domain = {'i', 'j'};
     x1.records = struct();
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         x1.records.i = categorical({'i21', 'i22', 'i23'})';
         x1.records.j = categorical({'j21', 'j22', 'j23'})';
     else
+        x1.unique_labels{1} = gams.transfer.unique_labels.Range.construct('j2', 1, 1, 3);
+        x1.unique_labels{2} = gams.transfer.unique_labels.Range.construct('j2', 1, 1, 3);
         x1.records.i = [1; 2; 3];
         x1.records.j = [1; 2; 3];
     end
@@ -1361,50 +1288,21 @@ function test_changeSymbol(t, cfg)
         x1.domain_labels = '*';
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain labels must be of type ''cellstr''.');
+        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must be ''cell''.');
     end
     try
         t.assert(false);
         x1.domain_labels = {'*'};
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain labels must have length equal to symbol dimension.');
-    end
-    try
-        t.assert(false);
-        x1.domain_labels = {'*', '*'};
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain labels must be unique.');
-    end
-
-    t.add('change_symbol_size');
-    try
-        t.assert(false);
-        x1.size = [1,2];
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Setting symbol size only allowed in indexed mode.');
-    end
-
-    t.add('change_symbol_format');
-    try
-        x1.format = 'struct';
-        t.assert(false);
-    catch e
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            msg_end = 'has private access and cannot be set in this context';
-            t.assertEquals(e.message(end-numel(msg_end)+1:end), msg_end);
-        else
-            t.assert(~isempty(strfind(e.message, 'read-only')));
-        end
+        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must have 2 elements.');
     end
 
 end
 
 function test_copySymbol(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     i = gams.transfer.Set(gdx, 'i', 'description', 'set i', 'records', {'i1', 'i2', 'i3'});
     a = gams.transfer.Alias(gdx, 'a', i);
     x = gams.transfer.Variable(gdx, 'x', 'binary', {i});
@@ -1413,7 +1311,7 @@ function test_copySymbol(t, cfg)
     gdx.modified = false;
 
     t.add('copy_symbol_set_empty');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     i.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1421,13 +1319,13 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.i.name, 'i');
     t.assertEquals(gdx2.data.i.description, 'set i');
     t.assert(gdx2.data.i.dimension == 1);
-    t.assert(isnan(gdx2.data.i.size(1)));
+    t.assert(gdx2.data.i.size(1) == 3);
     t.assert(iscell(gdx2.data.i.domain));
     t.assert(numel(gdx2.data.i.domain) == 1);
     t.assertEquals(gdx2.data.i.domain{1}, '*');
     t.assert(isfield(gdx2.data.i.records, 'uni'));
     t.assert(numel(gdx2.data.i.records.uni) == 3);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(gdx2.data.i.records.uni(1), 'i1');
         t.assertEquals(gdx2.data.i.records.uni(2), 'i2');
         t.assertEquals(gdx2.data.i.records.uni(3), 'i3');
@@ -1444,7 +1342,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_set_overwrite_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Set(gdx2, 'i');
     gdx2.modified = false;
     i.copy(gdx2, true);
@@ -1453,13 +1351,13 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.i.name, 'i');
     t.assertEquals(gdx2.data.i.description, 'set i');
     t.assert(gdx2.data.i.dimension == 1);
-    t.assert(isnan(gdx2.data.i.size(1)));
+    t.assert(gdx2.data.i.size(1) == 3);
     t.assert(iscell(gdx2.data.i.domain));
     t.assert(numel(gdx2.data.i.domain) == 1);
     t.assertEquals(gdx2.data.i.domain{1}, '*');
     t.assert(isfield(gdx2.data.i.records, 'uni'));
     t.assert(numel(gdx2.data.i.records.uni) == 3);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(gdx2.data.i.records.uni(1), 'i1');
         t.assertEquals(gdx2.data.i.records.uni(2), 'i2');
         t.assertEquals(gdx2.data.i.records.uni(3), 'i3');
@@ -1476,7 +1374,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_set_overwrite_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Set(gdx2, 'i');
     try
         t.assert(false);
@@ -1486,28 +1384,18 @@ function test_copySymbol(t, cfg)
         t.assertEquals(ex.message, 'Symbol already exists in destination.');
     end
 
-    t.add('copy_symbol_set_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
-    try
-        t.assert(false);
-        i.copy(gdx2);
-    catch ex
-        t.reset();
-        t.assertEquals(ex.message, 'Set not allowed in indexed mode.');
-    end
-
     t.add('copy_symbol_alias_empty_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     try
         t.assert(false);
         a.copy(gdx2);
     catch ex
         t.reset();
-        t.assertEquals(ex.message, 'Aliased symbol not available or differs in destination.');
+        t.assertEquals(ex.message, 'Aliased symbol not available in destination');
     end
 
     t.add('copy_symbol_alias_empty_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     i.copy(gdx2);
     a.copy(gdx2);
@@ -1516,16 +1404,14 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.i.name, 'i');
     t.assert(isfield(gdx2.data, 'a'));
     t.assertEquals(gdx2.data.a.name, 'a');
-    if gdx.features.handle_compare
-        t.assert(gdx2.data.i == gdx2.data.a.alias_with);
-    end
+    t.assert(gdx2.data.i == gdx2.data.a.alias_with);
     t.assert(~a.modified);
     t.assert(gdx2.data.a.modified);
     t.assert(~gdx.modified);
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_alias_overwrite_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     i.copy(gdx2);
     j = gams.transfer.Set(gdx2, 'j');
     gams.transfer.Alias(gdx2, 'a', j);
@@ -1536,18 +1422,14 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.i.name, 'i');
     t.assert(isfield(gdx2.data, 'a'));
     t.assertEquals(gdx2.data.a.name, 'a');
-    if gdx.features.handle_compare
-        t.assert(gdx2.data.i == gdx2.data.a.alias_with);
-    end
+    t.assert(gdx2.data.i == gdx2.data.a.alias_with);
     t.assert(~a.modified);
     t.assert(gdx2.data.a.modified);
     t.assert(~gdx.modified);
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_alias_overwrite_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
-    gams.transfer.Set(gdx2, 'i');
-    i.copy(gdx2);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     j = gams.transfer.Set(gdx2, 'j');
     gams.transfer.Alias(gdx2, 'a', j);
     try
@@ -1555,11 +1437,11 @@ function test_copySymbol(t, cfg)
         a.copy(gdx2, false);
     catch ex
         t.reset();
-        t.assertEquals(ex.message, 'Symbol already exists in destination.');
+        t.assertEquals(ex.message, 'Aliased symbol not available in destination');
     end
 
     t.add('copy_symbol_variable_empty_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     x.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1568,20 +1450,20 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.x.description, '');
     t.assertEquals(gdx2.data.x.type, 'binary');
     t.assert(gdx2.data.x.dimension == 1);
-    t.assert(isnan(gdx2.data.x.size(1)));
+    t.assert(gdx2.data.x.size(1) == 0);
     t.assert(iscell(gdx2.data.x.domain));
     t.assert(numel(gdx2.data.x.domain) == 1);
     t.assertEquals(gdx2.data.x.domain{1}, 'i');
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
     t.assert(~gdx2.data.x.domain_forwarding(1));
-    t.assertEquals(gdx2.data.x.format, 'empty');
+    t.assertEquals(gdx2.data.x.format, 'struct');
     t.assert(~x.modified);
     t.assert(gdx2.data.x.modified);
     t.assert(~gdx.modified);
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_empty_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     i.copy(gdx2);
     x.copy(gdx2);
@@ -1594,19 +1476,17 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.data.x.size(1) == 3);
     t.assert(iscell(gdx2.data.x.domain));
     t.assert(numel(gdx2.data.x.domain) == 1);
-    if gdx.features.handle_compare
-        t.assert(gdx2.data.x.domain{1} == gdx2.data.i);
-    end
+    t.assert(gdx2.data.x.domain{1}.equals(gdx2.data.i));
     t.assertEquals(gdx2.data.x.domain_type, 'regular');
     t.assert(~gdx2.data.x.domain_forwarding(1));
-    t.assertEquals(gdx2.data.x.format, 'empty');
+    t.assertEquals(gdx2.data.x.format, 'struct');
     t.assert(~x.modified);
     t.assert(gdx2.data.x.modified);
     t.assert(~gdx.modified);
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_overwrite_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Variable(gdx2, 'x');
     gdx2.modified = false;
     x.copy(gdx2, true);
@@ -1616,20 +1496,20 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.x.description, '');
     t.assertEquals(gdx2.data.x.type, 'binary');
     t.assert(gdx2.data.x.dimension == 1);
-    t.assert(isnan(gdx2.data.x.size(1)));
+    t.assert(gdx2.data.x.size(1) == 0);
     t.assert(iscell(gdx2.data.x.domain));
     t.assert(numel(gdx2.data.x.domain) == 1);
     t.assertEquals(gdx2.data.x.domain{1}, 'i');
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
     t.assert(~gdx2.data.x.domain_forwarding(1));
-    t.assertEquals(gdx2.data.x.format, 'empty');
+    t.assertEquals(gdx2.data.x.format, 'struct');
     t.assert(~x.modified);
     t.assert(gdx2.data.x.modified);
     t.assert(~gdx.modified);
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_overwrite_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Variable(gdx2, 'x');
     try
         t.assert(false);
@@ -1639,18 +1519,8 @@ function test_copySymbol(t, cfg)
         t.assertEquals(ex.message, 'Symbol already exists in destination.');
     end
 
-    t.add('copy_symbol_variable_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
-    try
-        t.assert(false);
-        x.copy(gdx2);
-    catch ex
-        t.reset();
-        t.assertEquals(ex.message, 'Variable not allowed in indexed mode.');
-    end
-
     t.add('copy_symbol_equation_empty_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     e.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1659,8 +1529,8 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.description, 'equ e');
     t.assertEquals(gdx2.data.e.type, 'leq');
     t.assert(gdx2.data.e.dimension == 2);
-    t.assert(isnan(gdx2.data.e.size(1)));
-    t.assert(isnan(gdx2.data.e.size(2)));
+    t.assert(gdx2.data.e.size(1) == 0);
+    t.assert(gdx2.data.e.size(2) == 0);
     t.assert(iscell(gdx2.data.e.domain));
     t.assert(numel(gdx2.data.e.domain) == 2);
     t.assertEquals(gdx2.data.e.domain{1}, 'a');
@@ -1668,14 +1538,14 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.domain_type, 'relaxed');
     t.assert(~gdx2.data.e.domain_forwarding(1));
     t.assert(~gdx2.data.e.domain_forwarding(2));
-    t.assertEquals(gdx2.data.e.format, 'empty');
+    t.assertEquals(gdx2.data.e.format, 'struct');
     t.assert(~e.modified);
     t.assert(gdx2.data.e.modified);
     t.assert(~gdx.modified);
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_equation_empty_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     i.copy(gdx2);
     a.copy(gdx2);
@@ -1690,21 +1560,19 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.data.e.size(2) == 3);
     t.assert(iscell(gdx2.data.e.domain));
     t.assert(numel(gdx2.data.e.domain) == 2);
-    if gdx.features.handle_compare
-        t.assert(gdx2.data.e.domain{1} == gdx2.data.a);
-        t.assert(gdx2.data.e.domain{2} == gdx2.data.i);
-    end
+    t.assert(gdx2.data.e.domain{1}.equals(gdx2.data.a));
+    t.assert(gdx2.data.e.domain{2}.equals(gdx2.data.i));
     t.assertEquals(gdx2.data.e.domain_type, 'regular');
     t.assert(~gdx2.data.e.domain_forwarding(1));
     t.assert(~gdx2.data.e.domain_forwarding(2));
-    t.assertEquals(gdx2.data.e.format, 'empty');
+    t.assertEquals(gdx2.data.e.format, 'struct');
     t.assert(~e.modified);
     t.assert(gdx2.data.e.modified);
     t.assert(~gdx.modified);
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_equation_overwrite_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Equation(gdx2, 'e', 'geq');
     gdx2.modified = false;
     e.copy(gdx2, true);
@@ -1714,8 +1582,8 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.description, 'equ e');
     t.assertEquals(gdx2.data.e.type, 'leq');
     t.assert(gdx2.data.e.dimension == 2);
-    t.assert(isnan(gdx2.data.e.size(1)));
-    t.assert(isnan(gdx2.data.e.size(2)));
+    t.assert(gdx2.data.e.size(1) == 0);
+    t.assert(gdx2.data.e.size(2) == 0);
     t.assert(iscell(gdx2.data.e.domain));
     t.assert(numel(gdx2.data.e.domain) == 2);
     t.assertEquals(gdx2.data.e.domain{1}, 'a');
@@ -1723,14 +1591,14 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.e.domain_type, 'relaxed');
     t.assert(~gdx2.data.e.domain_forwarding(1));
     t.assert(~gdx2.data.e.domain_forwarding(2));
-    t.assertEquals(gdx2.data.e.format, 'empty');
+    t.assertEquals(gdx2.data.e.format, 'struct');
     t.assert(~e.modified);
     t.assert(gdx2.data.e.modified);
     t.assert(~gdx.modified);
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_variable_overwrite_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Equation(gdx2, 'e', 'geq');
     try
         t.assert(false);
@@ -1740,18 +1608,8 @@ function test_copySymbol(t, cfg)
         t.assertEquals(ex.message, 'Symbol already exists in destination.');
     end
 
-    t.add('copy_symbol_variable_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
-    try
-        t.assert(false);
-        e.copy(gdx2);
-    catch ex
-        t.reset();
-        t.assertEquals(ex.message, 'Equation not allowed in indexed mode.');
-    end
-
     t.add('copy_symbol_parameter_empty_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     p.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -1759,7 +1617,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.p.name, 'p');
     t.assertEquals(gdx2.data.p.description, '');
     t.assert(gdx2.data.p.dimension == 1);
-    t.assert(isnan(gdx2.data.p.size(1)));
+    t.assert(gdx2.data.p.size(1) == 2);
     t.assert(iscell(gdx2.data.p.domain));
     t.assert(numel(gdx2.data.p.domain) == 1);
     t.assertEquals(gdx2.data.p.domain{1}, 'i');
@@ -1769,7 +1627,7 @@ function test_copySymbol(t, cfg)
     t.assert(isfield(gdx2.data.p.records, 'i'));
     t.assert(isfield(gdx2.data.p.records, 'value'));
     t.assert(numel(gdx2.data.p.records.i) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(gdx2.data.p.records.i(1), 'i1');
         t.assertEquals(gdx2.data.p.records.i(2), 'i2');
     else
@@ -1785,7 +1643,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_parameter_empty_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx2.modified = false;
     i.copy(gdx2);
     p.copy(gdx2);
@@ -1797,16 +1655,14 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.data.p.size(1) == 3);
     t.assert(iscell(gdx2.data.p.domain));
     t.assert(numel(gdx2.data.p.domain) == 1);
-    if gdx.features.handle_compare
-        t.assert(gdx2.data.p.domain{1} == gdx2.data.i);
-    end
+    t.assert(gdx2.data.p.domain{1}.equals(gdx2.data.i));
     t.assertEquals(gdx2.data.p.domain_type, 'regular');
     t.assert(~gdx2.data.p.domain_forwarding(1));
     t.assertEquals(gdx2.data.p.format, 'struct');
     t.assert(isfield(gdx2.data.p.records, 'i'));
     t.assert(isfield(gdx2.data.p.records, 'value'));
     t.assert(numel(gdx2.data.p.records.i) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(gdx2.data.p.records.i(1), 'i1');
         t.assertEquals(gdx2.data.p.records.i(2), 'i2');
     else
@@ -1822,7 +1678,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_parameter_overwrite_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Parameter(gdx2, 'p');
     gdx2.modified = false;
     p.copy(gdx2, true);
@@ -1831,7 +1687,7 @@ function test_copySymbol(t, cfg)
     t.assertEquals(gdx2.data.p.name, 'p');
     t.assertEquals(gdx2.data.p.description, '');
     t.assert(gdx2.data.p.dimension == 1);
-    t.assert(isnan(gdx2.data.p.size(1)));
+    t.assert(gdx2.data.p.size(1) == 2);
     t.assert(iscell(gdx2.data.p.domain));
     t.assert(numel(gdx2.data.p.domain) == 1);
     t.assertEquals(gdx2.data.p.domain{1}, 'i');
@@ -1841,7 +1697,7 @@ function test_copySymbol(t, cfg)
     t.assert(isfield(gdx2.data.p.records, 'i'));
     t.assert(isfield(gdx2.data.p.records, 'value'));
     t.assert(numel(gdx2.data.p.records.i) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(gdx2.data.p.records.i(1), 'i1');
         t.assertEquals(gdx2.data.p.records.i(2), 'i2');
     else
@@ -1857,7 +1713,7 @@ function test_copySymbol(t, cfg)
     t.assert(gdx2.modified);
 
     t.add('copy_symbol_parameter_overwrite_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Parameter(gdx2, 'p');
     try
         t.assert(false);
@@ -1867,21 +1723,11 @@ function test_copySymbol(t, cfg)
         t.assertEquals(ex.message, 'Symbol already exists in destination.');
     end
 
-    t.add('copy_symbol_parameter_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, 'features', cfg.features);
-    try
-        t.assert(false);
-        p.copy(gdx2);
-    catch ex
-        t.reset();
-        t.assertEquals(ex.message, 'Destination container must not be indexed.');
-    end
-
 end
 
 function test_defaultvalues(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
 
     t.add('default_values_variables');
     s = gams.transfer.Variable(gdx, 'x1', 'binary');
@@ -1987,7 +1833,7 @@ end
 
 function test_domainViolation(t, cfg);
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i1 = gams.transfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
@@ -2011,18 +1857,15 @@ function test_domainViolation(t, cfg);
     t.assert(~a3.domain_forwarding(1));
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 3);
-    t.assert(isa(domviol{1}, 'gams.transfer.DomainViolation'));
-    t.assert(isa(domviol{2}, 'gams.transfer.DomainViolation'));
-    t.assert(isa(domviol{3}, 'gams.transfer.DomainViolation'));
+    t.assert(isa(domviol{1}, 'gams.transfer.symbol.domain.Violation'));
+    t.assert(isa(domviol{2}, 'gams.transfer.symbol.domain.Violation'));
+    t.assert(isa(domviol{3}, 'gams.transfer.symbol.domain.Violation'));
     t.assertEquals(domviol{1}.symbol.name, 'a1');
     t.assertEquals(domviol{2}.symbol.name, 'a2');
     t.assertEquals(domviol{3}.symbol.name, 'a3');
     t.assert(domviol{1}.dimension == 1);
     t.assert(domviol{2}.dimension == 1);
     t.assert(domviol{3}.dimension == 1);
-    t.assertEquals(domviol{1}.domain.name, 'i1');
-    t.assertEquals(domviol{2}.domain.name, 'i1');
-    t.assertEquals(domviol{3}.domain.name, 'i2');
     t.assert(iscellstr(domviol{1}.violations));
     t.assert(iscellstr(domviol{2}.violations));
     t.assert(iscellstr(domviol{3}.violations));
@@ -2039,7 +1882,7 @@ function test_domainViolation(t, cfg);
         gdx.write(write_filename);
     catch e
         t.reset();
-        if exist('OCTAVE_VERSION', 'builtin') > 0
+        if gams.transfer.Constants.IS_OCTAVE
             t.assertEquals(e.message, 'gt_gdx_write: GDX error for a1: Domain violation');
         else
             t.assertEquals(e.message, 'GDX error for a1: Domain violation');
@@ -2068,7 +1911,7 @@ function test_domainViolation(t, cfg);
     t.add('domain_violation_4');
     gdx.write(write_filename);
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i1 = gams.transfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
@@ -2092,18 +1935,15 @@ function test_domainViolation(t, cfg);
     t.assert(~a3.domain_forwarding(1));
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 3);
-    t.assert(isa(domviol{1}, 'gams.transfer.DomainViolation'));
-    t.assert(isa(domviol{2}, 'gams.transfer.DomainViolation'));
-    t.assert(isa(domviol{3}, 'gams.transfer.DomainViolation'));
+    t.assert(isa(domviol{1}, 'gams.transfer.symbol.domain.Violation'));
+    t.assert(isa(domviol{2}, 'gams.transfer.symbol.domain.Violation'));
+    t.assert(isa(domviol{3}, 'gams.transfer.symbol.domain.Violation'));
     t.assertEquals(domviol{1}.symbol.name, 'a1');
     t.assertEquals(domviol{2}.symbol.name, 'a2');
     t.assertEquals(domviol{3}.symbol.name, 'a3');
     t.assert(domviol{1}.dimension == 1);
     t.assert(domviol{2}.dimension == 1);
     t.assert(domviol{3}.dimension == 1);
-    t.assertEquals(domviol{1}.domain.name, 'i1');
-    t.assertEquals(domviol{2}.domain.name, 'i1');
-    t.assertEquals(domviol{3}.domain.name, 'i2');
     t.assert(iscellstr(domviol{1}.violations));
     t.assert(iscellstr(domviol{2}.violations));
     t.assert(iscellstr(domviol{3}.violations));
@@ -2140,7 +1980,7 @@ function test_domainViolation(t, cfg);
     t.assert(a2.isValid());
     t.assert(a3.isValid());
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i1 = gams.transfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
@@ -2176,7 +2016,7 @@ function test_domainViolation(t, cfg);
     t.assert(a2.isValid());
     t.assert(a3.isValid());
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i1 = gams.transfer.Set(gdx, 'i1', '*', 'records', {'i1', 'i2', 'i3', 'i4'});
@@ -2199,14 +2039,12 @@ function test_domainViolation(t, cfg);
     t.assert(a3.domain_forwarding(1));
     domviol = gdx.getDomainViolations();
     t.assert(numel(domviol) == 2);
-    t.assert(isa(domviol{1}, 'gams.transfer.DomainViolation'));
-    t.assert(isa(domviol{2}, 'gams.transfer.DomainViolation'));
+    t.assert(isa(domviol{1}, 'gams.transfer.symbol.domain.Violation'));
+    t.assert(isa(domviol{2}, 'gams.transfer.symbol.domain.Violation'));
     t.assertEquals(domviol{1}.symbol.name, 'a1');
     t.assertEquals(domviol{2}.symbol.name, 'a2');
     t.assert(domviol{1}.dimension == 1);
     t.assert(domviol{2}.dimension == 1);
-    t.assertEquals(domviol{1}.domain.name, 'i1');
-    t.assertEquals(domviol{2}.domain.name, 'i1');
     t.assert(iscellstr(domviol{1}.violations));
     t.assert(iscellstr(domviol{2}.violations));
     t.assert(numel(domviol{1}.violations) == 1);
@@ -2217,7 +2055,7 @@ end
 
 function test_setRecords(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
 
     i1 = gams.transfer.Set(gdx, 'i1');
     s1 = gams.transfer.Variable(gdx, 'x1', 'free', {'i'});
@@ -2232,7 +2070,7 @@ function test_setRecords(t, cfg)
     t.assert(numel(fieldnames(s1.records)) == 1);
     t.assert(isfield(s1.records, 'i'));
     t.assert(numel(s1.records.i) == 1);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s1.records.i(1), 'test');
     else
         t.assert(s1.records.i(1) == 1);
@@ -2260,7 +2098,7 @@ function test_setRecords(t, cfg)
     t.assert(numel(fieldnames(s1.records)) == 1);
     t.assert(isfield(s1.records, 'i'));
     t.assert(numel(s1.records.i) == 3);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s1.records.i(1), 'test1');
         t.assertEquals(s1.records.i(2), 'test2');
         t.assertEquals(s1.records.i(3), 'test3');
@@ -2296,7 +2134,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(s2.records, 'uni'));
     t.assert(numel(s2.records.i) == 3);
     t.assert(numel(s2.records.uni) == 3);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s2.records.i(1), 'test11');
         t.assertEquals(s2.records.i(2), 'test12');
         t.assertEquals(s2.records.i(3), 'test13');
@@ -2332,7 +2170,7 @@ function test_setRecords(t, cfg)
         s1.setRecords([1; 2; 3; 4]);
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Records size doesn''t match symbol size.');
+        t.assertEquals(e.message, 'Cannot create matrix records, because value size does not match symbol size.');
     end
 
     t.add('set_records_numeric_2');
@@ -2372,7 +2210,7 @@ function test_setRecords(t, cfg)
         s3.setRecords([1; 2; 3; 4; 5]);
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Records size doesn''t match symbol size.');
+        t.assertEquals(e.message, 'Cannot create matrix records, because value size does not match symbol size.');
     end
 
     t.add('set_records_cell_1');
@@ -2400,7 +2238,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(s3.records, 'level'));
     t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s3.records.i1(1), 'i1');
         t.assertEquals(s3.records.i1(2), 'i4');
     else
@@ -2427,7 +2265,7 @@ function test_setRecords(t, cfg)
     t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
     t.assert(numel(s3.records.marginal) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s3.records.i1(1), 'i1');
         t.assertEquals(s3.records.i1(2), 'i4');
     else
@@ -2462,7 +2300,7 @@ function test_setRecords(t, cfg)
     t.assert(numel(s3.records.lower) == 2);
     t.assert(numel(s3.records.upper) == 2);
     t.assert(numel(s3.records.scale) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s3.records.i1(1), 'i1');
         t.assertEquals(s3.records.i1(2), 'i4');
     else
@@ -2491,7 +2329,7 @@ function test_setRecords(t, cfg)
         s2.setRecords({{'i1', 'i4'}, [1; 4]});
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Incorrect number of domain fields.');
+        t.assertEquals(e.message, 'Records have no domain column ''uni''.');
     end
 
     t.add('set_records_cell_6');
@@ -2500,7 +2338,7 @@ function test_setRecords(t, cfg)
         s3.setRecords({{'i1', 'i4'}, [1; 4], {'i1', 'i4'}});
     catch e
         t.reset();
-        t.assertEquals(e.message, 'More domain fields than symbol dimension.');
+        t.assertEquals(e.message, 'More cellstr values than domains and string value fields.');
     end
 
     t.add('set_records_cell_7');
@@ -2511,6 +2349,8 @@ function test_setRecords(t, cfg)
         t.reset();
         t.assertEquals(e.message, 'Too many value fields in records.');
     end
+
+    s3.unique_labels{1} = [];
 
     t.add('set_records_struct_1');
     gdx.modified = false;
@@ -2548,7 +2388,7 @@ function test_setRecords(t, cfg)
         s3.setRecords(struct('i1', {'i1', 'i4'}, 'level', [1; 4]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Non-scalar structure arrays currently not supported.');
+        t.assertEquals(e.message, 'Unsupported records format.');
     end
 
     t.add('set_records_struct_4');
@@ -2564,7 +2404,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(s3.records, 'level'));
     t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s3.records.i1(1), 'i1');
         t.assertEquals(s3.records.i1(2), 'i4');
     else
@@ -2593,7 +2433,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(s3.records, 'level'));
     t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s3.records.i1(1), 'i1');
         t.assertEquals(s3.records.i1(2), 'i4');
     else
@@ -2621,7 +2461,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(s3.records, 'level'));
     t.assert(numel(s3.records.i1) == 2);
     t.assert(numel(s3.records.level) == 2);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s3.records.i1(1), 'i1');
         t.assertEquals(s3.records.i1(2), 'i4');
     else
@@ -2645,8 +2485,10 @@ function test_setRecords(t, cfg)
         s3.setRecords(recs);
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Fields need to match matrix format or to be of same length');
+        t.assertEquals(e.message, 'Records value column ''level'' must have same size as other columns.');
     end
+
+    s3.unique_labels{1} = [];
 
     t.add('set_records_struct_8');
     gdx.modified = false;
@@ -2669,12 +2511,12 @@ function test_setRecords(t, cfg)
         s3.setRecords(struct('level', [1, 2, 3]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Incorrect number of domain fields.');
+        t.assertEquals(e.message, 'Cannot create matrix records, because value size does not match symbol size.');
     end
 
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.add('set_records_table_1');
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
         else
             tbl = table([1; 2; 3], [1; 2; 3]);
@@ -2689,7 +2531,7 @@ function test_setRecords(t, cfg)
 
         t.add('set_records_table_2');
         gdx.modified = false;
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             tbl = table(categorical({'i1'; 'i2'; 'i3'}), [1; 2; 3]);
         else
             tbl = table([1; 2; 3], [1; 2; 3]);
@@ -2697,7 +2539,7 @@ function test_setRecords(t, cfg)
         end
         tbl.Properties.VariableNames = {'i1', 'level'};
         s3.setRecords(tbl);
-        if ~gdx.features.categorical
+        if ~gams.transfer.Constants.SUPPORTS_CATEGORICAL
             s3.setUELs({'i1'; 'i2'; 'i3'}, 1, 'rename', true);
         end
         t.assertEquals(s3.format, 'table');
@@ -2715,7 +2557,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(i1.records, 'element_text'));
     t.assert(numel(i1.records.uni) == 4);
     t.assert(numel(i1.records.element_text) == 4);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(i1.records.uni(1), 'i1');
         t.assertEquals(i1.records.uni(2), 'i2');
         t.assertEquals(i1.records.uni(3), 'i3');
@@ -2755,7 +2597,7 @@ function test_setRecords(t, cfg)
     t.assert(isfield(i1.records, 'element_text'));
     t.assert(numel(i1.records.uni) == 4);
     t.assert(numel(i1.records.element_text) == 4);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(i1.records.uni(1), 'i1');
         t.assertEquals(i1.records.uni(2), 'i2');
         t.assertEquals(i1.records.uni(3), 'i3');
@@ -2786,7 +2628,7 @@ end
 
 function test_writeUnordered(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     i = gams.transfer.Set(gdx, 'i', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
@@ -2802,7 +2644,7 @@ function test_writeUnordered(t, cfg)
         gdx.write(write_filename, 'sorted', true);
     catch e
         t.reset();
-        if exist('OCTAVE_VERSION', 'builtin') > 0
+        if gams.transfer.Constants.IS_OCTAVE
             t.assertEquals(e.message, 'gt_gdx_write: GDX error in record c(i3,j1): Data not sorted when writing raw');
         else
             t.assertEquals(e.message, 'GDX error in record c(i3,j1): Data not sorted when writing raw');
@@ -2824,7 +2666,7 @@ function test_writeUnordered(t, cfg)
         gdx.write(write_filename, 'sorted', true);
     catch e
         t.reset();
-        if exist('OCTAVE_VERSION', 'builtin') > 0
+        if gams.transfer.Constants.IS_OCTAVE
             t.assertEquals(e.message, 'gt_gdx_write: GDX error in record c(i2,j1): Data not sorted when writing raw');
         else
             t.assertEquals(e.message, 'GDX error in record c(i2,j1): Data not sorted when writing raw');
@@ -2838,7 +2680,7 @@ end
 
 function test_reorder(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     s1 = gams.transfer.Set(gdx, 's1', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
@@ -2863,30 +2705,19 @@ function test_reorder(t, cfg)
     s3.domain = {s4};
 
     t.add('reorder_2');
+    gdx.modified = false;
     t.assert(numel(fieldnames(gdx.data)) == 4);
     fields = fieldnames(gdx.data);
     t.assertEquals(fields{1}, 's1');
     t.assertEquals(fields{2}, 's2');
     t.assertEquals(fields{3}, 's3');
     t.assertEquals(fields{4}, 's4');
-    try
-        t.assert(false);
-        s3.isValid(2);
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain set ''s4'' is out of order: Try calling the Container method reorderSymbols().');
-    end
-
-    gdx.modified = false;
-    gdx.reorderSymbols();
-
-    t.add('reorder_3');
+    gdx.isValid();
     t.assert(gdx.modified);
     t.assert(~s1.modified);
     t.assert(~s2.modified);
     t.assert(~s3.modified);
     t.assert(~s4.modified);
-    t.assert(numel(fieldnames(gdx.data)) == 4);
     fields = fieldnames(gdx.data);
     t.assertEquals(fields{1}, 's1');
     t.assertEquals(fields{2}, 's2');
@@ -2899,11 +2730,11 @@ function test_reorder(t, cfg)
     end
 
     s2.domain = {s3};
-    s3.domain = {s4};
+
     gdx.modified = false;
     gdx.reorderSymbols();
 
-    t.add('reorder_4');
+    t.add('reorder_3');
     t.assert(gdx.modified);
     t.assert(~s1.modified);
     t.assert(~s2.modified);
@@ -2924,7 +2755,7 @@ function test_reorder(t, cfg)
     s2.domain = {s3};
     s3.domain = {s2};
 
-    t.add('reorder_5');
+    t.add('reorder_4');
     try
         t.assert(false);
         gdx.reorderSymbols();
@@ -2933,19 +2764,12 @@ function test_reorder(t, cfg)
         t.assertEquals(e.message, 'Circular domain set dependency in: [s2,s3].');
     end
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
 
     s1 = gams.transfer.Set(gdx, 's1', 'records', {'i1', 'i2', 'i3', 'i4', 'i5'});
     s1.domain = {s1};
 
-    t.add('reorder_6');
-    try
-        t.assert(false);
-        s1.isValid(2);
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain set ''s1'' is out of order: Try calling the Container method reorderSymbols().');
-    end
+    t.add('reorder_5');
     try
         t.assert(false);
         gdx.reorderSymbols();
@@ -2972,10 +2796,10 @@ function test_transformRecords(t, cfg)
     x_format = cell(1, numel(formats));
 
     for i = 1:numel(formats)
-        if strcmp(formats{i}, 'table') && ~gdx.features.table
+        if strcmp(formats{i}, 'table') && ~gams.transfer.Constants.SUPPORTS_TABLE
             continue
         end
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', formats{i});
         i_recs{i} = gdx.data.i.records;
         j_recs{i} = gdx.data.j.records;
@@ -2990,17 +2814,17 @@ function test_transformRecords(t, cfg)
     end
 
     for i = 1:numel(formats)
-        if strcmp(formats{i}, 'table') && ~gdx.features.table
+        if strcmp(formats{i}, 'table') && ~gams.transfer.Constants.SUPPORTS_TABLE
             continue
         end
 
         for j = 1:numel(formats)
-            if strcmp(formats{j}, 'table') && ~gdx.features.table
+            if strcmp(formats{j}, 'table') && ~gams.transfer.Constants.SUPPORTS_TABLE
                 continue
             end
 
             t.add(sprintf('transform_records_%s_to_%s', formats{i}, formats{j}));
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
             gdx.read(cfg.filenames{1}, 'format', formats{i});
             try
                 if strcmp(formats{j}, 'dense_matrix') || strcmp(formats{j}, 'sparse_matrix')

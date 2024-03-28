@@ -5,8 +5,8 @@
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -30,22 +30,9 @@
 %
 % GAMS Transfer Container stores (multiple) symbols
 %
-% A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
-% parameters), each holding multiple symbol records. In GAMS Transfer the
-% Container is the main object that holds different symbols and allows to read
-% and write those to GDX.
-%
-% Indexed Mode:
-%
-% There are two different modes GAMS Transfer can be used in: indexed or default.
-% - In default mode the main characteristic of a symbol is its domain that
-%   defines the symbol dimension and its dependencies. A size of symbol is here
-%   given by the number of records of the domain sets of each dimension. In
-%   default mode all GAMS symbol types can be used.
-% - In indexed mode, there are no domain sets, but sizes (the shape of a symbol)
-%   can be set explicitly. Furthermore, there are no UELs and only GAMS
-%   Parameters are allowed to be used in indexed mode.
-% The mode is defined when creating a container and can't be changed thereafter.
+% A GAMS GDX file is a collection of GAMS symbols (e.g. variables or parameters), each holding
+% multiple symbol records. In GAMS Transfer the Container is the main object that holds different
+% symbols and allows to read and write those to GDX.
 %
 % Optional Arguments:
 % 1. source (string or Container):
@@ -53,95 +40,102 @@
 %
 % Parameter Arguments:
 % - gams_dir (string):
-%   Path to GAMS system directory. Default is determined from PATH environment
-%   variable
-% - indexed (logical):
-%   Specifies if container is used in indexed of default mode, see above.
+%   Path to GAMS system directory. Default is determined from PATH environment variable
 %
 % Example:
 % c = Container();
 % c = Container('path/to/file.gdx');
-% c = Container('indexed', true, 'gams_dir', 'C:\GAMS');
+% c = Container('gams_dir', 'C:\GAMS');
 %
-% See also: gams.transfer.Set, gams.transfer.Alias, gams.transfer.Parameter,
-% gams.transfer.Variable, gams.transfer.Equation
+% See also: gams.transfer.Set, gams.transfer.Alias, gams.transfer.Parameter, gams.transfer.Variable,
+% gams.transfer.Equation
 %
 
 %> @brief GAMS Transfer Container stores (multiple) symbols
 %>
-%> A GAMS GDX file is a collection of GAMS symbols (e.g. variables or
-%> parameters), each holding multiple symbol records. In GAMS Transfer the
-%> Container is the main object that holds different symbols and allows to read
-%> and write those to GDX. See \ref GAMS_TRANSFER_MATLAB_CONTAINER for more
-%> information.
-%>
-%> **Indexed Mode:**
-%>
-%> There are two different modes GAMS Transfer can be used in: indexed or default.
-%> - In default mode the main characteristic of a symbol is its domain that
-%>   defines the symbol dimension and its dependencies. A size of symbol is here
-%>   given by the number of records of the domain sets of each dimension. In
-%>   default mode all GAMS symbol types can be used.
-%> - In indexed mode, there are no domain sets, but sizes (the shape of a symbol)
-%>   can be set explicitly. Furthermore, there are no UELs and only GAMS
-%>   Parameters are allowed to be used in indexed mode.
-%>
-%> The mode is defined when creating a container and can't be changed thereafter.
-%> See \ref GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED for more information.
+%> A GAMS GDX file is a collection of GAMS symbols (e.g. variables or parameters), each holding
+%> multiple symbol records. In GAMS Transfer the Container is the main object that holds different
+%> symbols and allows to read and write those to GDX. See \ref GAMS_TRANSFER_MATLAB_CONTAINER for
+%> more information.
 %>
 %> **Example:**
 %> ```
 %> c = Container();
 %> c = Container('path/to/file.gdx');
-%> c = Container('indexed', true, 'gams_dir', 'C:\GAMS');
+%> c = Container('gams_dir', 'C:\GAMS');
 %> ```
 %>
 %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Alias "Alias", \ref
-%> gams::transfer::Parameter "Parameter", \ref gams::transfer::Variable "Variable",
-%> \ref gams::transfer::Equation "Equation"
-classdef Container < handle
+%> gams::transfer::Parameter "Parameter", \ref gams::transfer::Variable "Variable", \ref
+%> gams::transfer::Equation "Equation"
+classdef Container < gams.transfer.utils.Handle
 
-    properties (SetAccess = protected)
+    %#ok<*INUSD,*STOUT,*PROPLC>
+
+    properties (Hidden, SetAccess = protected)
+        gams_dir_ = ''
+        data_
+        modified_ = true
+    end
+
+    properties (Dependent, SetAccess = protected)
         %> GAMS system directory
 
         % gams_dir GAMS system directory
-        gams_dir = ''
-
-
-        %> Flag for indexed mode
-
-        % indexed Flag for indexed mode
-        indexed = false
+        gams_dir
 
 
         %> GAMS (GDX) symbols
 
         % data GAMS (GDX) symbols
-        data = struct()
+        data
     end
 
     properties (Dependent)
 
         %> Flag to indicate modification
         %>
-        %> If the container or any symbol within has been modified since last
-        %> reset of flag (`false`), this flag will be `true`. Resetting will
-        %> also reset symbol flag.
+        %> If the container or any symbol within has been modified since last reset of flag
+        %> (`false`), this flag will be `true`. Resetting will also reset symbol flag.
 
         % Flag to indicate modification
         %
-        % If the container or any symbol within has been modified since last
-        % reset of flag (`false`), this flag will be `true`. Resetting will
-        % also reset symbol flag.
+        % If the container or any symbol within has been modified since last reset of flag
+        % (`false`), this flag will be `true`. Resetting will also reset symbol flag.
         modified
 
     end
 
-    properties (Hidden, SetAccess = protected)
-        id
-        features
-        modified_ = true
-        name_lookup = struct();
+    methods
+
+        function gams_dir = get.gams_dir(obj)
+            gams_dir = obj.gams_dir_;
+        end
+
+        function data = get.data(obj)
+            data = obj.data_.entries_;
+        end
+
+        function modified = get.modified(obj)
+            modified = obj.modified_;
+            symbols = obj.data_.entries();
+            for i = 1:numel(symbols)
+                if modified
+                    return
+                end
+                modified = modified || symbols{i}.modified;
+            end
+        end
+
+        function set.modified(obj, modified)
+            gams.transfer.utils.Validator('modified', 1, modified).type('logical').scalar();
+            obj.modified_ = modified;
+            symbols = obj.data_.entries();
+            for i = 1:numel(symbols)
+                symbols{i}.modified = modified;
+            end
+        end
+
     end
 
     methods
@@ -150,91 +144,72 @@ classdef Container < handle
         %>
         %> **Optional Arguments:**
         %> 1. source (`string` or `Container`):
-        %>    Path to GDX file or a \ref gams::transfer::Container "Container"
-        %>    object to be read
+        %>    Path to GDX file or a \ref gams::transfer::Container "Container" object to be read
         %>
         %> **Parameter Arguments:**
         %> - gams_dir (`string`):
-        %>   Path to GAMS system directory. Default is determined from PATH environment
-        %>   variable
-        %> - indexed (`logical`):
-        %>   Specifies if container is used in indexed of default mode, see above.
+        %>   Path to GAMS system directory. Default is determined from PATH environment variable
         %>
         %> **Example:**
         %> ```
         %> c = Container();
         %> c = Container('path/to/file.gdx');
-        %> c = Container('indexed', true, 'gams_dir', 'C:\GAMS');
+        %> c = Container('gams_dir', 'C:\GAMS');
         %> ```
         %>
         %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Alias "Alias", \ref
-        %> gams::transfer::Parameter "Parameter", \ref gams::transfer::Variable "Variable",
-        %> \ref gams::transfer::Equation "Equation", \ref gams::transfer::Container
-        %> "Container"
+        %> gams::transfer::Parameter "Parameter", \ref gams::transfer::Variable "Variable", \ref
+        %> gams::transfer::Equation "Equation"
         function obj = Container(varargin)
             % Constructs a GAMS Transfer Container, see class help
 
-            % input arguments
-            p = inputParser();
-            is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-                ~strcmpi(x, 'gams_dir') && ~strcmpi(x, 'indexed') && ...
-                ~strcmpi(x, 'features');
-            is_source = @(x) is_string_char(x) || isa(x, 'gams.transfer.Container');
-            addOptional(p, 'source', '', is_source);
-            addParameter(p, 'gams_dir', '', is_string_char);
-            addParameter(p, 'indexed', false, @islogical);
-            addParameter(p, 'features', struct(), @isstruct);
-            parse(p, varargin{:});
+            obj.data_ = gams.transfer.incase_ordered_dict.Struct();
 
-            obj.id = int32(randi(100000));
-
-            % check support of features
-            obj.features = gams.transfer.Utils.checkFeatureSupport();
-
-            % input arguments
-            obj.gams_dir = gams.transfer.Utils.checkGamsDirectory(p.Results.gams_dir);
-            obj.indexed = p.Results.indexed;
-            feature_names = fieldnames(obj.features);
-            for i = 1:numel(feature_names)
-                if isfield(p.Results.features, feature_names{i})
-                    obj.features.(feature_names{i}) = p.Results.features.(feature_names{i});
+            % parse input arguments
+            has_gams_dir = false;
+            has_source = false;
+            try
+                index = 1;
+                is_pararg = false;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'gams_dir')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        gams_dir = gams.transfer.utils.Validator('gams_dir', index, varargin{index})...
+                            .string2char().type('char').value;
+                        if ~isfile(fullfile(gams_dir, gams.transfer.Constants.GDX_LIBRARY_NAME))
+                            error('Argument ''gams_dir'' (at position %d) does not contain a path to the GDX library.', index);
+                        end
+                        has_gams_dir = true;
+                        index = index + 1;
+                        is_pararg = true;
+                    elseif strcmpi(varargin{index}, 'indexed')
+                        warning('Setting argument ''indexed'' for the Container has no effect anymore. Use it in the ''read'' and/or ''write'' method.');
+                        index = index + 2;
+                        is_pararg = true;
+                    elseif ~is_pararg && index == 1
+                        source = gams.transfer.utils.Validator('source', index, varargin{index}) ...
+                            .types({'gams.transfer.Container', 'string', 'char'}).value;
+                        has_source = true;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
                 end
+            catch e
+                error(e.message);
+            end
+
+            % find GDX directory from PATH if not given
+            if has_gams_dir
+                obj.gams_dir_ = gams_dir;
+            else
+                obj.gams_dir_ = gams.transfer.utils.find_gdx();
             end
 
             % read GDX file
-            if ~strcmp(p.Results.source, '')
-                obj.read(p.Results.source);
-            end
-        end
-
-    end
-
-    methods
-
-        function set.data(obj, data)
-            obj.data = data;
-            obj.modified_ = true;
-        end
-
-        function set.modified(obj, modified)
-            if ~islogical(modified)
-                error('Modified must be logical.');
-            end
-            symbols = fieldnames(obj.data);
-            for i = 1:numel(symbols)
-                obj.data.(symbols{i}).modified = modified;
-            end
-            obj.modified_ = modified;
-        end
-
-        function modified = get.modified(obj)
-            modified = obj.modified_;
-            symbols = fieldnames(obj.data);
-            for i = 1:numel(symbols)
-                if modified
-                    return
-                end
-                modified = modified || obj.data.(symbols{i}).modified;
+            if has_source
+                obj.read(source);
             end
         end
 
@@ -255,27 +230,68 @@ classdef Container < handle
             %    Other Container
 
             eq = false;
-            if ~isa(container, 'gams.transfer.Container')
+            if ~isequal(class(obj), class(container)) || ...
+                ~isequal(obj.gams_dir_, container.gams_dir)
                 return
             end
-            eq = isequaln(obj.gams_dir, container.gams_dir);
-            eq = eq && obj.indexed == container.indexed;
-            eq = eq && numel(fieldnames(obj.data)) == numel(fieldnames(container.data));
-            if ~eq
-                return
-            end
-
-            symbols1 = fieldnames(obj.data);
-            symbols2 = fieldnames(container.data);
+            symbols1 = obj.getSymbols();
+            symbols2 = container.getSymbols();
             if numel(symbols1) ~= numel(symbols2)
-                eq = false;
                 return
             end
             for i = 1:numel(symbols1)
-                eq = eq && isequaln(symbols1{i}, symbols2{i});
-                eq = eq && obj.data.(symbols1{i}).equals(container.data.(symbols2{i}));
+                if ~symbols1{i}.equals(symbols2{i})
+                    return
+                end
             end
+            eq = true;
         end
+
+    end
+
+    methods (Hidden, Access = protected)
+
+        function copyFrom(obj, varargin)
+
+            % parse input arguments
+            has_symbols = false;
+            try
+                gams.transfer.utils.Validator.minargin(numel(varargin), 1);
+                container = gams.transfer.utils.Validator('container', 1, varargin{1}).type('gams.transfer.Container').value;
+                index = 2;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            if has_symbols
+                all_symbols = container.listSymbols();
+                idx = ismember(all_symbols, container.getSymbolNames(symbols));
+                symbols = container.getSymbols(all_symbols(idx));
+            else
+                symbols = container.getSymbols();
+            end
+
+            for i = 1:numel(symbols)
+                symbols{i}.copy(obj);
+            end
+
+        end
+
+    end
+
+    methods
 
         %> Reads symbols from GDX file
         %>
@@ -287,15 +303,16 @@ classdef Container < handle
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be read. All if empty. Case doesn't matter.
-        %>   Default is `{}`.
+        %>   List of symbols to be read. All if empty. Case doesn't matter. Default is `{}`.
         %> - format (`string`):
         %>   Records format symbols should be stored in. Default is `table`.
         %> - records (`logical`):
         %>   Enables reading of records. Default is `true`.
         %> - values (`cell`):
-        %>   Subset of `{"level", "marginal", "lower", "upper", "scale"}` that
-        %>   defines what value fields should be read. Default is all.
+        %>   Subset of `{"level", "marginal", "lower", "upper", "scale"}` that defines what value
+        %>   fields should be read. Default is all.
+        %> - indexed (`logical`):
+        %>   Specifies if indexed GDX should be read. Default is `false`.
         %>
         %> **Example:**
         %> ```
@@ -304,8 +321,6 @@ classdef Container < handle
         %> c.read('path/to/file.gdx', 'format', 'dense_matrix');
         %> c.read('path/to/file.gdx', 'symbols', {'x', 'z'}, 'format', 'struct', 'values', {'level'});
         %> ```
-        %>
-        %> @see \ref gams::transfer::RecordsFormat "RecordsFormat"
         function read(obj, varargin)
             % Reads symbols from GDX file
             %
@@ -315,157 +330,202 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be read. All if empty. Case doesn't matter.
-            %   Default is {}.
+            %   List of symbols to be read. All if empty. Case doesn't matter. Default is {}.
             % - format (string):
             %   Records format symbols should be stored in. Default is table.
             % - records (logical):
             %   Enables reading of records. Default is true.
             % - values (cell):
-            %   Subset of {'level', 'marginal', 'lower', 'upper', 'scale'} that
-            %   defines what value fields should be read. Default is all.
+            %   Subset of {'level', 'marginal', 'lower', 'upper', 'scale'} that defines what value
+            %   fields should be read. Default is all.
+            % - indexed (logical):
+            %   Specifies if indexed GDX should be read. Default is false.
             %
             % Example:
             % c = Container();
             % c.read('path/to/file.gdx');
             % c.read('path/to/file.gdx', 'format', 'dense_matrix');
             % c.read('path/to/file.gdx', 'symbols', {'x', 'z'}, 'format', 'struct', 'values', {'level'});
-            %
-            % See also: gams.transfer.RecordsFormat
 
-            % input arguments
-            p = inputParser();
-            is_string_char = @(x) isstring(x) && numel(x) == 1 || ischar(x);
-            is_source = @(x) is_string_char(x) || isa(x, 'gams.transfer.Container');
-            is_values = @(x) iscellstr(x) && numel(x) <= 5;
-            addRequired(p, 'source', is_source);
-            addParameter(p, 'symbols', {}, @iscellstr);
-            addParameter(p, 'format', 'table', is_string_char);
-            addParameter(p, 'records', true, @islogical);
-            addParameter(p, 'values', {'level', 'marginal', 'lower', 'upper', 'scale'}, ...
-                is_values);
-            parse(p, varargin{:});
-
-            % copy symbols from container
-            if isa(p.Results.source, 'gams.transfer.Container')
-                if p.Results.source.indexed ~= obj.indexed
-                    error('Indexed flags of source and this container must match.');
+            % parse input arguments
+            symbols = {};
+            has_symbols = false;
+            format = 'table';
+            records = true;
+            values = {'level', 'marginal', 'lower', 'upper', 'scale'};
+            indexed = false;
+            try
+                gams.transfer.utils.Validator.minargin(numel(varargin), 1);
+                valid = gams.transfer.utils.Validator('source', 1, varargin{1}) ...
+                    .types({'gams.transfer.Container', 'string', 'char'});
+                if ~isa(valid.value, 'gams.transfer.Container')
+                    valid.string2char().fileExtension('.gdx').fileExists();
                 end
-                source_data = p.Results.source.data;
-                symbols = p.Results.source.listSymbols();
-                if ~isempty(p.Results.symbols)
-                    sym_enabled = false(size(symbols));
-                    for i = 1:numel(p.Results.symbols)
-                        sym_enabled(strcmp(symbols, p.Results.symbols{i})) = true;
+                source = valid.value;
+                index = 2;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().vector().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'format')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        format = gams.transfer.utils.Validator('format', index, varargin{index}) ...
+                            .string2char().type('char').vector().value;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'records')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        records = gams.transfer.utils.Validator('records', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'values')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        values = gams.transfer.utils.Validator('values', index, varargin{index}) ...
+                            .string2char().cellstr().vector().value;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'indexed')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        indexed = gams.transfer.utils.Validator('indexed', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
                     end
-                    symbols = symbols(sym_enabled);
                 end
-                for i = 1:numel(symbols)
-                    source_data.(symbols{i}).copy(obj);
+            catch e
+                error(e.message);
+            end
+
+            % read from other container?
+            if isa(source, 'gams.transfer.Container')
+                if has_symbols
+                    obj.copyFrom(source, 'symbols', symbols);
+                else
+                    obj.copyFrom(source);
                 end
                 return
             end
 
-            % read raw data
-            data = obj.readRaw(p.Results.source, p.Results.symbols, p.Results.format, ...
-                p.Results.records, p.Results.values);
-            symbols = fieldnames(data);
-            is_partial_read = numel(p.Results.symbols) > 0;
+            % validate input arguments
+            switch format
+            case 'struct'
+                format = int32(2);
+            case 'dense_matrix'
+                format = int32(3);
+            case 'sparse_matrix'
+                format = int32(4);
+            case 'table'
+                format = int32(5);
+                if ~gams.transfer.Constants.SUPPORTS_TABLE
+                    format = int32(2);
+                end
+            otherwise
+                error('Argument ''format'' must be ''struct'', ''table'', ''dense_matrix'' or ''sparse_matrix''.');
+            end
+            values_bool = false(5,1);
+            for e = values
+                switch e{1}
+                case {'level', 'value', 'element_text'}
+                    values_bool(1) = true;
+                case 'marginal'
+                    values_bool(2) = true;
+                case 'lower'
+                    values_bool(3) = true;
+                case 'upper'
+                    values_bool(4) = true;
+                case 'scale'
+                    values_bool(5) = true;
+                otherwise
+                    error('Argument ''values'' contains invalid selection ''%s''. Must be subset of ''level'', ''value'', ''element_text'', ''marginal'', ''lower'', ''upper'', ''scale''.', e{1});
+                end
+            end
+            values = values_bool;
+
+            % read records
+            if indexed
+                symbols = gams.transfer.gdx.gt_idx_read(obj.gams_dir_, source, symbols, format, records);
+            else
+                symbols = gams.transfer.gdx.gt_gdx_read(obj.gams_dir_, source, symbols, format, records, ...
+                    values, gams.transfer.Constants.SUPPORTS_CATEGORICAL, false);
+            end
+            symbol_names = fieldnames(symbols);
 
             % transform data into Symbol object
-            for i = 1:numel(symbols)
-                symbol = data.(symbols{i});
+            for i = 1:numel(symbol_names)
+                symbol = symbols.(symbol_names{i});
 
-                % handle alias differently
+                % create symbol object
                 switch symbol.symbol_type
-                case {gams.transfer.SymbolType.ALIAS, 'alias'}
-                    if strcmp(symbol.alias_with, '*')
-                        gams.transfer.UniverseAlias(obj, symbol.name);
+                case {gams.transfer.gdx.SymbolType.ALIAS, 'alias'}
+                    if strcmp(symbol.alias_with, gams.transfer.Constants.UNIVERSE_NAME)
+                        new_symbol = gams.transfer.alias.Universe(obj, symbol.name);
                     elseif obj.hasSymbols(symbol.alias_with)
-                        gams.transfer.Alias(obj, symbol.name, obj.getSymbols(symbol.alias_with));
+                        new_symbol = gams.transfer.alias.Set(obj, symbol.name, obj.getSymbols(symbol.alias_with));
                     else
-                        error('Alias reference for symbol ''%s'' not found: %s.', ...
-                            symbol.name, symbol.alias_with);
+                        error('Alias reference for symbol ''%s'' not found: %s.', symbol.name, symbol.alias_with);
                     end
-                    continue;
-                end
-
-                % create cross-referenced domain if possible
-                if obj.indexed
-                    domain = symbol.size;
-                else
-                    domain = symbol.domain;
-                    for j = 1:numel(domain)
-                        if strcmp(domain{j}, '*')
-                            continue
-                        elseif symbol.domain_type == 2
-                            continue
-                        elseif obj.hasSymbols(domain{j}) && isfield(data, domain{j})
-                            domain{j} = obj.getSymbols(domain{j});
-                        end
-                    end
-                end
-
-                % convert symbol to GDXSymbol
-                switch symbol.symbol_type
-                case {gams.transfer.SymbolType.SET, 'set'}
-                    gams.transfer.Set(obj, symbol.name, domain, 'description', ...
-                        symbol.description, 'is_singleton', symbol.is_singleton);
-                case {gams.transfer.SymbolType.PARAMETER, 'parameter'}
-                    gams.transfer.Parameter(obj, symbol.name, domain, 'description', ...
-                        symbol.description);
-                case {gams.transfer.SymbolType.VARIABLE, 'variable'}
-                    gams.transfer.Variable(obj, symbol.name, symbol.type, domain, ...
-                        'description', symbol.description);
-                case {gams.transfer.SymbolType.EQUATION, 'equation'}
-                    gams.transfer.Equation(obj, symbol.name, symbol.type, domain, ...
-                        'description', symbol.description);
+                case {gams.transfer.gdx.SymbolType.SET, 'set'}
+                    new_symbol = gams.transfer.symbol.Set(obj, symbol.name, symbol.is_singleton, false);
+                case {gams.transfer.gdx.SymbolType.PARAMETER, 'parameter'}
+                    new_symbol = gams.transfer.symbol.Parameter(obj, symbol.name, false);
+                case {gams.transfer.gdx.SymbolType.VARIABLE, 'variable'}
+                    new_symbol = gams.transfer.symbol.Variable(obj, symbol.name, symbol.type, false);
+                case {gams.transfer.gdx.SymbolType.EQUATION, 'equation'}
+                    new_symbol = gams.transfer.symbol.Equation(obj, symbol.name, symbol.type, false);
                 otherwise
                     error('Invalid symbol type');
                 end
-
-                % set records and store format (no need to call isValid to
-                % detect the format because at this point, we know it)
-                obj.data.(symbol.name).records = symbol.records;
-                switch symbol.format
-                case {gams.transfer.RecordsFormat.DENSE_MATRIX, 'dense_matrix',
-                    gams.transfer.RecordsFormat.SPARSE_MATRIX, 'sparse_matrix'}
-                    copy_format = ~any(isnan(obj.data.(symbol.name).size));
-                otherwise
-                    copy_format = true;
+                obj.data_ = obj.data_.add(symbol.name, new_symbol);
+                if isa(new_symbol, 'gams.transfer.alias.Abstract')
+                    continue
                 end
-                if copy_format
-                    if isnumeric(symbol.format)
-                        obj.data.(symbol.name).format_ = symbol.format;
-                    else
-                        obj.data.(symbol.name).format_ = gams.transfer.RecordsFormat.str2int(symbol.format);
+
+                % set domain
+                if indexed
+                    new_symbol.size = symbol.size;
+                else
+                    for j = 1:numel(symbol.domain)
+                        if ~strcmp(symbol.domain{j}, gams.transfer.Constants.UNIVERSE_NAME) && ...
+                            symbol.domain_type ~= 2 && obj.hasSymbols(symbol.domain{j}) && ...
+                            isfield(symbols, symbol.domain{j}) && ~strcmpi(symbol.name, symbol.domain{j})
+                            symbol.domain{j} = obj.getSymbols(symbol.domain{j});
+                        end
+                    end
+                    new_symbol.domain = symbol.domain;
+                end
+
+                % set data
+                if isfield(symbol, 'format')
+                    switch symbol.format
+                    case {1, 2}
+                        new_symbol.data_ = gams.transfer.symbol.data.Struct(symbol.records);
+                    case 3
+                        new_symbol.data_ = gams.transfer.symbol.data.DenseMatrix(symbol.records);
+                    case 4
+                        new_symbol.data_ = gams.transfer.symbol.data.SparseMatrix(symbol.records);
+                    case 5
+                        new_symbol.data_ = gams.transfer.symbol.data.Table(symbol.records);
                     end
                 end
 
                 % set uels
-                if isfield(symbol, 'uels') && ~obj.features.categorical
-                    switch symbol.format
-                    case {gams.transfer.RecordsFormat.DENSE_MATRIX, 'dense_matrix',
-                        gams.transfer.RecordsFormat.SPARSE_MATRIX, 'sparse_matrix'}
-                    otherwise
-                        for j = 1:numel(symbol.domain)
-                            if isempty(symbol.uels{j})
-                                continue
-                            end
-                            obj.data.(symbol.name).setUELs(symbol.uels{j}, j, 'rename', true);
-                        end
+                if isfield(symbol, 'uels') && ~gams.transfer.Constants.SUPPORTS_CATEGORICAL
+                    for j = 1:new_symbol.dimension
+                        new_symbol.unique_labels{j} = gams.transfer.unique_labels.OrderedLabelSet(symbol.uels{j});
                     end
                 end
-            end
 
-            % check for format of read symbols in case of partial read (done by
-            % forced call to isValid). Domains may not be read and may cause
-            % invalid symbols.
-            if is_partial_read
-                for j = 1:numel(symbols)
-                    if obj.hasSymbols(symbols{i})
-                        obj.getSymbols(symbols{i}).isValid(false, true);
-                    end
+                % set other properties
+                new_symbol.description_ = symbol.description;
+                if isfield(symbol, 'domain_labels') && numel(symbol.domain_labels) == symbol.dimension
+                    new_symbol.def_.setDomainLabels_(symbol.domain_labels);
                 end
             end
         end
@@ -480,16 +540,15 @@ classdef Container < handle
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be written. All if empty. Case doesn't matter.
-        %>   Default is `{}`.
+        %>   List of symbols to be written. Case doesn't matter. Default is `{}`.
         %> - compress (`logical`):
-        %>   Flag to compress GDX file (`true`) or not (`false`). Default is
-        %>   `false`.
+        %>   Flag to compress GDX file (`true`) or not (`false`). Default is `false`.
         %> - sorted (`logical`):
-        %>   Flag to define records as sorted (`true`) or not (`false`). Default
-        %>   is `false`.
+        %>   Flag to define records as sorted (`true`) or not (`false`). Default is `false`.
         %> - uel_priority (`cellstr`):
         %>   UELs to be registered first before any symbol UELs. Default: `{}`.
+        %> - indexed (`logical`):
+        %>   Specifies if indexed GDX should be written. Default is `false`.
         %>
         %> **Example:**
         %> ```
@@ -497,22 +556,19 @@ classdef Container < handle
         %> c.write('path/to/file.gdx', 'compress', true, 'sorted', true);
         %> ```
         %>
-        %> @see \ref gams::transfer::Container::getDomainViolations
-        %> "Container.getDomainViolations"
+        %> @see \ref gams::transfer::Container::getDomainViolations "Container.getDomainViolations"
         function write(obj, varargin)
             % Writes symbols with symbol records to GDX file
             %
-            % There are different issues that can occur when writing to GDX:
-            % e.g. domain violations and unsorted data. For domain violations,
-            % see gams.transfer.Container.getDomainViolations. Domain labels are
-            % stored as UELs in GDX that are an (code,label) pair. The code is a
-            % number with an ascending order based on the write occurence. Data
-            % records must be sorted by these codes in ascending order (dimension
-            % 1 first, then dimension 2, ...). If one knows that the data is
-            % sorted, one can set the flag 'sorted' to true to improve
-            % performance. Otherwise GAMS Transfer will sort the values
-            % internally. Note, that the case of 'sorted' being true and the
-            % data not being sorted will lead to an error.
+            % There are different issues that can occur when writing to GDX: e.g. domain violations
+            % and unsorted data. For domain violations, see
+            % gams.transfer.Container.getDomainViolations. Domain labels are stored as UELs in GDX
+            % that are an (code,label) pair. The code is a number with an ascending order based on
+            % the write occurence. Data records must be sorted by these codes in ascending order
+            % (dimension 1 first, then dimension 2, ...). If one knows that the data is sorted, one
+            % can set the flag 'sorted' to true to improve performance. Otherwise GAMS Transfer will
+            % sort the values internally. Note, that the case of 'sorted' being true and the data
+            % not being sorted will lead to an error.
             %
             % Required Arguments:
             % 1. filename (string):
@@ -520,16 +576,15 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be written. All if empty. Case doesn't
-            %   matter. Default is {}.
+            %   List of symbols to be written. Case doesn't matter. Default is {}.
             % - compress (logical):
-            %   Flag to compress GDX file (true) or not (false). Default is
-            %   false.
+            %   Flag to compress GDX file (true) or not (false). Default is false.
             % - sorted (logical):
-            %   Flag to define records as sorted (true) or not (false). Default
-            %   is false.
+            %   Flag to define records as sorted (true) or not (false). Default is false.
             % - uel_priority (cellstr):
             %   UELs to be registered first before any symbol UELs. Default: {}.
+            % - indexed (logical):
+            %   Specifies if indexed GDX should be written. Default is false.
             %
             % Example:
             % c.write('path/to/file.gdx');
@@ -537,60 +592,102 @@ classdef Container < handle
             %
             % See also: gams.transfer.Container.getDomainViolations
 
-            % input arguments
-            p = inputParser();
-            is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-                ~strcmpi(x, 'compress') && ~strcmpi(x, 'sorted');
-            addRequired(p, 'filename', is_string_char);
-            addParameter(p, 'symbols', {}, @iscellstr);
-            addParameter(p, 'compress', false, @islogical);
-            addParameter(p, 'sorted', false, @islogical);
-            addParameter(p, 'uel_priority', {}, @iscellstr);
-            parse(p, varargin{:});
+            % parse input arguments
+            has_symbols = false;
+            compress = false;
+            sorted = false;
+            uel_priority = {};
+            indexed = false;
+            try
+                gams.transfer.utils.Validator.minargin(numel(varargin), 1);
+                filename = gams.transfer.utils.absolute_path(gams.transfer.utils.Validator(...
+                    'filename', 1, varargin{1}).string2char().type('char').fileExtension('.gdx').value);
+                index = 2;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'uel_priority')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        uel_priority = gams.transfer.utils.Validator('uel_priority', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'compress')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        compress = gams.transfer.utils.Validator('compress', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'sorted')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        sorted = gams.transfer.utils.Validator('sorted', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'indexed')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        indexed = gams.transfer.utils.Validator('indexed', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
 
-            if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
+            if has_symbols
+                symbols = obj.getSymbolNames(symbols);
             else
-                symbols = obj.getSymbolNames(p.Results.symbols);
+                symbols = obj.data_.keys();
             end
 
             if ~obj.isValid('symbols', symbols)
-                obj.reorderSymbols();
-                if ~obj.isValid('symbols', symbols)
-                    invalid_symbols = gams.transfer.Utils.list2str(...
-                        obj.listSymbols('is_valid', false));
-                    error('Can''t write invalid container. Invalid symbols: %s.', invalid_symbols);
-                end
+                invalid_symbols = gams.transfer.utils.list2str(obj.listSymbols('is_valid', false));
+                error('Can''t write invalid container. Invalid symbols: %s.', invalid_symbols);
             end
 
             % create enable flags
-            if isempty(p.Results.symbols)
-                enable = true(1, numel(symbols));
+            if has_symbols
+                enable = ismember(obj.data_.keys(), symbols);
             else
-                enable = false(1, numel(symbols));
-                allsymbols = fieldnames(obj.data);
-                allsymbols = containers.Map(allsymbols, 1:numel(allsymbols));
+                enable = true(1, obj.data_.count());
+            end
+
+            % check indexed symbols
+            if indexed
+                disabled_symbols = {};
                 for i = 1:numel(symbols)
-                    enable(allsymbols(symbols{i})) = true;
+                    if enable(i) && ~obj.getSymbols(symbols{i}).indexed
+                        enable(i) = false;
+                        disabled_symbols{end+1} = symbols{i};
+                    end
+                end
+                if numel(disabled_symbols) > 0
+                    warning('The following symbols have been disbaled because they are not indexed: %s', ...
+                        gams.transfer.utils.list2str(disabled_symbols));
                 end
             end
 
-            if p.Results.compress && obj.indexed
+            if compress && indexed
                 error('Compression not supported for indexed GDX.');
             end
 
-            % get full path
-            filename = gams.transfer.Utils.checkFilename(...
-                char(p.Results.filename), '.gdx', false);
-
             % write data
-            if obj.indexed
-                gams.transfer.cmex.gt_idx_write(obj.gams_dir, filename, obj.data, ...
-                    enable, p.Results.sorted, obj.features.table);
+            if indexed
+                gams.transfer.gdx.gt_idx_write(obj.gams_dir_, filename, obj.data_.entries_, ...
+                    enable, sorted, gams.transfer.Constants.SUPPORTS_TABLE);
             else
-                gams.transfer.cmex.gt_gdx_write(obj.gams_dir, filename, obj.data, ...
-                    enable, p.Results.uel_priority, p.Results.compress, p.Results.sorted, ...
-                    obj.features.table, obj.features.categorical, obj.features.c_prop_setget);
+                gams.transfer.gdx.gt_gdx_write(obj.gams_dir_, filename, obj.data_.entries_, ...
+                    enable, uel_priority, compress, sorted, gams.transfer.Constants.SUPPORTS_TABLE, ...
+                    gams.transfer.Constants.SUPPORTS_CATEGORICAL);
             end
         end
 
@@ -622,23 +719,14 @@ classdef Container < handle
             % v1 = c.getSymbols('v1');
             % vars = c.getSymbols(c.listVariables());
 
-            if nargin == 1
-                symbols = struct2cell(obj.data);
-                return
-            end
-
-            sym_names = obj.getSymbolNames(names);
-
-            if ischar(names) || isstring(names)
-                symbols = obj.data.(sym_names);
-            elseif iscellstr(names)
-                n = numel(names);
-                symbols = cell(size(names));
-                for i = 1:n
-                    symbols{i} = obj.data.(sym_names{i});
+            try
+                if nargin == 1
+                    symbols = obj.data_.entries();
+                else
+                    symbols = obj.data_.entries(names);
                 end
-            else
-                error('Name must be of type ''char'' or ''cellstr''.');
+            catch e
+                error('Cannot get symbols: %s', e.message);
             end
         end
 
@@ -646,9 +734,8 @@ classdef Container < handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %>
         %> @see \ref gams::transfer::Container::listSets "Container.listSets", \ref
         %> gams::transfer::Container::getSymbols "Container.getSymbols"
@@ -657,9 +744,8 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listSets, gams.transfer.Container.getSymbols
 
@@ -670,9 +756,8 @@ classdef Container < handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %>
         %> @see \ref gams::transfer::Container::listParameters "Container.listParameters", \ref
         %> gams::transfer::Container::getSymbols "Container.getSymbols"
@@ -681,9 +766,8 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listParameters, gams.transfer.Container.getSymbols
 
@@ -694,12 +778,11 @@ classdef Container < handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %> - types (`any`):
-        %>   Enable filter for variable type, e.g. `type = {"binary",
-        %>   "integer"}`. Default: not applied.
+        %>   Enable filter for variable type, e.g. `type = {"binary", "integer"}`. Default: not
+        %>   applied.
         %>
         %> @see \ref gams::transfer::Container::listVariables "Container.listVariables", \ref
         %> gams::transfer::Container::getSymbols "Container.getSymbols"
@@ -708,12 +791,11 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             % - types (any):
-            %   Enable filter for variable type, e.g. type = {'binary',
-            %   'integer'}. Default: not applied.
+            %   Enable filter for variable type, e.g. type = {'binary', 'integer'}. Default: not
+            %   applied.
             %
             % See also: gams.transfer.Container.listVariables, gams.transfer.Container.getSymbols
 
@@ -724,12 +806,10 @@ classdef Container < handle
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %> - types (`any`):
-        %>   Enable filter for equation type, e.g. `type = {"g", "l"}`. Default:
-        %>   not applied.
+        %>   Enable filter for equation type, e.g. `type = {"g", "l"}`. Default: not applied.
         %>
         %> @see \ref gams::transfer::Container::listEquations "Container.listEquations", \ref
         %> gams::transfer::Container::getSymbols "Container.getSymbols"
@@ -738,25 +818,22 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not applied.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not applied.
             % - types (any):
-            %   Enable filter for equation type, e.g. type = {'g', 'l'}.
-            %   Default: not applied.
+            %   Enable filter for equation type, e.g. type = {'g', 'l'}. Default: not applied.
             %
             % See also: gams.transfer.Container.listEquations, gams.transfer.Container.getSymbols
 
-            symbols = obj.getSymbols(obj.listEquations(varargin));
+            symbols = obj.getSymbols(obj.listEquations(varargin{:}));
         end
 
         %> Gets all Alias objects
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %>
         %> @see \ref gams::transfer::Container::listAliases "Container.listAliases", \ref
         %> gams::transfer::Container::getSymbols "Container.getSymbols"
@@ -765,9 +842,8 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - is_valid: logical or any
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listAliases, gams.transfer.Container.getSymbols
 
@@ -776,39 +852,27 @@ classdef Container < handle
 
         %> Checks if symbol exists in container (case insensitive)
         %>
-        %> - `s = c.hasSymbols(a)` returns `true` if GAMS symbol named `a` (case
-        %>   does not matter) exists. `false` otherwise.
-        %> - `s = c.hasSymbols(b)` returns a list of bools where an entry `s{i}`
-        %>   is `true` if GAMS symbol named `b{i}` (case does not matter)
+        %> - `s = c.hasSymbols(a)` returns `true` if GAMS symbol named `a` (case does not matter)
         %>   exists. `false` otherwise.
+        %> - `s = c.hasSymbols(b)` returns a list of bools where an entry `s{i}` is `true` if GAMS
+        %>   symbol named `b{i}` (case does not matter) exists. `false` otherwise.
         function bool = hasSymbols(obj, names)
             % Checks if symbol exists in container (case insensitive)
             %
-            % s = c.hasSymbols(a) returns true if GAMS symbol named a (case does
-            % not matter) exists. false otherwise.
-            % s = c.hasSymbols(b) returns a list of bools where an entry s{i} is
-            % true if GAMS symbol named b{i} (case does not matter) exists.
+            % s = c.hasSymbols(a) returns true if GAMS symbol named a (case does not matter) exists.
             % false otherwise.
+            % s = c.hasSymbols(b) returns a list of bools where an entry s{i} is true if GAMS symbol
+            % named b{i} (case does not matter) exists. false otherwise.
 
-            if ischar(names) || isstring(names)
-                bool = isfield(obj.name_lookup, lower(names));
-            elseif iscellstr(names)
-                n = numel(names);
-                bool = true(1, n);
-                for i = 1:n
-                    bool(i) = isfield(obj.name_lookup, lower(names{i}));
-                end
-            else
-                error('Name must be of type ''char'' or ''cellstr''.');
-            end
+            bool = obj.data_.exists(names);
         end
 
         %> Get symbol names by names (case insensitive)
         %>
-        %> - `s = c.getSymbolNames(a)` returns GAMS symbol names named `a` where
-        %>   `a` may have different casing.
-        %> - `s = c.getSymbolNames(b)` returns a list GAMS symbol names
-        %>   where names equal `b` case insensitively.
+        %> - `s = c.getSymbolNames(a)` returns GAMS symbol names named `a` where `a` may have
+        %>   different casing.
+        %> - `s = c.getSymbolNames(b)` returns a list GAMS symbol names where names equal `b` case
+        %>   insensitively.
         %>
         %> **Example:**
         %> ```
@@ -817,42 +881,52 @@ classdef Container < handle
         function symbols = getSymbolNames(obj, names)
             % Get symbol names by names (case insensitive)
             %
-            % s = c.getSymbolNames(a) returns GAMS symbol names named a where a
-            % may have different casing.
-            % s = c.getSymbolNames(b) returns a list GAMS symbol names where
-            % names equal b case insensitively.
+            % s = c.getSymbolNames(a) returns GAMS symbol names named a where a may have different
+            % casing.
+            % s = c.getSymbolNames(b) returns a list GAMS symbol names where names equal b case
+            % insensitively.
             %
             % Example:
             % v1 = c.getSymbolNames('v1'); % equals c.getSymbolNames('V1');
 
-            if ischar(names) || isstring(names)
-                name_lower = lower(names);
-                if ~isfield(obj.name_lookup, name_lower)
-                    error('Symbol ''%s'' does not exist.', names);
+            symbols = obj.data_.keys(names);
+        end
+
+    end
+
+    methods (Hidden, Static, Access = private)
+
+        function [is_valid, types] = parseArgumentsListSymbols(args, has_types)
+            is_valid = nan;
+            types = {};
+            index = 1;
+            while index <= numel(args)
+                if strcmpi(args{index}, 'is_valid')
+                    index = index + 1;
+                    gams.transfer.utils.Validator.minargin(numel(args), index);
+                    is_valid = args{index};
+                    index = index + 1;
+                elseif has_types && strcmpi(args{index}, 'types')
+                    index = index + 1;
+                    gams.transfer.utils.Validator.minargin(numel(args), index);
+                    types = args{index};
+                    index = index + 1;
+                else
+                    error('Invalid argument at position %d', index);
                 end
-                symbols = obj.name_lookup.(name_lower);
-            elseif iscellstr(names)
-                n = numel(names);
-                symbols = cell(size(names));
-                for i = 1:n
-                    name_lower = lower(names{i});
-                    if ~isfield(obj.name_lookup, name_lower)
-                        error('Symbol ''%s'' does not exist.', names{i});
-                    end
-                    symbols{i} = obj.name_lookup.(name_lower);
-                end
-            else
-                error('Name must be of type ''char'' or ''cellstr''.');
             end
         end
+
+    end
+
+    methods
 
         %> Lists all symbols in container
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %>
         %> @see \ref gams::transfer::Container::listSets "Container.listSets", \ref
         %> gams::transfer::Container::listParameters "Container.listParameters", \ref
@@ -864,56 +938,35 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listSets, gams.transfer.Container.listParameters,
             % gams.transfer.Container.listVariables, gams.transfer.Container.listEquations,
             % gams.transfer.Container.listAliases
 
-            p = inputParser();
-            addParameter(p, 'types', [], @isnumeric);
-            addParameter(p, 'is_valid', nan);
-            parse(p, varargin{:});
-            types = p.Results.types;
-            is_valid = p.Results.is_valid;
+            try
+                [is_valid, types] = obj.parseArgumentsListSymbols(varargin, true);
+            catch e
+                error(e.message);
+            end
 
-            names = fieldnames(obj.data);
             if isempty(types) && ~islogical(is_valid)
-                list = names;
+                list = obj.data_.keys();
                 return
             end
 
             % count matched symbols
+            symbols = obj.data_.entries();
             for k = 1:2
                 n = 0;
-                for i = 1:numel(names)
-                    symbol = obj.data.(names{i});
+                for i = 1:numel(symbols)
 
                     % check type
                     matched_type = isempty(types);
                     for j = 1:numel(types)
-                        if isfield(symbol, 'symbol_type')
-                            matched_type = strcmp(symbol.symbol_type, ...
-                                gams.transfer.SymbolType.int2str(types(j)));
-                        else
-                            switch types(j)
-                            case gams.transfer.SymbolType.SET
-                                matched_type = isa(symbol, 'gams.transfer.Set');
-                            case gams.transfer.SymbolType.PARAMETER
-                                matched_type = isa(symbol, 'gams.transfer.Parameter');
-                            case gams.transfer.SymbolType.VARIABLE
-                                matched_type = isa(symbol, 'gams.transfer.Variable');
-                            case gams.transfer.SymbolType.EQUATION
-                                matched_type = isa(symbol, 'gams.transfer.Equation');
-                            case gams.transfer.SymbolType.ALIAS
-                                matched_type = isa(symbol, 'gams.transfer.Alias');
-                            otherwise
-                                error('Invalid symbol type.');
-                            end
-                        end
-                        if matched_type
+                        if isa(symbols{i}, types{j})
+                            matched_type = true;
                             break;
                         end
                     end
@@ -922,15 +975,14 @@ classdef Container < handle
                     end
 
                     % check invalid
-                    if islogical(is_valid) && isa(symbol, 'gams.transfer.Symbol') && ...
-                        xor(is_valid, symbol.isValid())
+                    if islogical(is_valid) && xor(is_valid, symbols{i}.isValid())
                         continue
                     end
 
                     % add name to list
                     n = n + 1;
                     if k == 2
-                        list{n} = names{i};
+                        list{n} = symbols{i}.name;
                     end
                 end
                 if k == 1
@@ -957,29 +1009,27 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listSymbols, gams.transfer.Container.listParameters,
             % gams.transfer.Container.listVariables, gams.transfer.Container.listEquations,
             % gams.transfer.Container.listAliases
 
-            p = inputParser();
-            addParameter(p, 'is_valid', nan);
-            parse(p, varargin{:});
-
-            list = obj.listSymbols('types', gams.transfer.SymbolType.SET, ...
-                'is_valid', p.Results.is_valid);
+            try
+                is_valid = obj.parseArgumentsListSymbols(varargin, false);
+            catch e
+                error(e.message);
+            end
+            list = obj.listSymbols('types', {'gams.transfer.symbol.Set'}, 'is_valid', is_valid);
         end
 
         %> Lists all parameters in container
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %>
         %> @see \ref gams::transfer::Container::listSymbols "Container.listSymbols", \ref
         %> gams::transfer::Container::listSets "Container.listSets", \ref
@@ -991,32 +1041,30 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listSymbols, gams.transfer.Container.listSets,
             % gams.transfer.Container.listVariables, gams.transfer.Container.listEquations,
             % gams.transfer.Container.listAliases
 
-            p = inputParser();
-            addParameter(p, 'is_valid', nan);
-            parse(p, varargin{:});
-
-            list = obj.listSymbols('types', gams.transfer.SymbolType.PARAMETER, ...
-                'is_valid', p.Results.is_valid);
+            try
+                is_valid = obj.parseArgumentsListSymbols(varargin, false);
+            catch e
+                error(e.message);
+            end
+            list = obj.listSymbols('types', {'gams.transfer.symbol.Parameter'}, 'is_valid', is_valid);
         end
 
         %> Lists all variables in container
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %> - types (`any`):
-        %>   Enable filter for variable type, e.g. `type = {"binary",
-        %>   "integer"}`. Default: not applied.
+        %>   Enable filter for variable type, e.g. `type = {"binary", "integer"}`. Default: not
+        %>   applied.
         %>
         %> @see \ref gams::transfer::Container::listSymbols "Container.listSymbols", \ref
         %> gams::transfer::Container::listSets "Container.listSets", \ref
@@ -1028,59 +1076,49 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             % - types (any):
-            %   Enable filter for variable type, e.g. type = {'binary',
-            %   'integer'}. Default: not applied.
+            %   Enable filter for variable type, e.g. type = {'binary', 'integer'}. Default: not
+            %   applied.
             %
             % See also: gams.transfer.Container.listSymbols, gams.transfer.Container.listSets,
             % gams.transfer.Container.listParameters, gams.transfer.Container.listEquations,
             % gams.transfer.Container.listAliases
 
-            p = inputParser();
-            addParameter(p, 'is_valid', nan);
-            addParameter(p, 'types', nan);
-            parse(p, varargin{:});
+            % parse input arguments
+            try
+                [is_valid, types] = obj.parseArgumentsListSymbols(varargin, true);
+            catch e
+                error(e.message);
+            end
+            try
+                types = gams.transfer.VariableType.values(types);
+            catch e
+                error('Argument ''types'' cannot create ''gams.transfer.VariableType'': %s', e.message);
+            end
 
-            list = obj.listSymbols('types', gams.transfer.SymbolType.VARIABLE, ...
-                'is_valid', p.Results.is_valid);
+            list = obj.listSymbols('types', {'gams.transfer.symbol.Variable'}, 'is_valid', is_valid);
 
-            % check for further filtering
-            if isstring(p.Results.types) && numel(p.Results.types) == 1 || ischar(p.Results.types)
-                type_request = [gams.transfer.VariableType.str2int(p.Results.types)];
-            elseif iscellstr(p.Results.types)
-                type_request = zeros(size(p.Results.types));
-                for i = 1:numel(type_request)
-                    type_request(i) = gams.transfer.VariableType.str2int(p.Results.types{i});
+            % filter by type
+            if numel(types) > 0
+                filter = false(size(list));
+                for i = 1:numel(list)
+                    symbol = obj.data_.entries(list{i});
+                    filter(i) = sum(types == gams.transfer.VariableType(symbol.type).value) > 0;
                 end
-            elseif isnan(p.Results.types)
-                return;
-            else
-                error('Type must be cellstr or string.');
+                list = list(filter);
             end
-
-            % filter
-            filter = false(size(list));
-            for i = 1:numel(list)
-                symbol = obj.data.(list{i});
-                type_sym = gams.transfer.VariableType.str2int(symbol.type);
-                filter(i) = sum(type_request == type_sym) > 0;
-            end
-            list = list(filter);
         end
 
         %> Lists all equations in container
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %> - types (`any`):
-        %>   Enable filter for equation type, e.g. `type = {"g", "l"}`. Default:
-        %>   not applied.
+        %>   Enable filter for equation type, e.g. `type = {"g", "l"}`. Default: not applied.
         %>
         %> @see \ref gams::transfer::Container::listSymbols "Container.listSymbols", \ref
         %> gams::transfer::Container::listSets "Container.listSets", \ref
@@ -1092,56 +1130,46 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - is_valid (logical or any):
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not applied.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not applied.
             % - types (any):
-            %   Enable filter for equation type, e.g. type = {'g', 'l'}.
-            %   Default: not applied.
+            %   Enable filter for equation type, e.g. type = {'g', 'l'}. Default: not applied.
             %
             % See also: gams.transfer.Container.listSymbols, gams.transfer.Container.listSets,
             % gams.transfer.Container.listParameters, gams.transfer.Container.listVariables,
             % gams.transfer.Container.listAliases
 
-            p = inputParser();
-            addParameter(p, 'is_valid', nan);
-            addParameter(p, 'types', nan);
-            parse(p, varargin{:});
+            % parse input arguments
+            try
+                [is_valid, types] = obj.parseArgumentsListSymbols(varargin, true);
+            catch e
+                error(e.message);
+            end
+            try
+                types = gams.transfer.EquationType.values(types);
+            catch e
+                error('Argument ''types'' cannot create ''gams.transfer.EquationType'': %s', e.message);
+            end
 
-            list = obj.listSymbols('types', gams.transfer.SymbolType.EQUATION, ...
-                'is_valid', p.Results.is_valid);
+            list = obj.listSymbols('types', {'gams.transfer.symbol.Equation'}, 'is_valid', is_valid);
 
-            % check for further filtering
-            if isstring(p.Results.types) && numel(p.Results.types) == 1 || ischar(p.Results.types)
-                type_request = [gams.transfer.EquationType.str2int(p.Results.types)];
-            elseif iscellstr(p.Results.types)
-                type_request = zeros(size(p.Results.types));
-                for i = 1:numel(type_request)
-                    type_request(i) = gams.transfer.EquationType.str2int(p.Results.types{i});
+            % filter by type
+            if numel(types) > 0
+                filter = false(size(list));
+                for i = 1:numel(list)
+                    symbol = obj.data_.entries(list{i});
+                    filter(i) = sum(types == gams.transfer.EquationType(symbol.type).value) > 0;
                 end
-            elseif isnan(p.Results.types)
-                return;
-            else
-                error('Type must be cellstr or string.');
+                list = list(filter);
             end
-
-            % filter
-            filter = false(size(list));
-            for i = 1:numel(list)
-                symbol = obj.data.(list{i});
-                type_sym = gams.transfer.EquationType.str2int(symbol.type);
-                filter(i) = sum(type_request == type_sym) > 0;
-            end
-            list = list(filter);
         end
 
         %> Lists all aliases in container
         %>
         %> **Parameter Arguments:**
         %> - is_valid (`logical` or `any`):
-        %>   Enable `valid` filter if argument is of type logical. If `true`,
-        %>   only include symbols that are valid and, if `false`, only invalid
-        %>   symbols. Default: not logical.
+        %>   Enable `valid` filter if argument is of type logical. If `true`, only include symbols
+        %>   that are valid and, if `false`, only invalid symbols. Default: not logical.
         %>
         %> @see \ref gams::transfer::Container::listSymbols "Container.listSymbols", \ref
         %> gams::transfer::Container::listSets "Container.listSets", \ref
@@ -1153,20 +1181,19 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - is_valid: logical or any
-            %   Enable valid filter if argument is of type logical. If true,
-            %   only include symbols that are valid and, if false, only invalid
-            %   symbols. Default: not logical.
+            %   Enable valid filter if argument is of type logical. If true, only include symbols
+            %   that are valid and, if false, only invalid symbols. Default: not logical.
             %
             % See also: gams.transfer.Container.listSymbols, gams.transfer.Container.listSets,
             % gams.transfer.Container.listParameters, gams.transfer.Container.listVariables,
             % gams.transfer.Container.listEquations
 
-            p = inputParser();
-            addParameter(p, 'is_valid', nan);
-            parse(p, varargin{:});
-
-            list = obj.listSymbols('types', gams.transfer.SymbolType.ALIAS, ...
-                'is_valid', p.Results.is_valid);
+            try
+                is_valid = obj.parseArgumentsListSymbols(varargin, false);
+            catch e
+                error(e.message);
+            end
+            list = obj.listSymbols('types', {'gams.transfer.alias.Set'}, 'is_valid', is_valid);
         end
 
         %> Returns an overview over all sets in container
@@ -1179,8 +1206,8 @@ classdef Container < handle
         %> 1. symbols (`cellstr`):
         %>    List of symbols to include. Default: `listSets()`.
         %>
-        %> The overview is in form of a table listing for each symbol its
-        %> main characteristics and some statistics.
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describeSets(obj, varargin)
             % Returns an overview over all sets in container
             %
@@ -1190,16 +1217,33 @@ classdef Container < handle
             % 1. symbols (cellstr):
             %    List of symbols to include. Default: listSets().
             %
-            % The overview is in form of a table listing for each symbol its
-            % main characteristics and some statistics.
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             if nargin == 2
-                symbols = obj.getSymbolNames(varargin{1});
+                symbols = obj.getSymbols(varargin{1});
             else
-                symbols = obj.listSets();
+                symbols = obj.getSets();
             end
 
-            descr = obj.describeSymbols(gams.transfer.SymbolType.SET, symbols);
+            % get sets for aliases
+            names = cell(1, numel(symbols));
+            for i = 1:numel(symbols)
+                names{i} = symbols{i}.name;
+                if isa(symbols{i}, 'gams.transfer.alias.Set')
+                    symbols{i} = symbols{i}.alias_with;
+                end
+            end
+
+            descr = gams.transfer.symbol.Set.describe(symbols);
+
+            for i = 1:numel(names)
+                if gams.transfer.Constants.SUPPORTS_CATEGORICAL
+                    descr.name(i) = names{i};
+                else
+                    descr.name{i} = names{i};
+                end
+            end
         end
 
         %> Returns an overview over all parameters in container
@@ -1210,8 +1254,8 @@ classdef Container < handle
         %> 1. symbols (`cellstr`):
         %>    List of symbols to include. Default: `listParameters()`.
         %>
-        %> The overview is in form of a table listing for each symbol its
-        %> main characteristics and some statistics.
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describeParameters(obj, varargin)
             % Returns an overview over all parameters in container
             %
@@ -1219,16 +1263,15 @@ classdef Container < handle
             % 1. symbols (cellstr):
             %    List of symbols to include. Default: listParameters().
             %
-            % The overview is in form of a table listing for each symbol its
-            % main characteristics and some statistics.
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             if nargin == 2
-                symbols = obj.getSymbolNames(varargin{1});
+                symbols = obj.getSymbols(varargin{1});
             else
-                symbols = obj.listParameters();
+                symbols = obj.getParameters();
             end
-
-            descr = obj.describeSymbols(gams.transfer.SymbolType.PARAMETER, symbols);
+            descr = gams.transfer.symbol.Parameter.describe(symbols);
         end
 
         %> Returns an overview over all variables in container
@@ -1239,8 +1282,8 @@ classdef Container < handle
         %> 1. symbols (`cellstr`):
         %>    List of symbols to include. Default: `listVariables()`.
         %>
-        %> The overview is in form of a table listing for each symbol its
-        %> main characteristics and some statistics.
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describeVariables(obj, varargin)
             % Returns an overview over all variables in container
             %
@@ -1248,16 +1291,15 @@ classdef Container < handle
             % 1. symbols: cellstr
             %    List of symbols to include. Default: listVariables().
             %
-            % The overview is in form of a table listing for each symbol its
-            % main characteristics and some statistics.
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             if nargin == 2
-                symbols = obj.getSymbolNames(varargin{1});
+                symbols = obj.getSymbols(varargin{1});
             else
-                symbols = obj.listVariables();
+                symbols = obj.getVariables();
             end
-
-            descr = obj.describeSymbols(gams.transfer.SymbolType.VARIABLE, symbols);
+            descr = gams.transfer.symbol.Variable.describe(symbols);
         end
 
         %> Returns an overview over all equations in container
@@ -1268,8 +1310,8 @@ classdef Container < handle
         %> 1. symbols (`cellstr`):
         %>    List of symbols to include. Default: `listEquations()`.
         %>
-        %> The overview is in form of a table listing for each symbol its
-        %> main characteristics and some statistics.
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describeEquations(obj, varargin)
             % Returns an overview over all equations in container
             %
@@ -1277,16 +1319,15 @@ classdef Container < handle
             % 1. symbols (cellstr):
             %    List of symbols to include. Default: listEquations().
             %
-            % The overview is in form of a table listing for each symbol its
-            % main characteristics and some statistics.
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             if nargin == 2
-                symbols = obj.getSymbolNames(varargin{1});
+                symbols = obj.getSymbols(varargin{1});
             else
-                symbols = obj.listEquations();
+                symbols = obj.getEquations();
             end
-
-            descr = obj.describeSymbols(gams.transfer.SymbolType.EQUATION, symbols);
+            descr = gams.transfer.symbol.Equation.describe(symbols);
         end
 
         %> Returns an overview over all aliases in container
@@ -1297,8 +1338,8 @@ classdef Container < handle
         %> 1. symbols (`cellstr`):
         %>    List of symbols to include. Default: `listAliases()`.
         %>
-        %> The overview is in form of a table listing for each symbol its
-        %> main characteristics and some statistics.
+        %> The overview is in form of a table listing for each symbol its main characteristics and
+        %> some statistics.
         function descr = describeAliases(obj, varargin)
             % Returns an overview over all aliases in container
             %
@@ -1306,27 +1347,45 @@ classdef Container < handle
             % 1. symbols (cellstr):
             %    List of symbols to include. Default: listAliases().
             %
-            % The overview is in form of a table listing for each symbol its
-            % main characteristics and some statistics.
+            % The overview is in form of a table listing for each symbol its main characteristics
+            % and some statistics.
 
             if nargin == 2
-                symbols = obj.getSymbolNames(varargin{1});
+                symbols = obj.getSymbols(varargin{1});
             else
-                symbols = obj.listAliases();
+                symbols = obj.getAliases();
             end
-
-            descr = obj.describeSymbols(gams.transfer.SymbolType.ALIAS, symbols);
+            descr = gams.transfer.alias.Abstract.describe(symbols);
         end
 
         %> Adds a set to the container
         %>
-        %> Arguments are identical to the \ref gams::transfer::Set "Set"
-        %> constructor. Alternatively, use the constructor directly. In contrast
-        %> to the constructor, this method may overwrite a set if its definition
-        %> (\ref gams::transfer::Set::is_singleton "is_singleton", \ref
-        %> gams::transfer::Set::domain "domain", \ref
-        %> gams::transfer::Set::domain_forwarding "domain_forwarding") doesn't
-        %> differ.
+        %> **Required Arguments:**
+        %> 1. name (`string`):
+        %>    Name of set
+        %>
+        %> **Optional Arguments:**
+        %> 2. domain (`cellstr` or `Set`):
+        %>    List of domains given either as `string` or as reference to a \ref
+        %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{"*"}` (for 1-dim with
+        %>    universe domain).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Set records, e.g. a list of strings. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - is_singleton (`logical`):
+        %>   Indicates if set is a is_singleton set (`true`) or not (`false`). Default is `false`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the domains in case
+        %>   they are not present in the domains already. With a logical vector domain forwarding
+        %>   can be enabled/disabled independently for each domain. Default: `false`.
+        %>
+        %> Note, this method may overwrite a set if its definition (\ref
+        %> gams::transfer::symbol::Set::is_singleton "is_singleton", \ref
+        %> gams::transfer::symbol::Set::domain "domain", \ref
+        %> gams::transfer::symbol::Set::domain_forwarding "domain_forwarding") doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -1336,14 +1395,33 @@ classdef Container < handle
         %> s3 = c.addSet('s3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
         %> ```
         %>
-        %> @see \ref gams::transfer::Set "Set"
+        %> @see \ref gams::transfer::symbol::Set "symbol.Set", \ref gams::transfer::Set "Set"
         function symbol = addSet(obj, name, varargin)
             % Adds a set to the container
             %
-            % Arguments are identical to the gams.transfer.Set constructor.
-            % Alternatively, use the constructor directly. In contrast to the
-            % constructor, this method may overwrite a set if its definition
-            % (is_singleton, domain, domain_forwarding) doesn't differ.
+            % Required Arguments:
+            % 1. name (string):
+            %    Name of set
+            %
+            % Optional Arguments:
+            % 2. domain (cellstr or Set):
+            %    List of domains given either as string or as reference to a
+            %    gams.transfer.symbol.Set object. Default is {"*"} (for 1-dim with universe domain).
+            %
+            % Parameter Arguments:
+            % - records:
+            %   Set records, e.g. a list of strings. Default is `[]`.
+            % - description (string):
+            %   Description of symbol. Default is "".
+            % - is_singleton (logical):
+            %   Indicates if set is a is_singleton set (true) or not (false). Default is false.
+            % - domain_forwarding (logical):
+            %   If true, domain entries in records will recursively be added to the domains in case
+            %   they are not present in the domains already. With a logical vector domain forwarding
+            %   can be enabled/disabled independently for each domain. Default: false.
+            %
+            % Note, this method may overwrite a set if its definition (is_singleton, domain,
+            % domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -1351,37 +1429,50 @@ classdef Container < handle
             % s2 = c.addSet('s2', {s1, '*', '*'});
             % s3 = c.addSet('s3', '*', 'records', {'e1', 'e2', 'e3'}, 'description', 'set s3');
             %
-            % See also: gams.transfer.Set
+            % See also: gams.transfer.symbol.Set, gams.transfer.Set
 
-            if obj.hasSymbols(name)
-                symbol = obj.getSymbols(name);
-                args = gams.transfer.Set.parseConstructArguments(name, varargin{:});
-                if isa(symbol, 'gams.transfer.Set') && ...
-                    isequal(symbol.is_singleton, args.is_singleton) && ...
-                    isequal(symbol.domain, args.domain) && ...
-                    isequal(symbol.domain_forwarding, args.domain_forwarding)
-                    if args.isset_description
-                        symbol.description = args.description;
-                    end
-                    if args.isset_records
-                        symbol.setRecords(args.records);
-                    end
-                else
-                    error('Symbol ''%s'' (with different definition) already exists.', name);
-                end
-            else
-                symbol = gams.transfer.Set(obj, name, varargin{:});
+            new_symbol = gams.transfer.symbol.Set.construct(obj, name, varargin{:});
+
+            if ~obj.hasSymbols(name)
+                obj.data_ = obj.data_.add(name, new_symbol);
+                symbol = new_symbol;
+                return
             end
+
+            symbol = obj.getSymbols(name);
+            if ~isa(symbol, 'gams.transfer.symbol.Set')
+                error('Symbol ''%s'' (with different symbol type) already exists.', name);
+            end
+            if ~symbol.def.equals(new_symbol.def)
+                error('Symbol ''%s'' (with different definition) already exists.', name);
+            end
+            symbol.copyFrom_(new_symbol);
         end
 
         %> Adds a parameter to the container
         %>
-        %> Arguments are identical to the \ref gams::transfer::Parameter
-        %> "Parameter" constructor. Alternatively, use the constructor directly.
-        %> In contrast to the constructor, this method may overwrite a parameter
-        %> if its definition (\ref gams::transfer::Parameter::domain "domain",
-        %> \ref gams::transfer::Parameter::domain_forwarding "domain_forwarding")
-        %> doesn't differ.
+        %> **Required Arguments:**
+        %> 1. name (`string`):
+        %>    Name of parameter
+        %>
+        %> **Optional Arguments:**
+        %> 2. domain (`cellstr` or `Set`):
+        %>    List of domains given either as `string` or as reference to a \ref
+        %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{}` (for scalar).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Parameter records. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the domains in case
+        %>   they are not present in the domains already. With a logical vector domain forwarding
+        %>   can be enabled/disabled independently for each domain. Default: `false`.
+        %>
+        %> Note, this method may overwrite a parameter if its definition (\ref
+        %> gams::transfer::symbol::Parameter::domain "domain", \ref
+        %> gams::transfer::symbol::Parameter::domain_forwarding "domain_forwarding") doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -1391,14 +1482,32 @@ classdef Container < handle
         %> p3 = c.addParameter('p3', '*', 'description', 'par p3');
         %> ```
         %>
-        %> @see \ref gams::transfer::Parameter "Parameter"
+        %> @see \ref gams::transfer::symbol::Parameter "symbol.Parameter", \ref
+        %> gams::transfer::Parameter "Parameter"
         function symbol = addParameter(obj, name, varargin)
             % Adds a parameter to the container
             %
-            % Arguments are identical to the gams.transfer.Parameter constructor.
-            % Alternatively, use the constructor directly. In contrast to the
-            % constructor, this method may overwrite a parameter if its
-            % definition (domain, domain_forwarding) doesn't differ.
+            % Required Arguments:
+            % 1. name (string):
+            %    Name of parameter
+            %
+            % Optional Arguments:
+            % 2. domain (cellstr or Set):
+            %    List of domains given either as string or as reference to a
+            %    gams.transfer.symbol.Set object. Default is {} (for scalar).
+            %
+            % Parameter Arguments:
+            % - records:
+            %   Parameter records. Default is [].
+            % - description (string):
+            %   Description of symbol. Default is "".
+            % - domain_forwarding (logical):
+            %   If true, domain entries in records will recursively be added to the domains in case
+            %   they are not present in the domains already. With a logical vector domain
+            %   forwarding can be enabled/disabled independently for each domain. Default: false.
+            %
+            % Note, this method may overwrite a parameter if its definition (domain,
+            % domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -1406,38 +1515,55 @@ classdef Container < handle
             % p2 = c.addParameter('p2', {'*', '*'});
             % p3 = c.addParameter('p3', '*', 'description', 'par p3');
             %
-            % See also: gams.transfer.Parameter
+            % See also: gams.transfer.symbol.Parameter, gams.transfer.Parameter
 
-            if obj.hasSymbols(name)
-                symbol = obj.getSymbols(name);
-                args = gams.transfer.Parameter.parseConstructArguments(obj.indexed, ...
-                    name, varargin{:});
-                if isa(symbol, 'gams.transfer.Parameter') && ...
-                    isequal(symbol.domain, args.domain) && ...
-                    isequal(symbol.domain_forwarding, args.domain_forwarding)
-                    if args.isset_description
-                        symbol.description = args.description;
-                    end
-                    if args.isset_records
-                        symbol.setRecords(args.records);
-                    end
-                else
-                    error('Symbol ''%s'' (with different definition) already exists.', name);
-                end
-            else
-                symbol = gams.transfer.Parameter(obj, name, varargin{:});
+            new_symbol = gams.transfer.symbol.Parameter.construct(obj, name, varargin{:});
+
+            if ~obj.hasSymbols(name)
+                obj.data_ = obj.data_.add(name, new_symbol);
+                symbol = new_symbol;
+                return
             end
+
+            symbol = obj.getSymbols(name);
+            if ~isa(symbol, 'gams.transfer.symbol.Parameter')
+                error('Symbol ''%s'' (with different symbol type) already exists.', name);
+            end
+            if ~symbol.def.equals(new_symbol.def)
+                error('Symbol ''%s'' (with different definition) already exists.', name);
+            end
+            symbol.copyFrom_(new_symbol);
         end
 
         %> Adds a variable to the container
         %>
-        %> Arguments are identical to the \ref gams::transfer::Variable "Variable"
-        %> constructor. Alternatively, use the constructor directly. In contrast
-        %> to the constructor, this method may overwrite a variable if its
-        %> definition (\ref gams::transfer::Variable::type "type", \ref
-        %> gams::transfer::Variable::domain "domain", \ref
-        %> gams::transfer::Variable::domain_forwarding "domain_forwarding")
-        %> doesn't differ.
+        %> **Required Arguments:**
+        %> 1. name (`string`):
+        %>    Name of variable
+        %>
+        %> **Optional Arguments:**
+        %> 2. type (`string`, `int` or \ref gams::transfer::VariableType "VariableType"):
+        %>    Specifies the variable type, either as `string`, as `integer` given by any of the
+        %>    constants in \ref gams::transfer::VariableType "VariableType" or \ref
+        %>    gams::transfer::VariableType "VariableType". Default is `"free"`.
+        %> 3. domain (`cellstr` or `Set`):
+        %>    List of domains given either as string or as reference to a \ref
+        %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{}` (for scalar).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Set records, e.g. a list of strings. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the domains in case
+        %>   they are not present in the domains already. With a logical vector domain forwarding
+        %>   can be enabled/disabled independently for each domain. Default: `false`.
+        %>
+        %> Note, this method may overwrite a variable if its definition (\ref
+        %> gams::transfer::symbol::Variable::type "type", \ref
+        %> gams::transfer::symbol::Variable::domain "domain", \ref
+        %> gams::transfer::symbol::Variable::domain_forwarding "domain_forwarding") doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -1447,15 +1573,36 @@ classdef Container < handle
         %> v3 = c.addVariable('v3', VariableType.BINARY, '*', 'description', 'var v3');
         %> ```
         %>
-        %> @see \ref gams::transfer::Variable "Variable", \ref
-        %> gams::transfer::VariableType "VariableType"
+        %> @see \ref gams::transfer::symbol::Variable "symbol.Variable", \ref
+        %> gams::transfer::Variable "Variable", \ref gams::transfer::VariableType "VariableType"
         function symbol = addVariable(obj, name, varargin)
             % Adds a variable to the container
             %
-            % Arguments are identical to the gams.transfer.Variable constructor.
-            % Alternatively, use the constructor directly. In contrast to the
-            % constructor, this method may overwrite a variable if its
-            % definition (type, domain, domain_forwarding) doesn't differ.
+            % Required Arguments:
+            % 1. name (string):
+            %    Name of variable
+            %
+            % Optional Arguments:
+            % 2. type (string, int or gams.transfer.VariableType):
+            %    Specifies the variable type, either as string, as integer given by any of the
+            %    constants in gams.transfer.VariableType or
+            %    gams.transfer.VariableType. Default is "free".
+            % 3. domain (cellstr or Set):
+            %    List of domains given either as string or as reference to a
+            %    gams.transfer.symbol.Set object. Default is {} (for scalar).
+            %
+            % Parameter Arguments:
+            % - records:
+            %   Set records, e.g. a list of strings. Default is [].
+            % - description (string):
+            %   Description of symbol. Default is "".
+            % - domain_forwarding (logical):
+            %   If true, domain entries in records will recursively be added to the domains in case
+            %   they are not present in the domains already. With a logical vector domain forwarding
+            %   can be enabled/disabled independently for each domain. Default: false.
+            %
+            % Note, this method may overwrite a variable if its definition (type, domain,
+            % domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
@@ -1463,39 +1610,56 @@ classdef Container < handle
             % v2 = c.addVariable('v2', 'binary', {'*', '*'});
             % v3 = c.addVariable('v3', VariableType.BINARY, '*', 'description', 'var v3');
             %
-            % See also: gams.transfer.Variable, gams.transfer.VariableType
+            % See also: gams.transfer.symbol.Variable, gams.transfer.Variable,
+            % gams.transfer.VariableType
 
-            if obj.hasSymbols(name)
-                symbol = obj.getSymbols(name);
-                args = gams.transfer.Variable.parseConstructArguments(name, varargin{:});
-                if isa(symbol, 'gams.transfer.Variable') && ...
-                    isequal(symbol.domain, args.domain) && ...
-                    (~isnumeric(args.type) && isequal(symbol.type, args.type) || ...
-                    isnumeric(args.type) && isequal(symbol.type, gams.transfer.VariableType.int2str(args.type))) && ...
-                    isequal(symbol.domain_forwarding, args.domain_forwarding)
-                    if args.isset_description
-                        symbol.description = args.description;
-                    end
-                    if args.isset_records
-                        symbol.setRecords(args.records);
-                    end
-                else
-                    error('Symbol ''%s'' (with different definition) already exists.', name);
-                end
-            else
-                symbol = gams.transfer.Variable(obj, name, varargin{:});
+            new_symbol = gams.transfer.symbol.Variable.construct(obj, name, varargin{:});
+
+            if ~obj.hasSymbols(name)
+                obj.data_ = obj.data_.add(name, new_symbol);
+                symbol = new_symbol;
+                return
             end
+
+            symbol = obj.getSymbols(name);
+            if ~isa(symbol, 'gams.transfer.symbol.Variable')
+                error('Symbol ''%s'' (with different symbol type) already exists.', name);
+            end
+            if ~symbol.def.equals(new_symbol.def)
+                error('Symbol ''%s'' (with different definition) already exists.', name);
+            end
+            symbol.copyFrom_(new_symbol);
         end
 
         %> Adds an equation to the container
         %>
-        %> Arguments are identical to the \ref gams::transfer::Equation "Equation"
-        %> constructor. Alternatively, use the constructor directly. In contrast
-        %> to the constructor, this method may overwrite an equation if its
-        %> definition (\ref gams::transfer::Equation::type "type", \ref
-        %> gams::transfer::Equation::domain "domain", \ref
-        %> gams::transfer::Equation::domain_forwarding "domain_forwarding")
-        %> doesn't differ.
+        %> **Required Arguments:**
+        %> 1. name (`string`):
+        %>    Name of equation
+        %> 2. type (`string`, `int` or \ref gams::transfer::EquationType "EquationType"):
+        %>    Specifies the variable type, either as `string`, as `integer` given by any of the
+        %>    constants in \ref gams::transfer::EquationType "EquationType" or \ref
+        %>    gams::transfer::EquationType "EquationType".
+        %>
+        %> **Optional Arguments:**
+        %> 3. domain (`cellstr` or `Set`):
+        %>    List of domains given either as `string` or as reference to a \ref
+        %>    gams::transfer::symbol::Set "symbol.Set" object. Default is `{}` (for scalar).
+        %>
+        %> **Parameter Arguments:**
+        %> - records:
+        %>   Equation records. Default is `[]`.
+        %> - description (`string`):
+        %>   Description of symbol. Default is `""`.
+        %> - domain_forwarding (`logical`):
+        %>   If `true`, domain entries in records will recursively be added to the domains in case
+        %>   they are not present in the domains already. With a logical vector domain forwarding
+        %>   can be enabled/disabled independently for each domain. Default: `false`.
+        %>
+        %> Note, this method may overwrite an equation if its definition (\ref
+        %> gams::transfer::symbol::Equation::type "type", \ref
+        %> gams::transfer::symbol::Equation::domain "domain", \ref
+        %> gams::transfer::symbol::Equation::domain_forwarding "domain_forwarding") doesn't differ.
         %>
         %> **Example:**
         %> ```
@@ -1504,50 +1668,70 @@ classdef Container < handle
         %> e3 = c.addEquation('e3', EquationType.EQ, '*', 'description', 'equ e3');
         %> ```
         %>
-        %> @see \ref gams::transfer::Equation "Equation", \ref
-        %> gams::transfer::EquationType "EquationType"
-        function symbol = addEquation(obj, name, etype, varargin)
+        %> @see \ref gams::transfer::symbol::Equation "symbol.Equation", \ref
+        %> gams::transfer::Equation "Equation", \ref gams::transfer::EquationType "EquationType"
+        function symbol = addEquation(obj, name, varargin)
             % Adds an equation to the container
             %
-            % Arguments are identical to the gams.transfer.Equation constructor.
-            % Alternatively, use the constructor directly. In contrast to the
-            % constructor, this method may overwrite an equation if its
-            % definition (type, domain, domain_forwarding) doesn't differ.
+            % Required Arguments:
+            % 1. name (string):
+            %    Name of equation
+            % 2. type (string, int or gams.transfer.EquationType):
+            %    Specifies the variable type, either as string, as integer given by any of the
+            %    constants in gams.transfer.EquationType or
+            %    gams.transfer.EquationType.
+            %
+            % Optional Arguments:
+            % 3. domain (cellstr or Set):
+            %    List of domains given either as string or as reference to a
+            %    gams.transfer.symbol.Set object. Default is {} (for scalar).
+            %
+            % Parameter Arguments:
+            % - records:
+            %   Equation records. Default is [].
+            % - description (string):
+            %   Description of symbol. Default is "".
+            % - domain_forwarding (logical):
+            %   If true, domain entries in records will recursively be added to the domains in case
+            %   they are not present in the domains already. With a logical vector domain forwarding
+            %   can be enabled/disabled independently for each domain. Default: false.
+            %
+            % Note, this method may overwrite an equation if its definition (type, domain,
+            % domain_forwarding) doesn't differ.
             %
             % Example:
             % c = Container();
             % e2 = c.addEquation('e2', 'l', {'*', '*'});
             % e3 = c.addEquation('e3', EquationType.EQ, '*', 'description', 'equ e3');
             %
-            % See also: gams.transfer.Equation, gams.transfer.EquationType
+            % See also: gams.transfer.symbol.Equation, gams.transfer.Equation,
+            % gams.transfer.EquationType
 
-            if obj.hasSymbols(name)
-                symbol = obj.getSymbols(name);
-                args = gams.transfer.Equation.parseConstructArguments(name, etype, varargin{:});
-                if isa(symbol, 'gams.transfer.Equation') && ...
-                    isequal(symbol.domain, args.domain) && ...
-                    (~isnumeric(args.type) && isequal(symbol.type, args.type) || ...
-                    isnumeric(args.type) && isequal(symbol.type, gams.transfer.EquationType.int2str(args.type))) && ...
-                    isequal(symbol.domain_forwarding, args.domain_forwarding)
-                    if args.isset_description
-                        symbol.description = args.description;
-                    end
-                    if args.isset_records
-                        symbol.setRecords(args.records);
-                    end
-                else
-                    error('Symbol ''%s'' (with different definition) already exists.', name);
-                end
-            else
-                symbol = gams.transfer.Equation(obj, name, etype, varargin{:});
+            new_symbol = gams.transfer.symbol.Equation.construct(obj, name, varargin{:});
+
+            if ~obj.hasSymbols(name)
+                obj.data_ = obj.data_.add(name, new_symbol);
+                symbol = new_symbol;
+                return
             end
+
+            symbol = obj.getSymbols(name);
+            if ~isa(symbol, 'gams.transfer.symbol.Equation')
+                error('Symbol ''%s'' (with different symbol type) already exists.', name);
+            end
+            if ~symbol.def.equals(new_symbol.def)
+                error('Symbol ''%s'' (with different definition) already exists.', name);
+            end
+            symbol.copyFrom_(new_symbol);
         end
 
         %> Adds an alias to the container
         %>
-        %> Arguments are identical to the \ref gams::transfer::Alias "Alias"
-        %> constructor. Alternatively, use the constructor directly. In contrast
-        %> to the constructor, this method may overwrite an alias.
+        %> **Required Arguments:**
+        %> 1. name (`string`):
+        %>    name of alias
+        %> 2. alias_with (`Set` or `Alias`):
+        %>    \ref gams::transfer::symbol::Set "symbol.Set" to be linked to.
         %>
         %> **Example:**
         %> ```
@@ -1556,39 +1740,44 @@ classdef Container < handle
         %> a = c.addAlias('a', s);
         %> ```
         %>
-        %> @see \ref gams::transfer::Alias "Alias", \ref gams::transfer::Set "Set"
+        %> @see \ref gams::transfer::alias::Set "alias.Set", \ref gams::transfer::Alias "Alias",
+        %> \ref gams::transfer::symbol::Set "symbol.Set"
         function symbol = addAlias(obj, name, alias_with)
             % Adds an alias to the container
             %
-            % Arguments are identical to the gams.transfer.Alias constructor.
-            % Alternatively, use the constructor directly. In contrast to the
-            % constructor, this method may overwrite an alias.
+            % Required Arguments:
+            % 1. name (string):
+            %    name of alias
+            % 2. alias_with (Set or Alias):
+            %    gams.transfer.symbol.Set to be linked to.
             %
             % Example:
             % c = Container();
             % s = c.addSet('s');
             % a = c.addAlias('a', s);
             %
-            % See also: gams.transfer.Alias, gams.transfer.Set
+            % See also: gams.transfer.alias.Set, gams.transfer.Alias, gams.transfer.symbol.Set
 
-            if obj.hasSymbols(name)
-                symbol = obj.getSymbols(name);
-                args = gams.transfer.Alias.parseConstructArguments(name, alias_with);
-                if isa(symbol, 'gams.transfer.Alias')
-                    symbol.alias_with = args.alias_with;
-                else
-                    error('Symbol ''%s'' (with different definition) already exists.', name);
-                end
-            else
-                symbol = gams.transfer.Alias(obj, name, alias_with);
+            new_symbol = gams.transfer.alias.Set.construct(obj, name, alias_with);
+
+            if ~obj.hasSymbols(name)
+                obj.data_ = obj.data_.add(name, new_symbol);
+                symbol = new_symbol;
+                return
             end
+
+            symbol = obj.getSymbols(name);
+            if ~isa(symbol, 'gams.transfer.alias.Set')
+                error('Symbol ''%s'' (with different symbol type) already exists.', name);
+            end
+            symbol.copyFrom_(new_symbol);
         end
 
         %> Adds a universe alias to the container
         %>
-        %> Arguments are identical to the \ref gams::transfer::UniverseAlias "UniverseAlias"
-        %> constructor. Alternatively, use the constructor directly. In contrast
-        %> to the constructor, this method may overwrite an alias.
+        %> **Required Arguments:**
+        %> 1. name (`string`):
+        %>    name of alias
         %>
         %> **Example:**
         %> ```
@@ -1596,29 +1785,34 @@ classdef Container < handle
         %> u = c.addUniverseAlias('u');
         %> ```
         %>
-        %> @see \ref gams::transfer::UniverseAlias "UniverseAlias", \ref gams::transfer::Alias "Alias",
-        %> \ref gams::transfer::Set "Set"
+        %> @see \ref gams::transfer::alias::Universe "alias.Universe", \ref
+        %> gams::transfer::UniverseAlias "UniverseAlias"
         function symbol = addUniverseAlias(obj, name)
             % Adds a universe alias to the container
             %
-            % Arguments are identical to the gams.transfer.UniverseAlias constructor.
-            % Alternatively, use the constructor directly. In contrast to the
-            % constructor, this method may overwrite an alias.
+            % Required Arguments:
+            % 1. name (string):
+            %    name of alias
             %
             % Example:
             % c = Container();
             % u = c.addUniverseAlias('u');
             %
-            % See also: gams.transfer.UniverseAlias, gams.transfer.Alias, gams.transfer.Set
+            % See also: gams.transfer.alias.Universe, gams.transfer.UniverseAlias
 
-            if obj.hasSymbols(name)
-                symbol = obj.getSymbols(name);
-                if ~isa(symbol, 'gams.transfer.UniverseAlias')
-                    error('Symbol ''%s'' (with different definition) already exists.', name);
-                end
-            else
-                symbol = gams.transfer.UniverseAlias(obj, name);
+            new_symbol = gams.transfer.alias.Universe.construct(obj, name);
+
+            if ~obj.hasSymbols(name)
+                obj.data_ = obj.data_.add(name, new_symbol);
+                symbol = new_symbol;
+                return
             end
+
+            symbol = obj.getSymbols(name);
+            if ~isa(symbol, 'gams.transfer.alias.Universe')
+                error('Symbol ''%s'' (with different symbol type) already exists.', name);
+            end
+            symbol.copyFrom_(new_symbol);
         end
 
         %> Rename a symbol
@@ -1639,18 +1833,22 @@ classdef Container < handle
             % Example:
             % c.renameSymbol('x', 'xx');
 
-            if strcmp(oldname, newname)
+            if isequal(oldname, newname)
                 return
             end
+            try
+                oldname = gams.transfer.utils.Validator('oldname', 1, oldname).symbolName().value;
+                newname = gams.transfer.utils.Validator('newname', 2, newname).symbolName().value;
+            catch e
+                error(e.message);
+            end
 
-            % check if symbol exists
             if obj.hasSymbols(newname) && ~strcmpi(newname, oldname)
                 error('Symbol ''%s'' already exists.', newname);
             end
-
-            oldname = obj.getSymbolNames(oldname);
-            obj.data.(oldname).name_ = char(newname);
-            obj.renameData(oldname, newname);
+            [obj.data_, symbol] = obj.data_.rename(oldname, newname);
+            symbol.name_ = newname;
+            symbol.modified = true;
         end
 
         %> Removes a symbol from container
@@ -1682,16 +1880,16 @@ classdef Container < handle
 
             if nargin == 1
                 removed_symbols = obj.getSymbols();
-
-                obj.data = struct();
-                obj.name_lookup = struct();
+                obj.data_ = obj.data_.clear();
 
                 % force recheck of deleted symbol (it may still live within an
                 % alias, domain or in the user's program)
                 for i = 1:numel(removed_symbols)
                     removed_symbols{i}.isValid(false, true);
-                    removed_symbols{i}.unsetContainer();
+                    removed_symbols{i}.container = [];
                 end
+
+                obj.modified_ = true;
                 return
             end
 
@@ -1710,52 +1908,55 @@ classdef Container < handle
                 removed_symbols{j} = obj.getSymbols(names{i});
 
                 % remove symbol
-                obj.removeFromData(removed_symbols{j}.name);
+                obj.data_ = obj.data_.remove(removed_symbols{j}.name);
 
                 % force recheck of deleted symbol (it may still live within an
                 % alias, domain or in the user's program)
                 removed_symbols{j}.isValid(false, true);
-
-                % unlink container
-                removed_symbols{j}.unsetContainer();
+                removed_symbols{j}.container = [];
             end
-            removed_symbols = removed_symbols(1:j);
 
-            % remove symbols from domain references
-            symbols = fieldnames(obj.data);
+            % remove aliases to removed sets
+            symbols = obj.data_.entries();
             remove_aliases = {};
             for i = 1:numel(symbols)
-                symbol = obj.data.(symbols{i});
-                if isa(symbol, 'gams.transfer.Alias')
-                    for j = 1:numel(removed_symbols)
-                        if symbol.alias_with.name == removed_symbols{j}.name
-                            remove_aliases{end+1} = symbol.name;
+                if isa(symbols{i}, 'gams.transfer.alias.Set')
+                    if isempty(symbols{i}.alias_with.container)
+                        remove_aliases{end+1} = symbols{i}.name;
+                    end
+                elseif isa(symbols{i}, 'gams.transfer.symbol.Abstract')
+                    for j = 1:numel(symbols{i}.def.domains)
+                        domain = symbols{i}.def.domains{j};
+                        if ~isa(domain, 'gams.transfer.symbol.domain.Regular')
+                            continue
+                        end
+                        if isempty(domain.symbol.container)
+                            symbols{i}.def.domains{j} = domain.getRelaxed();
                         end
                     end
-                else
-                    symbol.unsetDomain(removed_symbols);
                 end
             end
             if numel(remove_aliases) > 0
                 obj.removeSymbols(remove_aliases);
             end
+
+            obj.modified_ = true;
         end
 
         %> Reestablishes a valid GDX symbol order
         function reorderSymbols(obj)
             % Reestablishes a valid GDX symbol order
 
-            names = fieldnames(obj.data);
+            symbols = obj.getSymbols();
 
             % get number of set/alias
             n_sets = 0;
-            for i = 1:numel(names)
-                symbol = obj.data.(names{i});
-                if isa(symbol, 'gams.transfer.Set') || isa(symbol, 'gams.transfer.Alias')
+            for i = 1:numel(symbols)
+                if isa(symbols{i}, 'gams.transfer.symbol.Set') || isa(symbols{i}, 'gams.transfer.alias.Abstract')
                     n_sets = n_sets + 1;
                 end
             end
-            n_other = numel(names) - n_sets;
+            n_other = numel(symbols) - n_sets;
 
             sets = cell(1, n_sets);
             idx_sets = zeros(1, n_sets);
@@ -1764,12 +1965,11 @@ classdef Container < handle
             n_other = 0;
 
             % get index by type
-            for i = 1:numel(names)
-                symbol = obj.data.(names{i});
-                if isa(symbol, 'gams.transfer.Set') || isa(symbol, 'gams.transfer.Alias')
+            for i = 1:numel(symbols)
+                if isa(symbols{i}, 'gams.transfer.symbol.Set') || isa(symbols{i}, 'gams.transfer.alias.Abstract')
                     n_sets = n_sets + 1;
                     idx_sets(n_sets) = i;
-                    sets{n_sets} = names{i};
+                    sets{n_sets} = symbols{i}.name;
                 else
                     n_other = n_other + 1;
                     idx_other(n_other) = i;
@@ -1786,10 +1986,10 @@ classdef Container < handle
                 while n_handled < n_sets
                     % check if we can add the next set
                     curr_is_next = true;
-                    current_set = obj.data.(sets{idx(n_handled+1)});
+                    current_set = obj.getSymbols(sets{idx(n_handled+1)});
                     for i = 1:current_set.dimension
-                        if (isa(current_set.domain{i}, 'gams.transfer.Set') || ...
-                            isa(current_set.domain{i}, 'gams.transfer.Alias')) && ...
+                        if (isa(current_set.domain{i}, 'gams.transfer.symbol.Set') || ...
+                            isa(current_set.domain{i}, 'gams.transfer.alias.Abstract')) && ...
                             ~set_handled(current_set.domain{i}.name)
                             curr_is_next = false;
                             break;
@@ -1806,7 +2006,7 @@ classdef Container < handle
                     % find next available
                     next_avail = find(set_avail(idx(n_handled+1:end)), 1);
                     if isempty(next_avail)
-                        l = gams.transfer.Utils.list2str(sets(idx(n_handled+1:end)));
+                        l = gams.transfer.utils.list2str(sets(idx(n_handled+1:end)));
                         error('Circular domain set dependency in: %s.', l);
                     end
                     next_avail = next_avail + n_handled;
@@ -1819,7 +2019,8 @@ classdef Container < handle
             end
 
             % apply permutation
-            obj.data = orderfields(obj.data, [idx_sets, idx_other]);
+            obj.data_ = obj.data_.reorder([idx_sets, idx_other]);
+            obj.modified_ = true;
 
             % force recheck of all remaining symbols in container
             obj.isValid(false, true);
@@ -1827,97 +2028,101 @@ classdef Container < handle
 
         %> Get domain violations for all symbols
         %>
-        %> Domain violations occur when a symbol uses other \ref
-        %> gams::transfer::Set "Sets" as \ref gams::transfer::Symbol::domain
-        %> "domain"(s) -- and is thus of domain type `regular`, see \ref
-        %> GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in its
-        %> \ref gams::transfer::Symbol::records "records" that is not present in
-        %> the corresponding referenced domain set. Such a domain violation will
-        %> lead to a GDX error when writing the data!
+        %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
+        %> as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain
+        %> type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
+        %> its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+        %> corresponding referenced domain set. Such a domain violation will lead to a GDX error
+        %> when writing the data!
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
         %>
-        %> - `dom_violations = getDomainViolations` returns a list of domain
-        %>   violations.
+        %> - `dom_violations = getDomainViolations` returns a list of domain violations.
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be considered. All if empty. Case doesn't
-        %>   matter. Default is `{}`.
+        %>   List of symbols to be considered. All if empty. Case doesn't matter. Default is `{}`.
         %>
         %> @see \ref gams::transfer::Container::resolveDomainViolations
         %> "Container.resolveDomainViolations", \ref
-        %> gams::transfer::Symbol::getDomainViolations
-        %> "Symbol.getDomainViolations", \ref gams::transfer::DomainViolation
-        %> "DomainViolation"
+        %> gams::transfer::symbol::Abstract::getDomainViolations
+        %> "symbol.Abstract.getDomainViolations", \ref gams::transfer::symbol::domain::Violation
+        %> "symbol.domain.Violation"
         function dom_violations = getDomainViolations(obj, varargin)
             % Get domain violations for all symbols
             %
-            % Domain violations occur when a symbol uses other Set(s) as
-            % domain(s) and a domain entry in its records that is not present in
-            % the corresponding set. Such a domain violation will lead to a GDX
-            % error when writing the data.
+            % Domain violations occur when a symbol uses other Set(s) as domain(s) and a domain
+            % entry in its records that is not present in the corresponding set. Such a domain
+            % violation will lead to a GDX error when writing the data.
             %
-            % dom_violations = getDomainViolations returns a list of domain
-            % violations.
+            % dom_violations = getDomainViolations returns a list of domain violations.
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be considered. All if empty. Case doesn't
-            %   matter. Default is {}.
+            %   List of symbols to be considered. All if empty. Case doesn't matter. Default is {}.
             %
             % See also: gams.transfer.Container.resolveDomainViolations,
-            % gams.transfer.Symbol.getDomainViolations,
-            % gams.transfer.DomainViolation
+            % gams.transfer.symbol.Abstract.getDomainViolations,
+            % gams.transfer.symbol.domain.Violation
 
-            dom_violations = {};
-
-            % input arguments
-            p = inputParser();
-            addParameter(p, 'symbols', {}, @iscellstr);
-            parse(p, varargin{:});
-            if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
-            else
-                symbols = obj.getSymbolNames(p.Results.symbols);
+            % parse input arguments
+            has_symbols = false;
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
             end
 
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
+            else
+                symbols = obj.data_.entries();
+            end
+
+            dom_violations = {};
             for i = 1:numel(symbols)
-                symbol = obj.data.(symbols{i});
-                if isa(symbol, 'gams.transfer.Alias')
+                if isa(symbols{i}, 'gams.transfer.alias.Abstract')
                     continue
                 end
-
-                dom_violations_sym = symbol.getDomainViolations();
+                dom_violations_sym = symbols{i}.getDomainViolations();
                 dom_violations(end+1:end+numel(dom_violations_sym)) = dom_violations_sym;
             end
         end
 
         %> Extends domain sets in order to remove domain violations
         %>
-        %> Domain violations occur when a symbol uses other \ref
-        %> gams::transfer::Set "Sets" as \ref gams::transfer::Symbol::domain
-        %> "domain"(s) -- and is thus of domain type `regular`, see \ref
-        %> GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in its
-        %> \ref gams::transfer::Symbol::records "records" that is not present in
-        %> the corresponding referenced domain set. Such a domain violation will
-        %> lead to a GDX error when writing the data!
+        %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
+        %> as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain
+        %> type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
+        %> its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+        %> corresponding referenced domain set. Such a domain violation will lead to a GDX error
+        %> when writing the data!
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_DOMVIOL for more information.
         %>
-        %> - `resolveDomainViolations()` extends the domain sets with the
-        %>   violated domain entries. Hence, the domain violations disappear.
+        %> - `resolveDomainViolations()` extends the domain sets with the violated domain entries.
+        %>   Hence, the domain violations disappear.
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be considered. All if empty. Case doesn't
-        %>   matter. Default is `{}`.
+        %>   List of symbols to be considered. All if empty. Case doesn't matter. Default is `{}`.
         %>
-        %> @see \ref gams::transfer::Container::getDomainViolations
-        %> "Container.getDomainViolations", \ref
-        %> gams::transfer::Symbol::resolveDomainViolations
-        %> "Symbol.resolveDomainViolations", \ref gams::transfer::DomainViolation
-        %> "DomainViolation"
+        %> @see \ref gams::transfer::Container::getDomainViolations "Container.getDomainViolations",
+        %> \ref gams::transfer::symbol::Abstract::resolveDomainViolations
+        %> "symbol.Abstract.resolveDomainViolations", \ref gams::transfer::symbol::domain::Violation
+        %> "symbol.domain.Violation"
         function resolveDomainViolations(obj, varargin)
             % Extends domain sets in order to remove domain violations
             %
@@ -1935,15 +2140,10 @@ classdef Container < handle
             %   matter. Default is {}.
             %
             % See also: gams.transfer.Container.getDomainViolations,
-            % gams.transfer.Symbol.resolveDomainViolations,
-            % gams.transfer.DomainViolation
+            % gams.transfer.symbol.Abstract.resolveDomainViolations,
+            % gams.transfer.symbol.domain.Violation
 
-            % input arguments
-            p = inputParser();
-            addParameter(p, 'symbols', {}, @iscellstr);
-            parse(p, varargin{:});
-
-            dom_violations = obj.getDomainViolations('symbols', p.Results.symbols);
+            dom_violations = obj.getDomainViolations(varargin{:});
             for i = 1:numel(dom_violations)
                 dom_violations{i}.resolve();
             end
@@ -1961,10 +2161,9 @@ classdef Container < handle
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be considered. All if empty. Case doesn't
-        %>   matter. Default is `{}`.
+        %>   List of symbols to be considered. All if empty. Case doesn't matter. Default is `{}`.
         %>
-        %> @see \ref gams::transfer::Symbol::isValid "Symbol.isValid"
+        %> @see \ref gams::transfer::symbol::Abstract::isValid "symbol.Abstract.isValid"
         function valid = isValid(obj, varargin)
             % Checks correctness of all symbols
             %
@@ -1976,29 +2175,79 @@ classdef Container < handle
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be considered. All if empty. Case doesn't
-            %   matter. Default is {}.
+            %   List of symbols to be considered. All if empty. Case doesn't matter. Default is {}.
             %
-            % See also: gams.transfer.Symbol/isValid
+            % See also: gams.transfer.symbol.Abstract.isValid
 
-            % input arguments
-            p = inputParser();
-            addOptional(p, 'verbose', false, @islogical);
-            addOptional(p, 'force', false, @islogical);
-            addParameter(p, 'symbols', {}, @iscellstr);
-            parse(p, varargin{:});
-            if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
-            else
-                symbols = obj.getSymbolNames(p.Results.symbols);
+            % parse input arguments
+            has_symbols = false;
+            verbose = false;
+            force = false;
+            try
+                index = 1;
+                is_pararg = false;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                        is_pararg = true;
+                    elseif ~is_pararg && index == 1
+                        verbose = gams.transfer.utils.Validator('verbose', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
+                    elseif ~is_pararg && index == 2
+                        force = gams.transfer.utils.Validator('force', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
+
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
             end
-            verbose = p.Results.verbose;
-            force = p.Results.force;
 
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
+            else
+                symbols = obj.data_.entries();
+            end
+
+            % check for correct order of symbols
+            correct_order = true;
+            symbol_defined = struct();
+            for i = 1:numel(symbols)
+                symbol_defined.(symbols{i}.name) = true;
+                if ~isa(symbols{i}, 'gams.transfer.symbol.Abstract')
+                    continue
+                end
+                for j = 1:numel(symbols{i}.def.domains)
+                    domain = symbols{i}.def.domains{j};
+                    if ~isa(domain, 'gams.transfer.symbol.domain.Regular')
+                        continue
+                    end
+                    correct_order = isfield(symbol_defined, domain.name) && symbol_defined.(domain.name);
+                    if ~correct_order
+                        break;
+                    end
+                end
+                if ~correct_order
+                    break;
+                end
+            end
+            if ~correct_order
+                obj.reorderSymbols();
+            end
+
+            % check symbols
             valid = true;
             for i = 1:numel(symbols)
-                symbol = obj.data.(symbols{i});
-                if symbol.isValid(verbose, force)
+                if symbols{i}.isValid(verbose, force)
                     continue
                 end
                 valid = false;
@@ -2012,17 +2261,10 @@ classdef Container < handle
         %>
         %> - `u = getUELs()` returns the UELs across all symbols.
         %> - `u = getUELs(_, 'symbols', s)` returns the UELs across symbols `s`.
-        %> - `u = getUELs(_, "ignore_unused", true)` returns only those UELs
-        %>   that are actually used in the records.
+        %> - `u = getUELs(_, "ignore_unused", true)` returns only those UELs that are actually used
+        %>   in the records.
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
-        %>
-        %> @note This can only be used if the container is valid. UELs are not
-        %> available when using the indexed mode, see \ref
-        %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
-        %>
-        %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::Container::isValid "Container.isValid"
         function uels = getUELs(obj, varargin)
             % Get UELs from all symbols
             %
@@ -2030,31 +2272,46 @@ classdef Container < handle
             % u = getUELs(_, 'symbols', s) returns the UELs across symbols s.
             % u = getUELs(_, "ignore_unused", true) returns only those UELs
             % that are actually used in the records.
-            %
-            % Note: This can only be used if the container is valid. UELs are not
-            % available when using the indexed mode.
-            %
-            % See also: gams.transfer.Container.indexed, gams.transfer.Container.isValid
 
-            % input arguments
-            p = inputParser();
-            addParameter(p, 'symbols', {}, @iscellstr);
-            addParameter(p, 'ignore_unused', false, @islogical);
-            parse(p, varargin{:});
-            if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
+            % parse input arguments
+            has_symbols = false;
+            ignore_unused = false;
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'ignore_unused')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        ignore_unused = gams.transfer.utils.Validator('ignore_unused', index, ...
+                            varargin{index}).type('logical').scalar().value;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.getSymbolNames(p.Results.symbols);
+                symbols = obj.data_.entries();
             end
 
             uels = {};
             for i = 1:numel(symbols)
-                if isa(obj.data.(symbols{i}), 'gams.transfer.UniverseAlias')
+                if isa(symbols{i}, 'gams.transfer.alias.Abstract')
                     continue
                 end
-                uels = [uels; obj.data.(symbols{i}).getUELs('ignore_unused', p.Results.ignore_unused)];
-                [~,uidx,~] = unique(uels, 'first');
-                uels = uels(sort(uidx));
+                uels = gams.transfer.utils.unique([uels; symbols{i}.getUELs('ignore_unused', ignore_unused)]);
             end
         end
 
@@ -2065,122 +2322,116 @@ classdef Container < handle
         %> - `removeUELs(_, 'symbols', s)` removes UELs for symbols `s`.
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
-        %>
-        %> @note This can only be used if the container is valid. UELs are not
-        %> available when using the indexed mode, see \ref
-        %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
-        %>
-        %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::Container::isValid "Container.isValid"
         function removeUELs(obj, varargin)
             % Removes UELs from all symbol
             %
             % removeUELs() removes all unused UELs for all symbols.
             % removeUELs(u) removes the UELs u for all symbols.
             % removeUELs(_, 'symbols', s) removes UELs for symbols s.
-            %
-            % Note: This can only be used if the container is valid. UELs are not
-            % available when using the indexed mode.
-            %
-            % See also: gams.transfer.Container.indexed, gams.transfer.Container.isValid
 
-            is_parname = @(x) strcmpi(x, 'symbols');
-
-            % check optional arguments
-            i = 1;
+            % parse input arguments
+            has_symbols = false;
             uels = {};
-            while true
-                term = true;
-                if i == 1 && nargin > 1
-                    if ((isstring(uels) && numel(uels) == 1) || ischar(uels) || iscellstr(uels)) && ~is_parname(varargin{i})
-                        uels = varargin{i};
-                        i = i + 1;
-                        term = false;
-                    elseif ~is_parname(varargin{i})
-                        error('Argument ''uels'' must be ''char'' or ''cellstr''.');
+            try
+                index = 1;
+                is_pararg = false;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                        is_pararg = true;
+                    elseif ~is_pararg && index == 1
+                        if iscell(varargin{index})
+                            uels = gams.transfer.utils.Validator('uels', index, varargin{index}).cellstr().value;
+                        else
+                            uels = gams.transfer.utils.Validator('uels', index, varargin{index}).types({'string', 'char'}).value;
+                        end
+                        index = index + 1;
+
+                    else
+                        error('Invalid argument at position %d', index);
                     end
                 end
-                if term || i > 1
-                    break;
-                end
+            catch e
+                error(e.message);
             end
 
-            % check parameter arguments
-            symbols = {};
-            while i < nargin - 1
-                if strcmpi(varargin{i}, 'symbols')
-                    symbols = varargin{i+1};
-                else
-                    error('Unknown argument name.');
-                end
-                i = i + 2;
-            end
-
-            % check number of arguments
-            if i <= nargin - 1
-                error('Invalid number of arguments');
-            end
-
-            if isempty(symbols)
-                symbols = fieldnames(obj.data);
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.getSymbolNames(symbols);
+                symbols = obj.data_.entries();
             end
 
             for i = 1:numel(symbols)
-                obj.data.(symbols{i}).removeUELs(uels);
+                symbols{i}.removeUELs(uels);
             end
         end
 
         %> Renames UELs in all symbol
         %>
-        %> - `renameUELs(u)` renames the UELs `u` for all symbols. `u` can be a
-        %>   `struct` (field names = old UELs, field values = new UELs),
-        %>   `containers.Map` (keys = old UELs, values = new UELs) or `cellstr`
-        %>   (full list of UELs, must have as many entries as current UELs). The
-        %>   codes for renamed UELs do not change.
+        %> - `renameUELs(u)` renames the UELs `u` for all symbols. `u` can be a `struct` (field
+        %>   names = old UELs, field values = new UELs), `containers.Map` (keys = old UELs, values =
+        %>   new UELs) or `cellstr` (full list of UELs, must have as many entries as current UELs).
+        %>   The codes for renamed UELs do not change.
         %> - `renameUELs(_, 'symbols', s)` renames UELs for symbols `s`.
-        %> - `renameUELs(_, 'allow_merge', true)` enables support of merging one
-        %>   UEL into another one (renaming a UEL to an already existing one).
+        %> - `renameUELs(_, 'allow_merge', true)` enables support of merging one UEL into another
+        %>   one (renaming a UEL to an already existing one).
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
-        %>
-        %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode, see \ref
-        %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
-        %>
-        %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::Symbol::isValid "Symbol.isValid"
-        function renameUELs(obj, uels, varargin)
+        function renameUELs(obj, varargin)
             % Renames UELs in all symbol
             %
-            % renameUELs(u) renames the UELs u for all symbols. u can be a
-            % struct (field names = old UELs, field values = new UELs),
-            % containers.Map (keys = old UELs, values = new UELs) or cellstr
-            % (full list of UELs, must have as many entries as current UELs).
-            % The codes for renamed UELs do not change.
+            % renameUELs(u) renames the UELs u for all symbols. u can be a struct (field names = old
+            % UELs, field values = new UELs), containers.Map (keys = old UELs, values = new UELs) or
+            % cellstr (full list of UELs, must have as many entries as current UELs). The codes for
+            % renamed UELs do not change.
             % renameUELs(_, 'symbols', s) renames UELs for symbols s.
-            % renameUELs(_, 'allow_merge', true) enables support of merging one
-            % UEL into another one (renaming a UEL to an already existing one).
+            % renameUELs(_, 'allow_merge', true) enables support of merging one UEL into another one
+            % (renaming a UEL to an already existing one).
             %
-            % Note: This can only be used if the symbol is valid. UELs are not
-            % available when using the indexed mode.
-            %
-            % See also: gams.transfer.Container.indexed, gams.transfer.Symbol.isValid
+            % Note: This can only be used if the symbol is valid.
 
-            % input arguments
-            p = inputParser();
-            addParameter(p, 'symbols', {}, @iscellstr);
-            addParameter(p, 'allow_merge', false, @islogical);
-            parse(p, varargin{:});
-            if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
+            % parse input arguments
+            has_symbols = false;
+            allow_merge = false;
+            try
+                gams.transfer.utils.Validator.minargin(numel(varargin), 1);
+                uels = varargin{1}; % check in renameUELs later
+                index = 2;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'allow_merge')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        allow_merge = gams.transfer.utils.Validator('allow_merge', index, ...
+                            varargin{index}).type('logical').scalar().value;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
             else
-                symbols = obj.getSymbolNames(p.Results.symbols);
+                symbols = obj.data_.entries();
             end
 
             for i = 1:numel(symbols)
-                obj.data.(symbols{i}).renameUELs(uels, 'allow_merge', p.Results.allow_merge);
+                symbols{i}.renameUELs(uels, 'allow_merge', allow_merge);
             end
         end
 
@@ -2190,34 +2441,40 @@ classdef Container < handle
         %> - `lowerUELs('symbols', s)` converts all UELs to lower case for symbols `s`.
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
-        %>
-        %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode, see \ref
-        %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
-        %>
-        %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::Symbol::isValid "Symbol.isValid"
         function lowerUELs(obj, varargin)
             % Converts UELs to lower case
             %
             % lowerUELs() converts all UELs to lower case.
             % lowerUELs('symbols', s) converts all UELs to lower case for symbols s.
-            %
-            % Note: This can only be used if the symbol is valid. UELs are not
-            % available when using the indexed mode.
-            %
-            % See also: gams.transfer.Container.indexed, gams.transfer.Symbol.isValid
 
-            % input arguments
-            p = inputParser();
-            addParameter(p, 'symbols', {}, @iscellstr);
-            parse(p, varargin{:});
-            if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
+            % parse input arguments
+            has_symbols = false;
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
+            else
+                symbols = obj.data_.entries();
             end
 
             for i = 1:numel(symbols)
-                obj.data.(symbols{i}).lowerUELs();
+                symbols{i}.lowerUELs();
             end
         end
 
@@ -2227,317 +2484,41 @@ classdef Container < handle
         %> - `upperUELs('symbols', s)` converts all UELs to upper case for symbols `s`.
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_UELS for more information.
-        %>
-        %> @note This can only be used if the symbol is valid. UELs are not
-        %> available when using the indexed mode, see \ref
-        %> GAMS_TRANSFER_MATLAB_CONTAINER_INDEXED.
-        %>
-        %> @see \ref gams::transfer::Container::indexed "Container.indexed", \ref
-        %> gams::transfer::Symbol::isValid "Symbol.isValid"
         function upperUELs(obj, varargin)
             % Converts UELs to upper case
             %
             % upperUELs() converts all UELs to upper case.
             % upperUELs('symbols', s) converts all UELs to upper case for symbols s.
-            %
-            % Note: This can only be used if the symbol is valid. UELs are not
-            % available when using the indexed mode.
-            %
-            % See also: gams.transfer.Container.indexed, gams.transfer.Symbol.isValid
 
-            % input arguments
-            p = inputParser();
-            addParameter(p, 'symbols', {}, @iscellstr);
-            parse(p, varargin{:});
-            if isempty(p.Results.symbols)
-                symbols = fieldnames(obj.data);
+            % parse input arguments
+            has_symbols = false;
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
+            else
+                symbols = obj.data_.entries();
             end
 
             for i = 1:numel(symbols)
-                obj.data.(symbols{i}).upperUELs();
+                symbols{i}.upperUELs();
             end
-        end
-
-    end
-
-    methods (Hidden, Access = {?gams.transfer.Symbol, ?gams.transfer.Alias, ?gams.transfer.UniverseAlias})
-
-        function add(obj, symbol)
-            if obj.indexed && ~isa(symbol, 'gams.transfer.Parameter')
-                error('Symbol must be of type ''gams.transfer.Parameter'' in indexed mode.');
-            end
-            obj.addToData(symbol.name_, symbol);
-        end
-
-    end
-
-    methods (Hidden, Access = protected)
-
-        function data = readRaw(obj, filename, symbols, format, records, values)
-            % Reads symbol records from GDX file
-            %
-
-            % get full path
-            filename = gams.transfer.Utils.checkFilename(char(filename), '.gdx', false);
-
-            % parsing input arguments
-            switch format
-            case {'struct', 'dense_matrix', 'sparse_matrix'}
-                format_int = gams.transfer.RecordsFormat.str2int(format);
-            case 'table'
-                format_int = gams.transfer.RecordsFormat.TABLE;
-                if ~obj.features.table
-                    format_int = gams.transfer.RecordsFormat.STRUCT;
-                end
-            otherwise
-                error('Invalid format option: %s. Choose from: struct, table, dense_matrix, sparse_matrix.', format);
-            end
-            values_bool = false(5,1);
-            for e = values
-                switch e{1}
-                case {'level', 'value', 'element_text'}
-                    values_bool(1) = true;
-                case 'marginal'
-                    values_bool(2) = true;
-                case 'lower'
-                    values_bool(3) = true;
-                case 'upper'
-                    values_bool(4) = true;
-                case 'scale'
-                    values_bool(5) = true;
-                otherwise
-                    error('Invalid value option: %s. Choose from level, value, element_text, marginal, lower, upper, scale.', e{1});
-                end
-            end
-
-            % read records
-            if obj.indexed
-                data = gams.transfer.cmex.gt_idx_read(obj.gams_dir, filename, ...
-                    symbols, int32(format_int), records);
-            else
-                data = gams.transfer.cmex.gt_gdx_read(obj.gams_dir, filename, ...
-                    symbols, int32(format_int), records, values_bool, ...
-                    obj.features.categorical, obj.features.c_prop_setget);
-            end
-        end
-
-        function descr = describeSymbols(obj, symtype, wanted_symbols)
-            % get list of elements (ignore invalid labels)
-
-            symbols = cell(1, numel(wanted_symbols));
-            n_symbols = 0;
-            for i = 1:numel(wanted_symbols)
-                if ~isfield(obj.data, wanted_symbols{i})
-                    continue;
-                end
-                symbol = obj.data.(wanted_symbols{i});
-
-                if isfield(symbol, 'symbol_type')
-                    symbol_type = symbol.symbol_type;
-                elseif isa(symbol, 'gams.transfer.Set')
-                    symbol_type = 'set';
-                elseif isa(symbol, 'gams.transfer.Parameter')
-                    symbol_type = 'parameter';
-                elseif isa(symbol, 'gams.transfer.Variable')
-                    symbol_type = 'variable';
-                elseif isa(symbol, 'gams.transfer.Equation')
-                    symbol_type = 'equation';
-                elseif isa(symbol, 'gams.transfer.Alias')
-                    symbol_type = 'alias';
-                else
-                    error('Invalid symbol type');
-                end
-
-                if symtype == gams.transfer.SymbolType.SET && ...
-                    ~strcmp(symbol_type, 'set') && ~strcmp(symbol_type, 'alias')
-                    continue
-                end
-                if symtype == gams.transfer.SymbolType.PARAMETER && ...
-                    ~strcmp(symbol_type, 'parameter')
-                    continue
-                end
-                if symtype == gams.transfer.SymbolType.VARIABLE && ...
-                    ~strcmp(symbol_type, 'variable')
-                    continue
-                end
-                if symtype == gams.transfer.SymbolType.EQUATION && ...
-                    ~strcmp(symbol_type, 'equation')
-                    continue
-                end
-                if symtype == gams.transfer.SymbolType.ALIAS && ...
-                    ~strcmp(symbol_type, 'alias')
-                    continue
-                end
-
-                n_symbols = n_symbols + 1;
-                symbols{n_symbols} = symbol;
-            end
-            symbols = symbols(1:n_symbols);
-
-            % init describe table
-            descr = struct();
-            descr.name = cell(n_symbols, 1);
-            switch symtype
-            case {gams.transfer.SymbolType.VARIABLE, gams.transfer.SymbolType.EQUATION}
-                descr.type = cell(n_symbols, 1);
-            case gams.transfer.SymbolType.SET
-                descr.is_singleton = true(n_symbols, 1);
-            case gams.transfer.SymbolType.ALIAS
-                descr.is_singleton = true(n_symbols, 1);
-                descr.alias_with = cell(n_symbols, 1);
-            end
-            descr.format = cell(n_symbols, 1);
-            descr.dimension = zeros(n_symbols, 1);
-            descr.domain_type = cell(n_symbols, 1);
-            descr.domain = cell(n_symbols, 1);
-            descr.size = cell(n_symbols, 1);
-            descr.number_records = zeros(n_symbols, 1);
-            descr.number_values = zeros(n_symbols, 1);
-            descr.sparsity = zeros(n_symbols, 1);
-            switch symtype
-            case {gams.transfer.SymbolType.VARIABLE, gams.transfer.SymbolType.EQUATION}
-                descr.min_level = zeros(n_symbols, 1);
-                descr.mean_level = zeros(n_symbols, 1);
-                descr.max_level = zeros(n_symbols, 1);
-                descr.where_max_abs_level = cell(n_symbols, 1);
-            case gams.transfer.SymbolType.PARAMETER
-                descr.min = zeros(n_symbols, 1);
-                descr.mean = zeros(n_symbols, 1);
-                descr.max = zeros(n_symbols, 1);
-                descr.where_min = cell(n_symbols, 1);
-                descr.where_max = cell(n_symbols, 1);
-            end
-
-            % collect values
-            for i = 1:n_symbols
-                symbol = symbols{i};
-
-                descr.name{i} = symbol.name;
-                if symtype == gams.transfer.SymbolType.VARIABLE || ...
-                    symtype == gams.transfer.SymbolType.EQUATION
-                    descr.type{i} = symbol.type;
-                end
-                if symtype == gams.transfer.SymbolType.ALIAS
-                    descr.alias_with{i} = symbol.name;
-                elseif symtype == gams.transfer.SymbolType.SET
-                    descr.is_singleton(i) = symbol.is_singleton;
-                end
-                descr.format{i} = symbol.format;
-                descr.dimension(i) = symbol.dimension;
-                descr.domain_type{i} = symbol.domain_type;
-                descr.domain{i} = gams.transfer.Utils.list2str(symbol.domain);
-                descr.size{i} = gams.transfer.Utils.list2str(symbol.size);
-                if isfield(symbol, 'number_records')
-                    descr.number_records(i) = symbol.number_records;
-                else
-                    descr.number_records(i) = symbol.getNumberRecords();
-                end
-                if isfield(symbol, 'number_values')
-                    descr.number_values(i) = symbol.number_values;
-                else
-                    descr.number_values(i) = symbol.getNumberValues();
-                end
-                if isfield(symbol, 'sparsity')
-                    descr.sparsity(i) = symbol.sparsity;
-                else
-                    descr.sparsity(i) = symbol.getSparsity();
-                end
-                switch symtype
-                case {gams.transfer.SymbolType.VARIABLE, gams.transfer.SymbolType.EQUATION}
-                    descr.min_level(i) = gams.transfer.getMinValue(symbol, obj.indexed, 'level');
-                    descr.mean_level(i) = gams.transfer.getMeanValue(symbol, 'level');
-                    descr.max_level(i) = gams.transfer.getMaxValue(symbol, obj.indexed, 'level');
-                    [absmax, descr.where_max_abs_level{i}] = gams.transfer.getMaxAbsValue(symbol, obj.indexed, 'level');
-                    if isnan(absmax)
-                        descr.where_max_abs_level{i} = '';
-                    else
-                        descr.where_max_abs_level{i} = gams.transfer.Utils.list2str(descr.where_max_abs_level{i});
-                    end
-                case gams.transfer.SymbolType.PARAMETER
-                    [descr.min(i), descr.where_min{i}] = gams.transfer.getMinValue(symbol, obj.indexed);
-                    if isnan(descr.min(i))
-                        descr.where_min{i} = '';
-                    else
-                        descr.where_min{i} = gams.transfer.Utils.list2str(descr.where_min{i});
-                    end
-                    descr.mean(i) = gams.transfer.getMeanValue(symbol);
-                    [descr.max(i), descr.where_max{i}] = gams.transfer.getMaxValue(symbol, obj.indexed);
-                    if isnan(descr.max(i))
-                        descr.where_max{i} = '';
-                    else
-                        descr.where_max{i} = gams.transfer.Utils.list2str(descr.where_max{i});
-                    end
-                end
-            end
-
-            % convert to categorical if possible
-            if obj.features.categorical
-                descr.name = categorical(descr.name);
-                descr.format = categorical(descr.format);
-                descr.domain_type = categorical(descr.domain_type);
-                descr.domain = categorical(descr.domain);
-                descr.size = categorical(descr.size);
-                switch symtype
-                case {gams.transfer.SymbolType.VARIABLE, gams.transfer.SymbolType.EQUATION}
-                    descr.type = categorical(descr.type);
-                    descr.where_max_abs_level = categorical(descr.where_max_abs_level);
-                case gams.transfer.SymbolType.PARAMETER
-                    descr.where_min = categorical(descr.where_min);
-                    descr.where_max = categorical(descr.where_max);
-                case gams.transfer.SymbolType.ALIAS
-                    descr.alias_with = categorical(descr.alias_with);
-                end
-            end
-
-            % convert to table if possible
-            if obj.features.table
-                descr = struct2table(descr);
-            end
-        end
-
-        function clearData(obj)
-            obj.data = struct();
-            obj.name_lookup = struct();
-        end
-
-        function addToData(obj, name, symbol)
-            if obj.hasSymbols(name)
-                error('Symbol ''%s'' already exists.', name);
-            end
-            obj.data.(name) = symbol;
-            obj.name_lookup.(lower(name)) = name;
-        end
-
-        function renameData(obj, oldname, newname)
-            if ~obj.hasSymbols(oldname)
-                return
-            end
-
-            % get index of symbol
-            names = fieldnames(obj.data);
-            idx = find(strcmp(names, oldname), 1);
-            if isempty(idx)
-                return
-            end
-
-            % add new symbol / remove old symbol
-            obj.data.(newname) = obj.data.(oldname);
-            obj.data = rmfield(obj.data, oldname);
-            obj.name_lookup = rmfield(obj.name_lookup, lower(oldname));
-            obj.name_lookup.(lower(newname)) = newname;
-
-            % get old ordering
-            perm = [1:idx-1, numel(names), idx:numel(names)-1];
-            obj.data = orderfields(obj.data, perm);
-            obj.name_lookup = orderfields(obj.name_lookup, perm);
-        end
-
-        function removeFromData(obj, name)
-            if ~obj.hasSymbols(name)
-                return
-            end
-            obj.data = rmfield(obj.data, name);
-            obj.name_lookup = rmfield(obj.name_lookup, lower(name));
         end
 
     end

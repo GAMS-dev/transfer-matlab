@@ -1,12 +1,12 @@
-% GAMS Variable Types
+% GAMS Variable Type
 %
 % ------------------------------------------------------------------------------
 %
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -28,244 +28,319 @@
 %
 % ------------------------------------------------------------------------------
 %
-% GAMS Variable Types
+% GAMS Variable Type
 %
-% This class holds the possible GAMS variable types similar to an enumeration
-% class. Note that it is not an enumeration class due to compatibility (e.g.
-% for Octave).
+% This class holds the possible GAMS variable types similar to an enumeration class. Note that it is
+% not an enumeration class due to compatibility (e.g. for Octave).
 %
-% See also: gams.transfer.Variable
+% See also: gams.transfer.Variable, gams.transfer.symbol.Variable
 %
 
-%> @brief GAMS Variable Types
+%> @brief GAMS Variable Type
 %>
-%> This class holds the possible GAMS variable types similar to an enumeration
-%> class. Note that it is not an enumeration class due to compatibility (e.g.
-%> for Octave).
+%> This class holds the possible GAMS variable types similar to an enumeration class. Note that it
+%> is not an enumeration class due to compatibility (e.g. for Octave).
 %>
-%> @see \ref gams::transfer::Variable "Variable"
+%> @see \ref gams::transfer::Variable "Variable", \ref gams::transfer::symbol::Variable
+%> "symbol.Variable"
 classdef VariableType
 
     properties (Constant)
         %> identifier for binary variable
 
         % BINARY identifier for binary variable
-        BINARY = 1
+        BINARY = uint8(1)
 
 
         %> identifier for integer variable
 
         % INTEGER identifier for integer variable
-        INTEGER = 2
+        INTEGER = uint8(2)
 
 
         %> identifier for positive variable
 
         % POSITIVE identifier for positive variable
-        POSITIVE = 3
+        POSITIVE = uint8(3)
 
 
         %> identifier for negative variable
 
         % NEGATIVE identifier for negative variable
-        NEGATIVE = 4
+        NEGATIVE = uint8(4)
 
 
         %> identifier for free variable
 
         % FREE identifier for free variable
-        FREE = 5
+        FREE = uint8(5)
 
 
         %> identifier for SOS1 variable
 
         % SOS1 identifier for SOS1 variable
-        SOS1 = 6
+        SOS1 = uint8(6)
 
 
         %> SOS2 identifier for SOS2 variable
 
         % SOS2 identifier for SOS2 variable
-        SOS2 = 7
+        SOS2 = uint8(7)
 
 
         %> identifier for semi-continuous variable
 
         % SEMICONT identifier for semi-continuous variable
-        SEMICONT = 8
+        SEMICONT = uint8(8)
 
 
         %> identifier for semi-integer variable
 
         % SEMIINT identifier for semi-integer variable
-        SEMIINT = 9
+        SEMIINT = uint8(9)
+    end
+
+    properties (Hidden, SetAccess = protected)
+        value_ = uint8(5)
+    end
+
+    properties (Dependent)
+        %> Selection of enum option
+
+        % select Selection of enum option
+        select
+
+
+        %> Value of enum option
+
+        % value Value of enum option
+        value
+    end
+
+    methods
+
+        function select = get.select(obj)
+            switch obj.value_
+            case obj.BINARY
+                select = 'BINARY';
+            case obj.INTEGER
+                select = 'INTEGER';
+            case obj.POSITIVE
+                select = 'POSITIVE';
+            case obj.NEGATIVE
+                select = 'NEGATIVE';
+            case obj.FREE
+                select = 'FREE';
+            case obj.SOS1
+                select = 'SOS1';
+            case obj.SOS2
+                select = 'SOS2';
+            case obj.SEMICONT
+                select = 'SEMICONT';
+            case obj.SEMIINT
+                select = 'SEMIINT';
+            otherwise
+                error('Invalid variable type value: %d', obj.value_);
+            end
+        end
+
+        function obj = set.select(obj, select)
+            select = gams.transfer.utils.Validator('select', 1, select).string2char().type('char').nonempty().value;
+            switch upper(select)
+            case 'BINARY'
+                obj.value_ = gams.transfer.VariableType.BINARY;
+            case 'INTEGER'
+                obj.value_ = gams.transfer.VariableType.INTEGER;
+            case 'POSITIVE'
+                obj.value_ = gams.transfer.VariableType.POSITIVE;
+            case 'NEGATIVE'
+                obj.value_ = gams.transfer.VariableType.NEGATIVE;
+            case 'FREE'
+                obj.value_ = gams.transfer.VariableType.FREE;
+            case 'SOS1'
+                obj.value_ = gams.transfer.VariableType.SOS1;
+            case 'SOS2'
+                obj.value_ = gams.transfer.VariableType.SOS2;
+            case 'SEMICONT'
+                obj.value_ = gams.transfer.VariableType.SEMICONT;
+            case 'SEMIINT'
+                obj.value_ = gams.transfer.VariableType.SEMIINT;
+            otherwise
+                error('Invalid variable type selection: %s', select);
+            end
+        end
+
+        function value = get.value(obj)
+            value = obj.value_;
+        end
+
+        function obj = set.value(obj, value)
+            gams.transfer.utils.Validator('value', 1, value).integer().scalar().inInterval(1, 9);
+            obj.value_ = uint8(value);
+        end
+
+    end
+
+    methods
+
+        %> Constructs a Variable Type
+        %>
+        %> **Optional Arguments:**
+        %> 1. value (`numeric` or `string`)
+        %>    Enumeration value or label. Default: 5 (FREE).
+        function obj = VariableType(value)
+            % Constructs a Variable Type
+            %
+            % Optional Arguments:
+            % 1. value (numeric or string)
+            %    Enumeration value or label. Default: 5 (FREE).
+
+            if nargin == 0
+                return
+            end
+            if ischar(value) || isstring(value)
+                obj.select = value;
+            elseif isnumeric(value)
+                obj.value = value;
+            else
+                error('Argument ''value'' (at position 1) must be ''string'', ''char'' or numeric.');
+            end
+        end
+
     end
 
     methods (Static)
 
-        %> Converts a variable type identifier to string
-        %>
-        %> - `s = VariableType.int2str(i)` returns a string with the variable
-        %>   type name for the given variable type identifier `i`. If `i` is an
-        %>   invalid identifier, this function raises an error.
-        %>
-        %> **Example:**
-        %> ```
-        %> s = VariableType.int2str(VariableType.BINARY)
-        %> ```
-        %> `s` equals `"binary"`
-        function value_str = int2str(value_int)
-            % Converts a variable type identifier to string
-            %
-            % s = VariableType.int2str(i) returns a string with the variable
-            % type name for the given variable type identifier i. If i is an
-            % invalid identifier, this function raises an error.
-            %
-            % Example:
-            % s = VariableType.int2str(VariableType.BINARY)
-            % s equals 'binary'
+        %> Constructs a Variable Type as BINARY
+        function obj = binary()
+            % Constructs a Variable Type as BINARY
 
-            switch value_int
-            case gams.transfer.VariableType.BINARY
-                value_str = 'binary';
-            case gams.transfer.VariableType.INTEGER
-                value_str = 'integer';
-            case gams.transfer.VariableType.POSITIVE
-                value_str = 'positive';
-            case gams.transfer.VariableType.NEGATIVE
-                value_str = 'negative';
-            case gams.transfer.VariableType.FREE
-                value_str = 'free';
-            case gams.transfer.VariableType.SOS1
-                value_str = 'sos1';
-            case gams.transfer.VariableType.SOS2
-                value_str = 'sos2';
-            case gams.transfer.VariableType.SEMICONT
-                value_str = 'semicont';
-            case gams.transfer.VariableType.SEMIINT
-                value_str = 'semiint';
-            otherwise
-                error('Invalid variable type: %d', value_int);
-            end
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.BINARY;
         end
 
-        %> Converts a variable type name to an identifier
-        %>
-        %> - `i = VariableType.str2int(s)` returns an integer identifier for the
-        %>   given variable type name `s`. If `s` is an invalid type name, this
-        %>   function raises an error.
-        %>
-        %> **Example:**
-        %> ```
-        %> i = VariableType.str2int('binary')
-        %> ```
-        %> `i` equals `VariableType.BINARY`
-        function value_int = str2int(value_str)
-            % Converts a variable type name to an identifier
-            %
-            % i = VariableType.str2int(s) returns an integer identifier for the
-            % given variable type name s. If s is an invalid type name, this
-            % function raises an error.
-            %
-            % Example:
-            % i = VariableType.str2int('binary')
-            % i equals VariableType.BINARY
+        %> Constructs a Variable Type as INTEGER
+        function obj = integer()
+            % Constructs a Variable Type as INTEGER
 
-            switch lower(char(value_str))
-            case 'binary'
-                value_int = gams.transfer.VariableType.BINARY;
-            case 'integer'
-                value_int = gams.transfer.VariableType.INTEGER;
-            case 'positive'
-                value_int = gams.transfer.VariableType.POSITIVE;
-            case 'negative'
-                value_int = gams.transfer.VariableType.NEGATIVE;
-            case 'free'
-                value_int = gams.transfer.VariableType.FREE;
-            case 'sos1'
-                value_int = gams.transfer.VariableType.SOS1;
-            case 'sos2'
-                value_int = gams.transfer.VariableType.SOS2;
-            case 'semicont'
-                value_int = gams.transfer.VariableType.SEMICONT;
-            case 'semiint'
-                value_int = gams.transfer.VariableType.SEMIINT;
-            otherwise
-                error('Invalid variable type: %s', value_str);
-            end
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.INTEGER;
         end
 
-        %> Checks if a variable type name or identifier is valid
-        %>
-        %> - `b = VariableType.isValid(s)` returns `true` if `s` is a valid
-        %>   variable type name or variable type identifier and `false`
-        %>   otherwise.
-        %>
-        %> **Example:**
-        %> ```
-        %> VariableType.isValid('binary') % is true
-        %> VariableType.isValid(VariableType.BINARY) % is true
-        %> VariableType.isValid('not_a_valid_name') % is false
-        %> ```
-        function bool = isValid(value)
-            % Checks if a variable type name or identifier is valid
-            %
-            % b = VariableType.isValid(s) returns true if s is a valid variable
-            % type name or variable type identifier and false otherwise.
-            %
-            % Example:
-            % VariableType.isValid('binary') is true
-            % VariableType.isValid(VariableType.BINARY) is true
-            % VariableType.isValid('not_a_valid_name') is false
+        %> Constructs a Variable Type as POSITIVE
+        function obj = positive()
+            % Constructs a Variable Type as POSITIVE
 
-            if ischar(value) || isstring(value)
-                switch lower(char(value))
-                case 'binary'
-                    bool = true;
-                case 'integer'
-                    bool = true;
-                case 'positive'
-                    bool = true;
-                case 'negative'
-                    bool = true;
-                case 'free'
-                    bool = true;
-                case 'sos1'
-                    bool = true;
-                case 'sos2'
-                    bool = true;
-                case 'semicont'
-                    bool = true;
-                case 'semiint'
-                    bool = true;
-                otherwise
-                    bool = false;
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.POSITIVE;
+        end
+
+        %> Constructs a Variable Type as NEGATIVE
+        function obj = negative()
+            % Constructs a Variable Type as NEGATIVE
+
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.NEGATIVE;
+        end
+
+        %> Constructs a Variable Type as FREE
+        function obj = free()
+            % Constructs a Variable Type as FREE
+
+            obj = gams.transfer.VariableType();
+        end
+
+        %> Constructs a Variable Type as SOS1
+        function obj = sos1()
+            % Constructs a Variable Type as SOS1
+
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.SOS1;
+        end
+
+        %> Constructs a Variable Type as SOS2
+        function obj = sos2()
+            % Constructs a Variable Type as SOS2
+
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.SOS2;
+        end
+
+        %> Constructs a Variable Type as SEMICONT
+        function obj = semiCont()
+            % Constructs a Variable Type as SEMICONT
+
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.SEMICONT;
+        end
+
+        %> Constructs a Variable Type as SEMIINT
+        function obj = semiInt()
+            % Constructs a Variable Type as SEMIINT
+
+            obj = gams.transfer.VariableType();
+            obj.value_ = gams.transfer.VariableType.SEMIINT;
+        end
+
+        %> Converts input to Variable Type enumeration values
+        %>
+        %> **Required Arguments:**
+        %> 1. input (`numeric`, `cell` or `string`)
+        %>    Enumeration values or labels.
+        function values = values(input)
+            % Converts input to Variable Type enumeration values
+            %
+            % Required Arguments:
+            % 1. input (numeric, cell or string)
+            %    Enumeration values or labels.
+
+            if isnumeric(input)
+                values = zeros(size(input));
+                for i = 1:numel(input)
+                    values(i) = gams.transfer.VariableType(input(i)).value;
                 end
-            elseif isnumeric(value)
-                switch value
-                case gams.transfer.VariableType.BINARY
-                    bool = true;
-                case gams.transfer.VariableType.INTEGER
-                    bool = true;
-                case gams.transfer.VariableType.POSITIVE
-                    bool = true;
-                case gams.transfer.VariableType.NEGATIVE
-                    bool = true;
-                case gams.transfer.VariableType.FREE
-                    bool = true;
-                case gams.transfer.VariableType.SOS1
-                    bool = true;
-                case gams.transfer.VariableType.SOS2
-                    bool = true;
-                case gams.transfer.VariableType.SEMICONT
-                    bool = true;
-                case gams.transfer.VariableType.SEMIINT
-                    bool = true;
-                otherwise
-                    bool = false;
+            elseif iscell(input)
+                values = zeros(size(input));
+                for i = 1:numel(input)
+                    if isa(input{i}, 'gams.transfer.VariableType')
+                        values(i) = input{i}.value;
+                    else
+                        values(i) = gams.transfer.VariableType(input{i}).value;
+                    end
                 end
             else
-                bool = false;
+                values = gams.transfer.VariableType(input).value;
+            end
+        end
+
+        %> Converts input to Variable Type enumeration labels (selections)
+        %>
+        %> **Required Arguments:**
+        %> 1. input (`numeric`, `cell` or `string`)
+        %>    Enumeration values or labels.
+        function selects = selects(input)
+            % Converts input to Variable Type enumeration labels (selections)
+            %
+            % Required Arguments:
+            % 1. input (numeric, cell or string)
+            %    Enumeration values or labels.
+
+            if isnumeric(input)
+                selects = cell(size(input));
+                for i = 1:numel(input)
+                    selects{i} = gams.transfer.VariableType(input(i)).select;
+                end
+            elseif iscell(input)
+                selects = cell(size(input));
+                for i = 1:numel(input)
+                    if isa(input{i}, 'gams.transfer.VariableType')
+                        selects{i} = input{i}.select;
+                    else
+                        selects{i} = gams.transfer.VariableType(input{i}).select;
+                    end
+                end
+            else
+                selects = {gams.transfer.VariableType(input).select};
             end
         end
 

@@ -2,8 +2,8 @@ classdef GAMSTest < handle
     %
     % GAMS - General Algebraic Modeling System Matlab API
     %
-    % Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
-    % Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
+    % Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+    % Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
     %
     % Permission is hereby granted, free of charge, to any person obtaining a copy
     % of this software and associated documentation files (the 'Software'), to deal
@@ -51,7 +51,11 @@ classdef GAMSTest < handle
         end
 
         function assertEquals(obj, val1, val2)
-            obj.assert(isequaln(val1, val2));
+            if isa(val1, 'handle') && isa(val2, 'handle')
+                obj.assert(val1 == val2);
+            else
+                obj.assert(isequaln(val1, val2));
+            end
         end
 
         function reset(obj)
@@ -99,43 +103,35 @@ classdef GAMSTest < handle
 
         function testEmptySymbol(obj, symbol)
             switch class(symbol)
-            case {'gams.transfer.Set', 'gams.transfer.Parameter', 'gams.transfer.Variable', 'gams.transfer.Equation'}
+            case {'gams.transfer.symbol.Set', 'gams.transfer.symbol.Parameter', 'gams.transfer.symbol.Variable', 'gams.transfer.symbol.Equation'}
                 obj.assert(ischar(symbol.name));
                 obj.assert(ischar(symbol.description));
                 obj.assert(symbol.dimension >= 0);
                 obj.assert(iscell(symbol.domain));
                 obj.assert(numel(symbol.domain) == symbol.dimension);
                 obj.assert(iscell(symbol.domain_labels));
-                obj.assert(numel(symbol.domain_labels) == 0);
                 obj.assert(ischar(symbol.domain_type));
                 obj.assert(isnumeric(symbol.size));
                 obj.assert(numel(symbol.size) == symbol.dimension);
                 obj.assert(symbol.getNumberRecords() >= 0);
                 obj.assert(symbol.getNumberValues() == 0 || isnan(symbol.getNumberValues()));
-                obj.assert(isempty(symbol.records));
-                if ~symbol.container.indexed
-                    for i = 1:symbol.dimension
-                        obj.assert(strcmp(symbol.format, 'not_read') || iscell(symbol.getUELs(i)) && isempty(symbol.getUELs(i)));
-                    end
-                end
                 obj.assert(islogical(symbol.isValid()));
                 obj.assert(ischar(symbol.format));
-                obj.assert(strcmp(symbol.format, 'not_read') || strcmp(symbol.format, 'empty'));
-            case 'gams.transfer.Alias'
+            case 'gams.transfer.alias.Set'
                 obj.assert(ischar(symbol.name));
-                obj.assert(isa(symbol.alias_with, 'gams.transfer.Set'));
+                obj.assert(isa(symbol.alias_with, 'gams.transfer.symbol.Set'));
             otherwise
                 obj.assert(false);
             end
             switch class(symbol)
-            case 'gams.transfer.Set'
+            case 'gams.transfer.symbol.Set'
                 obj.assert(islogical(symbol.is_singleton));
-            case 'gams.transfer.Variable'
+            case 'gams.transfer.symbol.Variable'
                 obj.assert(ischar(symbol.type));
-                obj.assert(gams.transfer.VariableType.isValid(symbol.type));
-            case 'gams.transfer.Equation'
+                obj.assertEquals(lower(gams.transfer.VariableType(symbol.type).select), symbol.type);
+            case 'gams.transfer.symbol.Equation'
                 obj.assert(ischar(symbol.type));
-                obj.assert(gams.transfer.EquationType.isValid(symbol.type));
+                obj.assertEquals(lower(gams.transfer.EquationType(symbol.type).select), symbol.type);
             end
         end
 

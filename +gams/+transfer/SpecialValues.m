@@ -5,8 +5,8 @@
 % GAMS - General Algebraic Modeling System
 % GAMS Transfer Matlab
 %
-% Copyright (c) 2020-2023 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2023 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -30,30 +30,26 @@
 %
 % GAMS Special Values
 %
-% GAMS GDX offers five special values: NA (not available), UNDEF (undefined),
-% EPS (explicit zero, a standard zero is usually not stored in the sparse GDX
-% format), PINF or POSINF (positive infinity) and MINF or NEGINF (negative
-% infinity). All special values can be queried and checked for by using this
-% class. While UNDEF, POSINF and NEGINF have natural counterparts in Matlab
-% (NaN, Inf and -Inf, respectively), NA and EPS do not. The latter two are
-% therefore mapped to a special NaN and -0, respectively.
+% GAMS GDX offers five special values: NA (not available), UNDEF (undefined), EPS (explicit zero, a
+% standard zero is usually not stored in the sparse GDX format), PINF or POSINF (positive infinity)
+% and MINF or NEGINF (negative infinity). All special values can be queried and checked for by using
+% this class. While UNDEF, POSINF and NEGINF have natural counterparts in Matlab (NaN, Inf and -Inf,
+% respectively), NA and EPS do not. The latter two are therefore mapped to a special NaN and -0,
+% respectively.
 
 %> @brief GAMS Special Values
 %>
-%> GAMS GDX offers five special values: \ref gams::transfer::SpecialValues::NA
-%> "NA" (not available), \ref gams::transfer::SpecialValues::UNDEF "UNDEF"
-%> (undefined), \ref gams::transfer::SpecialValues::EPS "EPS" (explicit zero, a
-%> standard zero is usually not stored in the sparse GDX format), PINF or \ref
-%> gams::transfer::SpecialValues::POSINF "POSINF" (positive infinity) and MINF or
-%> \ref gams::transfer::SpecialValues::NEGINF "NEGINF" (negative infinity). All
-%> special values can be queried and checked for by using this class. While \ref
-%> gams::transfer::SpecialValues::UNDEF "UNDEF", \ref
-%> gams::transfer::SpecialValues::POSINF "POSINF" and \ref
-%> gams::transfer::SpecialValues::NEGINF "NEGINF" have natural counterparts in
-%> Matlab (`NaN`, `Inf` and `-Inf`, respectively), \ref
-%> gams::transfer::SpecialValues::NA "NA" and \ref
-%> gams::transfer::SpecialValues::EPS "EPS" do not. The latter two are therefore
-%> mapped to a special `NaN` and `-0`, respectively.
+%> GAMS GDX offers five special values: \ref gams::transfer::SpecialValues::NA "NA" (not available),
+%> \ref gams::transfer::SpecialValues::UNDEF "UNDEF" (undefined), \ref
+%> gams::transfer::SpecialValues::EPS "EPS" (explicit zero, a standard zero is usually not stored in
+%> the sparse GDX format), PINF or \ref gams::transfer::SpecialValues::POSINF "POSINF" (positive
+%> infinity) and MINF or \ref gams::transfer::SpecialValues::NEGINF "NEGINF" (negative infinity).
+%> All special values can be queried and checked for by using this class. While \ref
+%> gams::transfer::SpecialValues::UNDEF "UNDEF", \ref gams::transfer::SpecialValues::POSINF "POSINF"
+%> and \ref gams::transfer::SpecialValues::NEGINF "NEGINF" have natural counterparts in Matlab
+%> (`NaN`, `Inf` and `-Inf`, respectively), \ref gams::transfer::SpecialValues::NA "NA" and \ref
+%> gams::transfer::SpecialValues::EPS "EPS" do not. The latter two are therefore mapped to a special
+%> `NaN` and `-0`, respectively.
 %>
 %>\par Example:
 %>\code{.matlab}
@@ -99,13 +95,13 @@ classdef SpecialValues
         %> Value not available (in Matlab: special nan value)
 
         % NA Value not available (in Matlab: special nan value)
-        NA = gams.transfer.cmex.gt_getna()
+        NA = gams.transfer.gdx.gt_get_sv('na')
 
 
         %> Explicit zero (in Matlab: negative zero)
 
         % EPS Explicit zero (in Matlab: negative zero)
-        EPS = gams.transfer.cmex.gt_geteps()
+        EPS = gams.transfer.gdx.gt_get_sv('eps')
 
 
         %> positive infinity
@@ -143,11 +139,11 @@ classdef SpecialValues
 
             if issparse(value)
                 [row, col, val] = find(value);
-                val = isnan(val) & ~gams.transfer.cmex.gt_isna(val);
+                val = isnan(val) & ~gams.transfer.gdx.gt_is_sv('na', val);
                 [m, n] = size(value);
                 bool = sparse(row, col, val, m, n);
             else
-                bool = isnan(value) & ~gams.transfer.cmex.gt_isna(value);
+                bool = isnan(value) & ~gams.transfer.gdx.gt_is_sv('na', value);
             end
         end
 
@@ -175,11 +171,11 @@ classdef SpecialValues
 
             if issparse(value)
                 [row, col, val] = find(value);
-                val = gams.transfer.cmex.gt_isna(val);
+                val = gams.transfer.gdx.gt_is_sv('na', val);
                 [m, n] = size(value);
                 bool = sparse(row, col, val, m, n);
             else
-                bool = gams.transfer.cmex.gt_isna(value);
+                bool = gams.transfer.gdx.gt_is_sv('na', value);
             end
         end
 
@@ -207,11 +203,11 @@ classdef SpecialValues
 
             if issparse(value)
                 [row, col, val] = find(value);
-                val = gams.transfer.cmex.gt_iseps(val);
+                val = gams.transfer.gdx.gt_is_sv('eps', val);
                 [m, n] = size(value);
                 bool = sparse(row, col, val, m, n);
             else
-                bool = gams.transfer.cmex.gt_iseps(value);
+                bool = gams.transfer.gdx.gt_is_sv('eps', value);
             end
         end
 

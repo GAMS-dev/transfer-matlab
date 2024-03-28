@@ -1,3 +1,99 @@
+GAMS Transfer Matlab v0.9.0
+==================
+- Removed property `Container.indexed`. A container may now store indexed or standard symbols
+  together. To read or write an indexed GDX file, pass the argument `indexed, true` to
+  `Container.read` or `Container.write`. When writing an indexed GDX file, non-indexed symbols are
+  ignored (symbols have a new property `indexed` to show if the symbol can be used in indexed mode).
+  Writing a standard GDX file is always possible for all symbols (however, the meaning of indexed
+  symbols may be different compared to the indexed GDX file). An indexed symbol can be created by
+  passing the size array instead of a domain cell for the domain (as before) or by setting `size`
+  property of the symbol.
+- Restructured symbol classes:
+  - Added subpackages `gams.transfer.symbol` and `gams.transfer.alias` (as well as internal
+    subpackages `gams.transfer.incase_ordered_dict`, `gams.transfer.unique_labels`,
+    `gams.transfer.symbol.data`, `gams.transfer.symbol.definition`, `gams.transfer.symbol.domain`,
+    `gams.transfer.symbol.value` and `gams.transfer.symbol.unique_labels`). Note that internal and/
+    or hidden classes and packages may alter its API without notice, so use at own risk. Referring
+    to subpackages without `gams.transfer` in the following.
+  - Changed symbol and alias classes to `symbol.Set`, `symbol.Parameter`, `symbol.Variable`,
+    `symbol.Equation`, `alias.Set` and `alias.Universe`. The previous (constructors of) classes
+    `Set`, `Parameter`, `Variable`, `Equation`, `Alias` and `UniverseAlias` are now factory methods
+    that forward the call to `Container.addSet`, `Container.addParameter`, `Container.addVariable`,
+    `Container.addEquation`, `Container.addAlias` or `Container.addUniverseAlias`, respectively.
+    Therefore, the factory methods now benefit from the overwrite feature of the `Container.add*`
+    methods.
+  - Changed abstract symbol class `Symbol` to `symbol.Abstract` and added abstract alias class
+    `alias.Abstract`.
+- Changed behaviour of `symbol.Abstract.format` (previously `Symbol.format`):
+  - Changed selection of `symbol.Abstract.format`: This was previously detected automatically from
+    `symbol.Abstract.records`. It is now chosen explicitly to be one of the four supported formats
+    `table`, `struct`, `dense_matrix` or `sparse_matrix` by setting `symbol.Abstract.format`.
+    `symbol.Abstract.isValid` will check the records towards the chosen format. Changing the format
+    by setting `symbol.Abstract.format` does not change `symbol.Abstract.records`.
+  - Changed `symbol.Abstract.format` when reading or creating symbol without records: Previously
+    this was `empty` and `symbol.Abstract.records` was `[]`. Now, the format is always one of the
+    four supported formats `table`, `struct`, `dense_matrix` or `sparse_matrix` (but without any
+    records).
+  - Changed `symbol.Abstract.format` when reading a scalar. In this case the formats `struct` and
+    `dense_matrix` are identical and `Container.read` preferred `struct`, i.e., `dense_matrix` was
+    changed to `struct`. This is not the case anymore.
+- Changed enumeration-like classes `VariableType` and `EquationType`:
+  - Changed type of enumeration constants from `double` to `uint8`.
+  - Added state (property `value` and `select`) to enumeration-like classes `VariableType` and
+    `EquationType`.
+  - Added methods `binary`, `integer`, `positive`, `negative`, `free`, `sos1`, `sos2`, `semiCont`,
+    `semiInt` to `VariableType` to create enumeration with corresponding value.
+  - Added methods `eq`, `leq`, `geq`, `nonBinding`, `external`, `cone`, `boolean` to `EquationType`
+    to create enumeration with corresponding value.
+  - Added methods `values` and `selects` to `VariableType` and `EquationType` to convert input to
+    (multiple) enumeration values or selections at once.
+  - Removed methods `int2str`, `str2int` and `isValid`. Just use the constructor to create an
+    enumeration and then use the properties `value` or `select` instead.
+- Changed handling of `symbol.Abstract.domain_labels`: Previously, if not set explicitly, these were
+  extracted from the records. This is not the case anymore. They default to
+  `symbol.Abstract.domain_names` (with possible unique added IDs). Changing the fields / columns in
+  the records may require to update `symbol.Abstract.domain_labels` accordingly. However, updating
+  `symbol.Abstract.domain_labels` will also update the corresponding fields / columns if available.
+- Changed `symbol.Abstract.setRecords` when passing a `struct`. The domain fields are no longer
+  taken by number of occurance, but by `symbol.Abstract.domain_labels`.
+- Changed behaviour when resetting `symbol.Abstact.domain` or `symbol.Abstract.size`: This may now
+  reset all domain related properties such as `symbol.Abstract.domain_labels` or
+  `symbol.Abstract.domain_forwarding`.
+- Changed behaviour when removing a symbol or alias that is used as domain in another symbol:
+  Previously, the domain was set to the universe `*`. It is now relaxed keeping the symbol name such
+  that `symbol.Abstract.domain_names` stay the same.
+- Changed behaviour when passing `symbols, {}` to `Container.write`: Previously this wrote all
+  symbols, now it is none. To write all symbols, use all symbols in the `symbols` argument (see also
+  `Container.list*`) or don't specify the `symbols` argument in the call.
+- Changed signature of methods `symbol.Abstract.getMaxValue`, `symbol.Abstract.getMinValue`,
+  `symbol.Abstract.getMeanValue`, `symbol.Abstract.getMaxAbsValue`, `symbol.Abstract.countNA`,
+  `symbol.Abstract.countUndef`, `symbol.Abstract.countEps`, `symbol.Abstract.countPosInf`,
+  `symbol.Abstract.countNegInf` and `symbol.Abstract.getNumberValues`: Previously the considered
+  values could be filtered by passing individual strings (e.g. `'level', 'marginal'`). Now use the
+  parameter argument `values` (e.g. pass `'values', {'level', 'marginal'}`).
+- Changed class `DomainViolation`: Moved to `symbol.domain.Violation`, hid constructor and removed
+  property `domain`.
+- Changed behaviour of `symbol.Set.getNumberValues`: This was constantly 0 before, now it considers
+  the `element_text` column.
+- Changed name of subpackage `gams.transfer.cmex` to `gams.transfer.gdx` (internal).
+- Added (or unhided) property `symbol.Abstract.container` and `alias.Abstract.container` referring
+  to the `Container` the symbol or alias is stored in.
+- Added possibility for matrix formats `dense_matrix` and `sparse_matrix` to maintain UELs.
+  Previously UELs were used directly from the domain set for these formats and it was not allowed to
+  change the UELs through the `symbol.Abstract.*UELs` methods. Now, if a symbol has a regular
+  domain, UELs are initialized with the domain set as UELs. But it is further possible to edit those
+  UELs per symbol without modifying the domain set. The size of the matrices in
+  `symbol.Abstract.records` is defined by the number of UELs per dimension (`symbol.Abstract.size`
+  stays the size defined mainly by the domain). This new feature therefore allows to use matrix
+  formats when the symbol domain is relaxed and/or smaller matrices than actually defined by the
+  regular domain. Note that the previous behaviour for regular symbols with matrix formats does not
+  change.
+- Added return of new symbol to `symbol.Abstract.copy` and `alias.Abstract.copy`.
+- Added a silent call to `Container.reorderSymbols` in `Container.isValid` if symbols are out of
+  order (symbols that use other symbols in the domain must appear after the domain symbols). Even
+  though having unordered symbols is rather unlikely, this now makes it unnecessary to manually call
+  `Container.reorderSymbols`.
+
 GAMS Transfer Matlab v0.8.0
 ==================
 - Breaking: Renamed package to `gams.transfer` (previously: `GAMSTransfer`) and moved MEX interface

@@ -1,8 +1,8 @@
 %
 % GAMS - General Algebraic Modeling System Matlab API
 %
-% Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -57,23 +57,21 @@ function test_read(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container(cfg.filenames{1}, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(cfg.filenames{1}, 'gams_dir', cfg.gams_dir);
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1});
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('read_basic_info');
     t.assertEquals(gdx.gams_dir, cfg.gams_dir);
-    t.assert(~gdx.indexed);
     t.assert(numel(fieldnames(gdx.data)) == 5);
 
     t.add('read_set_basic');
     t.assert(isfield(gdx.data, 'i'));
     s = gdx.data.i;
-    t.assert(isa(s, 'gams.transfer.Set'));
+    t.assert(isa(s, 'gams.transfer.symbol.Set'));
     t.assertEquals(s.name, 'i');
     t.assertEquals(s.description, 'set_i');
     t.assert(~s.is_singleton);
@@ -84,15 +82,15 @@ function test_read(t, cfg, container_type)
     t.assertEquals(s.domain_labels{1}, 'uni');
     t.assertEquals(s.domain_type, 'none');
     t.assert(numel(s.size) == 1);
-    t.assert(isnan(s.size(1)));
-    t.assert(isnan(s.getSparsity()));
+    t.assert(s.size(1) == 5);
+    t.assert(s.getSparsity() == 0);
     t.assert(s.getNumberRecords() == 5);
     t.assert(s.isValid());
 
     t.add('read_scalar_basic');
     t.assert(isfield(gdx.data, 'a'));
     s = gdx.data.a;
-    t.assert(isa(s, 'gams.transfer.Parameter'));
+    t.assert(isa(s, 'gams.transfer.symbol.Parameter'));
     t.assertEquals(s.name, 'a');
     t.assertEquals(s.description, 'par_a');
     t.assert(s.dimension == 0);
@@ -107,12 +105,12 @@ function test_read(t, cfg, container_type)
     t.add('read_parameter_basic');
     t.assert(isfield(gdx.data, 'b'));
     s = gdx.data.b;
-    t.assert(isa(s, 'gams.transfer.Parameter'));
+    t.assert(isa(s, 'gams.transfer.symbol.Parameter'));
     t.assertEquals(s.name, 'b');
     t.assertEquals(s.description, 'par_b');
     t.assert(s.dimension == 1);
     t.assert(numel(s.domain) == 1);
-    t.assertEquals(s.domain{1}.id, gdx.data.i.id);
+    t.assertEquals(s.domain{1}, gdx.data.i);
     t.assertEquals(s.domain{1}.name, 'i');
     t.assert(numel(s.domain_labels) == 1);
     t.assertEquals(s.domain_labels{1}, 'i');
@@ -126,14 +124,14 @@ function test_read(t, cfg, container_type)
     t.add('read_variable_basic');
     t.assert(isfield(gdx.data, 'x'));
     s = gdx.data.x;
-    t.assert(isa(s, 'gams.transfer.Variable'));
+    t.assert(isa(s, 'gams.transfer.symbol.Variable'));
     t.assertEquals(s.name, 'x');
     t.assertEquals(s.description, 'var_x');
     t.assertEquals(s.type, 'positive');
     t.assert(s.dimension == 2);
     t.assert(numel(s.domain) == 2);
-    t.assertEquals(s.domain{1}.id, gdx.data.i.id);
-    t.assertEquals(s.domain{2}.id, gdx.data.j.id);
+    t.assertEquals(s.domain{1}, gdx.data.i);
+    t.assertEquals(s.domain{2}, gdx.data.j);
     t.assertEquals(s.domain{1}.name, 'i');
     t.assertEquals(s.domain{2}.name, 'j');
     t.assert(numel(s.domain_labels) == 2);
@@ -149,13 +147,12 @@ function test_read(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'struct');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'struct');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('read_set_records_struct');
@@ -169,7 +166,7 @@ function test_read(t, cfg, container_type)
     t.assert(isfield(s.records, 'element_text'));
     t.assert(numel(s.records.uni) == 5);
     t.assert(numel(s.records.element_text) == 5);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s.records.uni(1), 'i1');
         t.assertEquals(s.records.uni(2), 'i3');
         t.assertEquals(s.records.uni(3), 'i4');
@@ -182,7 +179,7 @@ function test_read(t, cfg, container_type)
     t.assert(uni_int(3) == 3);
     t.assert(uni_int(4) == 4);
     t.assert(uni_int(5) == 5);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assert(isundefined(s.records.element_text(1)));
         t.assertEquals(s.records.element_text(2), 'expl text 3');
         t.assert(isundefined(s.records.element_text(3)));
@@ -224,7 +221,7 @@ function test_read(t, cfg, container_type)
     t.assert(isfield(s.records, 'value'));
     t.assert(numel(s.records.i) == 3);
     t.assert(numel(s.records.value) == 3);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s.records.i(1), 'i1');
         t.assertEquals(s.records.i(2), 'i3');
         t.assertEquals(s.records.i(3), 'i10');
@@ -263,7 +260,7 @@ function test_read(t, cfg, container_type)
     t.assert(numel(s.records.lower) == 6);
     t.assert(numel(s.records.upper) == 6);
     t.assert(numel(s.records.scale) == 6);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s.records.i(1), 'i1');
         t.assertEquals(s.records.i(2), 'i3');
         t.assertEquals(s.records.i(3), 'i3');
@@ -335,16 +332,15 @@ function test_read(t, cfg, container_type)
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
 
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         switch container_type
         case 'c'
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
             gdx.read(cfg.filenames{1}, 'format', 'table');
         case 'rc'
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
             gdx.read(cfg.filenames{1}, 'format', 'table');
-            gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-                cfg.gams_dir, 'features', cfg.features);
+            gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
         end
 
         t.add('read_set_records_table');
@@ -358,7 +354,7 @@ function test_read(t, cfg, container_type)
         t.assertEquals(s.records.Properties.VariableNames{2}, 'element_text');
         t.assert(numel(s.records.uni) == 5);
         t.assert(numel(s.records.element_text) == 5);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(s.records.uni(1), 'i1');
             t.assertEquals(s.records.uni(2), 'i3');
             t.assertEquals(s.records.uni(3), 'i4');
@@ -371,7 +367,7 @@ function test_read(t, cfg, container_type)
         t.assert(uni_int(3) == 3);
         t.assert(uni_int(4) == 4);
         t.assert(uni_int(5) == 5);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assert(isundefined(s.records.element_text(1)));
             t.assertEquals(s.records.element_text(2), 'expl text 3');
             t.assert(isundefined(s.records.element_text(3)));
@@ -414,7 +410,7 @@ function test_read(t, cfg, container_type)
         t.assertEquals(s.records.Properties.VariableNames{2}, 'value');
         t.assert(numel(s.records.i) == 3);
         t.assert(numel(s.records.value) == 3);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(s.records.i(1), 'i1');
             t.assertEquals(s.records.i(2), 'i3');
             t.assertEquals(s.records.i(3), 'i10');
@@ -453,7 +449,7 @@ function test_read(t, cfg, container_type)
         t.assert(numel(s.records.lower) == 6);
         t.assert(numel(s.records.upper) == 6);
         t.assert(numel(s.records.scale) == 6);
-        if gdx.features.categorical
+        if gams.transfer.Constants.SUPPORTS_CATEGORICAL
             t.assertEquals(s.records.i(1), 'i1');
             t.assertEquals(s.records.i(2), 'i3');
             t.assertEquals(s.records.i(3), 'i3');
@@ -528,13 +524,12 @@ function test_read(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('read_set_records_dense_matrix');
@@ -548,7 +543,7 @@ function test_read(t, cfg, container_type)
     t.assert(isfield(s.records, 'element_text'));
     t.assert(numel(s.records.uni) == 5);
     t.assert(numel(s.records.element_text) == 5);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s.records.uni(1), 'i1');
         t.assertEquals(s.records.uni(2), 'i3');
         t.assertEquals(s.records.uni(3), 'i4');
@@ -561,7 +556,7 @@ function test_read(t, cfg, container_type)
     t.assert(uni_int(3) == 3);
     t.assert(uni_int(4) == 4);
     t.assert(uni_int(5) == 5);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assert(isundefined(s.records.element_text(1)));
         t.assertEquals(s.records.element_text(2), 'expl text 3');
         t.assert(isundefined(s.records.element_text(3)));
@@ -706,13 +701,12 @@ function test_read(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('read_set_records_sparse_matrix');
@@ -726,7 +720,7 @@ function test_read(t, cfg, container_type)
     t.assert(isfield(s.records, 'element_text'));
     t.assert(numel(s.records.uni) == 5);
     t.assert(numel(s.records.element_text) == 5);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s.records.uni(1), 'i1');
         t.assertEquals(s.records.uni(2), 'i3');
         t.assertEquals(s.records.uni(3), 'i4');
@@ -739,7 +733,7 @@ function test_read(t, cfg, container_type)
     t.assert(uni_int(3) == 3);
     t.assert(uni_int(4) == 4);
     t.assert(uni_int(5) == 5);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assert(isundefined(s.records.element_text(1)));
         t.assertEquals(s.records.element_text(2), 'expl text 3');
         t.assert(isundefined(s.records.element_text(3)));
@@ -897,17 +891,15 @@ function test_readEquals(t, cfg, container_type)
     for i = [1,2,5,7]
         switch container_type
         case 'c'
-            gdx1 = gams.transfer.Container(cfg.filenames{i}, 'gams_dir', ...
-                cfg.gams_dir, 'features', cfg.features);
-            gdx2 = gams.transfer.Container(cfg.filenames{i}, 'gams_dir', ...
-                cfg.gams_dir, 'features', cfg.features);
+            gdx1 = gams.transfer.Container(cfg.filenames{i}, 'gams_dir', cfg.gams_dir);
+            gdx2 = gams.transfer.Container(cfg.filenames{i}, 'gams_dir', cfg.gams_dir);
         case 'rc'
-            gdx1 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx1 = gams.transfer.Container('gams_dir', cfg.gams_dir);
             gdx1.read(cfg.filenames{i});
-            gdx1 = gams.transfer.Container(gdx1, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
-            gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx1 = gams.transfer.Container(gdx1, 'gams_dir', cfg.gams_dir);
+            gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
             gdx2.read(cfg.filenames{i});
-            gdx2 = gams.transfer.Container(gdx2, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx2 = gams.transfer.Container(gdx2, 'gams_dir', cfg.gams_dir);
         end
 
         t.add(sprintf('read_equals_%d', i));
@@ -919,12 +911,11 @@ function test_readSameDomainLabels(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container(cfg.filenames{9}, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(cfg.filenames{9}, 'gams_dir', cfg.gams_dir);
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{9});
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('read_same_domain_labels_1');
@@ -975,30 +966,30 @@ function test_readNoRecords(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'records', false);
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'records', false);
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('read_no_records_set');
     t.assert(isfield(gdx.data, 'i'));
     s = gdx.data.i;
-    t.assert(isa(s, 'gams.transfer.Set'));
+    t.assert(isa(s, 'gams.transfer.symbol.Set'));
     t.assertEquals(s.name, 'i');
     t.assertEquals(s.description, 'set_i');
     t.assert(~s.is_singleton);
     t.assert(s.dimension == 1);
     t.assert(numel(s.domain) == 1);
     t.assertEquals(s.domain{1}, '*');
-    t.assert(numel(s.domain_labels) == 0);
+    t.assert(numel(s.domain_labels) == 1);
+    t.assertEquals(s.domain_labels{1}, 'uni')
     t.assertEquals(s.domain_type, 'none');
     t.assert(numel(s.size) == 1);
-    t.assert(isnan(s.size(1)));
-    t.assertEquals(s.format, 'empty');
+    t.assert(s.size(1) == 0);
+    t.assertEquals(s.format, 'struct');
     t.assert(isnan(s.getSparsity()));
     t.assert(s.getNumberRecords() == 0);
     t.assert(s.getNumberValues() == 0);
@@ -1007,7 +998,7 @@ function test_readNoRecords(t, cfg, container_type)
     t.add('read_no_records_scalar');
     t.assert(isfield(gdx.data, 'a'));
     s = gdx.data.a;
-    t.assert(isa(s, 'gams.transfer.Parameter'));
+    t.assert(isa(s, 'gams.transfer.symbol.Parameter'));
     t.assertEquals(s.name, 'a');
     t.assertEquals(s.description, 'par_a');
     t.assert(s.dimension == 0);
@@ -1015,7 +1006,7 @@ function test_readNoRecords(t, cfg, container_type)
     t.assert(numel(s.domain_labels) == 0);
     t.assertEquals(s.domain_type, 'none');
     t.assert(numel(s.size) == 0);
-    t.assertEquals(s.format, 'empty');
+    t.assertEquals(s.format, 'struct');
     t.assert(~isnan(s.getSparsity()));
     t.assert(s.getNumberRecords() == 0);
     t.assert(s.getNumberValues() == 0);
@@ -1024,18 +1015,19 @@ function test_readNoRecords(t, cfg, container_type)
     t.add('read_no_records_parameter');
     t.assert(isfield(gdx.data, 'b'));
     s = gdx.data.b;
-    t.assert(isa(s, 'gams.transfer.Parameter'));
+    t.assert(isa(s, 'gams.transfer.symbol.Parameter'));
     t.assertEquals(s.name, 'b');
     t.assertEquals(s.description, 'par_b');
     t.assert(s.dimension == 1);
     t.assert(numel(s.domain) == 1);
-    t.assertEquals(s.domain{1}.id, gdx.data.i.id);
+    t.assertEquals(s.domain{1}, gdx.data.i);
     t.assertEquals(s.domain{1}.name, 'i');
-    t.assert(numel(s.domain_labels) == 0);
+    t.assert(numel(s.domain_labels) == 1);
+    t.assertEquals(s.domain_labels{1}, 'i')
     t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 1);
     t.assert(s.size(1) == 0);
-    t.assertEquals(s.format, 'empty');
+    t.assertEquals(s.format, 'struct');
     t.assert(isnan(s.getSparsity()));
     t.assert(s.getNumberRecords() == 0);
     t.assert(s.getNumberValues() == 0);
@@ -1044,22 +1036,24 @@ function test_readNoRecords(t, cfg, container_type)
     t.add('read_no_records_variable');
     t.assert(isfield(gdx.data, 'x'));
     s = gdx.data.x;
-    t.assert(isa(s, 'gams.transfer.Variable'));
+    t.assert(isa(s, 'gams.transfer.symbol.Variable'));
     t.assertEquals(s.name, 'x');
     t.assertEquals(s.description, 'var_x');
     t.assertEquals(s.type, 'positive');
     t.assert(s.dimension == 2);
     t.assert(numel(s.domain) == 2);
-    t.assertEquals(s.domain{1}.id, gdx.data.i.id);
-    t.assertEquals(s.domain{2}.id, gdx.data.j.id);
+    t.assertEquals(s.domain{1}, gdx.data.i);
+    t.assertEquals(s.domain{2}, gdx.data.j);
     t.assertEquals(s.domain{1}.name, 'i');
     t.assertEquals(s.domain{2}.name, 'j');
-    t.assert(numel(s.domain_labels) == 0);
+    t.assert(numel(s.domain_labels) == 2);
+    t.assertEquals(s.domain_labels{1}, 'i')
+    t.assertEquals(s.domain_labels{2}, 'j')
     t.assertEquals(s.domain_type, 'regular');
     t.assert(numel(s.size) == 2);
     t.assert(s.size(1) == 0);
     t.assert(s.size(2) == 0);
-    t.assertEquals(s.format, 'empty');
+    t.assertEquals(s.format, 'struct');
     t.assert(isnan(s.getSparsity()));
     t.assert(s.getNumberRecords() == 0);
     t.assert(s.getNumberValues() == 0);
@@ -1071,20 +1065,18 @@ function test_readPartial(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'i', 'j', 'x'}, ...
             'values', {'level', 'marginal'});
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'i', 'j', 'x'}, ...
             'values', {'level', 'marginal'});
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('read_partial_basic_info_1');
     t.assertEquals(gdx.gams_dir, cfg.gams_dir);
-    t.assert(~gdx.indexed);
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'i'));
     t.assert(isfield(gdx.data, 'j'));
@@ -1108,7 +1100,7 @@ function test_readPartial(t, cfg, container_type)
     t.assert(isfield(s.records, 'element_text'));
     t.assert(numel(s.records.uni) == 5);
     t.assert(numel(s.records.element_text) == 5);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s.records.uni(1), 'i1');
         t.assertEquals(s.records.uni(2), 'i3');
         t.assertEquals(s.records.uni(3), 'i4');
@@ -1121,7 +1113,7 @@ function test_readPartial(t, cfg, container_type)
     t.assert(uni_int(3) == 3);
     t.assert(uni_int(4) == 4);
     t.assert(uni_int(5) == 5);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assert(isundefined(s.records.element_text(1)));
         t.assertEquals(s.records.element_text(2), 'expl text 3');
         t.assert(isundefined(s.records.element_text(3)));
@@ -1153,7 +1145,7 @@ function test_readPartial(t, cfg, container_type)
     t.assert(numel(s.records.j) == 6);
     t.assert(numel(s.records.level) == 6);
     t.assert(numel(s.records.marginal) == 6);
-    if gdx.features.categorical
+    if gams.transfer.Constants.SUPPORTS_CATEGORICAL
         t.assertEquals(s.records.i(1), 'i1');
         t.assertEquals(s.records.i(2), 'i3');
         t.assertEquals(s.records.i(3), 'i3');
@@ -1196,18 +1188,16 @@ function test_readPartial(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'x'}, 'values', {'marginal'});
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'x'}, 'values', {'marginal'});
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('read_partial_basic_info_2');
     t.assertEquals(gdx.gams_dir, cfg.gams_dir);
-    t.assert(~gdx.indexed);
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'x'));
 
@@ -1237,20 +1227,18 @@ function test_readPartial(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'I', 'J', 'X'}, ...
             'values', {'level', 'marginal'});
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'I', 'J', 'X'}, ...
             'values', {'level', 'marginal'});
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('read_partial_diffcase_basic_info');
     t.assertEquals(gdx.gams_dir, cfg.gams_dir);
-    t.assert(~gdx.indexed);
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'i'));
     t.assert(isfield(gdx.data, 'j'));
@@ -1261,13 +1249,13 @@ function test_readPartial(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'j', 'x', 'i'}, ...
             'values', {'level', 'marginal'});
     case 'rc'
-        gdx1 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx1 = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx1.read(cfg.filenames{1}, 'format', 'struct');
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(gdx1, 'symbols', {'j', 'x', 'i'}, 'values', {'level', 'marginal'});
     end
 
@@ -1283,13 +1271,12 @@ function test_readSpecialValues(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{2}, 'format', 'struct');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{2}, 'format', 'struct');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('read_special_values');
@@ -1298,11 +1285,11 @@ function test_readSpecialValues(t, cfg, container_type)
     t.assert(isfield(gdx.data, 'GPInf'));
     t.assert(isfield(gdx.data, 'GMInf'));
     t.assert(isfield(gdx.data, 'GEps'));
-    t.assert(isa(gdx.data.GUndef, 'gams.transfer.Parameter'));
-    t.assert(isa(gdx.data.GNA, 'gams.transfer.Parameter'));
-    t.assert(isa(gdx.data.GPInf, 'gams.transfer.Parameter'));
-    t.assert(isa(gdx.data.GMInf, 'gams.transfer.Parameter'));
-    t.assert(isa(gdx.data.GEps, 'gams.transfer.Parameter'));
+    t.assert(isa(gdx.data.GUndef, 'gams.transfer.symbol.Parameter'));
+    t.assert(isa(gdx.data.GNA, 'gams.transfer.symbol.Parameter'));
+    t.assert(isa(gdx.data.GPInf, 'gams.transfer.symbol.Parameter'));
+    t.assert(isa(gdx.data.GMInf, 'gams.transfer.symbol.Parameter'));
+    t.assert(isa(gdx.data.GEps, 'gams.transfer.symbol.Parameter'));
     t.assert(isstruct(gdx.data.GUndef.records));
     t.assert(isstruct(gdx.data.GNA.records));
     t.assert(isstruct(gdx.data.GPInf.records));
@@ -1321,13 +1308,12 @@ function test_readDomainCycle(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{8}, 'format', 'struct');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{8}, 'format', 'struct');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('read_domain_cycle_i_of_i');
@@ -1346,7 +1332,7 @@ function test_readAcronyms(t, cfg, container_type);
     t.add('read_acronyms_1');
     switch container_type
     case {'c', 'rc'}
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         stdout = evalc("gdx.read(cfg.filenames{6}, 'format', 'struct');");
     end
     t.assert(~isempty(strfind(stdout, ...
@@ -1356,17 +1342,16 @@ function test_readAcronyms(t, cfg, container_type);
     warning('off');
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{6}, 'format', 'struct');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{6}, 'format', 'struct');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
     t.assert(isfield(gdx.data, 'i'));
     t.assert(isfield(gdx.data, 'a'));
-    t.assert(isa(gdx.data.a, 'gams.transfer.Parameter'));
+    t.assert(isa(gdx.data.a, 'gams.transfer.symbol.Parameter'));
     t.assert(gdx.data.a.isValid());
     t.assert(numel(gdx.data.a.records.value) == 3);
     t.assert(gdx.data.a.records.value(1) == 1);
@@ -1380,13 +1365,10 @@ function test_readSymbolTypes(t, cfg, container_type);
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', cfg.gams_dir);
     case 'rc'
-        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('read_symbol_types_vartypes');
@@ -1426,13 +1408,12 @@ function test_readSymbolTypes(t, cfg, container_type);
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{3}, 'format', 'dense_matrix');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{3}, 'format', 'dense_matrix');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', ...
-            cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
     end
 
     t.add('read_symbol_types_vartypes_default_values');
@@ -1512,15 +1493,15 @@ function test_readWrite(t, cfg)
         gdxdump = fullfile(cfg.gams_dir, 'gdxdump');
 
         t.add(sprintf('read_write_struct_%d', i));
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{i}, 'format', 'struct');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
-        if gdx.features.table
+        if gams.transfer.Constants.SUPPORTS_TABLE
             t.add(sprintf('read_write_table_%d', i));
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
             gdx.read(cfg.filenames{i}, 'format', 'table');
             gdx.write(write_filename);
             t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
@@ -1528,7 +1509,7 @@ function test_readWrite(t, cfg)
         end
 
         t.add(sprintf('read_write_dense_matrix_%d', i));
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{i}, 'format', 'dense_matrix');
         gdx.write(write_filename);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
@@ -1536,7 +1517,7 @@ function test_readWrite(t, cfg)
 
         if i ~= 9
             t.add(sprintf('read_write_sparse_matrix_%d', i));
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
             gdx.read(cfg.filenames{i}, 'format', 'sparse_matrix');
             gdx.write(write_filename);
             t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
@@ -1547,7 +1528,7 @@ end
 
 function test_readWritePartial(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'x'});
 
     t.add('read_write_partial_1');
@@ -1570,8 +1551,7 @@ function test_readWritePartial(t, cfg)
 
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
     gdx.write(write_filename);
-    gdx = gams.transfer.Container(write_filename, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
 
     t.add('read_write_partial_3');
     t.assert(numel(fieldnames(gdx.data)) == 3);
@@ -1580,29 +1560,24 @@ function test_readWritePartial(t, cfg)
     t.assert(isfield(gdx.data, 'x'));
     t.assert(gdx.isValid());
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx.read(cfg.filenames{1});
 
     t.add('read_write_partial_4');
     gdx.write(write_filename, 'symbols', {'x'});
-    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'x'));
     t.assert(gdx.isValid());
     t.assertEquals(gdx.data.x.domain_type, 'relaxed');
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx.read(cfg.filenames{1});
 
     t.add('read_write_partial_5');
     gdx.write(write_filename, 'symbols', {});
-    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir, 'features', cfg.features);
-    t.assert(numel(fieldnames(gdx.data)) == 5);
-    t.assert(isfield(gdx.data, 'i'));
-    t.assert(isfield(gdx.data, 'j'));
-    t.assert(isfield(gdx.data, 'a'));
-    t.assert(isfield(gdx.data, 'b'));
-    t.assert(isfield(gdx.data, 'x'));
+    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    t.assert(numel(fieldnames(gdx.data)) == 0);
     t.assert(gdx.isValid());
 
 end
@@ -1614,15 +1589,15 @@ function test_readWriteCompress(t, cfg)
         gdxdump = fullfile(cfg.gams_dir, 'gdxdump');
 
         t.add(sprintf('read_write_struct_%d', i));
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{i}, 'format', 'struct');
         gdx.write(write_filename, 'compress', true);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
-        if gdx.features.table
+        if gams.transfer.Constants.SUPPORTS_TABLE
             t.add(sprintf('read_write_table_%d', i));
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
             gdx.read(cfg.filenames{i}, 'format', 'table');
             gdx.write(write_filename, 'compress', true);
             t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
@@ -1630,14 +1605,14 @@ function test_readWriteCompress(t, cfg)
         end
 
         t.add(sprintf('read_write_dense_matrix_%d', i));
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{i}, 'format', 'dense_matrix');
         gdx.write(write_filename, 'compress', true);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         t.add(sprintf('read_write_sparse_matrix_%d', i));
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{i}, 'format', 'sparse_matrix');
         gdx.write(write_filename, 'compress', true);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
@@ -1650,37 +1625,32 @@ function test_readWriteDomainCheck(t, cfg)
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     t.add('read_write_domain_check_regular');
-    gdx = gams.transfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container(cfg.filenames{1}, 'gams_dir', cfg.gams_dir);
     t.assertEquals(gdx.data.x.domain_type, 'regular');
     gdx.write(write_filename);
-    gdx2 = gams.transfer.Container(write_filename, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
     t.assertEquals(gdx2.data.x.domain_type, 'regular');
 
     t.add('read_write_domain_check_relaxed_1');
-    gdx = gams.transfer.Container(cfg.filenames{1}, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container(cfg.filenames{1}, 'gams_dir', cfg.gams_dir);
     t.assertEquals(gdx.data.x.domain_type, 'regular');
     x = gdx.data.x;
     x.domain{1} = 'i';
     x.domain{2} = 'j';
     t.assertEquals(gdx.data.x.domain_type, 'relaxed');
     gdx.write(write_filename);
-    gdx2 = gams.transfer.Container(write_filename, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
     x = gdx2.data.x;
     x.domain{1} = gdx2.data.i;
     x.domain{2} = gdx2.data.j;
     t.assertEquals(gdx2.data.x.domain_type, 'regular');
     gdx2.write(write_filename);
-    gdx = gams.transfer.Container(write_filename, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
     t.assertEquals(gdx.data.x.domain_type, 'regular');
 
     t.add('read_write_domain_check_relaxed_2');
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gdx.read(cfg.filenames{1}, 'format', 'struct');
     t.assertEquals(gdx.data.x.domain_type, 'regular');
     records = gdx.data.x.records;
@@ -1701,8 +1671,7 @@ function test_readWriteDomainCheck(t, cfg)
     x.setUELs(uels2, 2, 'rename', true);
     t.assertEquals(gdx.data.x.domain_type, 'relaxed');
     gdx.write(write_filename);
-    gdx2 = gams.transfer.Container(write_filename, 'gams_dir', ...
-        cfg.gams_dir, 'features', cfg.features);
+    gdx2 = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
 
 end

@@ -1,8 +1,8 @@
 %
 % GAMS - General Algebraic Modeling System Matlab API
 %
-% Copyright (c) 2020-2022 GAMS Software GmbH <support@gams.com>
-% Copyright (c) 2020-2022 GAMS Development Corp. <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Software GmbH <support@gams.com>
+% Copyright (c) 2020-2024 GAMS Development Corp. <support@gams.com>
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the 'Software'), to deal
@@ -37,8 +37,7 @@ end
 
 function test_idx_addSymbols(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-        'indexed', true, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
 
     t.add('idx_add_symbols_parameter_1');
     p1 = gams.transfer.Parameter(gdx, 'p1');
@@ -49,14 +48,14 @@ function test_idx_addSymbols(t, cfg)
     t.assert(numel(p1.domain) == 0);
     t.assert(numel(p1.domain_names) == 0);
     t.assert(numel(p1.domain_labels) == 0);
-    t.assertEquals(p1.domain_type, 'relaxed');
+    t.assertEquals(p1.domain_type, 'none');
     t.assert(numel(p1.size) == 0);
-    t.assert(strcmp(p1.format, 'empty'));
+    t.assert(strcmp(p1.format, 'struct'));
     t.assert(p1.getNumberRecords() == 0);
     t.assert(p1.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'p1'));
-    t.assert(gdx.data.p1.id == p1.id);
+    t.assert(gdx.data.p1 == p1);
 
     t.add('idx_add_symbols_parameter_2');
     p2 = gams.transfer.Parameter(gdx, 'p2', 0, 'description', 'descr par 2');
@@ -68,16 +67,16 @@ function test_idx_addSymbols(t, cfg)
     t.assertEquals(p2.domain{1}, 'dim_1');
     t.assert(numel(p2.domain_names) == 1);
     t.assertEquals(p2.domain_names{1}, 'dim_1');
-    t.assert(numel(p2.domain_labels) == 0);
+    t.assert(numel(p2.domain_labels) == 1);
     t.assertEquals(p2.domain_type, 'relaxed');
     t.assert(numel(p2.size) == 1);
     t.assert(p2.size(1) == 0);
-    t.assert(strcmp(p2.format, 'empty'));
+    t.assert(strcmp(p2.format, 'struct'));
     t.assert(p2.getNumberRecords() == 0);
     t.assert(p2.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 2);
     t.assert(isfield(gdx.data, 'p2'));
-    t.assert(gdx.data.p2.id == p2.id);
+    t.assert(gdx.data.p2 == p2);
 
     t.add('idx_add_symbols_parameter_3');
     p3 = gams.transfer.Parameter(gdx, 'p3', [1,2,3], 'description', 'descr par 3');
@@ -93,18 +92,18 @@ function test_idx_addSymbols(t, cfg)
     t.assertEquals(p3.domain_names{1}, 'dim_1');
     t.assertEquals(p3.domain_names{2}, 'dim_2');
     t.assertEquals(p3.domain_names{3}, 'dim_3');
-    t.assert(numel(p3.domain_labels) == 0);
+    t.assert(numel(p3.domain_labels) == 3);
     t.assertEquals(p3.domain_type, 'relaxed');
     t.assert(numel(p3.size) == 3);
     t.assert(p3.size(1) == 1);
     t.assert(p3.size(2) == 2);
     t.assert(p3.size(3) == 3);
-    t.assert(strcmp(p3.format, 'empty'));
+    t.assert(strcmp(p3.format, 'struct'));
     t.assert(p3.getNumberRecords() == 0);
     t.assert(p3.isValid());
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'p3'));
-    t.assert(gdx.data.p3.id == p3.id);
+    t.assert(gdx.data.p3 == p3);
 
     t.add('idx_add_symbols_parameter_fails');
     try
@@ -125,7 +124,7 @@ function test_idx_addSymbols(t, cfg)
     catch
         t.reset();
     end
-    if exist('OCTAVE_VERSION', 'builtin') <= 0
+    if ~gams.transfer.Constants.IS_OCTAVE
         try
             t.assert(false);
             gams.transfer.Parameter(gdx, 's', ["s1", "s2"]);
@@ -146,39 +145,11 @@ function test_idx_addSymbols(t, cfg)
         t.reset();
     end
 
-    t.add('idx_add_symbols_set');
-    try
-        t.assert(false);
-        gams.transfer.Set(gdx, 's1');
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Set not allowed in indexed mode.');
-    end
-
-    t.add('idx_add_symbols_variable');
-    try
-        t.assert(false);
-        gams.transfer.Variable(gdx, 'v1');
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Variable not allowed in indexed mode.');
-    end
-
-    t.add('idx_add_symbols_equation');
-    try
-        t.assert(false);
-        gams.transfer.Equation(gdx, 'e1', 'n');
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Equation not allowed in indexed mode.');
-    end
-
 end
 
 function test_idx_changeSymbol(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-        'indexed', true, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     p1 = gams.transfer.Parameter(gdx, 'p1', 5);
     p2 = gams.transfer.Parameter(gdx, 'p2', [5,10]);
 
@@ -203,14 +174,14 @@ function test_idx_changeSymbol(t, cfg)
         p1.name = 2;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Name must be of type ''char''.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 1) must be ''string'' or ''char''.');
     end
     try
         t.assert(false);
         p1.name = NaN;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Name must be of type ''char''.');
+        t.assertEquals(e.message, 'Argument ''name'' (at position 1) must be ''string'' or ''char''.');
     end
 
     t.add('idx_change_symbol_description_1');
@@ -226,14 +197,14 @@ function test_idx_changeSymbol(t, cfg)
         p1.description = 2;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Description must be of type ''char''.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 1) must be ''string'' or ''char''.');
     end
     try
         t.assert(false);
         p1.description = NaN;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Description must be of type ''char''.');
+        t.assertEquals(e.message, 'Argument ''description'' (at position 1) must be ''string'' or ''char''.');
     end
 
     t.add('idx_change_symbol_dimension_1');
@@ -245,9 +216,9 @@ function test_idx_changeSymbol(t, cfg)
     t.assert(numel(p1.size) == 2);
     t.assert(numel(p1.domain) == 2);
     t.assert(p1.size(1) == 5);
-    t.assert(p1.size(2) == 1);
+    t.assert(p1.size(2) == 0);
     t.assertEquals(p1.domain{1}, 'dim_1');
-    t.assertEquals(p1.domain{2}, 'dim_2');
+    t.assertEquals(p1.domain{2}, '*');
     p1.dimension = 1;
     t.assert(p1.dimension == 1);
     t.assert(numel(p1.size) == 1);
@@ -261,36 +232,28 @@ function test_idx_changeSymbol(t, cfg)
         p1.dimension = '2';
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Dimension must be of type ''numeric''.');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be numeric.');
     end
     try
         t.assert(false);
         p1.dimension = 2.5;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Dimension must be integer.');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be integer.');
     end
     try
         t.assert(false);
         p1.dimension = -1;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Dimension must be within [0,20].');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0,20].');
     end
     try
         t.assert(false);
         p1.dimension = 21;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Dimension must be within [0,20].');
-    end
-
-    t.add('idx_change_symbol_domain');
-    try
-        p1.domain = {'dim_1', 'dim_2'};
-        t.assert(false);
-    catch e
-        t.assertEquals(e.message, 'Setting symbol domain not allowed in indexed mode.');
+        t.assertEquals(e.message, 'Argument ''dimension'' (at position 1) must be in [0,20].');
     end
 
     t.add('idx_change_symbol_size_1');
@@ -298,12 +261,12 @@ function test_idx_changeSymbol(t, cfg)
     t.assert(p1.size == 5);
     t.assert(p1.dimension == 1);
     t.assert(numel(p1.domain) == 1);
-    t.assert(numel(p1.domain_labels) == 0);
+    t.assert(numel(p1.domain_labels) == 1);
     p1.size = 10;
     t.assert(p1.size == 10);
     t.assert(p1.dimension == 1);
     t.assert(numel(p1.domain) == 1);
-    t.assert(numel(p1.domain_labels) == 0);
+    t.assert(numel(p1.domain_labels) == 1);
     p1.size = [10, 20];
     t.assert(p1.size(1) == 10);
     t.assert(p1.size(2) == 20);
@@ -311,7 +274,7 @@ function test_idx_changeSymbol(t, cfg)
     t.assert(numel(p1.domain) == 2);
     t.assertEquals(p1.domain{1}, 'dim_1');
     t.assertEquals(p1.domain{2}, 'dim_2');
-    t.assert(numel(p1.domain_labels) == 0);
+    t.assert(numel(p1.domain_labels) == 2);
 
     t.add('idx_change_symbol_size_2');
     try
@@ -319,35 +282,35 @@ function test_idx_changeSymbol(t, cfg)
         p1.size = '2';
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Size must be of type ''numeric''.');
+        t.assertEquals(e.message, 'Argument ''size'' (at position 1) must be numeric.');
     end
     try
         t.assert(false);
         p1.size = 2.5;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Size must be integer.');
+        t.assertEquals(e.message, 'Argument ''size'' (at position 1) must be integer.');
     end
     try
         t.assert(false);
         p1.size = nan;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Size must not be inf or nan.');
+        t.assertEquals(e.message, 'Argument ''size'' (at position 1) must be integer.');
     end
     try
         t.assert(false);
         p1.size = inf;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Size must not be inf or nan.');
+        t.assertEquals(e.message, 'Argument ''size'' (at position 1) must not be inf.');
     end
     try
         t.assert(false);
         p1.size = -1;
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Size must be non-negative.');
+        t.assertEquals(e.message, 'Argument ''size'' (at position 1) must be equal to or larger than 0.');
     end
 
     t.add('idx_change_symbol_domain_labels_1');
@@ -386,49 +349,27 @@ function test_idx_changeSymbol(t, cfg)
         p1.domain_labels = '*';
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain labels must be of type ''cellstr''.');
+        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must be ''cell''.');
     end
     try
         t.assert(false);
         p1.domain_labels = {'*'};
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Domain labels must have length equal to symbol dimension.');
-    end
-    try
-        t.assert(false);
-        p1.domain_labels = {'*', '*'};
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain labels must be unique.');
-    end
-
-    t.add('idx_change_symbol_format');
-    try
-        p1.format = 'struct';
-        t.assert(false);
-    catch e
-        if exist('OCTAVE_VERSION', 'builtin') > 0
-            msg_end = 'has private access and cannot be set in this context';
-            t.assertEquals(e.message(end-numel(msg_end)+1:end), msg_end);
-        else
-            t.assert(~isempty(strfind(e.message, 'read-only')));
-        end
+        t.assertEquals(e.message, 'Argument ''domain_labels'' (at position 1) must have 2 elements.');
     end
 end
 
 function test_idx_copySymbol(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-        'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     p = gams.transfer.Parameter(gdx, 'p', [10]);
     p.records.dim_1 = [2 4]';
     p.records.value = [1 2]';
     t.assert(p.isValid());
 
     t.add('idx_copy_symbol_parameter_empty');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-        'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     p.copy(gdx2);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
     t.assert(isfield(gdx2.data, 'p'));
@@ -452,8 +393,7 @@ function test_idx_copySymbol(t, cfg)
     t.assert(gdx2.data.p.records.value(2) == 2);
 
     t.add('idx_copy_symbol_parameter_overwrite_1');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-        'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Parameter(gdx2, 'p');
     p.copy(gdx2, true);
     t.assert(numel(fieldnames(gdx2.data)) == 1);
@@ -478,8 +418,7 @@ function test_idx_copySymbol(t, cfg)
     t.assert(gdx2.data.p.records.value(2) == 2);
 
     t.add('idx_copy_symbol_parameter_overwrite_2');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-        'features', cfg.features);
+    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
     gams.transfer.Parameter(gdx2, 'p');
     try
         t.assert(false);
@@ -489,42 +428,13 @@ function test_idx_copySymbol(t, cfg)
         t.assertEquals(ex.message, 'Symbol already exists in destination.');
     end
 
-    t.add('idx_copy_symbol_parameter_indexed');
-    gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', false, 'features', cfg.features);
-    try
-        t.assert(false);
-        p.copy(gdx2);
-    catch ex
-        t.reset();
-        t.assertEquals(ex.message, 'Destination container must be indexed.');
-    end
-
 end
 
 function test_idx_setRecords(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-        'indexed', true, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
 
     p1 = gams.transfer.Parameter(gdx, 'p1', 5);
-
-    t.add('set_records_string');
-    try
-        t.assert(false);
-        p1.setRecords('test');
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Strings not allowed in indexed mode.');
-    end
-
-    t.add('set_records_cellstr');
-    try
-        t.assert(false);
-        p1.setRecords({'test1', 'test2', 'test3'});
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Strings not allowed in indexed mode.');
-    end
 
     t.add('set_records_numeric_1');
     try
@@ -532,7 +442,7 @@ function test_idx_setRecords(t, cfg)
         p1.setRecords([1; 2; 3; 4]);
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Records size doesn''t match symbol size.');
+        t.assertEquals(e.message, 'Cannot create matrix records, because value size does not match symbol size.');
     end
 
     t.add('set_records_numeric_2');
@@ -578,22 +488,13 @@ function test_idx_setRecords(t, cfg)
     t.assert(p1.records.value(5) == 5);
     t.assert(p1.isValid());
 
-    t.add('set_records_cell_2');
-    try
-        t.assert(false);
-        p1.setRecords({{'i1', 'i4'}, [1; 4]});
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Strings not allowed in indexed mode.');
-    end
-
     t.add('set_records_cell_3');
     try
         t.assert(false);
         p1.setRecords({[1; 4], [11; 44], [111; 444], [1111; 4444], [11111; 44444]});
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Incorrect number of domain fields.');
+        t.assertEquals(e.message, 'Too many value fields in records.');
     end
 
     t.add('set_records_cell_4');
@@ -619,22 +520,13 @@ function test_idx_setRecords(t, cfg)
     t.assert(p1.records.value(5) == 5);
     t.assert(p1.isValid());
 
-    t.add('set_records_struct_2');
-    try
-        t.assert(false);
-        p1.setRecords(struct('marginal', [1; 2; 3; 4; 5]));
-    catch e
-        t.reset();
-        t.assertEquals(e.message, 'Domain fields not allowed in this format.');
-    end
-
     t.add('set_records_struct_3');
     try
         t.assert(false);
         p1.setRecords(struct('i1_1', {'i1', 'i4'}, 'level', [1; 4]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Non-scalar structure arrays currently not supported.');
+        t.assertEquals(e.message, 'Unsupported records format.');
     end
 
     t.add('set_records_struct_4');
@@ -661,10 +553,10 @@ function test_idx_setRecords(t, cfg)
         p1.setRecords(struct('value', [1, 2, 3]));
     catch e
         t.reset();
-        t.assertEquals(e.message, 'Incorrect number of domain fields.');
+        t.assertEquals(e.message, 'Cannot create matrix records, because value size does not match symbol size.');
     end
 
-    if gdx.features.table
+    if gams.transfer.Constants.SUPPORTS_TABLE
         t.add('set_records_table_1');
         tbl = table([1; 2; 3], [1; 2; 3]);
         try
@@ -685,8 +577,7 @@ end
 
 function test_idx_writeUnordered(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, ...
-        'indexed', true, 'features', cfg.features);
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     c = gams.transfer.Parameter(gdx, 'c', [5,10]);
@@ -696,10 +587,10 @@ function test_idx_writeUnordered(t, cfg)
     t.add('idx_write_unordered_1')
     try
         t.assert(false);
-        gdx.write(write_filename, 'sorted', true);
+        gdx.write(write_filename, 'sorted', true, 'indexed', true);
     catch e
         t.reset();
-        if exist('OCTAVE_VERSION', 'builtin') > 0
+        if gams.transfer.Constants.IS_OCTAVE
             t.assertEquals(e.message, 'gt_idx_write: GDX error in record c(3,1): Data not sorted when writing raw');
         else
             t.assertEquals(e.message, 'GDX error in record c(3,1): Data not sorted when writing raw');
@@ -707,7 +598,7 @@ function test_idx_writeUnordered(t, cfg)
     end
 
     t.add('idx_write_unordered_2')
-    gdx.write(write_filename, 'sorted', false);
+    gdx.write(write_filename, 'sorted', false, 'indexed', true);
 
     c.setRecords(struct('dim_1', [1, 1, 2, 2], 'dim_2', [1, 2, 2, 1], ...
         'value', [11, 12, 22, 21]));
@@ -715,10 +606,10 @@ function test_idx_writeUnordered(t, cfg)
     t.add('idx_write_unordered_3')
     try
         t.assert(false);
-        gdx.write(write_filename, 'sorted', true);
+        gdx.write(write_filename, 'sorted', true, 'indexed', true);
     catch e
         t.reset();
-        if exist('OCTAVE_VERSION', 'builtin') > 0
+        if gams.transfer.Constants.IS_OCTAVE
             t.assertEquals(e.message, 'gt_idx_write: GDX error in record c(2,1): Data not sorted when writing raw');
         else
             t.assertEquals(e.message, 'GDX error in record c(2,1): Data not sorted when writing raw');
@@ -726,7 +617,7 @@ function test_idx_writeUnordered(t, cfg)
     end
 
     t.add('idx_write_unordered_4')
-    gdx.write(write_filename, 'sorted', false);
+    gdx.write(write_filename, 'sorted', false, 'indexed', true);
 
 end
 
@@ -741,12 +632,11 @@ function test_idx_transformRecords(t, cfg)
     c_format = cell(1, numel(formats));
 
     for i = 1:numel(formats)
-        if strcmp(formats{i}, 'table') && ~gdx.features.table
+        if strcmp(formats{i}, 'table') && ~gams.transfer.Constants.SUPPORTS_TABLE
             continue
         end
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-            'features', cfg.features);
-        gdx.read(cfg.filenames{4}, 'format', formats{i});
+        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx.read(cfg.filenames{4}, 'format', formats{i}, 'indexed', true);
         a_recs{i} = gdx.data.a.records;
         b_recs{i} = gdx.data.b.records;
         c_recs{i} = gdx.data.c.records;
@@ -756,19 +646,18 @@ function test_idx_transformRecords(t, cfg)
     end
 
     for i = 1:numel(formats)
-        if strcmp(formats{i}, 'table') && ~gdx.features.table
+        if strcmp(formats{i}, 'table') && ~gams.transfer.Constants.SUPPORTS_TABLE
             continue
         end
 
         for j = 1:numel(formats)
-            if strcmp(formats{j}, 'table') && ~gdx.features.table
+            if strcmp(formats{j}, 'table') && ~gams.transfer.Constants.SUPPORTS_TABLE
                 continue
             end
 
             t.add(sprintf('idx_transform_records_%s_to_%s', formats{i}, formats{j}));
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir, 'indexed', true, ...
-                'features', cfg.features);
-            gdx.read(cfg.filenames{4}, 'format', formats{i});
+            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+            gdx.read(cfg.filenames{4}, 'format', formats{i}, 'indexed', true);
             gdx.data.a.transformRecords(formats{j});
             gdx.data.b.transformRecords(formats{j});
             gdx.data.c.transformRecords(formats{j});
