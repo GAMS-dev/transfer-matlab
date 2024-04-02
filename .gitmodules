@@ -7,3 +7,6 @@
 [submodule "ext/gdx"]
 	path = ext/gdx
 	url = https://github.com/GAMS-dev/gdx
+[submodule "ext/zlib"]
+	path = ext/zlib
+	url = https://github.com/madler/zlib
