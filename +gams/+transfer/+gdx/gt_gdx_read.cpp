@@ -30,7 +30,12 @@
 
 #include "mex.h"
 
+#ifdef HAS_GDX_SOURCE
+#define NO_SET_LOAD_PATH_DEF
+#include "gdxcwrap.hpp"
+#else
 #include "gdxcc.h"
+#endif
 #include "gt_utils.h"
 #include "gt_mex.h"
 #include "gt_gdx_idx.h"

@@ -23,7 +23,12 @@
  * SOFTWARE.
  */
 
+#ifdef HAS_GDX_SOURCE
+#define NO_SET_LOAD_PATH_DEF
+#include "gdxcwrap.hpp"
+#else
 #include "gdxcc.h"
+#endif
 #include "mex.h"
 #include "gt_utils.h"
 #include "gt_mex.h"

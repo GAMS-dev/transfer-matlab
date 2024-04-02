@@ -41,7 +41,6 @@ void gt_gdx_init_read(
     char buf[GMS_SSSIZE];
 
     /* start gdx */
-    gdxLibraryUnload();
     if (!gdxCreateD(gdx, sysdir, buf, sizeof(buf)))
         mexErrMsgIdAndTxt(ERRID"gdxCreateD", "GDX init failed: %s", buf);
     mxAssert(*gdx, "GDX init failed!");
@@ -65,7 +64,6 @@ void gt_gdx_init_write(
     char buf[GMS_SSSIZE];
 
     /* start gdx */
-    gdxLibraryUnload();
     if (!gdxCreateD(gdx, sysdir, buf, sizeof(buf)))
         mexErrMsgIdAndTxt(ERRID"gdxCreateD", "GDX init failed: %s", buf);
     mxAssert(*gdx, "GDX init failed!");
@@ -88,7 +86,6 @@ void gt_idx_init_read(
     char buf[GMS_SSSIZE];
 
     /* start gdx */
-    gdxLibraryUnload();
     idxLibraryUnload();
     if (!idxCreateD(gdx, sysdir, buf, sizeof(buf)))
         mexErrMsgIdAndTxt(ERRID"idxCreateD", "GDX init failed: %s", buf);
@@ -112,7 +109,6 @@ void gt_idx_init_write(
     char buf[GMS_SSSIZE];
 
     /* start gdx */
-    gdxLibraryUnload();
     idxLibraryUnload();
     if (!idxCreateD(gdx, sysdir, buf, sizeof(buf)))
         mexErrMsgIdAndTxt(ERRID"idxCreateD", "GDX init failed: %s", buf);

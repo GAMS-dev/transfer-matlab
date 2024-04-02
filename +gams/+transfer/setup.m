@@ -29,38 +29,59 @@
 % ------------------------------------------------------------------------------
 %
 % GAMS Transfer Setup
+%
+% Required Arguments:
+% 1. gdx_path (string):
+%    Path to GDX repository. Use submodule in ext/gdx or clone https://github.com/GAMS-dev/gdx.
+% 2. idx_path (string):
+%    Path to IDX API. Use ext/idx or [GAMS]/apifiles/C/api
+% 3. zlib_path (string):
+%    Path zo ZLIB repository. Use submodule in ext/zlib or clone https://github.com/madler/zlib.
 function setup(varargin)
 
     current_dir = fileparts(mfilename('fullpath'));
 
     p = inputParser();
     is_string_char = @(x) (isstring(x) && isscalar(x) || ischar(x));
-    addParameter(p, 'verbose', 0, @isnumeric)
-    addParameter(p, 'gams_dir', '', is_string_char);
+    addRequired(p, 'gdx_path', is_string_char);
+    addRequired(p, 'idx_path', is_string_char);
+    addRequired(p, 'zlib_path', is_string_char);
+    addParameter(p, 'verbose', 0, @isnumeric);
     parse(p, varargin{:});
-    if strcmp(p.Results.gams_dir, '')
-        gams_dir = gams.transfer.utils.absolute_path(gams.transfer.utils.find_gdx());
-    else
-        gams_dir = gams.transfer.utils.absolute_path(p.Results.gams_dir);
-    end
+
+    fprintf('Using GDX path: %s\n', p.Results.gdx_path);
+    fprintf('Using IDX path: %s\n', p.Results.idx_path);
+    fprintf('Using ZLIB path: %s\n', p.Results.zlib_path);
 
     files = {
-        fullfile(current_dir, '+gdx', 'gt_gdx_read.c'), ...
-        fullfile(current_dir, '+gdx', 'gt_gdx_write.c'), ...
-        fullfile(current_dir, '+gdx', 'gt_idx_read.c'), ...
-        fullfile(current_dir, '+gdx', 'gt_idx_write.c'), ...
+        fullfile(current_dir, '+gdx', 'gt_gdx_read.cpp'), ...
+        fullfile(current_dir, '+gdx', 'gt_gdx_write.cpp'), ...
+        fullfile(current_dir, '+gdx', 'gt_idx_read.cpp'), ...
+        fullfile(current_dir, '+gdx', 'gt_idx_write.cpp'), ...
         fullfile(current_dir, '+gdx', 'gt_get_defaults.c'), ...
         fullfile(current_dir, '+gdx', 'gt_get_sv.c'), ...
         fullfile(current_dir, '+gdx', 'gt_is_sv.c'), ...
     };
 
     common_files = {
-        fullfile(gams_dir, 'apifiles', 'C', 'api', 'gdxcc.c'), ...
-        fullfile(gams_dir, 'apifiles', 'C', 'api', 'idxcc.c'), ...
+        fullfile(p.Results.idx_path, 'idxcc.c'), ...
         fullfile(current_dir, '+gdx', 'gt_utils.c'), ...
         fullfile(current_dir, '+gdx', 'gt_mex.c'), ...
-        fullfile(current_dir, '+gdx', 'gt_gdx_idx.c'), ...
+        fullfile(current_dir, '+gdx', 'gt_gdx_idx.cpp'), ...
     };
+    common_files_from_lists = {
+        dir(fullfile(p.Results.gdx_path, 'src', '*.cpp')), ...
+        dir(fullfile(p.Results.gdx_path, 'src', 'gdlib', '*.cpp')), ...
+        dir(fullfile(p.Results.gdx_path, 'src', 'rtl', '*.cpp')), ...
+        dir(fullfile(p.Results.gdx_path, 'src', 'rtl', '*.c')), ...
+        dir(fullfile(p.Results.gdx_path, 'src', 'global', '*.cpp')), ...
+        dir(fullfile(p.Results.zlib_path, '*.c')), ...
+    };
+    for i = 1:numel(common_files_from_lists)
+        for j = 1:numel(common_files_from_lists{i})
+            common_files{end+1} = fullfile(common_files_from_lists{i}(j).folder, common_files_from_lists{i}(j).name);
+        end
+    end
 
     build.system = '';
     if ispc
@@ -73,22 +94,35 @@ function setup(varargin)
         else
             build.system = 'macos';
         end
-        build.libs = {'dl'};
+        build.libs = {'dl', 'pthread'};
     elseif isunix
         build.system = 'linux';
-        build.libs = {'dl'};
+        build.libs = {'dl', 'pthread'};
     end
     build.includes = {
-        fullfile(gams_dir, 'apifiles', 'C', 'api'), ...
+        fullfile(p.Results.idx_path), ...
+        fullfile(p.Results.gdx_path, 'generated'), ...
+        fullfile(p.Results.gdx_path, 'src'), ...
+        fullfile(p.Results.gdx_path, 'src', 'gdlib'), ...
+        fullfile(p.Results.zlib_path), ...
     };
     build.defines = {
         '-DGC_NO_MUTEX', ...
+        '-DHAS_GDX_SOURCE', ...
     };
+    switch build.system
+    case {'macos', 'macos_arm'}
+        build.defines{end+1} = '-DZ_HAVE_UNISTD_H';
+    end
     build.c_flags = {
         '-Wall', ...
     };
     build.cpp_flags = {
         '-Wall', ...
+        '-std=c++17', ...
+    };
+    build.cpp_comp_flags = {
+        '/std:c++17', ...
     };
     build.verbose = p.Results.verbose;
     build.object_path = tempname;
@@ -166,28 +200,35 @@ function compile_file(build, filename, object_only, other_objects)
     end
 
     % C/C++ flags
-    if ~gams.transfer.Constants.IS_OCTAVE
-        switch build.system
-        case {'macos', 'macos_arm', 'linux'}
-            cmd = strcat(cmd, ' CFLAGS=''$CFLAGS ');
-        case {'windows'}
-            cmd = strcat(cmd, ' COMPFLAGS=''$COMPFLAGS ');
-        otherwise
-            error('Unknown system %s', build.system);
-        end
-    end
     switch target_fileext
     case {'.c', '.C'}
+        if ~gams.transfer.Constants.IS_OCTAVE
+            cmd = strcat(cmd, ' CFLAGS=''$CFLAGS ');
+        end
         for i = 1:numel(build.c_flags)
             cmd = sprintf('%s %s', cmd, build.c_flags{i});
         end
+        if ~gams.transfer.Constants.IS_OCTAVE
+            cmd = strcat(cmd, '''');
+        end
     case {'.cpp', '.CPP'}
+        if ~gams.transfer.Constants.IS_OCTAVE
+            if strcmp(build.system, 'windows')
+                cmd = strcat(cmd, ' COMPFLAGS=''$COMPFLAGS ');
+                for i = 1:numel(build.cpp_comp_flags)
+                    cmd = sprintf('%s %s', cmd, build.cpp_comp_flags{i});
+                end
+                cmd = strcat(cmd, '''');
+
+            end
+            cmd = strcat(cmd, ' CXXFLAGS=''$CXXFLAGS ');
+        end
         for i = 1:numel(build.cpp_flags)
             cmd = sprintf('%s %s', cmd, build.cpp_flags{i});
         end
-    end
-    if ~gams.transfer.Constants.IS_OCTAVE
-        cmd = strcat(cmd, '''');
+        if ~gams.transfer.Constants.IS_OCTAVE
+            cmd = strcat(cmd, '''');
+        end
     end
 
     % output level

@@ -26,7 +26,12 @@
 #ifndef _GAMS_TRANSFER_CMEX_GDX_IDX_H_
 #define _GAMS_TRANSFER_CMEX_GDX_IDX_H_
 
+#ifdef HAS_GDX_SOURCE
+#define NO_SET_LOAD_PATH_DEF
+#include "gdxcwrap.hpp"
+#else
 #include "gdxcc.h"
+#endif
 #include "idxcc.h"
 #include "mex.h"
 

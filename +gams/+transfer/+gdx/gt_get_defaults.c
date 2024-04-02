@@ -25,7 +25,7 @@
 
 #include "mex.h"
 
-#include "gdxcc.h"
+#include "gclgms.h"
 #include "gt_mex.h"
 #include "gt_utils.h"
 

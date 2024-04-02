@@ -157,7 +157,7 @@ octave:build:linux:
         - mkdir -p linux/octave
         - cp -r +gams linux/octave
         - cd linux/octave
-        - octave --no-gui --no-window-system --eval "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+        - octave --no-gui --no-window-system --eval "gams.transfer.setup('../../ext/gdx', '../../ext/idx', '../../ext/zlib', 'verbose', $BUILD_VERBOSITY)"
     only:
         - merge_requests
         - master
@@ -176,7 +176,7 @@ octave:build:macos:
         - mkdir -p macos/octave
         - cp -r +gams macos/octave
         - cd macos/octave
-        - octave --no-gui --no-window-system --eval "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+        - octave --no-gui --no-window-system --eval "gams.transfer.setup('../../ext/gdx', '../../ext/idx', '../../ext/zlib', 'verbose', $BUILD_VERBOSITY)"
     only:
         - merge_requests
         - master
@@ -195,7 +195,7 @@ octave:build:macos_arm:
         - mkdir -p macos_arm/octave
         - cp -r +gams macos_arm/octave
         - cd macos_arm/octave
-        - octave --no-gui --no-window-system --eval "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+        - octave --no-gui --no-window-system --eval "gams.transfer.setup('../../ext/gdx', '../../ext/idx', '../../ext/zlib', 'verbose', $BUILD_VERBOSITY)"
     only:
         - merge_requests
         - master
@@ -216,7 +216,7 @@ matlab:build:linux:
         - mkdir -p linux/matlab
         - cp -r +gams linux/matlab
         - cd linux/matlab
-        - ~/Documents/MATLAB/runmatlab.sh "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+        - ~/Documents/MATLAB/runmatlab.sh "mex -setup C -v; mex -setup C++ -v; gams.transfer.setup('../../ext/gdx', '../../ext/idx', '../../ext/zlib', 'verbose', $BUILD_VERBOSITY)"
     only:
         - merge_requests
         - master
@@ -236,7 +236,7 @@ matlab:build:macos:
         - mkdir -p macos/matlab
         - cp -r +gams macos/matlab
         - cd macos/matlab
-        - matlab -nodisplay -nosplash -nodesktop -r "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+        - matlab -nodisplay -nosplash -nodesktop -r "mex -setup C -v; mex -setup C++ -v; gams.transfer.setup('../../ext/gdx', '../../ext/idx', '../../ext/zlib', 'verbose', $BUILD_VERBOSITY)"
     only:
         - merge_requests
         - master
@@ -256,7 +256,7 @@ matlab:build:macos_arm:
         - mkdir -p macos_arm/matlab
         - cp -r +gams macos_arm/matlab
         - cd macos_arm/matlab
-        - matlab -nodisplay -nosplash -nodesktop -r "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+        - matlab -nodisplay -nosplash -nodesktop -r "mex -setup C -v; mex -setup C++ -v; gams.transfer.setup('../../ext/gdx', '../../ext/idx', '../../ext/zlib', 'verbose', $BUILD_VERBOSITY)"
     only:
         - merge_requests
         - master
@@ -276,7 +276,7 @@ matlab:build:windows:
         - mkdir -p windows/matlab
         - cp -r +gams windows/matlab
         - cd windows/matlab
-        - matlab.exe -batch "gams.transfer.setup('gams_dir', '../gdx', 'verbose', $BUILD_VERBOSITY)"
+        - matlab.exe -batch "mex -setup C -v; mex -setup C++ -v; gams.transfer.setup('../../ext/gdx', '../../ext/idx', '../../ext/zlib', 'verbose', $BUILD_VERBOSITY)"
     only:
         - merge_requests
         - master
