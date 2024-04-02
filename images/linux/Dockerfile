@@ -1,10 +1,13 @@
 # Build from the MATLAB base image
-FROM mathworks/matlab:r2022b
+FROM mathworks/matlab:r2024a
 
-RUN sudo apt-get update && \
-    sudo apt-get -y install git build-essential expect zip graphviz && \
-    sudo apt-get -y install octave liboctave-dev doxygen && \
-    sudo apt-get -y clean
+RUN sudo apt-get update && sudo apt-get -y install git zip && sudo apt-get -y clean
+
+RUN sudo apt-get update && sudo apt-get -y install octave liboctave-dev && sudo apt-get -y clean
+
+RUN sudo apt-get update && sudo apt-get -y install doxygen graphviz && sudo apt-get -y clean
+
+RUN sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install expect && sudo apt-get -y clean
 
 COPY runmatlab.sh ./
 
