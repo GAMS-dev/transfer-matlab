@@ -549,6 +549,8 @@ classdef Container < gams.transfer.utils.Handle
         %>   UELs to be registered first before any symbol UELs. Default: `{}`.
         %> - indexed (`logical`):
         %>   Specifies if indexed GDX should be written. Default is `false`.
+        %> - eps_to_zero (`logical`):
+        %>   Specifies if EPS values should be written as zero. Default is `true`.
         %>
         %> **Example:**
         %> ```
@@ -585,6 +587,8 @@ classdef Container < gams.transfer.utils.Handle
             %   UELs to be registered first before any symbol UELs. Default: {}.
             % - indexed (logical):
             %   Specifies if indexed GDX should be written. Default is false.
+            % - eps_to_zero (logical):
+            %   Specifies if EPS values should be written as zero. Default is true.
             %
             % Example:
             % c.write('path/to/file.gdx');
