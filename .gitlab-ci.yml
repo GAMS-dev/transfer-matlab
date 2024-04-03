@@ -1,6 +1,7 @@
 
 stages:
   - images
+  - lint
   - doc
   - download
   - octave:build
@@ -41,13 +42,23 @@ image_linux:
           when: manual
           allow_failure: true
 
+lint:
+    stage: lint
+    tags:
+        - windows-shell
+    script:
+        - matlab.exe -batch "addpath('test'); code_issues('exit_on_fail', true)"
+    only:
+        - merge_requests
+        - master
+        - tags
+
 doc:build:
     stage: doc
     tags:
         - linux
     image:
         name: $CI_REGISTRY_IMAGE/linux/builder
-    needs: []
     script:
         - mkdir -p build
         - doxygen doc/Doxyfile
@@ -67,7 +78,6 @@ download:linux:
         - linux
     image:
         name: $CI_REGISTRY_IMAGE/linux/builder
-    needs: []
     script:
         - mkdir -p linux/gdx
         - curl -o gdx.zip $URL_GDX_LINUX
@@ -86,7 +96,6 @@ download:macos:
     stage: download
     tags:
         - macos
-    needs: []
     script:
         - mkdir -p macos/gdx
         - curl -o gdx.zip $URL_GDX_MACOS
@@ -105,7 +114,6 @@ download:macos_arm:
     stage: download
     tags:
         - macos-arm64
-    needs: []
     script:
         - mkdir -p macos_arm/gdx
         - curl -o gdx.zip $URL_GDX_MACOS_ARM
@@ -124,7 +132,6 @@ download:windows:
     stage: download
     tags:
         - windows-shell
-    needs: []
     script:
         - mkdir -p windows/gdx
         - curl -o gdx.zip $URL_GDX_WINDOWS
