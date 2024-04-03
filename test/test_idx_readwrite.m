@@ -31,6 +31,7 @@ function success = test_idx_readwrite(cfg)
     test_idx_readSpecialValues(t, cfg, 'c');
     test_idx_readWrite(t, cfg);
     test_idx_readWritePartial(t, cfg);
+    test_idx_writeEpsToZero(t, cfg);
     [~, n_fails1] = t.summary();
 
     t = GAMSTest('idx_readwrite_rc');
@@ -509,7 +510,7 @@ function test_idx_readWrite(t, cfg)
         t.add(sprintf('idx_read_write_struct_%d', i));
         gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{i}, 'format', 'struct', 'indexed', true);
-        gdx.write(write_filename, 'indexed', true);
+        gdx.write(write_filename, 'indexed', true, 'eps_to_zero', false);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
@@ -517,7 +518,7 @@ function test_idx_readWrite(t, cfg)
             t.add(sprintf('idx_read_write_table_%d', i));
             gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
             gdx.read(cfg.filenames{i}, 'format', 'table', 'indexed', true);
-            gdx.write(write_filename, 'indexed', true);
+            gdx.write(write_filename, 'indexed', true, 'eps_to_zero', false);
             t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
             t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
         end
@@ -525,14 +526,14 @@ function test_idx_readWrite(t, cfg)
         t.add(sprintf('idx_read_write_dense_matrix_%d', i));
         gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{i}, 'format', 'dense_matrix', 'indexed', true);
-        gdx.write(write_filename, 'indexed', true);
+        gdx.write(write_filename, 'indexed', true, 'eps_to_zero', false);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
 
         t.add(sprintf('idx_read_write_sparse_matrix_%d', i));
         gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
         gdx.read(cfg.filenames{i}, 'format', 'sparse_matrix', 'indexed', true);
-        gdx.write(write_filename, 'indexed', true);
+        gdx.write(write_filename, 'indexed', true, 'eps_to_zero', false);
         t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
     end
@@ -563,4 +564,28 @@ function test_idx_readWritePartial(t, cfg)
     gdx.read(write_filename, 'indexed', true);
     t.assert(numel(fieldnames(gdx.data)) == 0);
     t.assert(gdx.isValid());
+end
+
+function test_idx_writeEpsToZero(t, cfg)
+
+    write_filename = fullfile(cfg.working_dir, 'write.gdx');
+
+    geps = gams.transfer.SpecialValues.EPS;
+
+    t.add('idx_write_eps_to_zero_1');
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    gams.transfer.Parameter(gdx, 'p', {}, 'records', geps);
+    gdx.write(write_filename, 'indexed', true);
+    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    t.assert(gdx.data.p.records.value == 0);
+    t.assert(~gams.transfer.SpecialValues.isEps(gdx.data.p.records.value));
+
+    t.add('idx_write_eps_to_zero_2');
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    gams.transfer.Parameter(gdx, 'p', {}, 'records', geps);
+    gdx.write(write_filename, 'indexed', true, 'eps_to_zero', false);
+    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    t.assert(gdx.data.p.records.value == 0);
+    % t.assert(gams.transfer.SpecialValues.isEps(gdx.data.p.records.value)); % see special values test above
+
 end

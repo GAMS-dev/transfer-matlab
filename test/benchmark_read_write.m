@@ -7,7 +7,7 @@ function results = benchmark_read_write(varargin)
     addParameter(p, 'format', 'struct', is_string_char)
     addParameter(p, 'working_dir', tempname, is_string_char);
     addParameter(p, 'check_same', false, @islogical);
-    addParameter(p, 'gams_dir', gams.transfer.find_gams(), is_string_char);
+    addParameter(p, 'gams_dir', gams.transfer.utils.find_gdx(), is_string_char);
     parse(p, varargin{:});
 
     files = dir(fullfile(p.Results.gdx_dir, '**', '*.gdx'));

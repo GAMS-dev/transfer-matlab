@@ -48,7 +48,7 @@ void mexFunction(
     char gdx_filename[GMS_SSSIZE], buf[GMS_SSSIZE], sysdir[GMS_SSSIZE], name[GMS_SSSIZE];
     char text[GMS_SSSIZE];
     double def_values[GMS_VAL_MAX];
-    bool was_table, support_table, issorted, have_nrecs;
+    bool was_table, support_table, issorted, have_nrecs, eps_to_zero;
     char* data_name = NULL;
     idxHandle_t gdx = NULL;
     gdxUelIndex_t gdx_uel_index;
@@ -79,12 +79,13 @@ void mexFunction(
     mxArray* call_prhs[2] = {NULL};
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(0, nlhs, 6, nrhs);
+    gt_mex_check_arguments_num(0, nlhs, 7, nrhs);
     gt_mex_check_argument_str(prhs, 0, sysdir);
     gt_mex_check_argument_str(prhs, 1, gdx_filename);
     gt_mex_check_argument_struct(prhs, 2);
     gt_mex_check_argument_bool(prhs, 4, 1, &issorted);
-    gt_mex_check_argument_bool(prhs, 5, 1, &support_table);
+    gt_mex_check_argument_bool(prhs, 5, 1, &eps_to_zero);
+    gt_mex_check_argument_bool(prhs, 6, 1, &support_table);
 
     /* create output data */
     plhs = NULL;
@@ -250,7 +251,12 @@ void mexFunction(
                     for (size_t k = 0; k < GMS_VAL_MAX; k++)
                     {
                         if (mx_arr_values[k])
-                            gdx_values[k] = mx_values[k][j];
+                        {
+                            if (eps_to_zero && gt_utils_iseps(mx_values[k][j]))
+                                gdx_values[k] = 0.0;
+                            else
+                                gdx_values[k] = mx_values[k][j];
+                        }
                         else
                             gdx_values[k] = def_values[k];
                     }
@@ -291,7 +297,12 @@ void mexFunction(
                     for (size_t k = 0; k < GMS_VAL_MAX; k++)
                     {
                         if (mx_arr_values[k])
-                            gdx_values[k] = mx_values[k][idx];
+                        {
+                            if (eps_to_zero && gt_utils_iseps(mx_values[k][idx]))
+                                gdx_values[k] = 0.0;
+                            else
+                                gdx_values[k] = mx_values[k][idx];
+                        }
                         else
                             gdx_values[k] = def_values[k];
                         is_default_rec = (gdx_values[k] != def_values[k]) ? false : is_default_rec;
@@ -339,7 +350,10 @@ void mexFunction(
                                 continue;
                             }
                             col_nnz[kk][k]++;
-                            gdx_values[kk] = mx_values[kk][idx];
+                            if (eps_to_zero && gt_utils_iseps(mx_values[kk][idx]))
+                                gdx_values[kk] = 0.0;
+                            else
+                                gdx_values[kk] = mx_values[kk][idx];
                         }
 
                         /* write values */

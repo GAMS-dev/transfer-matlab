@@ -598,6 +598,7 @@ classdef Container < gams.transfer.utils.Handle
             sorted = false;
             uel_priority = {};
             indexed = false;
+            eps_to_zero = true;
             try
                 gams.transfer.utils.Validator.minargin(numel(varargin), 1);
                 filename = gams.transfer.utils.absolute_path(gams.transfer.utils.Validator(...
@@ -633,6 +634,12 @@ classdef Container < gams.transfer.utils.Handle
                         index = index + 1;
                         gams.transfer.utils.Validator.minargin(numel(varargin), index);
                         indexed = gams.transfer.utils.Validator('indexed', index, varargin{index}) ...
+                            .type('logical').scalar().value;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'eps_to_zero')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        eps_to_zero = gams.transfer.utils.Validator('eps_to_zero', index, varargin{index}) ...
                             .type('logical').scalar().value;
                         index = index + 1;
                     else
@@ -683,10 +690,11 @@ classdef Container < gams.transfer.utils.Handle
             % write data
             if indexed
                 gams.transfer.gdx.gt_idx_write(obj.gams_dir_, filename, obj.data_.entries_, ...
-                    enable, sorted, gams.transfer.Constants.SUPPORTS_TABLE);
+                    enable, sorted, eps_to_zero, gams.transfer.Constants.SUPPORTS_TABLE);
             else
                 gams.transfer.gdx.gt_gdx_write(obj.gams_dir_, filename, obj.data_.entries_, ...
-                    enable, uel_priority, compress, sorted, gams.transfer.Constants.SUPPORTS_TABLE, ...
+                    enable, uel_priority, compress, sorted, eps_to_zero, ...
+                    gams.transfer.Constants.SUPPORTS_TABLE, ...
                     gams.transfer.Constants.SUPPORTS_CATEGORICAL);
             end
         end

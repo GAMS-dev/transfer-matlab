@@ -37,6 +37,7 @@ function success = test_readwrite(cfg)
     test_readWritePartial(t, cfg);
     test_readWriteCompress(t, cfg);
     test_readWriteDomainCheck(t, cfg);
+    test_writeEpsToZero(t, cfg);
     [~, n_fails1] = t.summary();
 
     t = GAMSTest('readwrite_rc');
@@ -1673,5 +1674,73 @@ function test_readWriteDomainCheck(t, cfg)
     gdx.write(write_filename);
     gdx2 = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
+
+end
+
+function test_writeEpsToZero(t, cfg)
+
+    write_filename = fullfile(cfg.working_dir, 'write.gdx');
+
+    geps = gams.transfer.SpecialValues.EPS;
+
+    t.add('write_eps_to_zero_1');
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    gams.transfer.Parameter(gdx, 'p', {}, 'records', geps);
+    gams.transfer.Variable(gdx, 'v', 'free', {}, 'records', {geps, geps, geps, geps, geps});
+    gams.transfer.Equation(gdx, 'e', 'leq', {}, 'records', {geps, geps, geps, geps, geps});
+    gdx.write(write_filename);
+    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    t.assert(gdx.data.p.records.value == 0);
+    t.assert(gdx.data.v.records.level == 0);
+    t.assert(gdx.data.v.records.marginal == 0);
+    t.assert(gdx.data.v.records.lower == 0);
+    t.assert(gdx.data.v.records.upper == 0);
+    t.assert(gdx.data.v.records.scale == 0);
+    t.assert(gdx.data.e.records.level == 0);
+    t.assert(gdx.data.e.records.marginal == 0);
+    t.assert(gdx.data.e.records.lower == 0);
+    t.assert(gdx.data.e.records.upper == 0);
+    t.assert(gdx.data.e.records.scale == 0);
+    t.assert(~gams.transfer.SpecialValues.isEps(gdx.data.p.records.value));
+    t.assert(~gams.transfer.SpecialValues.isEps(gdx.data.v.records.level));
+    t.assert(~gams.transfer.SpecialValues.isEps(gdx.data.v.records.marginal));
+    t.assert(~gams.transfer.SpecialValues.isEps(gdx.data.v.records.lower));
+    t.assert(~gams.transfer.SpecialValues.isEps(gdx.data.v.records.upper));
+    t.assert(~gams.transfer.SpecialValues.isEps(gdx.data.v.records.scale));
+    t.assert(~gams.transfer.SpecialValues.isEps(gdx.data.e.records.level));
+    t.assert(~gams.transfer.SpecialValues.isEps(gdx.data.e.records.marginal));
+    t.assert(~gams.transfer.SpecialValues.isEps(gdx.data.e.records.lower));
+    t.assert(~gams.transfer.SpecialValues.isEps(gdx.data.e.records.upper));
+    t.assert(~gams.transfer.SpecialValues.isEps(gdx.data.e.records.scale));
+
+    t.add('write_eps_to_zero_2');
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    gams.transfer.Parameter(gdx, 'p', {}, 'records', geps);
+    gams.transfer.Variable(gdx, 'v', 'free', {}, 'records', {geps, geps, geps, geps, geps});
+    gams.transfer.Equation(gdx, 'e', 'leq', {}, 'records', {geps, geps, geps, geps, geps});
+    gdx.write(write_filename, 'eps_to_zero', false);
+    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    t.assert(gdx.data.p.records.value == 0);
+    t.assert(gdx.data.v.records.level == 0);
+    t.assert(gdx.data.v.records.marginal == 0);
+    t.assert(gdx.data.v.records.lower == 0);
+    t.assert(gdx.data.v.records.upper == 0);
+    t.assert(gdx.data.v.records.scale == 0);
+    t.assert(gdx.data.e.records.level == 0);
+    t.assert(gdx.data.e.records.marginal == 0);
+    t.assert(gdx.data.e.records.lower == 0);
+    t.assert(gdx.data.e.records.upper == 0);
+    t.assert(gdx.data.e.records.scale == 0);
+    t.assert(gams.transfer.SpecialValues.isEps(gdx.data.p.records.value));
+    t.assert(gams.transfer.SpecialValues.isEps(gdx.data.v.records.level));
+    t.assert(gams.transfer.SpecialValues.isEps(gdx.data.v.records.marginal));
+    t.assert(gams.transfer.SpecialValues.isEps(gdx.data.v.records.lower));
+    t.assert(gams.transfer.SpecialValues.isEps(gdx.data.v.records.upper));
+    t.assert(gams.transfer.SpecialValues.isEps(gdx.data.v.records.scale));
+    t.assert(gams.transfer.SpecialValues.isEps(gdx.data.e.records.level));
+    t.assert(gams.transfer.SpecialValues.isEps(gdx.data.e.records.marginal));
+    t.assert(gams.transfer.SpecialValues.isEps(gdx.data.e.records.lower));
+    t.assert(gams.transfer.SpecialValues.isEps(gdx.data.e.records.upper));
+    t.assert(gams.transfer.SpecialValues.isEps(gdx.data.e.records.scale));
 
 end
