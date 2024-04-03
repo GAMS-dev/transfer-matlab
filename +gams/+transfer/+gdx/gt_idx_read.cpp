@@ -30,7 +30,7 @@
 
 #include "mex.h"
 
-#include "idxcc.h"
+#include "gt_idx.h"
 #include "gt_utils.h"
 #include "gt_mex.h"
 #include "gt_gdx_idx.h"

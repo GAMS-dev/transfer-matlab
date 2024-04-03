@@ -32,7 +32,7 @@
 #else
 #include "gdxcc.h"
 #endif
-#include "idxcc.h"
+#include "gt_idx.h"
 #include "mex.h"
 
 #ifdef __cplusplus

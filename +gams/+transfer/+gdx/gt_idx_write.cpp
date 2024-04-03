@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "idxcc.h"
+#include "gt_idx.h"
 #include "mex.h"
 #include "gt_utils.h"
 #include "gt_mex.h"

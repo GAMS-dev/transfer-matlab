@@ -44,13 +44,11 @@ function setup(varargin)
     p = inputParser();
     is_string_char = @(x) (isstring(x) && isscalar(x) || ischar(x));
     addRequired(p, 'gdx_path', is_string_char);
-    addRequired(p, 'idx_path', is_string_char);
     addRequired(p, 'zlib_path', is_string_char);
     addParameter(p, 'verbose', 0, @isnumeric);
     parse(p, varargin{:});
 
     fprintf('Using GDX path: %s\n', p.Results.gdx_path);
-    fprintf('Using IDX path: %s\n', p.Results.idx_path);
     fprintf('Using ZLIB path: %s\n', p.Results.zlib_path);
 
     files = {
@@ -64,7 +62,7 @@ function setup(varargin)
     };
 
     common_files = {
-        fullfile(p.Results.idx_path, 'idxcc.c'), ...
+        fullfile(current_dir, '+gdx', 'gt_idx.cpp'), ...
         fullfile(current_dir, '+gdx', 'gt_utils.c'), ...
         fullfile(current_dir, '+gdx', 'gt_mex.c'), ...
         fullfile(current_dir, '+gdx', 'gt_gdx_idx.cpp'), ...
@@ -100,7 +98,6 @@ function setup(varargin)
         build.libs = {'dl', 'pthread'};
     end
     build.includes = {
-        fullfile(p.Results.idx_path), ...
         fullfile(p.Results.gdx_path, 'generated'), ...
         fullfile(p.Results.gdx_path, 'src'), ...
         fullfile(p.Results.gdx_path, 'src', 'gdlib'), ...
