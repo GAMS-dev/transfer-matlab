@@ -30,12 +30,6 @@ c2 = Container(c1);
 ```
 \endparblock
 
-\note On default, GAMS Transfer Matlab tries to find the GAMS system directory using the PATH
-environment variable (this is not the Matlab path). Whether GAMS was found, can be checked by
-looking at `c.gams_dir` (empty string = not found). Alternatively, one can pass a GAMS system path
-to the \ref gams::transfer::Container "Container" constructor: `c = Container("gams_dir",
-"path/to/gams");`.
-
 \section GAMS_TRANSFER_MATLAB_CONTAINER_READ Reading From GDX
 
 Above was a first example of how to read a whole GDX file into a container. But often it is useful

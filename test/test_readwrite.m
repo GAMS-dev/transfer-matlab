@@ -58,15 +58,14 @@ function test_read(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container(cfg.filenames{1}, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(cfg.filenames{1});
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1});
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx);
     end
 
     t.add('read_basic_info');
-    t.assertEquals(gdx.gams_dir, cfg.gams_dir);
     t.assert(numel(fieldnames(gdx.data)) == 5);
 
     t.add('read_set_basic');
@@ -148,12 +147,12 @@ function test_read(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'struct');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'struct');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx);
     end
 
     t.add('read_set_records_struct');
@@ -336,12 +335,12 @@ function test_read(t, cfg, container_type)
     if gams.transfer.Constants.SUPPORTS_TABLE
         switch container_type
         case 'c'
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+            gdx = gams.transfer.Container();
             gdx.read(cfg.filenames{1}, 'format', 'table');
         case 'rc'
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+            gdx = gams.transfer.Container();
             gdx.read(cfg.filenames{1}, 'format', 'table');
-            gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+            gdx = gams.transfer.Container(gdx);
         end
 
         t.add('read_set_records_table');
@@ -525,12 +524,12 @@ function test_read(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'dense_matrix');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx);
     end
 
     t.add('read_set_records_dense_matrix');
@@ -702,12 +701,12 @@ function test_read(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'sparse_matrix');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx);
     end
 
     t.add('read_set_records_sparse_matrix');
@@ -892,15 +891,15 @@ function test_readEquals(t, cfg, container_type)
     for i = [1,2,5,7]
         switch container_type
         case 'c'
-            gdx1 = gams.transfer.Container(cfg.filenames{i}, 'gams_dir', cfg.gams_dir);
-            gdx2 = gams.transfer.Container(cfg.filenames{i}, 'gams_dir', cfg.gams_dir);
+            gdx1 = gams.transfer.Container(cfg.filenames{i});
+            gdx2 = gams.transfer.Container(cfg.filenames{i});
         case 'rc'
-            gdx1 = gams.transfer.Container('gams_dir', cfg.gams_dir);
+            gdx1 = gams.transfer.Container();
             gdx1.read(cfg.filenames{i});
-            gdx1 = gams.transfer.Container(gdx1, 'gams_dir', cfg.gams_dir);
-            gdx2 = gams.transfer.Container('gams_dir', cfg.gams_dir);
+            gdx1 = gams.transfer.Container(gdx1);
+            gdx2 = gams.transfer.Container();
             gdx2.read(cfg.filenames{i});
-            gdx2 = gams.transfer.Container(gdx2, 'gams_dir', cfg.gams_dir);
+            gdx2 = gams.transfer.Container(gdx2);
         end
 
         t.add(sprintf('read_equals_%d', i));
@@ -912,11 +911,11 @@ function test_readSameDomainLabels(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container(cfg.filenames{9}, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(cfg.filenames{9});
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{9});
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx);
     end
 
     t.add('read_same_domain_labels_1');
@@ -967,12 +966,12 @@ function test_readNoRecords(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'records', false);
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'records', false);
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx);
     end
 
     t.add('read_no_records_set');
@@ -1066,18 +1065,17 @@ function test_readPartial(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'i', 'j', 'x'}, ...
             'values', {'level', 'marginal'});
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'i', 'j', 'x'}, ...
             'values', {'level', 'marginal'});
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx);
     end
 
     t.add('read_partial_basic_info_1');
-    t.assertEquals(gdx.gams_dir, cfg.gams_dir);
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'i'));
     t.assert(isfield(gdx.data, 'j'));
@@ -1189,16 +1187,15 @@ function test_readPartial(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'x'}, 'values', {'marginal'});
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'x'}, 'values', {'marginal'});
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx);
     end
 
     t.add('read_partial_basic_info_2');
-    t.assertEquals(gdx.gams_dir, cfg.gams_dir);
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'x'));
 
@@ -1228,18 +1225,17 @@ function test_readPartial(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'I', 'J', 'X'}, ...
             'values', {'level', 'marginal'});
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'I', 'J', 'X'}, ...
             'values', {'level', 'marginal'});
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx);
     end
 
     t.add('read_partial_diffcase_basic_info');
-    t.assertEquals(gdx.gams_dir, cfg.gams_dir);
     t.assert(numel(fieldnames(gdx.data)) == 3);
     t.assert(isfield(gdx.data, 'i'));
     t.assert(isfield(gdx.data, 'j'));
@@ -1250,13 +1246,13 @@ function test_readPartial(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'j', 'x', 'i'}, ...
             'values', {'level', 'marginal'});
     case 'rc'
-        gdx1 = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx1 = gams.transfer.Container();
         gdx1.read(cfg.filenames{1}, 'format', 'struct');
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(gdx1, 'symbols', {'j', 'x', 'i'}, 'values', {'level', 'marginal'});
     end
 
@@ -1272,12 +1268,12 @@ function test_readSpecialValues(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{2}, 'format', 'struct');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{2}, 'format', 'struct');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx);
     end
 
     t.add('read_special_values');
@@ -1309,12 +1305,12 @@ function test_readDomainCycle(t, cfg, container_type)
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{8}, 'format', 'struct');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{8}, 'format', 'struct');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx);
     end
 
     t.add('read_domain_cycle_i_of_i');
@@ -1333,7 +1329,7 @@ function test_readAcronyms(t, cfg, container_type);
     t.add('read_acronyms_1');
     switch container_type
     case {'c', 'rc'}
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         stdout = evalc("gdx.read(cfg.filenames{6}, 'format', 'struct');");
     end
     t.assert(~isempty(strfind(stdout, ...
@@ -1343,12 +1339,12 @@ function test_readAcronyms(t, cfg, container_type);
     warning('off');
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{6}, 'format', 'struct');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{6}, 'format', 'struct');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx);
     end
     t.assert(isfield(gdx.data, 'i'));
     t.assert(isfield(gdx.data, 'a'));
@@ -1366,10 +1362,10 @@ function test_readSymbolTypes(t, cfg, container_type);
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(cfg.filenames{3});
     case 'rc'
-        gdx = gams.transfer.Container(cfg.filenames{3}, 'gams_dir', cfg.gams_dir);
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(cfg.filenames{3});
+        gdx = gams.transfer.Container(gdx);
     end
 
     t.add('read_symbol_types_vartypes');
@@ -1409,12 +1405,12 @@ function test_readSymbolTypes(t, cfg, container_type);
 
     switch container_type
     case 'c'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{3}, 'format', 'dense_matrix');
     case 'rc'
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{3}, 'format', 'dense_matrix');
-        gdx = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container(gdx);
     end
 
     t.add('read_symbol_types_vartypes_default_values');
@@ -1491,45 +1487,44 @@ function test_readWrite(t, cfg)
 
     for i = [1,2,5,7,9]
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
-        gdxdump = fullfile(cfg.gams_dir, 'gdxdump');
 
         t.add(sprintf('read_write_struct_%d', i));
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{i}, 'format', 'struct');
         gdx.write(write_filename);
-        t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
-        t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
+        t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
 
         if gams.transfer.Constants.SUPPORTS_TABLE
             t.add(sprintf('read_write_table_%d', i));
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+            gdx = gams.transfer.Container();
             gdx.read(cfg.filenames{i}, 'format', 'table');
             gdx.write(write_filename);
-            t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
-            t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
+            t.testGdxDiff(cfg.filenames{i}, write_filename);
+            t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
         end
 
         t.add(sprintf('read_write_dense_matrix_%d', i));
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{i}, 'format', 'dense_matrix');
         gdx.write(write_filename);
-        t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
-        t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
+        t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
 
         if i ~= 9
             t.add(sprintf('read_write_sparse_matrix_%d', i));
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+            gdx = gams.transfer.Container();
             gdx.read(cfg.filenames{i}, 'format', 'sparse_matrix');
             gdx.write(write_filename);
-            t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
-            t.assert(system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
+            t.testGdxDiff(cfg.filenames{i}, write_filename);
+            t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
         end
     end
 end
 
 function test_readWritePartial(t, cfg)
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container();
     gdx.read(cfg.filenames{1}, 'format', 'struct', 'symbols', {'x'});
 
     t.add('read_write_partial_1');
@@ -1552,7 +1547,7 @@ function test_readWritePartial(t, cfg)
 
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
     gdx.write(write_filename);
-    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container(write_filename);
 
     t.add('read_write_partial_3');
     t.assert(numel(fieldnames(gdx.data)) == 3);
@@ -1561,23 +1556,23 @@ function test_readWritePartial(t, cfg)
     t.assert(isfield(gdx.data, 'x'));
     t.assert(gdx.isValid());
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container();
     gdx.read(cfg.filenames{1});
 
     t.add('read_write_partial_4');
     gdx.write(write_filename, 'symbols', {'x'});
-    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container(write_filename);
     t.assert(numel(fieldnames(gdx.data)) == 1);
     t.assert(isfield(gdx.data, 'x'));
     t.assert(gdx.isValid());
     t.assertEquals(gdx.data.x.domain_type, 'relaxed');
 
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container();
     gdx.read(cfg.filenames{1});
 
     t.add('read_write_partial_5');
     gdx.write(write_filename, 'symbols', {});
-    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container(write_filename);
     t.assert(numel(fieldnames(gdx.data)) == 0);
     t.assert(gdx.isValid());
 
@@ -1587,37 +1582,36 @@ function test_readWriteCompress(t, cfg)
 
     for i = [1,2,5]
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
-        gdxdump = fullfile(cfg.gams_dir, 'gdxdump');
 
         t.add(sprintf('read_write_struct_%d', i));
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{i}, 'format', 'struct');
         gdx.write(write_filename, 'compress', true);
-        t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
-        t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
+        t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(~system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
 
         if gams.transfer.Constants.SUPPORTS_TABLE
             t.add(sprintf('read_write_table_%d', i));
-            gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+            gdx = gams.transfer.Container();
             gdx.read(cfg.filenames{i}, 'format', 'table');
             gdx.write(write_filename, 'compress', true);
-            t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
-            t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
+            t.testGdxDiff(cfg.filenames{i}, write_filename);
+            t.assert(~system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
         end
 
         t.add(sprintf('read_write_dense_matrix_%d', i));
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{i}, 'format', 'dense_matrix');
         gdx.write(write_filename, 'compress', true);
-        t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
-        t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
+        t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(~system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
 
         t.add(sprintf('read_write_sparse_matrix_%d', i));
-        gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+        gdx = gams.transfer.Container();
         gdx.read(cfg.filenames{i}, 'format', 'sparse_matrix');
         gdx.write(write_filename, 'compress', true);
-        t.testGdxDiff(cfg.gams_dir, cfg.filenames{i}, write_filename);
-        t.assert(~system(sprintf('%s %s -v | grep -q "Compression.*1"', gdxdump, write_filename)));
+        t.testGdxDiff(cfg.filenames{i}, write_filename);
+        t.assert(~system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
     end
 end
 
@@ -1626,32 +1620,32 @@ function test_readWriteDomainCheck(t, cfg)
     write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
     t.add('read_write_domain_check_regular');
-    gdx = gams.transfer.Container(cfg.filenames{1}, 'gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container(cfg.filenames{1});
     t.assertEquals(gdx.data.x.domain_type, 'regular');
     gdx.write(write_filename);
-    gdx2 = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    gdx2 = gams.transfer.Container(write_filename);
     t.assertEquals(gdx2.data.x.domain_type, 'regular');
 
     t.add('read_write_domain_check_relaxed_1');
-    gdx = gams.transfer.Container(cfg.filenames{1}, 'gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container(cfg.filenames{1});
     t.assertEquals(gdx.data.x.domain_type, 'regular');
     x = gdx.data.x;
     x.domain{1} = 'i';
     x.domain{2} = 'j';
     t.assertEquals(gdx.data.x.domain_type, 'relaxed');
     gdx.write(write_filename);
-    gdx2 = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    gdx2 = gams.transfer.Container(write_filename);
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
     x = gdx2.data.x;
     x.domain{1} = gdx2.data.i;
     x.domain{2} = gdx2.data.j;
     t.assertEquals(gdx2.data.x.domain_type, 'regular');
     gdx2.write(write_filename);
-    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container(write_filename);
     t.assertEquals(gdx.data.x.domain_type, 'regular');
 
     t.add('read_write_domain_check_relaxed_2');
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container();
     gdx.read(cfg.filenames{1}, 'format', 'struct');
     t.assertEquals(gdx.data.x.domain_type, 'regular');
     records = gdx.data.x.records;
@@ -1672,7 +1666,7 @@ function test_readWriteDomainCheck(t, cfg)
     x.setUELs(uels2, 2, 'rename', true);
     t.assertEquals(gdx.data.x.domain_type, 'relaxed');
     gdx.write(write_filename);
-    gdx2 = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    gdx2 = gams.transfer.Container(write_filename);
     t.assertEquals(gdx2.data.x.domain_type, 'relaxed');
 
 end
@@ -1684,12 +1678,12 @@ function test_writeEpsToZero(t, cfg)
     geps = gams.transfer.SpecialValues.EPS;
 
     t.add('write_eps_to_zero_1');
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container();
     gams.transfer.Parameter(gdx, 'p', {}, 'records', geps);
     gams.transfer.Variable(gdx, 'v', 'free', {}, 'records', {geps, geps, geps, geps, geps});
     gams.transfer.Equation(gdx, 'e', 'leq', {}, 'records', {geps, geps, geps, geps, geps});
     gdx.write(write_filename);
-    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container(write_filename);
     t.assert(gdx.data.p.records.value == 0);
     t.assert(gdx.data.v.records.level == 0);
     t.assert(gdx.data.v.records.marginal == 0);
@@ -1714,12 +1708,12 @@ function test_writeEpsToZero(t, cfg)
     t.assert(~gams.transfer.SpecialValues.isEps(gdx.data.e.records.scale));
 
     t.add('write_eps_to_zero_2');
-    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container();
     gams.transfer.Parameter(gdx, 'p', {}, 'records', geps);
     gams.transfer.Variable(gdx, 'v', 'free', {}, 'records', {geps, geps, geps, geps, geps});
     gams.transfer.Equation(gdx, 'e', 'leq', {}, 'records', {geps, geps, geps, geps, geps});
     gdx.write(write_filename, 'eps_to_zero', false);
-    gdx = gams.transfer.Container(write_filename, 'gams_dir', cfg.gams_dir);
+    gdx = gams.transfer.Container(write_filename);
     t.assert(gdx.data.p.records.value == 0);
     t.assert(gdx.data.v.records.level == 0);
     t.assert(gdx.data.v.records.marginal == 0);

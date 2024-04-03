@@ -30,7 +30,7 @@ function success = test_trnsport(cfg)
 
     for k = 1:3
         if k == 1
-            m = gams.transfer.Container('gams_dir', cfg.gams_dir);
+            m = gams.transfer.Container();
             i = gams.transfer.Set(m, 'i', ...
                 'records', {'seattle', 'san-diego'}, ...
                 'description', 'canning plants');
@@ -68,7 +68,7 @@ function success = test_trnsport(cfg)
                 'records', {[325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]}, ...
                 'description', 'satisfy demand at market j');
         elseif k == 2
-            m = gams.transfer.Container('gams_dir', cfg.gams_dir);
+            m = gams.transfer.Container();
             i = gams.transfer.Set(m, 'i', 'description', 'canning plants');
             i.setRecords({'seattle', 'san-diego'});
             j = gams.transfer.Set(m, 'j', 'description', 'markets');
@@ -94,7 +94,7 @@ function success = test_trnsport(cfg)
             demand = gams.transfer.Equation(m, 'demand', 'g', j, 'description', 'satisfy demand at market j');
             demand.setRecords([325, 300, 275], [0.225, 0.153, 0.126], [325, 300, 275]);
         elseif k == 3
-            m = gams.transfer.Container('gams_dir', cfg.gams_dir);
+            m = gams.transfer.Container();
             i = gams.transfer.Set(m, 'i', 'description', 'canning plants');
             if gams.transfer.Constants.SUPPORTS_CATEGORICAL
                 i.records = struct('uni', categorical({'seattle'; 'san-diego'}, ...
@@ -139,14 +139,11 @@ function success = test_trnsport(cfg)
             demand.records = struct('level', [325; 300; 275], 'marginal', [0.225; 0.153; 0.126], 'lower', [325; 300; 275]);
             demand.format = 'dense_matrix';
         elseif k == 4
-            m = gams.transfer.Container(fullfile(cfg.working_dir, 'write_trnsport_1.gdx'), ...
-                'gams_dir', cfg.gams_dir);
+            m = gams.transfer.Container(fullfile(cfg.working_dir, 'write_trnsport_1.gdx'));
         elseif k == 5
-            m = gams.transfer.Container(fullfile(cfg.working_dir, 'write_trnsport_2.gdx'), ...
-                'gams_dir', cfg.gams_dir);
+            m = gams.transfer.Container(fullfile(cfg.working_dir, 'write_trnsport_2.gdx'));
         elseif k == 6
-            m = gams.transfer.Container(fullfile(cfg.working_dir, 'write_trnsport_3.gdx'), ...
-                'gams_dir', cfg.gams_dir);
+            m = gams.transfer.Container(fullfile(cfg.working_dir, 'write_trnsport_3.gdx'));
         end
 
         if k == 4 || k == 5 || k == 6

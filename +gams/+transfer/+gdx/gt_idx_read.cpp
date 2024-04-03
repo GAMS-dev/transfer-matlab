@@ -48,7 +48,7 @@ void mexFunction(
     size_t dim, nrecs, nvals, n_dom_fields;
     bool read_records;
     bool values_flag[GMS_VAL_MAX];
-    char buf[GMS_SSSIZE], name[GMS_SSSIZE], gdx_filename[GMS_SSSIZE], sysdir[GMS_SSSIZE];
+    char buf[GMS_SSSIZE], name[GMS_SSSIZE], gdx_filename[GMS_SSSIZE];
     char text[GMS_SSSIZE];
     double def_values[GMS_VAL_MAX];
     double sizes[GLOBAL_MAX_INDEX_DIM];
@@ -82,12 +82,11 @@ void mexFunction(
     GDXSTRINDEXPTRS_INIT(domains, domains_ptr);
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(1, nlhs, 5, nrhs);
-    gt_mex_check_argument_str(prhs, 0, sysdir);
-    gt_mex_check_argument_str(prhs, 1, gdx_filename);
-    gt_mex_check_argument_cell(prhs, 2);
-    gt_mex_check_argument_int(prhs, 3, GT_FILTER_NONE, 1, &orig_format);
-    gt_mex_check_argument_bool(prhs, 4, 1, &read_records);
+    gt_mex_check_arguments_num(1, nlhs, 4, nrhs);
+    gt_mex_check_argument_str(prhs, 0, gdx_filename);
+    gt_mex_check_argument_cell(prhs, 1);
+    gt_mex_check_argument_int(prhs, 2, GT_FILTER_NONE, 1, &orig_format);
+    gt_mex_check_argument_bool(prhs, 3, 1, &read_records);
     if (orig_format != GT_FORMAT_STRUCT && orig_format != GT_FORMAT_DENSEMAT &&
         orig_format != GT_FORMAT_SPARSEMAT && orig_format != GT_FORMAT_TABLE)
         mexErrMsgIdAndTxt(ERRID"format", "Invalid record format.");
@@ -96,14 +95,14 @@ void mexFunction(
     plhs[0] = mxCreateStructMatrix(1, 1, 0, NULL);
 
     /* start GDX */
-    gt_idx_init_read(&gdx, sysdir, gdx_filename);
+    gt_idx_init_read(&gdx, gdx_filename);
     if (!idxGetSymCount(gdx, &sym_count))
         mexErrMsgIdAndTxt(ERRID"gdxSystemInfo", "GDX error (idxGetSymCount)");
 
     sym_enabled = (bool*) mxCalloc(sym_count+1, sizeof(bool));
 
     /* get symbol ids */
-    if (mxGetNumberOfElements(prhs[2]) == 0)
+    if (mxGetNumberOfElements(prhs[1]) == 0)
     {
         sym_enabled[0] = false;
         for (int i = 1; i < sym_count+1; i++)
@@ -113,9 +112,9 @@ void mexFunction(
     {
         for (int i = 0; i < sym_count+1; i++)
             sym_enabled[i] = false;
-        for (size_t i = 0; i < mxGetNumberOfElements(prhs[2]); i++)
+        for (size_t i = 0; i < mxGetNumberOfElements(prhs[1]); i++)
         {
-            mx_arr_symbol_name = mxGetCell(prhs[2], i);
+            mx_arr_symbol_name = mxGetCell(prhs[1], i);
             if (!mxIsChar(mx_arr_symbol_name))
                 mexErrMsgIdAndTxt(ERRID"symbol", "Symbol name must be of type 'char'.");
             mxGetString(mx_arr_symbol_name, buf, GMS_SSSIZE);

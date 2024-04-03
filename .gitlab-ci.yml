@@ -294,8 +294,10 @@ octave:test:linux:
     image:
         name: $CI_REGISTRY_IMAGE/linux/builder
     needs: [download:linux, octave:build:linux]
+    before_script:
+        - PATH=$PWD/linux/gdx:$PATH
     script:
-        - octave --no-gui --no-window-system --path $PWD/test --eval "run_tests('linux/octave', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - octave --no-gui --no-window-system --path $PWD/test --eval "run_tests('linux/octave', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -305,8 +307,10 @@ octave:test:macos:
     tags:
         - macos
     needs: [download:macos, octave:build:macos]
+    before_script:
+        - PATH=$PWD/macos/gdx:$PATH
     script:
-        - octave --no-gui --no-window-system --path $PWD/test --eval "run_tests('macos/octave', 'gams_dir', 'macos/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - octave --no-gui --no-window-system --path $PWD/test --eval "run_tests('macos/octave', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -316,8 +320,10 @@ octave:test:macos_arm:
     tags:
         - macos-arm64
     needs: [download:macos_arm, octave:build:macos_arm]
+    before_script:
+        - PATH=$PWD/macos_arm/gdx:$PATH
     script:
-        - octave --no-gui --no-window-system --path $PWD/test --eval "run_tests('macos_arm/octave', 'gams_dir', 'macos_arm/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - octave --no-gui --no-window-system --path $PWD/test --eval "run_tests('macos_arm/octave', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -329,17 +335,19 @@ matlab:test:linux:
     image:
         name: $CI_REGISTRY_IMAGE/linux/builder
     needs: [download:linux, matlab:build:linux]
+    before_script:
+        - PATH=$PWD/linux/gdx:$PATH
     script:
-        - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
         # - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=false
         # - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=true
-        # - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        # - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
         # - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=true
         # - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=false
-        # - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        # - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
         # - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=false
         # - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=false
-        # - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'gams_dir', 'linux/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        # - ~/Documents/MATLAB/runmatlab.sh "addpath('test'); run_tests('linux/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -349,17 +357,19 @@ matlab:test:macos:
     tags:
         - macos
     needs: [download:macos, matlab:build:macos]
+    before_script:
+        - PATH=$PWD/macos/gdx:$PATH
     script:
-        - matlab -batch "addpath('test'); run_tests('macos/matlab', 'gams_dir', 'macos/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab -batch "addpath('test'); run_tests('macos/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
         - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=false
         - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=true
-        - matlab -batch "addpath('test'); run_tests('macos/matlab', 'gams_dir', 'macos/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab -batch "addpath('test'); run_tests('macos/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
         - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=true
         - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=false
-        - matlab -batch "addpath('test'); run_tests('macos/matlab', 'gams_dir', 'macos/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab -batch "addpath('test'); run_tests('macos/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
         - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=false
         - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=false
-        - matlab -batch "addpath('test'); run_tests('macos/matlab', 'gams_dir', 'macos/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab -batch "addpath('test'); run_tests('macos/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -369,17 +379,19 @@ matlab:test:macos_arm:
     tags:
         - macos-arm64
     needs: [download:macos_arm, matlab:build:macos_arm]
+    before_script:
+        - PATH=$PWD/macos_arm/gdx:$PATH
     script:
-        - matlab -batch "addpath('test'); run_tests('macos_arm/matlab', 'gams_dir', 'macos_arm/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab -batch "addpath('test'); run_tests('macos_arm/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
         - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=false
         - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=true
-        - matlab -batch "addpath('test'); run_tests('macos_arm/matlab', 'gams_dir', 'macos_arm/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab -batch "addpath('test'); run_tests('macos_arm/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
         - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=true
         - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=false
-        - matlab -batch "addpath('test'); run_tests('macos_arm/matlab', 'gams_dir', 'macos_arm/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab -batch "addpath('test'); run_tests('macos_arm/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
         - export GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL=false
         - export GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE=false
-        - matlab -batch "addpath('test'); run_tests('macos_arm/matlab', 'gams_dir', 'macos_arm/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab -batch "addpath('test'); run_tests('macos_arm/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master
@@ -389,17 +401,19 @@ matlab:test:windows:
     tags:
         - windows-shell
     needs: [download:windows, matlab:build:windows]
+    before_script:
+        - $env:Path = "$pwd/windows/gdx;" + $env:Path
     script:
-        - matlab.exe -batch "addpath('test'); run_tests('windows/matlab', 'gams_dir', 'windows/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab.exe -batch "addpath('test'); run_tests('windows/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
         - $env:GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL = 'false'
         - $env:GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE = 'true'
-        - matlab.exe -batch "addpath('test'); run_tests('windows/matlab', 'gams_dir', 'windows/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab.exe -batch "addpath('test'); run_tests('windows/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
         - $env:GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL = 'true'
         - $env:GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE = 'false'
-        - matlab.exe -batch "addpath('test'); run_tests('windows/matlab', 'gams_dir', 'windows/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab.exe -batch "addpath('test'); run_tests('windows/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
         - $env:GAMS_TRANSFER_MATLAB_SUPPORTS_CATEGORICAL = 'false'
         - $env:GAMS_TRANSFER_MATLAB_SUPPORTS_TABLE = 'false'
-        - matlab.exe -batch "addpath('test'); run_tests('windows/matlab', 'gams_dir', 'windows/gdx', 'working_dir', 'unittest', 'exit_on_fail', true)"
+        - matlab.exe -batch "addpath('test'); run_tests('windows/matlab', 'working_dir', 'unittest', 'exit_on_fail', true)"
     only:
         - merge_requests
         - master

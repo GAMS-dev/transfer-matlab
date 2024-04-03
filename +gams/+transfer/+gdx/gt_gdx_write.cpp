@@ -50,7 +50,7 @@ void mexFunction(
     int type, subtype, format, sym_nr;
     size_t dim, nrecs;
     char gdx_filename[GMS_SSSIZE], buf[GMS_SSSIZE], name[GMS_SSSIZE];
-    char text[GMS_SSSIZE], dominfo[10], sysdir[GMS_SSSIZE];
+    char text[GMS_SSSIZE], dominfo[10];
     double def_values[GMS_VAL_MAX];
     bool was_table, support_table, support_categorical, compress, issorted, singleton, eps_to_zero;
     bool have_nrecs, can_skip_default_recs;
@@ -90,34 +90,33 @@ void mexFunction(
     GDXSTRINDEXPTRS_INIT(domains, domains_ptr);
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(0, nlhs, 10, nrhs);
-    gt_mex_check_argument_str(prhs, 0, sysdir);
-    gt_mex_check_argument_str(prhs, 1, gdx_filename);
-    gt_mex_check_argument_struct(prhs, 2);
-    gt_mex_check_argument_cell(prhs, 4);
-    gt_mex_check_argument_bool(prhs, 5, 1, &compress);
-    gt_mex_check_argument_bool(prhs, 6, 1, &issorted);
-    gt_mex_check_argument_bool(prhs, 7, 1, &eps_to_zero);
-    gt_mex_check_argument_bool(prhs, 8, 1, &support_table);
-    gt_mex_check_argument_bool(prhs, 9, 1, &support_categorical);
+    gt_mex_check_arguments_num(0, nlhs, 9, nrhs);
+    gt_mex_check_argument_str(prhs, 0, gdx_filename);
+    gt_mex_check_argument_struct(prhs, 1);
+    gt_mex_check_argument_cell(prhs, 3);
+    gt_mex_check_argument_bool(prhs, 4, 1, &compress);
+    gt_mex_check_argument_bool(prhs, 5, 1, &issorted);
+    gt_mex_check_argument_bool(prhs, 6, 1, &eps_to_zero);
+    gt_mex_check_argument_bool(prhs, 7, 1, &support_table);
+    gt_mex_check_argument_bool(prhs, 8, 1, &support_categorical);
 
     /* create output data */
     plhs = NULL;
 
     /* start GDX */
-    gt_gdx_init_write(&gdx, sysdir, gdx_filename, compress);
+    gt_gdx_init_write(&gdx, gdx_filename, compress);
 
     /* register priority UELs */
-    gt_gdx_register_uels(gdx, (mxArray*) prhs[4], NULL);
+    gt_gdx_register_uels(gdx, (mxArray*) prhs[3], NULL);
 
 
 #ifdef WITH_R2018A_OR_NEWER
-    mx_enable = mxGetLogicals(prhs[3]);
+    mx_enable = mxGetLogicals(prhs[2]);
 #else
-    mx_enable = (mxLogical*) mxGetData(prhs[3]);
+    mx_enable = (mxLogical*) mxGetData(prhs[2]);
 #endif
     sym_nr = 0;
-    for (int i = 0; i < mxGetNumberOfFields(prhs[2]); i++)
+    for (int i = 0; i < mxGetNumberOfFields(prhs[1]); i++)
     {
         if (!mx_enable[i])
             continue;
@@ -135,8 +134,8 @@ void mexFunction(
         sym_nr++;
 
         /* get data field */
-        mx_arr_symbol = mxGetFieldByNumber(prhs[2], 0, i);
-        data_name = (char*) mxGetFieldNameByNumber(prhs[2], i);
+        mx_arr_symbol = mxGetFieldByNumber(prhs[1], 0, i);
+        data_name = (char*) mxGetFieldNameByNumber(prhs[1], i);
 
         /* get symbol type */
         if (mxIsClass(mx_arr_symbol, "gams.transfer.alias.Set"))

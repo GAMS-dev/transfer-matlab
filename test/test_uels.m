@@ -353,7 +353,7 @@ end
 
 function test_symbol_uels(t, cfg)
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
@@ -507,7 +507,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{3}, 'i6');
     t.assertEquals(uels{4}, 'i10');
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
@@ -621,7 +621,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 0);
     t.assert(ids(6) == 3);
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
@@ -640,7 +640,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 0);
     t.assert(ids(6) == 0);
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
@@ -666,7 +666,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 0);
     t.assert(ids(6) == 0);
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
@@ -720,7 +720,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{4}, 'i10');
     t.assertEquals(uels{5}, 'i5');
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
@@ -777,7 +777,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{4}, 'i6');
     t.assertEquals(uels{5}, 'i10');
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
@@ -814,7 +814,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 0);
     t.assert(ids(6) == 2);
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
@@ -849,7 +849,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
@@ -910,7 +910,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     i = c.data.i;
     j = c.data.j;
@@ -985,7 +985,7 @@ function test_symbol_uels(t, cfg)
     t.assertEquals(uels{4}, 'j8');
     t.assertEquals(uels{5}, 'j9');
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
@@ -1027,7 +1027,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
@@ -1069,7 +1069,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
@@ -1111,7 +1111,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(5) == 3);
     t.assert(ids(6) == 4);
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
     i = c.data.i;
@@ -1150,7 +1150,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 4);
     t.assert(ids(5) == 5);
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
     i = c.data.i;
@@ -1185,7 +1185,7 @@ function test_symbol_uels(t, cfg)
     t.assert(ids(4) == 2);
     t.assert(ids(5) == 3);
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 
@@ -1287,7 +1287,7 @@ function test_symbol_uels(t, cfg)
         t.assertEquals(e.message, 'Adding new UELs not supported for reordering');
     end
 
-    c = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    c = gams.transfer.Container();
     c.read(cfg.filenames{1}, 'format', 'struct');
     x = c.data.x;
 

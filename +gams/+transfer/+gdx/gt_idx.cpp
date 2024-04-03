@@ -456,7 +456,7 @@ idxGetSymbolInfo (idxHandle_t ih, int iSym, char symName[], int symNameSiz,
 {
   shortStringBuf_t sName;
   int gSym;                     /* index in GDX space */
-  int rc, isIndexed, symCount;
+  int isIndexed, symCount;
 
   symName[0] = '\0';
   *symDim = -1;
@@ -474,8 +474,7 @@ idxGetSymbolInfo (idxHandle_t ih, int iSym, char symName[], int symNameSiz,
 
   gSym = ih->i2gSymMap[iSym];
   GOODASSERT(gSym > 0);
-  rc = getSymInfo (ih, gSym, sName, symDim, dims, nNZ, explText, explTextSiz, &isIndexed);
-  GOODASSERT(rc);
+  getSymInfo (ih, gSym, sName, symDim, dims, nNZ, explText, explTextSiz, &isIndexed);
   GOODASSERT(isIndexed);
   strncpy (symName, sName, symNameSiz);
   symName[symNameSiz-1] = '\0';
@@ -725,7 +724,7 @@ idxDataReadSparseRowMajor (idxHandle_t ih, int idxBase,
 {
   gdxValues_t values;
   int i, iNext;                 /* both 0-based */
-  int j, k, m, n, dummy;
+  int j, k, m, dummy;
   int iRecs;
   int keys[GMS_MAX_INDEX_DIM];
 
@@ -734,7 +733,7 @@ idxDataReadSparseRowMajor (idxHandle_t ih, int idxBase,
     return 0;
   }
   m = ih->currSymDims[0];
-  n = ih->currSymDims[1];
+  // n = ih->currSymDims[1];
   /* printf ("DEBUG readSparseRowMajor:  m=%d  n=%d\n", m, n); */
   k = 0;
   iNext = 0;
@@ -749,7 +748,7 @@ idxDataReadSparseRowMajor (idxHandle_t ih, int idxBase,
     j = keys[1]-1;
     /* printf ("  k=%d  i=%d  j=%d\n", iRecs,i,j); */
     GOODASSERT(i < m);
-    GOODASSERT(j < n);
+    // GOODASSERT(j < n);
     GOODASSERT((i+1) >= iNext);
     while (iNext <= i)
       rowPtr[iNext++] = k + idxBase;

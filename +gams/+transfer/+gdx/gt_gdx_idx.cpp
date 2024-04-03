@@ -33,7 +33,6 @@
 
 void gt_gdx_init_read(
     gdxHandle_t*    gdx,            /** GDX handle */
-    const char*     sysdir,         /** GAMS system directory */
     const char*     filename        /** GDX filename */
 )
 {
@@ -55,7 +54,6 @@ void gt_gdx_init_read(
 
 void gt_gdx_init_write(
     gdxHandle_t*    gdx,            /** GDX handle */
-    const char*     sysdir,         /** GAMS system directory */
     const char*     filename,       /** GDX filename */
     bool            compress        /** enable compression for write */
 )
@@ -78,7 +76,6 @@ void gt_gdx_init_write(
 
 void gt_idx_init_read(
     idxHandle_t*    gdx,            /** IDX handle */
-    const char*     sysdir,         /** GAMS system directory */
     const char*     filename        /** GDX filename */
 )
 {
@@ -100,7 +97,6 @@ void gt_idx_init_read(
 
 void gt_idx_init_write(
     idxHandle_t*    gdx,            /** IDX handle */
-    const char*     sysdir,         /** GAMS system directory */
     const char*     filename        /** GDX filename */
 )
 {

@@ -51,6 +51,7 @@ function setup(varargin)
     fprintf('Using GDX path: %s\n', p.Results.gdx_path);
     fprintf('Using ZLIB path: %s\n', p.Results.zlib_path);
 
+    % MEX files
     files = {
         fullfile(current_dir, '+gdx', 'gt_gdx_read.cpp'), ...
         fullfile(current_dir, '+gdx', 'gt_gdx_write.cpp'), ...
@@ -60,27 +61,51 @@ function setup(varargin)
         fullfile(current_dir, '+gdx', 'gt_get_sv.c'), ...
         fullfile(current_dir, '+gdx', 'gt_is_sv.c'), ...
     };
+    use_gdx = false(1, numel(files));
+    use_gdx(1:4) = true;
+    use_zlib = false(1, numel(files));
+    use_zlib(1:4) = true;
 
+    % Common C/C++ files
     common_files = {
-        fullfile(current_dir, '+gdx', 'gt_idx.cpp'), ...
         fullfile(current_dir, '+gdx', 'gt_utils.c'), ...
         fullfile(current_dir, '+gdx', 'gt_mex.c'), ...
-        fullfile(current_dir, '+gdx', 'gt_gdx_idx.cpp'), ...
     };
-    common_files_from_lists = {
+
+    % GDX files
+    filelist = {
         dir(fullfile(p.Results.gdx_path, 'src', '*.cpp')), ...
         dir(fullfile(p.Results.gdx_path, 'src', 'gdlib', '*.cpp')), ...
         dir(fullfile(p.Results.gdx_path, 'src', 'rtl', '*.cpp')), ...
         dir(fullfile(p.Results.gdx_path, 'src', 'rtl', '*.c')), ...
         dir(fullfile(p.Results.gdx_path, 'src', 'global', '*.cpp')), ...
-        dir(fullfile(p.Results.zlib_path, '*.c')), ...
     };
-    for i = 1:numel(common_files_from_lists)
-        for j = 1:numel(common_files_from_lists{i})
-            common_files{end+1} = fullfile(common_files_from_lists{i}(j).folder, common_files_from_lists{i}(j).name);
+    gdx_files = cell(1, numel(filelist));
+    for i = 1:numel(filelist)
+        gdx_files{i} = cell(1, numel(filelist{i}));
+        for j = 1:numel(filelist{i})
+            gdx_files{i}{j} = fullfile(filelist{i}(j).folder, filelist{i}(j).name);
         end
     end
+    gdx_files = horzcat(gdx_files{:}, {
+        fullfile(current_dir, '+gdx', 'gt_idx.cpp'), ...
+        fullfile(current_dir, '+gdx', 'gt_gdx_idx.cpp'), ...
+    });
 
+    % ZLIB files
+    filelist = {
+        dir(fullfile(p.Results.zlib_path, '*.c')), ...
+    };
+    zlib_files = cell(1, numel(filelist));
+    for i = 1:numel(filelist)
+        zlib_files{i} = cell(1, numel(filelist{i}));
+        for j = 1:numel(filelist{i})
+            zlib_files{i}{j} = fullfile(filelist{i}(j).folder, filelist{i}(j).name);
+        end
+    end
+    zlib_files = horzcat(zlib_files{:});
+
+    % Build properties
     build.system = '';
     if ispc
         build.system = 'windows';
@@ -113,9 +138,13 @@ function setup(varargin)
     end
     build.c_flags = {
         '-Wall', ...
+        '-Wno-unused-variable', ...
+        '-Wno-stringop-truncation', ...
     };
     build.cpp_flags = {
         '-Wall', ...
+        '-Wno-unused-variable', ...
+        '-Wno-stringop-truncation', ...
         '-std=c++17', ...
     };
     build.cpp_comp_flags = {
@@ -123,7 +152,6 @@ function setup(varargin)
     };
     build.verbose = p.Results.verbose;
     build.object_path = tempname;
-
     if build.verbose > 1
         disp(build);
     end
@@ -132,28 +160,47 @@ function setup(varargin)
 
     try
         fprintf('Compiling %d common files...\n', numel(common_files));
+        build_common = build;
         for i = 1:numel(common_files)
             fprintf('   %d: %s\n', i, common_files{i});
-            compile_file(build, common_files{i}, true, {});
+            compile_file(build_common, common_files{i}, true, {});
         end
+        common_objects = find_objects(build);
 
-        switch build.system
-        case {'windows'}
-            object_pattern = '*.obj';
-        otherwise
-            object_pattern = '*.o';
+        fprintf('Compiling %d GDX files...\n', numel(gdx_files));
+        build_gdx = build;
+        build_gdx.object_path = fullfile(build.object_path, 'gdx');
+        mkdir(build_gdx.object_path);
+        for i = 1:numel(gdx_files)
+            fprintf('   %d: %s\n', i, gdx_files{i});
+            compile_file(build_gdx, gdx_files{i}, true, {});
         end
-        objects_ = dir(fullfile(build.object_path, object_pattern));
-        objects = cell(size(objects_));
-        for i = 1:numel(objects_)
-            objects{i} = fullfile(objects_(i).folder, objects_(i).name);
+        gdx_objects = find_objects(build_gdx);
+
+        fprintf('Compiling %d ZLIB files...\n', numel(zlib_files));
+        build_zlib = build;
+        build_zlib.object_path = fullfile(build.object_path, 'zlib');
+        mkdir(build_zlib.object_path);
+        for i = 1:numel(zlib_files)
+            fprintf('   %d: %s\n', i, zlib_files{i});
+            compile_file(build_zlib, zlib_files{i}, true, {});
         end
+        zlib_objects = find_objects(build_zlib);
 
         fprintf('Compiling %d main files...\n', numel(files));
         for i = 1:numel(files)
             fprintf('   %d: %s\n', i, files{i});
+            objects = common_objects;
+            if use_gdx(i)
+                objects = vertcat(objects, gdx_objects); %#ok<AGROW>
+            end
+            if use_zlib(i)
+                objects = vertcat(objects, zlib_objects); %#ok<AGROW>
+            end
             compile_file(build, files{i}, false, objects);
         end
+
+        rmdir(build.object_path, 's');
 
         fprintf('GAMS Transfer install completed successfully.\n');
     catch e
@@ -261,4 +308,18 @@ function compile_file(build, filename, object_only, other_objects)
         fprintf('Command: %s\n', cmd);
     end
     eval(cmd);
+end
+
+function objects = find_objects(build)
+    switch build.system
+    case {'windows'}
+        object_pattern = '*.obj';
+    otherwise
+        object_pattern = '*.o';
+    end
+    objects_ = dir(fullfile(build.object_path, object_pattern));
+    objects = cell(size(objects_));
+    for i = 1:numel(objects_)
+        objects{i} = fullfile(objects_(i).folder, objects_(i).name);
+    end
 end

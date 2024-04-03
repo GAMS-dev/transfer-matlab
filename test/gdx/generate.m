@@ -33,17 +33,11 @@ function gams_transfer_testcreate(varargin)
     addpath(fullfile(current_dir, '..', '..', 'src'));
 
     p = inputParser();
-    is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-        ~strcmpi(x, 'gams_dir');
-    addParameter(p, 'gams_dir', find_gams(), is_string_char);
+    is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x));
     addParameter(p, 'license', '', is_string_char);
     parse(p, varargin{:});
-    if strcmp(p.Results.gams_dir, '')
-        error('GAMS system directory not found.');
-    end
 
     % check paths
-    gams_dir = gams.transfer.utils.absolute_path(p.Results.gams_dir);
     working_dir = tempname;
 
     mkdir(working_dir);
@@ -159,7 +153,7 @@ function gams_transfer_testcreate(varargin)
     };
 
     for i = 1:n_probs
-        gams_exe = fullfile(gams_dir, 'gams');
+        gams_exe = 'gams';
         gms_filename = fullfile(working_dir, sprintf('data%d.gms', i));
         gdx_filenames{i} = fullfile(working_dir, sprintf('data%d.gdx', i));
 

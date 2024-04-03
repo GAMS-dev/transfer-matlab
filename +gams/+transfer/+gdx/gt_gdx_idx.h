@@ -42,14 +42,12 @@ extern "C" {
 /** creates GDX handle and opens GDX file for reading */
 void gt_gdx_init_read(
     gdxHandle_t*    gdx,            /** GDX handle */
-    const char*     sysdir,         /** GAMS system directory */
     const char*     filename        /** GDX filename */
 );
 
 /** creates GDX handle and opens GDX file for writing */
 void gt_gdx_init_write(
     gdxHandle_t*    gdx,            /** GDX handle */
-    const char*     sysdir,         /** GAMS system directory */
     const char*     filename,       /** GDX filename */
     bool            compress        /** enable compression for write */
 );
@@ -57,14 +55,12 @@ void gt_gdx_init_write(
 /** creates IDX handle and opens GDX file for reading */
 void gt_idx_init_read(
     idxHandle_t*    gdx,            /** IDX handle */
-    const char*     sysdir,         /** GAMS system directory */
     const char*     filename        /** GDX filename */
 );
 
 /** creates IDX handle and opens GDX file for writing */
 void gt_idx_init_write(
     idxHandle_t*    gdx,            /** IDX handle */
-    const char*     sysdir,         /** GAMS system directory */
     const char*     filename        /** GDX filename */
 );
 
