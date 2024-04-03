@@ -52,12 +52,12 @@ classdef Validator
         function obj = string2char(obj)
             if iscell(obj.value)
                 for i = 1:numel(obj.value)
-                    if isstring(obj.value{i}) && numel(obj.value{i}) == 1
+                    if isstring(obj.value{i}) && isscalar(obj.value{i})
                         obj.value{i} = char(obj.value{i});
                     end
                 end
             end
-            if isstring(obj.value) && numel(obj.value) == 1
+            if isstring(obj.value) && isscalar(obj.value)
                 obj.value = char(obj.value);
             end
         end
@@ -126,7 +126,7 @@ classdef Validator
         end
 
         function obj = symbolName(obj)
-            if isstring(obj.value) && numel(obj.value) == 1
+            if isstring(obj.value) && isscalar(obj.value)
                 obj.value = char(obj.value);
             end
             if ~ischar(obj.value)
@@ -144,7 +144,7 @@ classdef Validator
         end
 
         function obj = symbolDescription(obj)
-            if isstring(obj.value) && numel(obj.value) == 1
+            if isstring(obj.value) && isscalar(obj.value)
                 obj.value = char(obj.value);
             end
             if ~ischar(obj.value)

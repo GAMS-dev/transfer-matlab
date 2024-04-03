@@ -55,7 +55,7 @@ classdef (Hidden) DomainSet < gams.transfer.unique_labels.Abstract
             symbol = obj.symbol_;
         end
 
-        function modified = get.modified(obj)
+        function modified = get.modified(obj) %#ok<MANU>
             modified = false;
         end
 

@@ -58,7 +58,7 @@ classdef (Abstract, Hidden) Abstract
                 if isa(input, 'gams.transfer.symbol.domain.Abstract') || ...
                     isa(input, 'gams.transfer.symbol.Set') || ...
                     isa(input, 'gams.transfer.alias.Abstract') || ...
-                    ischar(input) || isstring(input) && numel(input) == 1
+                    ischar(input) || isstring(input) && isscalar(input)
                     input = {input};
                 else
                     error(['Cannot create domains from ''%s'' (at position %d): Must be ''cell'', ', ...
@@ -72,7 +72,7 @@ classdef (Abstract, Hidden) Abstract
                     domains{i} = input{i};
                 elseif isa(input{i}, 'gams.transfer.symbol.Set') || isa(input{i}, 'gams.transfer.alias.Abstract')
                     domains{i} = gams.transfer.symbol.domain.Regular(input{i});
-                elseif ischar(input{i}) || isstring(input{i}) && numel(input{i}) == 1
+                elseif ischar(input{i}) || isstring(input{i}) && isscalar(input{i})
                     domains{i} = gams.transfer.symbol.domain.Relaxed(input{i});
                 else
                     error(['Cannot create domains from ''%s'' (at position %d): Element %d must be ', ...

@@ -131,7 +131,7 @@ classdef (Abstract, Hidden) Abstract
         function addLabels(obj, labels, forwarding)
             gams.transfer.utils.Validator('labels', 1, labels).string2char().cellstr();
             gams.transfer.utils.Validator('forwarding', 2, forwarding).logical().scalar();
-            obj = obj.addLabels_(labels, forwarding);
+            obj.addLabels_(labels, forwarding);
         end
 
     end

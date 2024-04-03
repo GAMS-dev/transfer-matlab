@@ -101,13 +101,13 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
                 case 'gams.transfer.symbol.value.String'
 
                     if isempty(obj.records_.(label))
-                    elseif (gams.transfer.Constants.SUPPORTS_CATEGORICAL && iscategorical(obj.records_.(label))) || iscellstr(obj.records_.(label))
+                    elseif (gams.transfer.Constants.SUPPORTS_CATEGORICAL && iscategorical(obj.records_.(label))) || iscellstr(obj.records_.(label)) %#ok<ISCLSTR>
                     else
                         status = gams.transfer.utils.Status(sprintf("Records value column '%s' must be categorical, cellstr or empty.", label));
                         return
                     end
                 otherwise
-                    error('Unknown symbol value type: %s', class(values{i}));
+                    error('Unknown symbol value type: %s', class(def.values{i}));
                 end
 
                 if issparse(obj.records_.(label))

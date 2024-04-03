@@ -380,7 +380,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
         function set.domain_forwarding(obj, domain_forwarding)
             dim = obj.dimension;
-            if numel(domain_forwarding) == 1
+            if isscalar(domain_forwarding)
                 domain_forwarding = false(1, dim) | domain_forwarding;
             end
             for i = 1:dim
@@ -609,7 +609,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             dim = obj.dimension;
 
             % string -> recall with cell of strings
-            if isstring(records) && numel(records) == 1 || ischar(records)
+            if isstring(records) && isscalar(records) || ischar(records)
                 if dim ~= 1
                     error('Single string as records only accepted if symbol dimension equals 1.');
                 end
@@ -649,7 +649,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                             value = obj.def_.values{j};
                             if isa(value, 'gams.transfer.symbol.value.Numeric') && ~values_used(j)
                                 new_records.(value.label) = records{i};
-                                values{end+1} = value;
+                                values{end+1} = value; %#ok<AGROW>
                                 values_used(j) = true;
                                 stored_record = true;
                                 break;
@@ -667,7 +667,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                                 value = obj.def_.values{j};
                                 if isa(value, 'gams.transfer.symbol.value.String') && ~values_used(j)
                                     new_records.(value.label) = records{i};
-                                    values{end+1} = value;
+                                    values{end+1} = value; %#ok<AGROW>
                                     values_used(j) = true;
                                     stored_record = true;
                                     break;
@@ -679,7 +679,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                         else
                             domain = obj.def_.domains{n_domains};
                             new_records.(domain.label) = records{i};
-                            domains{end+1} = domain;
+                            domains{end+1} = domain; %#ok<AGROW>
                         end
                     else
                         error('Cell elements must be cellstr or numeric.');
@@ -687,20 +687,20 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 end
 
             % struct -> check fields for domain or value fields
-            elseif isstruct(records) && numel(records) == 1
+            elseif isstruct(records) && isscalar(records)
                 fields = fieldnames(records);
                 for i = 1:numel(fields)
                     value = obj.def_.findValue_(fields{i});
                     if ~isempty(value)
                         new_records.(value.label) = records.(fields{i});
-                        values{end+1} = value;
+                        values{end+1} = value; %#ok<AGROW>
                         continue;
                     end
 
                     domain = obj.def_.findDomain_(fields{i});
                     if ~isempty(domain)
                         new_records.(domain.label) = records.(fields{i});
-                        domains{end+1} = domain;
+                        domains{end+1} = domain; %#ok<AGROW>
                     end
                 end
 
@@ -980,7 +980,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
                 if numel(added_labels) > 0
                     domain_violations{end+1} = gams.transfer.symbol.domain.Violation(obj, i, ...
-                        obj.def_.domains{i}, added_labels);
+                        obj.def_.domains{i}, added_labels); %#ok<AGROW>
                 end
             end
 
@@ -1751,20 +1751,21 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
                 error(e.message);
             end
 
-            uels = {};
-            for i = dimensions
-
+            uels = cell(1, numel(dimensions));
+            for i = 1:numel(dimensions)
+                dim = dimensions(i);
                 if isempty(codes) && ignore_unused
-                    uels_i = obj.getUsedAxisLabels_(i);
+                    uels{i} = obj.getUsedAxisLabels_(dim);
                 elseif isempty(codes)
-                    uels_i = obj.getAxisLabels_(i);
+                    uels{i} = obj.getAxisLabels_(dim);
                 elseif ignore_unused
-                    uels_i = gams.transfer.utils.filter_unique_labels(obj.getUsedAxisLabels_(i), codes);
+                    uels{i} = gams.transfer.utils.filter_unique_labels(obj.getUsedAxisLabels_(dim), codes);
                 else
-                    uels_i = obj.getAxisLabelsAt_(i, codes);
+                    uels{i} = obj.getAxisLabelsAt_(dim, codes);
                 end
-                uels = [uels; reshape(uels_i, [], 1)];
+                uels{i} = reshape(uels{i}, [], 1);
             end
+            uels = vertcat(uels{:});
 
             if numel(dimensions) > 1
                 uels = gams.transfer.utils.unique(uels);
