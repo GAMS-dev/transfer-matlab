@@ -329,7 +329,7 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
     methods (Hidden)
 
-        function status = isValidDomain(obj)
+        function status = isValidDomain(obj) %#ok<MANU>
             status = gams.transfer.utils.Status.ok();
         end
 

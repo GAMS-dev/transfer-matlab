@@ -74,7 +74,7 @@ classdef (Hidden) Struct < gams.transfer.incase_ordered_dict.Abstract
 
         function keys = keysAt(obj, indices)
             keys = fieldnames(obj.keys_);
-            if numel(indices) == 1
+            if isscalar(indices)
                 keys = keys{indices};
             else
                 keys = keys(indices);
@@ -115,7 +115,7 @@ classdef (Hidden) Struct < gams.transfer.incase_ordered_dict.Abstract
 
         function entries = entriesAt(obj, indices)
             entries = obj.entries();
-            if numel(indices) == 1
+            if isscalar(indices)
                 entries = entries{indices};
             else
                 entries = entries(indices);

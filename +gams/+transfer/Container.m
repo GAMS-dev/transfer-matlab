@@ -667,7 +667,7 @@ classdef Container < gams.transfer.utils.Handle
                 for i = 1:numel(symbols)
                     if enable(i) && ~obj.getSymbols(symbols{i}).indexed
                         enable(i) = false;
-                        disabled_symbols{end+1} = symbols{i};
+                        disabled_symbols{end+1} = symbols{i}; %#ok<AGROW>
                     end
                 end
                 if numel(disabled_symbols) > 0
@@ -982,7 +982,7 @@ classdef Container < gams.transfer.utils.Handle
                     % add name to list
                     n = n + 1;
                     if k == 2
-                        list{n} = symbols{i}.name;
+                        list{n} = symbols{i}.name; %#ok<AGROW>
                     end
                 end
                 if k == 1
@@ -1922,7 +1922,7 @@ classdef Container < gams.transfer.utils.Handle
             for i = 1:numel(symbols)
                 if isa(symbols{i}, 'gams.transfer.alias.Set')
                     if isempty(symbols{i}.alias_with.container)
-                        remove_aliases{end+1} = symbols{i}.name;
+                        remove_aliases{end+1} = symbols{i}.name; %#ok<AGROW>
                     end
                 elseif isa(symbols{i}, 'gams.transfer.symbol.Abstract')
                     for j = 1:numel(symbols{i}.def.domains)

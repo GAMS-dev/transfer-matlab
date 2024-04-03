@@ -43,7 +43,7 @@ classdef (Hidden) Empty < gams.transfer.unique_labels.Abstract
 
     methods
 
-        function modified = get.modified(obj)
+        function modified = get.modified(obj) %#ok<MANU>
             modified = false;
         end
 

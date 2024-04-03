@@ -34,7 +34,7 @@ function setup(varargin)
     current_dir = fileparts(mfilename('fullpath'));
 
     p = inputParser();
-    is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x));
+    is_string_char = @(x) (isstring(x) && isscalar(x) || ischar(x));
     addParameter(p, 'verbose', 0, @isnumeric)
     addParameter(p, 'gams_dir', '', is_string_char);
     parse(p, varargin{:});
