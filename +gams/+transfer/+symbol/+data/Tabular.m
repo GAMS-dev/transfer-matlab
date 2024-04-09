@@ -166,6 +166,31 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             end
         end
 
+        function obj = dropDefaults_(obj, def)
+            fun = @(i) (obj.records_.(def.values{i}.label) == def.values{i}.default);
+            obj = obj.dropFun_(def, fun);
+        end
+
+        function obj = dropNA_(obj, def)
+            fun = @(i) (gams.transfer.SpecialValues.isNA(obj.records_.(def.values{i}.label)));
+            obj = obj.dropFun_(def, fun);
+        end
+
+        function obj = dropUndef_(obj, def)
+            fun = @(i) (gams.transfer.SpecialValues.isUndef(obj.records_.(def.values{i}.label)));
+            obj = obj.dropFun_(def, fun);
+        end
+
+        function obj = dropMissing_(obj, def)
+            fun = @(i) (isnan(obj.records_.(def.values{i}.label)));
+            obj = obj.dropFun_(def, fun);
+        end
+
+        function obj = dropEps_(obj, def)
+            fun = @(i) (gams.transfer.SpecialValues.isEps(obj.records_.(def.values{i}.label)));
+            obj = obj.dropFun_(def, fun);
+        end
+
         function subindex = ind2sub_(obj, axes, value, linindex)
             dim = axes.dimension;
             subindex = zeros(1, dim);
@@ -245,6 +270,22 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
         function obj = removeRows(obj, indices)
             gams.transfer.utils.Validator('indices', 1, indices).integer().vector().min(1);
             obj = obj.removeRows_(indices);
+        end
+
+    end
+
+    methods (Hidden, Access = private)
+
+        function obj = dropFun_(obj, def, fun)
+            nrecs = obj.getNumberRecords_(def);
+            if isnan(nrecs)
+                return
+            end
+            drop_indices = false(nrecs, 1);
+            for i = 1:numel(def.values)
+                drop_indices = drop_indices | fun(i);
+            end
+            obj = obj.removeRows_(drop_indices);
         end
 
     end

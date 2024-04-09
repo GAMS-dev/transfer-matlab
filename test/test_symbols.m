@@ -35,6 +35,7 @@ function success = test_symbols(cfg)
     test_writeUnordered(t, cfg);
     test_reorder(t, cfg);
     test_transformRecords(t, cfg);
+    test_dropRecords(t, cfg);
     [~, n_fails] = t.summary();
     success = n_fails == 0;
 end
@@ -2869,4 +2870,513 @@ function test_transformRecords(t, cfg)
             t.assertEquals(gdx.data.x.records, x_recs{j});
         end
     end
+end
+
+function test_dropRecords(t, cfg)
+
+    gdx0 = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    i = gams.transfer.Set(gdx0, 'i', {'*'}, 'records', {'i1', 'i2', 'ieps', 'ina', 'iundef', 'i0', 'i10'});
+    p = gams.transfer.Parameter(gdx0, 'p', {i}, 'records', [1, 2, 33, ...
+        gams.transfer.SpecialValues.NA, gams.transfer.SpecialValues.UNDEF, 44, 10]);
+
+    if gams.transfer.Constants.SUPPORTS_TABLE
+        formats = {'table', 'struct'};
+    else
+        formats = {'struct'};
+    end
+    for i = 1:numel(formats)
+
+        t.add(sprintf('drop_records_tabular_defaults_%s', formats{i}));
+        gdx = gams.transfer.Container(gdx0, 'gams_dir', cfg.gams_dir);
+        p = gdx.data.p;
+        p.transformRecords(formats{i});
+        p.records.value(3) = gams.transfer.SpecialValues.EPS;
+        p.records.value(6) = 0;
+        t.assert(p.getNumberRecords() == 7);
+        t.assert(p.records.value(1) == 1);
+        t.assert(p.records.value(2) == 2);
+        t.assert(gams.transfer.SpecialValues.isEps(p.records.value(3)));
+        t.assert(gams.transfer.SpecialValues.isNA(p.records.value(4)));
+        t.assert(gams.transfer.SpecialValues.isUndef(p.records.value(5)));
+        t.assert(p.records.value(6) == 0);
+        t.assert(p.records.value(7) == 10);
+        p.dropDefaults();
+        t.assert(p.getNumberRecords() == 5);
+        t.assert(p.records.value(1) == 1);
+        t.assert(p.records.value(2) == 2);
+        t.assert(gams.transfer.SpecialValues.isNA(p.records.value(3)));
+        t.assert(gams.transfer.SpecialValues.isUndef(p.records.value(4)));
+        t.assert(p.records.value(5) == 10);
+
+        t.add(sprintf('drop_records_tabular_zeros_%s', formats{i}));
+        gdx = gams.transfer.Container(gdx0, 'gams_dir', cfg.gams_dir);
+        p = gdx.data.p;
+        p.transformRecords(formats{i});
+        p.records.value(3) = gams.transfer.SpecialValues.EPS;
+        p.records.value(6) = 0;
+        t.assert(p.getNumberRecords() == 7);
+        t.assert(p.records.value(1) == 1);
+        t.assert(p.records.value(2) == 2);
+        t.assert(gams.transfer.SpecialValues.isEps(p.records.value(3)));
+        t.assert(gams.transfer.SpecialValues.isNA(p.records.value(4)));
+        t.assert(gams.transfer.SpecialValues.isUndef(p.records.value(5)));
+        t.assert(p.records.value(6) == 0);
+        t.assert(p.records.value(7) == 10);
+        p.dropZeros();
+        t.assert(p.getNumberRecords() == 5);
+        t.assert(p.records.value(1) == 1);
+        t.assert(p.records.value(2) == 2);
+        t.assert(gams.transfer.SpecialValues.isNA(p.records.value(3)));
+        t.assert(gams.transfer.SpecialValues.isUndef(p.records.value(4)));
+        t.assert(p.records.value(5) == 10);
+
+        t.add(sprintf('drop_records_tabular_na_%s', formats{i}));
+        gdx = gams.transfer.Container(gdx0, 'gams_dir', cfg.gams_dir);
+        p = gdx.data.p;
+        p.transformRecords(formats{i});
+        p.records.value(3) = gams.transfer.SpecialValues.EPS;
+        p.records.value(6) = 0;
+        t.assert(p.getNumberRecords() == 7);
+        t.assert(p.records.value(1) == 1);
+        t.assert(p.records.value(2) == 2);
+        t.assert(gams.transfer.SpecialValues.isEps(p.records.value(3)));
+        t.assert(gams.transfer.SpecialValues.isNA(p.records.value(4)));
+        t.assert(gams.transfer.SpecialValues.isUndef(p.records.value(5)));
+        t.assert(p.records.value(6) == 0);
+        t.assert(p.records.value(7) == 10);
+        p.dropNA();
+        t.assert(p.getNumberRecords() == 6);
+        t.assert(p.records.value(1) == 1);
+        t.assert(p.records.value(2) == 2);
+        t.assert(gams.transfer.SpecialValues.isEps(p.records.value(3)));
+        t.assert(gams.transfer.SpecialValues.isUndef(p.records.value(4)));
+        t.assert(p.records.value(5) == 0);
+        t.assert(p.records.value(6) == 10);
+
+        t.add(sprintf('drop_records_tabular_undef_%s', formats{i}));
+        gdx = gams.transfer.Container(gdx0, 'gams_dir', cfg.gams_dir);
+        p = gdx.data.p;
+        p.transformRecords(formats{i});
+        p.records.value(3) = gams.transfer.SpecialValues.EPS;
+        p.records.value(6) = 0;
+        t.assert(p.getNumberRecords() == 7);
+        t.assert(p.records.value(1) == 1);
+        t.assert(p.records.value(2) == 2);
+        t.assert(gams.transfer.SpecialValues.isEps(p.records.value(3)));
+        t.assert(gams.transfer.SpecialValues.isNA(p.records.value(4)));
+        t.assert(gams.transfer.SpecialValues.isUndef(p.records.value(5)));
+        t.assert(p.records.value(6) == 0);
+        t.assert(p.records.value(7) == 10);
+        p.dropUndef();
+        t.assert(p.getNumberRecords() == 6);
+        t.assert(p.records.value(1) == 1);
+        t.assert(p.records.value(2) == 2);
+        t.assert(gams.transfer.SpecialValues.isEps(p.records.value(3)));
+        t.assert(gams.transfer.SpecialValues.isNA(p.records.value(4)));
+        t.assert(p.records.value(5) == 0);
+        t.assert(p.records.value(6) == 10);
+
+        t.add(sprintf('drop_records_tabular_missing_%s', formats{i}));
+        gdx = gams.transfer.Container(gdx0, 'gams_dir', cfg.gams_dir);
+        p = gdx.data.p;
+        p.transformRecords(formats{i});
+        p.records.value(3) = gams.transfer.SpecialValues.EPS;
+        p.records.value(6) = 0;
+        t.assert(p.getNumberRecords() == 7);
+        t.assert(p.records.value(1) == 1);
+        t.assert(p.records.value(2) == 2);
+        t.assert(gams.transfer.SpecialValues.isEps(p.records.value(3)));
+        t.assert(gams.transfer.SpecialValues.isNA(p.records.value(4)));
+        t.assert(gams.transfer.SpecialValues.isUndef(p.records.value(5)));
+        t.assert(p.records.value(6) == 0);
+        t.assert(p.records.value(7) == 10);
+        p.dropMissing();
+        t.assert(p.getNumberRecords() == 5);
+        t.assert(p.records.value(1) == 1);
+        t.assert(p.records.value(2) == 2);
+        t.assert(gams.transfer.SpecialValues.isEps(p.records.value(3)));
+        t.assert(p.records.value(4) == 0);
+        t.assert(p.records.value(5) == 10);
+
+        t.add(sprintf('drop_records_tabular_eps_%s', formats{i}));
+        gdx = gams.transfer.Container(gdx0, 'gams_dir', cfg.gams_dir);
+        p = gdx.data.p;
+        p.transformRecords(formats{i});
+        p.records.value(3) = gams.transfer.SpecialValues.EPS;
+        p.records.value(6) = 0;
+        t.assert(p.getNumberRecords() == 7);
+        t.assert(p.records.value(1) == 1);
+        t.assert(p.records.value(2) == 2);
+        t.assert(gams.transfer.SpecialValues.isEps(p.records.value(3)));
+        t.assert(gams.transfer.SpecialValues.isNA(p.records.value(4)));
+        t.assert(gams.transfer.SpecialValues.isUndef(p.records.value(5)));
+        t.assert(p.records.value(6) == 0);
+        t.assert(p.records.value(7) == 10);
+        p.dropEps();
+        t.assert(p.getNumberRecords() == 6);
+        t.assert(p.records.value(1) == 1);
+        t.assert(p.records.value(2) == 2);
+        t.assert(gams.transfer.SpecialValues.isNA(p.records.value(3)));
+        t.assert(gams.transfer.SpecialValues.isUndef(p.records.value(4)));
+        t.assert(p.records.value(5) == 0);
+        t.assert(p.records.value(6) == 10);
+
+    end
+
+    gdx0 = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    i = gams.transfer.Set(gdx0, 'i', {'*'}, 'records', {'i1', 'i2'});
+    v = gams.transfer.Variable(gdx0, 'v', 'positive', {i, i}, 'records', {...
+        [1, gams.transfer.SpecialValues.EPS; 0, gams.transfer.SpecialValues.UNDEF], ...
+        [1, gams.transfer.SpecialValues.NA; 0, gams.transfer.SpecialValues.UNDEF], ...
+        [1, -1; 0, gams.transfer.SpecialValues.EPS], ...
+        [1, gams.transfer.SpecialValues.EPS; 0, gams.transfer.SpecialValues.NA], ...
+        [1, 10; 0, 3]});
+
+    formats = {'dense_matrix', 'sparse_matrix'};
+    for i = 1:numel(formats)
+
+        t.add(sprintf('drop_records_matrix_defaults_%s', formats{i}));
+        gdx = gams.transfer.Container(gdx0, 'gams_dir', cfg.gams_dir);
+        v = gdx.data.v;
+        v.transformRecords(formats{i});
+        t.assert(v.records.level(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.level(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.level(1,2)));
+        end
+        t.assert(v.records.level(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.level(2,2)));
+        t.assert(v.records.marginal(1,1) == 1);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.marginal(1,2)));
+        t.assert(v.records.marginal(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.marginal(2,2)));
+        t.assert(v.records.lower(1,1) == 1);
+        t.assert(v.records.lower(1,2) == -1);
+        t.assert(v.records.lower(2,1) == 0);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.lower(2,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.lower(2,2)));
+        end
+        t.assert(v.records.upper(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.upper(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.upper(1,2)));
+        end
+        t.assert(v.records.upper(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.upper(2,2)));
+        t.assert(v.records.scale(1,1) == 1);
+        t.assert(v.records.scale(1,2) == 10);
+        t.assert(v.records.scale(2,1) == 0);
+        t.assert(v.records.scale(2,2) == 3);
+        v.dropDefaults();
+        t.assert(v.records.level(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.level(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.level(1,2)));
+        end
+        t.assert(v.records.level(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.level(2,2)));
+        t.assert(v.records.marginal(1,1) == 1);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.marginal(1,2)));
+        t.assert(v.records.marginal(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.marginal(2,2)));
+        t.assert(v.records.lower(1,1) == 1);
+        t.assert(v.records.lower(1,2) == -1);
+        t.assert(v.records.lower(2,1) == 0);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.lower(2,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.lower(2,2)));
+        end
+        t.assert(v.records.upper(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.upper(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.upper(1,2)));
+        end
+        t.assert(v.records.upper(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.upper(2,2)));
+        t.assert(v.records.scale(1,1) == 1);
+        t.assert(v.records.scale(1,2) == 10);
+        t.assert(v.records.scale(2,1) == 0);
+        t.assert(v.records.scale(2,2) == 3);
+
+        t.add(sprintf('drop_records_matrix_na_%s', formats{i}));
+        gdx = gams.transfer.Container(gdx0, 'gams_dir', cfg.gams_dir);
+        v = gdx.data.v;
+        v.transformRecords(formats{i});
+        t.assert(v.records.level(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.level(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.level(1,2)));
+        end
+        t.assert(v.records.level(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.level(2,2)));
+        t.assert(v.records.marginal(1,1) == 1);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.marginal(1,2)));
+        t.assert(v.records.marginal(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.marginal(2,2)));
+        t.assert(v.records.lower(1,1) == 1);
+        t.assert(v.records.lower(1,2) == -1);
+        t.assert(v.records.lower(2,1) == 0);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.lower(2,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.lower(2,2)));
+        end
+        t.assert(v.records.upper(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.upper(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.upper(1,2)));
+        end
+        t.assert(v.records.upper(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.upper(2,2)));
+        t.assert(v.records.scale(1,1) == 1);
+        t.assert(v.records.scale(1,2) == 10);
+        t.assert(v.records.scale(2,1) == 0);
+        t.assert(v.records.scale(2,2) == 3);
+        v.dropNA();
+        t.assert(v.records.level(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.level(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.level(1,2)));
+        end
+        t.assert(v.records.level(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.level(2,2)));
+        t.assert(v.records.marginal(1,1) == 1);
+        t.assert(v.records.marginal(1,2) == 0);
+        t.assert(v.records.marginal(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.marginal(2,2)));
+        t.assert(v.records.lower(1,1) == 1);
+        t.assert(v.records.lower(1,2) == -1);
+        t.assert(v.records.lower(2,1) == 0);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.lower(2,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.lower(2,2)));
+        end
+        t.assert(v.records.upper(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.upper(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.upper(1,2)));
+        end
+        t.assert(v.records.upper(2,1) == 0);
+        t.assert(isinf(v.records.upper(2,2)));
+        t.assert(v.records.scale(1,1) == 1);
+        t.assert(v.records.scale(1,2) == 10);
+        t.assert(v.records.scale(2,1) == 0);
+        t.assert(v.records.scale(2,2) == 3);
+
+        t.add(sprintf('drop_records_matrix_undef_%s', formats{i}));
+        gdx = gams.transfer.Container(gdx0, 'gams_dir', cfg.gams_dir);
+        v = gdx.data.v;
+        v.transformRecords(formats{i});
+        t.assert(v.records.level(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.level(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.level(1,2)));
+        end
+        t.assert(v.records.level(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.level(2,2)));
+        t.assert(v.records.marginal(1,1) == 1);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.marginal(1,2)));
+        t.assert(v.records.marginal(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.marginal(2,2)));
+        t.assert(v.records.lower(1,1) == 1);
+        t.assert(v.records.lower(1,2) == -1);
+        t.assert(v.records.lower(2,1) == 0);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.lower(2,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.lower(2,2)));
+        end
+        t.assert(v.records.upper(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.upper(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.upper(1,2)));
+        end
+        t.assert(v.records.upper(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.upper(2,2)));
+        t.assert(v.records.scale(1,1) == 1);
+        t.assert(v.records.scale(1,2) == 10);
+        t.assert(v.records.scale(2,1) == 0);
+        t.assert(v.records.scale(2,2) == 3);
+        v.dropUndef();
+        t.assert(v.records.level(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.level(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.level(1,2)));
+        end
+        t.assert(v.records.level(2,1) == 0);
+        t.assert(v.records.level(2,2) == 0);
+        t.assert(v.records.marginal(1,1) == 1);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.marginal(1,2)));
+        t.assert(v.records.marginal(2,1) == 0);
+        t.assert(v.records.marginal(2,2) == 0);
+        t.assert(v.records.lower(1,1) == 1);
+        t.assert(v.records.lower(1,2) == -1);
+        t.assert(v.records.lower(2,1) == 0);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.lower(2,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.lower(2,2)));
+        end
+        t.assert(v.records.upper(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.upper(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.upper(1,2)));
+        end
+        t.assert(v.records.upper(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.upper(2,2)));
+        t.assert(v.records.scale(1,1) == 1);
+        t.assert(v.records.scale(1,2) == 10);
+        t.assert(v.records.scale(2,1) == 0);
+        t.assert(v.records.scale(2,2) == 3);
+
+        t.add(sprintf('drop_records_matrix_missing_%s', formats{i}));
+        gdx = gams.transfer.Container(gdx0, 'gams_dir', cfg.gams_dir);
+        v = gdx.data.v;
+        v.transformRecords(formats{i});
+        t.assert(v.records.level(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.level(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.level(1,2)));
+        end
+        t.assert(v.records.level(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.level(2,2)));
+        t.assert(v.records.marginal(1,1) == 1);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.marginal(1,2)));
+        t.assert(v.records.marginal(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.marginal(2,2)));
+        t.assert(v.records.lower(1,1) == 1);
+        t.assert(v.records.lower(1,2) == -1);
+        t.assert(v.records.lower(2,1) == 0);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.lower(2,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.lower(2,2)));
+        end
+        t.assert(v.records.upper(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.upper(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.upper(1,2)));
+        end
+        t.assert(v.records.upper(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.upper(2,2)));
+        t.assert(v.records.scale(1,1) == 1);
+        t.assert(v.records.scale(1,2) == 10);
+        t.assert(v.records.scale(2,1) == 0);
+        t.assert(v.records.scale(2,2) == 3);
+        v.dropMissing();
+        t.assert(v.records.level(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.level(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.level(1,2)));
+        end
+        t.assert(v.records.level(2,1) == 0);
+        t.assert(v.records.level(2,2) == 0);
+        t.assert(v.records.marginal(1,1) == 1);
+        t.assert(v.records.marginal(1,2) == 0);
+        t.assert(v.records.marginal(2,1) == 0);
+        t.assert(v.records.marginal(2,2) == 0);
+        t.assert(v.records.lower(1,1) == 1);
+        t.assert(v.records.lower(1,2) == -1);
+        t.assert(v.records.lower(2,1) == 0);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.lower(2,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.lower(2,2)));
+        end
+        t.assert(v.records.upper(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.upper(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.upper(1,2)));
+        end
+        t.assert(v.records.upper(2,1) == 0);
+        t.assert(isinf(v.records.upper(2,2)));
+        t.assert(v.records.scale(1,1) == 1);
+        t.assert(v.records.scale(1,2) == 10);
+        t.assert(v.records.scale(2,1) == 0);
+        t.assert(v.records.scale(2,2) == 3);
+
+        t.add(sprintf('drop_records_matrix_eps_%s', formats{i}));
+        gdx = gams.transfer.Container(gdx0, 'gams_dir', cfg.gams_dir);
+        v = gdx.data.v;
+        v.transformRecords(formats{i});
+        t.assert(v.records.level(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.level(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.level(1,2)));
+        end
+        t.assert(v.records.level(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.level(2,2)));
+        t.assert(v.records.marginal(1,1) == 1);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.marginal(1,2)));
+        t.assert(v.records.marginal(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.marginal(2,2)));
+        t.assert(v.records.lower(1,1) == 1);
+        t.assert(v.records.lower(1,2) == -1);
+        t.assert(v.records.lower(2,1) == 0);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.lower(2,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.lower(2,2)));
+        end
+        t.assert(v.records.upper(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.upper(1,2) == 0);
+        else
+            t.assert(gams.transfer.SpecialValues.isEps(v.records.upper(1,2)));
+        end
+        t.assert(v.records.upper(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.upper(2,2)));
+        t.assert(v.records.scale(1,1) == 1);
+        t.assert(v.records.scale(1,2) == 10);
+        t.assert(v.records.scale(2,1) == 0);
+        t.assert(v.records.scale(2,2) == 3);
+        v.dropEps();
+        t.assert(v.records.level(1,1) == 1);
+        t.assert(v.records.level(1,2) == 0);
+        t.assert(v.records.level(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.level(2,2)));
+        t.assert(v.records.marginal(1,1) == 1);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.marginal(1,2)));
+        t.assert(v.records.marginal(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isUndef(v.records.marginal(2,2)));
+        t.assert(v.records.lower(1,1) == 1);
+        t.assert(v.records.lower(1,2) == -1);
+        t.assert(v.records.lower(2,1) == 0);
+        t.assert(v.records.lower(2,2) == 0);
+        t.assert(v.records.upper(1,1) == 1);
+        if strcmp(formats{i}, 'sparse_matrix')
+            t.assert(v.records.upper(1,2) == 0);
+        else
+            t.assert(isinf(v.records.upper(1,2)));
+        end
+        t.assert(v.records.upper(2,1) == 0);
+        t.assert(gams.transfer.SpecialValues.isNA(v.records.upper(2,2)));
+        t.assert(v.records.scale(1,1) == 1);
+        t.assert(v.records.scale(1,2) == 10);
+        t.assert(v.records.scale(2,1) == 0);
+        t.assert(v.records.scale(2,2) == 3);
+
+    end
+
 end

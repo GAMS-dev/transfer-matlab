@@ -108,7 +108,7 @@ classdef Variable < gams.transfer.symbol.Abstract
             type = lower(obj.def_.type.select);
         end
 
-        function obj = set.type(obj, type)
+        function set.type(obj, type)
             obj.def_.type = type;
         end
 

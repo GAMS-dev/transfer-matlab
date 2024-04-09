@@ -184,6 +184,31 @@ classdef (Abstract, Hidden) Abstract
             n = obj.countFun_(@gams.transfer.SpecialValues.isNegInf, def);
         end
 
+        function obj = dropDefaults_(obj, def)
+            st = dbstack;
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
+        function obj = dropNA_(obj, def)
+            st = dbstack;
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
+        function obj = dropUndef_(obj, def)
+            st = dbstack;
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
+        function obj = dropMissing_(obj, def)
+            st = dbstack;
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
+        function obj = dropEps_(obj, def)
+            st = dbstack;
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
         function subindex = ind2sub_(obj, axes, value, linindex)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
@@ -323,25 +348,50 @@ classdef (Abstract, Hidden) Abstract
             n = obj.countFun_(@gams.transfer.SpecialValues.isNegInf, def);
         end
 
-        function transformTo(obj, def, axes, data)
+        function obj = dropDefaults(obj, def)
             gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
-            gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            gams.transfer.utils.Validator('data', 3, data).type('gams.transfer.symbol.data.Abstract');
-            obj.transformTo_(def, axes, data);
+            obj = obj.dropDefaults_(def);
         end
 
-        function transformToTabular(obj, def, axes, data)
+        function obj = dropNA(obj, def)
             gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
-            gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
-            gams.transfer.utils.Validator('data', 3, data).type('gams.transfer.symbol.data.Abstract');
-            obj.transformToTabular_(def, axes, data);
+            obj = obj.dropNA_(def);
         end
 
-        function transformToMatrix(obj, def, axes, data)
+        function obj = dropUndef(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            obj = obj.dropUndef_(def);
+        end
+
+        function obj = dropMissing(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            obj = obj.dropMissing_(def);
+        end
+
+        function obj = dropEps(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            obj = obj.dropEps_(def);
+        end
+
+        function data = transformTo(obj, def, axes, data)
             gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
             gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
             gams.transfer.utils.Validator('data', 3, data).type('gams.transfer.symbol.data.Abstract');
-            obj.transformToMatrix_(def, axes, data);
+            data = obj.transformTo_(def, axes, data);
+        end
+
+        function data = transformToTabular(obj, def, axes, data)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
+            gams.transfer.utils.Validator('data', 3, data).type('gams.transfer.symbol.data.Abstract');
+            data = obj.transformToTabular_(def, axes, data);
+        end
+
+        function data = transformToMatrix(obj, def, axes, data)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('axes', 2, axes).type('gams.transfer.symbol.unique_labels.Axes');
+            gams.transfer.utils.Validator('data', 3, data).type('gams.transfer.symbol.data.Abstract');
+            data = obj.transformToMatrix_(def, axes, data);
         end
 
         function obj = permuteAxis(obj, def, axes, dimension, permutation)
