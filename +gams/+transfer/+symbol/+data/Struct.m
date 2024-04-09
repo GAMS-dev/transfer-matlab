@@ -118,6 +118,21 @@ classdef (Hidden) Struct < gams.transfer.symbol.data.Tabular
             end
         end
 
+        function indices = findDuplicates_(obj, def, keep)
+            nrecs = obj.getNumberRecords_(def);
+            if isnan(nrecs)
+                indices = [];
+                return
+            end
+            domain_matrix = zeros(nrecs, numel(def.domains));
+            for i = 1:numel(def.domains)
+                domain_matrix(:,i) = obj.records_.(def.domains{i}.label);
+            end
+            [~, indices_, ~] = unique(domain_matrix, keep, 'rows');
+            indices = 1:nrecs;
+            indices(indices_) = [];
+        end
+
         function data = transformToTabular_(obj, def, axes, data)
             if isa(data, 'gams.transfer.symbol.data.Table')
                 data.records_ = struct2table(obj.records_);

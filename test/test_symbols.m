@@ -36,6 +36,7 @@ function success = test_symbols(cfg)
     test_reorder(t, cfg);
     test_transformRecords(t, cfg);
     test_dropRecords(t, cfg);
+    test_duplicates(t, cfg);
     [~, n_fails] = t.summary();
     success = n_fails == 0;
 end
@@ -3377,6 +3378,93 @@ function test_dropRecords(t, cfg)
         t.assert(v.records.scale(2,1) == 0);
         t.assert(v.records.scale(2,2) == 3);
 
+    end
+end
+
+function test_duplicates(t, cfg)
+
+    gdx = gams.transfer.Container('gams_dir', cfg.gams_dir);
+    i = gams.transfer.Set(gdx, 'i', {'*'}, 'records', {'i1', 'i2', 'i3'});
+    j = gams.transfer.Set(gdx, 'j', {'*'}, 'records', {'j1', 'j2', 'j3'});
+    a = gams.transfer.Parameter(gdx, 'a', {i, j}, 'records', {...
+        {'i1', 'i1', 'i2', 'i2'}, {'j1', 'j2', 'j1', 'j1'}, 1:4});
+    if gams.transfer.Constants.SUPPORTS_TABLE
+        a.transformRecords('table');
+    end
+    b = gams.transfer.Parameter(gdx, 'b', {i, j}, 'records', {...
+        {'i1', 'i1', 'i2', 'i2'}, {'j1', 'j1', 'j2', 'j2'}, 1:4});
+    a.transformRecords('struct');
+    c = gams.transfer.Parameter(gdx, 'c', {i}, 'records', 1:3);
+
+    t.add('duplicates_count');
+    t.assert(a.isValid());
+    t.assert(b.isValid());
+    t.assert(c.isValid());
+    t.assert(a.countDuplicateRecords() == 1);
+    t.assert(b.countDuplicateRecords() == 2);
+    t.assert(c.countDuplicateRecords() == 0);
+    t.assert(gdx.countDuplicateRecords() == 3);
+    t.assert(gdx.countDuplicateRecords('symbols', {'a'}) == 1);
+    t.assert(gdx.countDuplicateRecords('symbols', {'a', 'c'}) == 1);
+
+    t.add('duplicates_has');
+    t.assert(a.hasDuplicateRecords());
+    t.assert(b.hasDuplicateRecords());
+    t.assert(~c.hasDuplicateRecords());
+    t.assert(gdx.hasDuplicateRecords());
+
+    t.add('duplicates_find_1')
+    idx = a.findDuplicateRecords('keep', 'first');
+    t.assert(numel(idx) == 1);
+    t.assert(idx(1) == 4);
+    idx = a.findDuplicateRecords('keep', 'last');
+    t.assert(numel(idx) == 1);
+    t.assert(idx(1) == 3);
+
+    t.add('duplicates_find_2')
+    idx = b.findDuplicateRecords('keep', 'first');
+    t.assert(numel(idx) == 2);
+    t.assert(idx(1) == 2);
+    t.assert(idx(2) == 4);
+    idx = b.findDuplicateRecords('keep', 'last');
+    t.assert(numel(idx) == 2);
+    t.assert(idx(1) == 1);
+    t.assert(idx(2) == 3);
+
+    t.add('duplicates_drop_1')
+    gdx_ = gams.transfer.Container(gdx, 'gams_dir', cfg.gams_dir);
+    t.assert(gdx_.countDuplicateRecords() == 3);
+    gdx_.dropDuplicateRecords('symbols', {'c'});
+    t.assert(gdx_.countDuplicateRecords() == 3);
+    gdx_.dropDuplicateRecords('symbols', {'a'});
+    t.assert(gdx_.countDuplicateRecords() == 2);
+    gdx_.dropDuplicateRecords();
+    t.assert(~gdx_.hasDuplicateRecords());
+
+    t.add('duplicates_drop_2')
+    a.dropDuplicateRecords();
+    t.assert(a.countDuplicateRecords() == 0);
+    b.dropDuplicateRecords();
+    t.assert(b.countDuplicateRecords() == 0);
+
+    t.add('duplicate_incorrect_keep')
+    try
+        t.assert(false);
+        a.findDuplicateRecords('keep', 'second');
+    catch
+        t.reset();
+    end
+    try
+        t.assert(false);
+        a.dropDuplicateRecords('keep', 'second_to_last');
+    catch
+        t.reset();
+    end
+    try
+        t.assert(false);
+        gdx.dropDuplicateRecords('keep', 'second');
+    catch
+        t.reset();
     end
 
 end

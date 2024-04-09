@@ -303,7 +303,7 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be read. All if empty. Case doesn't matter. Default is `{}`.
+        %>   List of symbols to be read. All if empty. Case doesn't matter. Default is all.
         %> - format (`string`):
         %>   Records format symbols should be stored in. Default is `table`.
         %> - records (`logical`):
@@ -330,7 +330,7 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be read. All if empty. Case doesn't matter. Default is {}.
+            %   List of symbols to be read. All if empty. Case doesn't matter. Default is all.
             % - format (string):
             %   Records format symbols should be stored in. Default is table.
             % - records (logical):
@@ -540,7 +540,7 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be written. Case doesn't matter. Default is `{}`.
+        %>   List of symbols to be written. List of symbols to be considered. Case doesn't matter. Default is all.
         %> - compress (`logical`):
         %>   Flag to compress GDX file (`true`) or not (`false`). Default is `false`.
         %> - sorted (`logical`):
@@ -578,7 +578,7 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be written. Case doesn't matter. Default is {}.
+            %   List of symbols to be written. Case doesn't matter. Default is all.
             % - compress (logical):
             %   Flag to compress GDX file (true) or not (false). Default is false.
             % - sorted (logical):
@@ -2053,7 +2053,7 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be considered. All if empty. Case doesn't matter. Default is `{}`.
+        %>   List of symbols to be considered. Case doesn't matter. Default is all.
         %>
         %> @see \ref gams::transfer::Container::resolveDomainViolations
         %> "Container.resolveDomainViolations", \ref
@@ -2071,7 +2071,7 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be considered. All if empty. Case doesn't matter. Default is {}.
+            %   List of symbols to be considered. Case doesn't matter. Default is all.
             %
             % See also: gams.transfer.Container.resolveDomainViolations,
             % gams.transfer.symbol.Abstract.getDomainViolations,
@@ -2129,7 +2129,7 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be considered. All if empty. Case doesn't matter. Default is `{}`.
+        %>   List of symbols to be considered. Case doesn't matter. Default is all.
         %>
         %> @see \ref gams::transfer::Container::getDomainViolations "Container.getDomainViolations",
         %> \ref gams::transfer::symbol::Abstract::resolveDomainViolations
@@ -2161,6 +2161,170 @@ classdef Container < gams.transfer.utils.Handle
             end
         end
 
+        %> Counts duplicate records in symbols
+        %>
+        %> In table-like record formats it may happen that duplicates occur. Duplicates are values
+        %> that refer to the same domain entry.
+        %>
+        %> **Parameter Arguments:**
+        %> - symbols (`cell`):
+        %>   List of symbols to be considered. Case doesn't matter. Default is all.
+        function n = countDuplicateRecords(obj, varargin)
+            % Counts duplicate records in symbols
+            %
+            % In table-like record formats it may happen that duplicates occur. Duplicates are values
+            % that refer to the same domain entry.
+            %
+            % Parameter Arguments:
+            % - symbols (cell):
+            %   List of symbols to be considered. Case doesn't matter. Default is all.
+
+            % parse input arguments
+            has_symbols = false;
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
+            else
+                symbols = obj.data_.entries();
+            end
+
+            n = 0;
+            for i = 1:numel(symbols)
+                n = n + symbols{i}.countDuplicateRecords();
+            end
+        end
+
+        %> Checks if duplicate records exist in symbols
+        %>
+        %> In table-like record formats it may happen that duplicates occur. Duplicates are values
+        %> that refer to the same domain entry.
+        %>
+        %> **Parameter Arguments:**
+        %> - symbols (`cell`):
+        %>   List of symbols to be considered. Case doesn't matter. Default is all.
+        function flag = hasDuplicateRecords(obj, varargin)
+            % Checks if duplicate records exist in symbols
+            %
+            % In table-like record formats it may happen that duplicates occur. Duplicates are values
+            % that refer to the same domain entry.
+            %
+            % Parameter Arguments:
+            % - symbols (cell):
+            %   List of symbols to be considered. Case doesn't matter. Default is all.
+
+            % parse input arguments
+            has_symbols = false;
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
+            else
+                symbols = obj.data_.entries();
+            end
+
+            flag = true;
+            for i = 1:numel(symbols)
+                if symbols{i}.hasDuplicateRecords()
+                    return
+                end
+            end
+            flag = false;
+        end
+
+        %> Drops duplicate records in symbols
+        %>
+        %> In table-like record formats it may happen that duplicates occur. Duplicates are values
+        %> that refer to the same domain entry.
+        %>
+        %> **Parameter Arguments:**
+        %> - symbols (`cell`):
+        %>   List of symbols to be considered. Case doesn't matter. Default is all.
+        %> - keep (`string`):
+        %>   Specify which record to keep in case of duplicates. Possible values: 'first' or 'last'.
+        %>   Default: 'first'.
+        function obj = dropDuplicateRecords(obj, varargin)
+            % Drops duplicate records in symbols
+            %
+            % In table-like record formats it may happen that duplicates occur. Duplicates are values
+            % that refer to the same domain entry.
+            %
+            % Parameter Arguments:
+            % - symbols (cell):
+            %   List of symbols to be considered. Case doesn't matter. Default is all.
+            % - keep (string):
+            %   Specify which record to keep in case of duplicates. Possible values: 'first' or
+            %   'last'. Default: 'first'.
+
+            % parse input arguments
+            has_symbols = false;
+            keep = 'first';
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'symbols')
+                        index = index + 1;
+                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
+                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
+                            .string2char().cellstr().value;
+                        has_symbols = true;
+                        index = index + 1;
+                    elseif strcmpi(varargin{index}, 'keep')
+                        index = index + 1;
+                        keep = gams.transfer.utils.Validator('keep', index, varargin{index}) ...
+                            .string2char().type('char').in({'first', 'last'}).value;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
+            else
+                symbols = obj.data_.entries();
+            end
+
+            for i = 1:numel(symbols)
+                symbols{i}.dropDuplicateRecords('keep', keep);
+            end
+        end
+
         %> Checks correctness of all symbols
         %>
         %> See \ref GAMS_TRANSFER_MATLAB_RECORDS_VALIDATE for more information.
@@ -2173,7 +2337,7 @@ classdef Container < gams.transfer.utils.Handle
         %>
         %> **Parameter Arguments:**
         %> - symbols (`cell`):
-        %>   List of symbols to be considered. All if empty. Case doesn't matter. Default is `{}`.
+        %>   List of symbols to be considered. Case doesn't matter. Default is all.
         %>
         %> @see \ref gams::transfer::symbol::Abstract::isValid "symbol.Abstract.isValid"
         function valid = isValid(obj, varargin)
@@ -2187,7 +2351,7 @@ classdef Container < gams.transfer.utils.Handle
             %
             % Parameter Arguments:
             % - symbols (cell):
-            %   List of symbols to be considered. All if empty. Case doesn't matter. Default is {}.
+            %   List of symbols to be considered. Case doesn't matter. Default is all.
             %
             % See also: gams.transfer.symbol.Abstract.isValid
 

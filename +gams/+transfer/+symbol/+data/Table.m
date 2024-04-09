@@ -105,6 +105,17 @@ classdef (Hidden) Table < gams.transfer.symbol.data.Tabular
             end
         end
 
+        function indices = findDuplicates_(obj, def, keep)
+            if ~istable(obj.records_)
+                indices = [];
+                return
+            end
+            domain_table = obj.records_(:, string(def.getDomainLabels()));
+            [~, indices_, ~] = unique(domain_table, keep);
+            indices = 1:height(obj.records_);
+            indices(indices_) = [];
+        end
+
         function data = transformToTabular_(obj, def, axes, data)
             if isa(data, 'gams.transfer.symbol.data.Table')
                 data.records_ = obj.records_;

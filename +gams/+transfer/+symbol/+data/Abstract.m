@@ -209,6 +209,24 @@ classdef (Abstract, Hidden) Abstract
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
+        function n = countDuplicates_(obj, def)
+            n = numel(obj.findDuplicates_(def, 'first'));
+        end
+
+        function indices = findDuplicates_(obj, def, keep)
+            st = dbstack;
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
+        function flag = hasDuplicates_(obj, def)
+            flag = obj.countDuplicates_(def) > 0;
+        end
+
+        function obj = dropDuplicates_(obj, def, keep)
+            st = dbstack;
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
         function subindex = ind2sub_(obj, axes, value, linindex)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
@@ -371,6 +389,28 @@ classdef (Abstract, Hidden) Abstract
         function obj = dropEps(obj, def)
             gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
             obj = obj.dropEps_(def);
+        end
+
+        function n = countDuplicates(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            n = obj.countDuplicates_(def);
+        end
+
+        function indices = findDuplicates(obj, def, keep)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('keep', 2, keep).string2char().type('char').in({'first', 'last'});
+            indices = obj.findDuplicates_(def, keep);
+        end
+
+        function flag = hasDuplicates(obj, def)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            flag = obj.hasDuplicates_(def);
+        end
+
+        function obj = dropDuplicates(obj, def, keep)
+            gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
+            gams.transfer.utils.Validator('keep', 2, keep).string2char().type('char').in({'first', 'last'});
+            obj = obj.dropDuplicates_(def, keep);
         end
 
         function data = transformTo(obj, def, axes, data)
