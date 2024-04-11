@@ -1410,6 +1410,170 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             nvals = obj.data_.getNumberValues_(def);
         end
 
+        %> Drops default values from records
+        %>
+        %> For table-like record formats rows are dropped if all columns of that row hold default
+        %> values. For matrix-like records formats, nothing happens.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
+        function dropDefaults(obj, varargin)
+            % Drops default values from records
+            %
+            % For table-like record formats rows are dropped if all columns of that row hold default
+            % values. For matrix-like records formats, nothing happens.
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
+
+            try
+                def = obj.parseValues(varargin{:});
+            catch e
+                error(e.message);
+            end
+            obj.data_ = obj.data_.dropDefaults_(def);
+        end
+
+        %> Drops NA values from records
+        %>
+        %> For table-like record formats rows are dropped if any column of that row holds NA. For
+        %> matrix-like records formats, NA elements are replaced by the corresponding default value.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
+        %>
+        %> @see \ref gams::transfer::SpecialValues::NA "SpecialValues.NA"
+        function dropNA(obj, varargin)
+            % Drops NA values from records
+            %
+            % For table-like record formats rows are dropped if any column of that row holds NA. For
+            % matrix-like records formats, NA elements are replaced by the corresponding default
+            % value.
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
+            %
+            % See also: gams.transfer.SpecialValues.NA
+
+            try
+                def = obj.parseValues(varargin{:});
+            catch e
+                error(e.message);
+            end
+            obj.data_ = obj.data_.dropNA_(def);
+        end
+
+        %> Drops Undef values from records
+        %>
+        %> For table-like record formats rows are dropped if any column of that row holds Undef. For
+        %> matrix-like records formats, Undef elements are replaced by the corresponding default
+        %> value.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
+        %>
+        %> @see \ref gams::transfer::SpecialValues::UNDEF "SpecialValues.UNDEF"
+        function dropUndef(obj, varargin)
+            % Drops Undef values from records
+            %
+            % For table-like record formats rows are dropped if any column of that row holds Undef.
+            % For matrix-like records formats, Undef elements are replaced by the corresponding
+            % default value.
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
+            %
+            % See also: gams.transfer.SpecialValues.UNDEF
+
+            try
+                def = obj.parseValues(varargin{:});
+            catch e
+                error(e.message);
+            end
+            obj.data_ = obj.data_.dropUndef_(def);
+        end
+
+        %> Drops NaN (includes NA and Undef) values from records
+        %>
+        %> For table-like record formats rows are dropped if any column of that row holds NaN. For
+        %> matrix-like records formats, NaN elements are replaced by the corresponding default
+        %> value.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
+        %>
+        %> @see \ref gams::transfer::SpecialValues::NA "SpecialValues.NA", \ref
+        %> gams::transfer::SpecialValues::UNDEF "SpecialValues.UNDEF"
+        function dropMissing(obj, varargin)
+            % Drops NaN (includes NA and Undef) values from records
+            %
+            % For table-like record formats rows are dropped if any column of that row holds NaN.
+            % For matrix-like records formats, NaN elements are replaced by the corresponding
+            % default value.
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
+            %
+            % See also: gams.transfer.SpecialValues.NA, gams.transfer.SpecialValues.UNDEF
+
+            try
+                def = obj.parseValues(varargin{:});
+            catch e
+                error(e.message);
+            end
+            obj.data_ = obj.data_.dropMissing_(def);
+        end
+
+        %> Drops Eps values from records
+        %>
+        %> For table-like record formats rows are dropped if any column of that row holds Eps. For
+        %> matrix-like records formats, Eps elements are replaced by the corresponding default
+        %> value.
+        %>
+        %> **Parameter Arguments:**
+        %> - values (`cell`):
+        %>   List of value fields that should be considered, e.g. `{'level', 'marginal', 'lower',
+        %>   'upper', 'scale'}`. Default: All value fields of symbol.
+        %>
+        %> @see \ref gams::transfer::SpecialValues::EPS "SpecialValues.EPS"
+        function dropEps(obj, varargin)
+            % Drops Eps values from records
+            %
+            % For table-like record formats rows are dropped if any column of that row holds Eps.
+            % For matrix-like records formats, Eps elements are replaced by the corresponding
+            % default value.
+            %
+            % Parameter Arguments:
+            % - values (cell):
+            %   List of value fields that should be considered, e.g. {'level', 'marginal', 'lower',
+            %   'upper', 'scale'}. Default: All value fields of symbol.
+            %
+            % See also: gams.transfer.SpecialValues.EPS
+
+            try
+                def = obj.parseValues(varargin{:});
+            catch e
+                error(e.message);
+            end
+            obj.data_ = obj.data_.dropEps_(def);
+        end
+
     end
 
     methods (Hidden, Access = {?gams.transfer.symbol.Abstract, ?gams.transfer.Container, ...

@@ -126,6 +126,29 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             end
         end
 
+        function obj = dropDefaults_(obj, def)
+        end
+
+        function obj = dropNA_(obj, def)
+            fun = @(i) (gams.transfer.SpecialValues.isNA(obj.records_.(def.values{i}.label)));
+            obj = obj.dropFun_(def, fun);
+        end
+
+        function obj = dropUndef_(obj, def)
+            fun = @(i) (gams.transfer.SpecialValues.isUndef(obj.records_.(def.values{i}.label)));
+            obj = obj.dropFun_(def, fun);
+        end
+
+        function obj = dropMissing_(obj, def)
+            fun = @(i) (isnan(obj.records_.(def.values{i}.label)));
+            obj = obj.dropFun_(def, fun);
+        end
+
+        function obj = dropEps_(obj, def)
+            fun = @(i) (gams.transfer.SpecialValues.isEps(obj.records_.(def.values{i}.label)));
+            obj = obj.dropFun_(def, fun);
+        end
+
         function subindex = ind2sub_(obj, axes, value, linindex)
             [i, j] = ind2sub(size(obj.records_.(value.label)), linindex);
             subindex = [i, j];
@@ -174,6 +197,16 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             % values columns
             for i = 1:numel(def.values)
                 data.records.(def.values{i}.label) = full(obj.records_.(def.values{i}.label)(indices_perm));
+            end
+        end
+
+    end
+
+    methods (Hidden, Access = private)
+
+        function obj = dropFun_(obj, def, fun)
+            for i = 1:numel(def.values)
+                obj.records_.(def.values{i}.label)(fun(i)) = def.values{i}.default;
             end
         end
 

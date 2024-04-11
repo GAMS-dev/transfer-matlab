@@ -304,6 +304,19 @@ classdef Parameter < gams.transfer.symbol.Abstract
             symbol.def_ = symbol.def_.switchContainer_(destination);
         end
 
+        %> Drops zero values from records
+        %>
+        %> For table-like record formats rows are dropped if values are zero. For matrix-like
+        %> records formats, nothing happens.
+        function dropZeros(obj)
+            % Drops default values from records
+            %
+            % For table-like record formats rows are dropped if values are zero. For matrix-like
+            % records formats, nothing happens.
+
+            obj.data_ = obj.data_.dropDefaults_(obj.def_);
+        end
+
     end
 
     methods (Static)

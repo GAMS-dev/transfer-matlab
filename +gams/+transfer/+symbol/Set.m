@@ -104,7 +104,7 @@ classdef Set < gams.transfer.symbol.Abstract
             is_singleton = obj.def_.is_singleton_;
         end
 
-        function obj = set.is_singleton(obj, is_singleton)
+        function set.is_singleton(obj, is_singleton)
             obj.def_.is_singleton = singleton;
         end
 

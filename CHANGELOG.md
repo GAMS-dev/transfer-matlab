@@ -91,6 +91,10 @@ GAMS Transfer Matlab v0.9.0
   formats when the symbol domain is relaxed and/or smaller matrices than actually defined by the
   regular domain. Note that the previous behaviour for regular symbols with matrix formats does not
   change.
+- Added methods `symbol.Abstract.dropDefaults`, `symbol.Abstract.dropNA`,
+  `symbol.Abstract.dropUndef`, `symbol.Abstract.dropMissing`, `symbol.Abstract.dropEps` and
+  `symbol.Parameter.dropZeros` to drop (table-like formats) or replace certain special values by
+  defaults (matrix-like formats).
 - Added return of new symbol to `symbol.Abstract.copy` and `alias.Abstract.copy`.
 - Added a silent call to `Container.reorderSymbols` in `Container.isValid` if symbols are out of
   order (symbols that use other symbols in the domain must appear after the domain symbols). Even
