@@ -65,6 +65,9 @@ GAMS Transfer Matlab v0.9.0
 - Changed behaviour when passing `symbols, {}` to `Container.write`: Previously this wrote all
   symbols, now it is none. To write all symbols, use all symbols in the `symbols` argument (see also
   `Container.list*`) or don't specify the `symbols` argument in the call.
+- Changed behaviour of `Container.write` w.r.t. `eps` values: Added argument `eps_to_zero` to
+  `Container.write` to convert all `SpecialValues.EPS` values in the records to zero in the write.
+  This does not change the records in the Container. Default is `true`.
 - Changed signature of methods `symbol.Abstract.getMaxValue`, `symbol.Abstract.getMinValue`,
   `symbol.Abstract.getMeanValue`, `symbol.Abstract.getMaxAbsValue`, `symbol.Abstract.countNA`,
   `symbol.Abstract.countUndef`, `symbol.Abstract.countEps`, `symbol.Abstract.countPosInf`,

@@ -83,7 +83,8 @@ double gt_utils_sv_gams2matlab(
 
 /** translates Matlab double values to GAMS double values */
 double gt_utils_sv_matlab2gams(
-    double          gams_value      /** original GAMS value */
+    double          gams_value,     /** original GAMS value */
+    bool            eps_to_zero     /** flag to set Matlab EPS to 0 instead of GAMS EPS */
 );
 
 /** returns the default GDX values for the given (type,subtype) tuple */

@@ -134,7 +134,8 @@ double gt_utils_sv_gams2matlab(
 }
 
 double gt_utils_sv_matlab2gams(
-    double          value           /** original value */
+    double          value,          /** original value */
+    bool            eps_to_zero     /** flag to set Matlab EPS to 0 instead of GAMS EPS */
 )
 {
     if (gt_utils_isna(value))
@@ -146,7 +147,7 @@ double gt_utils_sv_matlab2gams(
     if (mxIsInf(value) && value < 0)
         return GMS_SV_MINF;
     if (gt_utils_iseps(value))
-        return GMS_SV_EPS;
+        return eps_to_zero ? 0.0 : GMS_SV_EPS;
     return value;
 }
 

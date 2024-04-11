@@ -47,7 +47,7 @@ void mexFunction(
     char gdx_filename[GMS_SSSIZE], buf[GMS_SSSIZE], name[GMS_SSSIZE];
     char text[GMS_SSSIZE], dominfo[10], sysdir[GMS_SSSIZE];
     double def_values[GMS_VAL_MAX];
-    bool was_table, support_table, support_categorical, compress, issorted, singleton;
+    bool was_table, support_table, support_categorical, compress, issorted, singleton, eps_to_zero;
     bool have_nrecs, can_skip_default_recs;
     char* data_name = NULL;
     gdxHandle_t gdx = NULL;
@@ -85,15 +85,16 @@ void mexFunction(
     GDXSTRINDEXPTRS_INIT(domains, domains_ptr);
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(0, nlhs, 9, nrhs);
+    gt_mex_check_arguments_num(0, nlhs, 10, nrhs);
     gt_mex_check_argument_str(prhs, 0, sysdir);
     gt_mex_check_argument_str(prhs, 1, gdx_filename);
     gt_mex_check_argument_struct(prhs, 2);
     gt_mex_check_argument_cell(prhs, 4);
     gt_mex_check_argument_bool(prhs, 5, 1, &compress);
     gt_mex_check_argument_bool(prhs, 6, 1, &issorted);
-    gt_mex_check_argument_bool(prhs, 7, 1, &support_table);
-    gt_mex_check_argument_bool(prhs, 8, 1, &support_categorical);
+    gt_mex_check_argument_bool(prhs, 7, 1, &eps_to_zero);
+    gt_mex_check_argument_bool(prhs, 8, 1, &support_table);
+    gt_mex_check_argument_bool(prhs, 9, 1, &support_categorical);
 
     /* create output data */
     plhs = NULL;
@@ -386,7 +387,7 @@ void mexFunction(
                     for (size_t k = 0; k < GMS_VAL_MAX; k++)
                     {
                         if (mx_arr_values[k])
-                            gdx_values[k] = gt_utils_sv_matlab2gams(mx_values[k][j]);
+                            gdx_values[k] = gt_utils_sv_matlab2gams(mx_values[k][j], eps_to_zero);
                         else
                             gdx_values[k] = def_values[k];
                     }
@@ -438,7 +439,7 @@ void mexFunction(
                     for (size_t k = 0; k < GMS_VAL_MAX; k++)
                     {
                         if (mx_arr_values[k])
-                            gdx_values[k] = gt_utils_sv_matlab2gams(mx_values[k][idx]);
+                            gdx_values[k] = gt_utils_sv_matlab2gams(mx_values[k][idx], eps_to_zero);
                         else
                             gdx_values[k] = def_values[k];
                         is_default_rec = (gdx_values[k] != def_values[k]) ? false : is_default_rec;
@@ -495,7 +496,7 @@ void mexFunction(
                                 continue;
                             }
                             col_nnz[kk][k]++;
-                            gdx_values[kk] = gt_utils_sv_matlab2gams(mx_values[kk][idx]);
+                            gdx_values[kk] = gt_utils_sv_matlab2gams(mx_values[kk][idx], eps_to_zero);
                         }
 
                         /* write values */
