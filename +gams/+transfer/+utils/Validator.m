@@ -265,6 +265,15 @@ classdef Validator
             end
         end
 
+        function obj = in(obj, list)
+            for i = 1:numel(list)
+                if isequaln(obj.value, list{i})
+                    return
+                end
+            end
+            error('Argument ''%s'' (at position %d) does not match any of the allowed values.', obj.name, obj.index);
+        end
+
         function obj = inInterval(obj, left, right)
             if min(obj.value(:)) < left || max(obj.value(:)) > right
                 error('Argument ''%s'' (at position %d) must be in [%g,%g].', obj.name, obj.index, left, right);

@@ -191,6 +191,10 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             obj = obj.dropFun_(def, fun);
         end
 
+        function obj = dropDuplicates_(obj, def, keep)
+            obj = obj.removeRows_(obj.findDuplicates_(def, keep));
+        end
+
         function subindex = ind2sub_(obj, axes, value, linindex)
             dim = axes.dimension;
             subindex = zeros(1, dim);

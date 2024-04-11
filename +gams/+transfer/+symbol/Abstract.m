@@ -1039,6 +1039,118 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             sparsity = obj.data_.getSparsity_(def, obj.getDomainAxes_());
         end
 
+        %> Counts duplicate records
+        %>
+        %> In table-like record formats it may happen that duplicates occur. Duplicates are values
+        %> that refer to the same domain entry.
+        function n = countDuplicateRecords(obj)
+            % Counts duplicate records
+            %
+            % In table-like record formats it may happen that duplicates occur. Duplicates are
+            % values that refer to the same domain entry.
+
+            def = obj.data_.projectDefinition_(obj.def_);
+            n = obj.data_.countDuplicates_(def);
+        end
+
+        %> Finds duplicate records
+        %>
+        %> In table-like record formats it may happen that duplicates occur. Duplicates are values
+        %> that refer to the same domain entry.
+        %>
+        %> **Parameter Arguments:**
+        %> - keep (`string`):
+        %>   Specify which record to keep in case of duplicates. Possible values: 'first' or 'last'.
+        %>   Default: 'first'.
+        function indices = findDuplicateRecords(obj, varargin)
+            % Finds duplicate records
+            %
+            % In table-like record formats it may happen that duplicates occur. Duplicates are
+            % values that refer to the same domain entry.
+            %
+            % Parameter Arguments:
+            % - keep (string):
+            %   Specify which record to keep in case of duplicates. Possible values: 'first' or
+            %   'last'. Default: 'first'.
+
+            % parse input arguments
+            keep = 'first';
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'keep')
+                        index = index + 1;
+                        keep = gams.transfer.utils.Validator('keep', index, varargin{index})...
+                            .string2char().type('char').in({'first', 'last'}).value;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            def = obj.data_.projectDefinition_(obj.def_);
+            indices = obj.data_.findDuplicates_(def, keep);
+        end
+
+        %> Checks if duplicate records exist
+        %>
+        %> In table-like record formats it may happen that duplicates occur. Duplicates are values
+        %> that refer to the same domain entry.
+        function flag = hasDuplicateRecords(obj)
+            % Checks if duplicate records exist
+            %
+            % In table-like record formats it may happen that duplicates occur. Duplicates are
+            % values that refer to the same domain entry.
+
+            def = obj.data_.projectDefinition_(obj.def_);
+            flag = obj.data_.hasDuplicates_(def);
+        end
+
+        %> Drops duplicate records
+        %>
+        %> In table-like record formats it may happen that duplicates occur. Duplicates are values
+        %> that refer to the same domain entry.
+        %>
+        %> **Parameter Arguments:**
+        %> - keep (`string`):
+        %>   Specify which record to keep in case of duplicates. Possible values: 'first' or 'last'.
+        %>   Default: 'first'.
+        function obj = dropDuplicateRecords(obj, varargin)
+            % Drops duplicate records
+            %
+            % In table-like record formats it may happen that duplicates occur. Duplicates are
+            % values that refer to the same domain entry.
+            %
+            % Parameter Arguments:
+            % - keep (string):
+            %   Specify which record to keep in case of duplicates. Possible values: 'first' or
+            %   'last'. Default: 'first'.
+
+            % parse input arguments
+            keep = 'first';
+            try
+                index = 1;
+                while index <= numel(varargin)
+                    if strcmpi(varargin{index}, 'keep')
+                        index = index + 1;
+                        keep = gams.transfer.utils.Validator('keep', index, varargin{index})...
+                            .string2char().type('char').in({'first', 'last'}).value;
+                        index = index + 1;
+                    else
+                        error('Invalid argument at position %d', index);
+                    end
+                end
+            catch e
+                error(e.message);
+            end
+
+            def = obj.data_.projectDefinition_(obj.def_);
+            obj.data_ = obj.data_.dropDuplicates_(def, keep);
+        end
+
     end
 
     methods (Hidden, Access = protected)

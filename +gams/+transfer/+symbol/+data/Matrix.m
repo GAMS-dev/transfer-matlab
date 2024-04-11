@@ -149,6 +149,13 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
             obj = obj.dropFun_(def, fun);
         end
 
+        function indices = findDuplicates_(obj, def, keep)
+            indices = [];
+        end
+
+        function obj = dropDuplicates_(obj, def, keep)
+        end
+
         function subindex = ind2sub_(obj, axes, value, linindex)
             [i, j] = ind2sub(size(obj.records_.(value.label)), linindex);
             subindex = [i, j];

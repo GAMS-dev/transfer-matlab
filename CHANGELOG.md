@@ -95,6 +95,10 @@ GAMS Transfer Matlab v0.9.0
   `symbol.Abstract.dropUndef`, `symbol.Abstract.dropMissing`, `symbol.Abstract.dropEps` and
   `symbol.Parameter.dropZeros` to drop (table-like formats) or replace certain special values by
   defaults (matrix-like formats).
+- Added methods `symbol.Abstract.countDuplicateRecords`, `symbol.Abstract.hasDuplicateRecords`,
+  `symbol.Abstract.findDuplicateRecords`, `symbol.Abstract.dropDuplicateRecords`,
+  `Container.countDuplicateRecords`, `Container.hasDuplicateRecords` and
+  `Container.dropDuplicateRecords` to manage duplicates in table-like records formats.
 - Added return of new symbol to `symbol.Abstract.copy` and `alias.Abstract.copy`.
 - Added a silent call to `Container.reorderSymbols` in `Container.isValid` if symbols are out of
   order (symbols that use other symbols in the domain must appear after the domain symbols). Even
