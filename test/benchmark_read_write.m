@@ -2,12 +2,11 @@ function results = benchmark_read_write(varargin)
 
     p = inputParser();
     is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-        ~strcmpi(x, 'working_dir') && ~strcmpi(x, 'gams_dir') && ~strcmpi(x, 'format');
+        ~strcmpi(x, 'working_dir') && ~strcmpi(x, 'format');
     addRequired(p, 'gdx_dir');
     addParameter(p, 'format', 'struct', is_string_char)
     addParameter(p, 'working_dir', tempname, is_string_char);
     addParameter(p, 'check_same', false, @islogical);
-    addParameter(p, 'gams_dir', gams.transfer.utils.find_gdx(), is_string_char);
     parse(p, varargin{:});
 
     files = dir(fullfile(p.Results.gdx_dir, '**', '*.gdx'));
@@ -24,7 +23,6 @@ function results = benchmark_read_write(varargin)
 
     mkdir(p.Results.working_dir);
     write_filename = fullfile(p.Results.working_dir, 'write.gdx');
-    gdxdiff = fullfile(p.Results.gams_dir, 'gdxdiff');
 
     oldfolder = cd(p.Results.working_dir);
 
@@ -52,7 +50,7 @@ function results = benchmark_read_write(varargin)
             curr_bytes = curr_bytes + files(i).bytes;
             copyfile(results.file{i}, read_filename);
 
-            gdx = gams.transfer.Container('gams_dir', p.Results.gams_dir);
+            gdx = gams.transfer.Container();
 
             fprintf('%5.0f ', results.read_size(i));
 
@@ -67,7 +65,7 @@ function results = benchmark_read_write(varargin)
             gdx.write(write_filename);
             results.write_time(i) = toc(time);
 
-            clearvars -except i p files results oldfolder all_bytes curr_bytes gdxdiff read_filename write_filename
+            clearvars -except i p files results oldfolder all_bytes curr_bytes read_filename write_filename
 
             write_file = dir(write_filename);
             results.write_size(i) = write_file.bytes / 1024 / 1024;
@@ -76,7 +74,7 @@ function results = benchmark_read_write(varargin)
             fprintf('%5.0f %10.2f %10.2f | ', results.write_size(i), results.write_time(i), results.write_speed(i));
 
             if p.Results.check_same
-                [status, ~] = system(sprintf('%s %s %s EPS=1e-20 RELEPS=1e-20', gdxdiff, read_filename, write_filename));
+                [status, ~] = system(sprintf('gdxdiff %s %s EPS=1e-20 RELEPS=1e-20', read_filename, write_filename));
                 results.same(i) = status == 0;
             end
 

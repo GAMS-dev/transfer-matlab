@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "idxcc.h"
+#include "gt_idx.h"
 #include "mex.h"
 #include "gt_utils.h"
 #include "gt_mex.h"
@@ -45,7 +45,7 @@ void mexFunction(
 {
     int format;
     size_t dim, nrecs;
-    char gdx_filename[GMS_SSSIZE], buf[GMS_SSSIZE], sysdir[GMS_SSSIZE], name[GMS_SSSIZE];
+    char gdx_filename[GMS_SSSIZE], buf[GMS_SSSIZE], name[GMS_SSSIZE];
     char text[GMS_SSSIZE];
     double def_values[GMS_VAL_MAX];
     bool was_table, support_table, issorted, have_nrecs, eps_to_zero;
@@ -79,26 +79,25 @@ void mexFunction(
     mxArray* call_prhs[2] = {NULL};
 
     /* check input / outputs */
-    gt_mex_check_arguments_num(0, nlhs, 7, nrhs);
-    gt_mex_check_argument_str(prhs, 0, sysdir);
-    gt_mex_check_argument_str(prhs, 1, gdx_filename);
-    gt_mex_check_argument_struct(prhs, 2);
-    gt_mex_check_argument_bool(prhs, 4, 1, &issorted);
-    gt_mex_check_argument_bool(prhs, 5, 1, &eps_to_zero);
-    gt_mex_check_argument_bool(prhs, 6, 1, &support_table);
+    gt_mex_check_arguments_num(0, nlhs, 6, nrhs);
+    gt_mex_check_argument_str(prhs, 0, gdx_filename);
+    gt_mex_check_argument_struct(prhs, 1);
+    gt_mex_check_argument_bool(prhs, 3, 1, &issorted);
+    gt_mex_check_argument_bool(prhs, 4, 1, &eps_to_zero);
+    gt_mex_check_argument_bool(prhs, 5, 1, &support_table);
 
     /* create output data */
     plhs = NULL;
 
     /* start GDX */
-    gt_idx_init_write(&gdx, sysdir, gdx_filename);
+    gt_idx_init_write(&gdx, gdx_filename);
 
 #ifdef WITH_R2018A_OR_NEWER
-    mx_enable = mxGetLogicals(prhs[3]);
+    mx_enable = mxGetLogicals(prhs[2]);
 #else
-    mx_enable = (mxLogical*) mxGetData(prhs[3]);
+    mx_enable = (mxLogical*) mxGetData(prhs[2]);
 #endif
-    for (int i = 0; i < mxGetNumberOfFields(prhs[2]); i++)
+    for (int i = 0; i < mxGetNumberOfFields(prhs[1]); i++)
     {
         if (!mx_enable[i])
             continue;
@@ -114,8 +113,8 @@ void mexFunction(
         }
 
         /* get data field */
-        mx_arr_symbol = mxGetFieldByNumber(prhs[2], 0, i);
-        data_name = (char*) mxGetFieldNameByNumber(prhs[2], i);
+        mx_arr_symbol = mxGetFieldByNumber(prhs[1], 0, i);
+        data_name = (char*) mxGetFieldNameByNumber(prhs[1], i);
 
         if (!mxIsClass(mx_arr_symbol, "gams.transfer.symbol.Parameter"))
             mexErrMsgIdAndTxt(ERRID"type", "Symbol '%s' has invalid type.", data_name);
@@ -327,9 +326,9 @@ void mexFunction(
                     mx_cols[j] = mxGetJc(mx_arr_values[j]);
                 }
 
-                for (int j = 0; j < sizes[0]; j++)
+                for (size_t j = 0; j < sizes[0]; j++)
                 {
-                    for (int k = 0; k < sizes[1]; k++)
+                    for (size_t k = 0; k < sizes[1]; k++)
                     {
                         /* set domains */
                         if (dim >= 1)

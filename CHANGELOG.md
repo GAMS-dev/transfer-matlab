@@ -1,5 +1,7 @@
 GAMS Transfer Matlab v0.9.0
 ==================
+- Removed property `Container.gams_dir`. GAMS Transfer Matlab is now compiled statically with GDX
+  and is thus independent of the GAMS system.
 - Removed property `Container.indexed`. A container may now store indexed or standard symbols
   together. To read or write an indexed GDX file, pass the argument `indexed, true` to
   `Container.read` or `Container.write`. When writing an indexed GDX file, non-indexed symbols are

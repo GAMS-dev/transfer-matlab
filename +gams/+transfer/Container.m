@@ -38,14 +38,9 @@
 % 1. source (string or Container):
 %    Path to GDX file or a Container object to be read
 %
-% Parameter Arguments:
-% - gams_dir (string):
-%   Path to GAMS system directory. Default is determined from PATH environment variable
-%
 % Example:
 % c = Container();
 % c = Container('path/to/file.gdx');
-% c = Container('gams_dir', 'C:\GAMS');
 %
 % See also: gams.transfer.Set, gams.transfer.Alias, gams.transfer.Parameter, gams.transfer.Variable,
 % gams.transfer.Equation
@@ -62,7 +57,6 @@
 %> ```
 %> c = Container();
 %> c = Container('path/to/file.gdx');
-%> c = Container('gams_dir', 'C:\GAMS');
 %> ```
 %>
 %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Alias "Alias", \ref
@@ -73,18 +67,11 @@ classdef Container < gams.transfer.utils.Handle
     %#ok<*INUSD,*STOUT,*PROPLC>
 
     properties (Hidden, SetAccess = protected)
-        gams_dir_ = ''
         data_
         modified_ = true
     end
 
     properties (Dependent, SetAccess = protected)
-        %> GAMS system directory
-
-        % gams_dir GAMS system directory
-        gams_dir
-
-
         %> GAMS (GDX) symbols
 
         % data GAMS (GDX) symbols
@@ -107,10 +94,6 @@ classdef Container < gams.transfer.utils.Handle
     end
 
     methods
-
-        function gams_dir = get.gams_dir(obj)
-            gams_dir = obj.gams_dir_;
-        end
 
         function data = get.data(obj)
             data = obj.data_.entries_;
@@ -146,15 +129,10 @@ classdef Container < gams.transfer.utils.Handle
         %> 1. source (`string` or `Container`):
         %>    Path to GDX file or a \ref gams::transfer::Container "Container" object to be read
         %>
-        %> **Parameter Arguments:**
-        %> - gams_dir (`string`):
-        %>   Path to GAMS system directory. Default is determined from PATH environment variable
-        %>
         %> **Example:**
         %> ```
         %> c = Container();
         %> c = Container('path/to/file.gdx');
-        %> c = Container('gams_dir', 'C:\GAMS');
         %> ```
         %>
         %> @see \ref gams::transfer::Set "Set", \ref gams::transfer::Alias "Alias", \ref
@@ -166,24 +144,12 @@ classdef Container < gams.transfer.utils.Handle
             obj.data_ = gams.transfer.incase_ordered_dict.Struct();
 
             % parse input arguments
-            has_gams_dir = false;
             has_source = false;
             try
                 index = 1;
                 is_pararg = false;
                 while index <= numel(varargin)
-                    if strcmpi(varargin{index}, 'gams_dir')
-                        index = index + 1;
-                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
-                        gams_dir = gams.transfer.utils.Validator('gams_dir', index, varargin{index})...
-                            .string2char().type('char').value;
-                        if ~isfile(fullfile(gams_dir, gams.transfer.Constants.GDX_LIBRARY_NAME))
-                            error('Argument ''gams_dir'' (at position %d) does not contain a path to the GDX library.', index);
-                        end
-                        has_gams_dir = true;
-                        index = index + 1;
-                        is_pararg = true;
-                    elseif strcmpi(varargin{index}, 'indexed')
+                    if strcmpi(varargin{index}, 'indexed')
                         warning('Setting argument ''indexed'' for the Container has no effect anymore. Use it in the ''read'' and/or ''write'' method.');
                         index = index + 2;
                         is_pararg = true;
@@ -198,13 +164,6 @@ classdef Container < gams.transfer.utils.Handle
                 end
             catch e
                 error(e.message);
-            end
-
-            % find GDX directory from PATH if not given
-            if has_gams_dir
-                obj.gams_dir_ = gams_dir;
-            else
-                obj.gams_dir_ = gams.transfer.utils.find_gdx();
             end
 
             % read GDX file
@@ -230,8 +189,7 @@ classdef Container < gams.transfer.utils.Handle
             %    Other Container
 
             eq = false;
-            if ~isequal(class(obj), class(container)) || ...
-                ~isequal(obj.gams_dir_, container.gams_dir)
+            if ~isequal(class(obj), class(container))
                 return
             end
             symbols1 = obj.getSymbols();
@@ -450,9 +408,9 @@ classdef Container < gams.transfer.utils.Handle
 
             % read records
             if indexed
-                symbols = gams.transfer.gdx.gt_idx_read(obj.gams_dir_, source, symbols, format, records);
+                symbols = gams.transfer.gdx.gt_idx_read(source, symbols, format, records);
             else
-                symbols = gams.transfer.gdx.gt_gdx_read(obj.gams_dir_, source, symbols, format, records, ...
+                symbols = gams.transfer.gdx.gt_gdx_read(source, symbols, format, records, ...
                     values, gams.transfer.Constants.SUPPORTS_CATEGORICAL, false);
             end
             symbol_names = fieldnames(symbols);
@@ -693,10 +651,10 @@ classdef Container < gams.transfer.utils.Handle
 
             % write data
             if indexed
-                gams.transfer.gdx.gt_idx_write(obj.gams_dir_, filename, obj.data_.entries_, ...
+                gams.transfer.gdx.gt_idx_write(filename, obj.data_.entries_, ...
                     enable, sorted, eps_to_zero, gams.transfer.Constants.SUPPORTS_TABLE);
             else
-                gams.transfer.gdx.gt_gdx_write(obj.gams_dir_, filename, obj.data_.entries_, ...
+                gams.transfer.gdx.gt_gdx_write(filename, obj.data_.entries_, ...
                     enable, uel_priority, compress, sorted, eps_to_zero, ...
                     gams.transfer.Constants.SUPPORTS_TABLE, ...
                     gams.transfer.Constants.SUPPORTS_CATEGORICAL);

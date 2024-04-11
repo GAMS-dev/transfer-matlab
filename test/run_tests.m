@@ -36,20 +36,13 @@ function run_tests(transfer_dir, varargin)
     fprintf("Testing %s ...\n", fullfile(transfer_dir, '+gams', '+transfer'));
 
     p = inputParser();
-    is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ...
-        ~strcmpi(x, 'working_dir') && ~strcmpi(x, 'gams_dir');
+    is_string_char = @(x) (isstring(x) && numel(x) == 1 || ischar(x)) && ~strcmpi(x, 'working_dir');
     addParameter(p, 'working_dir', tempname, is_string_char);
-    addParameter(p, 'gams_dir', '', is_string_char);
     addParameter(p, 'exit_on_fail', false, @islogical);
     parse(p, varargin{:});
 
     % check paths
     working_dir = gams.transfer.utils.absolute_path(p.Results.working_dir);
-    if strcmp(p.Results.gams_dir, '')
-        gams_dir = gams.transfer.utils.absolute_path(gams.transfer.utils.find_gdx());
-    else
-        gams_dir = gams.transfer.utils.absolute_path(p.Results.gams_dir);
-    end
 
     % create working directory
     mkdir(working_dir);
@@ -67,7 +60,6 @@ function run_tests(transfer_dir, varargin)
         % test data
         cfg = struct();
         cfg.working_dir = working_dir;
-        cfg.gams_dir = gams_dir;
         cfg.filenames = filenames;
 
         % run tests

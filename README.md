@@ -56,11 +56,9 @@ Make sure that the GAMS Transfer build is part of the Matlab PATH. Then, run `ga
 ```matlab
 gams_transfer_test()
 gams_transfer_test(_, 'working_dir', <test_directory>)
-gams_transfer_test(_, 'gams_dir', <gams_gams_dir>)
 ```
 Description of parameters:
 - `working_dir`: Directory for test example GAMS / GDX files. Default: `tempname()`.
-- `gams_dir`: GAMS system directory. Default: found from PATH environment variable.
 
 ## Example
 
