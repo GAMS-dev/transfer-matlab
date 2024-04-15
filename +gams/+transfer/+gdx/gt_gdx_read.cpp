@@ -515,6 +515,7 @@ void mexFunction(
 
         /* collect uels (only used UELs in case of table like formats) */
         bool collect_only_used_uels = false;
+        bool uels_to_categorical = support_categorical;
         switch (format)
         {
             case GT_FORMAT_STRUCT:
@@ -544,6 +545,12 @@ void mexFunction(
                     continue;
                 if (!gdxUMUelGet(gdx, k, buf, &ival))
                     mexErrMsgIdAndTxt(ERRID"gdxUMUelGet", "GDX error (gdxUMUelGet)");
+                if (uels_to_categorical)
+                {
+                    size_t len = strlen(buf);
+                    if (len == 0 || buf[0] == ' ' || buf[len-1] == ' ')
+                        uels_to_categorical = false;
+                }
                 mxSetCell(mx_arr_dom_uels[j], kk++, mxCreateString(buf));
             }
 
@@ -558,7 +565,7 @@ void mexFunction(
         {
             case GT_FORMAT_STRUCT:
             case GT_FORMAT_TABLE:
-                if (support_categorical)
+                if (uels_to_categorical)
                     for (size_t j = 0; j < dim; j++)
                         gt_mex_domain2categorical(&mx_arr_dom_idx[j], mx_arr_dom_uels[j]);
                 for (size_t j = 0; j < dim; j++)
@@ -578,7 +585,7 @@ void mexFunction(
         {
             case GT_FORMAT_STRUCT:
             case GT_FORMAT_TABLE:
-                if (support_categorical)
+                if (uels_to_categorical)
                     break;
             case GT_FORMAT_DENSEMAT:
             case GT_FORMAT_SPARSEMAT:

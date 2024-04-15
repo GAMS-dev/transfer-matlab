@@ -1485,7 +1485,7 @@ end
 
 function test_readWrite(t, cfg)
 
-    for i = [1,2,5,7,9]
+    for i = [1,2,5,7,9,10]
         write_filename = fullfile(cfg.working_dir, 'write.gdx');
 
         t.add(sprintf('read_write_struct_%d', i));
@@ -1511,7 +1511,7 @@ function test_readWrite(t, cfg)
         t.testGdxDiff(cfg.filenames{i}, write_filename);
         t.assert(system(sprintf('gdxdump %s -v | grep -q "Compression.*1"', write_filename)));
 
-        if i ~= 9
+        if i ~= 9 && i ~= 10
             t.add(sprintf('read_write_sparse_matrix_%d', i));
             gdx = gams.transfer.Container();
             gdx.read(cfg.filenames{i}, 'format', 'sparse_matrix');
