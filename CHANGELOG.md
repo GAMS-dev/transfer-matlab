@@ -116,6 +116,9 @@ GAMS Transfer Matlab v0.9.0
   be stored in `symbol.Abstract.unique_labels` and columns in `symbol.Abstract.records` contain
   integer indices into the UELs instead of `categoricals`. Maintain UELs with the usual UEL methods
   like `getUELs` and `setUELs`.
+- Fixed reading GDX files with records that use UELs without string representation. For matrix-like
+  record formats, these records will be ignored. For table-like record formats, these will result in
+  `<undefined>` in `categorical` domain columns.
 
 GAMS Transfer Matlab v0.8.0
 ==================
