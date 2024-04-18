@@ -2053,6 +2053,63 @@ function test_domainViolation(t, cfg);
     t.assert(numel(domviol{2}.violations) == 1);
     t.assertEquals(domviol{1}.violations{1}, 'i0');
     t.assertEquals(lower(domviol{2}.violations{1}), 'i5');
+
+    gdx = gams.transfer.Container();
+    i = gams.transfer.Set(gdx, 'i', {'*'}, 'records', {'i1', 'i2', 'i3'});
+    j = gams.transfer.Set(gdx, 'j', {'*'}, 'records', {'j1', 'j2', 'j3'});
+    a = gams.transfer.Parameter(gdx, 'a', {i, j}, 'records', {...
+        {'i0', 'i1', 'i2', 'i2'}, {'j1', 'j2', 'j4', 'j2'}, 1:4});
+    if gams.transfer.Constants.SUPPORTS_TABLE
+        a.transformRecords('table');
+    end
+    b = gams.transfer.Parameter(gdx, 'b', {i, j}, 'records', {...
+        {'i1', 'i1', 'i10', 'i11'}, {'j1', 'j22', 'j1', 'j22'}, 1:4});
+    a.transformRecords('struct');
+    c = gams.transfer.Parameter(gdx, 'c', {i}, 'records', 1:3);
+
+    t.add('duplicates_count');
+    t.assert(a.isValid());
+    t.assert(b.isValid());
+    t.assert(c.isValid());
+    t.assert(a.countDomainViolations() == 2);
+    t.assert(b.countDomainViolations() == 3);
+    t.assert(c.countDomainViolations() == 0);
+    t.assert(gdx.countDomainViolations() == 5);
+    t.assert(gdx.countDomainViolations('symbols', {'a'}) == 2);
+    t.assert(gdx.countDomainViolations('symbols', {'a', 'c'}) == 2);
+
+    t.add('duplicates_has');
+    t.assert(a.hasDomainViolations());
+    t.assert(b.hasDomainViolations());
+    t.assert(~c.hasDomainViolations());
+    t.assert(gdx.hasDomainViolations());
+
+    t.add('duplicates_find')
+    idx = a.findDomainViolations();
+    t.assert(numel(idx) == 2);
+    t.assert(idx(1) == 1);
+    t.assert(idx(2) == 3);
+    idx = b.findDomainViolations();
+    t.assert(numel(idx) == 3);
+    t.assert(idx(1) == 2);
+    t.assert(idx(2) == 3);
+    t.assert(idx(3) == 4);
+
+    t.add('duplicates_drop_1')
+    gdx_ = gams.transfer.Container(gdx);
+    t.assert(gdx_.countDomainViolations() == 5);
+    gdx_.dropDomainViolations('symbols', {'c'});
+    t.assert(gdx_.countDomainViolations() == 5);
+    gdx_.dropDomainViolations('symbols', {'a'});
+    t.assert(gdx_.countDomainViolations() == 3);
+    gdx_.dropDomainViolations();
+    t.assert(~gdx_.hasDomainViolations());
+
+    t.add('duplicates_drop_2')
+    a.dropDomainViolations();
+    t.assert(a.countDomainViolations() == 0);
+    b.dropDomainViolations();
+    t.assert(b.countDomainViolations() == 0);
 end
 
 function test_setRecords(t, cfg)

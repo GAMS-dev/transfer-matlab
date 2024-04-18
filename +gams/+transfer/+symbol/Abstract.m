@@ -1058,6 +1058,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
         %> In table-like record formats it may happen that duplicates occur. Duplicates are values
         %> that refer to the same domain entry.
         %>
+        %> Returned indices are rows in table-like formats.
+        %>
         %> **Parameter Arguments:**
         %> - keep (`string`):
         %>   Specify which record to keep in case of duplicates. Possible values: 'first' or 'last'.
@@ -1067,6 +1069,8 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
             %
             % In table-like record formats it may happen that duplicates occur. Duplicates are
             % values that refer to the same domain entry.
+            %
+            % Returned indices are rows in table-like formats.
             %
             % Parameter Arguments:
             % - keep (string):
@@ -1149,6 +1153,116 @@ classdef (Abstract) Abstract < gams.transfer.utils.Handle
 
             def = obj.data_.projectDefinition_(obj.def_);
             obj.data_ = obj.data_.dropDuplicates_(def, keep);
+        end
+
+        %> Counts domain violations
+        %>
+        %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
+        %> as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain
+        %> type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
+        %> its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+        %> corresponding referenced domain set. Such a domain violation will lead to a GDX error
+        %> when writing the data!
+        %>
+        %> Only relevant for symbols with table-like record formats.
+        function n = countDomainViolations(obj)
+            % Counts domain violations
+            %
+            % Domain violations occur when a symbol uses other Set(s) as domain(s) and a domain
+            % entry in its records that is not present in the corresponding set. Such a domain
+            % violation will lead to a GDX error when writing the data.
+            %
+            % Only relevant for symbols with table-like record formats.
+
+            n = numel(obj.findDomainViolations());
+        end
+
+        %> Counts domain violations
+        %>
+        %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
+        %> as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain
+        %> type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
+        %> its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+        %> corresponding referenced domain set. Such a domain violation will lead to a GDX error
+        %> when writing the data!
+        %>
+        %> Returned indices are rows in table-like formats.
+        %>
+        %> Only relevant for symbols with table-like record formats.
+        function indices = findDomainViolations(obj)
+            % Counts domain violations
+            %
+            % Domain violations occur when a symbol uses other Set(s) as domain(s) and a domain
+            % entry in its records that is not present in the corresponding set. Such a domain
+            % violation will lead to a GDX error when writing the data.
+            %
+            % Returned indices are rows in table-like formats.
+            %
+            % Only relevant for symbols with table-like record formats.
+
+            indices = [];
+            for i = 1:obj.dimension
+                if obj.hasDomainAxis_(i)
+                    indices = vertcat(indices, ...
+                        obj.data_.findDomainViolations_(obj.getAxis_(i), obj.getDomainAxis_(i))); %#ok<AGROW>
+                end
+            end
+            indices = sort(unique(indices));
+        end
+
+        %> Checks if duplicate records exist
+        %>
+        %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
+        %> as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain
+        %> type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
+        %> its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+        %> corresponding referenced domain set. Such a domain violation will lead to a GDX error
+        %> when writing the data!
+        %>
+        %> Only relevant for symbols with table-like record formats.
+        function flag = hasDomainViolations(obj)
+            % Checks if duplicate records exist
+            %
+            % Domain violations occur when a symbol uses other Set(s) as domain(s) and a domain
+            % entry in its records that is not present in the corresponding set. Such a domain
+            % violation will lead to a GDX error when writing the data.
+            %
+            % Only relevant for symbols with table-like record formats.
+
+            flag = true;
+            for i = 1:obj.dimension
+                if obj.hasDomainAxis_(i) && ...
+                    obj.data_.hasDomainViolations_(obj.getAxis_(i), obj.getDomainAxis_(i))
+                    return
+                end
+            end
+            flag = false;
+        end
+
+        %> Drops duplicate records in symbols
+        %>
+        %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
+        %> as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain
+        %> type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
+        %> its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+        %> corresponding referenced domain set. Such a domain violation will lead to a GDX error
+        %> when writing the data!
+        %>
+        %> Only relevant for symbols with table-like record formats.
+        function obj = dropDomainViolations(obj)
+            % Drops duplicate records in symbols
+            %
+            % Domain violations occur when a symbol uses other Set(s) as domain(s) and a domain
+            % entry in its records that is not present in the corresponding set. Such a domain
+            % violation will lead to a GDX error when writing the data.
+            %
+            % Only relevant for symbols with table-like record formats.
+
+            for i = 1:obj.dimension
+                if obj.hasDomainAxis_(i)
+                    obj.data_ = obj.data_.dropDomainViolations_(obj.getAxis_(i), obj.getDomainAxis_(i));
+                end
+            end
         end
 
     end

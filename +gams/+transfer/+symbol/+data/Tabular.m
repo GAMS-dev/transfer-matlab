@@ -195,6 +195,18 @@ classdef (Abstract, Hidden) Tabular < gams.transfer.symbol.data.Abstract
             obj = obj.removeRows_(obj.findDuplicates_(def, keep));
         end
 
+        function indices = findDomainViolations_(obj, axis, domain_axis)
+            labels = axis.unique_labels.get();
+            records = uint64(obj.records.(axis.domain.label));
+            indices = records <= 0 | records > numel(labels);
+            indices(~indices) = ~domain_axis.unique_labels.find(labels(records(~indices)));
+            indices = find(indices);
+        end
+
+        function obj = dropDomainViolations_(obj, axes, domain_axes)
+            obj = obj.removeRows_(obj.findDomainViolations_(axes, domain_axes));
+        end
+
         function subindex = ind2sub_(obj, axes, value, linindex)
             dim = axes.dimension;
             subindex = zeros(1, dim);

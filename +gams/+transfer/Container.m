@@ -864,6 +864,34 @@ classdef Container < gams.transfer.utils.Handle
 
     end
 
+    methods (Hidden, Access = private)
+
+        function symbols = parseSymbols(obj, index, only_arg, args)
+            % parse input arguments
+            has_symbols = false;
+            while index <= numel(args)
+                if strcmpi(args{index}, 'symbols')
+                    index = index + 1;
+                    gams.transfer.utils.Validator.minargin(numel(args), index);
+                    symbols = gams.transfer.utils.Validator('symbols', index, args{index}) ...
+                        .string2char().cellstr().value;
+                    has_symbols = true;
+                    index = index + 1;
+                elseif only_arg
+                    error('Invalid argument at position %d', index);
+                else
+                    index = index + 1;
+                end
+            end
+            if has_symbols
+                symbols = obj.getSymbols(symbols);
+            else
+                symbols = obj.data_.entries();
+            end
+        end
+
+    end
+
     methods (Hidden, Static, Access = private)
 
         function [is_valid, types] = parseArgumentsListSymbols(args, has_types)
@@ -2035,30 +2063,10 @@ classdef Container < gams.transfer.utils.Handle
             % gams.transfer.symbol.Abstract.getDomainViolations,
             % gams.transfer.symbol.domain.Violation
 
-            % parse input arguments
-            has_symbols = false;
             try
-                index = 1;
-                while index <= numel(varargin)
-                    if strcmpi(varargin{index}, 'symbols')
-                        index = index + 1;
-                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
-                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
-                            .string2char().cellstr().value;
-                        has_symbols = true;
-                        index = index + 1;
-                    else
-                        error('Invalid argument at position %d', index);
-                    end
-                end
+                symbols = obj.parseSymbols(1, true, varargin);
             catch e
                 error(e.message);
-            end
-
-            if has_symbols
-                symbols = obj.getSymbols(symbols);
-            else
-                symbols = obj.data_.entries();
             end
 
             dom_violations = {};
@@ -2137,30 +2145,10 @@ classdef Container < gams.transfer.utils.Handle
             % - symbols (cell):
             %   List of symbols to be considered. Case doesn't matter. Default is all.
 
-            % parse input arguments
-            has_symbols = false;
             try
-                index = 1;
-                while index <= numel(varargin)
-                    if strcmpi(varargin{index}, 'symbols')
-                        index = index + 1;
-                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
-                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
-                            .string2char().cellstr().value;
-                        has_symbols = true;
-                        index = index + 1;
-                    else
-                        error('Invalid argument at position %d', index);
-                    end
-                end
+                symbols = obj.parseSymbols(1, true, varargin);
             catch e
                 error(e.message);
-            end
-
-            if has_symbols
-                symbols = obj.getSymbols(symbols);
-            else
-                symbols = obj.data_.entries();
             end
 
             n = 0;
@@ -2187,30 +2175,10 @@ classdef Container < gams.transfer.utils.Handle
             % - symbols (cell):
             %   List of symbols to be considered. Case doesn't matter. Default is all.
 
-            % parse input arguments
-            has_symbols = false;
             try
-                index = 1;
-                while index <= numel(varargin)
-                    if strcmpi(varargin{index}, 'symbols')
-                        index = index + 1;
-                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
-                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
-                            .string2char().cellstr().value;
-                        has_symbols = true;
-                        index = index + 1;
-                    else
-                        error('Invalid argument at position %d', index);
-                    end
-                end
+                symbols = obj.parseSymbols(1, true, varargin);
             catch e
                 error(e.message);
-            end
-
-            if has_symbols
-                symbols = obj.getSymbols(symbols);
-            else
-                symbols = obj.data_.entries();
             end
 
             flag = true;
@@ -2247,18 +2215,13 @@ classdef Container < gams.transfer.utils.Handle
             %   'last'. Default: 'first'.
 
             % parse input arguments
-            has_symbols = false;
             keep = 'first';
             try
                 index = 1;
+                symbols = obj.parseSymbols(index, false, varargin);
                 while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'symbols')
-                        index = index + 1;
-                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
-                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
-                            .string2char().cellstr().value;
-                        has_symbols = true;
-                        index = index + 1;
+                        index = index + 2;
                     elseif strcmpi(varargin{index}, 'keep')
                         index = index + 1;
                         keep = gams.transfer.utils.Validator('keep', index, varargin{index}) ...
@@ -2272,14 +2235,127 @@ classdef Container < gams.transfer.utils.Handle
                 error(e.message);
             end
 
-            if has_symbols
-                symbols = obj.getSymbols(symbols);
-            else
-                symbols = obj.data_.entries();
+            for i = 1:numel(symbols)
+                symbols{i}.dropDuplicateRecords('keep', keep);
+            end
+        end
+
+        %> Counts domain violations in symbols
+        %>
+        %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
+        %> as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain
+        %> type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
+        %> its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+        %> corresponding referenced domain set. Such a domain violation will lead to a GDX error
+        %> when writing the data!
+        %>
+        %> Only relevant for symbols with table-like record formats.
+        %>
+        %> **Parameter Arguments:**
+        %> - symbols (`cell`):
+        %>   List of symbols to be considered. Case doesn't matter. Default is all.
+        function n = countDomainViolations(obj, varargin)
+            % Counts domain violations in symbols
+            %
+            % Domain violations occur when a symbol uses other Set(s) as domain(s) and a domain
+            % entry in its records that is not present in the corresponding set. Such a domain
+            % violation will lead to a GDX error when writing the data.
+            %
+            % Only relevant for symbols with table-like record formats.
+            %
+            % Parameter Arguments:
+            % - symbols (cell):
+            %   List of symbols to be considered. Case doesn't matter. Default is all.
+
+            try
+                symbols = obj.parseSymbols(1, true, varargin);
+            catch e
+                error(e.message);
+            end
+
+            n = 0;
+            for i = 1:numel(symbols)
+                n = n + symbols{i}.countDomainViolations();
+            end
+        end
+
+        %> Checks if duplicate records exist in symbols
+        %>
+        %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
+        %> as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain
+        %> type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
+        %> its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+        %> corresponding referenced domain set. Such a domain violation will lead to a GDX error
+        %> when writing the data!
+        %>
+        %> Only relevant for symbols with table-like record formats.
+        %>
+        %> **Parameter Arguments:**
+        %> - symbols (`cell`):
+        %>   List of symbols to be considered. Case doesn't matter. Default is all.
+        function flag = hasDomainViolations(obj, varargin)
+            % Checks if duplicate records exist in symbols
+            %
+            % Domain violations occur when a symbol uses other Set(s) as domain(s) and a domain
+            % entry in its records that is not present in the corresponding set. Such a domain
+            % violation will lead to a GDX error when writing the data.
+            %
+            % Only relevant for symbols with table-like record formats.
+            %
+            % Parameter Arguments:
+            % - symbols (cell):
+            %   List of symbols to be considered. Case doesn't matter. Default is all.
+
+            try
+                symbols = obj.parseSymbols(1, true, varargin);
+            catch e
+                error(e.message);
+            end
+
+            flag = true;
+            for i = 1:numel(symbols)
+                if symbols{i}.hasDomainViolations()
+                    return
+                end
+            end
+            flag = false;
+        end
+
+        %> Drops duplicate records in symbols
+        %>
+        %> Domain violations occur when a symbol uses other \ref gams::transfer::symbol::Set "Sets"
+        %> as \ref gams::transfer::symbol::Abstract::domain "domain"(s) -- and is thus of domain
+        %> type `regular`, see \ref GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN -- and uses a domain entry in
+        %> its \ref gams::transfer::symbol::Abstract::records "records" that is not present in the
+        %> corresponding referenced domain set. Such a domain violation will lead to a GDX error
+        %> when writing the data!
+        %>
+        %> Only relevant for symbols with table-like record formats.
+        %>
+        %> **Parameter Arguments:**
+        %> - symbols (`cell`):
+        %>   List of symbols to be considered. Case doesn't matter. Default is all.
+        function obj = dropDomainViolations(obj, varargin)
+            % Drops duplicate records in symbols
+            %
+            % Domain violations occur when a symbol uses other Set(s) as domain(s) and a domain
+            % entry in its records that is not present in the corresponding set. Such a domain
+            % violation will lead to a GDX error when writing the data.
+            %
+            % Only relevant for symbols with table-like record formats.
+            %
+            % Parameter Arguments:
+            % - symbols (cell):
+            %   List of symbols to be considered. Case doesn't matter. Default is all.
+
+            try
+                symbols = obj.parseSymbols(1, true, varargin);
+            catch e
+                error(e.message);
             end
 
             for i = 1:numel(symbols)
-                symbols{i}.dropDuplicateRecords('keep', keep);
+                symbols{i}.dropDomainViolations();
             end
         end
 
@@ -2314,20 +2390,15 @@ classdef Container < gams.transfer.utils.Handle
             % See also: gams.transfer.symbol.Abstract.isValid
 
             % parse input arguments
-            has_symbols = false;
             verbose = false;
             force = false;
             try
                 index = 1;
                 is_pararg = false;
+                symbols = obj.parseSymbols(index, false, varargin);
                 while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'symbols')
-                        index = index + 1;
-                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
-                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
-                            .string2char().cellstr().value;
-                        has_symbols = true;
-                        index = index + 1;
+                        index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 1
                         verbose = gams.transfer.utils.Validator('verbose', index, varargin{index}) ...
@@ -2344,12 +2415,6 @@ classdef Container < gams.transfer.utils.Handle
                 end
             catch e
                 error(e.message);
-            end
-
-            if has_symbols
-                symbols = obj.getSymbols(symbols);
-            else
-                symbols = obj.data_.entries();
             end
 
             % check for correct order of symbols
@@ -2408,18 +2473,13 @@ classdef Container < gams.transfer.utils.Handle
             % that are actually used in the records.
 
             % parse input arguments
-            has_symbols = false;
             ignore_unused = false;
             try
                 index = 1;
+                symbols = obj.parseSymbols(index, false, varargin);
                 while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'symbols')
-                        index = index + 1;
-                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
-                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
-                            .string2char().cellstr().value;
-                        has_symbols = true;
-                        index = index + 1;
+                        index = index + 2;
                     elseif strcmpi(varargin{index}, 'ignore_unused')
                         index = index + 1;
                         gams.transfer.utils.Validator.minargin(numel(varargin), index);
@@ -2432,12 +2492,6 @@ classdef Container < gams.transfer.utils.Handle
                 end
             catch e
                 error(e.message);
-            end
-
-            if has_symbols
-                symbols = obj.getSymbols(symbols);
-            else
-                symbols = obj.data_.entries();
             end
 
             uels = {};
@@ -2464,19 +2518,14 @@ classdef Container < gams.transfer.utils.Handle
             % removeUELs(_, 'symbols', s) removes UELs for symbols s.
 
             % parse input arguments
-            has_symbols = false;
             uels = {};
             try
                 index = 1;
                 is_pararg = false;
+                symbols = obj.parseSymbols(index, false, varargin);
                 while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'symbols')
-                        index = index + 1;
-                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
-                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
-                            .string2char().cellstr().value;
-                        has_symbols = true;
-                        index = index + 1;
+                        index = index + 2;
                         is_pararg = true;
                     elseif ~is_pararg && index == 1
                         if iscell(varargin{index})
@@ -2492,12 +2541,6 @@ classdef Container < gams.transfer.utils.Handle
                 end
             catch e
                 error(e.message);
-            end
-
-            if has_symbols
-                symbols = obj.getSymbols(symbols);
-            else
-                symbols = obj.data_.entries();
             end
 
             for i = 1:numel(symbols)
@@ -2530,20 +2573,15 @@ classdef Container < gams.transfer.utils.Handle
             % Note: This can only be used if the symbol is valid.
 
             % parse input arguments
-            has_symbols = false;
             allow_merge = false;
             try
                 gams.transfer.utils.Validator.minargin(numel(varargin), 1);
                 uels = varargin{1}; % check in renameUELs later
                 index = 2;
+                symbols = obj.parseSymbols(index, false, varargin);
                 while index <= numel(varargin)
                     if strcmpi(varargin{index}, 'symbols')
-                        index = index + 1;
-                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
-                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
-                            .string2char().cellstr().value;
-                        has_symbols = true;
-                        index = index + 1;
+                        index = index + 2;
                     elseif strcmpi(varargin{index}, 'allow_merge')
                         index = index + 1;
                         gams.transfer.utils.Validator.minargin(numel(varargin), index);
@@ -2556,12 +2594,6 @@ classdef Container < gams.transfer.utils.Handle
                 end
             catch e
                 error(e.message);
-            end
-
-            if has_symbols
-                symbols = obj.getSymbols(symbols);
-            else
-                symbols = obj.data_.entries();
             end
 
             for i = 1:numel(symbols)
@@ -2581,30 +2613,10 @@ classdef Container < gams.transfer.utils.Handle
             % lowerUELs() converts all UELs to lower case.
             % lowerUELs('symbols', s) converts all UELs to lower case for symbols s.
 
-            % parse input arguments
-            has_symbols = false;
             try
-                index = 1;
-                while index <= numel(varargin)
-                    if strcmpi(varargin{index}, 'symbols')
-                        index = index + 1;
-                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
-                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
-                            .string2char().cellstr().value;
-                        has_symbols = true;
-                        index = index + 1;
-                    else
-                        error('Invalid argument at position %d', index);
-                    end
-                end
+                symbols = obj.parseSymbols(1, true, varargin);
             catch e
                 error(e.message);
-            end
-
-            if has_symbols
-                symbols = obj.getSymbols(symbols);
-            else
-                symbols = obj.data_.entries();
             end
 
             for i = 1:numel(symbols)
@@ -2624,30 +2636,10 @@ classdef Container < gams.transfer.utils.Handle
             % upperUELs() converts all UELs to upper case.
             % upperUELs('symbols', s) converts all UELs to upper case for symbols s.
 
-            % parse input arguments
-            has_symbols = false;
             try
-                index = 1;
-                while index <= numel(varargin)
-                    if strcmpi(varargin{index}, 'symbols')
-                        index = index + 1;
-                        gams.transfer.utils.Validator.minargin(numel(varargin), index);
-                        symbols = gams.transfer.utils.Validator('symbols', index, varargin{index}) ...
-                            .string2char().cellstr().value;
-                        has_symbols = true;
-                        index = index + 1;
-                    else
-                        error('Invalid argument at position %d', index);
-                    end
-                end
+                symbols = obj.parseSymbols(1, true, varargin);
             catch e
                 error(e.message);
-            end
-
-            if has_symbols
-                symbols = obj.getSymbols(symbols);
-            else
-                symbols = obj.data_.entries();
             end
 
             for i = 1:numel(symbols)
