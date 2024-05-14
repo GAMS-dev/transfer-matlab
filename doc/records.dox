@@ -205,6 +205,10 @@ save memory. Converting a `categorical` to `uint64` (or similar) reveals the ide
 In GAMS Transfer Matlab you can specify the identification numbers either by `categorical` (usually
 default) or by providing the numbers directly.
 
+\note `categorical` will trim the strings and hence prefixed or trailing whitespaces are not
+supported. In case of reading a GDX file with those, GAMS Transfer Maltab will use identification
+numbers instead.
+
 For example, note the `categorical` in `x` of \ref GAMS_TRANSFER_MATLAB_GETSTARTED_EXAMPLE
 ```
 >> transpose(x.records.i)
