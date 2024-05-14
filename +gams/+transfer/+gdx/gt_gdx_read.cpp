@@ -51,7 +51,7 @@ void mexFunction(
     const mxArray*  prhs[]
 )
 {
-    int sym_id, format, orig_format, type, subtype, lastdim, ival, sym_count;
+    int sym_id, format, orig_format, type, subtype, lastdim, ival, sym_count, num_out_of_bounds;
     int n_acronyms, uel_count, dom_type;
     size_t dim, nrecs, nvals, n_dom_fields;
     bool support_categorical, support_setget, read_records, unique_labels;
@@ -353,13 +353,23 @@ void mexFunction(
                 /* nonzero counts depent on data, thus we need to loop through it */
                 for (size_t j = 0; j < nrecs; j++)
                 {
+                    bool out_of_bounds = false;
+
                     if (!gdxDataReadRaw(gdx, gdx_uel_index, gdx_values, &ival))
                         mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw)");
 
                     /* get row and column index */
                     memset(mx_idx, 0, sizeof(mx_idx));
                     for (size_t k = 0; k < dim; k++)
-                        mx_idx[k] = GET_DOM_MAP(k, gdx_uel_index[k]);
+                        if (gdx_uel_index[k] < 1 || gdx_uel_index[k] > uel_count)
+                        {
+                            out_of_bounds = true;
+                            break;
+                        }
+                        else
+                            mx_idx[k] = GET_DOM_MAP(k, gdx_uel_index[k]);
+                    if (out_of_bounds)
+                        continue;
 
                     /* non-zero counts for values except current one */
                     gt_utils_count_2d_rowmajor_nnz(dim, mx_idx, mx_idx_last, mx_dom_nrecs[0],
@@ -395,12 +405,15 @@ void mexFunction(
             mexErrMsgIdAndTxt(ERRID"gdxDataReadRawStart", "GDX error (gdxDataReadRawStart)");
 
         /* store record values */
+        num_out_of_bounds = 0;
         switch (format)
         {
             case GT_FORMAT_STRUCT:
             case GT_FORMAT_TABLE:
                 for (size_t j = 0; j < nrecs; j++)
                 {
+                    bool out_of_bounds = false;
+
                     /* read values */
                     if (!gdxDataReadRaw(gdx, gdx_uel_index, gdx_values, &lastdim))
                         mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw)");
@@ -408,10 +421,20 @@ void mexFunction(
                     /* store domain labels */
                     for (size_t k = 0; k < dim; k++)
                     {
-                        idx = GET_DOM_MAP(k, gdx_uel_index[k]);
-                        mx_dom_idx[k][j] = idx + 1;
-                        dom_uels_used[k][idx] = true;
+                        if (gdx_uel_index[k] < 1 || gdx_uel_index[k] > uel_count)
+                        {
+                            out_of_bounds = true;
+                            mx_dom_idx[k][j] = 0;
+                        }
+                        else
+                        {
+                            idx = GET_DOM_MAP(k, gdx_uel_index[k]);
+                            mx_dom_idx[k][j] = idx + 1;
+                            dom_uels_used[k][idx] = true;
+                        }
                     }
+                    if (out_of_bounds)
+                        num_out_of_bounds++;
 
                     /* parse values */
                     for (size_t k = 0; k < GMS_VAL_MAX; k++)
@@ -423,6 +446,8 @@ void mexFunction(
             case GT_FORMAT_DENSEMAT:
                 for (size_t j = 0; j < nrecs; j++)
                 {
+                    bool out_of_bounds = false;
+
                     /* read values */
                     if (!gdxDataReadRaw(gdx, gdx_uel_index, gdx_values, &lastdim))
                         mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw)");
@@ -430,9 +455,22 @@ void mexFunction(
                     /* get indices in matrix and store domain labels */
                     for (size_t k = 0; k < dim; k++)
                     {
-                        idx = GET_DOM_MAP(k, gdx_uel_index[k]);
-                        mx_idx[k] = idx;
-                        dom_uels_used[k][idx] = true;
+                        if (gdx_uel_index[k] < 1 || gdx_uel_index[k] > uel_count)
+                        {
+                            out_of_bounds = true;
+                            break;
+                        }
+                        else
+                        {
+                            idx = GET_DOM_MAP(k, gdx_uel_index[k]);
+                            mx_idx[k] = idx;
+                            dom_uels_used[k][idx] = true;
+                        }
+                    }
+                    if (out_of_bounds)
+                    {
+                        num_out_of_bounds++;
+                        continue;
                     }
 
                     /* parse values */
@@ -460,6 +498,8 @@ void mexFunction(
                 /* read value records */
                 for (size_t j = 0; j < nrecs; j++)
                 {
+                    bool out_of_bounds = false;
+
                     if (!gdxDataReadRaw(gdx, gdx_uel_index, gdx_values, &lastdim))
                         mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw)");
 
@@ -467,9 +507,22 @@ void mexFunction(
                     memset(mx_idx, 0, sizeof(mx_idx));
                     for (size_t k = 0; k < dim; k++)
                     {
-                        idx = GET_DOM_MAP(k, gdx_uel_index[k]);
-                        mx_idx[k] = idx;
-                        dom_uels_used[k][idx] = true;
+                        if (gdx_uel_index[k] < 1 || gdx_uel_index[k] > uel_count)
+                        {
+                            out_of_bounds = true;
+                            break;
+                        }
+                        else
+                        {
+                            idx = GET_DOM_MAP(k, gdx_uel_index[k]);
+                            mx_idx[k] = idx;
+                            dom_uels_used[k][idx] = true;
+                        }
+                    }
+                    if (out_of_bounds)
+                    {
+                        num_out_of_bounds++;
+                        continue;
                     }
 
                     /* update non-zero counts and row indices for values in between and currrent non-zero */
@@ -487,6 +540,21 @@ void mexFunction(
 
         if (!gdxDataReadDone(gdx))
             mexErrMsgIdAndTxt(ERRID"gdxDataReadDone", "GDX error (gdxDataReadDone)");
+
+        /* check for out of bounds values */
+        if (num_out_of_bounds > 0)
+        {
+            char msg[1024];
+            sprintf(msg, "Symbol '%s' has %d records using UELs without label.",
+                name, num_out_of_bounds);
+            switch (format)
+            {
+                case GT_FORMAT_DENSEMAT:
+                case GT_FORMAT_SPARSEMAT:
+                    strcat(msg, " These records will be ignored.");
+            }
+            mexWarnMsgIdAndTxt(ERRID"symbol:record_out_of_bounds", msg);
+        }
 
         /* convert set text ids to explanatory text */
         if (type == GMS_DT_SET && values_flag[GMS_VAL_LEVEL])
@@ -557,7 +625,8 @@ void mexFunction(
             /* adapt domain indices */
             if (format == GT_FORMAT_STRUCT || format == GT_FORMAT_TABLE)
                 for (size_t k = 0; k < nrecs; k++)
-                    mx_dom_idx[j][k] = dom_uels_used[j][mx_dom_idx[j][k]-1] + 1;
+                    if (mx_dom_idx[j][k] > 0)
+                        mx_dom_idx[j][k] = dom_uels_used[j][mx_dom_idx[j][k]-1] + 1;
         }
 
         /* set domain fields */
