@@ -62,7 +62,7 @@ function results = benchmark_read_write(varargin)
             fprintf('%10.2f %10.2f | ', results.read_time(i), results.read_speed(i));
 
             time = tic();
-            gdx.write(write_filename);
+            gdx.write(write_filename, 'eps_to_zero', false);
             results.write_time(i) = toc(time);
 
             clearvars -except i p files results oldfolder all_bytes curr_bytes read_filename write_filename

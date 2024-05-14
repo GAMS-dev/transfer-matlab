@@ -138,7 +138,7 @@ classdef Validator
             if numel(obj.value) >= gams.transfer.Constants.MAX_NAME_LENGTH
                 error('Argument ''%s'' (at position %d) length must be smaller than %d.', obj.name, obj.index, gams.transfer.Constants.MAX_NAME_LENGTH);
             end
-            if ~isvarname(obj.value)
+            if isempty(regexp(obj.value, '^[a-zA-Z][a-zA-Z0-9_]*$', 'ONCE'))
                 error('Argument ''%s'' (at position %d) must start with letter and must only consist of letters, digits and underscores.', obj.name, obj.index)
             end
         end
@@ -281,7 +281,7 @@ classdef Validator
         end
 
         function obj = varname(obj)
-            if ~isvarname(obj.value)
+            if isempty(regexp(obj.value, '^[a-zA-Z][a-zA-Z0-9_]*$', 'ONCE'))
                 error('Argument ''%s'' (at position %d) must start with letter and must only consist of letters, digits and underscores.', obj.name, obj.index)
             end
         end
