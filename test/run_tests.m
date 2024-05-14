@@ -46,11 +46,13 @@ function run_tests(transfer_dir, varargin)
 
     % create working directory
     mkdir(working_dir);
-    filenames = cell(1, 8);
+    filenames = cell(1, 10);
     for i = 1:9
         filenames{i} = fullfile(working_dir, sprintf('data%d.gdx', i));
         copyfile(fullfile(test_dir, 'gdx', sprintf('data%d.gdx', i)), filenames{i});
     end
+    filenames{10} = fullfile(working_dir, 'de.gdx');
+    copyfile(fullfile(test_dir, 'gdx', 'de.gdx'), filenames{10});
     olddir = cd(working_dir);
 
     tic;

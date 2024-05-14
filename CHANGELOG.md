@@ -110,6 +110,12 @@ GAMS Transfer Matlab v0.9.0
   order (symbols that use other symbols in the domain must appear after the domain symbols). Even
   though having unordered symbols is rather unlikely, this now makes it unnecessary to manually call
   `Container.reorderSymbols`.
+- Fixed read of GDX files with trailing whitespace in UELs or empty UELs. Since Matlab's
+  `categorical` will trim category names and does not allow empty categories, GAMS Transfer Matlab
+  will fall back to non-categorical mode for symbols with this kind of UELs. In this mode UELs will
+  be stored in `symbol.Abstract.unique_labels` and columns in `symbol.Abstract.records` contain
+  integer indices into the UELs instead of `categoricals`. Maintain UELs with the usual UEL methods
+  like `getUELs` and `setUELs`.
 
 GAMS Transfer Matlab v0.8.0
 ==================
