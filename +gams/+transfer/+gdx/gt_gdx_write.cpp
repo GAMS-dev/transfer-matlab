@@ -283,12 +283,18 @@ void mexFunction(
         if (issorted)
         {
             if (!gdxDataWriteRawStart(gdx, name, text, (int) dim, type, subtype))
-                mexErrMsgIdAndTxt(ERRID"gdxDataWriteRawStart", "GDX error (gdxDataWriteRawStart)");
+            {
+                gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                mexErrMsgIdAndTxt(ERRID"gdxDataWriteRawStart", "GDX error (gdxDataWriteRawStart): %s", buf);
+            }
         }
         else
         {
             if (!gdxDataWriteMapStart(gdx, name, text, (int) dim, type, subtype))
-                mexErrMsgIdAndTxt(ERRID"gdxDataWriteMapStart", "GDX error (gdxDataWriteMapStart)");
+            {
+                gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                mexErrMsgIdAndTxt(ERRID"gdxDataWriteMapStart", "GDX error (gdxDataWriteMapStart): %s", buf);
+            }
         }
 
         /* write domain information */
@@ -300,7 +306,10 @@ void mexFunction(
             format == GT_FORMAT_NOT_READ)
         {
             if (!gdxDataWriteDone(gdx))
-                mexErrMsgIdAndTxt(ERRID"gdxDataWriteDone", "GDX error (gdxDataWriteDone)");
+            {
+                gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                mexErrMsgIdAndTxt(ERRID"gdxDataWriteDone", "GDX error (gdxDataWriteDone): %s", buf);
+            }
             mxFree(mx_arr_domains);
             mxFree(mx_domains);
             for (size_t j = 0; j < dim; j++)
@@ -354,7 +363,10 @@ void mexFunction(
         if (have_nrecs && nrecs == 0)
         {
             if (!gdxDataWriteDone(gdx))
-                mexErrMsgIdAndTxt(ERRID"gdxDataWriteDone", "GDX error (gdxDataWriteDone)");
+            {
+                gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                mexErrMsgIdAndTxt(ERRID"gdxDataWriteDone", "GDX error (gdxDataWriteDone): %s", buf);
+            }
             mxFree(mx_arr_domains);
             mxFree(mx_domains);
             for (size_t j = 0; j < dim; j++)
@@ -528,7 +540,10 @@ void mexFunction(
         }
 
         if (!gdxDataWriteDone(gdx))
-            mexErrMsgIdAndTxt(ERRID"gdxDataWriteDone", "GDX error (gdxDataWriteDone)");
+        {
+            gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+            mexErrMsgIdAndTxt(ERRID"gdxDataWriteDone", "GDX error (gdxDataWriteDone): %s", buf);
+        }
 
         /* check GDX errors */
         if (gdxDataErrorCount(gdx))

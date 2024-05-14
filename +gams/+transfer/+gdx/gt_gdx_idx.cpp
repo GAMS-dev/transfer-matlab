@@ -129,7 +129,10 @@ void gt_gdx_register_uels(
         mexErrMsgIdAndTxt(ERRID"register_uels", "UEL array must be of type cell of string.");
 
     if (!gdxUELRegisterStrStart(gdx))
-        mexErrMsgIdAndTxt(ERRID"gdxUELRegisterRawStart", "GDX error (gdxUELRegisterRawStart)");
+    {
+        gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+        mexErrMsgIdAndTxt(ERRID"gdxUELRegisterRawStart", "GDX error (gdxUELRegisterRawStart): %s", buf);
+    }
 
     /* register uels */
     for (size_t i = 0; i < mxGetNumberOfElements(mx_cell_uels); i++)
@@ -140,13 +143,19 @@ void gt_gdx_register_uels(
         mxGetString(mx_arr_uel, buf, GMS_SSSIZE);
 
         if (!gdxUELRegisterStr(gdx, buf, &uel_id))
-            mexErrMsgIdAndTxt(ERRID"gdxUELRegisterRaw", "GDX error (gdxUELRegisterRaw)");
+        {
+            gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+            mexErrMsgIdAndTxt(ERRID"gdxUELRegisterRaw", "GDX error (gdxUELRegisterRaw): %s", buf);
+        }
         if (uel_ids)
             uel_ids[i] = uel_id;
     }
 
     if (!gdxUELRegisterDone(gdx))
-        mexErrMsgIdAndTxt(ERRID"gdxUELRegisterDone", "GDX error (gdxUELRegisterDone)");
+    {
+        gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+        mexErrMsgIdAndTxt(ERRID"gdxUELRegisterDone", "GDX error (gdxUELRegisterDone): %s", buf);
+    }
 }
 
 void gt_gdx_addalias(
@@ -191,7 +200,10 @@ void gt_gdx_addsettext(
 
         /* register element_text */
         if (!gdxAddSetText(gdx, buf, &text_id))
-            mexErrMsgIdAndTxt(ERRID"addsettext", "GDX error (gdxAddSetText)");
+        {
+            gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+            mexErrMsgIdAndTxt(ERRID"addsettext", "GDX error (gdxAddSetText)", buf);
+        }
         text_ids[i] = text_id;
     }
 }

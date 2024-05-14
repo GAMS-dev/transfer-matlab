@@ -114,7 +114,10 @@ void mexFunction(
     /* start GDX */
     gt_gdx_init_read(&gdx, gdx_filename);
     if (!gdxSystemInfo(gdx, &sym_count, &uel_count))
-        mexErrMsgIdAndTxt(ERRID"gdxSystemInfo", "GDX error (gdxSystemInfo)");
+    {
+        gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+        mexErrMsgIdAndTxt(ERRID"gdxSystemInfo", "GDX error (gdxSystemInfo): %s", buf);
+    }
 
     dom_uel_dim_maps = (int**) mxCalloc(sym_count+1, sizeof(int*));
     sym_enabled = (bool*) mxCalloc(sym_count+1, sizeof(bool));
@@ -187,24 +190,39 @@ void mexFunction(
 
         /* read symbol gdx data */
         if (!gdxSymbolInfo(gdx, sym_id, name, &ival, &type))
-            mexErrMsgIdAndTxt(ERRID"gdxSymbolInfo", "GDX error (gdxSymbolInfo)");
+        {
+            gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+            mexErrMsgIdAndTxt(ERRID"gdxSymbolInfo", "GDX error (gdxSymbolInfo): %s", buf);
+        }
         mxAssert(ival >= 0 && ival <= GLOBAL_MAX_INDEX_DIM, "Invalid dimension of symbol.");
         dim = (size_t) ival;
         if (!gdxSymbolInfoX(gdx, sym_id, &ival, &subtype, text))
-            mexErrMsgIdAndTxt(ERRID"gdxSymbolInfoX", "GDX error (gdxSymbolInfoX)");
+        {
+            gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+            mexErrMsgIdAndTxt(ERRID"gdxSymbolInfoX", "GDX error (gdxSymbolInfoX): %s", buf);
+        }
         mxAssert(ival >= 0, "Invalid number of records");
         nrecs = (size_t) ival;
 
         /* read symbol domain info */
         if (!gdxSymbolGetDomain(gdx, sym_id, dom_symid))
-            mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomain", "GDX error (gdxSymbolGetDomain)");
+        {
+            gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+            mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomain", "GDX error (gdxSymbolGetDomain): %s", buf);
+        }
         dom_type = gdxSymbolGetDomainX(gdx, sym_id, domains_ptr);
         if (dom_type < 1 || dom_type > 3)
-            mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomainX", "GDX error (gdxSymbolGetDomainX)");
+        {
+            gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+            mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomainX", "GDX error (gdxSymbolGetDomainX): %s", buf);
+        }
 
         /* load domains and transform to domain_labels */
         if (!gdxSymbolGetDomainX(gdx, sym_id, domain_labels_ptr))
-            mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomainX", "GDX error (gdxSymbolGetDomainX)");
+        {
+            gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+            mexErrMsgIdAndTxt(ERRID"gdxSymbolGetDomainX", "GDX error (gdxSymbolGetDomainX): %s", buf);
+        }
         unique_labels = true;
         for (size_t j = 0; j < dim; j++)
         {
@@ -285,13 +303,19 @@ void mexFunction(
 
             /* get domain info */
             if (!gdxSymbolInfo(gdx, dom_symid[j], buf, &dom_dim, &dom_type))
-                mexErrMsgIdAndTxt(ERRID"gdxSymbolInfo", "GDX error (gdxSymbolInfo)");
+            {
+                gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                mexErrMsgIdAndTxt(ERRID"gdxSymbolInfo", "GDX error (gdxSymbolInfo): %s", buf);
+            }
             mxAssert(dom_type == GMS_DT_SET || dom_type == GMS_DT_ALIAS, "Invalid domain data type.");
             mxAssert(dom_dim == 1, "Invalid domain dimension.");
 
             /* get number of records in domain and start reading */
             if (!gdxDataReadRawStart(gdx, dom_symid[j], &dom_nrecs))
-                mexErrMsgIdAndTxt(ERRID"gdxDataReadRawStart", "GDX error (gdxDataReadRawStart)");
+            {
+                gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                mexErrMsgIdAndTxt(ERRID"gdxDataReadRawStart", "GDX error (gdxDataReadRawStart): %s", buf);
+            }
             mxAssert(dom_nrecs >= 0, "Invalid number of symbol records.");
             mx_dom_nrecs[j] = (mwSize) dom_nrecs;
 
@@ -310,13 +334,19 @@ void mexFunction(
                 for (size_t k = 0; k < mx_dom_nrecs[j]; k++)
                 {
                     if (!gdxDataReadRaw(gdx, gdx_uel_index, gdx_values, &lastdim))
-                        mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw)");
+                    {
+                        gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                        mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw): %s", buf);
+                    }
                     dom_uel_dim_maps[dom_symid[j]][gdx_uel_index[0]] = (int) k;
                 }
             }
 
             if (!gdxDataReadDone(gdx))
-                mexErrMsgIdAndTxt(ERRID"gdxDataReadDone", "GDX error (gdxDataReadDone)");
+            {
+                gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                mexErrMsgIdAndTxt(ERRID"gdxDataReadDone", "GDX error (gdxDataReadDone): %s", buf);
+            }
         }
 
         /* get shape of symbol */
@@ -348,7 +378,10 @@ void mexFunction(
                         col_nnz[j] = (mwIndex*) mxCalloc(mx_dom_nrecs[1], sizeof(mwIndex));
 
                 if (!gdxDataReadRawStart(gdx, sym_id, &ival))
-                    mexErrMsgIdAndTxt(ERRID"gdxDataReadRawStart", "GDX error (gdxDataReadRawStart)");
+                {
+                    gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                    mexErrMsgIdAndTxt(ERRID"gdxDataReadRawStart", "GDX error (gdxDataReadRawStart): %s", buf);
+                }
 
                 /* nonzero counts depent on data, thus we need to loop through it */
                 for (size_t j = 0; j < nrecs; j++)
@@ -356,7 +389,10 @@ void mexFunction(
                     bool out_of_bounds = false;
 
                     if (!gdxDataReadRaw(gdx, gdx_uel_index, gdx_values, &ival))
-                        mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw)");
+                    {
+                        gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                        mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw): %s", buf);
+                    }
 
                     /* get row and column index */
                     memset(mx_idx, 0, sizeof(mx_idx));
@@ -378,7 +414,10 @@ void mexFunction(
                 }
 
                 if (!gdxDataReadDone(gdx))
-                    mexErrMsgIdAndTxt(ERRID"gdxDataReadDone", "GDX error (gdxDataReadDone)");
+                {
+                    gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                    mexErrMsgIdAndTxt(ERRID"gdxDataReadDone", "GDX error (gdxDataReadDone): %s", buf);
+                }
                 break;
         }
 
@@ -402,7 +441,10 @@ void mexFunction(
 
         /* start reading records */
         if (!gdxDataReadRawStart(gdx, sym_id, &ival))
-            mexErrMsgIdAndTxt(ERRID"gdxDataReadRawStart", "GDX error (gdxDataReadRawStart)");
+        {
+            gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+            mexErrMsgIdAndTxt(ERRID"gdxDataReadRawStart", "GDX error (gdxDataReadRawStart): %s", buf);
+        }
 
         /* store record values */
         num_out_of_bounds = 0;
@@ -416,7 +458,10 @@ void mexFunction(
 
                     /* read values */
                     if (!gdxDataReadRaw(gdx, gdx_uel_index, gdx_values, &lastdim))
-                        mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw)");
+                    {
+                        gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                        mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw): %s", buf);
+                    }
 
                     /* store domain labels */
                     for (size_t k = 0; k < dim; k++)
@@ -450,7 +495,10 @@ void mexFunction(
 
                     /* read values */
                     if (!gdxDataReadRaw(gdx, gdx_uel_index, gdx_values, &lastdim))
-                        mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw)");
+                    {
+                        gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                        mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw): %s", buf);
+                    }
 
                     /* get indices in matrix and store domain labels */
                     for (size_t k = 0; k < dim; k++)
@@ -501,7 +549,10 @@ void mexFunction(
                     bool out_of_bounds = false;
 
                     if (!gdxDataReadRaw(gdx, gdx_uel_index, gdx_values, &lastdim))
-                        mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw)");
+                    {
+                        gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                        mexErrMsgIdAndTxt(ERRID"gdxDataReadRaw", "GDX error (gdxDataReadRaw): %s", buf);
+                    }
 
                     /* get indices in matrix (row: mx_idx[0]; col: mx_idx[1]) and store domain labels */
                     memset(mx_idx, 0, sizeof(mx_idx));
@@ -539,7 +590,10 @@ void mexFunction(
         }
 
         if (!gdxDataReadDone(gdx))
-            mexErrMsgIdAndTxt(ERRID"gdxDataReadDone", "GDX error (gdxDataReadDone)");
+        {
+            gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+            mexErrMsgIdAndTxt(ERRID"gdxDataReadDone", "GDX error (gdxDataReadDone): %s", buf);
+        }
 
         /* check for out of bounds values */
         if (num_out_of_bounds > 0)
@@ -612,7 +666,10 @@ void mexFunction(
                 if (dom_uels_used[j][uel_idx] < 0)
                     continue;
                 if (!gdxUMUelGet(gdx, k, buf, &ival))
-                    mexErrMsgIdAndTxt(ERRID"gdxUMUelGet", "GDX error (gdxUMUelGet)");
+                {
+                    gdxErrorStr(gdx, gdxGetLastError(gdx), buf);
+                    mexErrMsgIdAndTxt(ERRID"gdxUMUelGet", "GDX error (gdxUMUelGet): %s", buf);
+                }
                 if (uels_to_categorical)
                 {
                     size_t len = strlen(buf);

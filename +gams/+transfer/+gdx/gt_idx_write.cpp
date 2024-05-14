@@ -179,7 +179,10 @@ void mexFunction(
             format == GT_FORMAT_NOT_READ)
         {
             if (!idxDataWriteDone(gdx))
-                mexErrMsgIdAndTxt(ERRID"idxDataWriteDone", "GDX error (idxDataWriteDone)");
+            {
+                idxErrorStr(gdx, idxGetLastError(gdx), buf, GMS_SSSIZE);
+                mexErrMsgIdAndTxt(ERRID"idxDataWriteDone", "GDX error (idxDataWriteDone): %s", buf);
+            }
             mxFree(mx_arr_domains);
             mxFree(mx_domains);
             continue;
@@ -219,7 +222,10 @@ void mexFunction(
         if (have_nrecs && nrecs == 0)
         {
             if (!idxDataWriteDone(gdx))
-                mexErrMsgIdAndTxt(ERRID"idxDataWriteDone", "GDX error (idxDataWriteDone)");
+            {
+                idxErrorStr(gdx, idxGetLastError(gdx), buf, GMS_SSSIZE);
+                mexErrMsgIdAndTxt(ERRID"idxDataWriteDone", "GDX error (idxDataWriteDone): %s", buf);
+            }
             mxFree(mx_arr_domains);
             mxFree(mx_domains);
             continue;
@@ -372,7 +378,10 @@ void mexFunction(
         }
 
         if (!idxDataWriteDone(gdx))
-            mexErrMsgIdAndTxt(ERRID"idxDataWriteDone", "GDX error (idxDataWriteDone)");
+        {
+            idxErrorStr(gdx, idxGetLastError(gdx), buf, GMS_SSSIZE);
+            mexErrMsgIdAndTxt(ERRID"idxDataWriteDone", "GDX error (idxDataWriteDone): %s", buf);
+        }
 
         mxFree(mx_arr_domains);
         mxFree(mx_domains);
