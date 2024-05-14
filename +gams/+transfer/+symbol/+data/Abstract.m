@@ -227,6 +227,24 @@ classdef (Abstract, Hidden) Abstract
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
         end
 
+        function n = countDomainViolations_(obj, axis, domain_axis)
+            n = numel(obj.findDomainViolations_(axis, domain_axis));
+        end
+
+        function indices = findDomainViolations_(obj, axis, domain_axis)
+            st = dbstack;
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
+        function flag = hasDomainViolations_(obj, axis, domain_axis)
+            flag = obj.countDomainViolations_(axis, domain_axis) > 0;
+        end
+
+        function obj = dropDomainViolations_(obj, axis, domain_axis)
+            st = dbstack;
+            error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
+        end
+
         function subindex = ind2sub_(obj, axes, value, linindex)
             st = dbstack;
             error('Method ''%s'' not supported by ''%s''.', st(1).name, class(obj));
@@ -411,6 +429,30 @@ classdef (Abstract, Hidden) Abstract
             gams.transfer.utils.Validator('def', 1, def).type('gams.transfer.symbol.definition.Abstract');
             gams.transfer.utils.Validator('keep', 2, keep).string2char().type('char').in({'first', 'last'});
             obj = obj.dropDuplicates_(def, keep);
+        end
+
+        function n = countDomainViolations(obj, axis, domain_axis)
+            gams.transfer.utils.Validator('axis', 1, axis).type('gams.transfer.symbol.unique_labels.Axis');
+            gams.transfer.utils.Validator('domain_axis', 2, domain_axis).type('gams.transfer.symbol.unique_labels.Axis');
+            n = obj.countDomainViolations_(axis, domain_axis);
+        end
+
+        function indices = findDomainViolations(obj, axis, domain_axis)
+            gams.transfer.utils.Validator('axis', 1, axis).type('gams.transfer.symbol.unique_labels.Axis');
+            gams.transfer.utils.Validator('domain_axis', 2, domain_axis).type('gams.transfer.symbol.unique_labels.Axis');
+            indices = obj.findDomainViolations_(axis, domain_axe);
+        end
+
+        function flag = hasDomainViolations(obj, axis, domain_axis)
+            gams.transfer.utils.Validator('axis', 1, axis).type('gams.transfer.symbol.unique_labels.Axis');
+            gams.transfer.utils.Validator('domain_axis', 2, domain_axis).type('gams.transfer.symbol.unique_labels.Axis');
+            flag = obj.hasDomainViolations_(axis, domain_axis);
+        end
+
+        function obj = dropDomainViolations(obj, axis, domain_axis)
+            gams.transfer.utils.Validator('axis', 1, axis).type('gams.transfer.symbol.unique_labels.Axis');
+            gams.transfer.utils.Validator('domain_axis', 2, domain_axis).type('gams.transfer.symbol.unique_labels.Axis');
+            obj = obj.dropDomainViolations_(axis, domain_axis);
         end
 
         function data = transformTo(obj, def, axes, data)

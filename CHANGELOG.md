@@ -101,6 +101,10 @@ GAMS Transfer Matlab v0.9.0
   `symbol.Abstract.findDuplicateRecords`, `symbol.Abstract.dropDuplicateRecords`,
   `Container.countDuplicateRecords`, `Container.hasDuplicateRecords` and
   `Container.dropDuplicateRecords` to manage duplicates in table-like records formats.
+- Added methods `symbol.Abstract.countDomainViolations`, `symbol.Abstract.hasDomainViolations`,
+  `symbol.Abstract.findDomainViolations`, `symbol.Abstract.dropDomainViolations`,
+  `Container.countDomainViolations`, `Container.hasDomainViolations` and
+  `Container.dropDomainViolations` to manage domain violations in table-like records formats.
 - Added return of new symbol to `symbol.Abstract.copy` and `alias.Abstract.copy`.
 - Added a silent call to `Container.reorderSymbols` in `Container.isValid` if symbols are out of
   order (symbols that use other symbols in the domain must appear after the domain symbols). Even

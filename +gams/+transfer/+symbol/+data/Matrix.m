@@ -156,6 +156,13 @@ classdef (Abstract, Hidden) Matrix < gams.transfer.symbol.data.Abstract
         function obj = dropDuplicates_(obj, def, keep)
         end
 
+        function indices = findDomainViolations_(obj, axis, domain_axis)
+            indices = [];
+        end
+
+        function obj = dropDomainViolations_(obj, axis, domain_axis)
+        end
+
         function subindex = ind2sub_(obj, axes, value, linindex)
             [i, j] = ind2sub(size(obj.records_.(value.label)), linindex);
             subindex = [i, j];
