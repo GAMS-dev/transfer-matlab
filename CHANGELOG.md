@@ -1,3 +1,7 @@
+GAMS Transfer Matlab v1.0.1
+==================
+- Fixed GDX setup.
+
 GAMS Transfer Matlab v1.0.0
 ==================
 - Removed property `Container.gams_dir`. GAMS Transfer Matlab is now compiled statically with GDX

@@ -1,5 +1,5 @@
 # Build from the MATLAB base image
-FROM mathworks/matlab:r2024a
+FROM mathworks/matlab:r2023a
 
 RUN sudo apt-get update && sudo apt-get -y install git zip && sudo apt-get -y clean
 
