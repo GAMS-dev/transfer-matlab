@@ -426,14 +426,14 @@ package:
     image:
         name: $CI_REGISTRY_IMAGE/linux/builder
     script:
-        - cd linux/matlab
-        - sudo zip -r gams_transfer_matlab_linux.zip +gams
-        - cd ../../macos/matlab
-        - sudo zip -r gams_transfer_matlab_macos.zip +gams
-        - cd ../../macos_arm/matlab
-        - sudo zip -r gams_transfer_matlab_macos_arm.zip +gams
-        - cd ../../windows/matlab
-        - sudo zip -r gams_transfer_matlab_windows.zip +gams
+        - |
+            for d in linux macos macos_arm windows
+            do
+                cd $d/matlab
+                sudo zip -r gams_transfer_matlab_$d.zip +gams
+                cd ../..
+                mv $d/matlab/gams_transfer_matlab_$d.zip .
+            done
     artifacts:
         name: release
         paths:
