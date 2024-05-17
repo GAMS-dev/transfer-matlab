@@ -157,6 +157,7 @@ octave:build:linux:
         - cp -r +gams linux/octave
         - cd linux/octave
         - octave --no-gui --no-window-system --eval "gams.transfer.setup('../../ext/gdx', '../../ext/zlib', 'verbose', $BUILD_VERBOSITY)"
+        - nm -o `find -name "*mex"` | grep -F GLIBC_2. | grep -v -F 2.2.5 | grep -v -F 2.3.4
     only:
         - merge_requests
         - master
@@ -216,6 +217,7 @@ matlab:build:linux:
         - cp -r +gams linux/matlab
         - cd linux/matlab
         - ~/Documents/MATLAB/runmatlab.sh "mex -setup C -v; mex -setup C++ -v; gams.transfer.setup('../../ext/gdx', '../../ext/zlib', 'verbose', $BUILD_VERBOSITY)"
+        - nm -o `find -name "*mexa64"` | grep -F GLIBC_2. | grep -v -F 2.2.5 | grep -v -F 2.3.4
     only:
         - merge_requests
         - master
