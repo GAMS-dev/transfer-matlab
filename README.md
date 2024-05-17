@@ -1,57 +1,57 @@
 
 # GAMS Transfer Matlab
 
-GAMS Transfer is a package to maintain GAMS data outside a GAMS script in a
-programming language like Python or Matlab. It allows the user to add GAMS
-symbols (Sets, Parameters, Variables and Equations), to manipulate GAMS symbols,
-read symbols from a GDX file or write them to one. While keeping those
-operations as simple as possible for the user, GAMS Transfer's main focus is the
-highly efficient transfer of data between GAMS and the target programming
-language. In order to achieve this, symbol records – the actual and potentially
-large-scale data sets – are stored in native data structures of the
-corresponding programming languages, e.g., dataframes, tables or (sparse)
-matrices. The benefits of this approach are threefold:
+[GAMS]: https://www.gams.com/
+[GDX]: https://github.com/GAMS-dev/gdx
+
+GAMS Transfer is a package to maintain [GAMS] data outside a [GAMS] script in a programming language
+like Python or Matlab. It allows the user to add [GAMS] symbols (Sets, Parameters, Variables and
+Equations), to manipulate [GAMS] symbols, read symbols from a [GDX] file or write them to one. While
+keeping those operations as simple as possible for the user, GAMS Transfer's main focus is the
+highly efficient transfer of data between GAMS and the target programming language. In order to
+achieve this, symbol records – the actual and potentially large-scale data sets – are stored in
+native data structures of the corresponding programming languages, e.g., dataframes, tables or
+(sparse) matrices. The benefits of this approach are threefold:
 - The user is usually very familiar with these data structures.
 - These data structures come with a large tool box for various data operations.
-- Optimized methods for reading from and writing to GDX can transfer the data as
-  a bulk –- resulting in the high performance of this package.
+- Optimized methods for reading from and writing to [GDX] can transfer the data as a bulk –-
+  resulting in the high performance of this package.
 
 ## Install
 
-GAMS comes with a ready-to-use GAMS Transfer Matlab (for Matlab 2018a or newer).
-Simply add the GAMS Matlab API to the Matlab path:
+Note: Releases come with built artifacts that are ready to use so usually compiling is not necessary.
+
+Requires Matlab 2018a (or newer) or Octave with C/C++ compilers.
+
+To build GAMS Transfer Matlab from source, open Matlab, move into the GAMS Transfer Matlab directory
+and run:
+```matlab
+gams.transfer.setup('ext/gdx', 'ext/zlib')
 ```
-addpath("[PathToGAMS]/api/matlab")
+Make sure, that the submodules `gdx` and `zlib` in `ext` are checked out (`git submodule update
+--init`).
+
+## Usage
+
+Simply add the GAMS Transfer Matlab root directory (the one that has a `+gams` directory) to the
+Matlab path:
+```
+addpath('.')
 ```
 
-Note that GAMS Transfer Matlab comes as a Matlab package and, thus, all classes
-must be prefixed with `gams.transfer.`. In order to avoid this, you can import
-the package with:
+Note that GAMS Transfer Matlab comes as a Matlab package and, thus, all classes must be prefixed
+with `gams.transfer.`. In order to avoid this, you can import the package with:
 ```
 import gams.transfer.*
 ```
 
-## Install From Source
+## Tests
 
-### Build
-
-To build GAMS Transfer, open Matlab and run `gams.transfer.setup`:
+Run:
 ```matlab
-gams.transfer.setup()
-gams.transfer.setup(_, 'gdx_path', <c_gdx_api_path>)
-gams.transfer.setup(_, 'verbose', <level>)
-```
-Description of parameters:
-- `gdx_path`: C GDX API path, e.g. `[PathToGAMS]/apifiles/C/api`.
-- `verbose`: Compilation verbosity level from 0 (no compiler output) to 2 (all
-  compiler output). Default: 0.
-
-### Run Unit Tests
-
-Make sure that the GAMS Transfer build is part of the Matlab PATH. Then, run `gams_transfer_test`:
-```matlab
-gams_transfer_test()
-gams_transfer_test(_, 'working_dir', <test_directory>)
+addpath('test');
+run_tests('.')
+run_tests(_, 'working_dir', <test_directory>)
 ```
 Description of parameters:
 - `working_dir`: Directory for test example GAMS / GDX files. Default: `tempname()`.
