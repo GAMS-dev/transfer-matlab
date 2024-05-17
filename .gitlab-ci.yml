@@ -445,7 +445,7 @@ package:
     only:
         - tags
 
-release:gitlab:
+deploy:gitlab:
     stage: deploy
     tags:
         - linux
@@ -468,10 +468,14 @@ release:gitlab:
                 --assets-link "{\"name\":\"gams_transfer_matlab_macos.zip\",\"url\":\"${PACKAGE_REGISTRY_URL}gams_transfer_matlab_macos.zip\"}" \
                 --assets-link "{\"name\":\"gams_transfer_matlab_macos_arm.zip\",\"url\":\"${PACKAGE_REGISTRY_URL}gams_transfer_matlab_macos_arm.zip\"}" \
                 --assets-link "{\"name\":\"gams_transfer_matlab_windows.zip\",\"url\":\"${PACKAGE_REGISTRY_URL}gams_transfer_matlab_windows.zip\"}"
+        - mv build/doc/html public/
+    artifacts:
+        paths:
+            - public
     only:
         - tags
 
-release:github:
+deploy:github:
     stage: deploy
     tags:
         - linux
@@ -504,19 +508,4 @@ release:github:
                     -n $fn -f $fn
             done
     only:
-        - tags
-
-pages:
-    stage: deploy
-    tags:
-        - linux
-    image:
-        name: alpine
-    script:
-        - mv build/doc/html public/
-    artifacts:
-        paths:
-            - public
-    only:
-        - master
         - tags
