@@ -147,6 +147,16 @@ function setup(varargin)
 
     mkdir(build.object_path);
 
+    % remove dependency on pow in GDX
+    fid = fopen(fullfile(p.Results.gdx_path, 'src', 'gdlib', 'utils.cpp'), 'r');
+    f = fread(fid,'*char')';
+    fclose(fid);
+    f = strrep(f, 'std::round( n * std::pow( 10, ndigits ) ) * pow( 10, -ndigits )', '0');
+    f = strrep(f, 'std::pow( 16, exp )', '1<<(4*exp)');
+    fid = fopen(fullfile(p.Results.gdx_path, 'src', 'gdlib', 'utils.cpp'),'w');
+    fprintf(fid, '%s', f);
+    fclose(fid);
+
     try
         fprintf('Compiling %d common files...\n', numel(common_files));
         build_common = build;
