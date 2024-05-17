@@ -16,10 +16,6 @@ matrices. The benefits of this approach are threefold:
 - Optimized methods for reading from and writing to GDX can transfer the data as
   a bulk –- resulting in the high performance of this package.
 
-## Documentation
-
-See [GAMS Transfer Matlab Documentation](http://devel.pages.gams.com/gams-transfer-matlab).
-
 ## Install
 
 GAMS comes with a ready-to-use GAMS Transfer Matlab (for Matlab 2018a or newer).
