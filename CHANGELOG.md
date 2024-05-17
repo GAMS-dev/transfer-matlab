@@ -1,3 +1,7 @@
+GAMS Transfer Matlab v1.0.2
+==================
+- Fixed GDX setup.
+
 GAMS Transfer Matlab v1.0.1
 ==================
 - Fixed GDX setup.

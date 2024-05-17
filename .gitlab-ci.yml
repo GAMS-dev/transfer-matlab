@@ -9,7 +9,6 @@ stages:
   - matlab:build
   - matlab:test
   - package
-  - release
   - deploy
 
 variables:
@@ -70,7 +69,7 @@ doc:build:
         name: doc
         paths:
             - build/doc/html
-        expire_in: 10 min
+        expire_in: 30 min
 
 download:linux:
     stage: download
@@ -90,7 +89,7 @@ download:linux:
         name: linux:gdx
         paths:
             - linux/gdx
-        expire_in: 10 min
+        expire_in: 30 min
 
 download:macos:
     stage: download
@@ -108,7 +107,7 @@ download:macos:
         name: macos:gdx
         paths:
             - macos/gdx
-        expire_in: 10 min
+        expire_in: 30 min
 
 download:macos_arm:
     stage: download
@@ -126,7 +125,7 @@ download:macos_arm:
         name: macos_arm:gdx
         paths:
             - macos_arm/gdx
-        expire_in: 10 min
+        expire_in: 30 min
 
 download:windows:
     stage: download
@@ -144,7 +143,7 @@ download:windows:
         name: windows:gdx
         paths:
             - windows/gdx
-        expire_in: 10 min
+        expire_in: 30 min
 
 octave:build:linux:
     stage: octave:build
@@ -158,6 +157,7 @@ octave:build:linux:
         - cp -r +gams linux/octave
         - cd linux/octave
         - octave --no-gui --no-window-system --eval "gams.transfer.setup('../../ext/gdx', '../../ext/zlib', 'verbose', $BUILD_VERBOSITY)"
+        - nm -o `find -name "*mex"` | grep -F GLIBC_2. | grep -v -F 2.2.5 | grep -v -F 2.3.4
     only:
         - merge_requests
         - master
@@ -165,7 +165,7 @@ octave:build:linux:
         name: linux:octave
         paths:
             - linux/octave/+gams
-        expire_in: 10 min
+        expire_in: 30 min
 
 octave:build:macos:
     stage: octave:build
@@ -184,7 +184,7 @@ octave:build:macos:
         name: macos:octave
         paths:
             - macos/octave/+gams
-        expire_in: 10 min
+        expire_in: 30 min
 
 octave:build:macos_arm:
     stage: octave:build
@@ -203,7 +203,7 @@ octave:build:macos_arm:
         name: macos_arm:octave
         paths:
             - macos_arm/octave/+gams
-        expire_in: 10 min
+        expire_in: 30 min
 
 matlab:build:linux:
     stage: matlab:build
@@ -217,6 +217,7 @@ matlab:build:linux:
         - cp -r +gams linux/matlab
         - cd linux/matlab
         - ~/Documents/MATLAB/runmatlab.sh "mex -setup C -v; mex -setup C++ -v; gams.transfer.setup('../../ext/gdx', '../../ext/zlib', 'verbose', $BUILD_VERBOSITY)"
+        - nm -o `find -name "*mexa64"` | grep -F GLIBC_2. | grep -v -F 2.2.5 | grep -v -F 2.3.4
     only:
         - merge_requests
         - master
@@ -225,7 +226,7 @@ matlab:build:linux:
         name: linux:matlab
         paths:
             - linux/matlab/+gams
-        expire_in: 10 min
+        expire_in: 30 min
 
 matlab:build:macos:
     stage: matlab:build
@@ -245,7 +246,7 @@ matlab:build:macos:
         name: macos:matlab
         paths:
             - macos/matlab/+gams
-        expire_in: 10 min
+        expire_in: 30 min
 
 matlab:build:macos_arm:
     stage: matlab:build
@@ -265,7 +266,7 @@ matlab:build:macos_arm:
         name: macos_arm:matlab
         paths:
             - macos_arm/matlab/+gams
-        expire_in: 10 min
+        expire_in: 30 min
 
 matlab:build:windows:
     stage: matlab:build
@@ -285,7 +286,7 @@ matlab:build:windows:
         name: windows:matlab
         paths:
             - windows/matlab/+gams
-        expire_in: 10 min
+        expire_in: 30 min
 
 octave:test:linux:
     stage: octave:test
@@ -427,31 +428,37 @@ package:
     script:
         - cd linux/matlab
         - sudo zip -r gams_transfer_matlab_linux.zip +gams
-        - |
-            curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_linux.zip ${PACKAGE_REGISTRY_URL}
         - cd ../../macos/matlab
         - sudo zip -r gams_transfer_matlab_macos.zip +gams
-        - |
-            curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_macos.zip ${PACKAGE_REGISTRY_URL}
         - cd ../../macos_arm/matlab
         - sudo zip -r gams_transfer_matlab_macos_arm.zip +gams
-        - |
-            curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_macos_arm.zip ${PACKAGE_REGISTRY_URL}
         - cd ../../windows/matlab
         - sudo zip -r gams_transfer_matlab_windows.zip +gams
-        - |
-            curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file gams_transfer_matlab_windows.zip ${PACKAGE_REGISTRY_URL}
+    artifacts:
+        name: release
+        paths:
+            - gams_transfer_matlab_linux.zip
+            - gams_transfer_matlab_macos.zip
+            - gams_transfer_matlab_macos_arm.zip
+            - gams_transfer_matlab_windows.zip
+        expire_in: 30 min
     only:
         - tags
 
-release:
-    stage: release
+release:gitlab:
+    stage: deploy
     tags:
         - linux
     image:
         name: $CI_REGISTRY_IMAGE/linux/builder
     script:
+        - |
+            for fn in gams_transfer_matlab_linux.zip gams_transfer_matlab_macos.zip gams_transfer_matlab_macos_arm.zip gams_transfer_matlab_windows.zip
+            do
+                curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file $fn ${PACKAGE_REGISTRY_URL}
+            done
         - DESCR=$(grep -Pzo "(?s)GAMS Transfer Matlab $CI_COMMIT_TAG.*?((?=\nGAMS Transfer Matlab v)|$)" CHANGELOG.md | tr -d '\0')
+        - DESCR=$(sed 1,2d <<< "$DESCR")
         - |
             release-cli create \
                 --name "Release $CI_COMMIT_TAG" \
@@ -461,6 +468,41 @@ release:
                 --assets-link "{\"name\":\"gams_transfer_matlab_macos.zip\",\"url\":\"${PACKAGE_REGISTRY_URL}gams_transfer_matlab_macos.zip\"}" \
                 --assets-link "{\"name\":\"gams_transfer_matlab_macos_arm.zip\",\"url\":\"${PACKAGE_REGISTRY_URL}gams_transfer_matlab_macos_arm.zip\"}" \
                 --assets-link "{\"name\":\"gams_transfer_matlab_windows.zip\",\"url\":\"${PACKAGE_REGISTRY_URL}gams_transfer_matlab_windows.zip\"}"
+    only:
+        - tags
+
+release:github:
+    stage: deploy
+    tags:
+        - linux
+    image:
+        name: $CI_REGISTRY_IMAGE/linux/builder
+    before_script:
+        - PATH="/opt/github-release:${PATH}"
+    script:
+        - DESCR=$(grep -Pzo "(?s)GAMS Transfer Matlab $CI_COMMIT_TAG.*?((?=\nGAMS Transfer Matlab v)|$)" CHANGELOG.md | tr -d '\0')
+        - DESCR=$(sed 1,2d <<< "$DESCR")
+        - |
+            GITHUB_TOKEN=${GITHUB_TOKEN} \
+                github-release \
+                -v release \
+                -u GAMS-dev \
+                -r transfer-matlab \
+                -t "${CI_COMMIT_TAG}" \
+                -d "${DESCR}" \
+                -n "GAMS Transfer Matlab ${CI_COMMIT_TAG}"
+        - sleep 10s # make sure the release is available to reference
+        - |
+            for fn in gams_transfer_matlab_linux.zip gams_transfer_matlab_macos.zip gams_transfer_matlab_macos_arm.zip gams_transfer_matlab_windows.zip
+            do
+                GITHUB_TOKEN=${GITHUB_TOKEN} \
+                    github-release \
+                    -v upload -R \
+                    -u GAMS-dev \
+                    -r transfer-matlab \
+                    -t "${CI_COMMIT_TAG}" \
+                    -n $fn -f $fn
+            done
     only:
         - tags
 
