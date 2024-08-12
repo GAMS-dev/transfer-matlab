@@ -38,6 +38,7 @@ function success = test_readwrite(cfg)
     test_readWriteCompress(t, cfg);
     test_readWriteDomainCheck(t, cfg);
     test_writeEpsToZero(t, cfg);
+    test_writeSparse(t, cfg);
     [~, n_fails1] = t.summary();
 
     t = GAMSTest('readwrite_rc');
@@ -1736,5 +1737,30 @@ function test_writeEpsToZero(t, cfg)
     t.assert(gams.transfer.SpecialValues.isEps(gdx.data.e.records.lower));
     t.assert(gams.transfer.SpecialValues.isEps(gdx.data.e.records.upper));
     t.assert(gams.transfer.SpecialValues.isEps(gdx.data.e.records.scale));
+
+end
+
+function test_writeSparse(t, cfg)
+
+    gdx = gams.transfer.Container();
+    i = gams.transfer.Set(gdx, 'i', '*', 'records', {'i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9', 'i10'});
+    gams.transfer.Parameter(gdx, 'p', i, 'records', {{'i2', 'i6'}, [2 6]});
+
+    t.add('write_sparse_sparse_matrix');
+    gdx.data.p.transformRecords('sparse_matrix');
+    gdx.write('test.gdx');
+    t.assert(~system(sprintf('gdxdump %s Symbols | grep -q "p *1 *Par *2"', 'test.gdx')));
+
+    t.add('write_sparse_struct');
+    gdx.data.p.transformRecords('struct');
+    gdx.write('test.gdx');
+    t.assert(~system(sprintf('gdxdump %s Symbols | grep -q "p *1 *Par *2"', 'test.gdx')));
+
+    if gams.transfer.Constants.SUPPORTS_TABLE
+        t.add('write_sparse_table');
+        gdx.data.p.transformRecords('table');
+        gdx.write('test.gdx');
+        t.assert(~system(sprintf('gdxdump %s Symbols | grep -q "p *1 *Par *2"', 'test.gdx')));
+    end
 
 end
