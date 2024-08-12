@@ -493,6 +493,8 @@ void mexFunction(
                 {
                     for (size_t k = 0; k < sizes[1]; k++)
                     {
+                        bool is_default_rec = true;
+
                         /* set domains */
                         if (dim >= 1)
                             gdx_uel_index[0] = domain_uel_ids[0][j];
@@ -507,13 +509,16 @@ void mexFunction(
                                 continue;
                             idx = mx_cols[kk][k] + col_nnz[kk][k];
                             if (idx >= mx_cols[kk][k+1] || mx_rows[kk][idx] != j)
-                            {
                                 gdx_values[kk] = 0;
-                                continue;
+                            else
+                            {
+                                col_nnz[kk][k]++;
+                                gdx_values[kk] = gt_utils_sv_matlab2gams(mx_values[kk][idx], eps_to_zero);
                             }
-                            col_nnz[kk][k]++;
-                            gdx_values[kk] = gt_utils_sv_matlab2gams(mx_values[kk][idx], eps_to_zero);
+                            is_default_rec = (gdx_values[kk] != def_values[kk]) ? false : is_default_rec;
                         }
+                        if (can_skip_default_recs && is_default_rec)
+                            continue;
 
                         /* write values */
                         if (issorted)

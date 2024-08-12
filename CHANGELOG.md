@@ -1,3 +1,7 @@
+GAMS Transfer Matlab v1.0.3
+==================
+- Fixed sparse write of format `sparse_matrix`.
+
 GAMS Transfer Matlab v1.0.2
 ==================
 - Fixed GDX setup.

@@ -232,6 +232,7 @@ matlab:build:macos:
     stage: matlab:build
     tags:
         - macos
+        - clarus
     needs: [download:macos]
     script:
         - mkdir -p macos/matlab
@@ -252,6 +253,7 @@ matlab:build:macos_arm:
     stage: matlab:build
     tags:
         - macos-arm64
+        - stan
     needs: [download:macos_arm]
     script:
         - mkdir -p macos_arm/matlab
@@ -357,6 +359,7 @@ matlab:test:macos:
     stage: matlab:test
     tags:
         - macos
+        - clarus
     needs: [download:macos, matlab:build:macos]
     before_script:
         - PATH=$PWD/macos/gdx:$PATH
@@ -379,6 +382,7 @@ matlab:test:macos_arm:
     stage: matlab:test
     tags:
         - macos-arm64
+        - stan
     needs: [download:macos_arm, matlab:build:macos_arm]
     before_script:
         - PATH=$PWD/macos_arm/gdx:$PATH
@@ -426,14 +430,14 @@ package:
     image:
         name: $CI_REGISTRY_IMAGE/linux/builder
     script:
-        - cd linux/matlab
-        - sudo zip -r gams_transfer_matlab_linux.zip +gams
-        - cd ../../macos/matlab
-        - sudo zip -r gams_transfer_matlab_macos.zip +gams
-        - cd ../../macos_arm/matlab
-        - sudo zip -r gams_transfer_matlab_macos_arm.zip +gams
-        - cd ../../windows/matlab
-        - sudo zip -r gams_transfer_matlab_windows.zip +gams
+        - |
+            for d in linux macos macos_arm windows
+            do
+                cd $d/matlab
+                sudo zip -r gams_transfer_matlab_$d.zip +gams
+                cd ../..
+                mv $d/matlab/gams_transfer_matlab_$d.zip .
+            done
     artifacts:
         name: release
         paths:
