@@ -96,6 +96,12 @@ c.read(source, 'indexed', true);
 name. It is currently not possible to rename a symbol on load or to merge symbol contents, for
 example. GAMS Transfer Matlab will simply raise an error.
 
+\attention Many features of GAMS Transfer Matlab, including reading formats `dense_matrix` and
+`sparse_matrix` require domain knowledge of the GDX symbols, see also \ref
+GAMS_TRANSFER_MATLAB_SYMBOL_DOMAIN. For example, if no domain knowledge is given, GAMS Transfer
+Matlab can only overestimate the matrix sizes in formats `dense_matrix` and `sparse_matrix`. In
+order to unload your GDX properly, please use `execute_unloaddi` instead of `execute_unload`.
+
 \section GAMS_TRANSFER_MATLAB_CONTAINER_WRITE Writing To GDX
 
 A container with all symbols and symbol records can be written to a GDX file with it's \ref
