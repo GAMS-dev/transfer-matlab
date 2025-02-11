@@ -231,7 +231,6 @@ matlab:build:linux:
 matlab:build:macos:
     stage: matlab:build
     tags:
-        - macos
         - clarus
     needs: [download:macos]
     script:
@@ -358,7 +357,6 @@ matlab:test:linux:
 matlab:test:macos:
     stage: matlab:test
     tags:
-        - macos
         - clarus
     needs: [download:macos, matlab:build:macos]
     before_script:
