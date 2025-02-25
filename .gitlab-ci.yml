@@ -231,7 +231,7 @@ matlab:build:linux:
 matlab:build:macos:
     stage: matlab:build
     tags:
-        - clarus
+        - corina
     needs: [download:macos]
     script:
         - mkdir -p macos/matlab
@@ -357,7 +357,7 @@ matlab:test:linux:
 matlab:test:macos:
     stage: matlab:test
     tags:
-        - clarus
+        - corina
     needs: [download:macos, matlab:build:macos]
     before_script:
         - PATH=$PWD/macos/gdx:$PATH
