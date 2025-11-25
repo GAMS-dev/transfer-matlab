@@ -231,7 +231,8 @@ matlab:build:linux:
 matlab:build:macos:
     stage: matlab:build
     tags:
-        - corina
+        - macos
+        - matlab
     needs: [download:macos]
     script:
         - mkdir -p macos/matlab
@@ -252,7 +253,7 @@ matlab:build:macos_arm:
     stage: matlab:build
     tags:
         - macos-arm64
-        - stan
+        - matlab
     needs: [download:macos_arm]
     script:
         - mkdir -p macos_arm/matlab
@@ -273,6 +274,7 @@ matlab:build:windows:
     stage: matlab:build
     tags:
         - windows-shell
+        - matlab
     needs: [download:windows]
     script:
         - mkdir -p windows/matlab
@@ -357,7 +359,8 @@ matlab:test:linux:
 matlab:test:macos:
     stage: matlab:test
     tags:
-        - corina
+        - macos
+        - matlab
     needs: [download:macos, matlab:build:macos]
     before_script:
         - PATH=$PWD/macos/gdx:$PATH
@@ -380,7 +383,7 @@ matlab:test:macos_arm:
     stage: matlab:test
     tags:
         - macos-arm64
-        - stan
+        - matlab
     needs: [download:macos_arm, matlab:build:macos_arm]
     before_script:
         - PATH=$PWD/macos_arm/gdx:$PATH
@@ -403,6 +406,7 @@ matlab:test:windows:
     stage: matlab:test
     tags:
         - windows-shell
+        - matlab
     needs: [download:windows, matlab:build:windows]
     before_script:
         - $env:Path = "$pwd/windows/gdx;" + $env:Path
