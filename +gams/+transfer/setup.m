@@ -103,10 +103,11 @@ function setup(varargin)
         [~,result] = system('uname -v');
         if any(strfind(result, 'ARM64'))
             build.system = 'macos_arm';
+            build.libs = {'dl', 'pthread'};
         else
             build.system = 'macos';
+            build.libs = {'dl', 'pthread', 'd_classic'};
         end
-        build.libs = {'dl', 'pthread'};
     elseif isunix
         build.system = 'linux';
         build.libs = {'dl', 'pthread'};
